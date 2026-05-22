@@ -10129,6 +10129,7 @@ components:
       enum:
       - linux-vm
       - container
+      - android
       type: string
     RegionUsageOverview:
       example:
@@ -11209,6 +11210,7 @@ components:
           enum:
           - linux-vm
           - container
+          - android
           example: linux-vm
           type: string
         daemonVersion:
@@ -14294,6 +14296,7 @@ components:
           enum:
           - linux-vm
           - container
+          - android
           example: linux-vm
           type: string
         daemonVersion:

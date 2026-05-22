@@ -33,6 +33,7 @@ type DockerClientConfig struct {
 	ResourceLimitsDisabled       bool
 	DaemonStartTimeoutSec        int
 	SandboxStartTimeoutSec       int
+	AndroidBootTimeoutSec        int
 	UseSnapshotEntrypoint        bool
 	VolumeCleanupInterval        time.Duration
 	VolumeCleanupDryRun          bool
@@ -45,6 +46,7 @@ type DockerClientConfig struct {
 	InitializeDaemonTelemetry    bool
 	InterSandboxNetworkEnabled   bool
 	GpuEnabled                   bool
+	MountKvmToAndroidSandbox     bool
 }
 
 func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerClient, error) {
@@ -61,6 +63,13 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 	if config.SandboxStartTimeoutSec <= 0 {
 		logger.Warn("Invalid sandbox start timeout value. Using default value of 30 seconds")
 		config.SandboxStartTimeoutSec = 30
+	}
+
+	// Android emulator cold boot can take well over a minute even on capable hosts,
+	// so we allow a dedicated longer timeout for the ADB readiness probe.
+	if config.AndroidBootTimeoutSec <= 0 {
+		logger.Warn("Invalid android boot timeout value. Using default value of 300 seconds")
+		config.AndroidBootTimeoutSec = 300
 	}
 
 	if config.BackupTimeoutMin <= 0 {
@@ -131,6 +140,7 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		resourceLimitsDisabled:       config.ResourceLimitsDisabled,
 		daemonStartTimeoutSec:        config.DaemonStartTimeoutSec,
 		sandboxStartTimeoutSec:       config.SandboxStartTimeoutSec,
+		androidBootTimeoutSec:        config.AndroidBootTimeoutSec,
 		useSnapshotEntrypoint:        config.UseSnapshotEntrypoint,
 		volumeCleanupInterval:        config.VolumeCleanupInterval,
 		volumeCleanupDryRun:          config.VolumeCleanupDryRun,
@@ -144,6 +154,7 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		interSandboxNetworkEnabled:   config.InterSandboxNetworkEnabled,
 		gpuEnabled:                   config.GpuEnabled,
 		filesystem:                   filesystem,
+		mountKvmToAndroidSandbox:     config.MountKvmToAndroidSandbox,
 	}, nil
 }
 
@@ -170,6 +181,7 @@ type DockerClient struct {
 	resourceLimitsDisabled       bool
 	daemonStartTimeoutSec        int
 	sandboxStartTimeoutSec       int
+	androidBootTimeoutSec        int
 	useSnapshotEntrypoint        bool
 	volumeCleanupInterval        time.Duration
 	volumeCleanupDryRun          bool
@@ -185,4 +197,5 @@ type DockerClient struct {
 	filesystem                   string
 	interSandboxNetworkEnabled   bool
 	gpuEnabled                   bool
+	mountKvmToAndroidSandbox     bool
 }

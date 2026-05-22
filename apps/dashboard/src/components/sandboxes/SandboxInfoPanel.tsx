@@ -6,6 +6,7 @@
 import { CopyButton } from '@/components/CopyButton'
 import { ResourceChip } from '@/components/ResourceChip'
 import { SandboxLabel } from '@/components/SandboxLabel'
+import { getSandboxClassIcon, getSandboxClassLabel } from '@/components/SandboxTable/constants'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -93,6 +94,17 @@ export function SandboxInfoPanel({
             <span className="truncate">{getRegionName(sandbox.target) ?? sandbox.target}</span>
             <CopyButton value={sandbox.target} tooltipText="Copy" size="icon-xs" />
           </div>
+        </InfoRow>
+        <InfoRow label="Class">
+          {(() => {
+            const ClassIcon = getSandboxClassIcon(sandbox.sandboxClass)
+            return (
+              <div className="flex items-center gap-1.5 justify-end">
+                <ClassIcon className="size-4 text-muted-foreground shrink-0" />
+                <span className="truncate">{getSandboxClassLabel(sandbox.sandboxClass)}</span>
+              </div>
+            )
+          })()}
         </InfoRow>
         <InfoRow label="Snapshot" className="-mr-2">
           {sandbox.snapshot ? (

@@ -37,6 +37,13 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 			return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
 
+		if isAndroidDeviceContainer(c) {
+			if err := d.waitForAdbRunning(ctx, containerIP); err != nil {
+				return nil, "", err
+			}
+			return c, "", nil
+		}
+
 		daemonVersion, err := d.waitForDaemonRunning(ctx, containerIP, authToken)
 		if err != nil {
 			return nil, "", err
@@ -70,6 +77,25 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 	containerIP := GetContainerIpAddress(ctx, runningContainer)
 	if containerIP == "" {
 		return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
+	}
+
+	// Android-device sandboxes do not run the daytona daemon. Readiness is signaled by
+	// the ADB port accepting TCP connections inside the container.
+	if isAndroidDeviceContainer(runningContainer) {
+		if err := d.waitForAdbRunning(ctx, containerIP); err != nil {
+			return nil, "", err
+		}
+
+		if metadata["limitNetworkEgress"] == "true" {
+			go func() {
+				containerShortId := c.ID[:12]
+				if err := d.netRulesManager.SetNetworkLimiter(containerShortId, containerIP); err != nil {
+					d.logger.ErrorContext(ctx, "Failed to set network limiter", "error", err)
+				}
+			}()
+		}
+
+		return runningContainer, "", nil
 	}
 
 	if !slices.Equal(c.Config.Entrypoint, strslice.StrSlice{common.DAEMON_PATH}) {

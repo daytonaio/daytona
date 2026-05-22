@@ -8,6 +8,7 @@ import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { getRegionFullDisplayName } from '@/lib/utils'
 import { Region, Sandbox } from '@daytona/api-client'
+import { getSandboxClassLabel } from './constants'
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -211,10 +212,17 @@ export function useSandboxTable({
       const labels = Object.entries(sandbox.labels ?? {})
         .map(([key, value]) => `${key}: ${value}`)
         .join(' ')
+      const sandboxClassLabel = getSandboxClassLabel(sandbox.sandboxClass)
 
-      return [sandbox.name, sandbox.id, sandbox.state, sandbox.snapshot ?? '', regionName, labels].some((value) =>
-        String(value).toLowerCase().includes(searchValue),
-      )
+      return [
+        sandbox.name,
+        sandbox.id,
+        sandbox.state,
+        sandbox.snapshot ?? '',
+        regionName,
+        labels,
+        sandboxClassLabel,
+      ].some((value) => String(value).toLowerCase().includes(searchValue))
     },
     state: {
       globalFilter,

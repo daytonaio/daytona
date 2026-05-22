@@ -4,7 +4,7 @@
  */
 
 import { getRelativeTimeString } from '@/lib/utils'
-import { Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
+import { Sandbox, SandboxClass, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
 import { CopyButton } from '../CopyButton'
@@ -17,7 +17,7 @@ import { Badge } from '../ui/badge'
 import { Checkbox } from '../ui/checkbox'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SandboxTableActions } from './SandboxTableActions'
-import { STATE_PRIORITY_ORDER } from './constants'
+import { STATE_PRIORITY_ORDER, getSandboxClassIcon, getSandboxClassLabel } from './constants'
 import { ResourceFilterValue } from './filters/ResourceFilter'
 import { arrayIncludesFilter, arrayIntersectionFilter, dateRangeFilter, resourceRangeFilter } from './filters/utils'
 
@@ -200,6 +200,29 @@ export function getColumns({
         }
 
         return STATE_PRIORITY_ORDER[stateA] - STATE_PRIORITY_ORDER[stateB]
+      },
+      filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
+    },
+    {
+      id: 'class',
+      size: 130,
+      maxSize: 130,
+      enableSorting: true,
+      enableHiding: true,
+      header: ({ column }) => {
+        return <SortableHeader column={column} label="Class" />
+      },
+      accessorFn: (row) => row.sandboxClass ?? SandboxClass.CONTAINER,
+      cell: ({ row }) => {
+        const sandboxClass = row.original.sandboxClass
+        const Icon = getSandboxClassIcon(sandboxClass)
+        const label = getSandboxClassLabel(sandboxClass)
+        return (
+          <div className="w-full truncate flex items-center gap-2">
+            <Icon className="size-4 text-muted-foreground shrink-0" />
+            <span className="truncate block">{label}</span>
+          </div>
+        )
       },
       filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
     },

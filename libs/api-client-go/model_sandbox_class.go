@@ -22,6 +22,7 @@ type SandboxClass string
 const (
 	SANDBOXCLASS_LINUX_VM SandboxClass = "linux-vm"
 	SANDBOXCLASS_CONTAINER SandboxClass = "container"
+	SANDBOXCLASS_ANDROID SandboxClass = "android"
 	SANDBOXCLASS_UNKNOWN_DEFAULT_OPEN_API SandboxClass = "11184809"
 )
 
@@ -29,6 +30,7 @@ const (
 var AllowedSandboxClassEnumValues = []SandboxClass{
 	"linux-vm",
 	"container",
+	"android",
 	"11184809",
 }
 

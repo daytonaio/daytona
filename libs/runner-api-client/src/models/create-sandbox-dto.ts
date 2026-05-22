@@ -48,6 +48,10 @@ export interface CreateSandboxDTO {
     'otelEndpoint'?: string;
     'regionId'?: string;
     'registry'?: RegistryDTO;
+    /**
+     * Optional for backward compatibility, but when provided, indicates the class of sandbox to create.
+     */
+    'sandboxClass'?: string;
     'skipStart'?: boolean;
     'snapshot': string;
     'storageQuota'?: number;

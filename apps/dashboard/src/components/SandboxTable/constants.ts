@@ -3,8 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxState } from '@daytona/api-client'
-import { CheckCircle, Circle, AlertTriangle, Timer, Archive } from 'lucide-react'
+import { SandboxClass, SandboxState } from '@daytona/api-client'
+import {
+  CheckCircle,
+  Circle,
+  AlertTriangle,
+  Timer,
+  Archive,
+  Container,
+  Server,
+  Smartphone,
+  LucideIcon,
+} from 'lucide-react'
 import { FacetedFilterOption } from './types'
 
 const STATE_PRIORITY_ORDER_ARRAY = [
@@ -99,4 +109,50 @@ export function getStateLabel(state?: SandboxState): string {
     return 'Unknown'
   }
   return STATE_LABEL_MAPPING[state]
+}
+
+const SANDBOX_CLASS_LABEL_MAPPING: Record<SandboxClass, string> = {
+  [SandboxClass.CONTAINER]: 'Container',
+  [SandboxClass.LINUX_VM]: 'Linux VM',
+  [SandboxClass.ANDROID]: 'Android',
+  [SandboxClass.UNKNOWN_DEFAULT_OPEN_API]: 'Unknown',
+}
+
+const SANDBOX_CLASS_ICON_MAPPING: Record<SandboxClass, LucideIcon> = {
+  [SandboxClass.CONTAINER]: Container,
+  [SandboxClass.LINUX_VM]: Server,
+  [SandboxClass.ANDROID]: Smartphone,
+  [SandboxClass.UNKNOWN_DEFAULT_OPEN_API]: Container,
+}
+
+export const SANDBOX_CLASS_OPTIONS: FacetedFilterOption[] = [
+  {
+    label: SANDBOX_CLASS_LABEL_MAPPING[SandboxClass.CONTAINER],
+    value: SandboxClass.CONTAINER,
+    icon: SANDBOX_CLASS_ICON_MAPPING[SandboxClass.CONTAINER],
+  },
+  {
+    label: SANDBOX_CLASS_LABEL_MAPPING[SandboxClass.LINUX_VM],
+    value: SandboxClass.LINUX_VM,
+    icon: SANDBOX_CLASS_ICON_MAPPING[SandboxClass.LINUX_VM],
+  },
+  {
+    label: SANDBOX_CLASS_LABEL_MAPPING[SandboxClass.ANDROID],
+    value: SandboxClass.ANDROID,
+    icon: SANDBOX_CLASS_ICON_MAPPING[SandboxClass.ANDROID],
+  },
+]
+
+export function getSandboxClassLabel(sandboxClass?: SandboxClass): string {
+  if (!sandboxClass) {
+    return SANDBOX_CLASS_LABEL_MAPPING[SandboxClass.CONTAINER]
+  }
+  return SANDBOX_CLASS_LABEL_MAPPING[sandboxClass]
+}
+
+export function getSandboxClassIcon(sandboxClass?: SandboxClass): LucideIcon {
+  if (!sandboxClass) {
+    return SANDBOX_CLASS_ICON_MAPPING[SandboxClass.CONTAINER]
+  }
+  return SANDBOX_CLASS_ICON_MAPPING[sandboxClass]
 }

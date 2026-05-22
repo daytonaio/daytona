@@ -230,6 +230,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       organizationId: sandbox.organizationId,
       regionId: sandbox.region,
       linkedSandboxId: sandbox.linkedSandboxId ?? undefined,
+      sandboxClass: sandbox.sandboxClass,
     }
 
     const response = await this.sandboxApiClient.create(createSandboxDto)

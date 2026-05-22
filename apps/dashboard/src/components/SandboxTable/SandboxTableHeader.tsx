@@ -3,7 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Calendar, Camera, Columns, Cpu, Globe, HardDrive, ListFilter, MemoryStick, Square, Tag } from 'lucide-react'
+import {
+  Boxes,
+  Calendar,
+  Camera,
+  Columns,
+  Cpu,
+  Globe,
+  HardDrive,
+  ListFilter,
+  MemoryStick,
+  Square,
+  Tag,
+} from 'lucide-react'
 import { SearchInput } from '../SearchInput'
 import { Button } from '../ui/button'
 import {
@@ -23,6 +35,7 @@ import { LabelFilter, LabelFilterIndicator } from './filters/LabelFilter'
 import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFilter'
 import { RegionFilter, RegionFilterIndicator } from './filters/RegionFilter'
 import { ResourceFilter, ResourceFilterIndicator, ResourceFilterValue } from './filters/ResourceFilter'
+import { SandboxClassFilter, SandboxClassFilterIndicator } from './filters/SandboxClassFilter'
 import { SnapshotFilter, SnapshotFilterIndicator } from './filters/SnapshotFilter'
 import { StateFilter, StateFilterIndicator } from './filters/StateFilter'
 import { SandboxTableHeaderProps } from './types'
@@ -37,6 +50,7 @@ const SANDBOX_TABLE_COLUMN_LABELS: Record<string, string> = {
   name: 'Name',
   id: 'UUID',
   state: 'State',
+  class: 'Class',
   snapshot: 'Snapshot',
   region: 'Region',
   resources: 'Resources',
@@ -54,6 +68,7 @@ export function SandboxTableHeader({
   loadingSnapshots,
 }: SandboxTableHeaderProps) {
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
+  const hasClassFilter = ((table.getColumn('class')?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
   const hasRegionFilter = ((table.getColumn('region')?.getFilterValue() as string[]) || []).length > 0
   const hasLabelsFilter = ((table.getColumn('labels')?.getFilterValue() as string[]) || []).length > 0
@@ -63,7 +78,13 @@ export function SandboxTableHeader({
   })
 
   const hasActiveFilters =
-    hasStateFilter || hasSnapshotFilter || hasRegionFilter || hasLabelsFilter || hasLastEventFilter || hasResourceFilter
+    hasStateFilter ||
+    hasClassFilter ||
+    hasSnapshotFilter ||
+    hasRegionFilter ||
+    hasLabelsFilter ||
+    hasLastEventFilter ||
+    hasResourceFilter
 
   const handleChangeFilter = (value: string) => {
     table.setGlobalFilter(value)
@@ -100,6 +121,20 @@ export function SandboxTableHeader({
                     <StateFilter
                       value={(table.getColumn('state')?.getFilterValue() as string[]) || []}
                       onFilterChange={(value) => table.getColumn('state')?.setFilterValue(value)}
+                    />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Boxes className="w-4 h-4" />
+                  Class
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="p-0 w-64">
+                    <SandboxClassFilter
+                      value={(table.getColumn('class')?.getFilterValue() as string[]) || []}
+                      onFilterChange={(value) => table.getColumn('class')?.setFilterValue(value)}
                     />
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
@@ -199,6 +234,13 @@ export function SandboxTableHeader({
             <StateFilterIndicator
               value={(table.getColumn('state')?.getFilterValue() as string[]) || []}
               onFilterChange={(value) => table.getColumn('state')?.setFilterValue(value)}
+            />
+          )}
+
+          {hasClassFilter && (
+            <SandboxClassFilterIndicator
+              value={(table.getColumn('class')?.getFilterValue() as string[]) || []}
+              onFilterChange={(value) => table.getColumn('class')?.setFilterValue(value)}
             />
           )}
 

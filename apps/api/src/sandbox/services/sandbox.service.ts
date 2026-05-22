@@ -502,6 +502,10 @@ export class SandboxService {
         throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
       }
 
+      if (snapshot.sandboxClass === SandboxClass.ANDROID && !createSandboxDto.linkedSandbox) {
+        throw new BadRequestError('Android sandboxes must be linked to another sandbox')
+      }
+
       // Resolve and validate an optional linked sandbox. When set, the new sandbox is pinned
       // to the same runner as the linked sandbox so a local network can be established.
       // Constraints:

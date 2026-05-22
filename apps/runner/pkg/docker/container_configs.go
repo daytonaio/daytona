@@ -18,6 +18,19 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
+// androidDeviceLabel is set on containers created for sandboxes tagged as "android-device".
+// The Start path reads it to skip the daytona daemon exec/wait that regular sandboxes need.
+const androidDeviceLabel = "daytona.android_device"
+
+// isAndroidDeviceContainer reports whether an already-created container was provisioned for
+// an android-device sandbox, based on the label written at create time.
+func isAndroidDeviceContainer(c *container.InspectResponse) bool {
+	if c == nil || c.Config == nil {
+		return false
+	}
+	return c.Config.Labels[androidDeviceLabel] == "true"
+}
+
 func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
 	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image)
 	if err != nil {
@@ -29,7 +42,7 @@ func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, imag
 		return nil, nil, nil, err
 	}
 
-	networkingConfig := d.getContainerNetworkingConfig()
+	networkingConfig := d.getContainerNetworkingConfig(sandboxDto)
 
 	return containerConfig, hostConfig, networkingConfig, nil
 }
@@ -81,6 +94,21 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		}
 	}
 
+	// Android-device sandboxes run the image's native entrypoint (e.g. the docker-android
+	// emulator bootstrap) and never host the daytona daemon. We mark the container with a
+	// label so the Start path can detect this later without needing the original DTO.
+	if sandboxDto.IsAndroidSandbox() {
+		labels[androidDeviceLabel] = "true"
+		return &container.Config{
+			Hostname:     sandboxDto.Id,
+			Image:        sandboxDto.Snapshot,
+			Env:          envVars,
+			Labels:       labels,
+			AttachStdout: true,
+			AttachStderr: true,
+		}, nil
+	}
+
 	workingDir := ""
 	cmd := []string{}
 	entrypoint := sandboxDto.Entrypoint
@@ -121,6 +149,12 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 }
 
 func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
+	// Android-device sandboxes run on plain docker runtime, without the bundled
+	// daytona daemon, and require /dev/kvm to be mounted for emulator acceleration.
+	if sandboxDto.IsAndroidSandbox() {
+		return d.getAndroidDeviceHostConfig(sandboxDto, volumeMountPathBinds), nil
+	}
+
 	var binds []string
 
 	binds = append(binds, fmt.Sprintf("%s:%s:ro", d.daemonPath, common.DAEMON_PATH))
@@ -185,7 +219,23 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 	return hostConfig, nil
 }
 
-func (d *DockerClient) getContainerNetworkingConfig() *network.NetworkingConfig {
+func (d *DockerClient) getContainerNetworkingConfig(sandboxDto dto.CreateSandboxDTO) *network.NetworkingConfig {
+	// Android-device followers attach directly to the owner's link network at create
+	// time (skipping the default bridge / runner-bridge) so the link network becomes
+	// eth0 inside the container. This is required for the docker-android entrypoint,
+	// which binds its ADB/emulator forwarders to eth0's IP only.
+	if sandboxDto.IsAndroidSandbox() && sandboxDto.LinkedSandboxId != nil && *sandboxDto.LinkedSandboxId != "" {
+		aliases := []string{}
+		if sandboxDto.Name != "" && sandboxDto.Name != sandboxDto.Id {
+			aliases = append(aliases, sandboxDto.Name)
+		}
+		return &network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				linkNetworkName(*sandboxDto.LinkedSandboxId): {Aliases: aliases},
+			},
+		}
+	}
+
 	containerNetwork := config.GetContainerNetwork()
 	var networkingConfig *network.NetworkingConfig
 	if containerNetwork != "" {
@@ -206,4 +256,55 @@ func (d *DockerClient) getContainerNetworkingConfig() *network.NetworkingConfig 
 	}
 
 	return networkingConfig
+}
+
+func (d *DockerClient) getAndroidDeviceHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) *container.HostConfig {
+	hostConfig := &container.HostConfig{
+		Privileged: false,
+		Binds:      append([]string{}, volumeMountPathBinds...),
+	}
+
+	if d.mountKvmToAndroidSandbox {
+		hostConfig.Resources = container.Resources{
+			Devices: []container.DeviceMapping{{
+				PathOnHost:        "/dev/kvm",
+				PathInContainer:   "/dev/kvm",
+				CgroupPermissions: "rwm",
+			}},
+		}
+	}
+
+	if sandboxDto.OtelEndpoint != nil && strings.Contains(*sandboxDto.OtelEndpoint, "host.docker.internal") {
+		hostConfig.ExtraHosts = []string{
+			"host.docker.internal:host-gateway",
+		}
+	}
+
+	if !d.resourceLimitsDisabled {
+		hostConfig.Resources = container.Resources{
+			CPUPeriod:  100000,
+			CPUQuota:   sandboxDto.CpuQuota * 100000,
+			Memory:     common.GBToBytes(float64(sandboxDto.MemoryQuota)),
+			MemorySwap: common.GBToBytes(float64(sandboxDto.MemoryQuota)),
+		}
+	}
+
+	if !d.resourceLimitsDisabled && d.filesystem == "xfs" {
+		hostConfig.StorageOpt = map[string]string{
+			"size": fmt.Sprintf("%dG", sandboxDto.StorageQuota),
+		}
+	}
+
+	// Android-device follower containers pin the link network as their only (and
+	// therefore primary / eth0) network. The docker-android entrypoint binds its
+	// ADB and emulator-console socat forwarders to eth0's IP; anchoring eth0 to
+	// the link network is what makes owner→follower connections work.
+	if sandboxDto.LinkedSandboxId != nil && *sandboxDto.LinkedSandboxId != "" {
+		hostConfig.NetworkMode = container.NetworkMode(linkNetworkName(*sandboxDto.LinkedSandboxId))
+	}
+
+	// Android-device sandboxes always use the stock docker runtime which is able to access /dev/kvm
+	hostConfig.Runtime = ""
+
+	return hostConfig
 }

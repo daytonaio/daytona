@@ -380,6 +380,17 @@ func (d *DockerClient) reconcileFollowerLinkNetwork(ctx context.Context, sandbox
 	}
 
 	if err := d.connectFollowerToLinkNetwork(ctx, ownerId, sandboxDto.Id, sandboxDto.Name); err != nil {
+		// Android-device followers pin the link network via HostConfig.NetworkMode at
+		// container create time, so an explicit connect here races with docker's own
+		// attachment and can surface "container not found" if the container hasn't
+		// been created yet, or succeed as a no-op once it has. Non-android followers
+		// always need the explicit connect. Swallow not-found for android-device so
+		// reconcile is safe to call pre-ContainerCreate; any real failure still bubbles
+		// up from the post-create reconcile in the main Create flow.
+		if sandboxDto.IsAndroidSandbox() && (errdefs.IsNotFound(err) || common_errors.IsNotFoundError(err)) {
+			return ownerId, nil
+		}
+
 		return "", err
 	}
 	return ownerId, nil

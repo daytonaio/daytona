@@ -197,6 +197,7 @@ export type WorkspaceBackupStateEnum = typeof WorkspaceBackupStateEnum[keyof typ
 export const WorkspaceSandboxClassEnum = {
     LINUX_VM: 'linux-vm',
     CONTAINER: 'container',
+    ANDROID: 'android',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
