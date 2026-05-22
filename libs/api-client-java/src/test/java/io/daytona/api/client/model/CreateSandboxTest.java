@@ -187,4 +187,12 @@ public class CreateSandboxTest {
         // TODO: test buildInfo
     }
 
+    /**
+     * Test the property 'linkedSandbox'
+     */
+    @Test
+    public void linkedSandboxTest() {
+        // TODO: test linkedSandbox
+    }
+
 }

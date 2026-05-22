@@ -40,6 +40,7 @@ func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, imag
 	}
 
 	networkingConfig := d.getContainerNetworkingConfig()
+
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
@@ -87,6 +88,9 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 	}
 
 	labels := make(map[string]string)
+	if sandboxDto.Name != "" {
+		labels[sandboxNameLabel] = sandboxDto.Name
+	}
 	if len(sandboxDto.Volumes) > 0 {
 		volumeMountPaths := make([]string, len(sandboxDto.Volumes))
 		for i, v := range sandboxDto.Volumes {

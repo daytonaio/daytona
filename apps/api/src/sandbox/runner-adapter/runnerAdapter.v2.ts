@@ -153,6 +153,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   ): Promise<StartSandboxResponse | undefined> {
     const payload: CreateSandboxDTO = {
       id: sandbox.id,
+      name: sandbox.name,
       userId: sandbox.organizationId,
       snapshot: snapshotRef,
       osUser: sandbox.osUser,
@@ -183,6 +184,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       skipStart: skipStart,
       organizationId: sandbox.organizationId,
       regionId: sandbox.region,
+      linkedSandboxId: sandbox.linkedSandboxId ?? undefined,
     }
 
     await this.jobService.createJob(

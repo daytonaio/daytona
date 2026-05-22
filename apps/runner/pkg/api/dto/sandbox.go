@@ -4,7 +4,11 @@
 package dto
 
 type CreateSandboxDTO struct {
-	Id               string            `json:"id" validate:"required"`
+	Id string `json:"id" validate:"required"`
+	// Name is the human-readable sandbox name. When present, it is used as the
+	// network alias for link networks so linked sandboxes can resolve each other
+	// by name.
+	Name             string            `json:"name,omitempty"`
 	FromVolumeId     string            `json:"fromVolumeId,omitempty"`
 	UserId           string            `json:"userId" validate:"required"`
 	Snapshot         string            `json:"snapshot" validate:"required"`
@@ -27,6 +31,10 @@ type CreateSandboxDTO struct {
 	// Nullable for backward compatibility
 	OrganizationId *string `json:"organizationId,omitempty"`
 	RegionId       *string `json:"regionId,omitempty"`
+
+	// LinkedSandboxId identifies an existing sandbox this sandbox should be co-located with.
+	// When set, the runner should attach both sandboxes to a shared local network so they can communicate.
+	LinkedSandboxId *string `json:"linkedSandboxId,omitempty"`
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {

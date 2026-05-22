@@ -491,6 +491,9 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 	if baseParams.NetworkAllowList != nil {
 		createReq.SetNetworkAllowList(*baseParams.NetworkAllowList)
 	}
+	if baseParams.LinkedSandbox != "" {
+		createReq.SetLinkedSandbox(baseParams.LinkedSandbox)
+	}
 
 	// Handle snapshot
 	if snapshot != "" {

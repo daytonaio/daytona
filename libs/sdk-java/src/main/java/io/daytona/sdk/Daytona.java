@@ -508,6 +508,7 @@ public class Daytona implements AutoCloseable {
         if (params.getAutoArchiveInterval() != null) body.setAutoArchiveInterval(params.getAutoArchiveInterval());
         if (params.getAutoDeleteInterval() != null) body.setAutoDeleteInterval(params.getAutoDeleteInterval());
         if (params.getNetworkBlockAll() != null) body.setNetworkBlockAll(params.getNetworkBlockAll());
+        if (params.getLinkedSandbox() != null) body.setLinkedSandbox(params.getLinkedSandbox());
         if (params.getVolumes() != null) {
             List<SandboxVolume> volumes = new ArrayList<SandboxVolume>();
             for (io.daytona.sdk.model.VolumeMount mount : params.getVolumes()) {

@@ -516,6 +516,14 @@ export class SandboxService {
         throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
       }
 
+      // Resolve and validate an optional linked sandbox. When set, the new sandbox is pinned
+      // to the same runner as the linked sandbox so a local network can be established.
+      // Constraints:
+      //   - linked sandbox must exist in the same org, be STARTED or STOPPED, and have a runnerId
+      //   - linked sandbox cannot itself be linked to another sandbox (no chains)
+      //   - new sandbox must be ephemeral (autoDeleteInterval === 0)
+      const linkedSandbox = await this.resolveLinkedSandbox(createSandboxDto, organization.id)
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       sandboxClass = snapshot.sandboxClass
@@ -554,7 +562,7 @@ export class SandboxService {
         if (volumeIdOrNames.length > 0) {
           await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
         }
-      } else if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
+      } else if (!linkedSandbox && (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0)) {
         const skipWarmPool = (await this.redis.exists(`warm-pool:skip:${snapshot.id}`)) === 1
 
         if (!skipWarmPool) {
@@ -575,7 +583,7 @@ export class SandboxService {
             return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
           }
         }
-      } else {
+      } else if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
         const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
@@ -592,12 +600,25 @@ export class SandboxService {
         gpuRunnerAssignmentLockKey = key
       }
 
-      const runner = await this.runnerService.getRandomAvailableRunner({
-        regions: [region.id],
-        sandboxClass: snapshot.sandboxClass,
-        snapshotRef: snapshot.ref,
-        gpu,
-      })
+      let runner: Runner
+      if (linkedSandbox && linkedSandbox.runnerId) {
+        runner = await this.runnerService.findOneOrFail(linkedSandbox.runnerId)
+
+        if (runner.region !== region.id) {
+          throw new BadRequestError(
+            `Runner hosting linked sandbox is in region ${runner.region}, which does not match requested region ${region.id}`,
+          )
+        }
+
+        this.runnerService.assertRunnerCanHost(runner)
+      } else {
+        runner = await this.runnerService.getRandomAvailableRunner({
+          regions: [region.id],
+          sandboxClass: snapshot.sandboxClass,
+          snapshotRef: snapshot.ref,
+          gpu,
+        })
+      }
 
       const sandbox = new Sandbox({ region: region.id, name: createSandboxDto.name })
 
@@ -642,6 +663,7 @@ export class SandboxService {
       }
 
       sandbox.runnerId = runner.id
+      sandbox.linkedSandboxId = linkedSandbox?.id ?? null
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
@@ -684,6 +706,43 @@ export class SandboxService {
           .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
       }
     }
+  }
+
+  /**
+   * Validates and resolves the optional linkedSandbox reference on a snapshot-based sandbox create request.
+   *
+   * Returns the linked Sandbox entity when linking is requested, otherwise undefined.
+   *
+   * @throws {BadRequestError} If any link precondition is not met.
+   * @throws {NotFoundException} If the linked sandbox does not exist for the organization.
+   */
+  private async resolveLinkedSandbox(
+    createSandboxDto: CreateSandboxDto,
+    organizationId: string,
+  ): Promise<Sandbox | undefined> {
+    if (!createSandboxDto.linkedSandbox) {
+      return undefined
+    }
+
+    if (!isEphemeral(createSandboxDto)) {
+      throw new BadRequestError('Linked sandboxes must be ephemeral (set autoDeleteInterval to 0)')
+    }
+
+    const linkedSandbox = await this.findOneByIdOrName(createSandboxDto.linkedSandbox, organizationId)
+
+    if (linkedSandbox.linkedSandboxId) {
+      throw new BadRequestError(
+        `Linked sandbox ${linkedSandbox.id} is itself linked to another sandbox; chained links are not allowed`,
+      )
+    }
+
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(linkedSandbox.state) || !linkedSandbox.runnerId) {
+      throw new BadRequestError(
+        `Linked sandbox must be in STARTED or STOPPED state with an assigned runner (current: ${linkedSandbox.state})`,
+      )
+    }
+
+    return linkedSandbox
   }
 
   private async assignWarmPoolSandbox(
@@ -3074,6 +3133,38 @@ export class SandboxService {
       //  log the error for now, but don't throw it as it will be retried
       this.logger.error(`Error stopping sandbox from suspended organization. SandboxId: ${event.sandboxId}: `, error)
     })
+  }
+
+  /**
+   * Cascade-destroys any sandboxes that are linked to the just-destroyed sandbox.
+   * Linked sandboxes are co-located on the same runner as their owner and share a
+   * runner-local network with it; once the owner is gone the followers lose the
+   * network and have no reason to exist (they are always ephemeral by design).
+   */
+  @OnEvent(SandboxEvents.DESTROYED)
+  async handleSandboxDestroyedCascadeLinked(event: SandboxDestroyedEvent) {
+    if (!event.sandbox?.id) {
+      return
+    }
+
+    const followers = await this.sandboxRepository.find({
+      where: {
+        linkedSandboxId: event.sandbox.id,
+        desiredState: Not(SandboxDesiredState.DESTROYED),
+      },
+    })
+
+    for (const follower of followers) {
+      try {
+        await this.destroy(follower.id, follower.organizationId)
+      } catch (err) {
+        this.logger.warn(
+          `Failed to cascade-destroy linked follower ${follower.id} after owner ${event.sandbox.id} was destroyed: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        )
+      }
+    }
   }
 
   private resolveAutoStopInterval(autoStopInterval: number): number {

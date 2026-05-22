@@ -33,6 +33,8 @@ Represents a Daytona Sandbox.
 - `id` _string_ - Unique identifier for the Sandbox
 - `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
 - `lastActivityAt?` _string_ - When the Sandbox last had activity
+- `linkedSandboxId?` _string_ - ID of the Sandbox this Sandbox is linked to. When set, the Sandbox is co-located on the same runner as the linked Sandbox.
+    (not returned by list results; call `refreshData()` on each item to populate)
 - `memory` _number_ - Amount of memory allocated to the Sandbox in GiB
 - `name` _string_
 - `networkAllowList?` _string_ - Comma-separated list of allowed CIDR network addresses for the Sandbox

@@ -476,6 +476,10 @@ Base parameters for creating a new Sandbox.
 - `network_allow_list` _str | None_ - Comma-separated list of allowed CIDR network addresses for the Sandbox.
 - `ephemeral` _bool | None_ - Whether the Sandbox should be ephemeral.
   If True, auto_delete_interval will be set to 0.
+- `linked_sandbox` _str | None_ - ID or name of an existing Sandbox to link the new Sandbox to. The new
+  Sandbox will be scheduled on the same runner as the linked Sandbox so a local network can be
+  established between them. Linked Sandboxes must be
+  ephemeral (auto_delete_interval=0) and cannot themselves be linked to another Sandbox.
 
 ## CreateSandboxFromImageParams
 

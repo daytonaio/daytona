@@ -83,6 +83,8 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * (not returned by list results; call `refreshData()` on each item to populate)
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
  * (not returned by list results; call `refreshData()` on each item to populate)
+ * @property {string} [linkedSandboxId] - ID of the Sandbox this Sandbox is linked to. When set, the Sandbox is co-located on the same runner as the linked Sandbox.
+ * (not returned by list results; call `refreshData()` on each item to populate)
  *
  * @class
  */
@@ -121,6 +123,7 @@ export class Sandbox {
   public lastActivityAt?: string
   public networkBlockAll?: boolean
   public networkAllowList?: string
+  public linkedSandboxId?: string
   public toolboxProxyUrl: string
 
   private infoApi: InfoApi
