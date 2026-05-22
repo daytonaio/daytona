@@ -37,7 +37,7 @@ class SandboxListItem(BaseModel):
     name: StrictStr = Field(description="The name of the sandbox")
     target: StrictStr = Field(description="The target environment for the sandbox")
     runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", serialization_alias="runnerId")
-    var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", serialization_alias="class")
+    sandbox_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", serialization_alias="sandboxClass")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
     desired_state: Optional[SandboxDesiredState] = Field(default=None, description="The desired state of the sandbox", serialization_alias="desiredState")
     snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the sandbox")
@@ -60,7 +60,7 @@ class SandboxListItem(BaseModel):
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", serialization_alias="daemonVersion")
     toolbox_proxy_url: StrictStr = Field(description="The toolbox proxy URL for the sandbox", serialization_alias="toolboxProxyUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "target", "runnerId", "class", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "target", "runnerId", "sandboxClass", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -124,7 +124,7 @@ class SandboxListItem(BaseModel):
             "name": obj.get("name"),
             "target": obj.get("target"),
             "runner_id": obj.get("runnerId"),
-            "var_class": obj.get("class"),
+            "sandbox_class": obj.get("sandboxClass"),
             "state": obj.get("state"),
             "desired_state": obj.get("desiredState"),
             "snapshot": obj.get("snapshot"),

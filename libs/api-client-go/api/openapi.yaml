@@ -10445,7 +10445,7 @@ components:
         runnerId: runner123
         id: sandbox123
         state: creating
-        class: small
+        sandboxClass: small
         updatedAt: 2024-10-01T12:00:00Z
         desiredState: destroyed
         recoverable: true
@@ -10482,7 +10482,7 @@ components:
           description: The runner ID of the sandbox
           example: runner123
           type: string
-        class:
+        sandboxClass:
           deprecated: true
           description: The class of the sandbox
           enum:
@@ -10617,7 +10617,7 @@ components:
           runnerId: runner123
           id: sandbox123
           state: creating
-          class: small
+          sandboxClass: small
           updatedAt: 2024-10-01T12:00:00Z
           desiredState: destroyed
           recoverable: true
@@ -10645,7 +10645,7 @@ components:
           runnerId: runner123
           id: sandbox123
           state: creating
-          class: small
+          sandboxClass: small
           updatedAt: 2024-10-01T12:00:00Z
           desiredState: destroyed
           recoverable: true

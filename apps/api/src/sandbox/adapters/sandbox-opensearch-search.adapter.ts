@@ -358,7 +358,7 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
       name: source.name,
       target: source.region,
       runnerId: source.runnerId,
-      class: source.class,
+      sandboxClass: source.class,
       state: source.state as SandboxState,
       desiredState: source.desiredState as SandboxDesiredState | undefined,
       snapshot: source.snapshot,

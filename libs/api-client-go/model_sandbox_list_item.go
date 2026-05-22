@@ -33,7 +33,7 @@ type SandboxListItem struct {
 	RunnerId *string `json:"runnerId,omitempty"`
 	// The class of the sandbox
 	// Deprecated
-	Class *string `json:"class,omitempty"`
+	SandboxClass *string `json:"sandboxClass,omitempty"`
 	// The state of the sandbox
 	State *SandboxState `json:"state,omitempty"`
 	// The desired state of the sandbox
@@ -238,39 +238,39 @@ func (o *SandboxListItem) SetRunnerId(v string) {
 	o.RunnerId = &v
 }
 
-// GetClass returns the Class field value if set, zero value otherwise.
+// GetSandboxClass returns the SandboxClass field value if set, zero value otherwise.
 // Deprecated
-func (o *SandboxListItem) GetClass() string {
-	if o == nil || IsNil(o.Class) {
+func (o *SandboxListItem) GetSandboxClass() string {
+	if o == nil || IsNil(o.SandboxClass) {
 		var ret string
 		return ret
 	}
-	return *o.Class
+	return *o.SandboxClass
 }
 
-// GetClassOk returns a tuple with the Class field value if set, nil otherwise
+// GetSandboxClassOk returns a tuple with the SandboxClass field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // Deprecated
-func (o *SandboxListItem) GetClassOk() (*string, bool) {
-	if o == nil || IsNil(o.Class) {
+func (o *SandboxListItem) GetSandboxClassOk() (*string, bool) {
+	if o == nil || IsNil(o.SandboxClass) {
 		return nil, false
 	}
-	return o.Class, true
+	return o.SandboxClass, true
 }
 
-// HasClass returns a boolean if a field has been set.
-func (o *SandboxListItem) HasClass() bool {
-	if o != nil && !IsNil(o.Class) {
+// HasSandboxClass returns a boolean if a field has been set.
+func (o *SandboxListItem) HasSandboxClass() bool {
+	if o != nil && !IsNil(o.SandboxClass) {
 		return true
 	}
 
 	return false
 }
 
-// SetClass gets a reference to the given string and assigns it to the Class field.
+// SetSandboxClass gets a reference to the given string and assigns it to the SandboxClass field.
 // Deprecated
-func (o *SandboxListItem) SetClass(v string) {
-	o.Class = &v
+func (o *SandboxListItem) SetSandboxClass(v string) {
+	o.SandboxClass = &v
 }
 
 // GetState returns the State field value if set, zero value otherwise.
@@ -898,8 +898,8 @@ func (o SandboxListItem) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.RunnerId) {
 		toSerialize["runnerId"] = o.RunnerId
 	}
-	if !IsNil(o.Class) {
-		toSerialize["class"] = o.Class
+	if !IsNil(o.SandboxClass) {
+		toSerialize["sandboxClass"] = o.SandboxClass
 	}
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
@@ -1007,7 +1007,7 @@ func (o *SandboxListItem) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "target")
 		delete(additionalProperties, "runnerId")
-		delete(additionalProperties, "class")
+		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "desiredState")
 		delete(additionalProperties, "snapshot")

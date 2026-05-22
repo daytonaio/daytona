@@ -45,7 +45,7 @@ export interface SandboxListItem {
      * The class of the sandbox
      * @deprecated
      */
-    'class'?: SandboxListItemClassEnum;
+    'sandboxClass'?: SandboxListItemSandboxClassEnum;
     /**
      * The state of the sandbox
      */
@@ -132,14 +132,14 @@ export interface SandboxListItem {
     'toolboxProxyUrl': string;
 }
 
-export const SandboxListItemClassEnum = {
+export const SandboxListItemSandboxClassEnum = {
     SMALL: 'small',
     MEDIUM: 'medium',
     LARGE: 'large',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
-export type SandboxListItemClassEnum = typeof SandboxListItemClassEnum[keyof typeof SandboxListItemClassEnum];
+export type SandboxListItemSandboxClassEnum = typeof SandboxListItemSandboxClassEnum[keyof typeof SandboxListItemSandboxClassEnum];
 export const SandboxListItemBackupStateEnum = {
     NONE: 'None',
     PENDING: 'Pending',

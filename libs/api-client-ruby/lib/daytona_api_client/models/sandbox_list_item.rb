@@ -31,7 +31,7 @@ module DaytonaApiClient
     attr_accessor :runner_id
 
     # The class of the sandbox
-    attr_accessor :_class
+    attr_accessor :sandbox_class
 
     # The state of the sandbox
     attr_accessor :state
@@ -126,7 +126,7 @@ module DaytonaApiClient
         :'name' => :'name',
         :'target' => :'target',
         :'runner_id' => :'runnerId',
-        :'_class' => :'class',
+        :'sandbox_class' => :'sandboxClass',
         :'state' => :'state',
         :'desired_state' => :'desiredState',
         :'snapshot' => :'snapshot',
@@ -169,7 +169,7 @@ module DaytonaApiClient
         :'name' => :'String',
         :'target' => :'String',
         :'runner_id' => :'String',
-        :'_class' => :'String',
+        :'sandbox_class' => :'String',
         :'state' => :'SandboxState',
         :'desired_state' => :'SandboxDesiredState',
         :'snapshot' => :'String',
@@ -244,8 +244,8 @@ module DaytonaApiClient
         self.runner_id = attributes[:'runner_id']
       end
 
-      if attributes.key?(:'_class')
-        self._class = attributes[:'_class']
+      if attributes.key?(:'sandbox_class')
+        self.sandbox_class = attributes[:'sandbox_class']
       end
 
       if attributes.key?(:'state')
@@ -415,8 +415,8 @@ module DaytonaApiClient
       return false if @organization_id.nil?
       return false if @name.nil?
       return false if @target.nil?
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      return false unless _class_validator.valid?(@_class)
+      sandbox_class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
+      return false unless sandbox_class_validator.valid?(@sandbox_class)
       return false if @user.nil?
       return false if @public.nil?
       return false if @cpu.nil?
@@ -471,13 +471,13 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] _class Object to be assigned
-    def _class=(_class)
+    # @param [Object] sandbox_class Object to be assigned
+    def sandbox_class=(sandbox_class)
       validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      unless validator.valid?(_class)
-        fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
+      unless validator.valid?(sandbox_class)
+        fail ArgumentError, "invalid value for \"sandbox_class\", must be one of #{validator.allowable_values}."
       end
-      @_class = _class
+      @sandbox_class = sandbox_class
     end
 
     # Custom attribute writer method with validation
@@ -580,7 +580,7 @@ module DaytonaApiClient
           name == o.name &&
           target == o.target &&
           runner_id == o.runner_id &&
-          _class == o._class &&
+          sandbox_class == o.sandbox_class &&
           state == o.state &&
           desired_state == o.desired_state &&
           snapshot == o.snapshot &&
@@ -613,7 +613,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, target, runner_id, _class, state, desired_state, snapshot, user, error_reason, recoverable, public, cpu, gpu, memory, disk, labels, backup_state, auto_stop_interval, auto_archive_interval, auto_delete_interval, created_at, updated_at, last_activity_at, daemon_version, toolbox_proxy_url].hash
+      [id, organization_id, name, target, runner_id, sandbox_class, state, desired_state, snapshot, user, error_reason, recoverable, public, cpu, gpu, memory, disk, labels, backup_state, auto_stop_interval, auto_archive_interval, auto_delete_interval, created_at, updated_at, last_activity_at, daemon_version, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

@@ -83,8 +83,8 @@ public class SandboxListItem {
   /**
    * The class of the sandbox
    */
-  @JsonAdapter(PropertyClassEnum.Adapter.class)
-  public enum PropertyClassEnum {
+  @JsonAdapter(SandboxClassEnum.Adapter.class)
+  public enum SandboxClassEnum {
     SMALL("small"),
     
     MEDIUM("medium"),
@@ -95,7 +95,7 @@ public class SandboxListItem {
 
     private String value;
 
-    PropertyClassEnum(String value) {
+    SandboxClassEnum(String value) {
       this.value = value;
     }
 
@@ -108,8 +108,8 @@ public class SandboxListItem {
       return String.valueOf(value);
     }
 
-    public static PropertyClassEnum fromValue(String value) {
-      for (PropertyClassEnum b : PropertyClassEnum.values()) {
+    public static SandboxClassEnum fromValue(String value) {
+      for (SandboxClassEnum b : SandboxClassEnum.values()) {
         if (b.value.equals(value)) {
           return b;
         }
@@ -117,30 +117,30 @@ public class SandboxListItem {
       return UNKNOWN_DEFAULT_OPEN_API;
     }
 
-    public static class Adapter extends TypeAdapter<PropertyClassEnum> {
+    public static class Adapter extends TypeAdapter<SandboxClassEnum> {
       @Override
-      public void write(final JsonWriter jsonWriter, final PropertyClassEnum enumeration) throws IOException {
+      public void write(final JsonWriter jsonWriter, final SandboxClassEnum enumeration) throws IOException {
         jsonWriter.value(enumeration.getValue());
       }
 
       @Override
-      public PropertyClassEnum read(final JsonReader jsonReader) throws IOException {
+      public SandboxClassEnum read(final JsonReader jsonReader) throws IOException {
         String value =  jsonReader.nextString();
-        return PropertyClassEnum.fromValue(value);
+        return SandboxClassEnum.fromValue(value);
       }
     }
 
     public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       String value = jsonElement.getAsString();
-      PropertyClassEnum.fromValue(value);
+      SandboxClassEnum.fromValue(value);
     }
   }
 
-  public static final String SERIALIZED_NAME_PROPERTY_CLASS = "class";
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
   @Deprecated
-  @SerializedName(SERIALIZED_NAME_PROPERTY_CLASS)
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
   @javax.annotation.Nullable
-  private PropertyClassEnum propertyClass;
+  private SandboxClassEnum sandboxClass;
 
   public static final String SERIALIZED_NAME_STATE = "state";
   @SerializedName(SERIALIZED_NAME_STATE)
@@ -406,25 +406,25 @@ public class SandboxListItem {
 
 
   @Deprecated
-  public SandboxListItem propertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
+  public SandboxListItem sandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
     return this;
   }
 
   /**
    * The class of the sandbox
-   * @return propertyClass
+   * @return sandboxClass
    * @deprecated
    */
   @Deprecated
   @javax.annotation.Nullable
-  public PropertyClassEnum getPropertyClass() {
-    return propertyClass;
+  public SandboxClassEnum getSandboxClass() {
+    return sandboxClass;
   }
 
   @Deprecated
-  public void setPropertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
   }
 
 
@@ -894,7 +894,7 @@ public class SandboxListItem {
         Objects.equals(this.name, sandboxListItem.name) &&
         Objects.equals(this.target, sandboxListItem.target) &&
         Objects.equals(this.runnerId, sandboxListItem.runnerId) &&
-        Objects.equals(this.propertyClass, sandboxListItem.propertyClass) &&
+        Objects.equals(this.sandboxClass, sandboxListItem.sandboxClass) &&
         Objects.equals(this.state, sandboxListItem.state) &&
         Objects.equals(this.desiredState, sandboxListItem.desiredState) &&
         Objects.equals(this.snapshot, sandboxListItem.snapshot) &&
@@ -921,7 +921,7 @@ public class SandboxListItem {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, target, runnerId, propertyClass, state, desiredState, snapshot, user, errorReason, recoverable, _public, cpu, gpu, memory, disk, labels, backupState, autoStopInterval, autoArchiveInterval, autoDeleteInterval, createdAt, updatedAt, lastActivityAt, daemonVersion, toolboxProxyUrl, additionalProperties);
+    return Objects.hash(id, organizationId, name, target, runnerId, sandboxClass, state, desiredState, snapshot, user, errorReason, recoverable, _public, cpu, gpu, memory, disk, labels, backupState, autoStopInterval, autoArchiveInterval, autoDeleteInterval, createdAt, updatedAt, lastActivityAt, daemonVersion, toolboxProxyUrl, additionalProperties);
   }
 
   @Override
@@ -933,7 +933,7 @@ public class SandboxListItem {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    target: ").append(toIndentedString(target)).append("\n");
     sb.append("    runnerId: ").append(toIndentedString(runnerId)).append("\n");
-    sb.append("    propertyClass: ").append(toIndentedString(propertyClass)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    desiredState: ").append(toIndentedString(desiredState)).append("\n");
     sb.append("    snapshot: ").append(toIndentedString(snapshot)).append("\n");
@@ -974,7 +974,7 @@ public class SandboxListItem {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "target", "runnerId", "class", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "target", "runnerId", "sandboxClass", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "target", "user", "public", "cpu", "gpu", "memory", "disk", "labels", "toolboxProxyUrl"));
@@ -1015,12 +1015,12 @@ public class SandboxListItem {
       if ((jsonObj.get("runnerId") != null && !jsonObj.get("runnerId").isJsonNull()) && !jsonObj.get("runnerId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `runnerId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("runnerId").toString()));
       }
-      if ((jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) && !jsonObj.get("class").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `class` to be a primitive type in the JSON string but got `%s`", jsonObj.get("class").toString()));
+      if ((jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) && !jsonObj.get("sandboxClass").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sandboxClass` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sandboxClass").toString()));
       }
-      // validate the optional field `class`
-      if (jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) {
-        PropertyClassEnum.validateJsonElement(jsonObj.get("class"));
+      // validate the optional field `sandboxClass`
+      if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
+        SandboxClassEnum.validateJsonElement(jsonObj.get("sandboxClass"));
       }
       // validate the optional field `state`
       if (jsonObj.get("state") != null && !jsonObj.get("state").isJsonNull()) {

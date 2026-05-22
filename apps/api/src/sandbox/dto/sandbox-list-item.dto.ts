@@ -16,7 +16,7 @@ interface SandboxListItemDtoFields {
   name: string
   target: string
   runnerId?: string
-  class?: SandboxClass
+  sandboxClass?: SandboxClass
   state: SandboxState
   desiredState?: SandboxDesiredState
   snapshot?: string
@@ -82,7 +82,7 @@ export class SandboxListItemDto {
   })
   @IsEnum(SandboxClass)
   @IsOptional()
-  class?: SandboxClass
+  sandboxClass?: SandboxClass
 
   @ApiPropertyOptional({
     description: 'The state of the sandbox',
@@ -251,7 +251,7 @@ export class SandboxListItemDto {
     name,
     target,
     runnerId,
-    class: sandboxClass,
+    sandboxClass,
     state,
     desiredState,
     snapshot,
@@ -278,7 +278,7 @@ export class SandboxListItemDto {
     this.name = name
     this.target = target
     this.runnerId = runnerId
-    this.class = sandboxClass
+    this.sandboxClass = sandboxClass
     this.state = SandboxListItemDto.deriveState(state, desiredState)
     this.desiredState = desiredState
     this.snapshot = snapshot
