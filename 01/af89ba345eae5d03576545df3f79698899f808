@@ -1,0 +1,40 @@
+apps/daytona-e2e/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 15
+apps/snapshot-manager/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 11,34,69,71-72
+apps/daemon/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 119
+apps/cli/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 44,79-80,82-83,97
+apps/proxy/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 44-47
+libs/common-go/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 65-66,68-69
+apps/ssh-gateway/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 7,14
+libs/sdk-go/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 43-45
+libs/computer-use/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 50,52-54
+apps/otel-collector/exporter/go.mod
+  s_c735b19505d2dc::t_95f07f29d2ceda 55-57
+apps/runner/go.mod
+  s_c735b19505d2dc::t_44928a82142255 51,99
+  s_c735b19505d2dc::t_95f07f29d2ceda 36,60,151,153-154,156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "01af89ba345eae5d03576545df3f79698899f808",
+  "prompts": {},
+  "sessions": {
+    "s_c735b19505d2dc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7f928d57-c1e4-4372-8ff7-03f8531ce2ab",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
