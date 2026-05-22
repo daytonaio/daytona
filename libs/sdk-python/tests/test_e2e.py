@@ -343,6 +343,59 @@ def test_upload_binary_content(sandbox):
     assert content == binary_data, "Binary content should round-trip exactly"
 
 
+def test_file_transfer_survives_dropped_daytona_reference():
+    """Regression test for an issue where ``Daytona().create()`` left the
+    returned Sandbox with a closed shared ``httpx.Client``.
+
+    The bug: a ``weakref.finalize`` on the ``Daytona`` instance closed the
+    shared http client as soon as the (unreferenced) ``Daytona`` was GC'd,
+    even though the returned ``Sandbox`` still held that client for
+    uploads/downloads. The first ``sandbox.fs.upload_file`` then raised
+    ``DaytonaError: Failed to upload files: Cannot send a request, as the
+    client has been closed.``
+
+    This test deliberately drops the only reference to ``Daytona`` after
+    obtaining the sandbox, forces a GC cycle, and then exercises every
+    file-transfer code path (upload bytes, upload stream, download bytes,
+    download stream). All of them must keep working — i.e. the shared
+    client must survive as long as any sandbox produced by the parent
+    Daytona is still reachable.
+    """
+    import gc
+
+    daytona = Daytona()
+    sb = daytona.create(CreateSandboxFromSnapshotParams(language="python"), timeout=120)
+    try:
+        # Drop the only reference to the parent Daytona and force GC. With
+        # the bug, this triggered the finalizer that closed the shared
+        # httpx.Client; with the fix, the client stays alive because the
+        # sandbox still references it.
+        del daytona
+        gc.collect()
+
+        path = f"e2e-orphan-{uuid.uuid4().hex}.txt"
+        payload = b"orphan-daytona-upload"
+
+        # upload_file (multipart, the original failing path)
+        sb.fs.upload_file(payload, path)
+        assert sb.fs.download_file(path) == payload
+
+        # upload_file_stream (also goes through the shared client)
+        stream_path = f"e2e-orphan-stream-{uuid.uuid4().hex}.bin"
+        stream_payload = b"orphan-stream-content" * 64
+        import io as _io
+
+        sb.fs.upload_file_stream(_io.BytesIO(stream_payload), stream_path)
+        assert b"".join(sb.fs.download_file_stream(stream_path)) == stream_payload
+    finally:
+        try:
+            # Recreate a Daytona to clean up; the sandbox keeps working
+            # because it carries its own SandboxApi reference.
+            Daytona().delete(sb)
+        except Exception:
+            pass
+
+
 # ===========================================================================
 # Process Execution
 # ===========================================================================

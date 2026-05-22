@@ -7,7 +7,6 @@ import asyncio
 import json
 import time
 import warnings
-import weakref
 from copy import deepcopy
 from importlib.metadata import version
 from typing import Callable, cast, overload
@@ -225,11 +224,10 @@ class Daytona:
             self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
 
         # Shared pooled client for file-transfer paths; honors connection_pool_maxsize.
+        # build_sync_http_client installs a finalizer on the client itself, so the
+        # pool is closed when the last reference (this Daytona or any Sandbox it
+        # produced) goes away.
         self._http_client: httpx.Client = build_sync_http_client(pool_size)
-        # Close the pool deterministically when the Daytona instance is dereferenced.
-        # The finalizer captures only the httpx.Client (not self), so it doesn't keep
-        # the Daytona alive — it just runs httpx.Client.close() on GC.
-        _ = weakref.finalize(self, self._http_client.close)
 
         # Initialize API clients with the api_client instance
         self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
