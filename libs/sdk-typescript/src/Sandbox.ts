@@ -76,6 +76,7 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * @property {string} [lastActivityAt] - When the Sandbox last had activity
  * @property {boolean} networkBlockAll - Whether to block all network access for the Sandbox
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
+ * @property {string} [linkedSandboxId] - ID of the Sandbox this Sandbox is linked to. When set, the Sandbox is co-located on the same runner as the linked Sandbox.
  *
  * @class
  */
@@ -114,6 +115,7 @@ export class Sandbox implements SandboxDto {
   public lastActivityAt?: string
   public networkBlockAll!: boolean
   public networkAllowList?: string
+  public linkedSandboxId?: string
   public toolboxProxyUrl: string
 
   private infoApi: InfoApi
@@ -875,6 +877,7 @@ export class Sandbox implements SandboxDto {
     this.lastActivityAt = sandboxDto.lastActivityAt
     this.networkBlockAll = sandboxDto.networkBlockAll
     this.networkAllowList = sandboxDto.networkAllowList
+    this.linkedSandboxId = sandboxDto.linkedSandboxId
     this.toolboxProxyUrl = sandboxDto.toolboxProxyUrl
   }
 

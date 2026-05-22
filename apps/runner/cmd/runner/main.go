@@ -153,6 +153,8 @@ func run() int {
 		ComputerUsePluginPath:        pluginPath,
 		NetRulesManager:              netRulesManager,
 		ResourceLimitsDisabled:       cfg.ResourceLimitsDisabled,
+		DaemonStartTimeoutSec:        cfg.DaemonStartTimeoutSec,
+		SandboxStartTimeoutSec:       cfg.SandboxStartTimeoutSec,
 		UseSnapshotEntrypoint:        cfg.UseSnapshotEntrypoint,
 		VolumeCleanupInterval:        cfg.VolumeCleanupInterval,
 		VolumeCleanupDryRun:          cfg.VolumeCleanupDryRun,

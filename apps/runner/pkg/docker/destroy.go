@@ -61,6 +61,10 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 				}
 			}()
 
+			if err := d.teardownOwnedLinkNetwork(ctx, containerId); err != nil {
+				d.logger.WarnContext(ctx, "Failed to teardown owned link network", "sandboxId", containerId, "error", err)
+			}
+
 			return nil
 		}
 
@@ -101,6 +105,10 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 			d.logger.ErrorContext(ctx, "Failed to delete sandbox network settings", "error", err)
 		}
 	}()
+
+	if err := d.teardownOwnedLinkNetwork(ctx, containerId); err != nil {
+		d.logger.WarnContext(ctx, "Failed to teardown owned link network", "sandboxId", containerId, "error", err)
+	}
 
 	return nil
 }

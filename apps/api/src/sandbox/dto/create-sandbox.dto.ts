@@ -173,4 +173,13 @@ export class CreateSandboxDto {
   @IsOptional()
   @IsObject()
   buildInfo?: CreateBuildInfoDto
+
+  @ApiPropertyOptional({
+    description:
+      'ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.',
+    example: 'sandbox123',
+  })
+  @IsOptional()
+  @IsString()
+  linkedSandbox?: string
 }

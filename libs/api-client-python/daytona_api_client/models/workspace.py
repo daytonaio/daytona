@@ -67,13 +67,14 @@ class Workspace(BaseModel):
     sandbox_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", serialization_alias="sandboxClass")
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", serialization_alias="daemonVersion")
     runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", serialization_alias="runnerId")
+    linked_sandbox_id: Optional[StrictStr] = Field(default=None, description="ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.", serialization_alias="linkedSandboxId")
     toolbox_proxy_url: StrictStr = Field(description="The toolbox proxy URL for the sandbox", serialization_alias="toolboxProxyUrl")
     image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
     snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", serialization_alias="snapshotState")
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", serialization_alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "toolboxProxyUrl", "image", "snapshotState", "snapshotCreatedAt", "info"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "linkedSandboxId", "toolboxProxyUrl", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -177,6 +178,7 @@ class Workspace(BaseModel):
             "sandbox_class": obj.get("sandboxClass"),
             "daemon_version": obj.get("daemonVersion"),
             "runner_id": obj.get("runnerId"),
+            "linked_sandbox_id": obj.get("linkedSandboxId"),
             "toolbox_proxy_url": obj.get("toolboxProxyUrl"),
             "image": obj.get("image"),
             "snapshot_state": obj.get("snapshotState"),

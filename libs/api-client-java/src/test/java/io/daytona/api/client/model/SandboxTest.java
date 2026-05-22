@@ -303,6 +303,14 @@ public class SandboxTest {
     }
 
     /**
+     * Test the property 'linkedSandboxId'
+     */
+    @Test
+    public void linkedSandboxIdTest() {
+        // TODO: test linkedSandboxId
+    }
+
+    /**
      * Test the property 'toolboxProxyUrl'
      */
     @Test
