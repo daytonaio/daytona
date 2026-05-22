@@ -168,6 +168,7 @@
     "nestjs-opensearch": "^1.4.1",
     "nestjs-pino": "^4.4.1",
     "node-cache": "^5.1.2",
+    "node-forge": "^1.4.0",
     "nodemailer": "^8.0.4",
     "nuqs": "^2.8.8",
     "oidc-client-ts": "^3.2.0",
