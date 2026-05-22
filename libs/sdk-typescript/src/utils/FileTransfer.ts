@@ -358,7 +358,7 @@ async function feedStreamToBusboy(stream: any, bb: any, observer: MultipartHeade
   // always emits DaytonaError, not a raw library error.
   if (typeof stream?.pipe === 'function') {
     if (observer) {
-      const { Transform } = require('stream') as typeof import('stream')
+      const { Transform } = await dynamicImport('stream', '"downloadFiles" is not supported: ')
       const tapStream = new Transform({
         transform(chunk: any, _encoding: BufferEncoding, callback: (err?: Error | null, data?: any) => void) {
           const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)

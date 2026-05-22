@@ -331,6 +331,9 @@ export class FileSystem {
       throw new DaytonaError('Download cancelled')
     }
 
+    // Pre-resolve `stream` so the sync `onFileStream` callback below is await-free.
+    const { Transform } = await dynamicImport('stream', 'downloadFileStream progress tracking is not supported: ')
+
     const toDownloadCancelledError = () => new DaytonaError('Download cancelled')
     const isCanceledError = (err: unknown) => {
       const error = err as { code?: string; name?: string }
@@ -367,7 +370,6 @@ export class FileSystem {
         metadataMap,
         (_source, fileStream, totalBytes) => {
           if (options.onProgress) {
-            const { Transform } = require('stream') as typeof import('stream')
             let bytesReceived = 0
             const progress = new Transform({
               transform(chunk, _encoding, callback) {
