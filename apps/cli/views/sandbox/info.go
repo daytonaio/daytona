@@ -15,33 +15,47 @@ import (
 	"golang.org/x/term"
 )
 
-func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
+// sandboxInfo is the minimal accessor surface shared by *[apiclient.Sandbox]
+// (single-sandbox endpoints) and *[apiclient.SandboxListItem] (list endpoint).
+// Used by RenderInfo so both DTOs can be displayed without duplicating logic.
+type sandboxInfo interface {
+	GetId() string
+	GetTarget() string
+	GetLabels() map[string]string
+	GetStateOk() (*apiclient.SandboxState, bool)
+	GetSnapshotOk() (*string, bool)
+	GetClassOk() (*string, bool)
+	GetCreatedAtOk() (*string, bool)
+	GetLastActivityAtOk() (*string, bool)
+}
+
+func RenderInfo(sandbox sandboxInfo, forceUnstyled bool) {
 	var output string
 
 	output += "\n"
 
-	output += getInfoLine("ID", sandbox.Id) + "\n"
+	output += getInfoLine("ID", sandbox.GetId()) + "\n"
 
-	if sandbox.State != nil {
-		output += getInfoLine("State", getStateLabel(*sandbox.State)) + "\n"
+	if state, ok := sandbox.GetStateOk(); ok && state != nil {
+		output += getInfoLine("State", getStateLabel(*state)) + "\n"
 	}
 
-	if sandbox.Snapshot != nil {
-		output += getInfoLine("Snapshot", *sandbox.Snapshot) + "\n"
+	if snapshot, ok := sandbox.GetSnapshotOk(); ok && snapshot != nil {
+		output += getInfoLine("Snapshot", *snapshot) + "\n"
 	}
 
-	output += getInfoLine("Region", sandbox.Target) + "\n"
+	output += getInfoLine("Region", sandbox.GetTarget()) + "\n"
 
-	if sandbox.Class != nil {
-		output += getInfoLine("Class", *sandbox.Class) + "\n"
+	if class, ok := sandbox.GetClassOk(); ok && class != nil {
+		output += getInfoLine("Class", *class) + "\n"
 	}
 
-	if sandbox.CreatedAt != nil {
-		output += getInfoLine("Created", util.GetTimeSinceLabelFromString(*sandbox.CreatedAt)) + "\n"
+	if createdAt, ok := sandbox.GetCreatedAtOk(); ok && createdAt != nil {
+		output += getInfoLine("Created", util.GetTimeSinceLabelFromString(*createdAt)) + "\n"
 	}
 
-	if sandbox.LastActivityAt != nil {
-		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(*sandbox.LastActivityAt)) + "\n"
+	if lastActivityAt, ok := sandbox.GetLastActivityAtOk(); ok && lastActivityAt != nil {
+		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(*lastActivityAt)) + "\n"
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -56,10 +70,11 @@ func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
 
 	output = common.GetStyledMainTitle("Sandbox Info") + "\n" + output
 
-	if len(sandbox.Labels) > 0 {
+	labelsMap := sandbox.GetLabels()
+	if len(labelsMap) > 0 {
 		labels := ""
 		i := 0
-		for k, v := range sandbox.Labels {
+		for k, v := range labelsMap {
 			label := fmt.Sprintf("%s=%s\n", k, v)
 			if i == 0 {
 				labels += label + "\n"

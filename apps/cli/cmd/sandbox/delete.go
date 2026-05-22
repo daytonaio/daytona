@@ -37,7 +37,7 @@ var DeleteCmd = &cobra.Command{
 			if allFlag {
 				var cursor *string
 				limit := float32(200.0) // 200 is the maximum limit for the API
-				var allSandboxes []apiclient.Sandbox
+				var allSandboxes []apiclient.SandboxListItem
 
 				for {
 					request := apiClient.SandboxAPI.ListSandboxes(ctx).Limit(limit)
@@ -71,7 +71,7 @@ var DeleteCmd = &cobra.Command{
 
 					for _, sb := range allSandboxes {
 						wg.Add(1)
-						go func(sb apiclient.Sandbox) {
+						go func(sb apiclient.SandboxListItem) {
 							defer wg.Done()
 							sem <- struct{}{}
 							defer func() { <-sem }()
