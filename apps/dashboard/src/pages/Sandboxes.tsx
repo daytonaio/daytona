@@ -819,7 +819,9 @@ const Sandboxes: React.FC = () => {
     const previousState = sandboxToStart?.state
 
     await cancelCurrentSandboxQueryRefetches()
-    performSandboxStateOptimisticUpdate(id, SandboxState.STARTING)
+    const optimisticStartState =
+      previousState === SandboxState.ARCHIVED ? SandboxState.RESTORING : SandboxState.STARTING
+    performSandboxStateOptimisticUpdate(id, optimisticStartState)
 
     try {
       await startSandboxMutation.mutateAsync({ sandboxId: id })
@@ -933,7 +935,7 @@ const Sandboxes: React.FC = () => {
     }: {
       ids: string[]
       actionName: string
-      optimisticState: SandboxState
+      optimisticState: SandboxState | ((previousState: SandboxState | undefined) => SandboxState)
       apiCall: (id: string) => Promise<unknown>
       toastMessages: {
         successTitle: string
@@ -969,7 +971,9 @@ const Sandboxes: React.FC = () => {
             action: { label: 'Cancel', onClick: onCancel },
           })
 
-          performSandboxStateOptimisticUpdate(id, optimisticState)
+          const resolvedOptimisticState =
+            typeof optimisticState === 'function' ? optimisticState(previousStatesById.get(id)) : optimisticState
+          performSandboxStateOptimisticUpdate(id, resolvedOptimisticState)
 
           try {
             await apiCall(id)
@@ -1003,7 +1007,8 @@ const Sandboxes: React.FC = () => {
     executeBulkAction({
       ids,
       actionName: 'Starting',
-      optimisticState: SandboxState.STARTING,
+      optimisticState: (previousState) =>
+        previousState === SandboxState.ARCHIVED ? SandboxState.RESTORING : SandboxState.STARTING,
       apiCall: (id) => startSandboxMutation.mutateAsync({ sandboxId: id }),
       toastMessages: {
         successTitle: `${pluralize(ids.length, 'sandbox', 'sandboxes')} started.`,

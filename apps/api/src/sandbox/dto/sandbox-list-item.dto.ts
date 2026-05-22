@@ -323,6 +323,11 @@ export class SandboxListItemDto {
           return SandboxState.ARCHIVING
         }
         break
+      case SandboxState.ARCHIVED:
+        if (desiredState === SandboxDesiredState.STARTED) {
+          return SandboxState.RESTORING
+        }
+        break
       case SandboxState.UNKNOWN:
         if (desiredState === SandboxDesiredState.STARTED) {
           return SandboxState.CREATING
