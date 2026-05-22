@@ -1,0 +1,19 @@
+package.json
+  s_c735b19505d2dc::t_7ee354ef3e4bbd 171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "f3d73ed83a651618d4e051c3234a006e736221f0",
+  "prompts": {},
+  "sessions": {
+    "s_c735b19505d2dc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7f928d57-c1e4-4372-8ff7-03f8531ce2ab",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
