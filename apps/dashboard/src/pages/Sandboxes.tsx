@@ -101,7 +101,7 @@ const SANDBOX_SORT_FIELDS: SandboxListSortField[] = [
 const SANDBOX_SORT_DIRECTIONS = Object.values(SandboxListSortDirection)
 const SANDBOX_STATES = Object.values(SandboxState)
 const DEFAULT_SANDBOXES: SandboxListItem[] = []
-const SANDBOX_LIST_REVALIDATION_DEBOUNCE_MS = 500
+const SANDBOX_LIST_REVALIDATION_DEBOUNCE_MS = 2000
 
 const labelsParser = parseAsJson<Record<string, string>>((value) => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
