@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
+	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -15,6 +16,11 @@ import (
 )
 
 func RenderInfo(snapshot *apiclient.SnapshotDto, forceUnstyled bool) {
+	if commoncmd.FormatFlag == "tsv" {
+		renderTSVInfo(snapshot)
+		return
+	}
+
 	var output string
 	nameLabel := "Snapshot"
 
@@ -48,6 +54,16 @@ func RenderInfo(snapshot *apiclient.SnapshotDto, forceUnstyled bool) {
 
 func renderUnstyledInfo(output string) {
 	fmt.Println(output)
+}
+
+func renderTSVInfo(s *apiclient.SnapshotDto) {
+	fmt.Printf("snapshot\t%s\n", s.Name)
+	fmt.Printf("state\t%s\n", string(s.State))
+	if size := s.Size.Get(); size != nil {
+		fmt.Printf("size_gb\t%.2f\n", *size)
+	}
+	fmt.Printf("created\t%s\n", s.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
+	fmt.Printf("id\t%s\n", s.Id)
 }
 
 func renderTUIView(output string, width int) {

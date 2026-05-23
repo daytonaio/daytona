@@ -11,6 +11,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
+	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"golang.org/x/term"
 )
@@ -21,8 +22,19 @@ var AdditionalPropertyPadding = "  "
 var RowWhiteSpace = 1 + 4 + len(AdditionalPropertyPadding)*2 + 4 + 4 + 1
 var ArbitrarySpace = 10
 
+var ansiRegex = regexp.MustCompile("\x1b\\[[0-9;]*[a-zA-Z]")
+
+// StripANSI removes ANSI escape sequences from s.
+func StripANSI(s string) string {
+	return ansiRegex.ReplaceAllString(s, "")
+}
+
 // Gets the table view string or falls back to an unstyled view for lower terminal widths
 func GetTableView(data [][]string, headers []string, activeOrganizationName *string, fallbackRender func()) string {
+	if commoncmd.FormatFlag == "tsv" {
+		return renderTSV(data)
+	}
+
 	re := lipgloss.NewRenderer(os.Stdout)
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -65,10 +77,7 @@ func getMinimumWidth(data [][]string) int {
 	widestRow := 0
 	for _, row := range data {
 		for _, cell := range row {
-			// Remove ANSI escape codes
-			regex := regexp.MustCompile("\x1b\\[[0-9;]*[a-zA-Z]")
-			strippedCell := regex.ReplaceAllString(cell, "")
-			width += longestLineLength(strippedCell)
+			width += longestLineLength(StripANSI(cell))
 			if width > widestRow {
 				widestRow = width
 			}
@@ -76,6 +85,23 @@ func getMinimumWidth(data [][]string) int {
 		width = 0
 	}
 	return widestRow
+}
+
+// renderTSV emits the rows as literal tab-separated values, stripping any
+// ANSI bytes the upstream styling layer may have applied. Headers are
+// intentionally omitted (kubectl-style) so scripts like
+// `daytona sandbox list | awk '{print $1}'` work without skipping a leading row.
+func renderTSV(data [][]string) string {
+	var b strings.Builder
+	for _, row := range data {
+		cells := make([]string, len(row))
+		for i, cell := range row {
+			cells[i] = strings.TrimSpace(StripANSI(cell))
+		}
+		b.WriteString(strings.Join(cells, "\t"))
+		b.WriteByte('\n')
+	}
+	return strings.TrimRight(b.String(), "\n")
 }
 
 // Returns the length of the longest line in a string

@@ -49,7 +49,7 @@ var ListCmd = &cobra.Command{
 
 		sandbox.SortSandboxes(&sandboxList.Items)
 
-		if common.FormatFlag != "" {
+		if common.IsStructuredOutput() {
 			formattedData := common.NewFormatter(sandboxList)
 			formattedData.Print()
 			return nil

@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
+	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -15,6 +16,11 @@ import (
 )
 
 func RenderInfo(organization *apiclient.Organization, forceUnstyled bool) {
+	if commoncmd.FormatFlag == "tsv" {
+		renderTSVInfo(organization)
+		return
+	}
+
 	var output string
 	nameLabel := "Organization"
 
@@ -41,6 +47,12 @@ func RenderInfo(organization *apiclient.Organization, forceUnstyled bool) {
 
 func renderUnstyledInfo(output string) {
 	fmt.Println(output)
+}
+
+func renderTSVInfo(o *apiclient.Organization) {
+	fmt.Printf("organization\t%s\n", o.Name)
+	fmt.Printf("created\t%s\n", o.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
+	fmt.Printf("id\t%s\n", o.Id)
 }
 
 func renderTUIView(output string, width int) {

@@ -32,7 +32,7 @@ var InfoCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if common.FormatFlag != "" {
+		if common.IsStructuredOutput() {
 			formattedData := common.NewFormatter(sb)
 			formattedData.Print()
 			return nil

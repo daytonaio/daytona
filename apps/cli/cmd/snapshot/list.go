@@ -49,7 +49,7 @@ var ListCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if common.FormatFlag != "" {
+		if common.IsStructuredOutput() {
 			formattedData := common.NewFormatter(snapshots.Items)
 			formattedData.Print()
 			return nil

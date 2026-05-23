@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -16,6 +17,11 @@ import (
 )
 
 func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
+	if commoncmd.FormatFlag == "tsv" {
+		renderTSVInfo(sandbox)
+		return
+	}
+
 	var output string
 
 	output += "\n"
@@ -79,6 +85,31 @@ func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
 
 func renderUnstyledInfo(output string) {
 	fmt.Println(output)
+}
+
+func renderTSVInfo(s *apiclient.Sandbox) {
+	fmt.Printf("id\t%s\n", s.Id)
+	if s.State != nil {
+		fmt.Printf("state\t%s\n", string(*s.State))
+	}
+	if s.Snapshot != nil {
+		fmt.Printf("snapshot\t%s\n", *s.Snapshot)
+	}
+	fmt.Printf("region\t%s\n", s.Target)
+	if s.Class != nil {
+		fmt.Printf("class\t%s\n", *s.Class)
+	}
+	if s.CreatedAt != nil {
+		fmt.Printf("created\t%s\n", *s.CreatedAt)
+	}
+	if s.LastActivityAt != nil {
+		fmt.Printf("last_event\t%s\n", *s.LastActivityAt)
+	} else if s.UpdatedAt != nil {
+		fmt.Printf("last_event\t%s\n", *s.UpdatedAt)
+	}
+	for k, v := range s.Labels {
+		fmt.Printf("label.%s\t%s\n", k, v)
+	}
 }
 
 func renderTUIView(output string, width int) {

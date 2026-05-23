@@ -8,13 +8,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 	"gopkg.in/yaml.v2"
 )
 
 const (
-	formatFlagDescription = `Output format. Must be one of (yaml, json)`
+	formatFlagDescription = `Output format. Must be one of (tsv, yaml, json). Defaults to tsv when stdout is piped.`
 	formatFlagName        = "format"
 	formatFlagShortHand   = "f"
 )
@@ -23,6 +26,41 @@ var (
 	FormatFlag  string
 	standardOut *os.File
 )
+
+func init() {
+	cobra.OnInitialize(resolveOutputMode)
+}
+
+// resolveOutputMode adapts CLI output to the terminal context. When stdout is
+// not a TTY, FormatFlag defaults to "tsv" so piped consumers (grep, awk, ...)
+// get machine-friendly rows. NO_COLOR and non-TTY stdout both strip ANSI from
+// styled output.
+func resolveOutputMode() {
+	applyDefaults(
+		term.IsTerminal(int(os.Stdout.Fd())),
+		os.Getenv("NO_COLOR"),
+	)
+}
+
+// applyDefaults is the pure-function core of resolveOutputMode; isolated so
+// tests can exercise the precedence rules without touching real fds or env.
+func applyDefaults(isStdoutTTY bool, noColor string) {
+	if FormatFlag == "" && !isStdoutTTY {
+		FormatFlag = "tsv"
+	}
+	if !isStdoutTTY || noColor != "" {
+		lipgloss.SetColorProfile(termenv.Ascii)
+	}
+}
+
+// IsStructuredOutput reports whether the user (or auto-detection) selected a
+// fully-serialized format (json/yaml). The list/info commands use this to
+// decide between calling NewFormatter and falling through to the view layer.
+// Note that "tsv" is *not* structured here: tsv output is generated inside
+// the view layer (where curated column data lives), not via NewFormatter.
+func IsStructuredOutput() bool {
+	return FormatFlag == "json" || FormatFlag == "yaml"
+}
 
 type outputFormatter struct {
 	data      interface{}
@@ -103,7 +141,7 @@ func UnblockStdOut() {
 func RegisterFormatFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&FormatFlag, formatFlagName, formatFlagShortHand, FormatFlag, formatFlagDescription)
 	cmd.PreRun = func(cmd *cobra.Command, args []string) {
-		if FormatFlag != "" {
+		if IsStructuredOutput() {
 			BlockStdOut()
 			// When a structured output format is requested, suppress
 			// noisy warnings such as version mismatch so scripts
