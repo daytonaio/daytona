@@ -5,6 +5,7 @@ package snapshot
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
@@ -17,7 +18,7 @@ import (
 
 func RenderInfo(snapshot *apiclient.SnapshotDto, forceUnstyled bool) {
 	if commoncmd.FormatFlag == "tsv" {
-		renderTSVInfo(snapshot)
+		renderTSVInfo(os.Stdout, snapshot)
 		return
 	}
 
@@ -56,14 +57,14 @@ func renderUnstyledInfo(output string) {
 	fmt.Println(output)
 }
 
-func renderTSVInfo(s *apiclient.SnapshotDto) {
-	fmt.Printf("snapshot\t%s\n", s.Name)
-	fmt.Printf("state\t%s\n", string(s.State))
+func renderTSVInfo(w io.Writer, s *apiclient.SnapshotDto) {
+	fmt.Fprintf(w, "snapshot\t%s\n", s.Name)
+	fmt.Fprintf(w, "state\t%s\n", string(s.State))
 	if size := s.Size.Get(); size != nil {
-		fmt.Printf("size_gb\t%.2f\n", *size)
+		fmt.Fprintf(w, "size_gb\t%.2f\n", *size)
 	}
-	fmt.Printf("created\t%s\n", s.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
-	fmt.Printf("id\t%s\n", s.Id)
+	fmt.Fprintf(w, "created\t%s\n", s.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
+	fmt.Fprintf(w, "id\t%s\n", s.Id)
 }
 
 func renderTUIView(output string, width int) {

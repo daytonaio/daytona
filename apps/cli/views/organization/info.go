@@ -5,6 +5,7 @@ package organization
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
@@ -17,7 +18,7 @@ import (
 
 func RenderInfo(organization *apiclient.Organization, forceUnstyled bool) {
 	if commoncmd.FormatFlag == "tsv" {
-		renderTSVInfo(organization)
+		renderTSVInfo(os.Stdout, organization)
 		return
 	}
 
@@ -49,10 +50,10 @@ func renderUnstyledInfo(output string) {
 	fmt.Println(output)
 }
 
-func renderTSVInfo(o *apiclient.Organization) {
-	fmt.Printf("organization\t%s\n", o.Name)
-	fmt.Printf("created\t%s\n", o.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
-	fmt.Printf("id\t%s\n", o.Id)
+func renderTSVInfo(w io.Writer, o *apiclient.Organization) {
+	fmt.Fprintf(w, "organization\t%s\n", o.Name)
+	fmt.Fprintf(w, "created\t%s\n", o.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
+	fmt.Fprintf(w, "id\t%s\n", o.Id)
 }
 
 func renderTUIView(output string, width int) {

@@ -45,3 +45,20 @@ func TestStripANSI(t *testing.T) {
 		t.Errorf("StripANSI(%q) = %q, want %q", in, got, want)
 	}
 }
+
+// TestGetTableViewTSVEmptyData pins the acceptance criterion:
+// "Empty list in piped mode: zero bytes on stdout, exit code 0."
+func TestGetTableViewTSVEmptyData(t *testing.T) {
+	commoncmd.FormatFlag = "tsv"
+	defer func() { commoncmd.FormatFlag = "" }()
+
+	out := GetTableView(nil, []string{"Sandbox"}, nil, func() {})
+	if out != "" {
+		t.Errorf("empty data should yield empty string, got %q", out)
+	}
+
+	out = GetTableView([][]string{}, []string{"Sandbox"}, nil, func() {})
+	if out != "" {
+		t.Errorf("zero-length data should yield empty string, got %q", out)
+	}
+}

@@ -5,6 +5,7 @@ package sandbox
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -18,7 +19,7 @@ import (
 
 func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
 	if commoncmd.FormatFlag == "tsv" {
-		renderTSVInfo(sandbox)
+		renderTSVInfo(os.Stdout, sandbox)
 		return
 	}
 
@@ -87,28 +88,28 @@ func renderUnstyledInfo(output string) {
 	fmt.Println(output)
 }
 
-func renderTSVInfo(s *apiclient.Sandbox) {
-	fmt.Printf("id\t%s\n", s.Id)
+func renderTSVInfo(w io.Writer, s *apiclient.Sandbox) {
+	fmt.Fprintf(w, "id\t%s\n", s.Id)
 	if s.State != nil {
-		fmt.Printf("state\t%s\n", string(*s.State))
+		fmt.Fprintf(w, "state\t%s\n", string(*s.State))
 	}
 	if s.Snapshot != nil {
-		fmt.Printf("snapshot\t%s\n", *s.Snapshot)
+		fmt.Fprintf(w, "snapshot\t%s\n", *s.Snapshot)
 	}
-	fmt.Printf("region\t%s\n", s.Target)
+	fmt.Fprintf(w, "region\t%s\n", s.Target)
 	if s.Class != nil {
-		fmt.Printf("class\t%s\n", *s.Class)
+		fmt.Fprintf(w, "class\t%s\n", *s.Class)
 	}
 	if s.CreatedAt != nil {
-		fmt.Printf("created\t%s\n", *s.CreatedAt)
+		fmt.Fprintf(w, "created\t%s\n", *s.CreatedAt)
 	}
 	if s.LastActivityAt != nil {
-		fmt.Printf("last_event\t%s\n", *s.LastActivityAt)
+		fmt.Fprintf(w, "last_event\t%s\n", *s.LastActivityAt)
 	} else if s.UpdatedAt != nil {
-		fmt.Printf("last_event\t%s\n", *s.UpdatedAt)
+		fmt.Fprintf(w, "last_event\t%s\n", *s.UpdatedAt)
 	}
 	for k, v := range s.Labels {
-		fmt.Printf("label.%s\t%s\n", k, v)
+		fmt.Fprintf(w, "label.%s\t%s\n", k, v)
 	}
 }
 

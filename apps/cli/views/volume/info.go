@@ -5,6 +5,7 @@ package volume
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
@@ -17,7 +18,7 @@ import (
 
 func RenderInfo(volume *apiclient.VolumeDto, forceUnstyled bool) {
 	if commoncmd.FormatFlag == "tsv" {
-		renderTSVInfo(volume)
+		renderTSVInfo(os.Stdout, volume)
 		return
 	}
 
@@ -50,11 +51,11 @@ func renderUnstyledInfo(output string) {
 	fmt.Println(output)
 }
 
-func renderTSVInfo(v *apiclient.VolumeDto) {
-	fmt.Printf("volume\t%s\n", v.Name)
-	fmt.Printf("id\t%s\n", v.Id)
-	fmt.Printf("state\t%s\n", string(v.State))
-	fmt.Printf("created\t%s\n", v.CreatedAt)
+func renderTSVInfo(w io.Writer, v *apiclient.VolumeDto) {
+	fmt.Fprintf(w, "volume\t%s\n", v.Name)
+	fmt.Fprintf(w, "id\t%s\n", v.Id)
+	fmt.Fprintf(w, "state\t%s\n", string(v.State))
+	fmt.Fprintf(w, "created\t%s\n", v.CreatedAt)
 }
 
 func renderTUIView(output string, width int) {
