@@ -92,6 +92,22 @@ export class RunnerHealthMetricsDto {
   })
   @IsNumber()
   diskGiB: number
+
+  @ApiPropertyOptional({
+    description: 'Total number of GPUs on the runner',
+    example: 4,
+  })
+  @IsOptional()
+  @IsNumber()
+  gpu?: number
+
+  @ApiPropertyOptional({
+    description: 'GPU model name',
+    example: 'NVIDIA H100 80GB HBM3',
+  })
+  @IsOptional()
+  @IsString()
+  gpuType?: string
 }
 
 @ApiSchema({ name: 'RunnerServiceHealth' })

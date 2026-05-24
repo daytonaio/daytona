@@ -6,6 +6,7 @@ package docker
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
@@ -18,13 +19,13 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
-	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image)
+func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string, gpuIndex *int) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
+	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image, gpuIndex)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds)
+	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds, gpuIndex)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -33,7 +34,7 @@ func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, imag
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
-func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse) (*container.Config, error) {
+func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, gpuIndex *int) (*container.Config, error) {
 	if image == nil {
 		return nil, fmt.Errorf("image not found for sandbox: %s", sandboxDto.Id)
 	}
@@ -42,6 +43,17 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		"DAYTONA_SANDBOX_ID=" + sandboxDto.Id,
 		"DAYTONA_SANDBOX_SNAPSHOT=" + sandboxDto.Snapshot,
 		"DAYTONA_SANDBOX_USER=" + sandboxDto.OsUser,
+	}
+
+	// Privileged sandboxes still see every /dev/nvidia*, so the CDI device
+	// request alone cannot hide unassigned cards. Scope CUDA / NVML to the
+	// allocated index so cooperative workloads only target their own GPU.
+	if gpuIndex != nil {
+		idx := strconv.Itoa(*gpuIndex)
+		envVars = append(envVars,
+			"NVIDIA_VISIBLE_DEVICES="+idx,
+			"CUDA_VISIBLE_DEVICES="+idx,
+		)
 	}
 
 	for key, value := range sandboxDto.Env {
@@ -75,6 +87,9 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		if orgName, ok := sandboxDto.Metadata["organizationName"]; ok && orgName != "" {
 			labels["daytona.organization_name"] = orgName
 		}
+	}
+	if gpuIndex != nil {
+		labels[GpuIndexLabel] = strconv.Itoa(*gpuIndex)
 	}
 
 	workingDir := ""
@@ -116,7 +131,7 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 	}, nil
 }
 
-func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
+func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string, gpuIndex *int) (*container.HostConfig, error) {
 	var binds []string
 
 	binds = append(binds, fmt.Sprintf("%s:%s:ro", d.daemonPath, common.DAEMON_PATH))
@@ -161,21 +176,11 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		}
 	}
 
-	if d.gpuEnabled {
-		nvidiaDevices := []string{
-			"/dev/nvidia0",
-			"/dev/nvidiactl",
-			"/dev/nvidia-uvm",
-			"/dev/nvidia-uvm-tools",
-			"/dev/nvidia-modeset",
-		}
-		for _, dev := range nvidiaDevices {
-			hostConfig.Devices = append(hostConfig.Devices, container.DeviceMapping{
-				PathOnHost:        dev,
-				PathInContainer:   dev,
-				CgroupPermissions: "rwm",
-			})
-		}
+	if d.gpuEnabled && gpuIndex != nil {
+		hostConfig.DeviceRequests = []container.DeviceRequest{{
+			Driver:    "cdi",
+			DeviceIDs: []string{fmt.Sprintf("nvidia.com/gpu=%d", *gpuIndex)},
+		}}
 	}
 
 	return hostConfig, nil

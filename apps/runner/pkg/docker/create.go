@@ -125,7 +125,20 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 	}
 
-	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(sandboxDto, image, volumeMountPathBinds)
+	// Pin GPU sandboxes to a single physical card. The mutex is held until
+	// ContainerCreate finishes (via the deferred release) so concurrent
+	// creators read the new daytona.gpu_index label and skip this index.
+	var gpuIndex *int
+	if d.gpuEnabled && sandboxDto.GpuQuota > 0 {
+		idx, release, err := d.gpuAllocator.Acquire(ctx, d)
+		if err != nil {
+			return "", "", err
+		}
+		defer release()
+		gpuIndex = &idx
+	}
+
+	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(sandboxDto, image, volumeMountPathBinds, gpuIndex)
 	if err != nil {
 		return "", "", err
 	}

@@ -45,6 +45,10 @@ type RunnerHealthMetrics struct {
 	MemoryGiB float32 `json:"memoryGiB"`
 	// Total disk space in GiB on the runner
 	DiskGiB float32 `json:"diskGiB"`
+	// Total number of GPUs on the runner
+	Gpu *float32 `json:"gpu,omitempty"`
+	// GPU model name
+	GpuType *string `json:"gpuType,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -367,6 +371,70 @@ func (o *RunnerHealthMetrics) SetDiskGiB(v float32) {
 	o.DiskGiB = v
 }
 
+// GetGpu returns the Gpu field value if set, zero value otherwise.
+func (o *RunnerHealthMetrics) GetGpu() float32 {
+	if o == nil || IsNil(o.Gpu) {
+		var ret float32
+		return ret
+	}
+	return *o.Gpu
+}
+
+// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthMetrics) GetGpuOk() (*float32, bool) {
+	if o == nil || IsNil(o.Gpu) {
+		return nil, false
+	}
+	return o.Gpu, true
+}
+
+// HasGpu returns a boolean if a field has been set.
+func (o *RunnerHealthMetrics) HasGpu() bool {
+	if o != nil && !IsNil(o.Gpu) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpu gets a reference to the given float32 and assigns it to the Gpu field.
+func (o *RunnerHealthMetrics) SetGpu(v float32) {
+	o.Gpu = &v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise.
+func (o *RunnerHealthMetrics) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthMetrics) GetGpuTypeOk() (*string, bool) {
+	if o == nil || IsNil(o.GpuType) {
+		return nil, false
+	}
+	return o.GpuType, true
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *RunnerHealthMetrics) HasGpuType() bool {
+	if o != nil && !IsNil(o.GpuType) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given string and assigns it to the GpuType field.
+func (o *RunnerHealthMetrics) SetGpuType(v string) {
+	o.GpuType = &v
+}
+
 func (o RunnerHealthMetrics) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -389,6 +457,12 @@ func (o RunnerHealthMetrics) ToMap() (map[string]interface{}, error) {
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["memoryGiB"] = o.MemoryGiB
 	toSerialize["diskGiB"] = o.DiskGiB
+	if !IsNil(o.Gpu) {
+		toSerialize["gpu"] = o.Gpu
+	}
+	if !IsNil(o.GpuType) {
+		toSerialize["gpuType"] = o.GpuType
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -455,6 +529,8 @@ func (o *RunnerHealthMetrics) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "memoryGiB")
 		delete(additionalProperties, "diskGiB")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "gpuType")
 		o.AdditionalProperties = additionalProperties
 	}
 
