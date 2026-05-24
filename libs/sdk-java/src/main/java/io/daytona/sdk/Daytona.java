@@ -12,17 +12,24 @@ import io.daytona.api.client.model.SandboxVolume;
 import io.daytona.sdk.exception.DaytonaException;
 import io.daytona.sdk.model.CreateSandboxFromImageParams;
 import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
-import io.daytona.sdk.model.PaginatedSandboxes;
+import io.daytona.sdk.model.ListSandboxesQuery;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import okhttp3.OkHttpClient;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.lang.reflect.Field;
 
 /**
@@ -199,67 +206,262 @@ public class Daytona implements AutoCloseable {
     }
 
     /**
-     * Lists Sandboxes using default pagination.
+     * Iterates over all Sandboxes (no filter, default sort).
      *
-     * @return first page of Sandboxes with default page size
-     * @throws DaytonaException if listing fails
+     * <p>Returns a lazily-paged {@link Iterable}; see {@link #list(ListSandboxesQuery)} for details
+     * on partial hydration and Stream usage.
+     *
+     * @return iterable over Sandboxes
      */
-    public PaginatedSandboxes list() {
-        return list(null, 1, 10);
+    public Iterable<Sandbox> list() {
+        return list(null);
     }
 
     /**
-     * Lists Sandboxes with optional label filtering and pagination.
+     * Iterates over Sandboxes matching the given query.
      *
-     * @param labels label filter map; only Sandboxes with matching labels are returned
-     * @param page page number starting from 1
-     * @param limit maximum items per page
-     * @return paginated Sandbox list
-     * @throws DaytonaException if listing fails
+     * <p>The returned {@link Iterable} lazily fetches pages from the API as iteration proceeds.
+     * Sandboxes are hydrated from the list endpoint, so fields marked "Not returned by
+     * {@code Daytona.list}" on {@link Sandbox} (env, networkBlockAll, networkAllowList, volumes,
+     * buildInfo, backupCreatedAt) remain {@code null} until {@link Sandbox#refreshData()} is called.
+     * For a {@link Stream} variant see {@link #listStream(ListSandboxesQuery)}.
+     *
+     * <pre>{@code
+     * ListSandboxesQuery query = new ListSandboxesQuery();
+     * query.setLabels(Map.of("env", "dev"));
+     * for (Sandbox sandbox : daytona.list(query)) {
+     *     System.out.println(sandbox.getId());
+     * }
+     * }</pre>
+     *
+     * @param query optional filters, sorting, and per-page size
+     * @return iterable over Sandboxes
      */
-    public PaginatedSandboxes list(Map<String, String> labels, Integer page, Integer limit) {
-        int p = page == null ? 1 : page;
-        int l = limit == null ? 10 : limit;
-        String path = "/sandbox/paginated?page=" + p + "&limit=" + l;
-        if (labels != null && !labels.isEmpty()) {
-            path = path + "&labels=" + urlEncodeQuery(toJson(labels));
+    public Iterable<Sandbox> list(ListSandboxesQuery query) {
+        return () -> new SandboxIterator(this, query);
+    }
+
+    /**
+     * Streams all Sandboxes (no filter, default sort).
+     *
+     * <p>The returned stream should be closed (use try-with-resources).
+     *
+     * @return stream of Sandboxes
+     * @see #list()
+     */
+    public Stream<Sandbox> listStream() {
+        return listStream(null);
+    }
+
+    /**
+     * Streams Sandboxes matching the given query.
+     *
+     * <p>The returned stream should be closed (use try-with-resources).
+     *
+     * <pre>{@code
+     * try (Stream<Sandbox> stream = daytona.listStream(query)) {
+     *     stream.filter(sb -> "started".equals(sb.getState()))
+     *           .limit(5)
+     *           .forEach(sb -> System.out.println(sb.getId()));
+     * }
+     * }</pre>
+     *
+     * @param query optional filters, sorting, and per-page size
+     * @return stream of Sandboxes
+     */
+    public Stream<Sandbox> listStream(ListSandboxesQuery query) {
+        Iterator<Sandbox> iter = list(query).iterator();
+        Spliterator<Sandbox> spliterator = Spliterators.spliteratorUnknownSize(
+                iter, Spliterator.ORDERED | Spliterator.NONNULL);
+        return StreamSupport.stream(spliterator, false);
+    }
+
+    /**
+     * Fetches a single page of Sandboxes. Package-private so {@link SandboxIterator}
+     * can call it directly. Each call results in one outbound API request.
+     */
+    PageResult fetchSandboxPage(ListSandboxesQuery query, String cursor) {
+        String labelsJson = null;
+        BigDecimal limitVal = null;
+        String id = null;
+        String name = null;
+        List<io.daytona.api.client.model.SandboxState> states = null;
+        List<String> snapshots = null;
+        List<String> targets = null;
+        BigDecimal minCpu = null;
+        BigDecimal maxCpu = null;
+        BigDecimal minMemoryGib = null;
+        BigDecimal maxMemoryGib = null;
+        BigDecimal minDiskGib = null;
+        BigDecimal maxDiskGib = null;
+        Boolean isPublic = null;
+        Boolean isRecoverable = null;
+        OffsetDateTime createdAtAfter = null;
+        OffsetDateTime createdAtBefore = null;
+        OffsetDateTime lastActivityAfter = null;
+        OffsetDateTime lastActivityBefore = null;
+        io.daytona.api.client.model.SandboxListSortField sort = null;
+        io.daytona.api.client.model.SandboxListSortDirection order = null;
+
+        if (query != null) {
+            if (query.getLimit() != null) limitVal = BigDecimal.valueOf(query.getLimit());
+            id = query.getId();
+            name = query.getName();
+            if (query.getLabels() != null && !query.getLabels().isEmpty()) {
+                labelsJson = toJson(query.getLabels());
+            }
+            if (query.getStates() != null) {
+                states = new ArrayList<>(query.getStates().size());
+                for (io.daytona.sdk.model.SandboxState s : query.getStates()) {
+                    states.add(s.toApiClient());
+                }
+            }
+            snapshots = query.getSnapshots();
+            targets = query.getTargets();
+            if (query.getMinCpu() != null) minCpu = BigDecimal.valueOf(query.getMinCpu());
+            if (query.getMaxCpu() != null) maxCpu = BigDecimal.valueOf(query.getMaxCpu());
+            if (query.getMinMemoryGib() != null) minMemoryGib = BigDecimal.valueOf(query.getMinMemoryGib());
+            if (query.getMaxMemoryGib() != null) maxMemoryGib = BigDecimal.valueOf(query.getMaxMemoryGib());
+            if (query.getMinDiskGib() != null) minDiskGib = BigDecimal.valueOf(query.getMinDiskGib());
+            if (query.getMaxDiskGib() != null) maxDiskGib = BigDecimal.valueOf(query.getMaxDiskGib());
+            isPublic = query.getIsPublic();
+            isRecoverable = query.getIsRecoverable();
+            createdAtAfter = query.getCreatedAtAfter();
+            createdAtBefore = query.getCreatedAtBefore();
+            lastActivityAfter = query.getLastActivityAfter();
+            lastActivityBefore = query.getLastActivityBefore();
+            if (query.getSort() != null) sort = query.getSort().toApiClient();
+            if (query.getOrder() != null) order = query.getOrder().toApiClient();
         }
 
-        io.daytona.api.client.model.PaginatedSandboxes result = ExceptionMapper.callMain(() -> sandboxApi.listSandboxesPaginated(
+        final String fLabelsJson = labelsJson;
+        final String fCursor = cursor;
+        final BigDecimal fLimitVal = limitVal;
+        final String fId = id;
+        final String fName = name;
+        final List<io.daytona.api.client.model.SandboxState> fStates = states;
+        final List<String> fSnapshots = snapshots;
+        final List<String> fTargets = targets;
+        final BigDecimal fMinCpu = minCpu;
+        final BigDecimal fMaxCpu = maxCpu;
+        final BigDecimal fMinMemoryGib = minMemoryGib;
+        final BigDecimal fMaxMemoryGib = maxMemoryGib;
+        final BigDecimal fMinDiskGib = minDiskGib;
+        final BigDecimal fMaxDiskGib = maxDiskGib;
+        final Boolean fIsPublic = isPublic;
+        final Boolean fIsRecoverable = isRecoverable;
+        final OffsetDateTime fCreatedAtAfter = createdAtAfter;
+        final OffsetDateTime fCreatedAtBefore = createdAtBefore;
+        final OffsetDateTime fLastActivityAfter = lastActivityAfter;
+        final OffsetDateTime fLastActivityBefore = lastActivityBefore;
+        final io.daytona.api.client.model.SandboxListSortField fSort = sort;
+        final io.daytona.api.client.model.SandboxListSortDirection fOrder = order;
+
+        io.daytona.api.client.model.ListSandboxesResponse result = ExceptionMapper.callMain(() -> sandboxApi.listSandboxes(
                 null,
-                BigDecimal.valueOf(p),
-                BigDecimal.valueOf(l),
+                fCursor,
+                fLimitVal,
+                fId,
+                fName,
+                fLabelsJson,
                 null,
-                null,
-                labels == null || labels.isEmpty() ? null : toJson(labels),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
+                fStates,
+                fSnapshots,
+                fTargets,
+                fMinCpu,
+                fMaxCpu,
+                fMinMemoryGib,
+                fMaxMemoryGib,
+                fMinDiskGib,
+                fMaxDiskGib,
+                fIsPublic,
+                fIsRecoverable,
+                fCreatedAtAfter,
+                fCreatedAtBefore,
+                fLastActivityAfter,
+                fLastActivityBefore,
+                fSort,
+                fOrder
         ));
 
-        PaginatedSandboxes paginated = new PaginatedSandboxes();
-        List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
+        List<Sandbox> items = new ArrayList<>();
         if (result != null && result.getItems() != null) {
-            for (io.daytona.api.client.model.Sandbox item : result.getItems()) {
-                items.add(sandboxToMap(item));
+            for (io.daytona.api.client.model.SandboxListItem item : result.getItems()) {
+                items.add(new Sandbox(sandboxApi, config, item));
             }
         }
-        paginated.setItems(items);
-        paginated.setTotal(result != null && result.getTotal() != null ? result.getTotal().intValue() : 0);
-        paginated.setPage(result != null && result.getPage() != null ? result.getPage().intValue() : 0);
-        paginated.setTotalPages(result != null && result.getTotalPages() != null ? result.getTotalPages().intValue() : 0);
-        return paginated;
+        String nextCursor = result != null ? result.getNextCursor() : null;
+        return new PageResult(items, nextCursor);
+    }
+
+    /**
+     * Internal page payload used by {@link SandboxIterator}.
+     */
+    static final class PageResult {
+        final List<Sandbox> items;
+        final String nextCursor;
+
+        PageResult(List<Sandbox> items, String nextCursor) {
+            this.items = items;
+            this.nextCursor = nextCursor;
+        }
+    }
+
+    /**
+     * Cursor-based iterator that lazily pulls pages from the Daytona API.
+     *
+     * <p>Single-consumer, not thread-safe. Stops fetching as soon as the API
+     * signals no further cursor.
+     */
+    private static final class SandboxIterator implements Iterator<Sandbox> {
+        private final Daytona daytona;
+        private final ListSandboxesQuery query;
+
+        private List<Sandbox> page = null;
+        private int pageIndex = 0;
+        private String cursor = null;
+        private boolean firstPageFetched = false;
+        private boolean exhausted = false;
+
+        SandboxIterator(Daytona daytona, ListSandboxesQuery query) {
+            this.daytona = daytona;
+            this.query = query;
+        }
+
+        @Override
+        public boolean hasNext() {
+            advanceIfNeeded();
+            return page != null && pageIndex < page.size();
+        }
+
+        @Override
+        public Sandbox next() {
+            advanceIfNeeded();
+            if (page == null || pageIndex >= page.size()) {
+                throw new NoSuchElementException();
+            }
+            return page.get(pageIndex++);
+        }
+
+        private void advanceIfNeeded() {
+            while ((page == null || pageIndex >= page.size()) && !exhausted) {
+                if (firstPageFetched && cursor == null) {
+                    exhausted = true;
+                    return;
+                }
+                PageResult result = daytona.fetchSandboxPage(query, cursor);
+                firstPageFetched = true;
+                page = result.items;
+                pageIndex = 0;
+                cursor = result.nextCursor;
+                if (cursor == null) {
+                    exhausted = true;
+                    if (page == null || page.isEmpty()) {
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -389,29 +591,6 @@ public class Daytona implements AutoCloseable {
             output = output.substring(0, output.length() - 1);
         }
         return output;
-    }
-
-    static Map<String, Object> sandboxToMap(io.daytona.api.client.model.Sandbox sandbox) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        if (sandbox == null) {
-            return map;
-        }
-        map.put("id", sandbox.getId());
-        map.put("name", sandbox.getName());
-        map.put("state", sandbox.getState() == null ? null : sandbox.getState().getValue());
-        map.put("target", sandbox.getTarget());
-        map.put("user", sandbox.getUser());
-        map.put("toolboxProxyUrl", sandbox.getToolboxProxyUrl());
-        map.put("cpu", sandbox.getCpu() == null ? 0 : sandbox.getCpu().intValue());
-        map.put("gpu", sandbox.getGpu() == null ? 0 : sandbox.getGpu().intValue());
-        map.put("memory", sandbox.getMemory() == null ? 0 : sandbox.getMemory().intValue());
-        map.put("disk", sandbox.getDisk() == null ? 0 : sandbox.getDisk().intValue());
-        map.put("env", sandbox.getEnv());
-        map.put("labels", sandbox.getLabels());
-        map.put("autoStopInterval", sandbox.getAutoStopInterval() == null ? null : sandbox.getAutoStopInterval().intValue());
-        map.put("autoArchiveInterval", sandbox.getAutoArchiveInterval() == null ? null : sandbox.getAutoArchiveInterval().intValue());
-        map.put("autoDeleteInterval", sandbox.getAutoDeleteInterval() == null ? null : sandbox.getAutoDeleteInterval().intValue());
-        return map;
     }
 
     static String urlEncodePathSegment(String value) {

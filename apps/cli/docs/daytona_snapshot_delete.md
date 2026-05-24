@@ -3,7 +3,7 @@
 Delete a snapshot
 
 ```
-daytona snapshot delete [SNAPSHOT_ID] [flags]
+daytona snapshot delete [SNAPSHOT_ID | SNAPSHOT_NAME] [flags]
 ```
 
 ### Options

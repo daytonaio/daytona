@@ -10,10 +10,11 @@ export default {
       apiKey: env.DAYTONA_API_KEY,
       apiUrl: env.DAYTONA_API_URL,
     })
-    const r: any = await daytona.list()
+    const iter = daytona.list()
+    const listOk = typeof (iter as any)[Symbol.asyncIterator] === 'function' && typeof (await iter.next()) === 'object'
     return Response.json({
       imageOk: image.dockerfile.includes('FROM alpine'),
-      listOk: Array.isArray(r.items),
+      listOk,
     })
   },
 }

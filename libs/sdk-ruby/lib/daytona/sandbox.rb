@@ -23,7 +23,8 @@ module Daytona
     # @return [String] The user associated with the project
     attr_reader :user
 
-    # @return [Hash<String, String>] Environment variables for the sandbox
+    # @return [Hash<String, String>, nil] Environment variables for the sandbox.
+    #   Not returned by list results; call #refresh on each item to populate.
     attr_reader :env
 
     # @return [Hash<String, String>] Labels for the sandbox
@@ -32,10 +33,12 @@ module Daytona
     # @return [Boolean] Whether the sandbox http preview is public
     attr_reader :public
 
-    # @return [Boolean] Whether to block all network access for the sandbox
+    # @return [Boolean, nil] Whether to block all network access for the sandbox.
+    #   Not returned by list results; call #refresh on each item to populate.
     attr_reader :network_block_all
 
-    # @return [String] Comma-separated list of allowed CIDR network addresses for the sandbox
+    # @return [String, nil] Comma-separated list of allowed CIDR network addresses for the sandbox.
+    #   Not returned by list results; call #refresh on each item to populate.
     attr_reader :network_allow_list
 
     # @return [String] The target environment for the sandbox
@@ -65,7 +68,8 @@ module Daytona
     # @return [String] The state of the backup
     attr_reader :backup_state
 
-    # @return [String] The creation timestamp of the last backup
+    # @return [String, nil] The creation timestamp of the last backup.
+    #   Not returned by list results; call #refresh on each item to populate.
     attr_reader :backup_created_at
 
     # @return [Float] Auto-stop interval in minutes (0 means disabled)
@@ -78,10 +82,13 @@ module Daytona
     # (negative value means disabled, 0 means delete immediately upon stopping)
     attr_reader :auto_delete_interval
 
-    # @return [Array<DaytonaApiClient::SandboxVolume>] Array of volumes attached to the sandbox
+    # @return [Array<DaytonaApiClient::SandboxVolume>, nil] Volumes attached to the sandbox.
+    #   Not returned by list results; call #refresh on each item to populate.
     attr_reader :volumes
 
-    # @return [DaytonaApiClient::BuildInfo] Build information for the sandbox
+    # @return [DaytonaApiClient::BuildInfo, nil] Build information for the sandbox if it was
+    #   created from a dynamic build.
+    #   Not returned by list results; call #refresh on each item to populate.
     attr_reader :build_info
 
     # @return [String] The creation timestamp of the sandbox
@@ -119,7 +126,7 @@ module Daytona
 
     # @params config [Daytona::Config]
     # @params sandbox_api [DaytonaApiClient::SandboxApi]
-    # @params sandbox_dto [DaytonaApiClient::Sandbox]
+    # @params sandbox_dto [DaytonaApiClient::Sandbox, DaytonaApiClient::SandboxListItem]
     # @params otel_state [Daytona::OtelState, nil]
     def initialize(sandbox_dto:, config:, sandbox_api:, otel_state: nil) # rubocop:disable Metrics/MethodLength
       process_response(sandbox_dto)
@@ -565,14 +572,14 @@ module Daytona
       end
     end
 
-    # @params sandbox_dto [DaytonaApiClient::Sandbox]
+    # @params sandbox_dto [DaytonaApiClient::Sandbox, DaytonaApiClient::SandboxListItem]
     # @return [void]
     def process_response(sandbox_dto) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+      # Fields shared by both DaytonaApiClient::Sandbox and DaytonaApiClient::SandboxListItem.
       @id = sandbox_dto.id
       @organization_id = sandbox_dto.organization_id
       @snapshot = sandbox_dto.snapshot
       @user = sandbox_dto.user
-      @env = sandbox_dto.env
       @labels = sandbox_dto.labels
       @public = sandbox_dto.public
       @target = sandbox_dto.target
@@ -584,19 +591,25 @@ module Daytona
       @desired_state = sandbox_dto.desired_state
       @error_reason = sandbox_dto.error_reason
       @backup_state = sandbox_dto.backup_state
-      @backup_created_at = sandbox_dto.backup_created_at
       @auto_stop_interval = sandbox_dto.auto_stop_interval
       @auto_archive_interval = sandbox_dto.auto_archive_interval
       @auto_delete_interval = sandbox_dto.auto_delete_interval
-      @volumes = sandbox_dto.volumes
-      @build_info = sandbox_dto.build_info
       @created_at = sandbox_dto.created_at
       @updated_at = sandbox_dto.updated_at
       @last_activity_at = sandbox_dto.last_activity_at
       @daemon_version = sandbox_dto.daemon_version
+      @toolbox_proxy_url = sandbox_dto.toolbox_proxy_url
+
+      # Fields only present on the full DaytonaApiClient::Sandbox DTO (not returned by list
+      # results; call #refresh on each item to populate them).
+      return unless sandbox_dto.is_a?(DaytonaApiClient::Sandbox)
+
+      @env = sandbox_dto.env
       @network_block_all = sandbox_dto.network_block_all
       @network_allow_list = sandbox_dto.network_allow_list
-      @toolbox_proxy_url = sandbox_dto.toolbox_proxy_url
+      @volumes = sandbox_dto.volumes
+      @build_info = sandbox_dto.build_info
+      @backup_created_at = sandbox_dto.backup_created_at
     end
 
     # Monitors block not to exceed max execution time.

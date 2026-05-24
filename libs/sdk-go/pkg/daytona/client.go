@@ -61,6 +61,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"iter"
 	"net/http"
 	"os"
 	"strings"
@@ -551,18 +552,8 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	sandbox := NewSandbox(c, toolboxClient, sandboxResp.GetId(), sandboxResp.GetName(), sandboxResp.GetState(), sandboxResp.GetTarget(), autoArchiveInterval, autoDeleteInterval, sandboxResp.GetNetworkBlockAll(), sandboxResp.NetworkAllowList, language)
+	sandbox := NewSandbox(c, toolboxClient, sandboxResp, language)
 
 	// Handle snapshot build logs
 	if sandbox.State == apiclient.SANDBOXSTATE_PENDING_BUILD {
@@ -647,130 +638,169 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 		return nil, err
 	}
 
-	autoArchiveInterval := 0
-	if sandboxResp.AutoArchiveInterval != nil {
-		autoArchiveInterval = int(*sandboxResp.AutoArchiveInterval)
-	}
-
-	autoDeleteInterval := 0
-	if sandboxResp.AutoDeleteInterval != nil {
-		autoDeleteInterval = int(*sandboxResp.AutoDeleteInterval)
-	}
-
 	language := types.CodeLanguage(sandboxResp.GetLabels()[types.CodeToolboxLanguageLabel])
-	sandbox := NewSandbox(c,
-		toolboxClient,
-		sandboxResp.GetId(),
-		sandboxResp.GetName(),
-		sandboxResp.GetState(),
-		sandboxResp.GetTarget(),
-		autoArchiveInterval,
-		autoDeleteInterval,
-		sandboxResp.GetNetworkBlockAll(),
-		sandboxResp.NetworkAllowList,
-		language,
-	)
-	return sandbox, nil
+	return NewSandbox(c, toolboxClient, sandboxResp, language), nil
 }
 
-// List retrieves sandboxes with optional label filtering and pagination.
+// List returns an iterator over Sandboxes matching the given query, following
+// the [database/sql.Rows] / [bufio.Scanner] iterator pattern.
 //
-// Parameters:
-//   - labels: Optional map of labels to filter sandboxes. Pass nil for no filtering.
-//   - page: Optional page number (1-indexed). Pass nil for the first page.
-//   - limit: Optional number of results per page. Pass nil for the default limit.
+// For Go 1.23+ range-over-func consumers, see [Client.ListSeq].
 //
 // Example:
 //
-//	// List all sandboxes
-//	result, err := client.List(ctx, nil, nil, nil)
-//
-//	// List sandboxes with pagination
-//	page, limit := 1, 10
-//	result, err := client.List(ctx, nil, &page, &limit)
-//
-//	// Filter by labels
-//	result, err := client.List(ctx, map[string]string{"env": "dev"}, nil, nil)
-//
-//	// Iterate through results
-//	for _, sandbox := range result.Items {
-//	    fmt.Printf("Sandbox: %s (state: %s)\n", sandbox.Name, sandbox.State)
+//	iter := client.List(ctx, &ListSandboxesQuery{Labels: map[string]string{"env": "dev"}})
+//	for iter.Next() {
+//	    fmt.Println(iter.Value().ID)
 //	}
-//
-// Returns a [PaginatedSandboxes] containing the matching sandboxes and pagination metadata.
-func (c *Client) List(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error) {
-	return withInstrumentation(ctx, c.Otel, "Client", "List", func(ctx context.Context) (*PaginatedSandboxes, error) {
-		return c.doList(ctx, labels, page, limit)
-	})
+//	if err := iter.Err(); err != nil {
+//	    log.Fatal(err)
+//	}
+func (c *Client) List(ctx context.Context, query *ListSandboxesQuery) *SandboxIterator {
+	return &SandboxIterator{
+		client: c,
+		ctx:    ctx,
+		query:  query,
+	}
 }
 
-func (c *Client) doList(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error) {
-	if page != nil && *page < 1 {
-		return nil, errors.NewDaytonaError("page must be a positive integer", 0, nil)
+// ListSeq returns a Go 1.23+ range-over-func iterator over Sandboxes matching
+// the given query. Each yielded pair is (sandbox, error); a non-nil error
+// terminates iteration and the consumer should break out of the range.
+//
+// Example:
+//
+//	for sandbox, err := range client.ListSeq(ctx, &ListSandboxesQuery{...}) {
+//	    if err != nil {
+//	        log.Fatal(err)
+//	    }
+//	    fmt.Println(sandbox.ID)
+//	}
+func (c *Client) ListSeq(ctx context.Context, query *ListSandboxesQuery) iter.Seq2[*Sandbox, error] {
+	return func(yield func(*Sandbox, error) bool) {
+		it := c.List(ctx, query)
+		for it.Next() {
+			if !yield(it.Value(), nil) {
+				return
+			}
+		}
+		if err := it.Err(); err != nil {
+			yield(nil, err)
+		}
 	}
-	if limit != nil && *limit < 1 {
-		return nil, errors.NewDaytonaError("limit must be a positive integer", 0, nil)
-	}
+}
 
-	authCtx := c.getAuthContext(ctx)
-	request := c.apiClient.SandboxAPI.ListSandboxesPaginated(authCtx)
+// sandboxPage holds the result of a single page fetch.
+type sandboxPage struct {
+	items      []*Sandbox
+	nextCursor *string
+}
 
-	// Add optional parameters
-	if labels != nil {
-		labelsJSON, _ := json.Marshal(labels)
-		request = request.Labels(string(labelsJSON))
-	}
-	if page != nil {
-		request = request.Page(float32(*page))
-	}
-	if limit != nil {
-		request = request.Limit(float32(*limit))
-	}
+// fetchPage fetches a single page of sandboxes. Each call is wrapped in a
+// dedicated OTEL span so that pagination produces N spans for N pages.
+func (c *Client) fetchPage(ctx context.Context, query *ListSandboxesQuery, cursor *string) ([]*Sandbox, *string, error) {
+	page, err := withInstrumentation(ctx, c.Otel, "Client", "List.fetchPage", func(ctx context.Context) (*sandboxPage, error) {
+		authCtx := c.getAuthContext(ctx)
+		request := c.apiClient.SandboxAPI.ListSandboxes(authCtx)
 
-	result, httpResp, err := request.Execute()
-	if err != nil {
-		return nil, errors.ConvertAPIError(err, httpResp)
-	}
+		if cursor != nil {
+			request = request.Cursor(*cursor)
+		}
+		if query != nil {
+			if query.Limit != nil {
+				request = request.Limit(float32(*query.Limit))
+			}
+			if query.ID != nil {
+				request = request.Id(*query.ID)
+			}
+			if query.Name != nil {
+				request = request.Name(*query.Name)
+			}
+			if query.Labels != nil {
+				labelsJSON, _ := json.Marshal(query.Labels)
+				request = request.Labels(string(labelsJSON))
+			}
+			if query.States != nil {
+				request = request.States(query.States)
+			}
+			if query.Snapshots != nil {
+				request = request.Snapshots(query.Snapshots)
+			}
+			if query.Targets != nil {
+				request = request.RegionIds(query.Targets)
+			}
+			if query.MinCpu != nil {
+				request = request.MinCpu(float32(*query.MinCpu))
+			}
+			if query.MaxCpu != nil {
+				request = request.MaxCpu(float32(*query.MaxCpu))
+			}
+			if query.MinMemoryGib != nil {
+				request = request.MinMemoryGiB(float32(*query.MinMemoryGib))
+			}
+			if query.MaxMemoryGib != nil {
+				request = request.MaxMemoryGiB(float32(*query.MaxMemoryGib))
+			}
+			if query.MinDiskGib != nil {
+				request = request.MinDiskGiB(float32(*query.MinDiskGib))
+			}
+			if query.MaxDiskGib != nil {
+				request = request.MaxDiskGiB(float32(*query.MaxDiskGib))
+			}
+			if query.IsPublic != nil {
+				request = request.IsPublic(*query.IsPublic)
+			}
+			if query.IsRecoverable != nil {
+				request = request.IsRecoverable(*query.IsRecoverable)
+			}
+			if query.CreatedAtAfter != nil {
+				request = request.CreatedAtAfter(*query.CreatedAtAfter)
+			}
+			if query.CreatedAtBefore != nil {
+				request = request.CreatedAtBefore(*query.CreatedAtBefore)
+			}
+			if query.LastActivityAfter != nil {
+				request = request.LastEventAfter(*query.LastActivityAfter)
+			}
+			if query.LastActivityBefore != nil {
+				request = request.LastEventBefore(*query.LastActivityBefore)
+			}
+			if query.Sort != nil {
+				request = request.Sort(*query.Sort)
+			}
+			if query.Order != nil {
+				request = request.Order(*query.Order)
+			}
+		}
 
-	items := result.GetItems()
-	sandboxes := make([]*Sandbox, len(items))
-	for i := range items {
-		toolboxClient, err := c.createToolboxClient(items[i].GetToolboxProxyUrl(), items[i].GetId())
+		result, httpResp, err := request.Execute()
 		if err != nil {
-			return nil, err
+			return nil, errors.ConvertAPIError(err, httpResp)
 		}
 
-		autoArchiveInterval := 0
-		if items[i].AutoArchiveInterval != nil {
-			autoArchiveInterval = int(*items[i].AutoArchiveInterval)
+		items := result.GetItems()
+		sandboxes := make([]*Sandbox, len(items))
+		for i := range items {
+			toolboxClient, tcErr := c.createToolboxClient(items[i].GetToolboxProxyUrl(), items[i].GetId())
+			if tcErr != nil {
+				return nil, tcErr
+			}
+
+			lang := types.CodeLanguage(items[i].GetLabels()[types.CodeToolboxLanguageLabel])
+			sandboxes[i] = NewSandbox(c, toolboxClient, &items[i], lang)
 		}
 
-		autoDeleteInterval := 0
-		if items[i].AutoDeleteInterval != nil {
-			autoDeleteInterval = int(*items[i].AutoDeleteInterval)
+		var nextCursor *string
+		if result.NextCursor.IsSet() && result.NextCursor.Get() != nil {
+			nextCursor = result.NextCursor.Get()
 		}
 
-		lang := types.CodeLanguage(items[i].GetLabels()[types.CodeToolboxLanguageLabel])
-		sandboxes[i] = NewSandbox(c,
-			toolboxClient,
-			items[i].GetId(),
-			items[i].GetName(),
-			items[i].GetState(),
-			items[i].GetTarget(),
-			autoArchiveInterval,
-			autoDeleteInterval,
-			items[i].GetNetworkBlockAll(),
-			items[i].NetworkAllowList,
-			lang,
-		)
+		return &sandboxPage{items: sandboxes, nextCursor: nextCursor}, nil
+	})
+	if err != nil {
+		return nil, nil, err
 	}
-
-	return &PaginatedSandboxes{
-		Items:      sandboxes,
-		Total:      int(result.GetTotal()),
-		Page:       int(result.GetPage()),
-		TotalPages: int(result.GetTotalPages()),
-	}, nil
+	return page.items, page.nextCursor, nil
 }
 
 // streamBuildLogsToChannel streams build logs for a sandbox to a channel

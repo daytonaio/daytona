@@ -95,28 +95,32 @@ module Daytona
       to_sandbox(sandbox_dto:)
     end
 
-    # Lists Sandboxes filtered by labels.
+    # Iterates over Sandboxes matching the given query.
     #
-    # @param labels [Hash<String, String>]
-    # @param page [Integer, Nil]
-    # @param limit [Integer, Nil]
-    # @return [Daytona::PaginatedResource]
+    # @param query [Daytona::ListSandboxesQuery, nil] Optional filters, sorting, and per-page size.
+    # @return [Enumerator<Daytona::Sandbox>]
     # @raise [Daytona::Sdk::Error]
-    def list(labels = {}, page: nil, limit: nil)
-      raise Sdk::Error, 'page must be positive integer' if page && page < 1
+    #
+    # @example
+    #   daytona.list(Daytona::ListSandboxesQuery.new(labels: { 'env' => 'dev' })).each do |sandbox|
+    #     puts sandbox.id
+    #   end
+    def list(query = nil)
+      q = query || ListSandboxesQuery.new
 
-      raise Sdk::Error, 'limit must be positive integer' if limit && limit < 1
-
-      response = sandbox_api.list_sandboxes_paginated(labels: JSON.dump(labels), page:, limit:)
-
-      PaginatedResource.new(
-        total: response.total,
-        page: response.page,
-        total_pages: response.total_pages,
-        items: response.items.map do |sandbox_dto|
-          to_sandbox(sandbox_dto:)
+      Enumerator.new do |yielder|
+        cursor = nil
+        first_page = true
+        while first_page || cursor
+          first_page = false
+          response = fetch_sandbox_page(q, cursor)
+          response.items.each do |sandbox_dto|
+            yielder << to_sandbox(sandbox_dto: sandbox_dto)
+          end
+          cursor = response.next_cursor
+          break if cursor.nil? || (cursor.respond_to?(:empty?) && cursor.empty?)
         end
-      )
+      end
     end
 
     # Starts a Sandbox and waits for it to be ready.
@@ -133,12 +137,50 @@ module Daytona
     # @return [void]
     def stop(sandbox, timeout = Sandbox::DEFAULT_TIMEOUT) = sandbox.stop(timeout)
 
-    instrument :create, :delete, :get, :list, :start, :stop, component: 'Daytona'
+    instrument :create, :delete, :get, :start, :stop, component: 'Daytona'
 
     private
 
     # @return [Daytona::OtelState, nil]
     attr_reader :otel_state
+
+    # Fetches a single page of sandboxes. Each call produces one OTel span
+    # ("Daytona.list_fetch_page") so that paginated iteration emits N spans
+    # for N pages.
+    #
+    # @param q [Daytona::ListSandboxesQuery]
+    # @param cursor [String, nil]
+    # @return [DaytonaApiClient::ListSandboxesResponse]
+    def fetch_sandbox_page(q, cursor)
+      opts = {
+        cursor: cursor,
+        limit: q.limit,
+        id: q.id,
+        name: q.name,
+        labels: q.labels ? JSON.dump(q.labels) : nil,
+        states: q.states,
+        snapshots: q.snapshots,
+        region_ids: q.targets,
+        min_cpu: q.min_cpu,
+        max_cpu: q.max_cpu,
+        min_memory_gi_b: q.min_memory_gib,
+        max_memory_gi_b: q.max_memory_gib,
+        min_disk_gi_b: q.min_disk_gib,
+        max_disk_gi_b: q.max_disk_gib,
+        is_public: q.is_public,
+        is_recoverable: q.is_recoverable,
+        created_at_after: q.created_at_after,
+        created_at_before: q.created_at_before,
+        last_event_after: q.last_activity_after,
+        last_event_before: q.last_activity_before,
+        sort: q.sort,
+        order: q.order
+      }.compact
+
+      sandbox_api.list_sandboxes(opts)
+    end
+
+    instrument :fetch_sandbox_page, component: 'Daytona.list'
 
     # Creates a sandbox with the specified parameters
     #
@@ -262,7 +304,7 @@ module Daytona
       end
     end
 
-    # @param sandbox_dto [DaytonaApiClient::Sandbox]
+    # @param sandbox_dto [DaytonaApiClient::Sandbox, DaytonaApiClient::SandboxListItem]
     # @return [Daytona::Sandbox]
     def to_sandbox(sandbox_dto:)
       Sandbox.new(

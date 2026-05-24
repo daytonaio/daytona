@@ -41,7 +41,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.api.users_api import UsersApi
     from daytona_api_client_async.api.volumes_api import VolumesApi
     from daytona_api_client_async.api.webhooks_api import WebhooksApi
-    from daytona_api_client_async.api.workspace_api import WorkspaceApi
     # import ApiClient
     from daytona_api_client_async.api_response import ApiResponse
     from daytona_api_client_async.api_client import ApiClient
@@ -88,7 +87,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.create_snapshot import CreateSnapshot
     from daytona_api_client_async.models.create_user import CreateUser
     from daytona_api_client_async.models.create_volume import CreateVolume
-    from daytona_api_client_async.models.create_workspace import CreateWorkspace
     from daytona_api_client_async.models.daytona_configuration import DaytonaConfiguration
     from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
     from daytona_api_client_async.models.docker_registry import DockerRegistry
@@ -118,6 +116,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.keyboard_press_request import KeyboardPressRequest
     from daytona_api_client_async.models.keyboard_type_request import KeyboardTypeRequest
     from daytona_api_client_async.models.list_branch_response import ListBranchResponse
+    from daytona_api_client_async.models.list_sandboxes_response import ListSandboxesResponse
     from daytona_api_client_async.models.log_entry import LogEntry
     from daytona_api_client_async.models.lsp_completion_params import LspCompletionParams
     from daytona_api_client_async.models.lsp_document_request import LspDocumentRequest
@@ -149,7 +148,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.paginated_audit_logs import PaginatedAuditLogs
     from daytona_api_client_async.models.paginated_jobs import PaginatedJobs
     from daytona_api_client_async.models.paginated_logs import PaginatedLogs
-    from daytona_api_client_async.models.paginated_sandboxes import PaginatedSandboxes
+    from daytona_api_client_async.models.paginated_sandboxes_deprecated import PaginatedSandboxesDeprecated
     from daytona_api_client_async.models.paginated_snapshots import PaginatedSnapshots
     from daytona_api_client_async.models.paginated_traces import PaginatedTraces
     from daytona_api_client_async.models.poll_jobs_response import PollJobsResponse
@@ -190,8 +189,10 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.sandbox import Sandbox
     from daytona_api_client_async.models.sandbox_class import SandboxClass
     from daytona_api_client_async.models.sandbox_desired_state import SandboxDesiredState
-    from daytona_api_client_async.models.sandbox_info import SandboxInfo
     from daytona_api_client_async.models.sandbox_labels import SandboxLabels
+    from daytona_api_client_async.models.sandbox_list_item import SandboxListItem
+    from daytona_api_client_async.models.sandbox_list_sort_direction import SandboxListSortDirection
+    from daytona_api_client_async.models.sandbox_list_sort_field import SandboxListSortField
     from daytona_api_client_async.models.sandbox_state import SandboxState
     from daytona_api_client_async.models.sandbox_volume import SandboxVolume
     from daytona_api_client_async.models.screenshot_response import ScreenshotResponse
@@ -233,8 +234,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.webhook_initialization_status import WebhookInitializationStatus
     from daytona_api_client_async.models.windows_response import WindowsResponse
     from daytona_api_client_async.models.work_dir_response import WorkDirResponse
-    from daytona_api_client_async.models.workspace import Workspace
-    from daytona_api_client_async.models.workspace_port_preview_url import WorkspacePortPreviewUrl
 
 _DYNAMIC_IMPORTS: dict[str, str] = {
     # apis
@@ -256,7 +255,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "UsersApi": "daytona_api_client_async.api.users_api",
     "VolumesApi": "daytona_api_client_async.api.volumes_api",
     "WebhooksApi": "daytona_api_client_async.api.webhooks_api",
-    "WorkspaceApi": "daytona_api_client_async.api.workspace_api",
     # ApiClient
     "ApiResponse": "daytona_api_client_async.api_response",
     "ApiClient": "daytona_api_client_async.api_client",
@@ -302,7 +300,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "CreateSnapshot": "daytona_api_client_async.models.create_snapshot",
     "CreateUser": "daytona_api_client_async.models.create_user",
     "CreateVolume": "daytona_api_client_async.models.create_volume",
-    "CreateWorkspace": "daytona_api_client_async.models.create_workspace",
     "DaytonaConfiguration": "daytona_api_client_async.models.daytona_configuration",
     "DisplayInfoResponse": "daytona_api_client_async.models.display_info_response",
     "DockerRegistry": "daytona_api_client_async.models.docker_registry",
@@ -332,6 +329,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "KeyboardPressRequest": "daytona_api_client_async.models.keyboard_press_request",
     "KeyboardTypeRequest": "daytona_api_client_async.models.keyboard_type_request",
     "ListBranchResponse": "daytona_api_client_async.models.list_branch_response",
+    "ListSandboxesResponse": "daytona_api_client_async.models.list_sandboxes_response",
     "LogEntry": "daytona_api_client_async.models.log_entry",
     "LspCompletionParams": "daytona_api_client_async.models.lsp_completion_params",
     "LspDocumentRequest": "daytona_api_client_async.models.lsp_document_request",
@@ -363,7 +361,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "PaginatedAuditLogs": "daytona_api_client_async.models.paginated_audit_logs",
     "PaginatedJobs": "daytona_api_client_async.models.paginated_jobs",
     "PaginatedLogs": "daytona_api_client_async.models.paginated_logs",
-    "PaginatedSandboxes": "daytona_api_client_async.models.paginated_sandboxes",
+    "PaginatedSandboxesDeprecated": "daytona_api_client_async.models.paginated_sandboxes_deprecated",
     "PaginatedSnapshots": "daytona_api_client_async.models.paginated_snapshots",
     "PaginatedTraces": "daytona_api_client_async.models.paginated_traces",
     "PollJobsResponse": "daytona_api_client_async.models.poll_jobs_response",
@@ -404,8 +402,10 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "Sandbox": "daytona_api_client_async.models.sandbox",
     "SandboxClass": "daytona_api_client_async.models.sandbox_class",
     "SandboxDesiredState": "daytona_api_client_async.models.sandbox_desired_state",
-    "SandboxInfo": "daytona_api_client_async.models.sandbox_info",
     "SandboxLabels": "daytona_api_client_async.models.sandbox_labels",
+    "SandboxListItem": "daytona_api_client_async.models.sandbox_list_item",
+    "SandboxListSortDirection": "daytona_api_client_async.models.sandbox_list_sort_direction",
+    "SandboxListSortField": "daytona_api_client_async.models.sandbox_list_sort_field",
     "SandboxState": "daytona_api_client_async.models.sandbox_state",
     "SandboxVolume": "daytona_api_client_async.models.sandbox_volume",
     "ScreenshotResponse": "daytona_api_client_async.models.screenshot_response",
@@ -447,8 +447,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "WebhookInitializationStatus": "daytona_api_client_async.models.webhook_initialization_status",
     "WindowsResponse": "daytona_api_client_async.models.windows_response",
     "WorkDirResponse": "daytona_api_client_async.models.work_dir_response",
-    "Workspace": "daytona_api_client_async.models.workspace",
-    "WorkspacePortPreviewUrl": "daytona_api_client_async.models.workspace_port_preview_url",
 }
 
 
@@ -495,7 +493,6 @@ __all__ = [
     "UsersApi",
     "VolumesApi",
     "WebhooksApi",
-    "WorkspaceApi",
     "AccountProvider",
     "AdminCreateRunner",
     "AdminGetWebhookStatus200Response",
@@ -530,7 +527,6 @@ __all__ = [
     "CreateSnapshot",
     "CreateUser",
     "CreateVolume",
-    "CreateWorkspace",
     "DaytonaConfiguration",
     "DisplayInfoResponse",
     "DockerRegistry",
@@ -560,6 +556,7 @@ __all__ = [
     "KeyboardPressRequest",
     "KeyboardTypeRequest",
     "ListBranchResponse",
+    "ListSandboxesResponse",
     "LogEntry",
     "LspCompletionParams",
     "LspDocumentRequest",
@@ -591,7 +588,7 @@ __all__ = [
     "PaginatedAuditLogs",
     "PaginatedJobs",
     "PaginatedLogs",
-    "PaginatedSandboxes",
+    "PaginatedSandboxesDeprecated",
     "PaginatedSnapshots",
     "PaginatedTraces",
     "PollJobsResponse",
@@ -632,8 +629,10 @@ __all__ = [
     "Sandbox",
     "SandboxClass",
     "SandboxDesiredState",
-    "SandboxInfo",
     "SandboxLabels",
+    "SandboxListItem",
+    "SandboxListSortDirection",
+    "SandboxListSortField",
     "SandboxState",
     "SandboxVolume",
     "ScreenshotResponse",
@@ -675,7 +674,5 @@ __all__ = [
     "WebhookInitializationStatus",
     "WindowsResponse",
     "WorkDirResponse",
-    "Workspace",
-    "WorkspacePortPreviewUrl",
 
 ]

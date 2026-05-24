@@ -16,17 +16,16 @@ type RowData struct {
 	Name      string
 	State     string
 	Region    string
-	Class     string
 	LastEvent string
 }
 
-func ListSandboxes(sandboxList []apiclient.Sandbox, activeOrganizationName *string) {
+func ListSandboxes(sandboxList []apiclient.SandboxListItem, activeOrganizationName *string) {
 	if len(sandboxList) == 0 {
 		util.NotifyEmptySandboxList(true)
 		return
 	}
 
-	headers := []string{"Sandbox", "State", "Region", "Class", "Last Event"}
+	headers := []string{"Sandbox", "State", "Region", "Last Event"}
 
 	data := [][]string{}
 
@@ -46,7 +45,7 @@ func ListSandboxes(sandboxList []apiclient.Sandbox, activeOrganizationName *stri
 	fmt.Println(table)
 }
 
-func SortSandboxes(sandboxList *[]apiclient.Sandbox) {
+func SortSandboxes(sandboxList *[]apiclient.SandboxListItem) {
 	sort.Slice(*sandboxList, func(i, j int) bool {
 		pi, pj := getStateSortPriorities(*(*sandboxList)[i].State, *(*sandboxList)[j].State)
 		if pi != pj {
@@ -57,40 +56,36 @@ func SortSandboxes(sandboxList *[]apiclient.Sandbox) {
 			return true
 		}
 
-		// If two sandboxes have the same state priority, compare the UpdatedAt property
+		// If two sandboxes have the same state priority, compare the CreatedAt property
 		return *(*sandboxList)[i].CreatedAt > *(*sandboxList)[j].CreatedAt
 	})
 }
 
-func getTableRowData(sandbox apiclient.Sandbox) *RowData {
-	rowData := RowData{"", "", "", "", ""}
+func getTableRowData(sandbox apiclient.SandboxListItem) *RowData {
+	rowData := RowData{"", "", "", ""}
 	rowData.Name = sandbox.Id + util.AdditionalPropertyPadding
 	if sandbox.State != nil {
 		rowData.State = getStateLabel(*sandbox.State)
 	}
 
 	rowData.Region = sandbox.Target
-	if sandbox.Class != nil {
-		rowData.Class = *sandbox.Class
-	}
 
 	if sandbox.LastActivityAt != nil {
 		rowData.LastEvent = util.GetTimeSinceLabelFromString(*sandbox.LastActivityAt)
-	} else if sandbox.UpdatedAt != nil {
-		rowData.LastEvent = util.GetTimeSinceLabelFromString(*sandbox.UpdatedAt)
 	}
 
 	return &rowData
 }
 
-func renderUnstyledList(sandboxList []apiclient.Sandbox) {
-	for _, sandbox := range sandboxList {
-		RenderInfo(&sandbox, true)
+func renderUnstyledList(sandboxList []apiclient.SandboxListItem) {
+	for i := range sandboxList {
+		// Pass by pointer so the value implements the sandboxInfo interface
+		// (pointer receiver methods on *apiclient.SandboxListItem).
+		RenderInfo(&sandboxList[i], true)
 
-		if sandbox.Id != sandboxList[len(sandboxList)-1].Id {
+		if sandboxList[i].Id != sandboxList[len(sandboxList)-1].Id {
 			fmt.Printf("\n%s\n\n", common.SeparatorString)
 		}
-
 	}
 }
 
@@ -99,7 +94,6 @@ func getRowFromRowData(rowData RowData) []string {
 		common.NameStyle.Render(rowData.Name),
 		rowData.State,
 		common.DefaultRowDataStyle.Render(rowData.Region),
-		common.DefaultRowDataStyle.Render(rowData.Class),
 		common.DefaultRowDataStyle.Render(rowData.LastEvent),
 	}
 

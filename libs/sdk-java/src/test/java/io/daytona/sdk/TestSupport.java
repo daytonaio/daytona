@@ -42,6 +42,24 @@ final class TestSupport {
         return sandbox;
     }
 
+    static io.daytona.api.client.model.SandboxListItem mainSandboxListItem(String id, SandboxState state) {
+        io.daytona.api.client.model.SandboxListItem sandbox = new io.daytona.api.client.model.SandboxListItem();
+        sandbox.setId(id);
+        sandbox.setOrganizationId("org-1");
+        sandbox.setName("sandbox-" + id);
+        sandbox.setUser("daytona");
+        sandbox.setLabels(new HashMap<String, String>());
+        sandbox.setPublic(false);
+        sandbox.setTarget("us");
+        sandbox.setCpu(BigDecimal.ONE);
+        sandbox.setGpu(BigDecimal.ZERO);
+        sandbox.setMemory(BigDecimal.valueOf(2));
+        sandbox.setDisk(BigDecimal.valueOf(3));
+        sandbox.setState(state);
+        sandbox.setToolboxProxyUrl("http://localhost:1/toolbox");
+        return sandbox;
+    }
+
     static DaytonaConfig config() {
         return new DaytonaConfig.Builder()
                 .apiKey("test-key")

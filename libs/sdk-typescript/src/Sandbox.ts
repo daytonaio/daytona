@@ -6,7 +6,7 @@
 import { SandboxState, SandboxApi, SandboxBackupStateEnum, Configuration } from '@daytona/api-client'
 import type {
   Sandbox as SandboxDto,
-  PaginatedSandboxes as PaginatedSandboxesDto,
+  SandboxListItem as SandboxListItemDto,
   PortPreviewUrl,
   SandboxVolume,
   BuildInfo,
@@ -16,10 +16,11 @@ import type {
   ResizeSandbox,
   CreateSandboxSnapshot,
   UpdateSandboxNetworkSettings,
+  SandboxListSortField,
+  SandboxListSortDirection,
 } from '@daytona/api-client'
 import { Daytona } from './Daytona'
 import type { Resources } from './Daytona'
-import type { CodeLanguage } from './Daytona'
 import {
   FileSystemApi,
   GitApi,
@@ -53,7 +54,8 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * @property {string} organizationId - Organization ID of the Sandbox
  * @property {string} [snapshot] - Daytona snapshot used to create the Sandbox
  * @property {string} user - OS user running in the Sandbox
- * @property {Record<string, string>} env - Environment variables set in the Sandbox
+ * @property {Record<string, string>} [env] - Environment variables set in the Sandbox
+ * (not returned by list results; call `refreshData()` on each item to populate)
  * @property {Record<string, string>} labels - Custom labels attached to the Sandbox
  * @property {boolean} public - Whether the Sandbox is publicly accessible
  * @property {string} target - Target location of the runner where the Sandbox runs
@@ -65,21 +67,26 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * @property {string} [errorReason] - Error message if Sandbox is in error state
  * @property {boolean} [recoverable] - Whether the Sandbox error is recoverable.
  * @property {SandboxBackupStateEnum} [backupState] - Current state of Sandbox backup
- * @property {string} [backupCreatedAt] - When the backup was created
+ * @property {string} [backupCreatedAt] - When the backup was created (not returned by list results;
+ * call `refreshData()` on each item to populate)
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes
  * @property {number} [autoDeleteInterval] - Auto-delete interval in minutes
- * @property {Array<SandboxVolume>} [volumes] - Volumes attached to the Sandbox
+ * @property {Array<SandboxVolume>} [volumes] - Volumes attached to the Sandbox (not returned by
+ * list results; call `refreshData()` on each item to populate)
  * @property {BuildInfo} [buildInfo] - Build information for the Sandbox if it was created from dynamic build
+ * (not returned by list results; call `refreshData()` on each item to populate)
  * @property {string} [createdAt] - When the Sandbox was created
  * @property {string} [updatedAt] - When the Sandbox was last updated
  * @property {string} [lastActivityAt] - When the Sandbox last had activity
- * @property {boolean} networkBlockAll - Whether to block all network access for the Sandbox
+ * @property {boolean} [networkBlockAll] - Whether to block all network access for the Sandbox
+ * (not returned by list results; call `refreshData()` on each item to populate)
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
+ * (not returned by list results; call `refreshData()` on each item to populate)
  *
  * @class
  */
-export class Sandbox implements SandboxDto {
+export class Sandbox {
   public readonly fs: FileSystem
   public readonly git: Git
   public readonly process: Process
@@ -91,7 +98,7 @@ export class Sandbox implements SandboxDto {
   public organizationId!: string
   public snapshot?: string
   public user!: string
-  public env!: Record<string, string>
+  public env?: Record<string, string>
   public labels!: Record<string, string>
   public public!: boolean
   public target!: string
@@ -112,7 +119,7 @@ export class Sandbox implements SandboxDto {
   public createdAt?: string
   public updatedAt?: string
   public lastActivityAt?: string
-  public networkBlockAll!: boolean
+  public networkBlockAll?: boolean
   public networkAllowList?: string
   public toolboxProxyUrl: string
 
@@ -124,7 +131,7 @@ export class Sandbox implements SandboxDto {
    * @param {SandboxDto} sandboxDto - The API Sandbox instance
    */
   constructor(
-    sandboxDto: SandboxDto,
+    sandboxDto: SandboxDto | SandboxListItemDto,
     private readonly clientConfig: Configuration,
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
@@ -846,13 +853,12 @@ export class Sandbox implements SandboxDto {
    * @param {SandboxDto} sandboxDto - The API sandbox instance to assign data from
    * @returns {void}
    */
-  private processSandboxDto(sandboxDto: SandboxDto) {
+  private processSandboxDto(sandboxDto: SandboxDto | SandboxListItemDto) {
     this.id = sandboxDto.id
     this.name = sandboxDto.name
     this.organizationId = sandboxDto.organizationId
     this.snapshot = sandboxDto.snapshot
     this.user = sandboxDto.user
-    this.env = sandboxDto.env
     this.labels = sandboxDto.labels
     this.public = sandboxDto.public
     this.target = sandboxDto.target
@@ -864,18 +870,23 @@ export class Sandbox implements SandboxDto {
     this.errorReason = sandboxDto.errorReason
     this.recoverable = sandboxDto.recoverable
     this.backupState = sandboxDto.backupState
-    this.backupCreatedAt = sandboxDto.backupCreatedAt
     this.autoStopInterval = sandboxDto.autoStopInterval
     this.autoArchiveInterval = sandboxDto.autoArchiveInterval
     this.autoDeleteInterval = sandboxDto.autoDeleteInterval
-    this.volumes = sandboxDto.volumes
-    this.buildInfo = sandboxDto.buildInfo
     this.createdAt = sandboxDto.createdAt
     this.updatedAt = sandboxDto.updatedAt
     this.lastActivityAt = sandboxDto.lastActivityAt
-    this.networkBlockAll = sandboxDto.networkBlockAll
-    this.networkAllowList = sandboxDto.networkAllowList
     this.toolboxProxyUrl = sandboxDto.toolboxProxyUrl
+
+    // Fields only present in the full SandboxDto (not returned by list endpoint)
+    if ('env' in sandboxDto) {
+      this.env = sandboxDto.env
+      this.networkBlockAll = sandboxDto.networkBlockAll
+      this.networkAllowList = sandboxDto.networkAllowList
+      this.volumes = sandboxDto.volumes
+      this.buildInfo = sandboxDto.buildInfo
+      this.backupCreatedAt = sandboxDto.backupCreatedAt
+    }
   }
 
   /**
@@ -895,6 +906,109 @@ export class Sandbox implements SandboxDto {
   }
 }
 
-export interface PaginatedSandboxes extends Omit<PaginatedSandboxesDto, 'items'> {
-  items: Sandbox[]
+export interface ListSandboxesQuery {
+  /**
+   * Per-page fetch size. Does NOT limit the total number of Sandboxes returned.
+   * */
+  limit?: number
+
+  /**
+   * Sort by field
+   * */
+  sort?: SandboxListSortField
+
+  /**
+   * Sort direction
+   * */
+  order?: SandboxListSortDirection
+
+  /**
+   * Filter by ID prefix (case-insensitive)
+   * */
+  id?: string
+
+  /**
+   * Filter by name prefix (case-insensitive)
+   * */
+  name?: string
+
+  /**
+   * Filter by labels
+   * */
+  labels?: Record<string, string>
+
+  /**
+   * Filter by states
+   * */
+  states?: SandboxState[]
+
+  /**
+   * Filter by snapshot names
+   * */
+  snapshots?: string[]
+
+  /**
+   * Filter by targets
+   * */
+  targets?: string[]
+
+  /**
+   * Filter by minimum CPU
+   * */
+  minCpu?: number
+
+  /**
+   * Filter by maximum CPU
+   * */
+  maxCpu?: number
+
+  /**
+   * Filter by minimum memory in GiB
+   * */
+  minMemoryGib?: number
+
+  /**
+   * Filter by maximum memory in GiB
+   * */
+  maxMemoryGib?: number
+
+  /**
+   * Filter by minimum disk space in GiB
+   * */
+  minDiskGib?: number
+
+  /**
+   * Filter by maximum disk space in GiB
+   * */
+  maxDiskGib?: number
+
+  /**
+   * Filter by public status
+   * */
+  isPublic?: boolean
+
+  /**
+   * Filter by recoverable status
+   * */
+  isRecoverable?: boolean
+
+  /**
+   * Include sandboxes created after this timestamp
+   * */
+  createdAtAfter?: Date
+
+  /**
+   * Include sandboxes created before this timestamp
+   * */
+  createdAtBefore?: Date
+
+  /**
+   * Include sandboxes with last activity after this timestamp
+   * */
+  lastActivityAfter?: Date
+
+  /**
+   * Include sandboxes with last activity before this timestamp
+   * */
+  lastActivityBefore?: Date
 }

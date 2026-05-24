@@ -19,7 +19,6 @@ api/toolbox-api.ts
 api/users-api.ts
 api/volumes-api.ts
 api/webhooks-api.ts
-api/workspace-api.ts
 base.ts
 common.ts
 configuration.ts
@@ -58,7 +57,6 @@ models/create-session-request.ts
 models/create-snapshot.ts
 models/create-user.ts
 models/create-volume.ts
-models/create-workspace.ts
 models/daytona-configuration.ts
 models/display-info-response.ts
 models/docker-registry.ts
@@ -89,6 +87,7 @@ models/keyboard-hotkey-request.ts
 models/keyboard-press-request.ts
 models/keyboard-type-request.ts
 models/list-branch-response.ts
+models/list-sandboxes-response.ts
 models/log-entry.ts
 models/lsp-completion-params.ts
 models/lsp-document-request.ts
@@ -120,7 +119,7 @@ models/otel-config.ts
 models/paginated-audit-logs.ts
 models/paginated-jobs.ts
 models/paginated-logs.ts
-models/paginated-sandboxes.ts
+models/paginated-sandboxes-deprecated.ts
 models/paginated-snapshots.ts
 models/paginated-traces.ts
 models/poll-jobs-response.ts
@@ -160,8 +159,10 @@ models/runner-state.ts
 models/runner.ts
 models/sandbox-class.ts
 models/sandbox-desired-state.ts
-models/sandbox-info.ts
 models/sandbox-labels.ts
+models/sandbox-list-item.ts
+models/sandbox-list-sort-direction.ts
+models/sandbox-list-sort-field.ts
 models/sandbox-state.ts
 models/sandbox-volume.ts
 models/sandbox.ts
@@ -204,5 +205,3 @@ models/webhook-event.ts
 models/webhook-initialization-status.ts
 models/windows-response.ts
 models/work-dir-response.ts
-models/workspace-port-preview-url.ts
-models/workspace.ts

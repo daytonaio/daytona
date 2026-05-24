@@ -1039,20 +1039,25 @@ describe('TypeScript SDK E2E (real Daytona API)', () => {
   // Daytona Client Operations
   // ──────────────────────────────────────────────
   describe('Daytona Client Operations', () => {
-    test('list returns paginated sandboxes', async () => {
+    test('list iterates over sandboxes', async () => {
       console.log('[E2E][Client] Listing sandboxes...')
-      const result = await daytona.list()
-      expect(result.items).toBeDefined()
-      expect(Array.isArray(result.items)).toBe(true)
-      expect(result.total).toBeGreaterThan(0)
+      const collected: { id: string }[] = []
+      for await (const sb of daytona.list()) {
+        collected.push({ id: sb.id })
+      }
+      expect(collected.length).toBeGreaterThan(0)
     })
 
-    test('list with page/limit pagination', async () => {
-      console.log('[E2E][Client] Listing sandboxes with pagination...')
-      const result = await daytona.list(undefined, 1, 2)
-      expect(result.items).toBeDefined()
-      expect(result.items.length).toBeLessThanOrEqual(2)
-      expect(result.page).toBeDefined()
+    test('list with limit fetches per-page hint', async () => {
+      console.log('[E2E][Client] Listing sandboxes with limit hint...')
+      // limit is a per-page fetch size, not a total cap. We just verify
+      // iteration succeeds and yields at least one item.
+      let yielded = 0
+      for await (const _ of daytona.list({ limit: 2 })) {
+        yielded++
+        if (yielded >= 2) break // exercise early-termination
+      }
+      expect(yielded).toBeGreaterThan(0)
     })
 
     test('get by id returns correct sandbox', async () => {
@@ -1066,11 +1071,13 @@ describe('TypeScript SDK E2E (real Daytona API)', () => {
     test('list with label filter', async () => {
       console.log('[E2E][Client] Listing sandboxes with label filter...')
       // We set labels earlier: { test: 'e2e', env: 'ci' }
-      const result = await daytona.list({ test: 'e2e' })
-      expect(result.items).toBeDefined()
-      expect(result.items.length).toBeGreaterThan(0)
+      const collected: { id: string }[] = []
+      for await (const sb of daytona.list({ labels: { test: 'e2e' } })) {
+        collected.push({ id: sb.id })
+      }
+      expect(collected.length).toBeGreaterThan(0)
       // Our sandbox should be in the results
-      expect(result.items.some((s) => s.id === sandbox.id)).toBe(true)
+      expect(collected.some((s) => s.id === sandbox.id)).toBe(true)
     })
   })
 

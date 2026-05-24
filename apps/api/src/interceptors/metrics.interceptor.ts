@@ -36,8 +36,6 @@ import { CreateSandboxSnapshotDto } from '../sandbox/dto/create-sandbox-snapshot
 import { ForkSandboxDto } from '../sandbox/dto/fork-sandbox.dto'
 import { CreateVolumeDto } from '../sandbox/dto/create-volume.dto'
 import { VolumeDto } from '../sandbox/dto/volume.dto'
-import { CreateWorkspaceDto } from '../sandbox/dto/create-workspace.deprecated.dto'
-import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
 import { TypedConfigService } from '../config/typed-config.service'
 import { UpdateOrganizationRegionQuotaDto } from '../organization/dto/update-organization-region-quota.dto'
 import { UpdateOrganizationDefaultRegionDto } from '../organization/dto/update-organization-default-region.dto'
@@ -138,7 +136,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       userAgent,
       error,
       source: Array.isArray(source) ? source[0] : source,
-      isDeprecated: request.route.path.includes('/workspace') || request.route.path.includes('/images'),
+      isDeprecated: request.route.path.includes('/images'),
       sdkVersion,
       environment: this.configService.get('posthog.environment'),
     }
@@ -164,27 +162,17 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/sandbox':
             this.captureCreateSandbox(props, request.body, response)
             break
-          case '/api/workspace':
-            this.captureCreateWorkspace_deprecated(props, request.body, response)
-            break
           case '/api/sandbox/:sandboxIdOrName/start':
-          case '/api/workspace/:workspaceId/start':
-            this.captureStartSandbox(props, request.params.sandboxIdOrName || request.params.workspaceId)
+            this.captureStartSandbox(props, request.params.sandboxIdOrName)
             break
           case '/api/sandbox/:sandboxIdOrName/stop':
-          case '/api/workspace/:workspaceId/stop':
-            this.captureStopSandbox(
-              props,
-              request.params.sandboxIdOrName || request.params.workspaceId,
-              request.query?.force === 'true',
-            )
+            this.captureStopSandbox(props, request.params.sandboxIdOrName, request.query?.force === 'true')
             break
           case '/api/sandbox/:sandboxIdOrName/resize':
             this.captureResizeSandbox(props, request.params.sandboxIdOrName, request.body)
             break
           case '/api/sandbox/:sandboxIdOrName/archive':
-          case '/api/workspace/:workspaceId/archive':
-            this.captureArchiveSandbox(props, request.params.sandboxIdOrName || request.params.workspaceId)
+            this.captureArchiveSandbox(props, request.params.sandboxIdOrName)
             break
           case '/api/sandbox/:sandboxIdOrName/backup':
             this.captureCreateBackup(props, request.params.sandboxIdOrName)
@@ -199,28 +187,13 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
             this.captureForkSandbox(props, request.params.sandboxIdOrName, request.body, response)
             break
           case '/api/sandbox/:sandboxIdOrName/public/:isPublic':
-          case '/api/workspace/:workspaceId/public/:isPublic':
-            this.captureUpdatePublicStatus(
-              props,
-              request.params.sandboxIdOrName || request.params.workspaceId,
-              request.params.isPublic === 'true',
-            )
+            this.captureUpdatePublicStatus(props, request.params.sandboxIdOrName, request.params.isPublic === 'true')
             break
           case '/api/sandbox/:sandboxIdOrName/autostop/:interval':
-          case '/api/workspace/:workspaceId/autostop/:interval':
-            this.captureSetAutostopInterval(
-              props,
-              request.params.sandboxIdOrName || request.params.workspaceId,
-              parseInt(request.params.interval),
-            )
+            this.captureSetAutostopInterval(props, request.params.sandboxIdOrName, parseInt(request.params.interval))
             break
           case '/api/sandbox/:sandboxIdOrName/autoarchive/:interval':
-          case '/api/workspace/:workspaceId/autoarchive/:interval':
-            this.captureSetAutoArchiveInterval(
-              props,
-              request.params.sandboxIdOrName || request.params.workspaceId,
-              parseInt(request.params.interval),
-            )
+            this.captureSetAutoArchiveInterval(props, request.params.sandboxIdOrName, parseInt(request.params.interval))
             break
           case '/api/sandbox/:sandboxIdOrName/autodelete/:interval':
             this.captureSetAutoDeleteInterval(props, request.params.sandboxIdOrName, parseInt(request.params.interval))
@@ -262,8 +235,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       case 'DELETE':
         switch (request.route.path) {
           case '/api/sandbox/:sandboxIdOrName':
-          case '/api/workspace/:workspaceId':
-            this.captureDeleteSandbox(props, request.params.sandboxIdOrName || request.params.workspaceId)
+            this.captureDeleteSandbox(props, request.params.sandboxIdOrName)
             break
           case '/api/snapshots/:snapshotId':
             this.captureDeleteSnapshot(props, request.params.snapshotId)
@@ -288,8 +260,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       case 'PUT':
         switch (request.route.path) {
           case '/api/sandbox/:sandboxIdOrName/labels':
-          case '/api/workspace/:workspaceId/labels':
-            this.captureUpdateSandboxLabels(props, request.params.sandboxIdOrName || request.params.workspaceId)
+            this.captureUpdateSandboxLabels(props, request.params.sandboxIdOrName)
             break
           case '/api/organizations/:organizationId/roles/:roleId':
             this.captureUpdateOrganizationRole(
@@ -579,50 +550,6 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       sandbox_network_block_all: response.networkBlockAll,
       sandbox_network_allow_list_set_request: !!request.networkAllowList,
       sandbox_network_allow_list_set: !!response.networkAllowList,
-    }
-
-    if (request.buildInfo) {
-      records['sandbox_is_dynamic_build'] = true
-      records['sandbox_build_info_context_hashes_length'] = request.buildInfo.contextHashes?.length
-    }
-
-    this.capture('api_sandbox_created', props, 'api_sandbox_creation_failed', records)
-  }
-
-  private captureCreateWorkspace_deprecated(
-    props: CommonCaptureProps,
-    request: CreateWorkspaceDto,
-    response: WorkspaceDto,
-  ) {
-    const envVarsLength = request.env ? Object.keys(request.env).length : 0
-
-    const records = {
-      sandbox_id: response.id,
-      sandbox_snapshot_request: request.image,
-      sandbox_snapshot: response.snapshot,
-      sandbox_user_request: request.user,
-      sandbox_user: response.user,
-      sandbox_cpu_request: request.cpu,
-      sandbox_cpu: response.cpu,
-      sandbox_gpu_request: request.gpu,
-      sandbox_gpu: response.gpu,
-      sandbox_memory_mb_request: request.memory * 1024,
-      sandbox_memory_mb: response.memory * 1024,
-      sandbox_disk_gb_request: request.disk,
-      sandbox_disk_gb: response.disk,
-      sandbox_target_request: request.target,
-      sandbox_target: response.target,
-      sandbox_auto_stop_interval_min_request: request.autoStopInterval,
-      sandbox_auto_stop_interval_min: response.autoStopInterval,
-      sandbox_auto_archive_interval_min_request: request.autoArchiveInterval,
-      sandbox_auto_archive_interval_min: response.autoArchiveInterval,
-      sandbox_public_request: request.public,
-      sandbox_public: response.public,
-      sandbox_labels_request: request.labels,
-      sandbox_labels: response.labels,
-      sandbox_env_vars_length_request: envVarsLength,
-      sandbox_volumes_length_request: request.volumes?.length,
-      sandbox_daemon_version: response.daemonVersion,
     }
 
     if (request.buildInfo) {

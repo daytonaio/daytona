@@ -35,7 +35,6 @@ src/main/java/io/daytona/api/client/api/ToolboxApi.java
 src/main/java/io/daytona/api/client/api/UsersApi.java
 src/main/java/io/daytona/api/client/api/VolumesApi.java
 src/main/java/io/daytona/api/client/api/WebhooksApi.java
-src/main/java/io/daytona/api/client/api/WorkspaceApi.java
 src/main/java/io/daytona/api/client/auth/ApiKeyAuth.java
 src/main/java/io/daytona/api/client/auth/Authentication.java
 src/main/java/io/daytona/api/client/auth/HttpBasicAuth.java
@@ -75,7 +74,6 @@ src/main/java/io/daytona/api/client/model/CreateSessionRequest.java
 src/main/java/io/daytona/api/client/model/CreateSnapshot.java
 src/main/java/io/daytona/api/client/model/CreateUser.java
 src/main/java/io/daytona/api/client/model/CreateVolume.java
-src/main/java/io/daytona/api/client/model/CreateWorkspace.java
 src/main/java/io/daytona/api/client/model/DaytonaConfiguration.java
 src/main/java/io/daytona/api/client/model/DisplayInfoResponse.java
 src/main/java/io/daytona/api/client/model/DockerRegistry.java
@@ -105,6 +103,7 @@ src/main/java/io/daytona/api/client/model/KeyboardHotkeyRequest.java
 src/main/java/io/daytona/api/client/model/KeyboardPressRequest.java
 src/main/java/io/daytona/api/client/model/KeyboardTypeRequest.java
 src/main/java/io/daytona/api/client/model/ListBranchResponse.java
+src/main/java/io/daytona/api/client/model/ListSandboxesResponse.java
 src/main/java/io/daytona/api/client/model/LogEntry.java
 src/main/java/io/daytona/api/client/model/LspCompletionParams.java
 src/main/java/io/daytona/api/client/model/LspDocumentRequest.java
@@ -136,7 +135,7 @@ src/main/java/io/daytona/api/client/model/OtelConfig.java
 src/main/java/io/daytona/api/client/model/PaginatedAuditLogs.java
 src/main/java/io/daytona/api/client/model/PaginatedJobs.java
 src/main/java/io/daytona/api/client/model/PaginatedLogs.java
-src/main/java/io/daytona/api/client/model/PaginatedSandboxes.java
+src/main/java/io/daytona/api/client/model/PaginatedSandboxesDeprecated.java
 src/main/java/io/daytona/api/client/model/PaginatedSnapshots.java
 src/main/java/io/daytona/api/client/model/PaginatedTraces.java
 src/main/java/io/daytona/api/client/model/PollJobsResponse.java
@@ -177,8 +176,10 @@ src/main/java/io/daytona/api/client/model/RunnerState.java
 src/main/java/io/daytona/api/client/model/Sandbox.java
 src/main/java/io/daytona/api/client/model/SandboxClass.java
 src/main/java/io/daytona/api/client/model/SandboxDesiredState.java
-src/main/java/io/daytona/api/client/model/SandboxInfo.java
 src/main/java/io/daytona/api/client/model/SandboxLabels.java
+src/main/java/io/daytona/api/client/model/SandboxListItem.java
+src/main/java/io/daytona/api/client/model/SandboxListSortDirection.java
+src/main/java/io/daytona/api/client/model/SandboxListSortField.java
 src/main/java/io/daytona/api/client/model/SandboxState.java
 src/main/java/io/daytona/api/client/model/SandboxVolume.java
 src/main/java/io/daytona/api/client/model/ScreenshotResponse.java
@@ -220,8 +221,6 @@ src/main/java/io/daytona/api/client/model/WebhookEvent.java
 src/main/java/io/daytona/api/client/model/WebhookInitializationStatus.java
 src/main/java/io/daytona/api/client/model/WindowsResponse.java
 src/main/java/io/daytona/api/client/model/WorkDirResponse.java
-src/main/java/io/daytona/api/client/model/Workspace.java
-src/main/java/io/daytona/api/client/model/WorkspacePortPreviewUrl.java
 src/test/java/io/daytona/api/client/api/AdminApiTest.java
 src/test/java/io/daytona/api/client/api/ApiKeysApiTest.java
 src/test/java/io/daytona/api/client/api/AuditApiTest.java
@@ -240,7 +239,6 @@ src/test/java/io/daytona/api/client/api/ToolboxApiTest.java
 src/test/java/io/daytona/api/client/api/UsersApiTest.java
 src/test/java/io/daytona/api/client/api/VolumesApiTest.java
 src/test/java/io/daytona/api/client/api/WebhooksApiTest.java
-src/test/java/io/daytona/api/client/api/WorkspaceApiTest.java
 src/test/java/io/daytona/api/client/model/AccountProviderTest.java
 src/test/java/io/daytona/api/client/model/AdminCreateRunnerTest.java
 src/test/java/io/daytona/api/client/model/AdminGetWebhookStatus200ResponseTest.java
@@ -275,7 +273,6 @@ src/test/java/io/daytona/api/client/model/CreateSessionRequestTest.java
 src/test/java/io/daytona/api/client/model/CreateSnapshotTest.java
 src/test/java/io/daytona/api/client/model/CreateUserTest.java
 src/test/java/io/daytona/api/client/model/CreateVolumeTest.java
-src/test/java/io/daytona/api/client/model/CreateWorkspaceTest.java
 src/test/java/io/daytona/api/client/model/DaytonaConfigurationTest.java
 src/test/java/io/daytona/api/client/model/DisplayInfoResponseTest.java
 src/test/java/io/daytona/api/client/model/DockerRegistryTest.java
@@ -305,6 +302,7 @@ src/test/java/io/daytona/api/client/model/KeyboardHotkeyRequestTest.java
 src/test/java/io/daytona/api/client/model/KeyboardPressRequestTest.java
 src/test/java/io/daytona/api/client/model/KeyboardTypeRequestTest.java
 src/test/java/io/daytona/api/client/model/ListBranchResponseTest.java
+src/test/java/io/daytona/api/client/model/ListSandboxesResponseTest.java
 src/test/java/io/daytona/api/client/model/LogEntryTest.java
 src/test/java/io/daytona/api/client/model/LspCompletionParamsTest.java
 src/test/java/io/daytona/api/client/model/LspDocumentRequestTest.java
@@ -336,7 +334,7 @@ src/test/java/io/daytona/api/client/model/OtelConfigTest.java
 src/test/java/io/daytona/api/client/model/PaginatedAuditLogsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedJobsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedLogsTest.java
-src/test/java/io/daytona/api/client/model/PaginatedSandboxesTest.java
+src/test/java/io/daytona/api/client/model/PaginatedSandboxesDeprecatedTest.java
 src/test/java/io/daytona/api/client/model/PaginatedSnapshotsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedTracesTest.java
 src/test/java/io/daytona/api/client/model/PollJobsResponseTest.java
@@ -376,8 +374,10 @@ src/test/java/io/daytona/api/client/model/RunnerStateTest.java
 src/test/java/io/daytona/api/client/model/RunnerTest.java
 src/test/java/io/daytona/api/client/model/SandboxClassTest.java
 src/test/java/io/daytona/api/client/model/SandboxDesiredStateTest.java
-src/test/java/io/daytona/api/client/model/SandboxInfoTest.java
 src/test/java/io/daytona/api/client/model/SandboxLabelsTest.java
+src/test/java/io/daytona/api/client/model/SandboxListItemTest.java
+src/test/java/io/daytona/api/client/model/SandboxListSortDirectionTest.java
+src/test/java/io/daytona/api/client/model/SandboxListSortFieldTest.java
 src/test/java/io/daytona/api/client/model/SandboxStateTest.java
 src/test/java/io/daytona/api/client/model/SandboxTest.java
 src/test/java/io/daytona/api/client/model/SandboxVolumeTest.java
@@ -420,5 +420,3 @@ src/test/java/io/daytona/api/client/model/WebhookEventTest.java
 src/test/java/io/daytona/api/client/model/WebhookInitializationStatusTest.java
 src/test/java/io/daytona/api/client/model/WindowsResponseTest.java
 src/test/java/io/daytona/api/client/model/WorkDirResponseTest.java
-src/test/java/io/daytona/api/client/model/WorkspacePortPreviewUrlTest.java
-src/test/java/io/daytona/api/client/model/WorkspaceTest.java

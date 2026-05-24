@@ -5,6 +5,7 @@
 
 import asyncio
 import functools
+import inspect
 import time
 from typing import Any, Callable, Optional, TypeVar, cast
 
@@ -82,6 +83,41 @@ def with_span(
                 **attrs,
             }
             return span_name, all_attributes
+
+        if inspect.isasyncgenfunction(func):
+
+            @functools.wraps(func)
+            async def async_gen_wrapper(*args: object, **kwargs: object):
+                span_name, all_attributes = _span_logic(*args)
+                tracer = get_tracer()
+                with tracer.start_as_current_span(span_name, attributes=all_attributes) as span:
+                    try:
+                        async for item in func(*args, **kwargs):
+                            yield item
+                        span.set_status(Status(StatusCode.OK))
+                    except Exception as error:
+                        span.set_status(Status(StatusCode.ERROR, str(error)))
+                        span.record_exception(error)
+                        raise
+
+            return cast(F, async_gen_wrapper)
+
+        if inspect.isgeneratorfunction(func):
+
+            @functools.wraps(func)
+            def sync_gen_wrapper(*args: object, **kwargs: object):
+                span_name, all_attributes = _span_logic(*args)
+                tracer = get_tracer()
+                with tracer.start_as_current_span(span_name, attributes=all_attributes) as span:
+                    try:
+                        yield from func(*args, **kwargs)
+                        span.set_status(Status(StatusCode.OK))
+                    except Exception as error:
+                        span.set_status(Status(StatusCode.ERROR, str(error)))
+                        span.record_exception(error)
+                        raise
+
+            return cast(F, sync_gen_wrapper)
 
         if asyncio.iscoroutinefunction(func):
 
@@ -170,6 +206,45 @@ def with_metric(
                 )
 
             return _execution_histograms[metric_name], all_labels
+
+        if inspect.isasyncgenfunction(func):
+
+            @functools.wraps(func)
+            async def async_gen_wrapper(*args, **kwargs):
+                histogram, all_labels = _metric_setup(*args)
+                start_time = time.time()
+                status = "success"
+
+                try:
+                    async for item in func(*args, **kwargs):
+                        yield item
+                except Exception:
+                    status = "error"
+                    raise
+                finally:
+                    duration = (time.time() - start_time) * 1000
+                    histogram.record(duration, {**all_labels, "status": status})
+
+            return cast(F, async_gen_wrapper)
+
+        if inspect.isgeneratorfunction(func):
+
+            @functools.wraps(func)
+            def sync_gen_wrapper(*args, **kwargs):
+                histogram, all_labels = _metric_setup(*args)
+                start_time = time.time()
+                status = "success"
+
+                try:
+                    yield from func(*args, **kwargs)
+                except Exception:
+                    status = "error"
+                    raise
+                finally:
+                    duration = (time.time() - start_time) * 1000
+                    histogram.record(duration, {**all_labels, "status": status})
+
+            return cast(F, sync_gen_wrapper)
 
         if asyncio.iscoroutinefunction(func):
 

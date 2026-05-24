@@ -258,7 +258,8 @@ Waits until Sandbox reaches `started` state.
 public void refreshData()
 ```
 
-Refreshes local Sandbox fields from latest API state.
+Refreshes local Sandbox fields from latest API state. After refresh, all fields
+— including those not returned by `Daytona#list` — are populated.
 
 **Throws**:
 
@@ -339,110 +340,207 @@ The Sandbox will temporarily enter a 'snapshotting' state and return to its prev
 public String getId()
 ```
 
-Returns Sandbox ID.
-
 **Returns**:
 
-- `String` - Sandbox ID
+- `String` - Sandbox ID.
 
 #### getName()
 ```java
 public String getName()
 ```
 
-Returns Sandbox name.
-
 **Returns**:
 
-- `String` - Sandbox name
+- `String` - Sandbox name.
 
-#### getState()
+#### getOrganizationId()
 ```java
-public String getState()
+public String getOrganizationId()
 ```
 
-Returns Sandbox state.
-
 **Returns**:
 
-- `String` - lifecycle state
+- `String` - organization ID that owns this Sandbox.
 
-#### getTarget()
+#### getSnapshot()
 ```java
-public String getTarget()
+public String getSnapshot()
 ```
 
-Returns target region.
-
 **Returns**:
 
-- `String` - target identifier
+- `String` - Daytona snapshot used to create this Sandbox, or `null` if none.
 
 #### getUser()
 ```java
 public String getUser()
 ```
 
-Returns Sandbox OS user.
-
 **Returns**:
 
-- `String` - OS user
+- `String` - OS user running in the Sandbox.
 
-#### getToolboxProxyUrl()
+#### getLabels()
 ```java
-public String getToolboxProxyUrl()
+public Map<String, String> getLabels()
 ```
 
-Returns toolbox proxy URL.
+**Returns**:
+
+- `Map\<String, String\>` - custom labels attached to the Sandbox.
+
+#### getPublic()
+```java
+public Boolean getPublic()
+```
 
 **Returns**:
 
-- `String` - proxy URL
+- `Boolean` - whether the Sandbox HTTP preview is publicly accessible.
+
+#### getTarget()
+```java
+public String getTarget()
+```
+
+**Returns**:
+
+- `String` - target region/environment where the Sandbox runs.
 
 #### getCpu()
 ```java
 public int getCpu()
 ```
 
-Returns allocated CPU cores.
-
 **Returns**:
 
-- `int` - CPU cores
+- `int` - allocated CPU cores.
 
 #### getGpu()
 ```java
 public int getGpu()
 ```
 
-Returns allocated GPU units.
-
 **Returns**:
 
-- `int` - GPU units
+- `int` - allocated GPU units.
 
 #### getMemory()
 ```java
 public int getMemory()
 ```
 
-Returns allocated memory in GiB.
-
 **Returns**:
 
-- `int` - memory in GiB
+- `int` - allocated memory in GiB.
 
 #### getDisk()
 ```java
 public int getDisk()
 ```
 
-Returns allocated disk in GiB.
+**Returns**:
+
+- `int` - allocated disk in GiB.
+
+#### getState()
+```java
+public String getState()
+```
 
 **Returns**:
 
-- `int` - disk in GiB
+- `String` - current lifecycle state (e.g. "started", "stopped").
+
+#### getErrorReason()
+```java
+public String getErrorReason()
+```
+
+**Returns**:
+
+- `String` - error message if the Sandbox is in an error state, or `null`.
+
+#### getRecoverable()
+```java
+public Boolean getRecoverable()
+```
+
+**Returns**:
+
+- `Boolean` - whether the Sandbox error is recoverable, or `null` if unknown.
+
+#### getBackupState()
+```java
+public String getBackupState()
+```
+
+**Returns**:
+
+- `String` - current state of the Sandbox backup as a string, or `null`.
+
+#### getAutoStopInterval()
+```java
+public Integer getAutoStopInterval()
+```
+
+**Returns**:
+
+- `Integer` - auto-stop interval in minutes (0 means disabled).
+
+#### getAutoArchiveInterval()
+```java
+public Integer getAutoArchiveInterval()
+```
+
+**Returns**:
+
+- `Integer` - auto-archive interval in minutes.
+
+#### getAutoDeleteInterval()
+```java
+public Integer getAutoDeleteInterval()
+```
+
+**Returns**:
+
+- `Integer` - auto-delete interval in minutes (negative means disabled).
+
+#### getCreatedAt()
+```java
+public String getCreatedAt()
+```
+
+**Returns**:
+
+- `String` - when the Sandbox was created, or `null`.
+
+#### getUpdatedAt()
+```java
+public String getUpdatedAt()
+```
+
+**Returns**:
+
+- `String` - when the Sandbox was last updated, or `null`.
+
+#### getLastActivityAt()
+```java
+public String getLastActivityAt()
+```
+
+**Returns**:
+
+- `String` - when the Sandbox last had activity, or `null`.
+
+#### getToolboxProxyUrl()
+```java
+public String getToolboxProxyUrl()
+```
+
+**Returns**:
+
+- `String` - toolbox proxy URL.
 
 #### getEnv()
 ```java
@@ -451,53 +549,11 @@ public Map<String, String> getEnv()
 
 Returns Sandbox environment variables.
 
-**Returns**:
-
-- `Map\<String, String\>` - environment map
-
-#### getLabels()
-```java
-public Map<String, String> getLabels()
-```
-
-Returns Sandbox labels.
+Not returned by `Daytona#list`; call `#refreshData()` on each item to populate.
 
 **Returns**:
 
-- `Map\<String, String\>` - labels map
-
-#### getAutoStopInterval()
-```java
-public Integer getAutoStopInterval()
-```
-
-Returns auto-stop interval in minutes.
-
-**Returns**:
-
-- `Integer` - auto-stop interval
-
-#### getAutoArchiveInterval()
-```java
-public Integer getAutoArchiveInterval()
-```
-
-Returns auto-archive interval in minutes.
-
-**Returns**:
-
-- `Integer` - auto-archive interval
-
-#### getAutoDeleteInterval()
-```java
-public Integer getAutoDeleteInterval()
-```
-
-Returns auto-delete interval in minutes.
-
-**Returns**:
-
-- `Integer` - auto-delete interval
+- `Map\<String, String\>` - environment map, or `null` if not yet populated
 
 #### getNetworkBlockAll()
 ```java
@@ -506,9 +562,11 @@ public Boolean getNetworkBlockAll()
 
 Returns whether all network access is blocked for this Sandbox.
 
+Not returned by `Daytona#list`; call `#refreshData()` on each item to populate.
+
 **Returns**:
 
-- `Boolean` - block-all flag, or null if unknown
+- `Boolean` - block-all flag, or `null` if not yet populated
 
 #### getNetworkAllowList()
 ```java
@@ -517,39 +575,74 @@ public String getNetworkAllowList()
 
 Returns the comma-separated CIDR allow list, if any.
 
+Not returned by `Daytona#list`; call `#refreshData()` on each item to populate.
+
 **Returns**:
 
-- `String` - allow list or null
+- `String` - allow list, or `null`
+
+#### getVolumes()
+```java
+public List<SandboxVolume> getVolumes()
+```
+
+Returns volumes attached to the Sandbox.
+
+Not returned by `Daytona#list`; call `#refreshData()` on each item to populate.
+
+**Returns**:
+
+- `List\<SandboxVolume\>` - immutable list of attached volumes, or `null` if not yet populated
+
+#### getBuildInfo()
+```java
+public BuildInfo getBuildInfo()
+```
+
+Returns build information if the Sandbox was created from a dynamic build.
+
+Not returned by `Daytona#list`; call `#refreshData()` on each item to populate.
+
+**Returns**:
+
+- `BuildInfo` - build info, or `null`
+
+#### getBackupCreatedAt()
+```java
+public String getBackupCreatedAt()
+```
+
+Returns the creation timestamp of the last backup.
+
+Not returned by `Daytona#list`; call `#refreshData()` on each item to populate.
+
+**Returns**:
+
+- `String` - backup timestamp, or `null`
 
 #### getProcess()
 ```java
 public Process getProcess()
 ```
 
-Returns process operations facade.
-
 **Returns**:
 
-- `Process` - process interface
+- `Process` - process operations facade.
 
 #### getFs()
 ```java
 public FileSystem getFs()
 ```
 
-Returns file-system operations facade.
-
 **Returns**:
 
-- `FileSystem` - file-system interface
+- `FileSystem` - file-system operations facade.
 
 #### getGit()
 ```java
 public Git getGit()
 ```
 
-Returns Git operations facade.
-
 **Returns**:
 
-- `Git` - Git interface
+- `Git` - Git operations facade.

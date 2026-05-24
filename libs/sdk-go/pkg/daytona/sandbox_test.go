@@ -14,6 +14,7 @@ import (
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+	toolbox "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -81,7 +82,8 @@ func TestNewSandboxConstruction(t *testing.T) {
 			assert.Equal(t, tt.target, sandbox.Target)
 			assert.Equal(t, tt.autoArchiveInterval, sandbox.AutoArchiveInterval)
 			assert.Equal(t, tt.autoDeleteInterval, sandbox.AutoDeleteInterval)
-			assert.Equal(t, tt.networkBlockAll, sandbox.NetworkBlockAll)
+			require.NotNil(t, sandbox.NetworkBlockAll)
+			assert.Equal(t, tt.networkBlockAll, *sandbox.NetworkBlockAll)
 			assert.Equal(t, tt.networkAllowList, sandbox.NetworkAllowList)
 
 			assert.NotNil(t, sandbox.FileSystem)
@@ -343,7 +345,30 @@ func TestSandboxArchiveAPIError(t *testing.T) {
 }
 
 func newSandboxForTest(client *Client, id string, sandboxName string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox {
-	return NewSandbox(client, nil, id, sandboxName, state, target, autoArchiveInterval, autoDeleteInterval, networkBlockAll, networkAllowList, types.CodeLanguagePython)
+	archive := float32(autoArchiveInterval)
+	del := float32(autoDeleteInterval)
+	dto := &apiclient.Sandbox{
+		Id:                  id,
+		Name:                sandboxName,
+		Target:              target,
+		State:               &state,
+		NetworkBlockAll:     networkBlockAll,
+		NetworkAllowList:    networkAllowList,
+		AutoArchiveInterval: &archive,
+		AutoDeleteInterval:  &del,
+	}
+	return NewSandbox(client, nil, dto, types.CodeLanguagePython)
+}
+
+// newSandboxForToolboxTest builds a minimal Sandbox connected to a real toolbox
+// HTTP server for tests that exercise toolbox-API methods.
+func newSandboxForToolboxTest(toolboxClient *toolbox.APIClient, id string, state apiclient.SandboxState) *Sandbox {
+	dto := &apiclient.Sandbox{
+		Id:    id,
+		Name:  "name",
+		State: &state,
+	}
+	return NewSandbox(nil, toolboxClient, dto, types.CodeLanguagePython)
 }
 
 func TestSandboxRefreshDataSuccess(t *testing.T) {
@@ -363,7 +388,8 @@ func TestSandboxRefreshDataSuccess(t *testing.T) {
 	assert.Equal(t, "refreshed", sandbox.Name)
 	assert.Equal(t, apiclient.SANDBOXSTATE_STARTED, sandbox.State)
 	assert.Equal(t, "eu-west-1", sandbox.Target)
-	assert.True(t, sandbox.NetworkBlockAll)
+	require.NotNil(t, sandbox.NetworkBlockAll)
+	assert.True(t, *sandbox.NetworkBlockAll)
 	require.NotNil(t, sandbox.NetworkAllowList)
 	assert.Equal(t, "10.0.0.0/8", *sandbox.NetworkAllowList)
 }
@@ -384,7 +410,7 @@ func TestSandboxInfoMethods(t *testing.T) {
 		}))
 		defer server.Close()
 
-		sandbox := NewSandbox(nil, createTestToolboxClient(server), "sb", "name", apiclient.SANDBOXSTATE_STARTED, "target", 0, 0, false, nil, types.CodeLanguagePython)
+		sandbox := newSandboxForToolboxTest(createTestToolboxClient(server), "sb", apiclient.SANDBOXSTATE_STARTED)
 		home, err := sandbox.GetUserHomeDir(context.Background())
 		require.NoError(t, err)
 		workdir, err := sandbox.GetWorkingDir(context.Background())
@@ -399,7 +425,7 @@ func TestSandboxInfoMethods(t *testing.T) {
 		}))
 		defer server.Close()
 
-		sandbox := NewSandbox(nil, createTestToolboxClient(server), "sb", "name", apiclient.SANDBOXSTATE_STARTED, "target", 0, 0, false, nil, types.CodeLanguagePython)
+		sandbox := newSandboxForToolboxTest(createTestToolboxClient(server), "sb", apiclient.SANDBOXSTATE_STARTED)
 		_, err := sandbox.GetUserHomeDir(context.Background())
 		require.Error(t, err)
 		_, err = sandbox.GetWorkingDir(context.Background())

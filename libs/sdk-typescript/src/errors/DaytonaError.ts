@@ -67,7 +67,9 @@ export class DaytonaNotFoundError extends DaytonaError {}
  * @example
  * ```ts
  * try {
- *   await daytona.list()
+ *   for await (const sandbox of daytona.list()) {
+ *     console.log(sandbox.id)
+ *   }
  * } catch (error) {
  *   if (error instanceof DaytonaRateLimitError) {
  *     console.log(error.errorCode)
@@ -83,7 +85,9 @@ export class DaytonaRateLimitError extends DaytonaError {}
  * @example
  * ```ts
  * try {
- *   await daytona.list()
+ *   for await (const sandbox of daytona.list()) {
+ *     console.log(sandbox.id)
+ *   }
  * } catch (error) {
  *   if (error instanceof DaytonaAuthenticationError) {
  *     console.log(error.statusCode)

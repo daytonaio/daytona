@@ -8,9 +8,10 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   const image = Image.base('alpine').env({ FOO: 'bar' })
   const daytona = new Daytona()
-  const r: any = await daytona.list()
+  const iter = daytona.list()
+  const listOk = typeof (iter as any)[Symbol.asyncIterator] === 'function' && typeof (await iter.next()) === 'object'
   return Response.json({
     imageOk: image.dockerfile.includes('FROM alpine'),
-    listOk: Array.isArray(r.items),
+    listOk,
   })
 }

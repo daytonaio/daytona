@@ -5,14 +5,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
 )
 
 func main() {
-	// Create a new Daytona client using environment variables
-	// Set DAYTONA_API_KEY before running
 	client, err := daytona.NewClient()
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
@@ -20,23 +19,21 @@ func main() {
 
 	ctx := context.Background()
 
-	// Example 1: Paginate through sandboxes with labels
-	log.Println("=== Example 1: Paginate Sandboxes with Labels ===")
-	labels := map[string]string{
-		"my-label": "my-value",
-	}
-	page := 2
+	// Example 1: Iterate through sandboxes (Go 1.23+ range-over-func)
 	limit := 10
-
-	sandboxList, err := client.List(ctx, labels, &page, &limit)
-	if err != nil {
-		log.Fatalf("Failed to list sandboxes: %v", err)
-	}
-
-	log.Printf("Total sandboxes: %d\n", sandboxList.Total)
-	log.Printf("Page: %d, Limit: %d\n", page, limit)
-	for _, sandbox := range sandboxList.Items {
-		log.Printf("  - %s: %s\n", sandbox.ID, sandbox.State)
+	sort := daytona.SandboxListSortFieldCreatedAt
+	order := daytona.SandboxListSortDirectionDesc
+	for sandbox, err := range client.ListSeq(ctx, &daytona.ListSandboxesQuery{
+		Limit:  &limit,
+		Labels: map[string]string{"env": "dev"},
+		States: []daytona.SandboxState{daytona.SandboxStateStarted},
+		Sort:   &sort,
+		Order:  &order,
+	}) {
+		if err != nil {
+			log.Fatalf("Failed to list sandboxes: %v", err)
+		}
+		fmt.Println(sandbox.ID)
 	}
 
 	// Example 2: Paginate through snapshots

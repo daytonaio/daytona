@@ -35,22 +35,27 @@ var DeleteCmd = &cobra.Command{
 		// Handle case when no sandbox ID is provided and allFlag is true
 		if len(args) == 0 {
 			if allFlag {
-				page := float32(1.0)
+				var cursor *string
 				limit := float32(200.0) // 200 is the maximum limit for the API
-				var allSandboxes []apiclient.Sandbox
+				var allSandboxes []apiclient.SandboxListItem
 
 				for {
-					sandboxBatch, res, err := apiClient.SandboxAPI.ListSandboxesPaginated(ctx).Page(page).Limit(limit).Execute()
+					request := apiClient.SandboxAPI.ListSandboxes(ctx).Limit(limit)
+					if cursor != nil {
+						request = request.Cursor(*cursor)
+					}
+
+					sandboxBatch, res, err := request.Execute()
 					if err != nil {
 						return apiclient_cli.HandleErrorResponse(res, err)
 					}
 
 					allSandboxes = append(allSandboxes, sandboxBatch.Items...)
 
-					if len(sandboxBatch.Items) < int(limit) || page >= float32(sandboxBatch.TotalPages) {
+					if !sandboxBatch.NextCursor.IsSet() || sandboxBatch.NextCursor.Get() == nil {
 						break
 					}
-					page++
+					cursor = sandboxBatch.NextCursor.Get()
 				}
 
 				if len(allSandboxes) == 0 {
@@ -66,7 +71,7 @@ var DeleteCmd = &cobra.Command{
 
 					for _, sb := range allSandboxes {
 						wg.Add(1)
-						go func(sb apiclient.Sandbox) {
+						go func(sb apiclient.SandboxListItem) {
 							defer wg.Done()
 							sem <- struct{}{}
 							defer func() { <-sem }()

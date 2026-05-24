@@ -75,7 +75,8 @@ def env()
 
 **Returns**:
 
-- `Hash\<String, String\>` - Environment variables for the sandbox
+- `Hash\<String, String\>, nil` - Environment variables for the sandbox.
+Not returned by list results; call #refresh on each item to populate.
 
 #### labels()
 
@@ -108,7 +109,8 @@ def network_block_all()
 
 **Returns**:
 
-- `Boolean` - Whether to block all network access for the sandbox
+- `Boolean, nil` - Whether to block all network access for the sandbox.
+Not returned by list results; call #refresh on each item to populate.
 
 #### network_allow_list()
 
@@ -119,7 +121,8 @@ def network_allow_list()
 
 **Returns**:
 
-- `String` - Comma-separated list of allowed CIDR network addresses for the sandbox
+- `String, nil` - Comma-separated list of allowed CIDR network addresses for the sandbox.
+Not returned by list results; call #refresh on each item to populate.
 
 #### target()
 
@@ -229,7 +232,8 @@ def backup_created_at()
 
 **Returns**:
 
-- `String` - The creation timestamp of the last backup
+- `String, nil` - The creation timestamp of the last backup.
+Not returned by list results; call #refresh on each item to populate.
 
 #### auto_stop_interval()
 
@@ -275,7 +279,8 @@ def volumes()
 
 **Returns**:
 
-- `Array\<DaytonaApiClient:SandboxVolume\>` - Array of volumes attached to the sandbox
+- `Array\<DaytonaApiClient:SandboxVolume\>, nil` - Volumes attached to the sandbox.
+Not returned by list results; call #refresh on each item to populate.
 
 #### build_info()
 
@@ -286,7 +291,9 @@ def build_info()
 
 **Returns**:
 
-- `DaytonaApiClient:BuildInfo` - Build information for the sandbox
+- `DaytonaApiClient:BuildInfo, nil` - Build information for the sandbox if it was
+created from a dynamic build.
+Not returned by list results; call #refresh on each item to populate.
 
 #### created_at()
 

@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRegions } from '@/hooks/useRegions'
-import { Sandbox } from '@daytona/api-client'
+import { SandboxListItem } from '@daytona/api-client'
 import { SandboxFileSystemTab } from './SandboxFileSystemTab'
 import { SandboxInfoPanel } from './SandboxInfoPanel'
 import { SandboxLogsTab } from './SandboxLogsTab'
@@ -20,7 +20,7 @@ import { SandboxVncTab } from './SandboxVncTab'
 import { TabValue } from './SearchParams'
 
 interface SandboxContentTabsProps {
-  sandbox: Sandbox | undefined
+  sandbox: SandboxListItem | undefined
   isLoading: boolean
   spendingTabAvailable: boolean
   tab: TabValue

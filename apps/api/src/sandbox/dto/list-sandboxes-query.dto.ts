@@ -4,48 +4,53 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsBoolean, IsInt, IsOptional, IsString, IsArray, IsEnum, IsDate, Min } from 'class-validator'
-import { Type } from 'class-transformer'
+import { IsBoolean, IsOptional, IsString, IsArray, IsEnum, IsInt, Min, IsDate } from 'class-validator'
+import { Transform, Type } from 'class-transformer'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { ToArray } from '../../common/decorators/to-array.decorator'
-import { PageNumber } from '../../common/decorators/page-number.decorator'
 import { PageLimit } from '../../common/decorators/page-limit.decorator'
 
-export enum SandboxSortField {
-  ID = 'id',
+export enum SandboxListSortField {
   NAME = 'name',
-  STATE = 'state',
-  SNAPSHOT = 'snapshot',
-  REGION = 'region',
-  UPDATED_AT = 'updatedAt',
-  CREATED_AT = 'createdAt',
+  CPU = 'cpu',
+  MEMORY = 'memoryGib',
+  DISK = 'diskGib',
   LAST_ACTIVITY_AT = 'lastActivityAt',
+  CREATED_AT = 'createdAt',
 }
 
-export enum SandboxSortDirection {
+export enum SandboxListSortDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
 
-export const DEFAULT_SANDBOX_SORT_FIELD = SandboxSortField.CREATED_AT
-export const DEFAULT_SANDBOX_SORT_DIRECTION = SandboxSortDirection.DESC
+export const DEFAULT_SANDBOX_LIST_SORT_FIELD = SandboxListSortField.LAST_ACTIVITY_AT
+export const DEFAULT_SANDBOX_LIST_SORT_DIRECTION = SandboxListSortDirection.DESC
 
-const VALID_QUERY_STATES = Object.values(SandboxState).filter((state) => state !== SandboxState.DESTROYED)
+const LIST_SANDBOXES_QUERY_VALID_STATES = Object.values(SandboxState).filter(
+  (state) => state !== SandboxState.DESTROYED,
+)
 
 @ApiSchema({ name: 'ListSandboxesQuery' })
 export class ListSandboxesQueryDto {
-  @PageNumber(1)
-  page = 1
+  @ApiProperty({
+    name: 'cursor',
+    description: 'Pagination cursor from a previous response',
+    required: false,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string
 
   @PageLimit(100)
   limit = 100
 
   @ApiProperty({
     name: 'id',
-    description: 'Filter by partial ID match',
+    description: 'Filter by ID prefix (case-insensitive)',
     required: false,
     type: String,
-    example: 'abc123',
   })
   @IsOptional()
   @IsString()
@@ -53,10 +58,9 @@ export class ListSandboxesQueryDto {
 
   @ApiProperty({
     name: 'name',
-    description: 'Filter by partial name match',
+    description: 'Filter by name prefix (case-insensitive)',
     required: false,
     type: String,
-    example: 'abc123',
   })
   @IsOptional()
   @IsString()
@@ -81,23 +85,24 @@ export class ListSandboxesQueryDto {
     default: false,
   })
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   includeErroredDeleted?: boolean
 
   @ApiProperty({
     name: 'states',
-    description: 'List of states to filter by',
+    description: `List of states to filter by.`,
     required: false,
-    enum: VALID_QUERY_STATES,
+    enum: SandboxState,
+    enumName: 'SandboxState',
     isArray: true,
   })
   @IsOptional()
   @ToArray()
   @IsArray()
-  @IsEnum(VALID_QUERY_STATES, {
+  @IsEnum(LIST_SANDBOXES_QUERY_VALID_STATES, {
     each: true,
-    message: `each value must be one of the following values: ${VALID_QUERY_STATES.join(', ')}`,
+    message: `each value must be one of the following values: ${LIST_SANDBOXES_QUERY_VALID_STATES.join(', ')}`,
   })
   states?: SandboxState[]
 
@@ -114,8 +119,8 @@ export class ListSandboxesQueryDto {
   snapshots?: string[]
 
   @ApiProperty({
-    name: 'regions',
-    description: 'List of regions to filter by',
+    name: 'regionIds',
+    description: 'List of regions IDs to filter by',
     required: false,
     type: [String],
   })
@@ -123,7 +128,7 @@ export class ListSandboxesQueryDto {
   @ToArray()
   @IsArray()
   @IsString({ each: true })
-  regions?: string[]
+  regionIds?: string[]
 
   @ApiProperty({
     name: 'minCpu',
@@ -204,6 +209,56 @@ export class ListSandboxesQueryDto {
   maxDiskGiB?: number
 
   @ApiProperty({
+    name: 'isPublic',
+    description: 'Filter by public status',
+    required: false,
+    type: Boolean,
+    default: undefined,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isPublic?: boolean
+
+  @ApiProperty({
+    name: 'isRecoverable',
+    description: 'Filter by recoverable status',
+    required: false,
+    type: Boolean,
+    default: undefined,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isRecoverable?: boolean
+
+  @ApiProperty({
+    name: 'createdAtAfter',
+    description: 'Include items created after this timestamp',
+    required: false,
+    type: String,
+    format: 'date-time',
+    example: '2024-01-01T00:00:00Z',
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAtAfter?: Date
+
+  @ApiProperty({
+    name: 'createdAtBefore',
+    description: 'Include items created before this timestamp',
+    required: false,
+    type: String,
+    format: 'date-time',
+    example: '2024-12-31T23:59:59Z',
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  createdAtBefore?: Date
+
+  @ApiProperty({
     name: 'lastEventAfter',
     description: 'Include items with last event after this timestamp',
     required: false,
@@ -233,21 +288,23 @@ export class ListSandboxesQueryDto {
     name: 'sort',
     description: 'Field to sort by',
     required: false,
-    enum: SandboxSortField,
-    default: DEFAULT_SANDBOX_SORT_FIELD,
+    enum: SandboxListSortField,
+    enumName: 'SandboxListSortField',
+    default: DEFAULT_SANDBOX_LIST_SORT_FIELD,
   })
   @IsOptional()
-  @IsEnum(SandboxSortField)
-  sort = DEFAULT_SANDBOX_SORT_FIELD
+  @IsEnum(SandboxListSortField)
+  sort = DEFAULT_SANDBOX_LIST_SORT_FIELD
 
   @ApiProperty({
     name: 'order',
     description: 'Direction to sort by',
     required: false,
-    enum: SandboxSortDirection,
-    default: DEFAULT_SANDBOX_SORT_DIRECTION,
+    enum: SandboxListSortDirection,
+    enumName: 'SandboxListSortDirection',
+    default: DEFAULT_SANDBOX_LIST_SORT_DIRECTION,
   })
   @IsOptional()
-  @IsEnum(SandboxSortDirection)
-  order = DEFAULT_SANDBOX_SORT_DIRECTION
+  @IsEnum(SandboxListSortDirection)
+  order = DEFAULT_SANDBOX_LIST_SORT_DIRECTION
 }

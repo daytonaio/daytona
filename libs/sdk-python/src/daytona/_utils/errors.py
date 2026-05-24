@@ -5,7 +5,7 @@ from __future__ import annotations
 import functools
 import inspect
 import json
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator, Mapping
 from typing import Any, NoReturn, TypeVar, Union, cast
 
 import httpx
@@ -158,6 +158,31 @@ def intercept_errors(
                 ) from e
 
             raise DaytonaError(_prefix_message(message_prefix, str(e)))  # pylint: disable=raise-missing-from
+
+        if inspect.isasyncgenfunction(func):
+            async_gen_func = cast(Callable[..., AsyncIterator[Any]], func)
+
+            @functools.wraps(func)
+            async def async_gen_wrapper(*args: object, **kwargs: object) -> AsyncIterator[Any]:
+                try:
+                    async for item in async_gen_func(*args, **kwargs):
+                        yield item
+                except Exception as e:
+                    process_n_raise_exception(e)
+
+            return cast(F, async_gen_wrapper)
+
+        if inspect.isgeneratorfunction(func):
+            sync_gen_func = cast(Callable[..., Iterator[Any]], func)
+
+            @functools.wraps(func)
+            def sync_gen_wrapper(*args: object, **kwargs: object) -> Iterator[Any]:
+                try:
+                    yield from sync_gen_func(*args, **kwargs)
+                except Exception as e:
+                    process_n_raise_exception(e)
+
+            return cast(F, sync_gen_wrapper)
 
         if inspect.iscoroutinefunction(func):
             async_func = cast(Callable[..., Awaitable[object]], func)

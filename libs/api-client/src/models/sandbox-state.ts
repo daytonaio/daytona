@@ -14,9 +14,6 @@
 
 
 
-/**
- * The state of the sandbox
- */
 
 export const SandboxState = {
     CREATING: 'creating',

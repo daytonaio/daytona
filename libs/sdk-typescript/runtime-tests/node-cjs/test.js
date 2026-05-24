@@ -8,13 +8,19 @@ if (!image.dockerfile.includes('FROM alpine')) throw new Error('Image.base faile
 if (!image.dockerfile.includes('ENV FOO')) throw new Error('Image.env failed')
 
 const daytona = new Daytona()
-daytona
-  .list()
-  .then((r) => {
-    if (!Array.isArray(r.items)) throw new Error('list() did not return items array')
+;(async () => {
+  try {
+    const iter = daytona.list()
+    if (typeof iter[Symbol.asyncIterator] !== 'function') {
+      throw new Error('list() did not return an async iterator')
+    }
+    const first = await iter.next()
+    if (typeof first !== 'object' || !('done' in first)) {
+      throw new Error('list() iterator did not yield a valid result')
+    }
     console.log('PASS')
-  })
-  .catch((e) => {
+  } catch (e) {
     console.error('FAIL:', e.message)
     process.exit(1)
-  })
+  }
+})()

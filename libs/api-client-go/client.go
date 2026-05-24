@@ -85,8 +85,6 @@ type APIClient struct {
 	VolumesAPI VolumesAPI
 
 	WebhooksAPI WebhooksAPI
-
-	WorkspaceAPI WorkspaceAPI
 }
 
 type service struct {
@@ -123,7 +121,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.UsersAPI = (*UsersAPIService)(&c.common)
 	c.VolumesAPI = (*VolumesAPIService)(&c.common)
 	c.WebhooksAPI = (*WebhooksAPIService)(&c.common)
-	c.WorkspaceAPI = (*WorkspaceAPIService)(&c.common)
 
 	return c
 }
