@@ -45,9 +45,9 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		"DAYTONA_SANDBOX_USER=" + sandboxDto.OsUser,
 	}
 
-	// Privileged sandboxes still see every /dev/nvidia*, so the CDI device
-	// request alone cannot hide unassigned cards. Scope CUDA / NVML to the
-	// allocated index so cooperative workloads only target their own GPU.
+	// GPU sandboxes run non-privileged so CDI's per-device cgroup rules
+	// actually take effect; also pin the NVIDIA / CUDA env vars to the
+	// allocated index so userspace tools and libraries target only it.
 	if gpuIndex != nil {
 		idx := strconv.Itoa(*gpuIndex)
 		envVars = append(envVars,
@@ -146,7 +146,11 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 	}
 
 	hostConfig := &container.HostConfig{
-		Privileged: true,
+		// Privileged mode exposes every /dev/nvidia* node and bypasses the
+		// CDI cgroup rules, so GPU sandboxes have to opt out to keep their
+		// allocated card isolated. Non-GPU sandboxes still need privileged
+		// for their current workloads.
+		Privileged: gpuIndex == nil,
 		Binds:      binds,
 	}
 
