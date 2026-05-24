@@ -81,7 +81,7 @@ RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d
 RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install 25 && nvm use 25 && nvm alias default 25" \
   && chown -R daytona:daytona /usr/local/share/nvm
 
-RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.1.3 bun@1.3.6 @anthropic-ai/claude-code@2.1.19 @openai/codex@0.128.0 openclaw@2026.2.1 opencode-ai@1.1.35
+RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.1.3 bun@1.3.6 @anthropic-ai/claude-code@2.1.19 @openai/codex@0.128.0 openclaw@2026.5.22 opencode-ai@1.1.35
 
 # Create directory for computer use plugin
 RUN mkdir -p /usr/local/lib && chown daytona:daytona /usr/local/lib
