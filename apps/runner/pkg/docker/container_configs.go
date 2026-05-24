@@ -160,12 +160,30 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		}
 	}
 
+	// GPU sandboxes ignore the API-requested resources and instead receive
+	// a fixed slice of the host equal to host_total / gpu_count, so every
+	// allocated GPU card gets a balanced share of CPU, memory and disk.
+	cpuQuota := sandboxDto.CpuQuota
+	memoryQuotaGiB := sandboxDto.MemoryQuota
+	storageQuotaGiB := sandboxDto.StorageQuota
+	if gpuIndex != nil && d.gpuCount > 0 {
+		if d.hostCPUCores > 0 {
+			cpuQuota = d.hostCPUCores / int64(d.gpuCount)
+		}
+		if d.hostMemoryGiB > 0 {
+			memoryQuotaGiB = d.hostMemoryGiB / int64(d.gpuCount)
+		}
+		if d.hostDiskGiB > 0 {
+			storageQuotaGiB = d.hostDiskGiB / int64(d.gpuCount)
+		}
+	}
+
 	if !d.resourceLimitsDisabled {
 		hostConfig.Resources = container.Resources{
 			CPUPeriod:  100000,
-			CPUQuota:   sandboxDto.CpuQuota * 100000,
-			Memory:     common.GBToBytes(float64(sandboxDto.MemoryQuota)),
-			MemorySwap: common.GBToBytes(float64(sandboxDto.MemoryQuota)),
+			CPUQuota:   cpuQuota * 100000,
+			Memory:     common.GBToBytes(float64(memoryQuotaGiB)),
+			MemorySwap: common.GBToBytes(float64(memoryQuotaGiB)),
 		}
 	}
 
@@ -176,7 +194,7 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 
 	if !d.resourceLimitsDisabled && d.filesystem == "xfs" {
 		hostConfig.StorageOpt = map[string]string{
-			"size": fmt.Sprintf("%dG", sandboxDto.StorageQuota),
+			"size": fmt.Sprintf("%dG", storageQuotaGiB),
 		}
 	}
 

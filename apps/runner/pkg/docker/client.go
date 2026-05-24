@@ -17,6 +17,9 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/client"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/mem"
 )
 
 type DockerClientConfig struct {
@@ -117,12 +120,14 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 
 	gpuCount := 0
 	gpuType := ""
+	var hostCPUCores, hostMemoryGiB, hostDiskGiB int64
 	if config.GpuEnabled {
 		gpuCount, gpuType = detectGpus(ctx)
 		if gpuCount == 0 {
 			logger.Warn("GPU_ENABLED=true but nvidia-smi did not report any GPUs; runner will not host GPU sandboxes")
 		} else {
 			logger.Info("Detected GPUs", "count", gpuCount, "type", gpuType)
+			hostCPUCores, hostMemoryGiB, hostDiskGiB = detectHostCapacity(ctx, logger)
 		}
 	}
 
@@ -157,8 +162,40 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		gpuCount:                     gpuCount,
 		gpuType:                      gpuType,
 		gpuAllocator:                 newGpuAllocator(gpuCount),
+		hostCPUCores:                 hostCPUCores,
+		hostMemoryGiB:                hostMemoryGiB,
+		hostDiskGiB:                  hostDiskGiB,
 		filesystem:                   filesystem,
 	}, nil
+}
+
+// detectHostCapacity reads the host's total CPU cores, RAM, and the size of
+// the filesystem backing /var/lib/docker. It is called once at startup, only
+// when GPU support is enabled, so it can be used to compute the per-GPU slice
+// for GPU sandboxes (host_total / gpu_count).
+func detectHostCapacity(ctx context.Context, logger *slog.Logger) (int64, int64, int64) {
+	var cores, memGiB, diskGiB int64
+
+	if n, err := cpu.CountsWithContext(ctx, true); err == nil {
+		cores = int64(n)
+	} else {
+		logger.Warn("Failed to detect host CPU count; GPU sandbox CPU slice unavailable", "error", err)
+	}
+
+	if m, err := mem.VirtualMemoryWithContext(ctx); err == nil {
+		memGiB = int64(m.Total / (1024 * 1024 * 1024))
+	} else {
+		logger.Warn("Failed to detect host memory; GPU sandbox memory slice unavailable", "error", err)
+	}
+
+	if d, err := disk.UsageWithContext(ctx, "/var/lib/docker"); err == nil {
+		diskGiB = int64(d.Total / (1024 * 1024 * 1024))
+	} else {
+		logger.Warn("Failed to detect host disk; GPU sandbox disk slice unavailable", "error", err)
+	}
+
+	logger.Info("Detected host capacity", "cpuCores", cores, "memoryGiB", memGiB, "diskGiB", diskGiB)
+	return cores, memGiB, diskGiB
 }
 
 // GpuCount returns the number of NVIDIA GPUs detected on the host at startup.
@@ -215,4 +252,7 @@ type DockerClient struct {
 	gpuCount                     int
 	gpuType                      string
 	gpuAllocator                 *gpuAllocator
+	hostCPUCores                 int64
+	hostMemoryGiB                int64
+	hostDiskGiB                  int64
 }
