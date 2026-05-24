@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 )
@@ -33,10 +34,10 @@ func TestIsStructuredOutput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.format, func(t *testing.T) {
-			FormatFlag = tt.format
-			defer func() { FormatFlag = "" }()
-			if got := IsStructuredOutput(); got != tt.want {
-				t.Errorf("IsStructuredOutput() = %v, want %v", got, tt.want)
+			internal.FormatFlag = tt.format
+			defer func() { internal.FormatFlag = "" }()
+			if got := internal.IsStructuredOutput(); got != tt.want {
+				t.Errorf("internal.IsStructuredOutput() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -45,42 +46,42 @@ func TestIsStructuredOutput(t *testing.T) {
 func TestResolveOutputModePicksTSVWhenNotTTY(t *testing.T) {
 	// Going through resolveOutputMode would hit the real os.Stdout; instead we
 	// exercise the same logic with the predicate exposed for testing.
-	FormatFlag = ""
-	defer func() { FormatFlag = "" }()
+	internal.FormatFlag = ""
+	defer func() { internal.FormatFlag = "" }()
 
 	applyDefaults(false /* isStdoutTTY */, "" /* NO_COLOR */)
-	if FormatFlag != "tsv" {
-		t.Errorf("FormatFlag = %q, want %q", FormatFlag, "tsv")
+	if internal.FormatFlag != "tsv" {
+		t.Errorf("internal.FormatFlag = %q, want %q", internal.FormatFlag, "tsv")
 	}
 }
 
 func TestResolveOutputModeKeepsExplicitFormat(t *testing.T) {
-	FormatFlag = "json"
-	defer func() { FormatFlag = "" }()
+	internal.FormatFlag = "json"
+	defer func() { internal.FormatFlag = "" }()
 
 	applyDefaults(false, "")
-	if FormatFlag != "json" {
-		t.Errorf("explicit FormatFlag should win: got %q, want %q", FormatFlag, "json")
+	if internal.FormatFlag != "json" {
+		t.Errorf("explicit internal.FormatFlag should win: got %q, want %q", internal.FormatFlag, "json")
 	}
 }
 
 func TestResolveOutputModeKeepsFormatWhenTTY(t *testing.T) {
-	FormatFlag = ""
-	defer func() { FormatFlag = "" }()
+	internal.FormatFlag = ""
+	defer func() { internal.FormatFlag = "" }()
 
 	applyDefaults(true, "")
-	if FormatFlag != "" {
-		t.Errorf("interactive TTY should not auto-set format: got %q", FormatFlag)
+	if internal.FormatFlag != "" {
+		t.Errorf("interactive TTY should not auto-set format: got %q", internal.FormatFlag)
 	}
 }
 
 // TestApplyDefaultsNoColorStripsInTTY pins the headline acceptance criterion:
 // NO_COLOR=1 must strip ANSI even when stdout is an interactive terminal.
-// We assert the lipgloss color profile directly (not just FormatFlag).
+// We assert the lipgloss color profile directly (not just internal.FormatFlag).
 func TestApplyDefaultsNoColorStripsInTTY(t *testing.T) {
 	withColorProfile(t)
-	FormatFlag = ""
-	defer func() { FormatFlag = "" }()
+	internal.FormatFlag = ""
+	defer func() { internal.FormatFlag = "" }()
 
 	// Seed a non-Ascii profile so we can verify the call actually changes it.
 	lipgloss.SetColorProfile(termenv.TrueColor)
@@ -90,8 +91,8 @@ func TestApplyDefaultsNoColorStripsInTTY(t *testing.T) {
 	if got := lipgloss.DefaultRenderer().ColorProfile(); got != termenv.Ascii {
 		t.Errorf("NO_COLOR in TTY should set profile to Ascii, got %v", got)
 	}
-	if FormatFlag != "" {
-		t.Errorf("NO_COLOR alone should not auto-set format: got %q", FormatFlag)
+	if internal.FormatFlag != "" {
+		t.Errorf("NO_COLOR alone should not auto-set format: got %q", internal.FormatFlag)
 	}
 }
 
@@ -99,8 +100,8 @@ func TestApplyDefaultsNoColorStripsInTTY(t *testing.T) {
 // colors (not just sets tsv). Same headline guarantee, different path.
 func TestApplyDefaultsPipedSetsAsciiProfile(t *testing.T) {
 	withColorProfile(t)
-	FormatFlag = ""
-	defer func() { FormatFlag = "" }()
+	internal.FormatFlag = ""
+	defer func() { internal.FormatFlag = "" }()
 
 	lipgloss.SetColorProfile(termenv.TrueColor)
 
@@ -121,13 +122,13 @@ func TestRegisterFormatFlagPreRunDoesNotBlockStdoutForTSV(t *testing.T) {
 	t.Cleanup(func() {
 		os.Stdout = origStdout
 		standardOut = nil
-		FormatFlag = ""
+		internal.FormatFlag = ""
 	})
 
 	cmd := &cobra.Command{Use: "fake"}
 	RegisterFormatFlag(cmd)
 
-	FormatFlag = "tsv"
+	internal.FormatFlag = "tsv"
 	cmd.PreRun(cmd, nil)
 
 	if os.Stdout == nil {
@@ -143,13 +144,13 @@ func TestRegisterFormatFlagPreRunBlocksStdoutForJSON(t *testing.T) {
 	t.Cleanup(func() {
 		os.Stdout = origStdout
 		standardOut = nil
-		FormatFlag = ""
+		internal.FormatFlag = ""
 	})
 
 	cmd := &cobra.Command{Use: "fake"}
 	RegisterFormatFlag(cmd)
 
-	FormatFlag = "json"
+	internal.FormatFlag = "json"
 	cmd.PreRun(cmd, nil)
 
 	if os.Stdout != nil {

@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -17,7 +18,7 @@ import (
 )
 
 func RenderInfo(snapshot *apiclient.SnapshotDto, forceUnstyled bool) {
-	if commoncmd.FormatFlag == "tsv" {
+	if internal.FormatFlag == "tsv" {
 		renderTSVInfo(os.Stdout, snapshot)
 		return
 	}
@@ -58,13 +59,13 @@ func renderUnstyledInfo(output string) {
 }
 
 func renderTSVInfo(w io.Writer, s *apiclient.SnapshotDto) {
-	fmt.Fprintf(w, "snapshot\t%s\n", s.Name)
-	fmt.Fprintf(w, "state\t%s\n", string(s.State))
+	fmt.Fprintf(w, "snapshot\t%s\n", util.SanitizeTSV(s.Name))
+	fmt.Fprintf(w, "state\t%s\n", util.SanitizeTSV(string(s.State)))
 	if size := s.Size.Get(); size != nil {
 		fmt.Fprintf(w, "size_gb\t%.2f\n", *size)
 	}
-	fmt.Fprintf(w, "created\t%s\n", s.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
-	fmt.Fprintf(w, "id\t%s\n", s.Id)
+	fmt.Fprintf(w, "created\t%s\n", s.CreatedAt.Format(time.RFC3339))
+	fmt.Fprintf(w, "id\t%s\n", util.SanitizeTSV(s.Id))
 }
 
 func renderTUIView(output string, width int) {

@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
-	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -17,7 +17,7 @@ import (
 )
 
 func RenderInfo(volume *apiclient.VolumeDto, forceUnstyled bool) {
-	if commoncmd.FormatFlag == "tsv" {
+	if internal.FormatFlag == "tsv" {
 		renderTSVInfo(os.Stdout, volume)
 		return
 	}
@@ -52,10 +52,10 @@ func renderUnstyledInfo(output string) {
 }
 
 func renderTSVInfo(w io.Writer, v *apiclient.VolumeDto) {
-	fmt.Fprintf(w, "volume\t%s\n", v.Name)
-	fmt.Fprintf(w, "id\t%s\n", v.Id)
-	fmt.Fprintf(w, "state\t%s\n", string(v.State))
-	fmt.Fprintf(w, "created\t%s\n", v.CreatedAt)
+	fmt.Fprintf(w, "volume\t%s\n", util.SanitizeTSV(v.Name))
+	fmt.Fprintf(w, "id\t%s\n", util.SanitizeTSV(v.Id))
+	fmt.Fprintf(w, "state\t%s\n", util.SanitizeTSV(string(v.State)))
+	fmt.Fprintf(w, "created\t%s\n", util.SanitizeTSV(v.CreatedAt))
 }
 
 func renderTUIView(output string, width int) {

@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/daytonaio/daytona/cli/views/sandbox"
 	"github.com/spf13/cobra"
 )
@@ -49,7 +50,7 @@ var ListCmd = &cobra.Command{
 
 		sandbox.SortSandboxes(&sandboxList.Items)
 
-		if common.IsStructuredOutput() {
+		if internal.IsStructuredOutput() {
 			formattedData := common.NewFormatter(sandboxList)
 			formattedData.Print()
 			return nil

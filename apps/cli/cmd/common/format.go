@@ -22,10 +22,7 @@ const (
 	formatFlagShortHand   = "f"
 )
 
-var (
-	FormatFlag  string
-	standardOut *os.File
-)
+var standardOut *os.File
 
 func init() {
 	cobra.OnInitialize(resolveOutputMode)
@@ -45,21 +42,12 @@ func resolveOutputMode() {
 // applyDefaults is the pure-function core of resolveOutputMode; isolated so
 // tests can exercise the precedence rules without touching real fds or env.
 func applyDefaults(isStdoutTTY bool, noColor string) {
-	if FormatFlag == "" && !isStdoutTTY {
-		FormatFlag = "tsv"
+	if internal.FormatFlag == "" && !isStdoutTTY {
+		internal.FormatFlag = "tsv"
 	}
 	if !isStdoutTTY || noColor != "" {
 		lipgloss.SetColorProfile(termenv.Ascii)
 	}
-}
-
-// IsStructuredOutput reports whether the user (or auto-detection) selected a
-// fully-serialized format (json/yaml). The list/info commands use this to
-// decide between calling NewFormatter and falling through to the view layer.
-// Note that "tsv" is *not* structured here: tsv output is generated inside
-// the view layer (where curated column data lives), not via NewFormatter.
-func IsStructuredOutput() bool {
-	return FormatFlag == "json" || FormatFlag == "yaml"
 }
 
 type outputFormatter struct {
@@ -69,7 +57,7 @@ type outputFormatter struct {
 
 func NewFormatter(data interface{}) *outputFormatter {
 	var formatter Formatter
-	switch FormatFlag {
+	switch internal.FormatFlag {
 	case "json":
 		formatter = JSONFormatter{}
 	case "yaml":
@@ -139,9 +127,9 @@ func UnblockStdOut() {
 }
 
 func RegisterFormatFlag(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&FormatFlag, formatFlagName, formatFlagShortHand, FormatFlag, formatFlagDescription)
+	cmd.Flags().StringVarP(&internal.FormatFlag, formatFlagName, formatFlagShortHand, internal.FormatFlag, formatFlagDescription)
 	cmd.PreRun = func(cmd *cobra.Command, args []string) {
-		if IsStructuredOutput() {
+		if internal.IsStructuredOutput() {
 			BlockStdOut()
 			// When a structured output format is requested, suppress
 			// noisy warnings such as version mismatch so scripts

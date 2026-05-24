@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -18,7 +18,7 @@ import (
 )
 
 func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
-	if commoncmd.FormatFlag == "tsv" {
+	if internal.FormatFlag == "tsv" {
 		renderTSVInfo(os.Stdout, sandbox)
 		return
 	}
@@ -89,27 +89,27 @@ func renderUnstyledInfo(output string) {
 }
 
 func renderTSVInfo(w io.Writer, s *apiclient.Sandbox) {
-	fmt.Fprintf(w, "id\t%s\n", s.Id)
+	fmt.Fprintf(w, "id\t%s\n", util.SanitizeTSV(s.Id))
 	if s.State != nil {
-		fmt.Fprintf(w, "state\t%s\n", string(*s.State))
+		fmt.Fprintf(w, "state\t%s\n", util.SanitizeTSV(string(*s.State)))
 	}
 	if s.Snapshot != nil {
-		fmt.Fprintf(w, "snapshot\t%s\n", *s.Snapshot)
+		fmt.Fprintf(w, "snapshot\t%s\n", util.SanitizeTSV(*s.Snapshot))
 	}
-	fmt.Fprintf(w, "region\t%s\n", s.Target)
+	fmt.Fprintf(w, "region\t%s\n", util.SanitizeTSV(s.Target))
 	if s.Class != nil {
-		fmt.Fprintf(w, "class\t%s\n", *s.Class)
+		fmt.Fprintf(w, "class\t%s\n", util.SanitizeTSV(*s.Class))
 	}
 	if s.CreatedAt != nil {
-		fmt.Fprintf(w, "created\t%s\n", *s.CreatedAt)
+		fmt.Fprintf(w, "created\t%s\n", util.SanitizeTSV(*s.CreatedAt))
 	}
 	if s.LastActivityAt != nil {
-		fmt.Fprintf(w, "last_event\t%s\n", *s.LastActivityAt)
+		fmt.Fprintf(w, "last_event\t%s\n", util.SanitizeTSV(*s.LastActivityAt))
 	} else if s.UpdatedAt != nil {
-		fmt.Fprintf(w, "last_event\t%s\n", *s.UpdatedAt)
+		fmt.Fprintf(w, "last_event\t%s\n", util.SanitizeTSV(*s.UpdatedAt))
 	}
 	for k, v := range s.Labels {
-		fmt.Fprintf(w, "label.%s\t%s\n", k, v)
+		fmt.Fprintf(w, "label.%s\t%s\n", util.SanitizeTSV(k), util.SanitizeTSV(v))
 	}
 }
 

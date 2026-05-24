@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/daytonaio/daytona/cli/views/volume"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,7 @@ var GetCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if common.IsStructuredOutput() {
+		if internal.IsStructuredOutput() {
 			formattedData := common.NewFormatter(vol)
 			formattedData.Print()
 			return nil

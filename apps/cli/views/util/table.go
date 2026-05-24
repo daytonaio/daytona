@@ -11,7 +11,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
-	commoncmd "github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"golang.org/x/term"
 )
@@ -22,16 +22,57 @@ var AdditionalPropertyPadding = "  "
 var RowWhiteSpace = 1 + 4 + len(AdditionalPropertyPadding)*2 + 4 + 4 + 1
 var ArbitrarySpace = 10
 
-var ansiRegex = regexp.MustCompile("\x1b\\[[0-9;]*[a-zA-Z]")
+// ansiRegex matches the full ANSI escape family, not just CSI color codes:
+//   - OSC (Operating System Command) — terminal title, OSC-52 clipboard, OSC-8 hyperlinks
+//   - DCS (Device Control String)
+//   - CSI (Control Sequence Introducer) — colors, cursor movement, etc.
+//   - Charset-designation escapes (ESC ( F, ESC ) F, etc.)
+//   - Plain 2-byte ESC sequences (excluding [, ], P which introduce CSI/OSC/DCS)
+//   - Stray bare ESC bytes as a last-resort fallback
+//   - C0 control bytes and DEL (except \t \n \r — handled by tsvUnsafe below)
+//
+// A narrow CSI-only strip is unsafe here because user-controlled strings
+// (sandbox names, label values) flow into output that may later be rendered
+// in a real terminal. OSC-8 hyperlinks enable phishing; OSC-52 enables
+// clipboard hijack; DCS can elicit terminal responses that the shell reads
+// back as input. Order matters: Go's regexp picks leftmost-first among
+// alternatives, so longer/more-specific patterns come first.
+var ansiRegex = regexp.MustCompile(
+	`\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)` + // OSC, terminated by BEL or ST
+		`|\x1bP[^\x1b]*\x1b\\` + // DCS, ST-terminated (before 2-byte ESC so \x1bP matches DCS)
+		`|\x1b\[[0-?]*[ -/]*[@-~]` + // CSI: intro + params + intermediates + final
+		`|\x1b[()*+\-./][@-~]` + // Charset designation: ESC <intermediate> <final>
+		`|\x1b[@A-OQ-Z\\^_]` + // Plain 2-byte ESC (excludes [, ], P)
+		`|\x1b` + // Stray bare ESC — drop alone
+		`|[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]`, // C0 / DEL (keeps \t \n \r — handled by tsvUnsafe)
+)
 
-// StripANSI removes ANSI escape sequences from s.
+// tsvUnsafe replaces row-/field-delimiter characters that would corrupt the
+// TSV stream. The replacement choices match kubectl's convention (drop, don't
+// quote) so downstream `awk -F'\t'` and `cut -f` parsers see a stable row
+// count regardless of upstream field contents.
+var tsvUnsafe = strings.NewReplacer("\t", " ", "\n", " ", "\r", " ")
+
+// StripANSI removes ANSI escape sequences from s. See ansiRegex doc for the
+// covered families.
 func StripANSI(s string) string {
 	return ansiRegex.ReplaceAllString(s, "")
 }
 
+// SanitizeTSV prepares a string for emission as a TSV cell value. It strips
+// ANSI escapes (preventing terminal injection when the output is later
+// rendered) and replaces row/field delimiters (preventing row injection).
+// Use this at every TSV emission site that handles user-controlled data.
+func SanitizeTSV(s string) string {
+	return tsvUnsafe.Replace(StripANSI(s))
+}
+
 // Gets the table view string or falls back to an unstyled view for lower terminal widths
 func GetTableView(data [][]string, headers []string, activeOrganizationName *string, fallbackRender func()) string {
-	if commoncmd.FormatFlag == "tsv" {
+	if internal.FormatFlag == "tsv" {
+		// Headers and the active-org banner are intentionally dropped in TSV
+		// mode (kubectl-style): scripts grep/awk on data rows; a header row
+		// would force them to `tail -n +2`.
 		return renderTSV(data)
 	}
 
@@ -96,7 +137,7 @@ func renderTSV(data [][]string) string {
 	for _, row := range data {
 		cells := make([]string, len(row))
 		for i, cell := range row {
-			cells[i] = strings.TrimSpace(StripANSI(cell))
+			cells[i] = strings.TrimSpace(SanitizeTSV(cell))
 		}
 		b.WriteString(strings.Join(cells, "\t"))
 		b.WriteByte('\n')

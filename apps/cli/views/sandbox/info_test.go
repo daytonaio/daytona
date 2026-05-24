@@ -73,6 +73,46 @@ func TestRenderTSVInfoOmitsNilFields(t *testing.T) {
 	}
 }
 
+// TestRenderTSVInfoSanitizesAdversarialFields pins that user-controlled
+// fields containing tab/newline/ANSI bytes cannot inject extra rows or
+// terminal-injection sequences into the TSV output. Sandbox names and
+// labels are the most likely attacker-controlled inputs in practice.
+func TestRenderTSVInfoSanitizesAdversarialFields(t *testing.T) {
+	sb := &apiclient.Sandbox{
+		Id:     "sb\tinject\nfake",
+		Target: "us\x1b]8;;https://evil/\x07click\x1b]8;;\x07",
+		Labels: map[string]string{
+			"key\twith\ttab": "val\nwith\nnewline",
+			"normal":         "ok",
+		},
+	}
+
+	var buf bytes.Buffer
+	renderTSVInfo(&buf, sb)
+	out := buf.String()
+
+	if strings.ContainsRune(out, '\x1b') {
+		t.Errorf("output contains stray ESC byte after sanitization: %q", out)
+	}
+
+	// The structural invariant we care about: every emitted line is exactly
+	// one `key<TAB>value` pair. If sanitization had failed, the malicious id
+	// or label value would have introduced extra newlines and extra tabs,
+	// producing rows with !=1 tab.
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	for i, line := range lines {
+		if got := strings.Count(line, "\t"); got != 1 {
+			t.Errorf("line %d should have exactly 1 tab (key<TAB>value); got %d in %q", i, got, line)
+		}
+	}
+
+	// Sandbox has 1 id + 1 region + 2 labels = 4 lines (no state/snapshot/etc set).
+	// Without sanitization, the adversarial id+labels would expand to ~10+ rows.
+	if len(lines) != 4 {
+		t.Errorf("expected exactly 4 lines (id, region, 2 labels); got %d:\n%s", len(lines), out)
+	}
+}
+
 // TestRenderTSVInfoLastEventFallback exercises the LastActivityAt/UpdatedAt
 // fallback branch (LastActivityAt nil → use UpdatedAt).
 func TestRenderTSVInfoLastEventFallback(t *testing.T) {

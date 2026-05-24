@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/daytonaio/daytona/cli/views/snapshot"
 	"github.com/spf13/cobra"
 )
@@ -49,7 +50,7 @@ var ListCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if common.IsStructuredOutput() {
+		if internal.IsStructuredOutput() {
 			formattedData := common.NewFormatter(snapshots.Items)
 			formattedData.Print()
 			return nil
