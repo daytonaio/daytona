@@ -55,13 +55,18 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 	}
 
 	// GPU sandboxes run non-privileged so CDI's per-device cgroup rules
-	// actually take effect; also pin the NVIDIA / CUDA env vars to the
-	// allocated index so userspace tools and libraries target only it.
+	// actually take effect. CDI already restricts the container to the one
+	// allocated physical GPU (see DeviceRequests below), and Linux/CUDA
+	// renumber the exposed devices starting at 0 - so from inside the
+	// container the GPU is always index 0 regardless of which host slot
+	// was allocated. Hard-code the env vars to "0" so CUDA/userspace tools
+	// don't try to address a host-side index that doesn't exist in the
+	// container's view (which would break e.g. cudaSetDevice while letting
+	// nvidia-smi work).
 	if gpuIndex != nil {
-		idx := strconv.Itoa(*gpuIndex)
 		envVars = append(envVars,
-			"NVIDIA_VISIBLE_DEVICES="+idx,
-			"CUDA_VISIBLE_DEVICES="+idx,
+			"NVIDIA_VISIBLE_DEVICES=0",
+			"CUDA_VISIBLE_DEVICES=0",
 		)
 	}
 
