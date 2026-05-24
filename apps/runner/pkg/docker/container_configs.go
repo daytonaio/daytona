@@ -19,6 +19,15 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
+// Fixed sandbox slice applied to every GPU sandbox regardless of host size.
+// Keeping these constant across runners makes user-visible GPU sandbox
+// capacity uniform on heterogeneous GPU fleets.
+const (
+	gpuSandboxCPUCores  int64 = 16
+	gpuSandboxMemoryGiB int64 = 256
+	gpuSandboxDiskGiB   int64 = 512
+)
+
 func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string, gpuIndex *int) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
 	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image, gpuIndex)
 	if err != nil {
@@ -160,22 +169,17 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		}
 	}
 
-	// GPU sandboxes ignore the API-requested resources and instead receive
-	// a fixed slice of the host equal to host_total / gpu_count, so every
-	// allocated GPU card gets a balanced share of CPU, memory and disk.
+	// GPU sandboxes ignore the API-requested resources and instead get a
+	// uniform slice that is identical on every GPU runner regardless of
+	// host size. This keeps user-visible sandbox capacity consistent
+	// across heterogeneous GPU fleets (e.g. H100 NVL vs H100 SXM5 hosts).
 	cpuQuota := sandboxDto.CpuQuota
 	memoryQuotaGiB := sandboxDto.MemoryQuota
 	storageQuotaGiB := sandboxDto.StorageQuota
-	if gpuIndex != nil && d.gpuCount > 0 {
-		if d.hostCPUCores > 0 {
-			cpuQuota = d.hostCPUCores / int64(d.gpuCount)
-		}
-		if d.hostMemoryGiB > 0 {
-			memoryQuotaGiB = d.hostMemoryGiB / int64(d.gpuCount)
-		}
-		if d.hostDiskGiB > 0 {
-			storageQuotaGiB = d.hostDiskGiB / int64(d.gpuCount)
-		}
+	if gpuIndex != nil {
+		cpuQuota = gpuSandboxCPUCores
+		memoryQuotaGiB = gpuSandboxMemoryGiB
+		storageQuotaGiB = gpuSandboxDiskGiB
 	}
 
 	if !d.resourceLimitsDisabled {
