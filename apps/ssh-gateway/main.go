@@ -331,7 +331,15 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 		if err != nil {
 			log.Printf("Client to runner copy error: %v", err)
 		}
-		// Client disconnected — close runner channel so the reverse copy unblocks and the keepalive ticker stops.
+		// Always send MSG_CHANNEL_CLOSE (not just MSG_CHANNEL_EOF via CloseWrite).
+		// The SSH library surfaces transport errors as io.EOF on channel reads, so
+		// io.Copy returns nil even after an abrupt SIGKILL/network-drop — meaning
+		// CloseWrite would be taken in all cases.  More importantly, MSG_CHANNEL_EOF
+		// is silently ignored by long-lived processes such as VS Code Remote Server
+		// and JetBrains Gateway, leaving io.Copy(clientChannel, runnerChannel)
+		// blocked forever and the keepalive ticker running indefinitely.
+		// MSG_CHANNEL_CLOSE forces a reply from the runner, which unblocks the read
+		// and allows defer cancel() to stop the keepalive ticker.
 		runnerChannel.Close() // nolint:errcheck
 	}()
 

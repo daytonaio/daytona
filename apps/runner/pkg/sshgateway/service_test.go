@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 //go:build linux
@@ -36,8 +36,13 @@ type channelPair struct {
 	server ssh.Channel
 	// client is the channel as seen by the SSH client (OpenChannel()-returned).
 	client ssh.Channel
-	// closeConns tears down the underlying net.Pipe connections.
+	// closeConns tears down both sides of the underlying TCP connection.
 	closeConns func()
+	// closeClient closes only the client-side TCP connection, simulating an
+	// abrupt SSH client disconnect (SIGKILL / network drop). This causes any
+	// in-progress Read on server to return a non-nil error, which is how the
+	// production code distinguishes abrupt disconnects from clean stdin EOF.
+	closeClient func()
 }
 
 // newChannelPair creates an SSH connection backed by a loopback TCP socket and
@@ -134,6 +139,9 @@ func newChannelPair(t *testing.T) *channelPair {
 			cliConn.Close() //nolint:errcheck
 			srvConn.Close() //nolint:errcheck
 		},
+		closeClient: func() {
+			cliConn.Close() //nolint:errcheck
+		},
 	}
 }
 
@@ -146,13 +154,14 @@ func newChannelPair(t *testing.T) *channelPair {
 // JetBrains remote server processes) stays alive, and the gateway's keepalive ticker
 // keeps refreshing lastActivityAt every 45 s.
 //
-// The fix adds sandboxChannel.Close() at the end of the client→sandbox goroutine.
+// The fix closes sandboxChannel on error (abrupt disconnect) and half-closes on clean EOF.
 func TestClientDisconnectClosesSandboxChannel(t *testing.T) {
 	t.Parallel()
 
 	// clientPair simulates the runner receiving a channel from the gateway.
 	// clientPair.server == clientChannel in Service.handleChannel (runner's server-side view).
-	// clientPair.client == the gateway's end; closing it simulates the external client dying.
+	// clientPair.closeClient() simulates the gateway dropping (external client died):
+	// closes the TCP connection so io.Copy returns a non-nil error, triggering Close().
 	clientPair := newChannelPair(t)
 	defer clientPair.closeConns()
 
@@ -168,11 +177,11 @@ func TestClientDisconnectClosesSandboxChannel(t *testing.T) {
 	// done is closed when the main blocking io.Copy (sandbox→client) returns.
 	done := make(chan struct{})
 
-	// Fixed goroutine: client→sandbox copy, then close sandbox on disconnect.
-	// This is the goroutine that was modified in apps/runner/pkg/sshgateway/service.go.
+	// Mirror the goroutine from apps/runner/pkg/sshgateway/service.go.
+	// Always Close() so MSG_CHANNEL_CLOSE forces a reply that unblocks the reverse copy.
 	go func() {
 		_, _ = io.Copy(sandboxChannel, clientChannel)
-		sandboxChannel.Close() //nolint:errcheck — the fix
+		sandboxChannel.Close() //nolint:errcheck
 	}()
 
 	// Main blocking copy: sandbox→client.
@@ -182,11 +191,8 @@ func TestClientDisconnectClosesSandboxChannel(t *testing.T) {
 		close(done)
 	}()
 
-	// Allow goroutines to reach their blocking io.Copy calls.
-	time.Sleep(10 * time.Millisecond)
-
-	// Simulate gateway closing its channel (because the external SSH client disconnected).
-	clientPair.client.Close() //nolint:errcheck
+	// Simulate gateway dropping (external SSH client disconnected).
+	clientPair.closeClient()
 
 	select {
 	case <-done:
@@ -220,10 +226,8 @@ func TestSandboxChannelReceivesCloseOnClientDisconnect(t *testing.T) {
 		_, _ = io.Copy(clientChannel, sandboxChannel)
 	}()
 
-	time.Sleep(10 * time.Millisecond)
-
-	// Gateway closes its channel (external client disconnected).
-	clientPair.client.Close() //nolint:errcheck
+	// Simulate abrupt SSH client disconnect (SIGKILL / network drop).
+	clientPair.closeClient()
 
 	// The sandbox container's sshd side (sandboxPair.server) should receive EOF/close,
 	// which causes the sandbox shell process to receive a hangup and exit.

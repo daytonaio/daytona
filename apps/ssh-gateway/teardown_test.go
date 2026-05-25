@@ -1,7 +1,5 @@
-/*
- * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
- */
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
 
 package main
 
@@ -36,8 +34,13 @@ type channelPair struct {
 	server ssh.Channel
 	// client is the channel as seen by the SSH client (OpenChannel()-returned).
 	client ssh.Channel
-	// closeConns tears down the underlying net.Pipe connections.
+	// closeConns tears down both sides of the underlying TCP connection.
 	closeConns func()
+	// closeClient closes only the client-side TCP connection, simulating an
+	// abrupt SSH client disconnect (SIGKILL / network drop). This causes any
+	// in-progress Read on server to return a non-nil error, which is how the
+	// production code distinguishes abrupt disconnects from clean stdin EOF.
+	closeClient func()
 }
 
 // newChannelPair creates an SSH connection backed by a loopback TCP socket and
@@ -134,6 +137,9 @@ func newChannelPair(t *testing.T) *channelPair {
 			cliConn.Close() //nolint:errcheck
 			srvConn.Close() //nolint:errcheck
 		},
+		closeClient: func() {
+			cliConn.Close() //nolint:errcheck
+		},
 	}
 }
 
@@ -145,14 +151,14 @@ func newChannelPair(t *testing.T) *channelPair {
 // keepalive goroutine's context was never cancelled, lastActivityAt kept refreshing every
 // 45 s, and auto-stop never triggered.
 //
-// The fix adds runnerChannel.Close() at the end of the client→runner goroutine, which
-// unblocks the reverse copy and lets defer cancel() fire.
+// The fix closes runnerChannel on error (abrupt disconnect) and half-closes on clean EOF.
 func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 	t.Parallel()
 
 	// clientPair simulates the gateway receiving a channel from the external SSH client.
 	// clientPair.server == clientChannel in handleChannel (gateway's server-side view).
-	// clientPair.client == the external client's end; closing it simulates SIGKILL.
+	// clientPair.closeClient() simulates SIGKILL: drops the TCP connection so io.Copy
+	// returns a non-nil error, triggering the full Close() path in the production code.
 	clientPair := newChannelPair(t)
 	defer clientPair.closeConns()
 
@@ -168,11 +174,11 @@ func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 	// proving that the keepalive context would be cancelled via defer cancel().
 	done := make(chan struct{})
 
-	// Fixed goroutine: client→runner copy, then close runner on disconnect.
-	// This is the goroutine that was modified in apps/ssh-gateway/main.go.
+	// Mirror the goroutine from apps/ssh-gateway/main.go.
+	// Always Close() so MSG_CHANNEL_CLOSE forces a reply that unblocks the reverse copy.
 	go func() {
 		_, _ = io.Copy(runnerChannel, clientChannel)
-		runnerChannel.Close() //nolint:errcheck — the fix
+		runnerChannel.Close() //nolint:errcheck
 	}()
 
 	// Main blocking copy: runner→client.
@@ -182,11 +188,10 @@ func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 		close(done)
 	}()
 
-	// Allow goroutines to reach their blocking io.Copy calls.
-	time.Sleep(10 * time.Millisecond)
-
-	// Simulate abrupt SSH client disconnect (kill -9 / VS Code tab closed / network drop).
-	clientPair.client.Close() //nolint:errcheck
+	// Simulate abrupt SSH client disconnect (kill -9 / VS Code tab closed / network drop)
+	// by closing the underlying TCP connection. This causes io.Copy reading from
+	// clientChannel to return a non-nil error, which triggers runnerChannel.Close().
+	clientPair.closeClient()
 
 	select {
 	case <-done:
@@ -221,10 +226,8 @@ func TestRunnerChannelClosedAfterClientDisconnect(t *testing.T) {
 		_, _ = io.Copy(clientChannel, runnerChannel)
 	}()
 
-	time.Sleep(10 * time.Millisecond)
-
-	// Close the external client's end.
-	clientPair.client.Close() //nolint:errcheck
+	// Simulate abrupt SSH client disconnect (SIGKILL / network drop).
+	clientPair.closeClient()
 
 	// The runner-side server channel (runnerPair.server) should receive EOF/close,
 	// which propagates to the runner's handleChannel → sandboxChannel.Close().
