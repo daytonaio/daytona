@@ -55,7 +55,7 @@ ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   SKIP_COMPUTER_USE_BUILD=true VERSION=$VERSION yarn nx build runner --configuration=production --nxBail=true
 
-FROM docker:28.2.2-dind-alpine3.22 AS runner
+FROM docker:28.5.2-dind-alpine3.22 AS runner
 
 RUN apk update && apk upgrade --no-cache openssl pcre2 \
   && apk add --no-cache curl rsync
