@@ -205,8 +205,8 @@ export function getColumns({
     },
     {
       id: 'class',
-      size: 130,
-      maxSize: 130,
+      size: 64,
+      maxSize: 64,
       enableSorting: true,
       enableHiding: true,
       header: ({ column }) => {
@@ -218,10 +218,14 @@ export function getColumns({
         const Icon = getSandboxClassIcon(sandboxClass)
         const label = getSandboxClassLabel(sandboxClass)
         return (
-          <div className="w-full truncate flex items-center gap-2">
-            <Icon className="size-4 text-muted-foreground shrink-0" />
-            <span className="truncate block">{label}</span>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex items-center" aria-label={label}>
+                <Icon className="size-4 text-muted-foreground shrink-0" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{label}</TooltipContent>
+          </Tooltip>
         )
       },
       filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
