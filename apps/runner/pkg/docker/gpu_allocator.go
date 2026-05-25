@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -50,8 +50,18 @@ func (a *gpuAllocator) Acquire(ctx context.Context, d *DockerClient) (int, func(
 		return 0, nil, fmt.Errorf("list containers for GPU allocation: %w", err)
 	}
 
+	// Only containers whose process is alive can actually hold a GPU - Docker
+	// detaches the CDI device cgroup on exit, so an exited / dead / removing
+	// sandbox no longer occupies its physical card and its index must be
+	// reusable by the next allocation. (A subsequent restart of a stopped GPU
+	// sandbox is handled at start time by the per-card collision check rather
+	// than by keeping the slot reserved here.)
 	used := make(map[int]struct{}, len(containers))
 	for _, c := range containers {
+		switch c.State {
+		case "exited", "dead", "removing":
+			continue
+		}
 		if v, ok := c.Labels[GpuIndexLabel]; ok {
 			if n, err := strconv.Atoi(v); err == nil {
 				used[n] = struct{}{}
