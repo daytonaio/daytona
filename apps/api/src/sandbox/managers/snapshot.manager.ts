@@ -46,6 +46,7 @@ import { SnapshotInfoResponse } from '@daytona/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 
 /** Fisher-Yates shuffle — uniform random permutation in O(n). */
 function shuffleArray<T>(array: T[]): T[] {
@@ -341,7 +342,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           state: RunnerState.READY,
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
-          sandboxClass: snapshot.sandboxClass,
+          // Temporary: Android snapshots can go to container runners
+          sandboxClass:
+            snapshot.sandboxClass === SandboxClass.ANDROID
+              ? In([SandboxClass.CONTAINER, SandboxClass.ANDROID])
+              : snapshot.sandboxClass,
         },
       })
 
