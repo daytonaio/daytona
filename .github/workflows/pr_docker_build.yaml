@@ -1,0 +1,183 @@
+name: '[PR] Docker build'
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read   # required by dorny/paths-filter on pull_request triggers
+
+env:
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    name: Detect Docker changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      matrix: ${{ steps.compute.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - id: filter
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        with:
+          filters: |
+            shared: &shared
+              - '.github/workflows/pr_docker_build.yaml'
+              - '.github/dependabot.yml'
+              - '.dockerignore'
+            go-workspace: &go-workspace
+              - 'go.work'
+              - 'libs/common-go/**'
+              - 'libs/api-client-go/**'
+            api:
+              - *shared
+              - 'apps/api/Dockerfile'
+              - 'apps/api/.dockerignore'
+            dashboard:
+              - *shared
+              - 'apps/dashboard/Dockerfile'
+              - 'apps/dashboard/.dockerignore'
+            proxy:
+              - *shared
+              - *go-workspace
+              - 'apps/proxy/Dockerfile'
+            runner:
+              - *shared
+              - *go-workspace
+              - 'apps/runner/Dockerfile'
+              - 'apps/daemon/**'
+              - 'libs/computer-use/**'
+            snapshot-manager:
+              - *shared
+              - *go-workspace
+              - 'apps/snapshot-manager/Dockerfile'
+            ssh-gateway:
+              - *shared
+              - *go-workspace
+              - 'apps/ssh-gateway/Dockerfile'
+            otel-collector:
+              - *shared
+              - *go-workspace
+              - 'apps/otel-collector/Dockerfile'
+            docs:
+              - *shared
+              - 'apps/docs/Dockerfile'
+              - 'apps/docs/.dockerignore'
+            sandbox:
+              - *shared
+              - 'images/sandbox/Dockerfile'
+              - 'images/sandbox/.dockerignore'
+            sandbox-slim:
+              - *shared
+              - 'images/sandbox-slim/Dockerfile'
+              - 'images/sandbox-slim/.dockerignore'
+
+      - id: compute
+        # Build a JSON matrix array containing only the images whose filter fired.
+        # Job-level `if: needs.detect-changes.outputs[matrix.image.name]` does NOT work
+        # because GitHub evaluates jobs.<id>.if BEFORE matrix expansion, so matrix
+        # context is undefined at that point. The canonical fix is a dynamic matrix.
+        #
+        # MAINTENANCE: when adding or removing an image, update BOTH the per-image
+        # filters above AND the JSON array below — they must stay in sync.
+        env:
+          FILTERS: ${{ toJson(steps.filter.outputs) }}
+        run: |
+          set -euo pipefail
+          all='[
+            {"name":"api","context":".","file":"apps/api/Dockerfile","target":"daytona"},
+            {"name":"dashboard","context":".","file":"apps/dashboard/Dockerfile","target":"dashboard"},
+            {"name":"proxy","context":".","file":"apps/proxy/Dockerfile","target":"proxy","needs_go_work_sum":true},
+            {"name":"runner","context":".","file":"apps/runner/Dockerfile","target":"runner","needs_go_work_sum":true,"stub_computer_use":true},
+            {"name":"snapshot-manager","context":".","file":"apps/snapshot-manager/Dockerfile","target":"snapshot-manager","needs_go_work_sum":true},
+            {"name":"ssh-gateway","context":".","file":"apps/ssh-gateway/Dockerfile","target":"ssh-gateway","needs_go_work_sum":true},
+            {"name":"otel-collector","context":".","file":"apps/otel-collector/Dockerfile","target":"otel-collector","needs_go_work_sum":true},
+            {"name":"docs","context":".","file":"apps/docs/Dockerfile","target":"docs"},
+            {"name":"sandbox","context":"./images/sandbox","file":"images/sandbox/Dockerfile","target":""},
+            {"name":"sandbox-slim","context":"./images/sandbox-slim","file":"images/sandbox-slim/Dockerfile","target":""}
+          ]'
+          changed=$(jq -c --argjson f "$FILTERS" '[.[] | select($f[.name] == "true")]' <<<"$all")
+          echo "matrix=$changed" >> "$GITHUB_OUTPUT"
+          echo "Will build: $(jq -r '[.[].name] | join(", ")' <<<"$changed")"
+
+  docker-build:
+    name: Build (${{ matrix.image.name }})
+    needs: detect-changes
+    if: needs.detect-changes.result == 'success' && needs.detect-changes.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Prepare go.work.sum (required by Go Dockerfiles' COPY go.work go.work.sum)
+        if: matrix.image.needs_go_work_sum
+        run: touch go.work.sum
+
+      - name: Stub computer-use binary (runner only)
+        if: matrix.image.stub_computer_use
+        run: |
+          mkdir -p dist/libs
+          : > dist/libs/computer-use-amd64
+          chmod +x dist/libs/computer-use-amd64
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: ${{ matrix.image.context }}
+          file: ${{ matrix.image.file }}
+          target: ${{ matrix.image.target }}
+          push: false
+          load: false
+          platforms: linux/amd64
+          cache-from: type=gha,scope=pr-docker-${{ matrix.image.name }}
+          cache-to: type=gha,scope=pr-docker-${{ matrix.image.name }},mode=max
+          build-args: |
+            VERSION=v0.0.0-pr
+          provenance: false
+          sbom: false
+
+  docker-build-result:
+    name: docker-build-result
+    needs: [detect-changes, docker-build]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Aggregate results
+        env:
+          DETECT: ${{ needs.detect-changes.result }}
+          BUILD: ${{ needs.docker-build.result }}
+        run: |
+          # detect-changes must succeed. If it fails (dorny action 404, malformed filter
+          # YAML, etc.) the matrix gets skipped, and without this guard the aggregate
+          # would silently go green -- letting Dependabot PRs merge with zero validation.
+          if [ "$DETECT" != "success" ]; then
+            echo "detect-changes did not complete cleanly: $DETECT"
+            exit 1
+          fi
+          # docker-build matrix result: success | failure | cancelled | skipped
+          # "skipped" = no image had its Dockerfile touched (legitimate pass).
+          # "success" = all triggered matrix entries built cleanly.
+          case "$BUILD" in
+            success|skipped) echo "Docker build: $BUILD"; exit 0 ;;
+            *) echo "Docker build aggregate: $BUILD"; exit 1 ;;
+          esac
