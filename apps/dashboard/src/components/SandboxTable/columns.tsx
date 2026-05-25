@@ -73,6 +73,7 @@ interface GetColumnsProps {
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
   handleOpenTerminal: (sandbox: Sandbox) => void
+  includeClassColumn: boolean
 }
 
 export function getColumns({
@@ -93,6 +94,7 @@ export function getColumns({
   handleFork,
   handleViewForks,
   handleOpenTerminal,
+  includeClassColumn,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const columns: ColumnDef<Sandbox>[] = [
     {
@@ -415,7 +417,7 @@ export function getColumns({
     },
   ]
 
-  return columns
+  return includeClassColumn ? columns : columns.filter((column) => column.id !== 'class')
 }
 
 function getDisplayName(sandbox: Sandbox): string {

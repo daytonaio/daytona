@@ -23,3 +23,16 @@ export function useAvailableSandboxClasses(regionId: string | undefined): Sandbo
     return Object.values(SandboxClass)
   }, [usageOverview?.regionUsage, regionId])
 }
+
+export function useAvailableSandboxClassesForOrganization(): SandboxClass[] {
+  const { selectedOrganization } = useSelectedOrganization()
+  const { data: usageOverview } = useOrganizationUsageOverviewQuery({
+    organizationId: selectedOrganization?.id ?? '',
+  })
+
+  return useMemo<SandboxClass[]>(() => {
+    const regionUsage = usageOverview?.regionUsage ?? []
+    if (regionUsage.length === 0) return Object.values(SandboxClass)
+    return [...new Set(regionUsage.map((q) => q.sandboxClass))]
+  }, [usageOverview?.regionUsage])
+}

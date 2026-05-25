@@ -6,8 +6,9 @@
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
+import { useAvailableSandboxClassesForOrganization } from '@/hooks/useAvailableSandboxClasses'
 import { getRegionFullDisplayName } from '@/lib/utils'
-import { Region, Sandbox } from '@daytona/api-client'
+import { Region, Sandbox, SandboxClass } from '@daytona/api-client'
 import { getSandboxClassLabel } from './constants'
 import {
   ColumnFiltersState,
@@ -145,6 +146,12 @@ export function useSandboxTable({
     }))
   }, [regionsData])
 
+  const availableSandboxClasses = useAvailableSandboxClassesForOrganization()
+  const includeClassColumn = useMemo(
+    () => availableSandboxClasses.some((c) => c !== SandboxClass.CONTAINER),
+    [availableSandboxClasses],
+  )
+
   const columns = useMemo(
     () =>
       getColumns({
@@ -165,6 +172,7 @@ export function useSandboxTable({
         handleFork,
         handleViewForks,
         handleOpenTerminal,
+        includeClassColumn,
       }),
     [
       handleStart,
@@ -184,6 +192,7 @@ export function useSandboxTable({
       handleFork,
       handleViewForks,
       handleOpenTerminal,
+      includeClassColumn,
     ],
   )
 
