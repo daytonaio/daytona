@@ -10,6 +10,11 @@
         "tags": ["daytonaio/sandbox:$VERSION$ARCH"],
         "cache-from": ["type=registry,ref=daytonaio/sandbox:buildcache$ARCH"],
         "cache-to": ["type=registry,ref=daytonaio/sandbox:buildcache$ARCH,mode=max"]
+      },
+      "configurations": {
+        "pr-build": {
+          "tags": ["daytonaio/sandbox:$VERSION"]
+        }
       }
     }
   }
