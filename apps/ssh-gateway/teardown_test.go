@@ -89,17 +89,18 @@ func newChannelPair(t *testing.T) *channelPair {
 			return
 		}
 		go ssh.DiscardRequests(reqs)
-		for newCh := range chans {
-			ch, reqs, err := newCh.Accept()
-			if err != nil {
-				return
-			}
-			go ssh.DiscardRequests(reqs)
-			serverChanCh <- ch
-			for range chans {
-			} // drain remaining channels
+		newCh, ok := <-chans
+		if !ok {
 			return
 		}
+		ch, reqs, err := newCh.Accept()
+		if err != nil {
+			return
+		}
+		go ssh.DiscardRequests(reqs)
+		serverChanCh <- ch
+		for range chans {
+		} // drain remaining channels
 	}()
 
 	clientCfg := &ssh.ClientConfig{
