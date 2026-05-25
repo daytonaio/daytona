@@ -155,12 +155,13 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
 	defer clientChannel.Close()
 
 	// Connect to the sandbox container via toolbox
-	sandboxChannel, sandboxRequests, err := s.connectToSandbox(sandboxId, newChannel.ChannelType(), newChannel.ExtraData())
+	sandboxChannel, sandboxRequests, sandboxClient, err := s.connectToSandbox(sandboxId, newChannel.ChannelType(), newChannel.ExtraData())
 	if err != nil {
 		s.log.Warn("Could not connect to sandbox", "sandboxID", sandboxId, "error", err)
 		clientChannel.Close()
 		return
 	}
+	defer sandboxClient.Close()
 	defer sandboxChannel.Close()
 
 	// Forward requests from client to sandbox
@@ -217,6 +218,8 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
 		if err != nil {
 			s.log.Debug("Client to sandbox copy error", "error", err)
 		}
+		// Client disconnected — close sandbox channel so the reverse copy unblocks and the session is cleaned up.
+		sandboxChannel.Close() // nolint:errcheck
 	}()
 
 	_, err = io.Copy(clientChannel, sandboxChannel)
@@ -228,11 +231,11 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
 }
 
 // connectToSandbox connects to the sandbox container via the toolbox
-func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []byte) (ssh.Channel, <-chan *ssh.Request, error) {
+func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []byte) (ssh.Channel, <-chan *ssh.Request, *ssh.Client, error) {
 	// Get sandbox details via toolbox API
 	sandboxDetails, err := s.getSandboxDetails(sandboxId)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get sandbox details: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get sandbox details: %w", err)
 	}
 
 	// Create SSH client config to connect to the sandbox
@@ -246,18 +249,18 @@ func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []by
 	// Connect to the sandbox container via toolbox
 	sandboxClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:22220", sandboxDetails.Hostname), clientConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to connect to sandbox: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to connect to sandbox: %w", err)
 	}
 
 	// Open channel to the sandbox
 	sandboxChannel, sandboxRequests, err := sandboxClient.OpenChannel(channelType, extraData)
 	if err != nil {
 		sandboxClient.Close()
-		return nil, nil, fmt.Errorf("failed to open channel to sandbox: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to open channel to sandbox: %w", err)
 	}
 
-	// Return the real sandbox channel and requests
-	return sandboxChannel, sandboxRequests, nil
+	// Return the real sandbox channel, requests, and client (caller must close client)
+	return sandboxChannel, sandboxRequests, sandboxClient, nil
 }
 
 // getSandboxDetails gets sandbox information via docker client
