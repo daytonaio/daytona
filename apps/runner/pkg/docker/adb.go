@@ -53,9 +53,16 @@ func (d *DockerClient) waitForAdbRunning(ctx context.Context, containerIP string
 		select {
 		case <-timeoutCtx.Done():
 			span.SetAttributes(attribute.Int("retries", retries))
-			err := fmt.Errorf("timeout waiting for ADB port on %s", addr)
-			span.RecordError(err)
-			span.SetStatus(codes.Error, "timeout waiting for adb")
+			var err error
+			if ctx.Err() != nil {
+				err = fmt.Errorf("waiting for ADB port on %s cancelled: %w", addr, ctx.Err())
+				span.RecordError(err)
+				span.SetStatus(codes.Error, "wait for adb cancelled")
+			} else {
+				err = fmt.Errorf("timeout waiting for ADB port on %s", addr)
+				span.RecordError(err)
+				span.SetStatus(codes.Error, "timeout waiting for adb")
+			}
 			return err
 		case <-ticker.C:
 			conn, err := dialer.DialContext(timeoutCtx, "tcp", addr)

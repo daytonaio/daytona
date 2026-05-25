@@ -264,16 +264,6 @@ func (d *DockerClient) getAndroidDeviceHostConfig(sandboxDto dto.CreateSandboxDT
 		Binds:      append([]string{}, volumeMountPathBinds...),
 	}
 
-	if d.mountKvmToAndroidSandbox {
-		hostConfig.Resources = container.Resources{
-			Devices: []container.DeviceMapping{{
-				PathOnHost:        "/dev/kvm",
-				PathInContainer:   "/dev/kvm",
-				CgroupPermissions: "rwm",
-			}},
-		}
-	}
-
 	if sandboxDto.OtelEndpoint != nil && strings.Contains(*sandboxDto.OtelEndpoint, "host.docker.internal") {
 		hostConfig.ExtraHosts = []string{
 			"host.docker.internal:host-gateway",
@@ -287,6 +277,14 @@ func (d *DockerClient) getAndroidDeviceHostConfig(sandboxDto dto.CreateSandboxDT
 			Memory:     common.GBToBytes(float64(sandboxDto.MemoryQuota)),
 			MemorySwap: common.GBToBytes(float64(sandboxDto.MemoryQuota)),
 		}
+	}
+
+	if d.mountKvmToAndroidSandbox {
+		hostConfig.Devices = append(hostConfig.Devices, container.DeviceMapping{
+			PathOnHost:        "/dev/kvm",
+			PathInContainer:   "/dev/kvm",
+			CgroupPermissions: "rwm",
+		})
 	}
 
 	if !d.resourceLimitsDisabled && d.filesystem == "xfs" {

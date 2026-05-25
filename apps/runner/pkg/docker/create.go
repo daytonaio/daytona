@@ -86,8 +86,9 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 
 		// Android-device sandboxes do not run the daytona daemon; their readiness is
-		// signaled by the ADB port accepting TCP connections.
-		if sandboxDto.IsAndroidSandbox() {
+		// signaled by the ADB port accepting TCP connections. Match Start's behavior
+		// by branching on the inspected container label rather than the DTO.
+		if isAndroidDeviceContainer(c) {
 			if err := d.waitForAdbRunning(ctx, containerIP); err != nil {
 				return "", "", err
 			}

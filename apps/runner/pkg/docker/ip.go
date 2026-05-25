@@ -25,7 +25,12 @@ func GetContainerIpAddress(ctx context.Context, container *container.InspectResp
 		return ""
 	}
 
-	if isAndroidDeviceContainer(container) {
+	// Only Android followers (primary NetworkMode set to the link network) need
+	// the link IP — that's where their eth0-bound ADB/emulator forwarders listen.
+	// Android containers attached to a link network as a secondary network must
+	// still report their primary bridge IP.
+	if isAndroidDeviceContainer(container) && container.HostConfig != nil &&
+		strings.HasPrefix(string(container.HostConfig.NetworkMode), linkNetworkPrefix) {
 		if ip := linkNetworkIP(container); ip != "" {
 			return ip
 		}
