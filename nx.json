@@ -186,6 +186,13 @@
           ],
           "cache-from": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache"],
           "cache-to": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache,mode=max"]
+        },
+        "pr-build": {
+          "push": false,
+          "load": false,
+          "platforms": ["linux/amd64"],
+          "cache-from": ["type=gha,scope=docker-{projectName}"],
+          "cache-to": ["type=gha,scope=docker-{projectName},mode=max"]
         }
       },
       "dependsOn": ["check-version-env"]

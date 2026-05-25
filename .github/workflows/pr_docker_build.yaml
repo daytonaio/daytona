@@ -1,0 +1,64 @@
+name: '[PR] Docker build'
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-build:
+    name: Docker build (affected)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERSION: v0.0.0-pr
+      NX_DAEMON: 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0   # nx affected needs base-branch history
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+
+      - name: Enable corepack
+        run: npm install -g corepack && corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: go.work
+          cache: false
+
+      - name: Generate go.work.sum
+        run: |
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          touch go.work.sum
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Build affected Docker targets
+        run: |
+          yarn nx affected \
+            --base=origin/${{ github.base_ref }} \
+            --head=HEAD \
+            --target=docker \
+            --configuration=pr-build \
+            --parallel=2 \
+            --nxBail=true
