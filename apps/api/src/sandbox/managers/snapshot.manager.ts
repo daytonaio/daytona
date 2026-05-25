@@ -1133,7 +1133,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
         initialRunner = await this.runnerService.getRandomAvailableRunner({
           regions: regions.map((region) => region.id),
-          sandboxClass: snapshot.sandboxClass,
+          // Temporary: Android snapshots can go to container runners
+          sandboxClass: snapshot.sandboxClass === SandboxClass.ANDROID ? SandboxClass.CONTAINER : snapshot.sandboxClass,
           excludedRunnerIds: excludedRunnerIds,
           availabilityScoreThreshold: availabilityThreshold,
           gpu: snapshot.gpu,
