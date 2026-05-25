@@ -64,7 +64,7 @@ export class AuditLog {
   })
   createdAt: Date
 
-  constructor(params: {
+  constructor(params?: {
     id?: string
     actorId: string
     actorEmail: string
@@ -82,6 +82,7 @@ export class AuditLog {
     metadata?: AuditLogMetadata
     createdAt?: Date
   }) {
+    if (!params) return
     this.id = params.id || v4()
     this.actorId = params.actorId
     this.actorEmail = params.actorEmail

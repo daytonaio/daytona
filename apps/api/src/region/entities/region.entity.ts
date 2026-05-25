@@ -92,7 +92,7 @@ export class Region {
   @Column({ nullable: true })
   snapshotManagerUrl: string | null
 
-  constructor(params: {
+  constructor(params?: {
     name: string
     enforceQuotas: boolean
     regionType: RegionType
@@ -105,6 +105,7 @@ export class Region {
     sshGatewayApiKeyHash?: string | null
     snapshotManagerUrl?: string | null
   }) {
+    if (!params) return
     this.name = params.name
     this.enforceQuotas = params.enforceQuotas
     this.regionType = params.regionType

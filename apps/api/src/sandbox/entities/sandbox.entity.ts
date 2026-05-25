@@ -224,7 +224,8 @@ export class Sandbox {
   @Column({ nullable: true })
   daemonVersion?: string
 
-  constructor(region: string, name?: string) {
+  constructor(region?: string, name?: string) {
+    if (!region) return
     this.id = uuidv4()
     // Set name - use provided name or fallback to ID
     this.name = name || this.id

@@ -112,7 +112,7 @@ export class Job {
   })
   updatedAt: Date
 
-  constructor(params: {
+  constructor(params?: {
     id?: string
     type: JobType
     status?: JobStatus
@@ -125,6 +125,7 @@ export class Job {
     startedAt?: Date | null
     completedAt?: Date | null
   }) {
+    if (!params) return
     this.id = params.id || v4()
     this.version = 1
     this.type = params.type

@@ -371,13 +371,13 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     organization.defaultRegionId = defaultRegionId
 
     if (defaultRegion.enforceQuotas) {
-      const regionQuota = new RegionQuota(
-        organization.id,
-        defaultRegionId,
-        this.defaultOrganizationQuota.totalCpuQuota,
-        this.defaultOrganizationQuota.totalMemoryQuota,
-        this.defaultOrganizationQuota.totalDiskQuota,
-      )
+      const regionQuota = new RegionQuota({
+        organizationId: organization.id,
+        regionId: defaultRegionId,
+        totalCpuQuota: this.defaultOrganizationQuota.totalCpuQuota,
+        totalMemoryQuota: this.defaultOrganizationQuota.totalMemoryQuota,
+        totalDiskQuota: this.defaultOrganizationQuota.totalDiskQuota,
+      })
       if (organization.regionQuotas) {
         organization.regionQuotas = [...organization.regionQuotas, regionQuota]
       } else {
@@ -563,13 +563,13 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       const defaultRegion = await this.validateOrganizationDefaultRegion(createOrganizationDto.defaultRegionId)
 
       if (defaultRegion.enforceQuotas) {
-        const regionQuota = new RegionQuota(
-          organization.id,
-          createOrganizationDto.defaultRegionId,
-          quota.totalCpuQuota,
-          quota.totalMemoryQuota,
-          quota.totalDiskQuota,
-        )
+        const regionQuota = new RegionQuota({
+          organizationId: organization.id,
+          regionId: createOrganizationDto.defaultRegionId,
+          totalCpuQuota: quota.totalCpuQuota,
+          totalMemoryQuota: quota.totalMemoryQuota,
+          totalDiskQuota: quota.totalDiskQuota,
+        })
         organization.regionQuotas = [regionQuota]
       }
     }
