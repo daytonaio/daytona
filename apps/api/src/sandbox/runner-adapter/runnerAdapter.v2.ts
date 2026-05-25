@@ -123,7 +123,13 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     // Map job types to transitional states
     switch (job.type) {
       case JobType.CREATE_SANDBOX:
-        return job.status === JobStatus.COMPLETED ? SandboxState.STARTED : SandboxState.CREATING
+        if (job.status === JobStatus.COMPLETED) {
+          return SandboxState.STARTED
+        }
+        if (sandbox.state === SandboxState.RESTORING) {
+          return SandboxState.RESTORING
+        }
+        return SandboxState.CREATING
       case JobType.START_SANDBOX:
         return job.status === JobStatus.COMPLETED ? SandboxState.STARTED : SandboxState.STARTING
       case JobType.STOP_SANDBOX:
