@@ -31,6 +31,7 @@ const JOB_STALE_TIMEOUT_MINUTES: Partial<Record<JobType, number>> = {
   [JobType.CREATE_BACKUP]: 120,
   [JobType.PULL_SNAPSHOT]: 120,
   [JobType.SNAPSHOT_SANDBOX]: 120,
+  [JobType.CREATE_SANDBOX]: 30,
 }
 
 @Injectable()
