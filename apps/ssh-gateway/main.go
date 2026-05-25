@@ -331,6 +331,8 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 		if err != nil {
 			log.Printf("Client to runner copy error: %v", err)
 		}
+		// Client disconnected — close runner channel so the reverse copy unblocks and the keepalive ticker stops.
+		runnerChannel.Close() // nolint:errcheck
 	}()
 
 	keepAliveContext, cancel := context.WithCancel(context.Background())
