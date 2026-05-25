@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 
 ENV CI=true
 
@@ -36,7 +36,7 @@ COPY libs/api-client-go/ libs/api-client-go/
 
 RUN yarn nx build ssh-gateway --configuration=production --nxBail=true
 
-FROM alpine:3.22 AS ssh-gateway
+FROM alpine:3.23 AS ssh-gateway
 
 WORKDIR /usr/local/bin
 

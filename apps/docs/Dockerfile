@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 
 ENV CI=true
 
@@ -50,7 +50,7 @@ ENV NX_DAEMON=false
 
 RUN yarn nx build docs --configuration=production --nxBail=true
 
-FROM node:22-alpine AS docs
+FROM node:26-alpine AS docs
 
 ARG VERSION=0.0.1
 

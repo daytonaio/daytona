@@ -1,4 +1,4 @@
-FROM node:24-slim AS daytona
+FROM node:26-slim AS daytona
 
 ENV CI=true
 

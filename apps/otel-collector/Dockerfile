@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 
 ENV CI=true
 
@@ -41,7 +41,7 @@ RUN mkdir -p dist/apps/otel-collector
 
 RUN yarn nx build otel-collector --configuration=production --nxBail=true
 
-FROM alpine:3.22 AS otel-collector
+FROM alpine:3.23 AS otel-collector
 
 RUN apk add --no-cache curl
 
