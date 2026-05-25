@@ -134,4 +134,20 @@ public class RunnerHealthMetricsTest {
         // TODO: test diskGiB
     }
 
+    /**
+     * Test the property 'gpu'
+     */
+    @Test
+    public void gpuTest() {
+        // TODO: test gpu
+    }
+
+    /**
+     * Test the property 'gpuType'
+     */
+    @Test
+    public void gpuTypeTest() {
+        // TODO: test gpuType
+    }
+
 }

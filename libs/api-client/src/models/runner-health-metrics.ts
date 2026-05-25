@@ -63,5 +63,13 @@ export interface RunnerHealthMetrics {
      * Total disk space in GiB on the runner
      */
     'diskGiB': number;
+    /**
+     * Total number of GPUs on the runner
+     */
+    'gpu'?: number;
+    /**
+     * GPU model name
+     */
+    'gpuType'?: string;
 }
 

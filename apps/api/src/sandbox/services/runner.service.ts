@@ -313,11 +313,11 @@ export class RunnerService {
 
     const excludedRunnerIds = new Set((params.excludedRunnerIds ?? []).filter((id): id is string => !!id))
 
-    // GPU sandboxes get exclusive ownership of a runner: skip any runner that
-    // already hosts an active sandbox, regardless of whether that sandbox uses GPU.
+    // A runner with runner.gpu = N can host up to N concurrent GPU sandboxes.
+    // Skip runners that have already reached their GPU sandbox capacity.
     if (params.gpu > 0) {
-      const occupiedRunnerIds = await this.getRunnersWithActiveGpuSandbox()
-      for (const id of occupiedRunnerIds) {
+      const fullRunnerIds = await this.getRunnersAtGpuCapacity()
+      for (const id of fullRunnerIds) {
         excludedRunnerIds.add(id)
       }
     }
@@ -406,6 +406,8 @@ export class RunnerService {
       cpu?: number
       memoryGiB?: number
       diskGiB?: number
+      gpu?: number
+      gpuType?: string
     },
     appVersion?: string,
   ): Promise<void> {
@@ -470,6 +472,22 @@ export class RunnerService {
       updateData.cpu = metrics.cpu
       updateData.memoryGiB = metrics.memoryGiB
       updateData.diskGiB = metrics.diskGiB
+
+      if (metrics.gpu !== undefined) {
+        updateData.gpu = metrics.gpu
+      } else if (runner.apiVersion === '2') {
+        // v2 runners are the source of truth for their own GPU capacity;
+        // omitting `gpu` means "no GPUs visible to nvidia-smi right now", so
+        // clear any previously persisted value to keep the scheduler from
+        // sending GPU sandboxes to a runner that can no longer host them.
+        // v0 runners never report `gpu`, so leave operator-set values alone.
+        updateData.gpu = null
+      }
+      if (metrics.gpuType !== undefined) {
+        updateData.gpuType = metrics.gpuType
+      } else if (runner.apiVersion === '2') {
+        updateData.gpuType = null
+      }
 
       updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
         cpuLoadAverage: updateData.currentCpuLoadAverage,
@@ -900,23 +918,28 @@ export class RunnerService {
   }
 
   /**
-   * Returns runner IDs that currently host at least one GPU sandbox in a
-   * non-terminal state. Used by the GPU scheduler to enforce
-   * one-gpu-sandbox-per-runner exclusivity.
+   * Returns runner IDs that have reached their GPU sandbox capacity. A runner
+   * with `runner.gpu = N` can host up to N concurrent GPU sandboxes; this
+   * method returns runners where the count of active GPU sandboxes is `>= N`.
    *
    * Includes the conditionally-consuming states (RESIZING, SNAPSHOTTING) because a
    * GPU sandbox in either of those states is still physically present on its runner,
-   * regardless of `desiredState`. The runner cannot host a second GPU sandbox.
+   * regardless of `desiredState`, and therefore still consumes a GPU slot.
    */
-  async getRunnersWithActiveGpuSandbox(): Promise<string[]> {
+  async getRunnersAtGpuCapacity(): Promise<string[]> {
     const rows = await this.sandboxRepository
       .createQueryBuilder('sandbox')
-      .select('DISTINCT sandbox.runnerId', 'runnerId')
+      .innerJoin(Runner, 'runner', 'runner.id = sandbox.runnerId')
+      .select('sandbox.runnerId', 'runnerId')
       .where('sandbox.runnerId IS NOT NULL')
       .andWhere('sandbox.gpu > 0')
+      .andWhere('runner.gpu IS NOT NULL AND runner.gpu > 0')
       .andWhere('sandbox.state IN (:...states)', {
         states: [...SANDBOX_STATES_CONSUMING_COMPUTE, ...SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE],
       })
+      .groupBy('sandbox.runnerId')
+      .addGroupBy('runner.gpu')
+      .having('COUNT(*) >= runner.gpu')
       .getRawMany()
 
     return rows.map((r) => r.runnerId).filter((id): id is string => !!id)
@@ -1142,7 +1165,8 @@ export class GetRunnerParams {
   excludedRunnerIds?: string[]
   availabilityScoreThreshold?: number
   // When > 0, only consider runners that have at least this much GPU capacity
-  // and do not currently host any active sandbox (one-GPU-sandbox-per-runner rule).
+  // and have not yet reached their GPU sandbox capacity (a runner with
+  // runner.gpu = N can host up to N concurrent GPU sandboxes).
   gpu: number
 }
 

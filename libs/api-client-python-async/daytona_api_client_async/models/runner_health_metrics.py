@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -42,8 +42,10 @@ class RunnerHealthMetrics(BaseModel):
     cpu: Union[StrictFloat, StrictInt] = Field(description="Total CPU cores on the runner")
     memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total RAM in GiB on the runner", serialization_alias="memoryGiB")
     disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total disk space in GiB on the runner", serialization_alias="diskGiB")
+    gpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Total number of GPUs on the runner")
+    gpu_type: Optional[StrictStr] = Field(default=None, description="GPU model name", serialization_alias="gpuType")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"]
+    __properties: ClassVar[List[str]] = ["currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB", "gpu", "gpuType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -113,7 +115,9 @@ class RunnerHealthMetrics(BaseModel):
             "current_started_sandboxes": obj.get("currentStartedSandboxes"),
             "cpu": obj.get("cpu"),
             "memory_gi_b": obj.get("memoryGiB"),
-            "disk_gi_b": obj.get("diskGiB")
+            "disk_gi_b": obj.get("diskGiB"),
+            "gpu": obj.get("gpu"),
+            "gpu_type": obj.get("gpuType")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

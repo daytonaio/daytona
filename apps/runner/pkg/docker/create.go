@@ -125,7 +125,33 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 	}
 
-	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(sandboxDto, image, volumeMountPathBinds)
+	// Pin GPU sandboxes to a single physical card. The allocator mutex must
+	// be held across ContainerCreate so concurrent creators see the new
+	// daytona.gpu_index label on their next scan and skip this index, but it
+	// must NOT be held across the subsequent Start() / network setup which
+	// can take seconds and would otherwise serialize every GPU sandbox
+	// creation on the runner.
+	var (
+		gpuIndex   *int
+		releaseGpu func()
+	)
+	if d.gpuEnabled && sandboxDto.GpuQuota > 0 {
+		idx, release, err := d.gpuAllocator.Acquire(ctx, d)
+		if err != nil {
+			return "", "", err
+		}
+		releaseGpu = release
+		// Safety net: if anything between here and the explicit release
+		// below returns / panics, the mutex still gets released.
+		defer func() {
+			if releaseGpu != nil {
+				releaseGpu()
+			}
+		}()
+		gpuIndex = &idx
+	}
+
+	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(sandboxDto, image, volumeMountPathBinds, gpuIndex)
 	if err != nil {
 		return "", "", err
 	}
@@ -140,6 +166,14 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 			return sandboxDto.Id, "", nil
 		}
 		return "", "", err
+	}
+
+	// Container with the daytona.gpu_index label now exists; concurrent
+	// allocator scans will see it, so the mutex can be released even though
+	// Start() has not run yet.
+	if releaseGpu != nil {
+		releaseGpu()
+		releaseGpu = nil
 	}
 
 	// Skip starting the container if explicitly requested

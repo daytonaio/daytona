@@ -115,6 +115,17 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		}
 	}
 
+	gpuCount := 0
+	gpuType := ""
+	if config.GpuEnabled {
+		gpuCount, gpuType = detectGpus(ctx)
+		if gpuCount == 0 {
+			logger.Warn("GPU_ENABLED=true but nvidia-smi did not report any GPUs; runner will not host GPU sandboxes")
+		} else {
+			logger.Info("Detected GPUs", "count", gpuCount, "type", gpuType)
+		}
+	}
+
 	return &DockerClient{
 		apiClient:                    config.ApiClient,
 		backupInfoCache:              config.BackupInfoCache,
@@ -143,8 +154,24 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
 		interSandboxNetworkEnabled:   config.InterSandboxNetworkEnabled,
 		gpuEnabled:                   config.GpuEnabled,
+		gpuCount:                     gpuCount,
+		gpuType:                      gpuType,
+		gpuAllocator:                 newGpuAllocator(gpuCount),
 		filesystem:                   filesystem,
 	}, nil
+}
+
+// GpuCount returns the number of NVIDIA GPUs detected on the host at startup.
+// Returns 0 when GPU support is disabled or no GPU is present.
+func (d *DockerClient) GpuCount() int {
+	return d.gpuCount
+}
+
+// GpuType returns the human-readable name of the first GPU detected on the
+// host at startup (e.g. "NVIDIA H100 80GB HBM3"). Returns "" when no GPU is
+// present.
+func (d *DockerClient) GpuType() string {
+	return d.gpuType
 }
 
 func (d *DockerClient) ApiClient() client.APIClient {
@@ -185,4 +212,7 @@ type DockerClient struct {
 	filesystem                   string
 	interSandboxNetworkEnabled   bool
 	gpuEnabled                   bool
+	gpuCount                     int
+	gpuType                      string
+	gpuAllocator                 *gpuAllocator
 }

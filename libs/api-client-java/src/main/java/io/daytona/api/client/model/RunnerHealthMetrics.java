@@ -111,6 +111,16 @@ public class RunnerHealthMetrics {
   @javax.annotation.Nonnull
   private BigDecimal diskGiB;
 
+  public static final String SERIALIZED_NAME_GPU = "gpu";
+  @SerializedName(SERIALIZED_NAME_GPU)
+  @javax.annotation.Nullable
+  private BigDecimal gpu;
+
+  public static final String SERIALIZED_NAME_GPU_TYPE = "gpuType";
+  @SerializedName(SERIALIZED_NAME_GPU_TYPE)
+  @javax.annotation.Nullable
+  private String gpuType;
+
   public RunnerHealthMetrics() {
   }
 
@@ -341,6 +351,44 @@ public class RunnerHealthMetrics {
     this.diskGiB = diskGiB;
   }
 
+
+  public RunnerHealthMetrics gpu(@javax.annotation.Nullable BigDecimal gpu) {
+    this.gpu = gpu;
+    return this;
+  }
+
+  /**
+   * Total number of GPUs on the runner
+   * @return gpu
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getGpu() {
+    return gpu;
+  }
+
+  public void setGpu(@javax.annotation.Nullable BigDecimal gpu) {
+    this.gpu = gpu;
+  }
+
+
+  public RunnerHealthMetrics gpuType(@javax.annotation.Nullable String gpuType) {
+    this.gpuType = gpuType;
+    return this;
+  }
+
+  /**
+   * GPU model name
+   * @return gpuType
+   */
+  @javax.annotation.Nullable
+  public String getGpuType() {
+    return gpuType;
+  }
+
+  public void setGpuType(@javax.annotation.Nullable String gpuType) {
+    this.gpuType = gpuType;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -407,13 +455,15 @@ public class RunnerHealthMetrics {
         Objects.equals(this.currentStartedSandboxes, runnerHealthMetrics.currentStartedSandboxes) &&
         Objects.equals(this.cpu, runnerHealthMetrics.cpu) &&
         Objects.equals(this.memoryGiB, runnerHealthMetrics.memoryGiB) &&
-        Objects.equals(this.diskGiB, runnerHealthMetrics.diskGiB)&&
+        Objects.equals(this.diskGiB, runnerHealthMetrics.diskGiB) &&
+        Objects.equals(this.gpu, runnerHealthMetrics.gpu) &&
+        Objects.equals(this.gpuType, runnerHealthMetrics.gpuType)&&
         Objects.equals(this.additionalProperties, runnerHealthMetrics.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(currentCpuLoadAverage, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, cpu, memoryGiB, diskGiB, additionalProperties);
+    return Objects.hash(currentCpuLoadAverage, currentCpuUsagePercentage, currentMemoryUsagePercentage, currentDiskUsagePercentage, currentAllocatedCpu, currentAllocatedMemoryGiB, currentAllocatedDiskGiB, currentSnapshotCount, currentStartedSandboxes, cpu, memoryGiB, diskGiB, gpu, gpuType, additionalProperties);
   }
 
   @Override
@@ -432,6 +482,8 @@ public class RunnerHealthMetrics {
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    memoryGiB: ").append(toIndentedString(memoryGiB)).append("\n");
     sb.append("    diskGiB: ").append(toIndentedString(diskGiB)).append("\n");
+    sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
+    sb.append("    gpuType: ").append(toIndentedString(gpuType)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -451,7 +503,7 @@ public class RunnerHealthMetrics {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"));
+    openapiFields = new HashSet<String>(Arrays.asList("currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB", "gpu", "gpuType"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"));
@@ -477,6 +529,9 @@ public class RunnerHealthMetrics {
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
+      if ((jsonObj.get("gpuType") != null && !jsonObj.get("gpuType").isJsonNull()) && !jsonObj.get("gpuType").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `gpuType` to be a primitive type in the JSON string but got `%s`", jsonObj.get("gpuType").toString()));
+      }
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {
