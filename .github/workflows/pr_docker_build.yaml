@@ -45,6 +45,11 @@ jobs:
           go-version-file: go.work
           cache: false
 
+      - name: Install Go CGO deps for libs/computer-use
+        # runner:docker dependsOn computer-use:build-amd64, which native-compiles
+        # robotgo (X11 bindings). Same packages codeql.yml installs (line 62).
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc libx11-dev libxtst-dev
+
       - name: Generate go.work.sum
         run: |
           GONOSUMDB=github.com/daytonaio/daytona go work sync
