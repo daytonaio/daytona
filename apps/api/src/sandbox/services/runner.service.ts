@@ -49,10 +49,6 @@ import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/r
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
-import {
-  SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE,
-  SANDBOX_STATES_CONSUMING_COMPUTE,
-} from '../../organization/constants/sandbox-states-consuming-compute.constant'
 
 @Injectable()
 export class RunnerService {
@@ -920,11 +916,19 @@ export class RunnerService {
   /**
    * Returns runner IDs that have reached their GPU sandbox capacity. A runner
    * with `runner.gpu = N` can host up to N concurrent GPU sandboxes; this
-   * method returns runners where the count of active GPU sandboxes is `>= N`.
+   * method returns runners where the count of GPU sandboxes is `>= N`.
    *
-   * Includes the conditionally-consuming states (RESIZING, SNAPSHOTTING) because a
-   * GPU sandbox in either of those states is still physically present on its runner,
-   * regardless of `desiredState`, and therefore still consumes a GPU slot.
+   * Every GPU sandbox in any state other than DESTROYED / ARCHIVED counts
+   * toward capacity - including STOPPED, ERROR, RESIZING, SNAPSHOTTING, etc. -
+   * because the GPU index is pinned into the container's
+   * HostConfig.DeviceRequests at create time and survives any subsequent
+   * restart, so the physical card stays reserved for that sandbox until it
+   * is fully destroyed.
+   *
+   * ARCHIVED is excluded together with DESTROYED: GPU sandboxes are forced
+   * ephemeral (see SandboxService) so they cannot legitimately reach the
+   * archived state, but if one ever does (legacy data, manual bypass) the
+   * container is no longer on the runner and the card is effectively free.
    */
   async getRunnersAtGpuCapacity(): Promise<string[]> {
     const rows = await this.sandboxRepository
@@ -934,8 +938,8 @@ export class RunnerService {
       .where('sandbox.runnerId IS NOT NULL')
       .andWhere('sandbox.gpu > 0')
       .andWhere('runner.gpu IS NOT NULL AND runner.gpu > 0')
-      .andWhere('sandbox.state IN (:...states)', {
-        states: [...SANDBOX_STATES_CONSUMING_COMPUTE, ...SANDBOX_STATES_CONDITIONALLY_CONSUMING_COMPUTE],
+      .andWhere('sandbox.state NOT IN (:...freeStates)', {
+        freeStates: [SandboxState.DESTROYED, SandboxState.ARCHIVED],
       })
       .groupBy('sandbox.runnerId')
       .addGroupBy('runner.gpu')
