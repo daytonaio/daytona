@@ -140,7 +140,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	if err != nil {
 		s.log.WarnContext(reqCtx, "Failed to collect metrics for healthcheck", "error", err)
 	} else {
-		healthcheck.SetMetrics(apiclient.RunnerHealthMetrics{
+		metrics := apiclient.RunnerHealthMetrics{
 			CurrentCpuLoadAverage:        m.CPULoadAverage,
 			CurrentCpuUsagePercentage:    m.CPUUsagePercentage,
 			CurrentMemoryUsagePercentage: m.MemoryUsagePercentage,
@@ -153,7 +153,12 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 			Cpu:                          m.TotalCPU,
 			MemoryGiB:                    m.TotalRAMGiB,
 			DiskGiB:                      m.TotalDiskGiB,
-		})
+		}
+		if c := s.docker.GpuCount(); c > 0 {
+			metrics.SetGpu(float32(c))
+			metrics.SetGpuType(s.docker.GpuType())
+		}
+		healthcheck.SetMetrics(metrics)
 	}
 
 	req := s.client.RunnersAPI.RunnerHealthcheck(reqCtx).RunnerHealthcheck(*healthcheck)

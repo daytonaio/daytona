@@ -25,3 +25,42 @@ updates:
           - "*"
     commit-message:
       prefix: "chore(deps)"
+
+  - package-ecosystem: docker
+    directories:
+      - "/apps/api"
+      - "/apps/proxy"
+      - "/apps/runner"
+      - "/apps/snapshot-manager"
+      - "/apps/ssh-gateway"
+      - "/apps/otel-collector"
+      - "/apps/docs"
+      - "/images/sandbox"
+      - "/images/sandbox-slim"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      docker-base-images:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "docker"
+      docker-engine:
+        patterns:
+          - "docker"
+    ignore:
+      # docker: dind major bumps need Sysbox compatibility review first
+      - dependency-name: "docker"
+        update-types:
+          - "version-update:semver-major"
+      # node: pin to LTS lines; majors land manually after they reach Active LTS
+      - dependency-name: "node"
+        update-types:
+          - "version-update:semver-major"
+      # python: sandbox-slim runs user code; minor jumps need lifecycle validation
+      - dependency-name: "python"
+        update-types:
+          - "version-update:semver-major"
+    commit-message:
+      prefix: "chore(deps)"

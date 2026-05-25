@@ -51,6 +51,12 @@ module DaytonaApiClient
     # Total disk space in GiB on the runner
     attr_accessor :disk_gi_b
 
+    # Total number of GPUs on the runner
+    attr_accessor :gpu
+
+    # GPU model name
+    attr_accessor :gpu_type
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -65,7 +71,9 @@ module DaytonaApiClient
         :'current_started_sandboxes' => :'currentStartedSandboxes',
         :'cpu' => :'cpu',
         :'memory_gi_b' => :'memoryGiB',
-        :'disk_gi_b' => :'diskGiB'
+        :'disk_gi_b' => :'diskGiB',
+        :'gpu' => :'gpu',
+        :'gpu_type' => :'gpuType'
       }
     end
 
@@ -93,7 +101,9 @@ module DaytonaApiClient
         :'current_started_sandboxes' => :'Float',
         :'cpu' => :'Float',
         :'memory_gi_b' => :'Float',
-        :'disk_gi_b' => :'Float'
+        :'disk_gi_b' => :'Float',
+        :'gpu' => :'Float',
+        :'gpu_type' => :'String'
       }
     end
 
@@ -189,6 +199,14 @@ module DaytonaApiClient
         self.disk_gi_b = attributes[:'disk_gi_b']
       else
         self.disk_gi_b = nil
+      end
+
+      if attributes.key?(:'gpu')
+        self.gpu = attributes[:'gpu']
+      end
+
+      if attributes.key?(:'gpu_type')
+        self.gpu_type = attributes[:'gpu_type']
       end
     end
 
@@ -403,7 +421,9 @@ module DaytonaApiClient
           current_started_sandboxes == o.current_started_sandboxes &&
           cpu == o.cpu &&
           memory_gi_b == o.memory_gi_b &&
-          disk_gi_b == o.disk_gi_b
+          disk_gi_b == o.disk_gi_b &&
+          gpu == o.gpu &&
+          gpu_type == o.gpu_type
     end
 
     # @see the `==` method
@@ -415,7 +435,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [current_cpu_load_average, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, cpu, memory_gi_b, disk_gi_b].hash
+      [current_cpu_load_average, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, cpu, memory_gi_b, disk_gi_b, gpu, gpu_type].hash
     end
 
     # Builds the object from hash

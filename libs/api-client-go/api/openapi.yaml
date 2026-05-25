@@ -12037,6 +12037,14 @@ components:
           description: Total disk space in GiB on the runner
           example: 100
           type: number
+        gpu:
+          description: Total number of GPUs on the runner
+          example: 4
+          type: number
+        gpuType:
+          description: GPU model name
+          example: NVIDIA H100 80GB HBM3
+          type: string
       required:
       - cpu
       - currentAllocatedCpu

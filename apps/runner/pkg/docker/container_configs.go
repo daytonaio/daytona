@@ -6,6 +6,7 @@ package docker
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
@@ -18,13 +19,22 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
-	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image)
+// Fixed sandbox slice applied to every GPU sandbox regardless of host size.
+// Keeping these constant across runners makes user-visible GPU sandbox
+// capacity uniform on heterogeneous GPU fleets.
+const (
+	gpuSandboxCPUCores  int64 = 16
+	gpuSandboxMemoryGiB int64 = 256
+	gpuSandboxDiskGiB   int64 = 512
+)
+
+func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string, gpuIndex *int) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
+	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image, gpuIndex)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds)
+	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds, gpuIndex)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -33,7 +43,7 @@ func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, imag
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
-func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse) (*container.Config, error) {
+func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, gpuIndex *int) (*container.Config, error) {
 	if image == nil {
 		return nil, fmt.Errorf("image not found for sandbox: %s", sandboxDto.Id)
 	}
@@ -42,6 +52,22 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		"DAYTONA_SANDBOX_ID=" + sandboxDto.Id,
 		"DAYTONA_SANDBOX_SNAPSHOT=" + sandboxDto.Snapshot,
 		"DAYTONA_SANDBOX_USER=" + sandboxDto.OsUser,
+	}
+
+	// GPU sandboxes run non-privileged so CDI's per-device cgroup rules
+	// actually take effect. CDI already restricts the container to the one
+	// allocated physical GPU (see DeviceRequests below), and Linux/CUDA
+	// renumber the exposed devices starting at 0 - so from inside the
+	// container the GPU is always index 0 regardless of which host slot
+	// was allocated. Hard-code the env vars to "0" so CUDA/userspace tools
+	// don't try to address a host-side index that doesn't exist in the
+	// container's view (which would break e.g. cudaSetDevice while letting
+	// nvidia-smi work).
+	if gpuIndex != nil {
+		envVars = append(envVars,
+			"NVIDIA_VISIBLE_DEVICES=0",
+			"CUDA_VISIBLE_DEVICES=0",
+		)
 	}
 
 	for key, value := range sandboxDto.Env {
@@ -75,6 +101,9 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		if orgName, ok := sandboxDto.Metadata["organizationName"]; ok && orgName != "" {
 			labels["daytona.organization_name"] = orgName
 		}
+	}
+	if gpuIndex != nil {
+		labels[GpuIndexLabel] = strconv.Itoa(*gpuIndex)
 	}
 
 	workingDir := ""
@@ -116,7 +145,7 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 	}, nil
 }
 
-func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
+func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string, gpuIndex *int) (*container.HostConfig, error) {
 	var binds []string
 
 	binds = append(binds, fmt.Sprintf("%s:%s:ro", d.daemonPath, common.DAEMON_PATH))
@@ -131,7 +160,11 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 	}
 
 	hostConfig := &container.HostConfig{
-		Privileged: true,
+		// Privileged mode exposes every /dev/nvidia* node and bypasses the
+		// CDI cgroup rules, so GPU sandboxes have to opt out to keep their
+		// allocated card isolated. Non-GPU sandboxes still need privileged
+		// for their current workloads.
+		Privileged: gpuIndex == nil,
 		Binds:      binds,
 	}
 
@@ -141,12 +174,25 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		}
 	}
 
+	// GPU sandboxes ignore the API-requested resources and instead get a
+	// uniform slice that is identical on every GPU runner regardless of
+	// host size. This keeps user-visible sandbox capacity consistent
+	// across heterogeneous GPU fleets (e.g. H100 NVL vs H100 SXM5 hosts).
+	cpuQuota := sandboxDto.CpuQuota
+	memoryQuotaGiB := sandboxDto.MemoryQuota
+	storageQuotaGiB := sandboxDto.StorageQuota
+	if gpuIndex != nil {
+		cpuQuota = gpuSandboxCPUCores
+		memoryQuotaGiB = gpuSandboxMemoryGiB
+		storageQuotaGiB = gpuSandboxDiskGiB
+	}
+
 	if !d.resourceLimitsDisabled {
 		hostConfig.Resources = container.Resources{
 			CPUPeriod:  100000,
-			CPUQuota:   sandboxDto.CpuQuota * 100000,
-			Memory:     common.GBToBytes(float64(sandboxDto.MemoryQuota)),
-			MemorySwap: common.GBToBytes(float64(sandboxDto.MemoryQuota)),
+			CPUQuota:   cpuQuota * 100000,
+			Memory:     common.GBToBytes(float64(memoryQuotaGiB)),
+			MemorySwap: common.GBToBytes(float64(memoryQuotaGiB)),
 		}
 	}
 
@@ -157,25 +203,15 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 
 	if !d.resourceLimitsDisabled && d.filesystem == "xfs" {
 		hostConfig.StorageOpt = map[string]string{
-			"size": fmt.Sprintf("%dG", sandboxDto.StorageQuota),
+			"size": fmt.Sprintf("%dG", storageQuotaGiB),
 		}
 	}
 
-	if d.gpuEnabled {
-		nvidiaDevices := []string{
-			"/dev/nvidia0",
-			"/dev/nvidiactl",
-			"/dev/nvidia-uvm",
-			"/dev/nvidia-uvm-tools",
-			"/dev/nvidia-modeset",
-		}
-		for _, dev := range nvidiaDevices {
-			hostConfig.Devices = append(hostConfig.Devices, container.DeviceMapping{
-				PathOnHost:        dev,
-				PathInContainer:   dev,
-				CgroupPermissions: "rwm",
-			})
-		}
+	if d.gpuEnabled && gpuIndex != nil {
+		hostConfig.DeviceRequests = []container.DeviceRequest{{
+			Driver:    "cdi",
+			DeviceIDs: []string{fmt.Sprintf("nvidia.com/gpu=%d", *gpuIndex)},
+		}}
 	}
 
 	return hostConfig, nil
