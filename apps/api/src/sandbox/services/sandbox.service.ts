@@ -418,6 +418,7 @@ export class SandboxService {
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
     let pendingGpuIncrement: number | undefined
+    let gpuRunnerAssignmentLockKey: string | undefined
 
     const region = await this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
 
@@ -534,6 +535,16 @@ export class SandboxService {
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
+      // Serialize GPU runner assignment per region: getRunnersAtGpuCapacity reads
+      // the DB to find runners at capacity, but the just-assigned runnerId on a
+      // concurrent request is not yet persisted, so two concurrent creates can
+      // pick the same already-full runner. Hold the lock until the runnerId is
+      // written to the DB.
+      if (gpu > 0) {
+        gpuRunnerAssignmentLockKey = `gpu-runner-assignment:${region.id}`
+        await this.redisLockProvider.waitForLock(gpuRunnerAssignmentLockKey, 60, 30000)
+      }
+
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [region.id],
         sandboxClass,
@@ -589,6 +600,11 @@ export class SandboxService {
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
 
+      if (gpuRunnerAssignmentLockKey) {
+        await this.redisLockProvider.unlock(gpuRunnerAssignmentLockKey)
+        gpuRunnerAssignmentLockKey = undefined
+      }
+
       this.eventEmitter
         .emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
         .catch((err) => this.logger.error('Failed to emit SandboxCreatedEvent', err))
@@ -609,6 +625,12 @@ export class SandboxService {
       }
 
       throw error
+    } finally {
+      if (gpuRunnerAssignmentLockKey) {
+        await this.redisLockProvider
+          .unlock(gpuRunnerAssignmentLockKey)
+          .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
+      }
     }
   }
 
@@ -699,6 +721,7 @@ export class SandboxService {
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
     let pendingGpuIncrement: number | undefined
+    let gpuRunnerAssignmentLockKey: string | undefined
 
     const region = await this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
 
@@ -784,6 +807,16 @@ export class SandboxService {
 
       let runner: Runner
 
+      // Serialize GPU runner assignment per region: getRunnersAtGpuCapacity reads
+      // the DB to find runners at capacity, but the just-assigned runnerId on a
+      // concurrent request is not yet persisted, so two concurrent creates can
+      // pick the same already-full runner. Hold the lock until the runnerId is
+      // written to the DB.
+      if (sandbox.gpu > 0) {
+        gpuRunnerAssignmentLockKey = `gpu-runner-assignment:${region.id}`
+        await this.redisLockProvider.waitForLock(gpuRunnerAssignmentLockKey, 60, 30000)
+      }
+
       try {
         const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
         const maxCpuPerRunner = this.configService.getOrThrow('buildInfo.maxCpuPerRunner')
@@ -847,6 +880,11 @@ export class SandboxService {
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
 
+      if (gpuRunnerAssignmentLockKey) {
+        await this.redisLockProvider.unlock(gpuRunnerAssignmentLockKey)
+        gpuRunnerAssignmentLockKey = undefined
+      }
+
       this.eventEmitter
         .emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
         .catch((err) => this.logger.error('Failed to emit SandboxCreatedEvent', err))
@@ -867,6 +905,12 @@ export class SandboxService {
       }
 
       throw error
+    } finally {
+      if (gpuRunnerAssignmentLockKey) {
+        await this.redisLockProvider
+          .unlock(gpuRunnerAssignmentLockKey)
+          .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
+      }
     }
   }
 
