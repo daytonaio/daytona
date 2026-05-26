@@ -44,11 +44,11 @@ export class RedisLockProvider {
   async waitForLock(key: string, ttl: number, timeoutMs?: number): Promise<void> {
     const deadline = timeoutMs !== undefined ? Date.now() + timeoutMs : null
     while (true) {
-      const acquired = await this.lock(key, ttl)
-      if (acquired) break
       if (deadline !== null && Date.now() >= deadline) {
         throw new Error(`Timed out after ${timeoutMs}ms waiting for lock '${key}'`)
       }
+      const acquired = await this.lock(key, ttl)
+      if (acquired) break
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
   }

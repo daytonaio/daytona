@@ -399,18 +399,44 @@ export class SandboxService {
       throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
     }
 
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      regions: [sandbox.region],
-      sandboxClass: sandbox.class,
-      snapshotRef: snapshot.ref,
-      gpu: sandbox.gpu,
-    })
+    let gpuRunnerAssignmentLockKey: string | undefined
 
-    sandbox.runnerId = runner.id
-    sandbox.pending = true
+    try {
+      // Same per-region GPU runner assignment serialization as createFromSnapshot.
+      if (sandbox.gpu > 0) {
+        const key = `gpu-runner-assignment:${sandbox.region}`
+        await this.redisLockProvider.waitForLock(key, 60, 30000)
+        gpuRunnerAssignmentLockKey = key
+      }
 
-    await this.sandboxRepository.insert(sandbox)
-    return sandbox
+      const runner = await this.runnerService.getRandomAvailableRunner({
+        regions: [sandbox.region],
+        sandboxClass: sandbox.class,
+        snapshotRef: snapshot.ref,
+        gpu: sandbox.gpu,
+      })
+
+      sandbox.runnerId = runner.id
+      sandbox.pending = true
+
+      await this.sandboxRepository.insert(sandbox)
+
+      if (gpuRunnerAssignmentLockKey) {
+        const key = gpuRunnerAssignmentLockKey
+        gpuRunnerAssignmentLockKey = undefined
+        await this.redisLockProvider
+          .unlock(key)
+          .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
+      }
+
+      return sandbox
+    } finally {
+      if (gpuRunnerAssignmentLockKey) {
+        await this.redisLockProvider
+          .unlock(gpuRunnerAssignmentLockKey)
+          .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
+      }
+    }
   }
 
   async createFromSnapshot(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -539,10 +565,12 @@ export class SandboxService {
       // the DB to find runners at capacity, but the just-assigned runnerId on a
       // concurrent request is not yet persisted, so two concurrent creates can
       // pick the same already-full runner. Hold the lock until the runnerId is
-      // written to the DB.
+      // written to the DB. Only mark the key as held after acquisition succeeds —
+      // otherwise a timed-out waiter would unlock the actual holder in finally.
       if (gpu > 0) {
-        gpuRunnerAssignmentLockKey = `gpu-runner-assignment:${region.id}`
-        await this.redisLockProvider.waitForLock(gpuRunnerAssignmentLockKey, 60, 30000)
+        const key = `gpu-runner-assignment:${region.id}`
+        await this.redisLockProvider.waitForLock(key, 60, 30000)
+        gpuRunnerAssignmentLockKey = key
       }
 
       const runner = await this.runnerService.getRandomAvailableRunner({
@@ -601,8 +629,11 @@ export class SandboxService {
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
 
       if (gpuRunnerAssignmentLockKey) {
-        await this.redisLockProvider.unlock(gpuRunnerAssignmentLockKey)
+        const key = gpuRunnerAssignmentLockKey
         gpuRunnerAssignmentLockKey = undefined
+        await this.redisLockProvider
+          .unlock(key)
+          .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
       }
 
       this.eventEmitter
@@ -811,10 +842,12 @@ export class SandboxService {
       // the DB to find runners at capacity, but the just-assigned runnerId on a
       // concurrent request is not yet persisted, so two concurrent creates can
       // pick the same already-full runner. Hold the lock until the runnerId is
-      // written to the DB.
+      // written to the DB. Only mark the key as held after acquisition succeeds —
+      // otherwise a timed-out waiter would unlock the actual holder in finally.
       if (sandbox.gpu > 0) {
-        gpuRunnerAssignmentLockKey = `gpu-runner-assignment:${region.id}`
-        await this.redisLockProvider.waitForLock(gpuRunnerAssignmentLockKey, 60, 30000)
+        const key = `gpu-runner-assignment:${region.id}`
+        await this.redisLockProvider.waitForLock(key, 60, 30000)
+        gpuRunnerAssignmentLockKey = key
       }
 
       try {
@@ -881,8 +914,11 @@ export class SandboxService {
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
 
       if (gpuRunnerAssignmentLockKey) {
-        await this.redisLockProvider.unlock(gpuRunnerAssignmentLockKey)
+        const key = gpuRunnerAssignmentLockKey
         gpuRunnerAssignmentLockKey = undefined
+        await this.redisLockProvider
+          .unlock(key)
+          .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
       }
 
       this.eventEmitter
