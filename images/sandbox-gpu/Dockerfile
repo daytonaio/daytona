@@ -26,12 +26,22 @@ RUN FIV=$(python3 -c "import flashinfer; print(flashinfer.__version__)") \
 
 # GPU/ML packages the base image lacks
 RUN python3 -m pip install --no-cache-dir --break-system-packages \
-      accelerate datasets safetensors peft trl einops sentencepiece sentence-transformers \
-      huggingface_hub[hf_xet] nvitop wandb tensorboard jupyterlab ipykernel ipywidgets
+      accelerate==1.13.0 \
+      datasets==4.8.5 \
+      safetensors==0.7.0 \
+      peft==0.19.1 \
+      bitsandbytes==0.49.2 \
+      trl==1.5.0 \
+      einops==0.8.2 \
+      sentencepiece==0.2.1 \
+      sentence-transformers==5.5.1 \
+      nvitop==1.7.0 \
+      wandb==0.27.0 \
+      tensorboard==2.20.0 \
+      jupyterlab==4.5.7 \
+      ipykernel==7.2.0 \
+      ipywidgets==8.1.8
 
-RUN python3 -m pip install --no-cache-dir --break-system-packages bitsandbytes
-
-ENV HF_XET_HIGH_PERFORMANCE=1
 USER daytona
 # Cache FlashInfer cubins as daytona so they land in a runtime-readable home.
 RUN flashinfer download-cubin || true
