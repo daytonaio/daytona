@@ -183,6 +183,15 @@ export class SandboxController {
       order: sortDirection,
     } = queryParams
 
+    let parsedLabels: { [key: string]: string } | undefined
+    if (labels) {
+      try {
+        parsedLabels = JSON.parse(labels)
+      } catch {
+        throw new BadRequestError('Invalid labels JSON format')
+      }
+    }
+
     const result = await this.sandboxService.findAllPaginatedDeprecated(
       authContext.organizationId,
       page,
@@ -190,7 +199,7 @@ export class SandboxController {
       {
         id,
         name,
-        labels: labels ? JSON.parse(labels) : undefined,
+        labels: parsedLabels,
         includeErroredDestroyed,
         states,
         snapshots,
