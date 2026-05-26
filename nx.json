@@ -192,7 +192,10 @@
           "load": false,
           "platforms": ["linux/amd64"],
           "tags": ["daytonaio/daytona-{projectName}:$VERSION"],
-          "cache-from": ["type=gha,scope=docker-{projectName}"],
+          "cache-from": [
+            "type=registry,ref=daytonaio/daytona-{projectName}:buildcache-amd64",
+            "type=gha,scope=docker-{projectName}"
+          ],
           "cache-to": ["type=gha,scope=docker-{projectName},mode=max"]
         }
       },
