@@ -471,18 +471,9 @@ export class RunnerService {
 
       if (metrics.gpu !== undefined) {
         updateData.gpu = metrics.gpu
-      } else if (runner.apiVersion === '2') {
-        // v2 runners are the source of truth for their own GPU capacity;
-        // omitting `gpu` means "no GPUs visible to nvidia-smi right now", so
-        // clear any previously persisted value to keep the scheduler from
-        // sending GPU sandboxes to a runner that can no longer host them.
-        // v0 runners never report `gpu`, so leave operator-set values alone.
-        updateData.gpu = null
       }
       if (metrics.gpuType !== undefined) {
         updateData.gpuType = metrics.gpuType
-      } else if (runner.apiVersion === '2') {
-        updateData.gpuType = null
       }
 
       updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {

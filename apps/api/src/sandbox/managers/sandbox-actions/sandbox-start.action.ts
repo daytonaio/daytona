@@ -213,6 +213,16 @@ export class SandboxStartAction extends SandboxAction {
       // Consider removing the runner usage rate check or improving it
       const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
 
+      // Mirror the GPU class filter in findAvailableRunners - getSnapshotRunners
+      // can return GPU/non-GPU mismatched runners via stale snapshot_runner rows.
+      if (sandbox.gpu > 0) {
+        if (runner.gpu === null || runner.gpu < sandbox.gpu) {
+          continue
+        }
+      } else if (runner.gpu !== null && runner.gpu > 0) {
+        continue
+      }
+
       if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
         await this.updateSandboxState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
         return DONT_SYNC_AGAIN
