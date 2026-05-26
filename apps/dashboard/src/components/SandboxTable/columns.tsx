@@ -91,13 +91,13 @@ const columns: ColumnDef<SandboxListItem>[] = [
     minSize: 44,
     maxSize: 44,
     header: ({ table }) => {
-      const { deletePermitted, selectableCount } = getMeta(table)
+      const { writePermitted, deletePermitted, selectableCount } = getMeta(table)
       const selectedCount = table.getSelectedRowModel().rows.length
       const anySelectable = selectableCount > 0
       const allSelected = selectedCount > 0 && selectedCount === selectableCount
       const partiallySelected = selectedCount > 0 && selectedCount < selectableCount
 
-      if (!deletePermitted || !anySelectable) {
+      if ((!writePermitted && !deletePermitted) || !anySelectable) {
         return null
       }
 
@@ -121,10 +121,10 @@ const columns: ColumnDef<SandboxListItem>[] = [
       )
     },
     cell: ({ row, table }) => {
-      const { deletePermitted, sandboxIsLoading } = getMeta(table)
+      const { writePermitted, deletePermitted, sandboxIsLoading } = getMeta(table)
       const isLoading = Boolean(sandboxIsLoading[row.original.id])
 
-      if (!deletePermitted || !row.getCanSelect()) {
+      if ((!writePermitted && !deletePermitted) || !row.getCanSelect()) {
         return null
       }
 
