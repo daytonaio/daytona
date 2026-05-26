@@ -12,6 +12,8 @@ import { defaultProvider } from '@aws-sdk/credential-provider-node'
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers'
 import { ClientOptions } from '@opensearch-project/opensearch'
 import { RedisOptions } from 'ioredis'
+import type { RedisModuleOptions } from '@nestjs-modules/ioredis'
+import type { ClusterNode } from 'ioredis'
 
 type Configuration = typeof configuration
 
@@ -176,6 +178,65 @@ export class TypedConfigService {
       lazyConnect: this.get('skipConnections'),
       ...overrides,
     }
+  }
+
+  /**
+   * Get the Redis module options, supporting both single-node and cluster modes.
+   * @param overrides Optional overrides for the Redis options (applied to single-mode options or cluster redisOptions)
+   * @returns Redis module options compatible with @nestjs-modules/ioredis
+   */
+  getRedisModuleOptions(overrides?: Partial<RedisOptions>): RedisModuleOptions {
+    const mode = this.get('redis.mode')
+
+    if (mode === 'cluster') {
+      const nodesStr = this.getOrThrow('redis.clusterNodes')
+      const nodes = this.parseClusterNodes(nodesStr as string)
+      const { keyPrefix, ...redisOverrides } = overrides ?? {}
+      return {
+        type: 'cluster',
+        nodes,
+        options: {
+          keyPrefix,
+          redisOptions: {
+            username: this.get('redis.username'),
+            password: this.get('redis.password'),
+            tls: this.get('redis.tls'),
+            lazyConnect: this.get('skipConnections'),
+            ...redisOverrides,
+          },
+        },
+      }
+    }
+
+    return {
+      type: 'single',
+      options: this.getRedisConfig(overrides),
+    }
+  }
+
+  private parseClusterNodes(nodesStr: string): ClusterNode[] {
+    const nodes = nodesStr
+      .split(',')
+      .map((node) => node.trim())
+      .filter((node) => node.length > 0)
+
+    if (nodes.length === 0) {
+      throw new Error('redis.clusterNodes must contain at least one valid host')
+    }
+
+    return nodes.map((trimmed) => {
+      const lastColon = trimmed.lastIndexOf(':')
+      if (lastColon === -1) {
+        return { host: trimmed, port: 6379 }
+      }
+      const host = trimmed.substring(0, lastColon)
+      const portStr = trimmed.substring(lastColon + 1)
+      const port = parseInt(portStr, 10)
+      if (!host || isNaN(port)) {
+        throw new Error(`Invalid Redis cluster node: "${trimmed}"`)
+      }
+      return { host, port }
+    })
   }
 
   /**

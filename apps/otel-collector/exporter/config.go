@@ -4,6 +4,7 @@
 package exporter
 
 import (
+	"errors"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/cache"
@@ -44,8 +45,19 @@ type Config struct {
 	Redis *cache.RedisConfig `mapstructure:"redis"`
 }
 
-// Validate checks if the configuration is valid.
 func (cfg *Config) Validate() error {
-	// Add validation logic here if needed
+	if cfg.Redis != nil {
+		mode := ""
+		if cfg.Redis.Mode != nil {
+			mode = *cfg.Redis.Mode
+		}
+		if mode == "cluster" {
+			if cfg.Redis.ClusterNodes == nil || *cfg.Redis.ClusterNodes == "" {
+				return errors.New("redis cluster_nodes is required when redis mode is cluster")
+			}
+		} else if cfg.Redis.Host == nil || *cfg.Redis.Host == "" {
+			cfg.Redis = nil
+		}
+	}
 	return nil
 }

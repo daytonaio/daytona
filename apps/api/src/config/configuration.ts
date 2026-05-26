@@ -34,6 +34,8 @@ const configuration = {
     username: process.env.REDIS_USERNAME,
     password: process.env.REDIS_PASSWORD,
     tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
+    mode: (process.env.REDIS_MODE || 'single') as 'single' | 'cluster',
+    clusterNodes: process.env.REDIS_CLUSTER_NODES,
   },
   posthog: {
     apiKey: process.env.POSTHOG_API_KEY,
