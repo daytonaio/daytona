@@ -64,12 +64,17 @@ func (m promptModel) View() string {
 		m.textInput.View())
 }
 
-func PromptForInput(prompt, title, desc string) (string, error) {
+func PromptForInput(prompt, title, desc, placeholder string) (string, error) {
 	ti := textinput.New()
+	ti.Prompt = prompt
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = 80
-	ti.Prompt = "› "
+	ti.Placeholder = placeholder
+
+	if prompt == "" {
+		ti.Prompt = "› "
+	}
 
 	m := promptModel{
 		textInput: ti,

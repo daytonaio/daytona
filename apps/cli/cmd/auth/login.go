@@ -7,15 +7,21 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/charmbracelet/huh"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/daytonaio/daytona/cli/auth"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/internal"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
+	"github.com/iancoleman/strcase"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
+)
+
+var (
+	apiKeyFlag string
 )
 
 var LoginCmd = &cobra.Command{
@@ -27,7 +33,7 @@ var LoginCmd = &cobra.Command{
 		ctx := context.Background()
 
 		if apiKeyFlag != "" {
-			return updateProfileWithLogin(nil, &apiKeyFlag)
+			return upsertProfileWithLogin(nil, &apiKeyFlag)
 		}
 
 		items := []view_common.SelectItem{
@@ -49,11 +55,16 @@ var LoginCmd = &cobra.Command{
 
 		if setApiKey {
 			// Prompt for API key
-			apiKey, err := view_common.PromptForInput("", "Enter your Daytona API key", "You can find it in the Daytona dashboard - https://app.daytona.io/dashboard")
+			apiKey, err := view_common.PromptForInput(
+				"",
+				"Enter your Daytona API key",
+				"You can find it in the Daytona dashboard - https://app.daytona.io/dashboard",
+				"",
+			)
 			if err != nil {
 				return err
 			}
-			return updateProfileWithLogin(nil, &apiKey)
+			return upsertProfileWithLogin(nil, &apiKey)
 		}
 
 		token, err := login(ctx)
@@ -67,32 +78,76 @@ var LoginCmd = &cobra.Command{
 			ExpiresAt:    token.Expiry,
 		}
 
-		return updateProfileWithLogin(tokenConfig, nil)
+		return upsertProfileWithLogin(tokenConfig, nil)
 	},
 }
-
-var (
-	apiKeyFlag string
-)
 
 func init() {
 	LoginCmd.Flags().StringVar(&apiKeyFlag, "api-key", "", "API key to use for authentication")
 }
 
-func updateProfileWithLogin(tokenConfig *config.Token, apiKey *string) error {
+func upsertProfileWithLogin(tokenConfig *config.Token, apiKey *string) error {
 	c, err := config.GetConfig()
 	if err != nil {
 		return err
 	}
 
-	activeProfile, err := c.GetActiveProfile()
-	if err != nil {
-		if err == config.ErrNoProfilesFound {
-			activeProfile, err = createInitialProfile(c)
+	var shouldOverwriteProfile bool
+	var newProfile bool
+	var profileName string
+	var profileId string
+
+	// Loop until user decides on the name, i.e. if user is prompted with the
+	// decision to overwrite the existing profile (in case user chose name that
+	// already exists) they can select "NO" which would loop back to the prompt
+	// to define the profile name.
+	for !shouldOverwriteProfile {
+		profileName, err = view_common.PromptForInput(
+			"",
+			"Enter profile name",
+			"The name this profile will be known as",
+			"Default",
+		)
+		if err != nil {
+			return err
+		}
+		if profileName == "" {
+			profileName = "Default"
+		}
+
+		// Check if profile already exists and inform user that the profile will be
+		// reauthenticated if it does.
+		profileId = strcase.ToSnake(profileName)
+		if c.ProfileExists(profileId) {
+			err = huh.NewConfirm().
+				Title(fmt.Sprintf(
+					"Profile %s already exists, do you want to overwrite it?",
+					profileId,
+				)).
+				Affirmative("Yes").
+				Negative("No").
+				Value(&shouldOverwriteProfile).
+				Run()
 			if err != nil {
 				return err
 			}
 		} else {
+			shouldOverwriteProfile = true
+			newProfile = true
+		}
+	}
+
+	var activeProfile config.Profile
+
+	if newProfile {
+		activeProfile, err = config.CreateProfile(profileName, c)
+		if err != nil {
+			return err
+		}
+	} else {
+		activeProfile, err = c.GetProfile(profileId)
+		if err != nil {
+			// Should not occur
 			return err
 		}
 	}
@@ -124,22 +179,6 @@ func updateProfileWithLogin(tokenConfig *config.Token, apiKey *string) error {
 	}
 
 	return c.EditProfile(activeProfile)
-}
-
-func createInitialProfile(c *config.Config) (config.Profile, error) {
-	profile := config.Profile{
-		Id:   "initial",
-		Name: "initial",
-		Api: config.ServerApi{
-			Url: config.GetDaytonaApiUrl(),
-		},
-	}
-
-	if internal.Version == "v0.0.0-dev" {
-		profile.Api.Url = "http://localhost:3001/api"
-	}
-
-	return profile, c.AddProfile(profile)
 }
 
 func login(ctx context.Context) (*oauth2.Token, error) {

@@ -6,7 +6,6 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -15,20 +14,9 @@ import (
 	"github.com/daytonaio/daytona/cli/internal"
 )
 
-const DAYTONA_API_URL_ENV_VAR = "DAYTONA_API_URL"
-const DAYTONA_API_KEY_ENV_VAR = "DAYTONA_API_KEY"
-
 type Config struct {
 	ActiveProfileId string    `json:"activeProfile"`
 	Profiles        []Profile `json:"profiles"`
-}
-
-type Profile struct {
-	Id                   string            `json:"id"`
-	Name                 string            `json:"name"`
-	Api                  ServerApi         `json:"api"`
-	ActiveOrganizationId *string           `json:"activeOrganizationId"`
-	ToolboxProxyUrls     map[string]string `json:"toolboxProxyUrls,omitempty"` // Cache proxy URLs by region
 }
 
 type ServerApi struct {
@@ -77,34 +65,6 @@ func GetConfig() (*Config, error) {
 }
 
 var ErrNoProfilesFound = errors.New("no profiles found. Run `daytona login` to authenticate")
-
-func (c *Config) GetActiveProfile() (Profile, error) {
-	apiUrl := os.Getenv(DAYTONA_API_URL_ENV_VAR)
-	apiKey := os.Getenv(DAYTONA_API_KEY_ENV_VAR)
-
-	if apiUrl != "" && apiKey != "" {
-		return Profile{
-			Id: "env",
-			Api: ServerApi{
-				Url: apiUrl,
-				Key: &apiKey,
-			},
-		}, nil
-	}
-
-	if len(c.Profiles) == 0 {
-		return Profile{}, ErrNoProfilesFound
-	}
-
-	for _, profile := range c.Profiles {
-		if profile.Id == c.ActiveProfileId {
-			return profile, nil
-		}
-	}
-
-	return Profile{}, ErrNoActiveProfile
-}
-
 var ErrNoActiveProfile = errors.New("no active profile found. Run `daytona login` to authenticate")
 var ErrNoActiveOrganization = errors.New("no active organization found. Run `daytona organization use` to select an organization")
 
@@ -125,52 +85,6 @@ func (c *Config) Save() error {
 	}
 
 	return os.WriteFile(configFilePath, configContent, 0644)
-}
-
-func (c *Config) AddProfile(profile Profile) error {
-	c.Profiles = append(c.Profiles, profile)
-	c.ActiveProfileId = profile.Id
-
-	return c.Save()
-}
-
-func (c *Config) EditProfile(profile Profile) error {
-	for i, p := range c.Profiles {
-		if p.Id == profile.Id {
-			c.Profiles[i] = profile
-
-			return c.Save()
-		}
-	}
-
-	return fmt.Errorf("profile with id %s not found", profile.Id)
-}
-
-func (c *Config) RemoveProfile(profileId string) error {
-	if c.ActiveProfileId == profileId {
-		return errors.New("cannot remove active profile")
-	}
-
-	var profiles []Profile
-	for _, profile := range c.Profiles {
-		if profile.Id != profileId {
-			profiles = append(profiles, profile)
-		}
-	}
-
-	c.Profiles = profiles
-
-	return c.Save()
-}
-
-func (c *Config) GetProfile(profileId string) (Profile, error) {
-	for _, profile := range c.Profiles {
-		if profile.Id == profileId {
-			return profile, nil
-		}
-	}
-
-	return Profile{}, errors.New("profile not found")
 }
 
 func getConfigPath() (string, error) {
