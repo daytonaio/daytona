@@ -3,8 +3,10 @@ FROM ${SANDBOX_IMAGE}
 USER root
 
 # CUDA 13 toolkit (nvcc) via runfile -- NVIDIA's apt repo is unusable on Debian trixie.
-# --toolkit only; the host provides the driver.
+# --toolkit only; the host provides the driver. SHA-256 verified before executing as root.
+ARG CUDA_RUN_SHA256=81a5d0d0870ba2022efb0a531dcc60adbdc2bbff7b3ef19d6fd6d8105406c775
 RUN curl -fsSL -o /tmp/cuda.run https://developer.download.nvidia.com/compute/cuda/13.0.2/local_installers/cuda_13.0.2_580.95.05_linux.run \
+    && echo "${CUDA_RUN_SHA256}  /tmp/cuda.run" | sha256sum -c - \
     && sh /tmp/cuda.run --silent --toolkit --override \
     && rm -f /tmp/cuda.run
 ENV CUDA_HOME=/usr/local/cuda
