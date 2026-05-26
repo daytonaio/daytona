@@ -63,6 +63,7 @@ import {
   OrganizationRolePermissionsEnum,
   OrganizationUserRoleEnum,
   Sandbox,
+  SandboxClass,
   SandboxDesiredState,
   SandboxListItem,
   SandboxListSortDirection,
@@ -100,6 +101,7 @@ const SANDBOX_SORT_FIELDS: SandboxListSortField[] = [
 ]
 const SANDBOX_SORT_DIRECTIONS = Object.values(SandboxListSortDirection)
 const SANDBOX_STATES = Object.values(SandboxState)
+const SANDBOX_CLASSES = Object.values(SandboxClass)
 const DEFAULT_SANDBOXES: SandboxListItem[] = []
 const SANDBOX_LIST_REVALIDATION_DEBOUNCE_MS = 2000
 
@@ -159,6 +161,10 @@ function normalizeSorting(field: string, direction: string): SandboxSorting {
 
 function getValidatedStates(states: string[]): SandboxState[] {
   return states.filter((state): state is SandboxState => SANDBOX_STATES.includes(state as SandboxState))
+}
+
+function getValidatedSandboxClasses(classes: string[]): SandboxClass[] {
+  return classes.filter((c): c is SandboxClass => SANDBOX_CLASSES.includes(c as SandboxClass))
 }
 
 function getNonEmptyLabels(labels: Record<string, string>) {

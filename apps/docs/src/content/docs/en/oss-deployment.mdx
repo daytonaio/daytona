@@ -487,6 +487,7 @@ Below is a full list of environment variables with their default values:
 | `AWS_DEFAULT_BUCKET`                    | string  | `daytona`                         | AWS default bucket name                               |
 | `DAEMON_START_TIMEOUT_SEC`              | number  | `60`                              | Daemon start timeout in seconds                       |
 | `SANDBOX_START_TIMEOUT_SEC`             | number  | `30`                              | Sandbox start timeout in seconds                      |
+| `ANDROID_BOOT_TIMEOUT_SEC`              | number  | `300`                             | Android emulator boot timeout in seconds              |
 | `USE_SNAPSHOT_ENTRYPOINT`               | boolean | `false`                           | Use snapshot entrypoint for sandbox                   |
 | `RUNNER_DOMAIN`                         | string  | (none)                            | Runner domain name (hostname for runner URLs)         |
 | `VOLUME_CLEANUP_INTERVAL`               | number  | `30s`                             | Volume cleanup interval in seconds (minimum: 10s)     |
@@ -502,6 +503,7 @@ Below is a full list of environment variables with their default values:
 | `CONTAINER_NETWORK`                     | string  | (none)                            | Custom docker network for sandboxes                   |
 | `INTER_SANDBOX_NETWORK_ENABLED`         | boolean | `false`                           | Enable or disable inter-sandbox network connectivity  |
 | `BUILD_ENGINE`                          | string  | `buildkit`                        | Docker image build engine (`buildkit` or `legacy`)    |
+| `MOUNT_KVM_TO_ANDROID_SANDBOX`          | boolean | `false`                           | Mount KVM device to Android sandbox                   |
 
 ### SSH Gateway
 

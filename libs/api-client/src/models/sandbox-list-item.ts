@@ -135,6 +135,7 @@ export interface SandboxListItem {
 export const SandboxListItemSandboxClassEnum = {
     LINUX_VM: 'linux-vm',
     CONTAINER: 'container',
+    ANDROID: 'android',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 

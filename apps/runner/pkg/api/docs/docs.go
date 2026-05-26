@@ -1618,6 +1618,10 @@ const docTemplate = `{
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
                 },
+                "sandboxClass": {
+                    "description": "Optional for backward compatibility, but when provided, indicates the class of sandbox to create.",
+                    "type": "string"
+                },
                 "skipStart": {
                     "type": "boolean"
                 },

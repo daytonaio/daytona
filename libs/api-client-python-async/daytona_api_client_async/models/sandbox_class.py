@@ -29,6 +29,7 @@ class SandboxClass(str, Enum):
     """
     LINUX_MINUS_VM = 'linux-vm'
     CONTAINER = 'container'
+    ANDROID = 'android'
     UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod

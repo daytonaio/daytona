@@ -46,6 +46,7 @@ const snapshotNameSchema = z
 const SANDBOX_CLASS_OPTIONS: { value: SandboxClass; label: string }[] = [
   { value: SandboxClass.CONTAINER, label: 'Container' },
   { value: SandboxClass.LINUX_VM, label: 'Linux VM' },
+  { value: SandboxClass.ANDROID, label: 'Android' },
 ]
 
 const formSchema = z.object({

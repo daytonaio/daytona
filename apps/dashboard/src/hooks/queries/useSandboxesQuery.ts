@@ -9,6 +9,7 @@ import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
   type SandboxListItem,
+  SandboxClass,
   SandboxListSortDirection,
   SandboxListSortField,
   SandboxState,

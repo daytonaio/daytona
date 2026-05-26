@@ -18,6 +18,7 @@ import { Column, ColumnDef, RowData, Table } from '@tanstack/react-table'
 import { Loader2 } from 'lucide-react'
 import React from 'react'
 import { SandboxTableActions } from './SandboxTableActions'
+import { getSandboxClassIcon, getSandboxClassLabel } from './constants'
 
 type SandboxTableMeta = {
   sandboxIsLoading: Record<string, boolean>
@@ -199,6 +200,30 @@ const columns: ColumnDef<SandboxListItem>[] = [
       />
     ),
     accessorKey: 'state',
+  },
+  {
+    id: 'sandboxClass',
+    size: 64,
+    maxSize: 64,
+    enableSorting: false,
+    enableHiding: false,
+    header: () => <span>Class</span>,
+    cell: ({ row }) => {
+      const sandboxClass = row.original.sandboxClass
+      const Icon = getSandboxClassIcon(sandboxClass)
+      const label = getSandboxClassLabel(sandboxClass)
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex items-center" aria-label={label}>
+              <Icon className="size-4 text-muted-foreground shrink-0" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{label}</TooltipContent>
+        </Tooltip>
+      )
+    },
+    accessorKey: 'sandboxClass',
   },
   {
     id: 'snapshot',

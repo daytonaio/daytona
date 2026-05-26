@@ -46,6 +46,7 @@ import { SnapshotInfoResponse } from '@daytona/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 
 /** Fisher-Yates shuffle — uniform random permutation in O(n). */
 function shuffleArray<T>(array: T[]): T[] {
@@ -342,7 +343,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
           gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
-          sandboxClass: snapshot.sandboxClass,
+          // Temporary: Android snapshots can go to container runners
+          sandboxClass:
+            snapshot.sandboxClass === SandboxClass.ANDROID
+              ? In([SandboxClass.CONTAINER, SandboxClass.ANDROID])
+              : snapshot.sandboxClass,
         },
       })
 
@@ -1129,7 +1134,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
         initialRunner = await this.runnerService.getRandomAvailableRunner({
           regions: regions.map((region) => region.id),
-          sandboxClass: snapshot.sandboxClass,
+          // Temporary: Android snapshots can go to container runners
+          sandboxClass: snapshot.sandboxClass === SandboxClass.ANDROID ? SandboxClass.CONTAINER : snapshot.sandboxClass,
           excludedRunnerIds: excludedRunnerIds,
           availabilityScoreThreshold: availabilityThreshold,
           gpu: snapshot.gpu,

@@ -709,6 +709,7 @@ export class Daytona implements AsyncDisposable {
               query?.states,
               query?.snapshots,
               query?.targets,
+              undefined,
               query?.minCpu,
               query?.maxCpu,
               query?.minMemoryGib,

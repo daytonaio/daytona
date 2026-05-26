@@ -6,6 +6,7 @@
 import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/queries/useSandboxesQuery'
 import {
   Region,
+  SandboxClass,
   SandboxListItem,
   SandboxListSortDirection,
   SandboxListSortField,

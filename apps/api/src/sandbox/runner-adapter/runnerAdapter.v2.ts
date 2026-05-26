@@ -185,6 +185,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       organizationId: sandbox.organizationId,
       regionId: sandbox.region,
       linkedSandboxId: sandbox.linkedSandboxId ?? undefined,
+      sandboxClass: sandbox.sandboxClass,
     }
 
     await this.jobService.createJob(
