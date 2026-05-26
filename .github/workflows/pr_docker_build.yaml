@@ -35,6 +35,7 @@ jobs:
           install-java: 'false'
           install-poetry: 'false'
           install-swag: 'false'
+          run-poetry-install: 'false'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
