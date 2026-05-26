@@ -98,7 +98,7 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 		}
 
 		// Serve the warning page
-		serveWarningPage(ctx, p.config.EnableTLS)
+		serveWarningPage(ctx, p.config.ProxyProtocol == "https")
 		ctx.Abort() // Stop further processing
 	}
 }
