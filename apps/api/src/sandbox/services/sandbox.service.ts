@@ -374,7 +374,7 @@ export class SandboxService {
   }
 
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
-    const sandbox = new Sandbox(warmPoolItem.target)
+    const sandbox = new Sandbox({ region: warmPoolItem.target })
 
     sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
 
@@ -580,7 +580,7 @@ export class SandboxService {
         gpu,
       })
 
-      const sandbox = new Sandbox(region.id, createSandboxDto.name)
+      const sandbox = new Sandbox({ region: region.id, name: createSandboxDto.name })
 
       sandbox.organizationId = organization.id
 
@@ -792,7 +792,7 @@ export class SandboxService {
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
-      const sandbox = new Sandbox(region.id, createSandboxDto.name)
+      const sandbox = new Sandbox({ region: region.id, name: createSandboxDto.name })
 
       sandbox.organizationId = organization.id
 
@@ -1003,7 +1003,7 @@ export class SandboxService {
       }
 
       // Copy all properties from source sandbox to forked sandbox
-      const forkedSandbox = new Sandbox(sourceSandbox.region, dto.name)
+      const forkedSandbox = new Sandbox({ region: sourceSandbox.region, name: dto.name })
       forkedSandbox.organizationId = organization.id
       forkedSandbox.class = sourceSandbox.class
       forkedSandbox.snapshot = sourceSandbox.snapshot

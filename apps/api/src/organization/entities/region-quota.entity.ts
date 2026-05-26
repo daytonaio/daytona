@@ -124,33 +124,34 @@ export class RegionQuota {
   })
   updatedAt: Date
 
-  constructor(
-    organizationId: string,
-    regionId: string,
-    totalCpuQuota: number,
-    totalMemoryQuota: number,
-    totalDiskQuota: number,
-    totalGpuQuota = 0,
-    maxCpuPerSandbox: number | null = null,
-    maxMemoryPerSandbox: number | null = null,
-    maxDiskPerSandbox: number | null = null,
-    maxDiskPerNonEphemeralSandbox: number | null = null,
-    maxCpuPerGpuSandbox: number | null = null,
-    maxMemoryPerGpuSandbox: number | null = null,
-    maxDiskPerGpuSandbox: number | null = null,
-  ) {
-    this.organizationId = organizationId
-    this.regionId = regionId
-    this.totalCpuQuota = totalCpuQuota
-    this.totalMemoryQuota = totalMemoryQuota
-    this.totalDiskQuota = totalDiskQuota
-    this.totalGpuQuota = totalGpuQuota
-    this.maxCpuPerSandbox = maxCpuPerSandbox
-    this.maxMemoryPerSandbox = maxMemoryPerSandbox
-    this.maxDiskPerSandbox = maxDiskPerSandbox
-    this.maxDiskPerNonEphemeralSandbox = maxDiskPerNonEphemeralSandbox
-    this.maxCpuPerGpuSandbox = maxCpuPerGpuSandbox
-    this.maxMemoryPerGpuSandbox = maxMemoryPerGpuSandbox
-    this.maxDiskPerGpuSandbox = maxDiskPerGpuSandbox
+  constructor(params?: {
+    organizationId: string
+    regionId: string
+    totalCpuQuota: number
+    totalMemoryQuota: number
+    totalDiskQuota: number
+    totalGpuQuota?: number
+    maxCpuPerSandbox?: number | null
+    maxMemoryPerSandbox?: number | null
+    maxDiskPerSandbox?: number | null
+    maxDiskPerNonEphemeralSandbox?: number | null
+    maxCpuPerGpuSandbox?: number | null
+    maxMemoryPerGpuSandbox?: number | null
+    maxDiskPerGpuSandbox?: number | null
+  }) {
+    if (!params) return
+    this.organizationId = params.organizationId
+    this.regionId = params.regionId
+    this.totalCpuQuota = params.totalCpuQuota
+    this.totalMemoryQuota = params.totalMemoryQuota
+    this.totalDiskQuota = params.totalDiskQuota
+    this.totalGpuQuota = params.totalGpuQuota ?? 0
+    this.maxCpuPerSandbox = params.maxCpuPerSandbox ?? null
+    this.maxMemoryPerSandbox = params.maxMemoryPerSandbox ?? null
+    this.maxDiskPerSandbox = params.maxDiskPerSandbox ?? null
+    this.maxDiskPerNonEphemeralSandbox = params.maxDiskPerNonEphemeralSandbox ?? null
+    this.maxCpuPerGpuSandbox = params.maxCpuPerGpuSandbox ?? null
+    this.maxMemoryPerGpuSandbox = params.maxMemoryPerGpuSandbox ?? null
+    this.maxDiskPerGpuSandbox = params.maxDiskPerGpuSandbox ?? null
   }
 }

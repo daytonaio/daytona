@@ -198,7 +198,7 @@ export class Runner {
   })
   updatedAt: Date
 
-  constructor(params: {
+  constructor(params?: {
     region: string
     name: string
     apiKey: string
@@ -212,6 +212,7 @@ export class Runner {
     appVersion?: string | null
     tags?: string[]
   }) {
+    if (!params) return
     this.region = params.region
     this.name = params.name
     this.apiKey = params.apiKey
