@@ -1040,6 +1040,14 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
 </TabItem>
 </Tabs>
 
+To verify CPU and memory limits inside the sandbox after resizing, read `cgroup` values directly. Tools such as `nproc`, `free`, `top`, `htop`, `/proc/cpuinfo`, and `/proc/meminfo` read host-level values and do not reflect sandbox resource limits.
+
+```bash
+cat /sys/fs/cgroup/cpu.max      # "<quota> <period>" (cores = quota / period)
+cat /sys/fs/cgroup/memory.max   # bytes
+df -h /                         # disk
+```
+
 ## Fork Sandboxes
 
 :::caution[Experimental]
