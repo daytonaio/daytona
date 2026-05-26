@@ -28,7 +28,6 @@ GPU / ML / fine-tuning:
 - einops
 - sentencepiece
 - sentence-transformers
-- huggingface-hub (with hf_xet)
 - nvitop
 
 Experiment tracking:
