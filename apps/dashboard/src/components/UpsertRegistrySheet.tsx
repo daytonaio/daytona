@@ -243,13 +243,16 @@ export const UpsertRegistrySheet = ({
     }
   }, [isOpen, resetState])
 
-  // Tab switch wipes per-tab fields so prior provider values can't leak into
-  // the next provider's submission. Name is preserved as a quality-of-life win.
   const handleProviderChange = useCallback(
     (next: RegistryProvider) => {
       setProvider(next)
       const currentName = form.getFieldValue('name')
-      form.reset({ ...createDefaultsFor(REGISTRY_PROVIDER_SPECS[next]), name: currentName })
+      // keepDefaultValues so the next render's useForm sync doesn't wipe
+      // hidden defaults (e.g. GCP's username '_json_key').
+      form.reset(
+        { ...createDefaultsFor(REGISTRY_PROVIDER_SPECS[next]), name: currentName },
+        { keepDefaultValues: true },
+      )
       setPasswordVisible(false)
     },
     [form],
