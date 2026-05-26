@@ -31,8 +31,8 @@ Sandbox limits provides an overview of resource limits per sandbox.
 
 Rate limits control how many API requests you can make within a specific time window. These limits are applied based on your tier, authentication status, and the type of operation you're performing. Rate limits for general authenticated requests are tracked per organization.
 
-| **Tier**       | **General Requests (per min)** | **Sandbox Creation (per min)** | **Sandbox Lifecycle (per min)** |
-| -------------- | ------------------------------ | ------------------------------ | ------------------------------- |
+| **Tier**   | **General Requests (per min)** | **Sandbox Creation (per min)** | **Sandbox Lifecycle (per min)** |
+| ---------- | ------------------------------ | ------------------------------ | ------------------------------- |
 | Tier 1     | 10,000                         | 300                            | 10,000                          |
 | Tier 2     | 20,000                         | 400                            | 20,000                          |
 | Tier 3     | 40,000                         | 500                            | 40,000                          |
@@ -43,10 +43,10 @@ Daytona supports managing your sandbox resources by [changing the sandbox state]
 
 | **State** | **vCPU** | **Memory** | **Storage** | **Description**                               |
 | --------- | -------- | ---------- | ----------- | --------------------------------------------- |
-| Running   | ✅        | ✅          | ✅           | Counts against all limits                     |
-| Stopped   | ❌        | ❌          | ✅           | Frees CPU & memory, but storage is still used |
-| Archived  | ❌        | ❌          | ❌           | Data moved to cold storage, no quota impact   |
-| Deleted   | ❌        | ❌          | ❌           | All resources freed                           |
+| Running   | ✅       | ✅         | ✅          | Counts against all limits                     |
+| Stopped   | ❌       | ❌         | ✅          | Frees CPU & memory, but storage is still used |
+| Archived  | ❌       | ❌         | ❌          | Data moved to cold storage, no quota impact   |
+| Deleted   | ❌       | ❌         | ❌          | All resources freed                           |
 
 #### Rate limit headers
 
@@ -128,13 +128,13 @@ All errors include [**`headers`**](#rate-limit-headers) and status code properti
 
 Limits are applied to your organization's default region. To unlock higher limits, complete the following verification steps in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/limits):
 
-| **Tier** | **Resources (vCPU / RAM / Storage)** | **Access Requirements**                                                      |
-| -------- | ------------------------------------ | ---------------------------------------------------------------------------- |
-| Tier 1   | 10 / 10GiB / 30GiB                   | Email verified                                                               |
-| Tier 2   | 100 / 200GiB / 300GiB                | Credit card linked, $25 top-up, [GitHub connected](/docs/en/linked-accounts) |
-| Tier 3   | 250 / 500GiB / 2000GiB               | $500 top-up                                                                  |
-| Tier 4   | 500 / 1000GiB / 5000GiB              | $2000 top-up every 30 days                                                   |
-| Custom   | Custom                               | Contact [support@daytona.io](mailto:support@daytona.io)                      |
+| **Tier** | **Resources (vCPU / RAM / Storage)** | **Access Requirements**                                 |
+| -------- | ------------------------------------ | ------------------------------------------------------- |
+| Tier 1   | 10 / 10GiB / 30GiB                   | Email verified                                          |
+| Tier 2   | 100 / 200GiB / 300GiB                | Credit card linked, $25 top-up                          |
+| Tier 3   | 250 / 500GiB / 2000GiB               | $500 top-up                                             |
+| Tier 4   | 500 / 1000GiB / 5000GiB              | $2000 top-up every 30 days                              |
+| Custom   | Custom                               | Contact [support@daytona.io](mailto:support@daytona.io) |
 
 :::note[Tier-based network restrictions]
 [Network limits](/docs/en/network-limits) are automatically applied to sandboxes based on your organization's billing tier. This provides secure and controlled internet access for development environments.
@@ -145,12 +145,12 @@ Limits are applied to your organization's default region. To unlock higher limit
 Limits provide an overview of tiers and their corresponding resource and rate limits.
 
 | **Tier**       | **Compute (vCPU)** | **Memory (GiB)** | **Storage (GiB)** | **API Requests (minutes)** | **Sandbox Creation (minutes)** | **Sandbox Lifecycle (minutes)** |
-| -------------- | ------------------ | ---------------- | ----------------- | -------------------- | ------------------------ | ------------------------- |
-| **1**          | 10                 | 20               | 30                | 10,000               | 300                      | 10,000                    |
-| **2**          | 100                | 200              | 300               | 20,000               | 400                      | 20,000                    |
-| **3**          | 250                | 500              | 2,000             | 40,000               | 500                      | 40,000                    |
-| **4**          | 500                | 1,000            | 5,000             | 50,000               | 600                      | 50,000                    |
-| **Enterprise** | Custom             | Custom           | Custom            | Custom               | Custom                   | Custom                    |
+| -------------- | ------------------ | ---------------- | ----------------- | -------------------------- | ------------------------------ | ------------------------------- |
+| **1**          | 10                 | 20               | 30                | 10,000                     | 300                            | 10,000                          |
+| **2**          | 100                | 200              | 300               | 20,000                     | 400                            | 20,000                          |
+| **3**          | 250                | 500              | 2,000             | 40,000                     | 500                            | 40,000                          |
+| **4**          | 500                | 1,000            | 5,000             | 50,000                     | 600                            | 50,000                          |
+| **Enterprise** | Custom             | Custom           | Custom            | Custom                     | Custom                         | Custom                          |
 
 ## Best practices
 
