@@ -11,6 +11,7 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 @Index('snapshot_runner_runnerid_snapshotref_idx', ['runnerId', 'snapshotRef'])
 @Index('snapshot_runner_runnerid_idx', ['runnerId'])
 @Index('snapshot_runner_state_idx', ['state'])
+@Index('snapshot_runner_lastusedat_idx', ['lastUsedAt'])
 export class SnapshotRunner {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -43,4 +44,7 @@ export class SnapshotRunner {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  lastUsedAt: Date | null
 }
