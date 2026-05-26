@@ -7,7 +7,7 @@ import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@n
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
-import { In, IsNull, LessThan, Not, Repository } from 'typeorm'
+import { Equal, In, IsNull, LessThan, MoreThanOrEqual, Not, Or, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -342,6 +342,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           state: RunnerState.READY,
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
+          gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
         },
       })
 
