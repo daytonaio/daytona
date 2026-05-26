@@ -4,6 +4,7 @@
 package middlewares
 
 import (
+	"crypto/subtle"
 	"errors"
 	"strings"
 
@@ -38,7 +39,7 @@ func AuthMiddleware(apiToken string) gin.HandlerFunc {
 
 		token := parts[1]
 
-		if token != apiToken {
+		if subtle.ConstantTimeCompare([]byte(token), []byte(apiToken)) != 1 {
 			ctx.Error(common_errors.NewUnauthorizedError(errors.New("invalid token")))
 			ctx.Abort()
 			return
