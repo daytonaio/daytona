@@ -1,34 +1,24 @@
 # Daytona Sandbox GPU Image
 
-[Dockerfile](./Dockerfile) contains the definition for [daytonaio/sandbox-gpu](https://hub.docker.com/r/daytonaio/sandbox-gpu) images (`:$VERSION`), intended for GPU-enabled sandboxes.
+[Dockerfile](./Dockerfile) defines [daytonaio/sandbox-gpu](https://hub.docker.com/r/daytonaio/sandbox-gpu), a GPU-enabled sandbox image for x86 GPU hosts (e.g. H100).
 
-It is built on the official [`vllm/vllm-openai`](https://hub.docker.com/r/vllm/vllm-openai) image, which already ships a working CUDA toolchain and inference stack:
-
-- CUDA 13.0 toolkit (`nvcc`)
-- PyTorch (CUDA build)
-- vLLM
-- FlashAttention, FlashInfer, cuDNN
-
-On top of that base it adds general GPU/ML development tooling.
+It is a **superset of the default [`daytonaio/sandbox`](../sandbox) image** — it builds `FROM daytonaio/sandbox` and layers the GPU stack on top, so everything in the standard sandbox (Python, Node, language servers, the computer-use/VNC tooling, the default Python/agent packages, the `daytona` user) is present, plus GPU support.
 
 ## NOTE
 
-This image is **amd64-only** — it targets x86 GPU hosts (e.g. H100). There is no arm64 variant.
+This image is **amd64-only** — there is no arm64 variant.
 
-## System tooling
+## Added on top of the base image
 
-- build-essential, cmake, ninja-build, pkg-config (for compiling CUDA extensions)
-- git, git-lfs (model/dataset repos)
-- curl, wget, aria2, rsync
-- nvtop, htop (GPU/system monitoring)
-- tmux, vim, less, jq, unzip, zip
-- uv (Python package/environment manager)
+CUDA / GPU runtime:
 
-## Python packages
+- CUDA 13 toolkit (`nvcc`), installed via the NVIDIA runfile
+- PyTorch (CUDA 13 build) — `torch`, `torchvision`, `torchaudio`
+- vLLM, with FlashInfer kernels pre-staged so first-serve cold-start stays fast
+- FlashAttention (bundled with vLLM), cuDNN
 
 GPU / ML / fine-tuning:
 
-- transformers
 - accelerate
 - datasets
 - safetensors
@@ -49,43 +39,5 @@ Experiment tracking:
 Interactive:
 
 - jupyterlab
-- ipython
 - ipykernel
 - ipywidgets
-
-Data science / viz:
-
-- numpy
-- pandas
-- scipy
-- scikit-learn
-- matplotlib
-- seaborn
-- pillow
-
-LLM clients:
-
-- openai
-- anthropic
-- ollama
-
-Agent / app frameworks:
-
-- langchain
-- llama-index
-- instructor
-- pydantic-ai
-- openai-agents
-- claude-agent-sdk
-
-Web / DB / misc:
-
-- django
-- flask
-- sqlalchemy
-- requests
-- beautifulsoup4
-
-Daytona:
-
-- daytona

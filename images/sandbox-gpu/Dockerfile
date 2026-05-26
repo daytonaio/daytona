@@ -1,68 +1,38 @@
-FROM vllm/vllm-openai:v0.21.0@sha256:a230095847e93bd4df9888b33dab956fa9504537b828a23657d2b26fed57b5c9
+ARG SANDBOX_IMAGE=daytonaio/sandbox:latest
+FROM ${SANDBOX_IMAGE}
+USER root
 
-ENV CUDA_HOME=/usr/local/cuda \
-    HF_HOME=/home/daytona/.cache/huggingface \
-    HF_XET_HIGH_PERFORMANCE=1 \
-    DEBIAN_FRONTEND=noninteractive
+# CUDA 13 toolkit (nvcc) via runfile -- NVIDIA's apt repo is unusable on Debian trixie.
+# --toolkit only; the host provides the driver.
+RUN curl -fsSL -o /tmp/cuda.run https://developer.download.nvidia.com/compute/cuda/13.0.2/local_installers/cuda_13.0.2_580.95.05_linux.run \
+    && sh /tmp/cuda.run --silent --toolkit --override \
+    && rm -f /tmp/cuda.run
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=/usr/local/cuda/bin:${PATH}
+# Put CUDA libs (libnvrtc.so.13) on the loader path, else vLLM's DeepGEMM warmup crashes.
+RUN printf '/usr/local/cuda/lib64\n/usr/local/cuda/targets/x86_64-linux/lib\n' > /etc/ld.so.conf.d/cuda.conf \
+    && ldconfig
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      sudo \
-      build-essential cmake ninja-build pkg-config \
-      git git-lfs curl wget aria2 rsync ca-certificates openssh-client \
-      nvtop htop tmux vim less jq unzip zip \
-    && git lfs install --system \
-    && rm -rf /var/lib/apt/lists/*
+RUN python3 -m pip install --no-cache-dir --break-system-packages \
+      torch==2.11.0 torchvision==0.26.0 torchaudio==2.11.0 \
+      --index-url https://download.pytorch.org/whl/cu130
 
-RUN python3 -m pip install --no-cache-dir uv==0.11.16
+RUN python3 -m pip install --no-cache-dir --break-system-packages vllm==0.21.0
 
-RUN uv pip install --system --no-cache \
-      transformers==5.8.1 \
-      accelerate==1.13.0 \
-      datasets==4.8.5 \
-      safetensors==0.7.0 \
-      peft==0.19.1 \
-      bitsandbytes==0.49.2 \
-      trl==1.5.0 \
-      einops==0.8.2 \
-      sentencepiece==0.2.1 \
-      sentence-transformers==5.5.1 \
-      huggingface_hub[hf_xet]==1.14.0 \
-      nvitop==1.7.0 \
-      wandb==0.27.0 \
-      tensorboard==2.20.0 \
-      jupyterlab==4.5.7 \
-      ipython==9.13.0 \
-      ipykernel==7.2.0 \
-      ipywidgets==8.1.8 \
-      numpy==2.2.6 \
-      pandas==3.0.3 \
-      scipy==1.17.1 \
-      scikit-learn==1.8.0 \
-      matplotlib==3.10.9 \
-      seaborn==0.13.2 \
-      pillow==12.2.0 \
-      openai==2.36.0 \
-      anthropic==0.102.0 \
-      ollama==0.6.2 \
-      langchain==1.3.1 \
-      llama-index==0.14.22 \
-      instructor==1.15.1 \
-      mistralai==1.12.4 \
-      pydantic-ai==1.94.0 \
-      openai-agents==0.17.4 \
-      claude-agent-sdk==0.2.87 \
-      django==6.0.5 \
-      flask==3.1.3 \
-      sqlalchemy==2.0.50 \
-      requests==2.34.2 \
-      beautifulsoup4==4.14.3 \
-      daytona==0.181.0
+# Pre-stage FlashInfer kernels, else vLLM JIT-compiles them on first serve (~60s cold start).
+RUN FIV=$(python3 -c "import flashinfer; print(flashinfer.__version__)") \
+    && python3 -m pip install --no-cache-dir --break-system-packages "flashinfer-jit-cache==${FIV}" \
+       --extra-index-url https://flashinfer.ai/whl/cu130
 
-RUN useradd -m -s /bin/bash daytona \
-    && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona \
-    && chmod 0440 /etc/sudoers.d/91-daytona
+# GPU/ML packages the base image lacks
+RUN python3 -m pip install --no-cache-dir --break-system-packages \
+      accelerate datasets safetensors peft trl einops sentencepiece sentence-transformers \
+      huggingface_hub[hf_xet] nvitop wandb tensorboard jupyterlab ipykernel ipywidgets
 
-ENV HOME=/home/daytona
-WORKDIR /home/daytona
+RUN python3 -m pip install --no-cache-dir --break-system-packages bitsandbytes
+
+ENV HF_XET_HIGH_PERFORMANCE=1
 USER daytona
+# Cache FlashInfer cubins as daytona so they land in a runtime-readable home.
+RUN flashinfer download-cubin || true
 ENTRYPOINT ["sleep", "infinity"]
