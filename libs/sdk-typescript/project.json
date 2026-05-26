@@ -52,7 +52,7 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "inputs": ["default", "{projectRoot}/package.json"],
+      "inputs": ["default", "{projectRoot}/package.json", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "outputs": ["{workspaceRoot}/dist/libs/sdk-typescript"],
       "options": {
         "cwd": "{projectRoot}",
