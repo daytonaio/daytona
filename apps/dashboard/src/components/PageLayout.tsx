@@ -46,7 +46,12 @@ function PageLayout({ className, contained = false, ...props }: ComponentProps<'
   )
 }
 
-function PageHeader({ className, children, ...props }: ComponentProps<'header'>) {
+function PageHeaderBase({
+  className,
+  children,
+  actions,
+  ...props
+}: ComponentProps<'header'> & { actions?: ReactNode }) {
   return (
     <header
       className={cn(
@@ -57,17 +62,28 @@ function PageHeader({ className, children, ...props }: ComponentProps<'header'>)
     >
       <SidebarTrigger className="shrink-0 [&_svg]:size-5 md:hidden" />
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">{children}</div>
-      <div className="flex shrink-0 items-center">
-        <PageHeaderExternalAction
-          label="Docs"
-          href={DAYTONA_DOCS_URL}
-          icon={<BookOpen className="size-4" />}
-          variant="link"
-        />
-        <PageHeaderSupportAction />
-        <PageHeaderProfileMenu />
-      </div>
+      {actions ? <div className="flex shrink-0 items-center">{actions}</div> : null}
     </header>
+  )
+}
+
+function PageHeader(props: ComponentProps<'header'>) {
+  return (
+    <PageHeaderBase
+      {...props}
+      actions={
+        <>
+          <PageHeaderExternalAction
+            label="Docs"
+            href={DAYTONA_DOCS_URL}
+            icon={<BookOpen className="size-4" />}
+            variant="link"
+          />
+          <PageHeaderSupportAction />
+          <PageHeaderProfileMenu />
+        </>
+      }
+    />
   )
 }
 
@@ -296,4 +312,4 @@ function PageFooter({ className, children, ...props }: ComponentProps<'footer'>)
   )
 }
 
-export { PageContent, PageFooter, PageFooterPortal, PageHeader, PageIntro, PageLayout, PageTitle }
+export { PageContent, PageFooter, PageFooterPortal, PageHeader, PageHeaderBase, PageIntro, PageLayout, PageTitle }
