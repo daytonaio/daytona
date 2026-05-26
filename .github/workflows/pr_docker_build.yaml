@@ -49,9 +49,9 @@ jobs:
       - name: Build all Docker targets
         # sandbox, sandbox-slim and sandbox-gpu excluded: sandbox/sandbox-slim's base
         # mcr.microsoft.com/devcontainers/python is anonymous-pulled from GHA runners and
-        # flakes with 403 Forbidden; sandbox-gpu's vllm/vllm-openai base is large and GPU
-        # oriented. Sandbox image validation happens in the default image publish workflow
-        # on release dispatch.
+        # flakes with 403 Forbidden; sandbox-gpu builds FROM the sandbox image (large, GPU
+        # oriented, amd64-only). Sandbox image validation happens in the default image
+        # publish workflow on release dispatch.
         run: |
           yarn nx run-many \
             --target=docker \
