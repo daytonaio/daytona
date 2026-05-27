@@ -20,6 +20,11 @@ func (d *DockerClient) RemoveImage(ctx context.Context, imageName string, force 
 			d.logger.InfoContext(ctx, "Image already removed and not found", "imageName", imageName)
 			return nil
 		}
+		if !force && errdefs.IsConflict(err) {
+			// Image still in use by a container — expected, not an error.
+			d.logger.InfoContext(ctx, "Image still in use by a container, skipping non-force removal", "imageName", imageName)
+			return nil
+		}
 		return err
 	}
 

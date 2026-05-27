@@ -9,6 +9,7 @@ import (
 	"context"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
+	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 )
 
@@ -69,7 +70,7 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) (any, e
 }
 
 func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
-	return nil, e.docker.RemoveImage(ctx, job.ResourceId, true)
+	return nil, e.docker.RemoveImage(ctx, job.ResourceId, config.GetForceSnapshotRemoval())
 }
 
 func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient.Job) (any, error) {
