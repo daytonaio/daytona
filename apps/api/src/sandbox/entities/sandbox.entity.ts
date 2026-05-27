@@ -417,6 +417,10 @@ export class Sandbox {
       changes.backupState = BackupState.NONE
     }
 
+    if (this.state === SandboxState.ERROR && this.backupState === BackupState.COMPLETED && this.backupSnapshot) {
+      changes.recoverable = true
+    }
+
     return changes
   }
 }
