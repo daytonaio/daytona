@@ -11,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,6 +24,10 @@ import (
 //	@Param			source		query	string	true	"Source file or directory path"
 //	@Param			destination	query	string	true	"Destination file or directory path"
 //	@Success		200
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		403	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		409	{object}	common.ErrorResponse
 //	@Router			/files/move [post]
 //
 //	@id				MoveFile
@@ -30,20 +36,20 @@ func MoveFile(c *gin.Context) {
 	destPath := c.Query("destination")
 
 	if sourcePath == "" || destPath == "" {
-		c.AbortWithError(http.StatusBadRequest, errors.New("source and destination paths are required"))
+		c.Error(common_errors.NewBadRequestError(errors.New("source and destination paths are required")))
 		return
 	}
 
 	// Get absolute paths
 	absSourcePath, err := filepath.Abs(sourcePath)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("invalid source path"))
+		c.Error(common_errors.NewBadRequestError(errors.New("invalid source path")))
 		return
 	}
 
 	absDestPath, err := filepath.Abs(destPath)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("invalid destination path"))
+		c.Error(common_errors.NewBadRequestError(errors.New("invalid destination path")))
 		return
 	}
 
@@ -51,14 +57,14 @@ func MoveFile(c *gin.Context) {
 	sourceInfo, err := os.Stat(absSourcePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.AbortWithError(http.StatusNotFound, err)
+			c.Error(common.NewFileNotFoundError(err.Error()))
 			return
 		}
 		if os.IsPermission(err) {
-			c.AbortWithError(http.StatusForbidden, err)
+			c.Error(common.NewFileAccessDeniedError(err.Error()))
 			return
 		}
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.Error(common_errors.NewBadRequestError(err))
 		return
 	}
 
@@ -67,20 +73,20 @@ func MoveFile(c *gin.Context) {
 	_, err = os.Stat(destDir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.AbortWithError(http.StatusNotFound, err)
+			c.Error(common.NewFileNotFoundError(err.Error()))
 			return
 		}
 		if os.IsPermission(err) {
-			c.AbortWithError(http.StatusForbidden, err)
+			c.Error(common.NewFileAccessDeniedError(err.Error()))
 			return
 		}
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.Error(common_errors.NewBadRequestError(err))
 		return
 	}
 
 	// Check if destination already exists
 	if _, err := os.Stat(absDestPath); err == nil {
-		c.AbortWithError(http.StatusConflict, errors.New("destination already exists"))
+		c.Error(common_errors.NewConflictError(errors.New("destination already exists")))
 		return
 	}
 
@@ -89,7 +95,7 @@ func MoveFile(c *gin.Context) {
 	if err != nil {
 		// If rename fails (e.g., across different devices), try copy and delete
 		if err := copyFile(absSourcePath, absDestPath, sourceInfo); err != nil {
-			c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to move file: %w", err))
+			c.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to move file: %s", err.Error())))
 			return
 		}
 

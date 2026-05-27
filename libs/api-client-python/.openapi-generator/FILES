@@ -28,6 +28,8 @@ daytona_api_client/models/account_provider.py
 daytona_api_client/models/admin_create_runner.py
 daytona_api_client/models/admin_get_webhook_status200_response.py
 daytona_api_client/models/announcement.py
+daytona_api_client/models/api_error_code.py
+daytona_api_client/models/api_error_response_dto.py
 daytona_api_client/models/api_key_list.py
 daytona_api_client/models/api_key_response.py
 daytona_api_client/models/audit_log.py

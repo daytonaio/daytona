@@ -4,6 +4,12 @@
   "projectType": "library",
   "sourceRoot": "libs/sdk-java/src",
   "targets": {
+    "generate:proxy-error-code": {
+      "outputs": ["{projectRoot}/src/main/java/io/daytona/sdk/codes/ProxyErrorCode.java"],
+      "options": {
+        "command": "go run hack/error-codes/main.go --lang=java"
+      }
+    },
     "docs": {
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/apps/docs/src/content/docs/en/java-sdk/**/*"],

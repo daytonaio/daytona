@@ -29,7 +29,8 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		var err error
 		targetPort, sandboxIdOrSignedToken, targetPath, err = p.parseToolboxSubpath(ctx.Request.URL.EscapedPath())
 		if err != nil {
-			ctx.Error(common_errors.NewBadRequestError(err))
+			err := common_errors.NewBadRequestError(err)
+			ctx.Error(err)
 			return nil, nil, err
 		}
 	} else {
@@ -38,7 +39,8 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		var err error
 		targetPort, sandboxIdOrSignedToken, _, err = p.parseHost(ctx.Request.Host)
 		if err != nil {
-			ctx.Error(common_errors.NewBadRequestError(err))
+			err := common_errors.NewBadRequestError(err)
+			ctx.Error(err)
 			return nil, nil, err
 		}
 
@@ -46,28 +48,32 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 	}
 
 	if targetPort == "" {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("target port is required")))
-		return nil, nil, errors.New("target port is required")
+		err := common_errors.NewBadRequestError(errors.New("target port is required"))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	if sandboxIdOrSignedToken == "" {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("sandbox ID or signed token is required")))
-		return nil, nil, errors.New("sandbox ID or signed token is required")
+		err := common_errors.NewBadRequestError(errors.New("sandbox ID or signed token is required"))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	sandboxId := sandboxIdOrSignedToken
 
 	isPublic, err := p.getSandboxPublic(ctx, sandboxIdOrSignedToken)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get sandbox public status: %w", err)))
-		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
+		err := classifyUpstreamError(fmt.Errorf("failed to get sandbox public status: %w", err))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT || targetPort == RECORDING_DASHBOARD_PORT {
 		portFloat, err := strconv.ParseFloat(targetPort, 64)
 		if err != nil {
-			ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target port: %w", err)))
-			return nil, nil, fmt.Errorf("failed to parse target port: %w", err)
+			err := common_errors.NewBadRequestError(fmt.Errorf("failed to parse target port: %w", err))
+			ctx.Error(err)
+			return nil, nil, err
 		}
 		var didRedirect bool
 		sandboxId, didRedirect, err = p.Authenticate(ctx, sandboxIdOrSignedToken, float32(portFloat))
@@ -81,8 +87,9 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 
 	runnerInfo, err := p.getSandboxRunnerInfo(ctx, sandboxId)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
-		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
+		err := classifyUpstreamError(fmt.Errorf("failed to get runner info: %w", err))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	// Skip last activity update if header is set
@@ -111,8 +118,9 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 	// Create the complete target URL with path
 	target, err := url.Parse(fmt.Sprintf("%s%s", targetURL, targetPath))
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
-		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
+		err := common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	return target, map[string]string{
@@ -144,7 +152,7 @@ func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*Ru
 	}
 
 	if runner.ProxyUrl == nil {
-		return nil, errors.New("runner proxy URL not found")
+		return nil, NewRunnerUnreachableError("runner proxy URL not found")
 	}
 
 	info := RunnerInfo{

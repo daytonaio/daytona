@@ -19,8 +19,6 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/image"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, string, error) {
@@ -58,7 +56,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 			case <-ctx.Done():
 				return "", "", ctx.Err()
 			case <-timeout.C:
-				return "", "", common_errors.NewRequestTimeoutError(fmt.Errorf("timed out waiting for sandbox %s snapshot pull to complete", sandboxDto.Id))
+				return "", "", common.NewSnapshotPullTimeoutError(fmt.Sprintf("timed out waiting for sandbox %s snapshot pull to complete", sandboxDto.Id))
 			case <-ticker.C:
 				state, err = d.GetSandboxState(ctx, sandboxDto.Id)
 				if err != nil && state == enums.SandboxStateError {
@@ -233,5 +231,7 @@ func (p *DockerClient) validateImageArchitecture(image *image.InspectResponse) e
 		}
 	}
 
-	return common_errors.NewConflictError(fmt.Errorf("image %s architecture (%s) is not x64 compatible", image.ID, image.Architecture))
+	return common.NewUnsupportedArchitectureError(
+		fmt.Sprintf("image %s architecture (%s) is not x64 compatible", image.ID, image.Architecture),
+	)
 }

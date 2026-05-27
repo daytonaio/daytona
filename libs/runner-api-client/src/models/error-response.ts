@@ -13,16 +13,22 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RunnerErrorCode } from './runner-error-code';
 
 /**
  * Error response
  */
 export interface ErrorResponse {
-    'code'?: string;
+    'code'?: RunnerErrorCode;
     'message': string;
     'method'?: string;
     'path': string;
+    'source'?: string;
     'statusCode': number;
     'timestamp': string;
 }
+
+
 

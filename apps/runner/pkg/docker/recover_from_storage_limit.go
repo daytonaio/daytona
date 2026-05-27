@@ -48,7 +48,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 
 	// Validate expansion limit
 	if newExpansion > maxExpansion {
-		return fmt.Errorf("storage cannot be further expanded")
+		return common.NewStorageExpansionLimitReachedError("storage cannot be further expanded")
 	}
 
 	// Stop container if running

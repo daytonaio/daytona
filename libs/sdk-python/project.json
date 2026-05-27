@@ -4,6 +4,12 @@
   "projectType": "library",
   "sourceRoot": "libs/sdk-python",
   "targets": {
+    "generate:proxy-error-code": {
+      "outputs": ["{projectRoot}/src/daytona/_generated/proxy_error_code.py"],
+      "options": {
+        "command": "go run hack/error-codes/main.go --lang=python"
+      }
+    },
     "docs": {
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/apps/docs/src/content/docs/en/python-sdk/**/*"],

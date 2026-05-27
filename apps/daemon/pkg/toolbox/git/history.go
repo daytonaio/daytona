@@ -18,15 +18,17 @@ import (
 //	@Description	Get the commit history of the Git repository
 //	@Tags			git
 //	@Produce		json
-//	@Param			path	query	string	true	"Repository path"
-//	@Success		200		{array}	git.GitCommitInfo
+//	@Param			path	query		string	true	"Repository path"
+//	@Success		200		{array}		git.GitCommitInfo
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //	@Router			/git/history [get]
 //
 //	@id				GetCommitHistory
 func GetCommitHistory(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {
-		_ = c.Error(common_errors.NewBadRequestError(errors.New("path is required")))
+		c.Error(common_errors.NewBadRequestError(errors.New("path is required")))
 		return
 	}
 

@@ -21,6 +21,7 @@ import {
   RawBodyRequest,
   Next,
   ParseBoolPipe,
+  BadRequestException,
 } from '@nestjs/common'
 import { SandboxService } from '../services/sandbox.service'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
@@ -62,7 +63,6 @@ import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -188,7 +188,7 @@ export class SandboxController {
       try {
         parsedLabels = JSON.parse(labels)
       } catch {
-        throw new BadRequestError('Invalid labels JSON format')
+        throw new BadRequestException('Invalid labels JSON format')
       }
     }
 
@@ -281,12 +281,12 @@ export class SandboxController {
 
     if (createSandboxDto.buildInfo) {
       if (createSandboxDto.snapshot) {
-        throw new BadRequestError('Cannot specify a snapshot when using a build info entry')
+        throw new BadRequestException('Cannot specify a snapshot when using a build info entry')
       }
       sandbox = await this.sandboxService.createFromBuildInfo(createSandboxDto, organization)
     } else {
       if (createSandboxDto.cpu || createSandboxDto.gpu || createSandboxDto.memory || createSandboxDto.disk) {
-        throw new BadRequestError('Cannot specify Sandbox resources when using a snapshot')
+        throw new BadRequestException('Cannot specify Sandbox resources when using a snapshot')
       }
       sandbox = await this.sandboxService.createFromSnapshot(createSandboxDto, organization)
       if (sandbox.state === SandboxState.STARTED) {
@@ -331,7 +331,7 @@ export class SandboxController {
     const stateArray = states
       ? states.split(',').map((s) => {
           if (!Object.values(SandboxState).includes(s as SandboxState)) {
-            throw new BadRequestError(`Invalid sandbox state: ${s}`)
+            throw new BadRequestException(`Invalid sandbox state: ${s}`)
           }
           return s as SandboxState
         })
@@ -1064,12 +1064,12 @@ export class SandboxController {
     @Body() networkSettings: UpdateSandboxNetworkSettingsDto,
   ): Promise<SandboxDto> {
     if (authContext.organization.sandboxLimitedNetworkEgress) {
-      throw new BadRequestError(
+      throw new BadRequestException(
         'Network access is restricted and cannot be overridden at the sandbox level. See https://www.daytona.io/docs/en/network-limits/#tier-based-network-restrictions',
       )
     }
     if (networkSettings.networkBlockAll === undefined && networkSettings.networkAllowList === undefined) {
-      throw new BadRequestError('At least one of networkBlockAll or networkAllowList must be provided')
+      throw new BadRequestException('At least one of networkBlockAll or networkAllowList must be provided')
     }
     const sandbox = await this.sandboxService.updateNetworkSettings(
       sandboxIdOrName,
@@ -1498,7 +1498,7 @@ export class SandboxController {
         if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
           this.sandboxCallbacks.delete(sandbox.id)
           clearTimeout(timeout)
-          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
+          reject(new BadRequestException(`Sandbox failed to start: ${event.sandbox.errorReason}`))
         }
       }
 

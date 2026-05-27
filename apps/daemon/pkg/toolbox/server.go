@@ -140,11 +140,8 @@ func (s *server) Start() error {
 		ctx.Next()
 	})
 	r.Use(sloggin.New(s.logger))
-	errMiddleware := common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
-		return common_errors.ErrorResponse{
-			StatusCode: http.StatusInternalServerError,
-			Message:    err.Error(),
-		}
+	errMiddleware := common_errors.NewErrorMiddleware("DAYTONA_DAEMON", func(ctx *gin.Context, err error) common_errors.ErrorResponse {
+		return common_errors.NewErrorResponseForCtx(ctx, http.StatusInternalServerError, "DAYTONA_DAEMON", err.Error())
 	})
 
 	noTelemetryRouter.Use(sloggin.New(s.logger))
@@ -359,7 +356,7 @@ func (s *server) Start() error {
 
 	proxyController := noTelemetryRouter.Group("/proxy")
 	{
-		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
+		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil, nil))
 	}
 
 	go portDetector.Start(context.Background())

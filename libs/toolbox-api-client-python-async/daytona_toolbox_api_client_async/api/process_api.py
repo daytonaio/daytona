@@ -108,6 +108,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CodeRunResponse",
+            '400': "ErrorResponse",
+            '408': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -175,6 +178,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CodeRunResponse",
+            '400': "ErrorResponse",
+            '408': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -242,6 +248,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CodeRunResponse",
+            '400': "ErrorResponse",
+            '408': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -381,6 +390,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '101': None,
+            '400': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -448,6 +458,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '101': None,
+            '400': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -515,6 +526,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '101': None,
+            '400': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -555,6 +567,13 @@ class ProcessApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    '*/*'
+                ]
+            )
 
 
         # authentication setting
@@ -634,6 +653,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "PtyCreateResponse",
+            '400': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -701,6 +723,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "PtyCreateResponse",
+            '400': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -768,6 +793,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "PtyCreateResponse",
+            '400': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -907,6 +935,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': None,
+            '400': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -974,6 +1005,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': None,
+            '400': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1041,6 +1075,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': None,
+            '400': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1081,6 +1118,13 @@ class ProcessApi:
             _body_params = request
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -1173,6 +1217,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Dict[str, object]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1240,6 +1286,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Dict[str, object]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1307,6 +1355,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Dict[str, object]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1433,6 +1483,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1500,6 +1553,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1567,6 +1623,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1607,6 +1666,13 @@ class ProcessApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    '*/*'
+                ]
+            )
 
 
         # authentication setting
@@ -1686,6 +1752,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExecuteResponse",
+            '400': "ErrorResponse",
+            '408': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1753,6 +1822,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExecuteResponse",
+            '400': "ErrorResponse",
+            '408': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1820,6 +1892,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExecuteResponse",
+            '400': "ErrorResponse",
+            '408': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1959,6 +2034,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionCommandLogsResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2026,6 +2103,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionCommandLogsResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2093,6 +2172,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionCommandLogsResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2218,6 +2299,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Session",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2281,6 +2364,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Session",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2344,6 +2429,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Session",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2467,6 +2554,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtySessionInfo",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2534,6 +2623,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtySessionInfo",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2601,6 +2692,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtySessionInfo",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2727,6 +2820,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Session",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2794,6 +2889,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Session",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2861,6 +2958,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Session",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2991,6 +3090,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Command",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3062,6 +3163,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Command",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3133,6 +3236,8 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Command",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3270,6 +3375,10 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionCommandLogsResponse",
+            '400': "ErrorResponse",
+            '403': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3345,6 +3454,10 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionCommandLogsResponse",
+            '400': "ErrorResponse",
+            '403': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3420,6 +3533,10 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionCommandLogsResponse",
+            '400': "ErrorResponse",
+            '403': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3551,6 +3668,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtyListResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3614,6 +3732,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtyListResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3677,6 +3796,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtyListResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3796,6 +3916,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Session]",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3859,6 +3980,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Session]",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3922,6 +4044,7 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Session]",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4049,6 +4172,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtySessionInfo",
+            '400': "ErrorResponse",
+            '410': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4120,6 +4246,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtySessionInfo",
+            '400': "ErrorResponse",
+            '410': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4191,6 +4320,9 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PtySessionInfo",
+            '400': "ErrorResponse",
+            '410': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4341,6 +4473,10 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '410': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4416,6 +4552,10 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '410': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4491,6 +4631,10 @@ class ProcessApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '410': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4537,6 +4681,13 @@ class ProcessApi:
             _body_params = request
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    '*/*'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -4634,6 +4785,10 @@ class ProcessApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionExecuteResponse",
             '202': "SessionExecuteResponse",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4706,6 +4861,10 @@ class ProcessApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionExecuteResponse",
             '202': "SessionExecuteResponse",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4778,6 +4937,10 @@ class ProcessApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SessionExecuteResponse",
             '202': "SessionExecuteResponse",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,

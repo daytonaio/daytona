@@ -2,8 +2,7 @@
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
-import { Injectable, Logger, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, In, IsNull, Like, Repository } from 'typeorm'
 import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
@@ -248,7 +247,7 @@ export class RegionService {
     })
 
     if (runnerCount > 0) {
-      throw new BadRequestError('Cannot delete region which has runners associated with it')
+      throw new BadRequestException('Cannot delete region which has runners associated with it')
     }
 
     await this.dataSource.transaction(async (em) => {

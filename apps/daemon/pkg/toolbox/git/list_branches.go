@@ -20,13 +20,15 @@ import (
 //	@Produce		json
 //	@Param			path	query		string	true	"Repository path"
 //	@Success		200		{object}	ListBranchResponse
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //	@Router			/git/branches [get]
 //
 //	@id				ListBranches
 func ListBranches(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {
-		_ = c.Error(common_errors.NewBadRequestError(errors.New("path is required")))
+		c.Error(common_errors.NewBadRequestError(errors.New("path is required")))
 		return
 	}
 

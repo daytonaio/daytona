@@ -1,77 +1,37 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
+// Package common holds the runner's error vocabulary (see runner_errors.go).
 package common
 
 import (
-	"fmt"
-	"net/http"
-	"strings"
 	"time"
-
-	"github.com/containerd/errdefs"
-	"github.com/daytonaio/runner/internal/util"
-	"github.com/gin-gonic/gin"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-func HandlePossibleDockerError(ctx *gin.Context, err error) common_errors.ErrorResponse {
-	if errdefs.IsUnauthorized(err) || strings.Contains(err.Error(), "unauthorized") {
-		return common_errors.ErrorResponse{
-			StatusCode: http.StatusUnauthorized,
-			Message:    fmt.Sprintf("unauthorized: %s", err.Error()),
-			Code:       "UNAUTHORIZED",
-			Timestamp:  time.Now(),
-			Path:       ctx.Request.URL.Path,
-			Method:     ctx.Request.Method,
-		}
-	} else if errdefs.IsConflict(err) {
-		return common_errors.ErrorResponse{
-			StatusCode: http.StatusConflict,
-			Message:    fmt.Sprintf("conflict: %s", err.Error()),
-			Code:       "CONFLICT",
-			Timestamp:  time.Now(),
-			Path:       ctx.Request.URL.Path,
-			Method:     ctx.Request.Method,
-		}
-	} else if errdefs.IsInvalidArgument(err) {
-		return common_errors.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    fmt.Sprintf("bad request: %s", err.Error()),
-			Code:       "BAD_REQUEST",
-			Timestamp:  time.Now(),
-			Path:       ctx.Request.URL.Path,
-			Method:     ctx.Request.Method,
-		}
-	} else if errdefs.IsNotFound(err) {
-		return common_errors.ErrorResponse{
-			StatusCode: http.StatusNotFound,
-			Message:    fmt.Sprintf("not found: %s", err.Error()),
-			Code:       "NOT_FOUND",
-			Timestamp:  time.Now(),
-			Path:       ctx.Request.URL.Path,
-			Method:     ctx.Request.Method,
-		}
-	} else if errdefs.IsInternal(err) {
-		if strings.Contains(err.Error(), "unable to find user") {
-			return common_errors.ErrorResponse{
-				StatusCode: http.StatusBadRequest,
-				Message:    util.ExtractErrorPart(err.Error()),
-				Code:       "BAD_REQUEST",
-				Timestamp:  time.Now(),
-				Path:       ctx.Request.URL.Path,
-				Method:     ctx.Request.Method,
-			}
-		}
-	}
+// RunnerErrorCode is the machine-readable error code surfaced to SDK callers.
+type RunnerErrorCode string // @name RunnerErrorCode
 
-	return common_errors.ErrorResponse{
-		StatusCode: http.StatusInternalServerError,
-		Message:    err.Error(),
-		Code:       "INTERNAL_SERVER_ERROR",
-		Timestamp:  time.Now(),
-		Path:       ctx.Request.URL.Path,
-		Method:     ctx.Request.Method,
-	}
-}
+const (
+	CodeStorageExpansionLimitReached RunnerErrorCode = "STORAGE_EXPANSION_LIMIT_REACHED"
+	CodeDockerDaemonUnreachable      RunnerErrorCode = "DOCKER_DAEMON_UNREACHABLE"
+	CodeSandboxDaemonUnreachable     RunnerErrorCode = "SANDBOX_DAEMON_UNREACHABLE"
+	CodeSnapshotPullTimeout          RunnerErrorCode = "SNAPSHOT_PULL_TIMEOUT"
+	CodeBuildTimeout                 RunnerErrorCode = "BUILD_TIMEOUT"
+	CodeContainerCrashed             RunnerErrorCode = "CONTAINER_CRASHED"
+	CodeUnsupportedArchitecture      RunnerErrorCode = "UNSUPPORTED_ARCHITECTURE"
+)
+
+// ErrorResponse mirrors libs/common-go ErrorResponse; this runner-local copy
+// exists only so swaggo emits a typed RunnerErrorCode enum reference.
+//
+//	@Description	Error response
+//	@Schema			ErrorResponse
+type ErrorResponse struct {
+	StatusCode int             `json:"statusCode" example:"400" binding:"required"`
+	Message    string          `json:"message" example:"Bad request" binding:"required"`
+	Source     string          `json:"source,omitempty" example:"DAYTONA_RUNNER"`
+	Code       RunnerErrorCode `json:"code,omitempty" example:"STORAGE_EXPANSION_LIMIT_REACHED"`
+	Timestamp  time.Time       `json:"timestamp" example:"2023-01-01T12:00:00Z" binding:"required"`
+	Path       string          `json:"path" example:"/api/resource" binding:"required"`
+	Method     string          `json:"method,omitempty" example:"GET"`
+} //	@name	ErrorResponse

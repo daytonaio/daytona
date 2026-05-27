@@ -4,8 +4,8 @@
  */
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { RunnerErrorCode } from '@daytona/runner-api-client'
 import { SandboxRepository } from '../../repositories/sandbox.repository'
-import { RECOVERY_ERROR_SUBSTRINGS } from '../../constants/errors-for-recovery'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from './sandbox.action'
@@ -556,19 +556,21 @@ export class SandboxStartAction extends SandboxAction {
       try {
         await runnerAdapter.startSandbox(sandbox.id, sandbox.authToken, metadata)
       } catch (error) {
-        // Check against a list of substrings that should trigger an automatic recovery
-        if (error?.message) {
-          const matchesRecovery = RECOVERY_ERROR_SUBSTRINGS.some((substring) =>
-            error.message.toLowerCase().includes(substring.toLowerCase()),
-          )
-          if (matchesRecovery) {
-            try {
-              await this.restoreSandboxOnNewRunner(sandbox, lockCode, organization, sandbox.runnerId, true)
-              this.logger.warn(`Sandbox ${sandbox.id} transferred to a new runner`)
-              return SYNC_AGAIN
-            } catch (restoreError) {
-              this.logger.warn(`Sandbox ${sandbox.id} recovery attempt failed:`, restoreError.message)
-            }
+        // New runners emit RunnerErrorCode.CodeDockerDaemonUnreachable (typed via
+        // docker/client.IsErrConnectionFailed) when the local Docker daemon is
+        // unreachable. The message-substring fallback keeps backward compatibility
+        // with older runners that pass the raw Docker SDK error without a structured code.
+        const matchesRecovery =
+          error?.response?.data?.code === RunnerErrorCode.CodeDockerDaemonUnreachable ||
+          (typeof error?.message === 'string' &&
+            error.message.toLowerCase().includes('can not connect to the docker daemon'))
+        if (matchesRecovery) {
+          try {
+            await this.restoreSandboxOnNewRunner(sandbox, lockCode, organization, sandbox.runnerId, true)
+            this.logger.warn(`Sandbox ${sandbox.id} transferred to a new runner`)
+            return SYNC_AGAIN
+          } catch (restoreError) {
+            this.logger.warn(`Sandbox ${sandbox.id} recovery attempt failed:`, restoreError.message)
           }
         }
         throw error

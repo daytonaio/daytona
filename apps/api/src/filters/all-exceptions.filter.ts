@@ -33,6 +33,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let statusCode: number
     let error: string
     let message: string
+    let code: string | undefined
 
     // If the exception is a NotFoundException and the request path is not an API request, serve the dashboard index.html file
     if (exception instanceof NotFoundException && !request.path.startsWith('/api/')) {
@@ -61,10 +62,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse
       } else {
-        const responseMessage = (exceptionResponse as Record<string, unknown>).message
+        const body = exceptionResponse as Record<string, unknown>
+        const responseMessage = body.message
         message = Array.isArray(responseMessage)
           ? responseMessage.join(', ')
           : (responseMessage as string) || exception.message
+        if (typeof body.code === 'string') {
+          code = body.code
+        }
       }
     } else {
       this.logger.error(exception)
@@ -77,6 +82,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       path: request.url,
       timestamp: new Date().toISOString(),
       statusCode,
+      source: 'DAYTONA_API',
+      ...(code !== undefined && { code }),
       error,
       message,
     })

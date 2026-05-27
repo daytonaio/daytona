@@ -22,7 +22,8 @@ import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { NoAvailableRunnersError } from '../../exceptions/no-available-runners.exception'
+import { SandboxRunnerNotFoundError } from '../../exceptions/sandbox-runner-not-found.exception'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
@@ -268,7 +269,7 @@ export class RunnerService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
     if (!sandbox.runnerId) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
+      throw new SandboxRunnerNotFoundError(`Sandbox with ID ${sandboxId} does not have a runner`)
     }
 
     return this.findOne(sandbox.runnerId)
@@ -366,14 +367,14 @@ export class RunnerService {
     }
 
     if (!runner.unschedulable) {
-      throw new BadRequestError('Cannot delete runner which is available for scheduling sandboxes')
+      throw new BadRequestException('Cannot delete runner which is available for scheduling sandboxes')
     }
 
     const sandboxCount = await this.sandboxRepository.count({
       where: { runnerId: id, state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED])) },
     })
     if (sandboxCount > 0) {
-      throw new BadRequestError('Cannot delete runner which has sandboxes associated with it')
+      throw new BadRequestException('Cannot delete runner which has sandboxes associated with it')
     }
 
     await this.dataSource.transaction(async (em) => {
@@ -767,7 +768,7 @@ export class RunnerService {
     const availableRunners = await this.findAvailableRunners(params)
 
     if (availableRunners.length === 0) {
-      throw new BadRequestError('No available runners')
+      throw new NoAvailableRunnersError()
     }
 
     // Get random runner from the best available runners

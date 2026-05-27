@@ -6,6 +6,7 @@ from __future__ import annotations
 from daytona_api_client_async import CreateVolume, VolumesApi
 from daytona_api_client_async.exceptions import NotFoundException
 
+from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from ..common.volume import Volume
 
@@ -16,6 +17,7 @@ class AsyncVolumeService:
     def __init__(self, volumes_api: VolumesApi):
         self.__volumes_api = volumes_api
 
+    @intercept_errors(message_prefix="Failed to list volumes: ")
     async def list(self) -> list[Volume]:
         """List all Volumes.
 
@@ -32,6 +34,7 @@ class AsyncVolumeService:
         """
         return [Volume.from_dto(volume) for volume in await self.__volumes_api.list_volumes()]
 
+    @intercept_errors(message_prefix="Failed to get volume: ")
     @with_instrumentation()
     async def get(self, name: str, create: bool = False) -> Volume:
         """Get a Volume by name.
@@ -52,11 +55,12 @@ class AsyncVolumeService:
         """
         try:
             return Volume.from_dto(await self.__volumes_api.get_volume_by_name(name))
-        except NotFoundException as e:
+        except NotFoundException:
             if create:
                 return await self.create(name)
-            raise e
+            raise
 
+    @intercept_errors(message_prefix="Failed to create volume: ")
     @with_instrumentation()
     async def create(self, name: str) -> Volume:
         """Create a new Volume.
@@ -76,6 +80,7 @@ class AsyncVolumeService:
         """
         return Volume.from_dto(await self.__volumes_api.create_volume(CreateVolume(name=name)))
 
+    @intercept_errors(message_prefix="Failed to delete volume: ")
     @with_instrumentation()
     async def delete(self, volume: Volume) -> None:
         """Delete a Volume.

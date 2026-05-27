@@ -14924,6 +14924,53 @@ components:
       required:
       - series
       type: object
+    ApiErrorCode:
+      enum:
+      - SANDBOX_STATE_CHANGE_IN_PROGRESS
+      - SANDBOX_STATE_ERROR
+      - SANDBOX_BACKUP_STATE_ERROR
+      - SANDBOX_OPERATION_NOT_SUPPORTED
+      - SANDBOX_DISK_EXPANSION_LIMIT
+      - SNAPSHOT_STATE_CHANGE_IN_PROGRESS
+      - ORGANIZATION_QUOTA_EXCEEDED
+      - ORGANIZATION_SUSPENDED
+      - DEFAULT_REGION_REQUIRED
+      - API_KEY_EXPIRED
+      - VOLUME_IN_USE
+      - NO_AVAILABLE_RUNNERS
+      - SANDBOX_RUNNER_NOT_FOUND
+      type: string
+    ApiErrorResponseDto:
+      properties:
+        path:
+          example: /api/snapshots/abc-123
+          type: string
+        timestamp:
+          example: 2026-01-01T00:00:00.000Z
+          type: string
+        statusCode:
+          example: 404
+          type: number
+        source:
+          example: DAYTONA_API
+          type: string
+        code:
+          allOf:
+          - $ref: "#/components/schemas/ApiErrorCode"
+        error:
+          example: Not Found
+          type: string
+        message:
+          example: Snapshot not found
+          type: string
+      required:
+      - error
+      - message
+      - path
+      - source
+      - statusCode
+      - timestamp
+      type: object
     uploadFile_deprecated_request:
       properties:
         file:

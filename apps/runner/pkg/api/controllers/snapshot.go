@@ -32,11 +32,11 @@ import (
 //	@Description	Tag an existing local image with a new target reference
 //	@Param			request	body		dto.TagImageRequestDTO	true	"Tag image request"
 //	@Success		200		{string}	string					"Image successfully tagged"
-//	@Failure		400		{object}	common_errors.ErrorResponse
-//	@Failure		401		{object}	common_errors.ErrorResponse
-//	@Failure		404		{object}	common_errors.ErrorResponse
-//	@Failure		409		{object}	common_errors.ErrorResponse
-//	@Failure		500		{object}	common_errors.ErrorResponse
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		401		{object}	common.ErrorResponse
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		409		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //
 //	@Router			/snapshots/tag [post]
 //
@@ -50,7 +50,7 @@ func TagImage(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -85,11 +85,11 @@ func TagImage(ctx *gin.Context) {
 //	@Description	Pull a snapshot from a registry and optionally push to another registry. The operation runs asynchronously and returns 202 immediately.
 //	@Param			request	body		dto.PullSnapshotRequestDTO	true	"Pull snapshot"
 //	@Success		202		{string}	string						"Snapshot pull started"
-//	@Failure		400		{object}	common_errors.ErrorResponse
-//	@Failure		401		{object}	common_errors.ErrorResponse
-//	@Failure		404		{object}	common_errors.ErrorResponse
-//	@Failure		409		{object}	common_errors.ErrorResponse
-//	@Failure		500		{object}	common_errors.ErrorResponse
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		401		{object}	common.ErrorResponse
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		409		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //
 //	@Router			/snapshots/pull [post]
 //
@@ -105,7 +105,7 @@ func PullSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gin
 
 		runner, err := runner.GetInstance(nil)
 		if err != nil {
-			ctx.Error(err)
+			ctx.Error(common_errors.NewInternalServerError(err))
 			return
 		}
 
@@ -146,11 +146,11 @@ func PullSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gin
 //	@Description	Build a snapshot from a Dockerfile and context hashes. The operation runs asynchronously and returns 202 immediately.
 //	@Param			request	body		dto.BuildSnapshotRequestDTO	true	"Build snapshot request"
 //	@Success		202		{string}	string						"Snapshot build started"
-//	@Failure		400		{object}	common_errors.ErrorResponse
-//	@Failure		401		{object}	common_errors.ErrorResponse
-//	@Failure		404		{object}	common_errors.ErrorResponse
-//	@Failure		409		{object}	common_errors.ErrorResponse
-//	@Failure		500		{object}	common_errors.ErrorResponse
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		401		{object}	common.ErrorResponse
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		409		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //
 //	@Router			/snapshots/build [post]
 //
@@ -171,7 +171,7 @@ func BuildSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gi
 
 		runner, err := runner.GetInstance(nil)
 		if err != nil {
-			ctx.Error(err)
+			ctx.Error(common_errors.NewInternalServerError(err))
 			return
 		}
 
@@ -208,11 +208,11 @@ func BuildSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gi
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
 //	@Success		200			{object}	SnapshotExistsResponse
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/snapshots/exists [get]
 //
 //	@id				SnapshotExists
@@ -225,7 +225,7 @@ func SnapshotExists(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -248,11 +248,11 @@ func SnapshotExists(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
 //	@Success		200			{string}	string	"Snapshot successfully removed"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/snapshots/remove [post]
 //
 //	@id				RemoveSnapshot
@@ -266,7 +266,7 @@ func RemoveSnapshot(logger *slog.Logger) gin.HandlerFunc {
 
 		runner, err := runner.GetInstance(nil)
 		if err != nil {
-			ctx.Error(err)
+			ctx.Error(common_errors.NewInternalServerError(err))
 			return
 		}
 
@@ -297,10 +297,10 @@ type SnapshotExistsResponse struct {
 //	@Param			snapshotRef	query		string	true	"Snapshot ref"
 //	@Param			follow		query		boolean	false	"Whether to follow the log output"
 //	@Success		200			{string}	string	"Build logs stream"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //
 //	@Router			/snapshots/logs [get]
 //
@@ -318,7 +318,7 @@ func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
 
 		logFilePath, err := config.GetBuildLogFilePath(snapshotRef)
 		if err != nil {
-			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+			ctx.Error(common_errors.NewInternalServerError(err))
 			return
 		}
 
@@ -331,7 +331,7 @@ func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
 
 		file, err := os.Open(logFilePath)
 		if err != nil {
-			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+			ctx.Error(common_errors.NewInternalServerError(err))
 			return
 		}
 		defer file.Close()
@@ -340,7 +340,7 @@ func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
 		if !follow {
 			_, err = io.Copy(ctx.Writer, file)
 			if err != nil {
-				ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+				ctx.Error(common_errors.NewInternalServerError(err))
 			}
 			return
 		}
@@ -348,7 +348,7 @@ func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
 		reader := bufio.NewReader(file)
 		runner, err := runner.GetInstance(nil)
 		if err != nil {
-			ctx.Error(err)
+			ctx.Error(common_errors.NewInternalServerError(err))
 			return
 		}
 
@@ -361,7 +361,7 @@ func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
 
 		flusher, ok := ctx.Writer.(http.Flusher)
 		if !ok {
-			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, "Streaming not supported", "STREAMING_NOT_SUPPORTED"))
+			ctx.Error(common_errors.NewInternalServerError(fmt.Errorf("streaming not supported")))
 			return
 		}
 
@@ -410,11 +410,11 @@ func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
 //	@Success		200			{object}	dto.SnapshotInfoResponse
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		422			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		422			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/snapshots/info [get]
 //
 //	@id				GetSnapshotInfo
@@ -427,7 +427,7 @@ func GetSnapshotInfo(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -470,10 +470,10 @@ func GetSnapshotInfo(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			request	body		dto.InspectSnapshotInRegistryRequestDTO	true	"Inspect snapshot in registry request"
 //	@Success		200		{object}	dto.SnapshotDigestResponse
-//	@Failure		400		{object}	common_errors.ErrorResponse
-//	@Failure		401		{object}	common_errors.ErrorResponse
-//	@Failure		404		{object}	common_errors.ErrorResponse
-//	@Failure		500		{object}	common_errors.ErrorResponse
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		401		{object}	common.ErrorResponse
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //
 //	@Router			/snapshots/inspect [post]
 //	@id				InspectSnapshotInRegistry
@@ -487,7 +487,7 @@ func InspectSnapshotInRegistry(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 

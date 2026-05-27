@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, UnauthorizedException, Logger, OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common'
+import { ApiKeyExpiredError } from '../exceptions/api-key-expired.exception'
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy } from 'passport-http-bearer'
 import { ApiKeyService } from '../api-key/api-key.service'
@@ -113,7 +114,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
 
         // Check expiry before caching to prevent storing expired keys
         if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
-          throw new UnauthorizedException('This API key has expired')
+          throw new ApiKeyExpiredError()
         }
 
         const validationCacheTtl = this.configService.get('apiKey.validationCacheTtlSeconds')
@@ -122,7 +123,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
       }
 
       if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
-        throw new UnauthorizedException('This API key has expired')
+        throw new ApiKeyExpiredError()
       }
 
       await this.apiKeyService.updateLastUsedAt(apiKey.organizationId, apiKey.userId, apiKey.name, new Date())

@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ConflictException, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException, ServiceUnavailableException, BadRequestException } from '@nestjs/common'
+import { VolumeInUseError } from '../../exceptions/volume-in-use.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
 import { v4 as uuidv4 } from 'uuid'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
@@ -49,7 +49,7 @@ export class VolumeService {
 
     try {
       if (usageOverview.currentVolumeUsage + usageOverview.pendingVolumeUsage > organization.volumeQuota) {
-        throw new BadRequestError(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
+        throw new BadRequestException(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
       }
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, addedVolumeCount)
@@ -109,7 +109,7 @@ export class VolumeService {
       })
 
       if (existingVolume) {
-        throw new BadRequestError(`Volume with name ${volume.name} already exists`)
+        throw new BadRequestException(`Volume with name ${volume.name} already exists`)
       }
 
       volume.organizationId = organization.id
@@ -136,7 +136,7 @@ export class VolumeService {
     }
 
     if (volume.state !== VolumeState.READY && volume.state !== VolumeState.ERROR) {
-      throw new BadRequestError(
+      throw new BadRequestException(
         `Volume must be in '${VolumeState.READY}' or '${VolumeState.ERROR}' state in order to be deleted`,
       )
     }
@@ -157,7 +157,7 @@ export class VolumeService {
       .getOne()
 
     if (sandboxUsingVolume) {
-      throw new ConflictException(
+      throw new VolumeInUseError(
         `Volume cannot be deleted because it is in use by one or more sandboxes (e.g. ${sandboxUsingVolume.name})`,
       )
     }
@@ -236,7 +236,7 @@ export class VolumeService {
 
     for (const volume of volumes) {
       if (volume.state !== VolumeState.READY) {
-        throw new BadRequestError(`Volume '${volume.name}' is not in a ready state. Current state: ${volume.state}`)
+        throw new BadRequestException(`Volume '${volume.name}' is not in a ready state. Current state: ${volume.state}`)
       }
     }
   }

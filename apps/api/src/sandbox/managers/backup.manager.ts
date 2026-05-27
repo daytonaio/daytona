@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, IsNull, LessThan, Not, Or } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
 import { RunnerState } from '../enums/runner-state.enum'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -162,7 +161,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
               try {
                 //  todo: remove the catch handler asap
                 await this.setBackupPending(sandbox).catch((error) => {
-                  if (error instanceof BadRequestError && error.message === 'A backup is already in progress') {
+                  if (error instanceof BadRequestException && error.message === 'A backup is already in progress') {
                     return
                   }
                   this.logger.error(`Failed to create backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
@@ -546,7 +545,9 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         (sandbox.state === SandboxState.ERROR && sandbox.runnerId)
       )
     ) {
-      throw new BadRequestError('Sandbox must be started, stopped, or errored with assigned runner to create a backup')
+      throw new BadRequestException(
+        'Sandbox must be started, stopped, or errored with assigned runner to create a backup',
+      )
     }
 
     if (sandbox.backupState === BackupState.IN_PROGRESS || sandbox.backupState === BackupState.PENDING) {
@@ -562,7 +563,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
 
     if (!registry) {
-      throw new BadRequestError('No backup registry configured')
+      throw new BadRequestException('No backup registry configured')
     }
     // Generate backup snapshot name
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')

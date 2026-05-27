@@ -14,6 +14,7 @@
 package io.daytona.toolbox.client.api;
 
 import io.daytona.toolbox.client.ApiException;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import java.io.File;
 import io.daytona.toolbox.client.model.FileInfo;
 import io.daytona.toolbox.client.model.FilesDownloadRequest;

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,6 +50,10 @@ func newScreenshotTestRouter(t *testing.T, fake *fakeComputerUse) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	r := gin.New()
+	// Install the same error middleware production uses so c.Error() calls
+	// are translated into the structured ErrorResponse before the recorder
+	// reads the status code.
+	r.Use(common_errors.NewErrorMiddleware("DAYTONA_DAEMON", nil))
 	r.GET("/computeruse/screenshot", WrapScreenshotHandler(fake.TakeScreenshot))
 	r.GET("/computeruse/screenshot/region", WrapRegionScreenshotHandler(fake.TakeRegionScreenshot))
 	r.GET("/computeruse/screenshot/compressed", WrapCompressedScreenshotHandler(fake.TakeCompressedScreenshot))
@@ -417,76 +422,75 @@ func TestWrapCompressedRegionScreenshotHandlerRejectsTitleCaseQueryParams(t *tes
 	assert.Nil(t, fake.compressedRegionReq)
 }
 
-func newComputerUseJSONContext(t *testing.T, path string, body any) (*gin.Context, *httptest.ResponseRecorder) {
+// newComputerUseJSONRouter wires a single handler behind the production error
+// middleware so `c.Error()` calls are translated into HTTP status codes before
+// the test recorder reads them. This mirrors what the daemon does at runtime.
+func newComputerUseJSONRouter(t *testing.T, method, path string, handler gin.HandlerFunc) *gin.Engine {
 	t.Helper()
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.Use(common_errors.NewErrorMiddleware("DAYTONA_DAEMON", nil))
+	r.Handle(method, path, handler)
+	return r
+}
 
-	recorder := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(recorder)
-
+func performJSONRequest(router *gin.Engine, method, path string, body any) (*httptest.ResponseRecorder, error) {
 	payload, err := json.Marshal(body)
 	if err != nil {
-		t.Fatalf("failed to marshal test request: %v", err)
+		return nil, err
 	}
-
-	ctx.Request = httptest.NewRequest(http.MethodPost, path, bytes.NewReader(payload))
-	ctx.Request.Header.Set("Content-Type", "application/json")
-
-	return ctx, recorder
+	req := httptest.NewRequest(method, path, bytes.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	return rr, nil
 }
 
 func TestWrapClickHandlerReturnsBadRequestForValidationErrors(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	handler := WrapClickHandler(func(req *MouseClickRequest) (*MouseClickResponse, error) {
 		if req.Button == "wheel" {
 			return nil, errors.New("unsupported mouse button")
 		}
-
 		return &MouseClickResponse{Position: Position{X: req.X, Y: req.Y}}, nil
 	})
 
-	ctx, recorder := newComputerUseJSONContext(t, "/computeruse/mouse/click", map[string]any{
+	router := newComputerUseJSONRouter(t, http.MethodPost, "/computeruse/mouse/click", handler)
+	recorder, err := performJSONRequest(router, http.MethodPost, "/computeruse/mouse/click", map[string]any{
 		"x":      100,
 		"y":      200,
 		"button": "wheel",
 		"double": false,
 	})
-
-	handler(ctx)
+	require.NoError(t, err)
 
 	if recorder.Code != http.StatusBadRequest {
-		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, recorder.Code)
+		t.Fatalf("expected status %d, got %d (body=%s)", http.StatusBadRequest, recorder.Code, recorder.Body.String())
 	}
-
 	if !strings.Contains(recorder.Body.String(), "unsupported mouse button") {
 		t.Fatalf("expected validation error in response body, got %q", recorder.Body.String())
 	}
 }
 
 func TestWrapScrollHandlerReturnsBadRequestForValidationErrors(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	handler := WrapScrollHandler(func(req *MouseScrollRequest) (*ScrollResponse, error) {
 		if req.Direction == "left" {
 			return nil, errors.New("unsupported scroll direction")
 		}
-
 		return &ScrollResponse{Success: true}, nil
 	})
 
-	ctx, recorder := newComputerUseJSONContext(t, "/computeruse/mouse/scroll", map[string]any{
+	router := newComputerUseJSONRouter(t, http.MethodPost, "/computeruse/mouse/scroll", handler)
+	recorder, err := performJSONRequest(router, http.MethodPost, "/computeruse/mouse/scroll", map[string]any{
 		"x":         10,
 		"y":         20,
 		"direction": "left",
 		"amount":    1,
 	})
-
-	handler(ctx)
+	require.NoError(t, err)
 
 	if recorder.Code != http.StatusBadRequest {
-		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, recorder.Code)
+		t.Fatalf("expected status %d, got %d (body=%s)", http.StatusBadRequest, recorder.Code, recorder.Body.String())
 	}
-
 	if !strings.Contains(recorder.Body.String(), "unsupported scroll direction") {
 		t.Fatalf("expected validation error in response body, got %q", recorder.Body.String())
 	}

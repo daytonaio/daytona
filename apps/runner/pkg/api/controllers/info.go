@@ -6,6 +6,7 @@ package controllers
 import (
 	"net/http"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models"
@@ -25,13 +26,13 @@ import (
 func RunnerInfo(ctx *gin.Context) {
 	runnerInstance, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
 	metrics, err := runnerInstance.MetricsCollector.Collect(ctx.Request.Context())
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 

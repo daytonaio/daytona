@@ -4,9 +4,12 @@
 package controllers
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -15,6 +18,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/common-go/pkg/utils"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
 )
@@ -44,14 +48,59 @@ func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 			}
 		}
 
-		proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+		proxy.NewProxyRequestHandler(
+			getProxyTarget,
+			nil,
+			sandboxDaemonProxyErrorHandler(logger),
+		)(ctx)
+	}
+}
+
+// sandboxDaemonProxyErrorHandler fires only when the reverse proxy can't
+// connect to the in-sandbox daemon at all (connection refused = sandbox not
+// running). Daemon-originated responses (4xx/5xx) flow through the normal
+// proxy path and are never intercepted here.
+func sandboxDaemonProxyErrorHandler(logger *slog.Logger) func(http.ResponseWriter, *http.Request, error) {
+	return func(rw http.ResponseWriter, req *http.Request, err error) {
+		if errors.Is(err, context.Canceled) || errors.Is(req.Context().Err(), context.Canceled) {
+			return
+		}
+
+		logger.WarnContext(req.Context(), "sandbox daemon proxy upstream error",
+			"path", req.URL.Path,
+			"method", req.Method,
+			"error", err,
+		)
+
+		typed := common.NewSandboxDaemonUnreachableError(
+			fmt.Sprintf("sandbox daemon is not reachable — the sandbox may not be running: %s", err.Error()),
+		)
+		body := common.ErrorResponse{
+			StatusCode: typed.HTTPStatusCode(),
+			Message:    typed.Error(),
+			Source:     "DAYTONA_RUNNER",
+			Code:       common.RunnerErrorCode(typed.ErrorCode()),
+			Timestamp:  time.Now(),
+			Path:       req.URL.Path,
+			Method:     req.Method,
+		}
+
+		payload, mErr := json.Marshal(body)
+		if mErr != nil {
+			rw.WriteHeader(http.StatusBadGateway)
+			return
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadGateway)
+		_, _ = rw.Write(payload)
 	}
 }
 
 func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return nil, nil, err
 	}
 
@@ -87,7 +136,9 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 		if containerNotFound {
 			ctx.Error(common_errors.NewNotFoundError(err))
 		} else {
-			ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("%w. Is the Sandbox started?", err)))
+			ctx.Error(common.NewSandboxDaemonUnreachableError(
+				fmt.Errorf("%w. Is the Sandbox started?", err).Error(),
+			))
 		}
 		return nil, nil, err
 	}

@@ -68,11 +68,12 @@ class TestSyncVolumeService:
         api.create_volume.assert_called_once()
 
     def test_get_not_found_raises(self):
+        from daytona import DaytonaNotFoundError
         from daytona_api_client.exceptions import NotFoundException
 
         service, api = self._make_service()
         api.get_volume_by_name.side_effect = NotFoundException(status=404, reason="Not found")
-        with pytest.raises(NotFoundException):
+        with pytest.raises(DaytonaNotFoundError):
             service.get("nonexistent")
 
     def test_create(self):

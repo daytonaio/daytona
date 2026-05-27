@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sync"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -283,11 +284,7 @@ func (l *LazyComputerUse) SetAccessibilityNodeValue(req *AccessibilitySetValueRe
 func LazyCheckMiddleware(lazy *LazyComputerUse) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !lazy.IsReady() {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"message":  "Computer-use functionality is not available",
-				"details":  "The computer-use plugin is still loading or failed to initialize.",
-				"solution": "Retry shortly. If the problem persists, check the daemon logs for specific error details.",
-			})
+			c.Error(common_errors.NewCustomError(http.StatusServiceUnavailable, "computer-use plugin is still loading or failed to initialize", ""))
 			c.Abort()
 			return
 		}

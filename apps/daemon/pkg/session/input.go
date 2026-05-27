@@ -11,6 +11,7 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/common-go/pkg/log"
+	"github.com/daytonaio/daemon/pkg/common"
 )
 
 // SendInput sends data to the session's stdin for a specific running command
@@ -23,7 +24,7 @@ func (s *SessionService) SendInput(sessionId, commandId string, data string) err
 
 	// Check if the session process is still active
 	if session.cmd.ProcessState != nil && session.cmd.ProcessState.Exited() {
-		return common_errors.NewGoneError(errors.New("session process has exited"))
+		return common.NewSessionEndedError("session process has exited")
 	}
 
 	// Verify the command exists
@@ -34,7 +35,7 @@ func (s *SessionService) SendInput(sessionId, commandId string, data string) err
 
 	// Check if the command is still running (exit code not set means still running)
 	if command.ExitCode != nil {
-		return common_errors.NewGoneError(fmt.Errorf("command has already completed with exit code %d", *command.ExitCode))
+		return common.NewCommandAlreadyCompletedError(fmt.Sprintf("command has already completed with exit code %d", *command.ExitCode))
 	}
 
 	inputFilePath := command.InputFilePath(session.Dir(s.configDir))

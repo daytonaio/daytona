@@ -15,13 +15,16 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaAuthenticationException extends DaytonaException {
+    /** HTTP status code carried by every instance of this class. */
+    public static final int STATUS_CODE = 401;
+
     /**
      * Creates an authentication exception.
      *
      * @param message error description from the API
      */
     public DaytonaAuthenticationException(String message) {
-        super(401, message);
+        super(STATUS_CODE, message);
     }
 
     /**
@@ -29,6 +32,14 @@ public class DaytonaAuthenticationException extends DaytonaException {
      * @param cause root cause
      */
     public DaytonaAuthenticationException(String message, Throwable cause) {
-        super(401, message, cause);
+        super(STATUS_CODE, message, cause);
+    }
+
+    public DaytonaAuthenticationException(String message, String code, String source) {
+        super(STATUS_CODE, message, code, source);
+    }
+
+    public DaytonaAuthenticationException(String message, Throwable cause, String code, String source) {
+        super(STATUS_CODE, message, cause, code, source);
     }
 }

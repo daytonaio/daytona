@@ -19,27 +19,31 @@ func (p *Proxy) getSandboxBuildTarget(ctx *gin.Context) (*url.URL, map[string]st
 	// Extract sandbox ID from the path
 	match := regexp.MustCompile(`^/sandboxes/([\w-]+)/build-logs$`).FindStringSubmatch(ctx.Request.URL.Path)
 	if len(match) != 2 {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("sandbox ID is required")))
-		return nil, nil, errors.New("sandbox ID is required")
+		err := common_errors.NewBadRequestError(errors.New("sandbox ID is required"))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	sandboxId := match[1]
 
 	sandbox, err := p.getSandbox(ctx, sandboxId)
 	if err != nil {
+		err := classifyUpstreamError(fmt.Errorf("failed to get sandbox: %w", err))
 		ctx.Error(err)
-		return nil, nil, fmt.Errorf("failed to get sandbox: %w", err)
+		return nil, nil, err
 	}
 
 	if sandbox.BuildInfo == nil {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("sandbox has no build info")))
-		return nil, nil, errors.New("sandbox has no build info")
+		err := common_errors.NewBadRequestError(errors.New("sandbox has no build info"))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	runnerInfo, err := p.getRunnerInfo(ctx, *sandbox.RunnerId)
 	if err != nil {
+		err := classifyUpstreamError(fmt.Errorf("failed to get runner info: %w", err))
 		ctx.Error(err)
-		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
+		return nil, nil, err
 	}
 
 	queryParams := ctx.Request.URL.Query()
@@ -51,8 +55,9 @@ func (p *Proxy) getSandboxBuildTarget(ctx *gin.Context) (*url.URL, map[string]st
 	// Create the complete target URL with path
 	target, err := url.Parse(targetURL)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
-		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
+		err := common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 	target.RawQuery = queryParams.Encode()
 

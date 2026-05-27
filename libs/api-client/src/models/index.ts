@@ -2,6 +2,8 @@ export * from './account-provider';
 export * from './admin-create-runner';
 export * from './admin-get-webhook-status200-response';
 export * from './announcement';
+export * from './api-error-code';
+export * from './api-error-response-dto';
 export * from './api-key-list';
 export * from './api-key-response';
 export * from './audit-log';

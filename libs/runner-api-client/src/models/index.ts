@@ -13,6 +13,7 @@ export * from './pull-snapshot-request-dto';
 export * from './recover-sandbox-dto';
 export * from './registry-dto';
 export * from './resize-sandbox-dto';
+export * from './runner-error-code';
 export * from './runner-info-response-dto';
 export * from './runner-metrics';
 export * from './runner-service-info';

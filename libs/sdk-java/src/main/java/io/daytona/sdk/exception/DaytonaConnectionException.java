@@ -36,4 +36,12 @@ public class DaytonaConnectionException extends DaytonaException {
     public DaytonaConnectionException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public DaytonaConnectionException(String message, String code, String source) {
+        super(0, message, code, source);
+    }
+
+    public DaytonaConnectionException(String message, Throwable cause, String code, String source) {
+        super(0, message, cause, code, source);
+    }
 }

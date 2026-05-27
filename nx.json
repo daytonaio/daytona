@@ -48,7 +48,8 @@
       "{workspaceRoot}/hack/go-client/openapi-templates/**/*",
       "{workspaceRoot}/hack/go-client/postprocess.sh"
     ],
-    "tsApiClient": ["apiClient", "{workspaceRoot}/hack/ts-client/postprocess.sh"]
+    "tsApiClient": ["apiClient", "{workspaceRoot}/hack/ts-client/postprocess.sh"],
+    "proxyErrorCode": ["{workspaceRoot}/apps/proxy/pkg/proxy/errors.go", "{workspaceRoot}/hack/error-codes/main.go"]
   },
   "plugins": [
     {
@@ -155,6 +156,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "if [ -z \"$VERSION\" ]; then echo \"VERSION is not set\" && exit 1; else echo \"VERSION is set to: $VERSION\"; fi"
+      }
+    },
+    "generate:proxy-error-code": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["proxyErrorCode"],
+      "options": {
+        "cwd": "{workspaceRoot}"
       }
     },
     "docker": {

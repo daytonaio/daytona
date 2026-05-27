@@ -21,6 +21,7 @@ import {
   Next,
   ParseBoolPipe,
   ParseUUIDPipe,
+  BadRequestException,
 } from '@nestjs/common'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'express'
@@ -48,7 +49,6 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { LogProxy } from '../proxy/log-proxy'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
@@ -114,14 +114,14 @@ export class SnapshotController {
   ): Promise<SnapshotDto> {
     if (createSnapshotDto.buildInfo) {
       if (createSnapshotDto.imageName) {
-        throw new BadRequestError('Cannot specify an image name when using a build info entry')
+        throw new BadRequestException('Cannot specify an image name when using a build info entry')
       }
       if (createSnapshotDto.entrypoint) {
-        throw new BadRequestError('Cannot specify an entrypoint when using a build info entry')
+        throw new BadRequestException('Cannot specify an entrypoint when using a build info entry')
       }
     } else {
       if (!createSnapshotDto.imageName) {
-        throw new BadRequestError('Must specify an image name when not using a build info entry')
+        throw new BadRequestException('Must specify an image name when not using a build info entry')
       }
     }
 

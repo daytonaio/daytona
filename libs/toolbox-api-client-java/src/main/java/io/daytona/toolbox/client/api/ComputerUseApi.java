@@ -37,6 +37,7 @@ import io.daytona.toolbox.client.model.ComputerUseStartResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
 import io.daytona.toolbox.client.model.ComputerUseStopResponse;
 import io.daytona.toolbox.client.model.DisplayInfoResponse;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import java.io.File;
 import io.daytona.toolbox.client.model.FindAccessibilityNodesRequest;
 import io.daytona.toolbox.client.model.KeyboardHotkeyRequest;
@@ -115,6 +116,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call clickCall(@javax.annotation.Nonnull MouseClickRequest request, final ApiCallback _callback) throws ApiException {
@@ -184,6 +187,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public MouseClickResponse click(@javax.annotation.Nonnull MouseClickRequest request) throws ApiException {
@@ -202,6 +207,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<MouseClickResponse> clickWithHttpInfo(@javax.annotation.Nonnull MouseClickRequest request) throws ApiException {
@@ -222,6 +229,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call clickAsync(@javax.annotation.Nonnull MouseClickRequest request, final ApiCallback<MouseClickResponse> _callback) throws ApiException {
@@ -244,6 +253,7 @@ public class ComputerUseApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
@@ -315,6 +325,7 @@ public class ComputerUseApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
@@ -335,6 +346,7 @@ public class ComputerUseApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
@@ -357,6 +369,7 @@ public class ComputerUseApi {
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
@@ -377,6 +390,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -448,6 +462,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -468,6 +483,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -490,6 +506,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -512,6 +529,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call dragCall(@javax.annotation.Nonnull MouseDragRequest request, final ApiCallback _callback) throws ApiException {
@@ -581,6 +600,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public MouseDragResponse drag(@javax.annotation.Nonnull MouseDragRequest request) throws ApiException {
@@ -599,6 +620,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<MouseDragResponse> dragWithHttpInfo(@javax.annotation.Nonnull MouseDragRequest request) throws ApiException {
@@ -619,6 +642,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call dragAsync(@javax.annotation.Nonnull MouseDragRequest request, final ApiCallback<MouseDragResponse> _callback) throws ApiException {
@@ -1198,6 +1223,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getComputerUseSystemStatusCall(final ApiCallback _callback) throws ApiException {
@@ -1260,6 +1286,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ComputerUseStatusResponse getComputerUseSystemStatus() throws ApiException {
@@ -1277,6 +1304,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ComputerUseStatusResponse> getComputerUseSystemStatusWithHttpInfo() throws ApiException {
@@ -1296,6 +1324,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getComputerUseSystemStatusAsync(final ApiCallback<ComputerUseStatusResponse> _callback) throws ApiException {
@@ -1315,6 +1344,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getDisplayInfoCall(final ApiCallback _callback) throws ApiException {
@@ -1377,6 +1407,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public DisplayInfoResponse getDisplayInfo() throws ApiException {
@@ -1394,6 +1425,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<DisplayInfoResponse> getDisplayInfoWithHttpInfo() throws ApiException {
@@ -1413,6 +1445,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getDisplayInfoAsync(final ApiCallback<DisplayInfoResponse> _callback) throws ApiException {
@@ -1432,6 +1465,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getMousePositionCall(final ApiCallback _callback) throws ApiException {
@@ -1494,6 +1528,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public MousePositionResponse getMousePosition() throws ApiException {
@@ -1511,6 +1546,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<MousePositionResponse> getMousePositionWithHttpInfo() throws ApiException {
@@ -1530,6 +1566,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getMousePositionAsync(final ApiCallback<MousePositionResponse> _callback) throws ApiException {
@@ -1931,6 +1968,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -2002,6 +2040,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -2022,6 +2061,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -2044,6 +2084,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
@@ -2065,6 +2106,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getWindowsCall(final ApiCallback _callback) throws ApiException {
@@ -2127,6 +2169,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public WindowsResponse getWindows() throws ApiException {
@@ -2144,6 +2187,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<WindowsResponse> getWindowsWithHttpInfo() throws ApiException {
@@ -2163,6 +2207,7 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getWindowsAsync(final ApiCallback<WindowsResponse> _callback) throws ApiException {
@@ -2447,6 +2492,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call moveMouseCall(@javax.annotation.Nonnull MouseMoveRequest request, final ApiCallback _callback) throws ApiException {
@@ -2516,6 +2563,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public MousePositionResponse moveMouse(@javax.annotation.Nonnull MouseMoveRequest request) throws ApiException {
@@ -2534,6 +2583,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<MousePositionResponse> moveMouseWithHttpInfo(@javax.annotation.Nonnull MouseMoveRequest request) throws ApiException {
@@ -2554,6 +2605,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call moveMouseAsync(@javax.annotation.Nonnull MouseMoveRequest request, final ApiCallback<MousePositionResponse> _callback) throws ApiException {
@@ -2574,6 +2627,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call pressHotkeyCall(@javax.annotation.Nonnull KeyboardHotkeyRequest request, final ApiCallback _callback) throws ApiException {
@@ -2643,6 +2698,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Object pressHotkey(@javax.annotation.Nonnull KeyboardHotkeyRequest request) throws ApiException {
@@ -2661,6 +2718,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Object> pressHotkeyWithHttpInfo(@javax.annotation.Nonnull KeyboardHotkeyRequest request) throws ApiException {
@@ -2681,6 +2740,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call pressHotkeyAsync(@javax.annotation.Nonnull KeyboardHotkeyRequest request, final ApiCallback<Object> _callback) throws ApiException {
@@ -2701,6 +2762,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call pressKeyCall(@javax.annotation.Nonnull KeyboardPressRequest request, final ApiCallback _callback) throws ApiException {
@@ -2770,6 +2833,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Object pressKey(@javax.annotation.Nonnull KeyboardPressRequest request) throws ApiException {
@@ -2788,6 +2853,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Object> pressKeyWithHttpInfo(@javax.annotation.Nonnull KeyboardPressRequest request) throws ApiException {
@@ -2808,6 +2875,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call pressKeyAsync(@javax.annotation.Nonnull KeyboardPressRequest request, final ApiCallback<Object> _callback) throws ApiException {
@@ -2955,6 +3024,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call scrollCall(@javax.annotation.Nonnull MouseScrollRequest request, final ApiCallback _callback) throws ApiException {
@@ -3024,6 +3095,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ScrollResponse scroll(@javax.annotation.Nonnull MouseScrollRequest request) throws ApiException {
@@ -3042,6 +3115,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ScrollResponse> scrollWithHttpInfo(@javax.annotation.Nonnull MouseScrollRequest request) throws ApiException {
@@ -3062,6 +3137,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call scrollAsync(@javax.annotation.Nonnull MouseScrollRequest request, final ApiCallback<ScrollResponse> _callback) throws ApiException {
@@ -3344,6 +3421,7 @@ public class ComputerUseApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call startRecordingCall(@javax.annotation.Nullable StartRecordingRequest request, final ApiCallback _callback) throws ApiException {
@@ -3410,6 +3488,7 @@ public class ComputerUseApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
      </table>
      */
     public Recording startRecording(@javax.annotation.Nullable StartRecordingRequest request) throws ApiException {
@@ -3430,6 +3509,7 @@ public class ComputerUseApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Recording> startRecordingWithHttpInfo(@javax.annotation.Nullable StartRecordingRequest request) throws ApiException {
@@ -3452,6 +3532,7 @@ public class ComputerUseApi {
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
+        <tr><td> 503 </td><td> Service Unavailable </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call startRecordingAsync(@javax.annotation.Nullable StartRecordingRequest request, final ApiCallback<Recording> _callback) throws ApiException {
@@ -3591,6 +3672,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call stopRecordingCall(@javax.annotation.Nonnull StopRecordingRequest request, final ApiCallback _callback) throws ApiException {
@@ -3662,6 +3744,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Recording stopRecording(@javax.annotation.Nonnull StopRecordingRequest request) throws ApiException {
@@ -3682,6 +3765,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Recording> stopRecordingWithHttpInfo(@javax.annotation.Nonnull StopRecordingRequest request) throws ApiException {
@@ -3704,6 +3788,7 @@ public class ComputerUseApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call stopRecordingAsync(@javax.annotation.Nonnull StopRecordingRequest request, final ApiCallback<Recording> _callback) throws ApiException {
@@ -3731,6 +3816,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeCompressedRegionScreenshotCall(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback _callback) throws ApiException {
@@ -3853,6 +3940,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ScreenshotResponse takeCompressedRegionScreenshot(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
@@ -3878,6 +3967,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ScreenshotResponse> takeCompressedRegionScreenshotWithHttpInfo(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
@@ -3905,6 +3996,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeCompressedRegionScreenshotAsync(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
@@ -3928,6 +4021,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeCompressedScreenshotCall(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback _callback) throws ApiException {
@@ -4010,6 +4105,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ScreenshotResponse takeCompressedScreenshot(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
@@ -4031,6 +4128,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ScreenshotResponse> takeCompressedScreenshotWithHttpInfo(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale) throws ApiException {
@@ -4054,6 +4153,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeCompressedScreenshotAsync(@javax.annotation.Nullable Boolean showCursor, @javax.annotation.Nullable String format, @javax.annotation.Nullable Integer quality, @javax.annotation.Nullable BigDecimal scale, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
@@ -4078,6 +4179,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeRegionScreenshotCall(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
@@ -4185,6 +4288,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ScreenshotResponse takeRegionScreenshot(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
@@ -4207,6 +4312,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ScreenshotResponse> takeRegionScreenshotWithHttpInfo(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor) throws ApiException {
@@ -4231,6 +4338,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeRegionScreenshotAsync(@javax.annotation.Nonnull Integer x, @javax.annotation.Nonnull Integer y, @javax.annotation.Nonnull Integer width, @javax.annotation.Nonnull Integer height, @javax.annotation.Nullable Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
@@ -4251,6 +4360,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeScreenshotCall(@javax.annotation.Nullable Boolean showCursor, final ApiCallback _callback) throws ApiException {
@@ -4318,6 +4429,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ScreenshotResponse takeScreenshot(@javax.annotation.Nullable Boolean showCursor) throws ApiException {
@@ -4336,6 +4449,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ScreenshotResponse> takeScreenshotWithHttpInfo(@javax.annotation.Nullable Boolean showCursor) throws ApiException {
@@ -4356,6 +4471,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call takeScreenshotAsync(@javax.annotation.Nullable Boolean showCursor, final ApiCallback<ScreenshotResponse> _callback) throws ApiException {
@@ -4376,6 +4493,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call typeTextCall(@javax.annotation.Nonnull KeyboardTypeRequest request, final ApiCallback _callback) throws ApiException {
@@ -4445,6 +4564,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Object typeText(@javax.annotation.Nonnull KeyboardTypeRequest request) throws ApiException {
@@ -4463,6 +4584,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Object> typeTextWithHttpInfo(@javax.annotation.Nonnull KeyboardTypeRequest request) throws ApiException {
@@ -4483,6 +4606,8 @@ public class ComputerUseApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call typeTextAsync(@javax.annotation.Nonnull KeyboardTypeRequest request, final ApiCallback<Object> _callback) throws ApiException {

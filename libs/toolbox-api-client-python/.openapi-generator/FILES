@@ -36,8 +36,10 @@ daytona_toolbox_api_client/models/computer_use_status_response.py
 daytona_toolbox_api_client/models/computer_use_stop_response.py
 daytona_toolbox_api_client/models/create_context_request.py
 daytona_toolbox_api_client/models/create_session_request.py
+daytona_toolbox_api_client/models/daemon_error_code.py
 daytona_toolbox_api_client/models/display_info.py
 daytona_toolbox_api_client/models/display_info_response.py
+daytona_toolbox_api_client/models/error_response.py
 daytona_toolbox_api_client/models/execute_request.py
 daytona_toolbox_api_client/models/execute_response.py
 daytona_toolbox_api_client/models/file_info.py

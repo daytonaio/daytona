@@ -22,6 +22,9 @@ import (
 //	@Produce		json
 //	@Param			request	body	CreateSessionRequest	true	"Session creation request"
 //	@Success		201
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		409	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/process/session [post]
 //
 //	@id				CreateSession
@@ -63,6 +66,9 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 //	@Tags			process
 //	@Param			sessionId	path	string	true	"Session ID"
 //	@Success		204
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/process/session/{sessionId} [delete]
 //
 //	@id				DeleteSession
@@ -89,7 +95,8 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 //	@Description	Get a list of all active shell sessions
 //	@Tags			process
 //	@Produce		json
-//	@Success		200	{array}	SessionDTO
+//	@Success		200	{array}		SessionDTO
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/process/session [get]
 //
 //	@id				ListSessions
@@ -116,6 +123,8 @@ func (s *SessionController) ListSessions(c *gin.Context) {
 //	@Produce		json
 //	@Param			sessionId	path		string	true	"Session ID"
 //	@Success		200			{object}	SessionDTO
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/process/session/{sessionId} [get]
 //
 //	@id				GetSession
@@ -140,6 +149,8 @@ func (s *SessionController) GetSession(c *gin.Context) {
 //	@Param			sessionId	path		string	true	"Session ID"
 //	@Param			commandId	path		string	true	"Command ID"
 //	@Success		200			{object}	CommandDTO
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/process/session/{sessionId}/command/{commandId} [get]
 //
 //	@id				GetSessionCommand
@@ -163,6 +174,8 @@ func (s *SessionController) GetSessionCommand(c *gin.Context) {
 //	@Tags			process
 //	@Produce		json
 //	@Success		200	{object}	SessionDTO
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/process/session/entrypoint [get]
 //
 //	@id				GetEntrypointSession

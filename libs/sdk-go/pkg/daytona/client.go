@@ -281,29 +281,11 @@ func (c *Client) getAuthContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, apiclient.ContextAccessToken, token)
 }
 
-// handleAPIError converts API client errors to Daytona error types
+// handleAPIError converts API client errors to Daytona error types. It
+// delegates to [errors.ConvertAPIError] which parses the JSON wire envelope
+// (`message`, `code`, `source`) so callers can branch on the typed sentinels.
 func (c *Client) handleAPIError(err error, httpResp *http.Response) error {
-	if httpResp == nil {
-		return errors.NewDaytonaError(err.Error(), 0, nil)
-	}
-
-	// Extract error message
-	message := err.Error()
-	if apiErr, ok := err.(apiclient.GenericOpenAPIError); ok {
-		if body := apiErr.Body(); len(body) > 0 {
-			message = string(body)
-		}
-	}
-
-	// Map to specific error types based on status code
-	switch httpResp.StatusCode {
-	case http.StatusNotFound:
-		return errors.NewDaytonaNotFoundError(message, httpResp.Header)
-	case http.StatusTooManyRequests:
-		return errors.NewDaytonaRateLimitError(message, httpResp.Header)
-	default:
-		return errors.NewDaytonaError(message, httpResp.StatusCode, httpResp.Header)
-	}
+	return errors.ConvertAPIError(err, httpResp)
 }
 
 // createToolboxClient creates a configured toolbox client for a specific sandbox.
@@ -604,14 +586,13 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 //
 // The sandboxIDOrName parameter accepts either the sandbox's unique ID or its
 // human-readable name. If a sandbox with the given identifier is not found,
-// a [errors.DaytonaNotFoundError] is returned.
+// a [*errors.DaytonaError] matching [errors.ErrNotFound] is returned.
 //
 // Example:
 //
 //	sandbox, err := client.Get(ctx, "my-sandbox")
 //	if err != nil {
-//	    var notFound *errors.DaytonaNotFoundError
-//	    if errors.As(err, &notFound) {
+//	    if stderrors.Is(err, errors.ErrNotFound) {
 //	        log.Println("Sandbox not found")
 //	    }
 //	    return err

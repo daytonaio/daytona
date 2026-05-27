@@ -33,8 +33,8 @@ module Daytona
       #   puts "Mouse is at: #{position.x}, #{position.y}"
       def position
         toolbox_api.get_mouse_position
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to get mouse position: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to get mouse position')
       end
 
       # Moves the mouse cursor to the specified coordinates.
@@ -50,8 +50,8 @@ module Daytona
       def move(x:, y:)
         request = DaytonaToolboxApiClient::MouseMoveRequest.new(x:, y:)
         toolbox_api.move_mouse(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to move mouse: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to move mouse')
       end
 
       # Clicks the mouse at the specified coordinates.
@@ -75,8 +75,8 @@ module Daytona
       def click(x:, y:, button: 'left', double: false)
         request = DaytonaToolboxApiClient::MouseClickRequest.new(x:, y:, button:, double:)
         toolbox_api.click(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to click mouse: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to click mouse')
       end
 
       # Drags the mouse from start coordinates to end coordinates.
@@ -95,8 +95,8 @@ module Daytona
       def drag(start_x:, start_y:, end_x:, end_y:, button: 'left')
         request = DaytonaToolboxApiClient::MouseDragRequest.new(start_x:, start_y:, end_x:, end_y:, button:)
         toolbox_api.drag(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to drag mouse: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to drag mouse')
       end
 
       # Scrolls the mouse wheel at the specified coordinates.
@@ -118,8 +118,8 @@ module Daytona
         request = DaytonaToolboxApiClient::MouseScrollRequest.new(x:, y:, direction:, amount:)
         toolbox_api.scroll(request)
         true
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to scroll mouse: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to scroll mouse')
       end
 
       instrument :position, :move, :click, :drag, :scroll, component: 'Mouse'
@@ -164,8 +164,8 @@ module Daytona
       def type(text:, delay: nil)
         request = DaytonaToolboxApiClient::KeyboardTypeRequest.new(text:, delay:)
         toolbox_api.type_text(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to type text: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to type text')
       end
 
       # Presses a key with optional modifiers.
@@ -187,8 +187,8 @@ module Daytona
       def press(key:, modifiers: nil)
         request = DaytonaToolboxApiClient::KeyboardPressRequest.new(key:, modifiers: modifiers || [])
         toolbox_api.press_key(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to press key: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to press key')
       end
 
       # Presses a hotkey combination.
@@ -209,8 +209,8 @@ module Daytona
       def hotkey(keys:)
         request = DaytonaToolboxApiClient::KeyboardHotkeyRequest.new(keys:)
         toolbox_api.press_hotkey(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to press hotkey: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to press hotkey')
       end
 
       instrument :type, :press, :hotkey, component: 'Keyboard'
@@ -254,8 +254,8 @@ module Daytona
       #   with_cursor = sandbox.computer_use.screenshot.take_full_screen(show_cursor: true)
       def take_full_screen(show_cursor: false)
         toolbox_api.take_screenshot(show_cursor:)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to take screenshot: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to take screenshot')
       end
 
       # Takes a screenshot of a specific region.
@@ -271,8 +271,8 @@ module Daytona
       #   puts "Captured region: #{screenshot.region.width}x#{screenshot.region.height}"
       def take_region(region:, show_cursor: false)
         toolbox_api.take_region_screenshot(region.height, region.width, region.y, region.x, show_cursor:)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to take region screenshot: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to take region screenshot')
       end
 
       # Takes a compressed screenshot of the entire screen.
@@ -303,8 +303,8 @@ module Daytona
           format: options.fmt,
           show_cursor: options.show_cursor
         )
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to take compressed screenshot: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to take compressed screenshot')
       end
 
       # Takes a compressed screenshot of a specific region.
@@ -334,8 +334,8 @@ module Daytona
           format: options.fmt,
           show_cursor: options.show_cursor
         )
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to take compressed region screenshot: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to take compressed region screenshot')
       end
 
       instrument :take_full_screen, :take_region, :take_compressed, :take_compressed_region,
@@ -380,8 +380,8 @@ module Daytona
       #   end
       def info
         toolbox_api.get_display_info
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to get display info: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to get display info')
       end
 
       # Gets the list of open windows.
@@ -397,8 +397,8 @@ module Daytona
       #   end
       def windows
         toolbox_api.get_windows
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to get windows: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to get windows')
       end
 
       instrument :info, :windows, component: 'Display'
@@ -446,8 +446,8 @@ module Daytona
         opts[:max_depth] = max_depth unless max_depth.nil?
 
         toolbox_api.get_accessibility_tree(opts)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to get accessibility tree: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to get accessibility tree')
       end
 
       # Finds AT-SPI accessibility nodes matching the provided filters.
@@ -482,8 +482,8 @@ module Daytona
 
         request = DaytonaToolboxApiClient::FindAccessibilityNodesRequest.new(attrs)
         toolbox_api.find_accessibility_nodes(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to find accessibility nodes: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to find accessibility nodes')
       end
 
       # Focuses an AT-SPI accessibility node.
@@ -496,8 +496,8 @@ module Daytona
       def focus_node(id:)
         request = DaytonaToolboxApiClient::AccessibilityNodeRequest.new(id:)
         toolbox_api.focus_accessibility_node(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to focus accessibility node: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to focus accessibility node')
       end
 
       # Invokes an AT-SPI accessibility node action.
@@ -514,8 +514,8 @@ module Daytona
 
         request = DaytonaToolboxApiClient::AccessibilityInvokeRequest.new(attrs)
         toolbox_api.invoke_accessibility_node(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to invoke accessibility node: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to invoke accessibility node')
       end
 
       # Sets an AT-SPI accessibility node value.
@@ -529,8 +529,8 @@ module Daytona
       def set_node_value(id:, value:)
         request = DaytonaToolboxApiClient::AccessibilitySetValueRequest.new(id:, value:)
         toolbox_api.set_accessibility_node_value(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to set accessibility node value: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to set accessibility node value')
       end
 
       instrument :get_tree, :find_nodes, :focus_node, :invoke_node, :set_node_value,
@@ -627,8 +627,8 @@ module Daytona
       def start(label: nil)
         request = DaytonaToolboxApiClient::StartRecordingRequest.new(label:)
         toolbox_api.start_recording(request: request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to start recording: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to start recording')
       end
 
       # Stops an active screen recording session.
@@ -644,8 +644,8 @@ module Daytona
       def stop(id:)
         request = DaytonaToolboxApiClient::StopRecordingRequest.new(id: id)
         toolbox_api.stop_recording(request)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to stop recording: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to stop recording')
       end
 
       # Lists all recordings (active and completed).
@@ -661,8 +661,8 @@ module Daytona
       #   end
       def list
         toolbox_api.list_recordings
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to list recordings: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to list recordings')
       end
 
       # Gets details of a specific recording by ID.
@@ -678,8 +678,8 @@ module Daytona
       #   puts "Duration: #{recording.duration_seconds} seconds"
       def get(id:)
         toolbox_api.get_recording(id)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to get recording: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to get recording')
       end
 
       # Deletes a recording by ID.
@@ -693,8 +693,8 @@ module Daytona
       #   puts "Recording deleted"
       def delete(id:)
         toolbox_api.delete_recording(id)
-      rescue StandardError => e
-        raise Sdk::Error, "Failed to delete recording: #{e.message}"
+      rescue *Sdk::API_ERROR_CLASSES => e
+        raise Sdk.wrap_error(e, 'Failed to delete recording')
       end
 
       # Downloads a recording file and saves it to a local path.
@@ -815,8 +815,8 @@ module Daytona
     #   puts "Computer use processes started: #{result.message}"
     def start
       toolbox_api.start_computer_use
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to start computer use: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to start computer use')
     end
 
     # Stops all computer use processes.
@@ -829,8 +829,8 @@ module Daytona
     #   puts "Computer use processes stopped: #{result.message}"
     def stop
       toolbox_api.stop_computer_use
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to stop computer use: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to stop computer use')
     end
 
     # Gets the status of all computer use processes.
@@ -843,8 +843,8 @@ module Daytona
     #   puts "Computer use status: #{response.status}"
     def status
       toolbox_api.get_computer_use_status
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to get computer use status: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get computer use status')
     end
 
     # Gets the status of a specific VNC process.
@@ -858,8 +858,8 @@ module Daytona
     #   no_vnc_status = sandbox.computer_use.get_process_status("novnc")
     def get_process_status(process_name:)
       toolbox_api.get_process_status(process_name, sandbox_id)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to get process status: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get process status')
     end
 
     # Restarts a specific VNC process.
@@ -873,8 +873,8 @@ module Daytona
     #   puts "XFCE4 process restarted: #{result.message}"
     def restart_process(process_name:)
       toolbox_api.restart_process(process_name, sandbox_id)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to restart process: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to restart process')
     end
 
     # Gets logs for a specific VNC process.
@@ -888,8 +888,8 @@ module Daytona
     #   puts "NoVNC logs: #{logs}"
     def get_process_logs(process_name:)
       toolbox_api.get_process_logs(process_name, sandbox_id)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to get process logs: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get process logs')
     end
 
     # Gets error logs for a specific VNC process.
@@ -903,8 +903,8 @@ module Daytona
     #   puts "X11VNC errors: #{errors}"
     def get_process_errors(process_name:)
       toolbox_api.get_process_errors(process_name, sandbox_id)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to get process errors: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get process errors')
     end
 
     instrument :start, :stop, :status, :get_process_status, :restart_process,

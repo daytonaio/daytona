@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 
@@ -59,7 +60,9 @@ func (d *DockerClient) getSandboxState(ct *container.InspectResponse) (enums.San
 		if ct.State.ExitCode == 0 || ct.State.ExitCode == 137 || ct.State.ExitCode == 143 || ct.State.ExitCode == 255 {
 			return enums.SandboxStateStopped, nil
 		}
-		return enums.SandboxStateError, fmt.Errorf("sandbox exited with code %d, reason: %s", ct.State.ExitCode, ct.State.Error)
+		return enums.SandboxStateError, common.NewContainerCrashedError(
+			fmt.Sprintf("sandbox exited with code %d, reason: %s", ct.State.ExitCode, ct.State.Error),
+		)
 
 	case container.StateDead:
 		return enums.SandboxStateDestroyed, nil

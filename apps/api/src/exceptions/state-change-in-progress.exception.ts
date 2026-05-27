@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { HttpException, HttpStatus } from '@nestjs/common'
+import { ConflictException } from '@nestjs/common'
+import { ApiErrorCode } from '../common/errors/api-error-code.enum'
 
-export class StateChangeInProgressError extends HttpException {
+export class StateChangeInProgressError extends ConflictException {
   constructor(message = 'Sandbox state change in progress') {
-    super(message, HttpStatus.CONFLICT)
+    super({ message, code: ApiErrorCode.SANDBOX_STATE_CHANGE_IN_PROGRESS })
   }
 }

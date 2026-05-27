@@ -1661,8 +1661,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "code": {
-                    "type": "string",
-                    "example": "BAD_REQUEST"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/RunnerErrorCode"
+                        }
+                    ],
+                    "example": "STORAGE_EXPANSION_LIMIT_REACHED"
                 },
                 "message": {
                     "type": "string",
@@ -1675,6 +1679,10 @@ const docTemplate = `{
                 "path": {
                     "type": "string",
                     "example": "/api/resource"
+                },
+                "source": {
+                    "type": "string",
+                    "example": "DAYTONA_RUNNER"
                 },
                 "statusCode": {
                     "type": "integer",
@@ -1851,6 +1859,27 @@ const docTemplate = `{
                     "$ref": "#/definitions/RegistryDTO"
                 }
             }
+        },
+        "RunnerErrorCode": {
+            "type": "string",
+            "enum": [
+                "STORAGE_EXPANSION_LIMIT_REACHED",
+                "DOCKER_DAEMON_UNREACHABLE",
+                "SANDBOX_DAEMON_UNREACHABLE",
+                "SNAPSHOT_PULL_TIMEOUT",
+                "BUILD_TIMEOUT",
+                "CONTAINER_CRASHED",
+                "UNSUPPORTED_ARCHITECTURE"
+            ],
+            "x-enum-varnames": [
+                "CodeStorageExpansionLimitReached",
+                "CodeDockerDaemonUnreachable",
+                "CodeSandboxDaemonUnreachable",
+                "CodeSnapshotPullTimeout",
+                "CodeBuildTimeout",
+                "CodeContainerCrashed",
+                "CodeUnsupportedArchitecture"
+            ]
         },
         "RunnerInfoResponseDTO": {
             "type": "object",

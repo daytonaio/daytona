@@ -178,7 +178,8 @@ RSpec.describe Daytona::Sandbox do
     end
 
     it 'wraps errors in Sdk::Error' do
-      allow(info_api).to receive(:get_user_home_dir).and_raise(StandardError, 'connection refused')
+      allow(info_api).to receive(:get_user_home_dir).and_raise(DaytonaApiClient::ApiError.new(code: 500,
+                                                                                              message: 'connection refused'))
 
       expect { sandbox.get_user_home_dir }.to raise_error(Daytona::Sdk::Error, /Failed to get user home directory/)
     end
@@ -192,7 +193,7 @@ RSpec.describe Daytona::Sandbox do
     end
 
     it 'wraps errors in Sdk::Error' do
-      allow(info_api).to receive(:get_work_dir).and_raise(StandardError, 'timeout')
+      allow(info_api).to receive(:get_work_dir).and_raise(DaytonaApiClient::ApiError.new(code: 500, message: 'timeout'))
 
       expect { sandbox.get_work_dir }.to raise_error(Daytona::Sdk::Error, /Failed to get working directory path/)
     end
@@ -268,7 +269,8 @@ RSpec.describe Daytona::Sandbox do
     end
 
     it 'wraps errors in Sdk::Error' do
-      allow(sandbox_api).to receive(:update_last_activity).and_raise(StandardError, 'offline')
+      allow(sandbox_api).to receive(:update_last_activity).and_raise(DaytonaApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'offline'))
 
       expect { sandbox.refresh_activity }.to raise_error(Daytona::Sdk::Error, /Failed to refresh sandbox activity/)
     end
@@ -304,7 +306,8 @@ RSpec.describe Daytona::Sandbox do
     end
 
     it 'wraps errors in Sdk::Error' do
-      allow(sandbox_api).to receive(:recover_sandbox).and_raise(StandardError, 'bad state')
+      allow(sandbox_api).to receive(:recover_sandbox).and_raise(DaytonaApiClient::ApiError.new(code: 500,
+                                                                                               message: 'bad state'))
 
       expect { sandbox.recover(5) }.to raise_error(Daytona::Sdk::Error, /Failed to recover sandbox/)
     end

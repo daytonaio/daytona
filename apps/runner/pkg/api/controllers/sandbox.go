@@ -27,11 +27,11 @@ var errInvalidSnapshotFromSandboxRegistry = errors.New("registry is required for
 //	@Param			sandbox	body	dto.CreateSandboxDTO	true	"Create sandbox"
 //	@Produce		json
 //	@Success		201	{object}	dto.StartSandboxResponse
-//	@Failure		400	{object}	common_errors.ErrorResponse
-//	@Failure		401	{object}	common_errors.ErrorResponse
-//	@Failure		404	{object}	common_errors.ErrorResponse
-//	@Failure		409	{object}	common_errors.ErrorResponse
-//	@Failure		500	{object}	common_errors.ErrorResponse
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		401	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		409	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/sandboxes [post]
 //
 //	@id				Create
@@ -45,7 +45,7 @@ func Create(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -71,11 +71,11 @@ func Create(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox destroyed"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/destroy [post]
 //
 //	@id				Destroy
@@ -84,7 +84,7 @@ func Destroy(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -109,11 +109,11 @@ func Destroy(ctx *gin.Context) {
 //	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Param			sandbox		body		dto.CreateBackupDTO	true	"Create backup"
 //	@Success		201			{string}	string				"Backup started"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/backup [post]
 //
 //	@id				CreateBackup
@@ -130,7 +130,7 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 
 		runner, err := runner.GetInstance(nil)
 		if err != nil {
-			ctx.Error(err)
+			ctx.Error(common_errors.NewInternalServerError(err))
 			return
 		}
 
@@ -158,11 +158,11 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 //	@Param			sandboxId	path		string									true	"Sandbox ID"
 //	@Param			body		body		dto.CreateSnapshotFromSandboxRequestDTO	true	"Snapshot from sandbox"
 //	@Success		200			{object}	dto.SnapshotInfoResponse
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/snapshot-from-sandbox [post]
 //
 //	@id				SnapshotFromSandbox
@@ -182,7 +182,7 @@ func SnapshotFromSandbox(ctx *gin.Context) {
 
 	r, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -204,11 +204,11 @@ func SnapshotFromSandbox(ctx *gin.Context) {
 //	@Param			sandboxId	path		string					true	"Sandbox ID"
 //	@Param			sandbox		body		dto.ResizeSandboxDTO	true	"Resize sandbox"
 //	@Success		200			{string}	string					"Sandbox resized"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/resize [post]
 //
 //	@id				Resize
@@ -224,7 +224,7 @@ func Resize(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -249,11 +249,11 @@ func Resize(ctx *gin.Context) {
 //	@Param			sandboxId	path		string							true	"Sandbox ID"
 //	@Param			sandbox		body		dto.UpdateNetworkSettingsDTO	true	"Update network settings"
 //	@Success		200			{string}	string							"Network settings updated"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/network-settings [post]
 //
 //	@id				UpdateNetworkSettings
@@ -268,7 +268,7 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -289,11 +289,11 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string							true	"Sandbox ID"
 //	@Success		200			{object}	dto.UpdateNetworkSettingsDTO	"Network settings"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/network-settings [get]
 //
 //	@id				GetNetworkSettings
@@ -326,11 +326,11 @@ func GetNetworkSettings(ctx *gin.Context) {
 //	@Param			metadata	body		object						false	"Metadata"
 //	@Param			token		query		string						false	"Auth token"
 //	@Success		200			{object}	dto.StartSandboxResponse	"Sandbox started"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/start [post]
 //
 //	@id				Start
@@ -339,7 +339,7 @@ func Start(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -376,11 +376,11 @@ func Start(ctx *gin.Context) {
 //	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Param			sandbox		body		dto.StopSandboxDTO	false	"Stop sandbox"
 //	@Success		200			{string}	string				"Sandbox stopped"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/stop [post]
 //
 //	@id				Stop
@@ -393,7 +393,7 @@ func Stop(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -414,11 +414,11 @@ func Stop(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Success		200			{object}	SandboxInfoResponse	"Sandbox info"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId} [get]
 //
 //	@id				Info
@@ -427,7 +427,7 @@ func Info(ctx *gin.Context) {
 
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -475,11 +475,11 @@ type SandboxInfoResponse struct {
 //	@Param			sandboxId	path		string					true	"Sandbox ID"
 //	@Param			recovery	body		dto.RecoverSandboxDTO	true	"Recovery parameters"
 //	@Success		200			{string}	string					"Sandbox recovered"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/recover [post]
 //
 //	@id				Recover
@@ -494,7 +494,7 @@ func Recover(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
-		ctx.Error(err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -517,7 +517,7 @@ func Recover(ctx *gin.Context) {
 //	@Param			sandboxId	path		string					true	"Sandbox ID"
 //	@Param			request		body		dto.IsRecoverableDTO	true	"Error reason to check"
 //	@Success		200			{object}	dto.IsRecoverableResponse
-//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		400			{object}	common.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/is-recoverable [post]
 //
 //	@id				IsRecoverable

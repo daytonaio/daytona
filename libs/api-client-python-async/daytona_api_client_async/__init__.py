@@ -57,6 +57,8 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.admin_create_runner import AdminCreateRunner
     from daytona_api_client_async.models.admin_get_webhook_status200_response import AdminGetWebhookStatus200Response
     from daytona_api_client_async.models.announcement import Announcement
+    from daytona_api_client_async.models.api_error_code import ApiErrorCode
+    from daytona_api_client_async.models.api_error_response_dto import ApiErrorResponseDto
     from daytona_api_client_async.models.api_key_list import ApiKeyList
     from daytona_api_client_async.models.api_key_response import ApiKeyResponse
     from daytona_api_client_async.models.audit_log import AuditLog
@@ -270,6 +272,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "AdminCreateRunner": "daytona_api_client_async.models.admin_create_runner",
     "AdminGetWebhookStatus200Response": "daytona_api_client_async.models.admin_get_webhook_status200_response",
     "Announcement": "daytona_api_client_async.models.announcement",
+    "ApiErrorCode": "daytona_api_client_async.models.api_error_code",
+    "ApiErrorResponseDto": "daytona_api_client_async.models.api_error_response_dto",
     "ApiKeyList": "daytona_api_client_async.models.api_key_list",
     "ApiKeyResponse": "daytona_api_client_async.models.api_key_response",
     "AuditLog": "daytona_api_client_async.models.audit_log",
@@ -497,6 +501,8 @@ __all__ = [
     "AdminCreateRunner",
     "AdminGetWebhookStatus200Response",
     "Announcement",
+    "ApiErrorCode",
+    "ApiErrorResponseDto",
     "ApiKeyList",
     "ApiKeyResponse",
     "AuditLog",

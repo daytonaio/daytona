@@ -5,6 +5,12 @@
   "sourceRoot": "libs/sdk-ruby",
   "tags": [],
   "targets": {
+    "generate:proxy-error-code": {
+      "outputs": ["{projectRoot}/lib/daytona/codes/proxy_error_code.rb"],
+      "options": {
+        "command": "go run hack/error-codes/main.go --lang=ruby"
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "options": {

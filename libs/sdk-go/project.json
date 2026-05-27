@@ -4,6 +4,12 @@
   "projectType": "library",
   "sourceRoot": "libs/sdk-go",
   "targets": {
+    "generate:proxy-error-code": {
+      "outputs": ["{projectRoot}/pkg/codes/proxy_error_code.go"],
+      "options": {
+        "command": "go run hack/error-codes/main.go --lang=go"
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "inputs": ["goProduction", "^goProduction"],

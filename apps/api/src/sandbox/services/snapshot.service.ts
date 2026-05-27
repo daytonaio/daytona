@@ -11,7 +11,8 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { OrganizationQuotaExceededError } from '../../exceptions/organization-quota-exceeded.exception'
+import { SnapshotStateChangeInProgressError } from '../../exceptions/snapshot-state-change-in-progress.exception'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In, Raw, ILike, IsNull, FindOptionsWhere, Like, LessThan } from 'typeorm'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
@@ -39,7 +40,7 @@ import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
 import { getEffectivePerSandboxLimits } from '../../organization/utils/sandbox-limits.util'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
-import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
+import { DefaultRegionRequiredError } from '../../exceptions/default-region-required.exception'
 import { Region } from '../../region/entities/region.entity'
 import { RunnerState } from '../enums/runner-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
@@ -147,7 +148,7 @@ export class SnapshotService {
 
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     if (!organization.defaultRegionId) {
-      throw new DefaultRegionRequiredException()
+      throw new DefaultRegionRequiredError()
     }
 
     const region = await this.getValidatedOrDefaultRegion(organization, createSnapshotDto.regionId)
@@ -228,7 +229,7 @@ export class SnapshotService {
 
   async createFromBuildInfo(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     if (!organization.defaultRegionId) {
-      throw new DefaultRegionRequiredException()
+      throw new DefaultRegionRequiredError()
     }
 
     const region = await this.getValidatedOrDefaultRegion(organization, createSnapshotDto.regionId)
@@ -558,24 +559,24 @@ export class SnapshotService {
     )
 
     if (cpu && cpu > maxCpuPerSandbox) {
-      throw new BadRequestError(
+      throw new BadRequestException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (memory && memory > maxMemoryPerSandbox) {
-      throw new BadRequestError(
+      throw new BadRequestException(
         `Memory request ${memory}GB exceeds maximum allowed per sandbox (${maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (disk && disk > maxDiskPerSandbox) {
-      throw new BadRequestError(
+      throw new BadRequestException(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
 
     // Do not allow creation of GPU snapshots if the region has no GPU quota at all.
     if (gpu && gpu > 0 && region.enforceQuotas && (!regionQuota || regionQuota.totalGpuQuota === 0)) {
-      throw new BadRequestError(`GPU quota exceeded. Maximum allowed: ${regionQuota?.totalGpuQuota ?? 0}.`)
+      throw new BadRequestException(`GPU quota exceeded. Maximum allowed: ${regionQuota?.totalGpuQuota ?? 0}.`)
     }
 
     // validate usage quotas
@@ -585,7 +586,9 @@ export class SnapshotService {
 
     try {
       if (usageOverview.currentSnapshotUsage + usageOverview.pendingSnapshotUsage > organization.snapshotQuota) {
-        throw new BadRequestError(`Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`)
+        throw new OrganizationQuotaExceededError(
+          `Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`,
+        )
       }
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, addedSnapshotCount)
@@ -657,7 +660,9 @@ export class SnapshotService {
       const recentlyDeactivated = Date.now() - snapshot.updatedAt.getTime() < activationCooldownMs
 
       if (recentlyDeactivated) {
-        throw new BadRequestException('Snapshot deactivation is still in progress. Please try again in a few minutes.')
+        throw new SnapshotStateChangeInProgressError(
+          'Snapshot deactivation is still in progress. Please try again in a few minutes.',
+        )
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
@@ -812,7 +817,7 @@ export class SnapshotService {
    */
   private async getValidatedOrDefaultRegion(organization: Organization, regionId?: string): Promise<Region> {
     if (!organization.defaultRegionId) {
-      throw new DefaultRegionRequiredException()
+      throw new DefaultRegionRequiredError()
     }
 
     regionId = regionId?.trim()

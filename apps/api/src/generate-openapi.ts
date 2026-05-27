@@ -15,6 +15,7 @@ import {
   VolumeCreatedWebhookDto,
   VolumeStateUpdatedWebhookDto,
 } from './webhook/dto/webhook-event-payloads.dto'
+import { ApiErrorResponseDto } from './common/errors/api-error-response.dto'
 
 async function generateOpenAPI() {
   try {
@@ -24,8 +25,15 @@ async function generateOpenAPI() {
 
     const config = getOpenApiConfig('http://localhost:3000')
 
+    // Always include the generic ApiErrorResponseDto (and the ApiErrorCode enum it
+    // references) so SDK consumers get a typed error envelope and code enum, even
+    // though individual controllers don't have to @ApiResponse-annotate it.
+    const errorExtraModels = [ApiErrorResponseDto]
+
     const document = {
-      ...SwaggerModule.createDocument(app, config),
+      ...SwaggerModule.createDocument(app, config, {
+        extraModels: errorExtraModels,
+      }),
     }
     const openapiPath = './dist/apps/api/openapi.json'
     fs.mkdirSync(path.dirname(openapiPath), { recursive: true })
@@ -36,6 +44,7 @@ async function generateOpenAPI() {
     const document_3_1_0 = {
       ...SwaggerModule.createDocument(app, config, {
         extraModels: [
+          ...errorExtraModels,
           SandboxCreatedWebhookDto,
           SandboxStateUpdatedWebhookDto,
           SnapshotCreatedWebhookDto,

@@ -23,32 +23,37 @@ func (p *Proxy) getSnapshotTarget(ctx *gin.Context) (*url.URL, map[string]string
 	// Extract snapshot ID from the path
 	match := regexp.MustCompile(`^/snapshots/([\w-]+)/build-logs$`).FindStringSubmatch(ctx.Request.URL.Path)
 	if len(match) != 2 {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot ID is required")))
-		return nil, nil, errors.New("snapshot ID is required")
+		err := common_errors.NewBadRequestError(errors.New("snapshot ID is required"))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	snapshotId := match[1]
 
 	snapshot, err := p.getSnapshot(ctx, snapshotId)
 	if err != nil {
+		err := classifyUpstreamError(fmt.Errorf("failed to get snapshot: %w", err))
 		ctx.Error(err)
-		return nil, nil, fmt.Errorf("failed to get snapshot: %w", err)
+		return nil, nil, err
 	}
 
 	if snapshot.Ref == nil {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot has no snapshot reference")))
-		return nil, nil, errors.New("snapshot has no snapshot reference")
+		err := common_errors.NewBadRequestError(errors.New("snapshot has no snapshot reference"))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	if snapshot.InitialRunnerId == nil {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot has no initial runner")))
-		return nil, nil, errors.New("snapshot has no initial runner")
+		err := common_errors.NewBadRequestError(errors.New("snapshot has no initial runner"))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 
 	runnerInfo, err := p.getRunnerInfo(ctx, *snapshot.InitialRunnerId)
 	if err != nil {
+		err := classifyUpstreamError(fmt.Errorf("failed to get runner info: %w", err))
 		ctx.Error(err)
-		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
+		return nil, nil, err
 	}
 
 	queryParams := ctx.Request.URL.Query()
@@ -60,8 +65,9 @@ func (p *Proxy) getSnapshotTarget(ctx *gin.Context) (*url.URL, map[string]string
 	// Create the complete target URL with path
 	target, err := url.Parse(targetURL)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
-		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
+		err := common_errors.NewInternalServerError(fmt.Errorf("failed to parse target URL: %w", err))
+		ctx.Error(err)
+		return nil, nil, err
 	}
 	target.RawQuery = queryParams.Encode()
 
@@ -113,7 +119,7 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, runnerId string) (*RunnerInfo
 	}
 
 	if runner.ApiUrl == nil {
-		return nil, errors.New("runner API URL not found")
+		return nil, NewRunnerUnreachableError("runner API URL not found")
 	}
 
 	info := RunnerInfo{

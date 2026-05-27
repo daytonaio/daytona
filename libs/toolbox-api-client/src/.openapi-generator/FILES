@@ -35,8 +35,10 @@ models/computer-use-status-response.ts
 models/computer-use-stop-response.ts
 models/create-context-request.ts
 models/create-session-request.ts
+models/daemon-error-code.ts
 models/display-info-response.ts
 models/display-info.ts
+models/error-response.ts
 models/execute-request.ts
 models/execute-response.ts
 models/file-info.ts

@@ -163,12 +163,13 @@ jobs:
           openapi_version="$(node -e "console.log(require('./openapitools.json')['generator-cli'].version)")"
           yarn openapi-generator-cli version-manager set "$openapi_version"
           yarn generate:api-client
+          yarn generate:proxy-error-code
           yarn lint:fix
           yarn format
           poetry lock
           yarn docs
           GONOSUMDB=github.com/daytonaio/daytona go work sync
-          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
+          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn generate:proxy-error-code', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
 
   typecheck-sdk-typescript:
     name: TypeScript SDK type check

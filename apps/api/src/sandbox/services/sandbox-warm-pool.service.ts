@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { FindOptionsWhere, In, MoreThan, Not, Repository } from 'typeorm'
@@ -20,7 +20,6 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Runner } from '../entities/runner.entity'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
@@ -91,7 +90,7 @@ export class SandboxWarmPoolService {
         where: snapshotFilter,
       })
       if (!snapshot) {
-        throw new BadRequestError(
+        throw new BadRequestException(
           `Snapshot ${sandboxSnapshot} not found. Did you add it through the Daytona Dashboard?`,
         )
       }

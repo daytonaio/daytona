@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
+import { OrganizationSuspendedError } from '../../exceptions/organization-suspended.exception'
 import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
@@ -784,9 +785,9 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
     if (organization.suspendedUntil ? organization.suspendedUntil > new Date() : true) {
       if (organization.suspensionReason) {
-        throw new ForbiddenException(`Organization is suspended: ${organization.suspensionReason}`)
+        throw new OrganizationSuspendedError(`Organization is suspended: ${organization.suspensionReason}`)
       } else {
-        throw new ForbiddenException('Organization is suspended')
+        throw new OrganizationSuspendedError()
       }
     }
   }

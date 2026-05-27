@@ -7,6 +7,8 @@ import (
 	"errors"
 	"net/http"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 
 	recordingservice "github.com/daytonaio/daemon/pkg/recording"
@@ -21,35 +23,34 @@ import (
 //	@Produce		json
 //	@Param			request	body		StartRecordingRequest	false	"Recording options"
 //	@Success		201		{object}	RecordingDTO
-//	@Failure		400		{object}	map[string]string
-//	@Failure		500		{object}	map[string]string
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
+//	@Failure		503		{object}	common.ErrorResponse
 //	@Router			/computeruse/recordings/start [post]
 //
 //	@id				StartRecording
 func (h *RecordingController) StartRecording(ctx *gin.Context) {
 	var request StartRecordingRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		// Allow empty body - label is optional
+		if ctx.Request.ContentLength > 0 {
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+			return
+		}
+
 		request = StartRecordingRequest{}
 	}
 
 	recording, err := h.recordingService.StartRecording(request.Label)
 	if err != nil {
 		if errors.Is(err, recordingservice.ErrFFmpegNotFound) {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error":   "ffmpeg_not_found",
-				"message": "FFmpeg must be installed and available in PATH to use screen recording",
-			})
+			ctx.Error(common.NewRecordingFfmpegNotFoundError("FFmpeg must be installed and available in PATH to use screen recording"))
 			return
 		}
 		if errors.Is(err, recordingservice.ErrInvalidLabel) {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error":   "invalid_label",
-				"message": err.Error(),
-			})
+			ctx.Error(common_errors.NewBadRequestError(err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 

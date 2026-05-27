@@ -34,8 +34,10 @@ model_computer_use_status_response.go
 model_computer_use_stop_response.go
 model_create_context_request.go
 model_create_session_request.go
+model_daemon_error_code.go
 model_display_info.go
 model_display_info_response.go
+model_error_response.go
 model_execute_request.go
 model_execute_response.go
 model_file_info.go

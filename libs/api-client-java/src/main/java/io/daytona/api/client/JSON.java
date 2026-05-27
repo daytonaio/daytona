@@ -100,6 +100,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.AdminCreateRunner.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.AdminGetWebhookStatus200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.Announcement.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.ApiErrorResponseDto.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.ApiKeyList.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.ApiKeyResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.api.client.model.AuditLog.CustomTypeAdapterFactory());

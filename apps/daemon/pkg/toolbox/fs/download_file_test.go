@@ -13,15 +13,25 @@ import (
 	"strings"
 	"testing"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
 func downloadFileContext(t *testing.T, filePath string) *httptest.ResponseRecorder {
 	t.Helper()
 	recorder := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(recorder)
-	ctx.Request = httptest.NewRequest(http.MethodGet, "/files/download?path="+url.QueryEscape(filePath), nil)
-	DownloadFile(ctx)
+	router := gin.New()
+	router.Use(common_errors.NewErrorMiddleware("DAYTONA_DAEMON", func(ctx *gin.Context, err error) common_errors.ErrorResponse {
+		return common_errors.ErrorResponse{
+			StatusCode: http.StatusInternalServerError,
+			Source:     "DAYTONA_DAEMON",
+			Code:       "INTERNAL_SERVER_ERROR",
+			Message:    err.Error(),
+		}
+	}))
+	router.GET("/files/download", DownloadFile)
+	req := httptest.NewRequest(http.MethodGet, "/files/download?path="+url.QueryEscape(filePath), nil)
+	router.ServeHTTP(recorder, req)
 	return recorder
 }
 

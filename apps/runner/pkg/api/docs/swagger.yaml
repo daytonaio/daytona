@@ -114,8 +114,9 @@ definitions:
     description: Error response
     properties:
       code:
-        example: BAD_REQUEST
-        type: string
+        allOf:
+          - $ref: '#/definitions/RunnerErrorCode'
+        example: STORAGE_EXPANSION_LIMIT_REACHED
       message:
         example: Bad request
         type: string
@@ -124,6 +125,9 @@ definitions:
         type: string
       path:
         example: /api/resource
+        type: string
+      source:
+        example: DAYTONA_RUNNER
         type: string
       statusCode:
         example: 400
@@ -250,6 +254,24 @@ definitions:
       registry:
         $ref: '#/definitions/RegistryDTO'
     type: object
+  RunnerErrorCode:
+    enum:
+      - STORAGE_EXPANSION_LIMIT_REACHED
+      - DOCKER_DAEMON_UNREACHABLE
+      - SANDBOX_DAEMON_UNREACHABLE
+      - SNAPSHOT_PULL_TIMEOUT
+      - BUILD_TIMEOUT
+      - CONTAINER_CRASHED
+      - UNSUPPORTED_ARCHITECTURE
+    type: string
+    x-enum-varnames:
+      - CodeStorageExpansionLimitReached
+      - CodeDockerDaemonUnreachable
+      - CodeSandboxDaemonUnreachable
+      - CodeSnapshotPullTimeout
+      - CodeBuildTimeout
+      - CodeContainerCrashed
+      - CodeUnsupportedArchitecture
   RunnerInfoResponseDTO:
     properties:
       appVersion:

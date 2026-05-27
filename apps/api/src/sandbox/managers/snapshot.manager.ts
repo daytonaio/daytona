@@ -40,7 +40,7 @@ import { parseDockerImage } from '../../common/utils/docker-image.util'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
-import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { NoAvailableRunnersError } from '../../exceptions/no-available-runners.exception'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotInfoResponse } from '@daytona/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
@@ -713,7 +713,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                   )
                   await this.redisLockProvider.unlock(sandboxLockKey)
                 } catch (e) {
-                  if (e instanceof BadRequestError && e.message === 'No available runners') {
+                  if (e instanceof NoAvailableRunnersError) {
                     this.logger.warn(
                       `No available runners found in region ${sandbox.region} for sandbox ${sandbox.id} snapshot migration`,
                     )

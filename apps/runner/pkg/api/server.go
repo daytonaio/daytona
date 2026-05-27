@@ -106,8 +106,7 @@ func (a *ApiServer) Start(ctx context.Context) error {
 		a.router.Use(sloggin.New(a.logger))
 	}
 	a.router.Use(otelgin.Middleware("daytona-runner"))
-	a.router.Use(common_errors.NewErrorMiddleware(common.HandlePossibleDockerError))
-	a.router.Use(middlewares.RecoverableErrorsMiddleware())
+	a.router.Use(common_errors.NewErrorMiddleware("DAYTONA_RUNNER", runnerDefaultErrorHandler))
 
 	public := a.router.Group("/")
 	public.GET("", controllers.HealthCheck)
@@ -192,4 +191,19 @@ func (a *ApiServer) Stop() {
 	if err := a.httpServer.Shutdown(ctx); err != nil {
 		a.logger.Error("Failed to shutdown API server", "error", err)
 	}
+}
+
+// runnerDefaultErrorHandler classifies raw errors that escape from deep
+// call stacks without implementing HTTPError: raw Docker / containerd
+// errors, and pattern-matched recoverable failures (e.g. "no space left
+// on device") that need the legacy JSON-blob shape for the API's
+// sanitizeSandboxError.
+func runnerDefaultErrorHandler(ctx *gin.Context, err error) common_errors.ErrorResponse {
+	if he, ok := common.ClassifyDockerError(err).(common_errors.HTTPError); ok && he != nil {
+		return common_errors.NewErrorResponseFromHTTPError(ctx, "DAYTONA_RUNNER", he)
+	}
+	if rec := common.NewRecoverableError(err); rec != nil {
+		return common_errors.NewErrorResponseFromHTTPError(ctx, "DAYTONA_RUNNER", rec)
+	}
+	return common_errors.NewErrorResponseForCtx(ctx, http.StatusInternalServerError, "DAYTONA_RUNNER", err.Error())
 }

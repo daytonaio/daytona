@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,15 +20,16 @@ import (
 //	@Tags			file-system
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body	ReplaceRequest	true	"Replace request"
-//	@Success		200		{array}	ReplaceResult
+//	@Param			request	body		ReplaceRequest	true	"Replace request"
+//	@Success		200		{array}		ReplaceResult
+//	@Failure		400		{object}	common.ErrorResponse
 //	@Router			/files/replace [post]
 //
 //	@id				ReplaceInFiles
 func ReplaceInFiles(c *gin.Context) {
 	var req ReplaceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
 	}
 
