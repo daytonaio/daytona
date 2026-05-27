@@ -64,6 +64,7 @@ type Config struct {
 	InitializeDaemonTelemetry          bool          `envconfig:"INITIALIZE_DAEMON_TELEMETRY" default:"true"`
 	SnapshotErrorCacheRetention        time.Duration `envconfig:"SNAPSHOT_ERROR_CACHE_RETENTION" default:"10m" validate:"min=5m"`
 	BuildEngine                        string        `envconfig:"BUILD_ENGINE" default:"buildkit" validate:"oneof=buildkit legacy"`
+	ForceSnapshotRemoval               bool          `envconfig:"FORCE_SNAPSHOT_REMOVAL" default:"true"`
 }
 
 var DEFAULT_API_PORT int = 8080
@@ -154,6 +155,10 @@ func GetEnvironment() string {
 
 func GetBuildEngine() string {
 	return config.BuildEngine
+}
+
+func GetForceSnapshotRemoval() bool {
+	return config.ForceSnapshotRemoval
 }
 
 func GetBuildLogFilePath(snapshotRef string) (string, error) {

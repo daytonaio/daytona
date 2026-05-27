@@ -270,7 +270,7 @@ func RemoveSnapshot(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		err = runner.Docker.RemoveImage(ctx.Request.Context(), snapshot, false)
+		err = runner.Docker.RemoveImage(ctx.Request.Context(), snapshot, config.GetForceSnapshotRemoval())
 		if err != nil {
 			ctx.Error(err)
 			return
