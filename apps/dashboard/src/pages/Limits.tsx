@@ -10,8 +10,10 @@ import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { RoutePath } from '@/enums/RoutePath'
 import { useOwnerTierQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
@@ -22,10 +24,14 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import type { Organization, RegionUsageOverview } from '@daytona/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
-import { RefreshCcw } from 'lucide-react'
+import { AlertCircle, ExternalLinkIcon, Globe, RefreshCcw, ShieldAlert } from 'lucide-react'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
+
+const PREVIEW_WARNING_CPU_QUOTA_THRESHOLD = 250
+const NETWORK_LIMITS_DOCS_URL = `${DAYTONA_DOCS_URL}/en/network-limits/`
+const PREVIEW_DOCS_URL = `${DAYTONA_DOCS_URL}/en/preview/`
 
 export default function Limits() {
   const { user } = useAuth()
@@ -95,16 +101,21 @@ export default function Limits() {
         <PageIntro title="Limits" />
         {isError ? (
           <Card>
-            <CardHeader>
-              <CardTitle className="text-center">Oops, something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-between items-center flex-col gap-3">
-              <div>There was an error loading your limits.</div>
-              <Button variant="outline" onClick={handleRetry}>
-                <RefreshCcw className="mr-2 h-4 w-4" />
-                Retry
-              </Button>
-            </CardContent>
+            <Empty className="py-12">
+              <EmptyHeader>
+                <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                  <AlertCircle />
+                </EmptyMedia>
+                <EmptyTitle className="text-destructive">Failed to load limits</EmptyTitle>
+                <EmptyDescription>Something went wrong while fetching limits data. Please try again.</EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button variant="secondary" size="sm" onClick={handleRetry}>
+                  <RefreshCcw />
+                  Retry
+                </Button>
+              </EmptyContent>
+            </Empty>
           </Card>
         ) : (
           <>
@@ -201,6 +212,9 @@ export default function Limits() {
                     },
                   ]}
                 />
+                {selectedOrganization && (
+                  <FeatureLimits organization={selectedOrganization} region={currentRegionUsageOverview} />
+                )}
               </CardContent>
             </Card>
 
@@ -378,6 +392,86 @@ function RateLimitItem({ label, value, unit, ttlSeconds }: LimitItem) {
       <div className="text-foreground text-sm font-medium">
         {value?.toLocaleString()}
         {unit ? ` ${unit}` : formatTtl(ttlSeconds)}
+      </div>
+    </div>
+  )
+}
+
+function FeatureLimits({
+  organization,
+  region,
+  className,
+}: {
+  organization: Organization
+  region: RegionUsageOverview | null
+  className?: string
+}) {
+  const previewWarningApplies = region != null && region.totalCpuQuota < PREVIEW_WARNING_CPU_QUOTA_THRESHOLD
+  const networkEgressRestricted = organization.sandboxLimitedNetworkEgress
+
+  return (
+    <div className={cn('p-4 border-t border-border flex flex-col gap-4', className)}>
+      <FeatureLimitItem
+        icon={<ShieldAlert className="size-4" />}
+        iconClassName="text-warning"
+        label="Preview Warning"
+        description={
+          previewWarningApplies
+            ? 'Shown before preview links open in a browser.'
+            : 'Skipped for preview links in the selected region.'
+        }
+        docsHref={PREVIEW_DOCS_URL}
+      />
+      <FeatureLimitItem
+        icon={<Globe className="size-4" />}
+        iconClassName="text-green-500 dark:text-green-400"
+        label="Internet Access"
+        description={
+          networkEgressRestricted
+            ? 'Restricted egress. Essential development services remain available.'
+            : 'Full outbound access is available by default.'
+        }
+        docsHref={NETWORK_LIMITS_DOCS_URL}
+      />
+    </div>
+  )
+}
+
+function FeatureLimitItem({
+  icon,
+  iconClassName,
+  label,
+  description,
+  docsHref,
+}: {
+  icon: ReactNode
+  iconClassName?: string
+  label: ReactNode
+  description: ReactNode
+  docsHref?: string
+}) {
+  return (
+    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+      <div className="flex min-w-40 items-center gap-3 text-sm font-medium text-foreground">
+        <span className={cn('inline-flex size-5 shrink-0 items-center justify-center', iconClassName)}>{icon}</span>
+        {label}
+      </div>
+      <div className="text-sm text-muted-foreground">
+        {description}
+        {docsHref ? (
+          <>
+            {' '}
+            <a
+              href={docsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-foreground/80 underline underline-offset-4 hover:text-foreground"
+            >
+              Learn more
+              <ExternalLinkIcon className="size-3.5" />
+            </a>
+          </>
+        ) : null}
       </div>
     </div>
   )

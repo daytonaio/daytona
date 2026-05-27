@@ -16,7 +16,17 @@ import { DaytonaConfiguration } from '@daytona/api-client/src'
 import { bypass, http, HttpResponse } from 'msw'
 
 const BILLING_API_URL = 'http://localhost:3000/api/billing'
+const BILLING_API_V2_URL = `${BILLING_API_URL}/v2`
 const API_URL = import.meta.env.VITE_API_URL
+
+const mockWallet: OrganizationWallet = {
+  balanceCents: 1000,
+  ongoingBalanceCents: 1000,
+  name: 'Wallet',
+  creditCardConnected: false,
+  automaticTopUp: undefined,
+  hasFailedOrPendingInvoice: true,
+}
 
 export const handlers = [
   http.get(`${API_URL}/config`, async () => {
@@ -75,14 +85,10 @@ export const handlers = [
     ])
   }),
   http.get(`${BILLING_API_URL}/organization/:organizationId/wallet`, async () => {
-    return HttpResponse.json<OrganizationWallet>({
-      balanceCents: 1000,
-      ongoingBalanceCents: 1000,
-      name: 'Wallet',
-      creditCardConnected: false,
-      automaticTopUp: undefined,
-      hasFailedOrPendingInvoice: true,
-    })
+    return HttpResponse.json<OrganizationWallet>(mockWallet)
+  }),
+  http.get(`${BILLING_API_V2_URL}/organization/:organizationId/wallet`, async () => {
+    return HttpResponse.json<OrganizationWallet>(mockWallet)
   }),
   http.get(`${BILLING_API_URL}/organization/:organizationId/tier`, async () => {
     return HttpResponse.json<OrganizationTier>({
