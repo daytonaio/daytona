@@ -489,6 +489,8 @@ export class RunnerService {
         runnerDiskGiB: updateData.diskGiB || runner.diskGiB,
         startedSandboxes: updateData.currentStartedSandboxes || 0,
       })
+    } else {
+      this.logger.warn(`Runner ${runnerId} reported null metrics`)
     }
 
     await this.updateRunner(runnerId, updateData)
