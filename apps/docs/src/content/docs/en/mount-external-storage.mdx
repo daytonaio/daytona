@@ -1806,12 +1806,6 @@ To run the same workflow from a language without an `agent-kit` equivalent, use 
 
 These headers drive snapshot and fork operations over the S3 API. Use them with any AWS SDK (boto3, aws-sdk-go-v2, aws-sdk-java-v2, aws-sdk-ruby) by attaching a request interceptor.
 
-| Header | Sent on | Purpose |
-|---|---|---|
-| `X-Tigris-Enable-Snapshot: true` | `CreateBucket` (new source) | Enable snapshots on a new bucket. Required before snapshotting it. |
-| `X-Tigris-Snapshot: true` | `CreateBucket` (existing source name) | Take a snapshot of the bucket. Optional `; name=<label>` suffix labels it. |
-| `X-Tigris-Snapshot-Version` | Response to snapshot create | Snapshot version ID returned to the caller — pass to fork creation. |
-| `X-Tigris-Fork-Source-Bucket` | `CreateBucket` (new fork name) | Source bucket to fork from. |
 | Header                                     | Sent on                                   | Purpose                                                                        |
 | ------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------ |
 | **`X-Tigris-Enable-Snapshot: true`**       | **`CreateBucket`** (new source)           | Enable snapshots on a new bucket. Required before snapshotting it.             |
