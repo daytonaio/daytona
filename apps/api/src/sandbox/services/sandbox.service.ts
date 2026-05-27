@@ -41,6 +41,7 @@ import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event
 import { Runner } from '../entities/runner.entity'
 import { Organization } from '../../organization/entities/organization.entity'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
+import { isApiRecoverableError } from '../constants/errors-for-recovery'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
@@ -2035,11 +2036,6 @@ export class SandboxService {
   }
 
   async recover(sandboxIdOrName: string, organization: Organization, skipStart = false): Promise<Sandbox> {
-    let pendingCpuIncrement: number | undefined
-    let pendingMemoryIncrement: number | undefined
-    let pendingDiskIncrement: number | undefined
-    let pendingGpuIncrement: number | undefined
-
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
     if (!sandbox.recoverable) {
@@ -2064,46 +2060,110 @@ export class SandboxService {
         throw new BadRequestError('Sandbox must be in error state to recover')
       }
 
-      if (!sandbox.runnerId) {
-        throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
-      }
-      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
-      const willStartOnV2 = runner.apiVersion === '2' && !skipStart
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-      // The chained start on v2 is queued by the job-completion handler via SandboxStartedEvent
-      // and bypasses SandboxService.start(); replicate the suspended-org check here.
-      if (willStartOnV2) {
-        this.organizationService.assertOrganizationIsNotSuspended(organization)
-      }
-
-      // ERROR → STOPPED activates disk usage; v2 + !skipStart additionally activates cpu/mem/gpu
-      // because there is no trailing start() call to validate them.
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
-        await this.validateOrganizationQuotas(
-          organization,
-          region,
-          willStartOnV2 ? sandbox.cpu : 0,
-          willStartOnV2 ? sandbox.mem : 0,
-          sandbox.disk,
-          willStartOnV2 ? sandbox.gpu : 0,
-          isEphemeral(sandbox),
-          sandbox.id,
-        )
-      if (pendingCpuIncremented) {
-        pendingCpuIncrement = sandbox.cpu
-      }
-      if (pendingMemoryIncremented) {
-        pendingMemoryIncrement = sandbox.mem
-      }
-      if (pendingDiskIncremented) {
-        pendingDiskIncrement = sandbox.disk
-      }
-      if (pendingGpuIncremented) {
-        pendingGpuIncrement = sandbox.gpu
+      // API-level recoverable errors (e.g. timeouts) bypass the runner and restore
+      // from backup on a new runner, provided a completed backup exists.
+      if (
+        isApiRecoverableError(sandbox.errorReason) &&
+        sandbox.backupState === BackupState.COMPLETED &&
+        sandbox.backupSnapshot &&
+        sandbox.backupRegistryId
+      ) {
+        return await this.recoverFromBackup(sandbox, organization, region)
       }
 
-      // Normalize desiredState upfront so the job handler can detect mid-job intent changes
-      // (e.g. /destroy). For v2 + !skipStart, also refresh authToken since we're bypassing start().
+      // Everything else goes to the runner for in-place recovery (e.g. disk expansion).
+      return await this.recoverInPlace(sandbox, organization, region, skipStart)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  private async recoverFromBackup(sandbox: Sandbox, organization: Organization, region: Region): Promise<Sandbox> {
+    const cooldownKey = `sandbox:recover-from-backup:${sandbox.id}`
+    const existing = await this.redis.get(cooldownKey)
+    if (existing) {
+      throw new ConflictException('Sandbox recovery has been attempted recently. Please try again later')
+    }
+
+    // The sandbox will be fully recreated from backup on a new runner, so reserve all resources.
+    const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
+      await this.validateOrganizationQuotas(
+        organization,
+        region,
+        sandbox.cpu,
+        sandbox.mem,
+        sandbox.disk,
+        sandbox.gpu,
+        isEphemeral(sandbox),
+        sandbox.id,
+      )
+
+    try {
+      // Transition the sandbox to ARCHIVED with desired state STARTED so the sync loop
+      // picks it up, assigns a new runner, and restores from the completed backup.
+      // enforceInvariants will set pending=true and runnerId=null for ARCHIVED state.
+      const updateData: Partial<Sandbox> = {
+        state: SandboxState.ARCHIVED,
+        desiredState: SandboxDesiredState.STARTED,
+        errorReason: null,
+        recoverable: false,
+        authToken: nanoid(32).toLocaleLowerCase(),
+        ...(sandbox.runnerId && { prevRunnerId: sandbox.runnerId }),
+      }
+
+      const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
+        updateData,
+        whereCondition: { recoverable: true, pending: false, state: SandboxState.ERROR },
+      })
+
+      await this.redis.set(cooldownKey, '1', 'EX', 3600)
+
+      this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(updatedSandbox))
+
+      return updatedSandbox
+    } catch (error) {
+      await this.rollbackPendingUsage(
+        organization.id,
+        sandbox.region,
+        pendingCpuIncremented ? sandbox.cpu : undefined,
+        pendingMemoryIncremented ? sandbox.mem : undefined,
+        pendingDiskIncremented ? sandbox.disk : undefined,
+        pendingGpuIncremented ? sandbox.gpu : undefined,
+      )
+      throw error
+    }
+  }
+
+  private async recoverInPlace(
+    sandbox: Sandbox,
+    organization: Organization,
+    region: Region,
+    skipStart: boolean,
+  ): Promise<Sandbox> {
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
+    }
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    const willStartOnV2 = runner.apiVersion === '2' && !skipStart
+
+    // ERROR → STOPPED activates disk usage; v2 + !skipStart additionally activates cpu/mem/gpu
+    // because there is no trailing start() call to validate them.
+    const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
+      await this.validateOrganizationQuotas(
+        organization,
+        region,
+        willStartOnV2 ? sandbox.cpu : 0,
+        willStartOnV2 ? sandbox.mem : 0,
+        sandbox.disk,
+        willStartOnV2 ? sandbox.gpu : 0,
+        isEphemeral(sandbox),
+        sandbox.id,
+      )
+
+    try {
+      // Normalize desiredState upfront so the job handler can detect mid-job intent changes.
       if (runner.apiVersion === '2') {
         await this.sandboxRepository.updateWhere(sandbox.id, {
           updateData: {
@@ -2172,14 +2232,12 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         sandbox.region,
-        pendingCpuIncrement,
-        pendingMemoryIncrement,
-        pendingDiskIncrement,
-        pendingGpuIncrement,
+        pendingCpuIncremented ? sandbox.cpu : undefined,
+        pendingMemoryIncremented ? sandbox.mem : undefined,
+        pendingDiskIncremented ? sandbox.disk : undefined,
+        pendingGpuIncremented ? sandbox.gpu : undefined,
       )
       throw error
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
