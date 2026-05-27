@@ -2068,12 +2068,6 @@ export class SandboxService {
     const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     const willStartOnV2 = runner.apiVersion === '2' && !skipStart
 
-    // The chained start on v2 is queued by the job-completion handler via SandboxStartedEvent
-    // and bypasses SandboxService.start(); replicate the suspended-org check here.
-    if (willStartOnV2) {
-      this.organizationService.assertOrganizationIsNotSuspended(organization)
-    }
-
     // ERROR → STOPPED activates disk usage; v2 + !skipStart additionally activates cpu/mem/gpu
     // because there is no trailing start() call to validate them.
     const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
