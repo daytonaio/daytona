@@ -46,5 +46,5 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages \
 
 USER daytona
 # Cache FlashInfer cubins as daytona so they land in a runtime-readable home.
-RUN flashinfer download-cubin || true
+RUN flashinfer download-cubin
 ENTRYPOINT ["sleep", "infinity"]
