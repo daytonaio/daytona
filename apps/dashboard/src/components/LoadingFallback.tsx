@@ -15,10 +15,9 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { AnimatedLogo } from './AnimatedLogo'
+import { LoadingFallbackContent } from './LoadingFallbackContent'
 import { Separator } from './ui/separator'
 import { Skeleton } from './ui/skeleton'
 
@@ -41,16 +40,6 @@ function SidebarSkeletonItem({ width }: { width: string }) {
 }
 
 const LoadingFallback = () => {
-  const [showLongLoadingMessage, setShowLongLoadingMessage] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLongLoadingMessage(true)
-    }, 5_000)
-
-    return () => clearTimeout(timer)
-  }, [])
-
   return (
     <SidebarProvider isBannerVisible={false}>
       <SidebarComponent isBannerVisible={false} collapsible="icon">
@@ -94,23 +83,7 @@ const LoadingFallback = () => {
       </SidebarComponent>
       <SidebarInset className="overflow-hidden">
         <div className="absolute inset-0 p-6 bg-background z-[3]">
-          <div className="flex items-center justify-center h-full flex-col gap-2">
-            <Loader2 className="w-8 h-8 animate-spin" />
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={showLongLoadingMessage ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-              transition={{ duration: 0.35 }}
-            >
-              <p className="text-sm text-muted-foreground text-center">This is taking longer than expected...</p>
-              <p className="text-sm text-muted-foreground text-center">
-                If this issue persists, contact us at{' '}
-                <a href="mailto:support@daytona.io" className="text-primary underline">
-                  support@daytona.io
-                </a>
-                .
-              </p>
-            </motion.div>
-          </div>
+          <LoadingFallbackContent className="h-full" />
         </div>
       </SidebarInset>
     </SidebarProvider>
