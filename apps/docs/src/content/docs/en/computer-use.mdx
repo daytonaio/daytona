@@ -1235,7 +1235,7 @@ from daytona import ScreenshotRegion, ScreenshotOptions
 region = ScreenshotRegion(x=0, y=0, width=800, height=600)
 screenshot = sandbox.computer_use.screenshot.take_compressed_region(
     region,
-    ScreenshotOptions(format="webp", quality=80, show_cursor=True)
+    ScreenshotOptions(format="jpeg", quality=80, show_cursor=True)
 )
 print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```
@@ -1246,7 +1246,7 @@ print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```typescript
 const region = { x: 0, y: 0, width: 800, height: 600 };
 const screenshot = await sandbox.computerUse.screenshot.takeCompressedRegion(region, {
-  format: 'webp',
+  format: 'jpeg',
   quality: 80,
   showCursor: true
 });
@@ -1260,7 +1260,7 @@ console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
 region = Daytona::ComputerUse::ScreenshotRegion.new(x: 0, y: 0, width: 800, height: 600)
 screenshot = sandbox.computer_use.screenshot.take_compressed_region(
   region: region,
-  options: Daytona::ComputerUse::ScreenshotOptions.new(format: "webp", quality: 80, show_cursor: true)
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: "jpeg", quality: 80, show_cursor: true)
 )
 puts "Compressed size: #{screenshot.size_bytes} bytes"
 ```

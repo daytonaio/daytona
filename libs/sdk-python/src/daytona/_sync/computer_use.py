@@ -406,7 +406,7 @@ class Screenshot:
             region = ScreenshotRegion(x=0, y=0, width=800, height=600)
             screenshot = sandbox.computer_use.screenshot.take_compressed_region(
                 region,
-                ScreenshotOptions(format="webp", quality=80, show_cursor=True)
+                ScreenshotOptions(format="jpeg", quality=80, show_cursor=True)
             )
             print(f"Compressed size: {screenshot.size_bytes} bytes")
             ```

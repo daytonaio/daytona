@@ -120,11 +120,11 @@ describe('ComputerUse', () => {
     await computerUse.screenshot.takeCompressed({ showCursor: true, format: 'jpeg', quality: 90, scale: 0.5 })
     await computerUse.screenshot.takeCompressedRegion(
       { x: 10, y: 20, width: 30, height: 40 },
-      { showCursor: true, format: 'webp', quality: 80, scale: 2 },
+      { showCursor: true, format: 'jpeg', quality: 80, scale: 2 },
     )
 
     expect(apiClient.takeCompressedScreenshot).toHaveBeenCalledWith(true, 'jpeg', 90, 0.5)
-    expect(apiClient.takeCompressedRegionScreenshot).toHaveBeenCalledWith(10, 20, 30, 40, true, 'webp', 80, 2)
+    expect(apiClient.takeCompressedRegionScreenshot).toHaveBeenCalledWith(10, 20, 30, 40, true, 'jpeg', 80, 2)
   })
 
   it('delegates recording operations including download stream', async () => {

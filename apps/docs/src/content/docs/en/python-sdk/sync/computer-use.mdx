@@ -642,7 +642,7 @@ Takes a compressed screenshot of a specific region.
 region = ScreenshotRegion(x=0, y=0, width=800, height=600)
 screenshot = sandbox.computer_use.screenshot.take_compressed_region(
     region,
-    ScreenshotOptions(format="webp", quality=80, show_cursor=True)
+    ScreenshotOptions(format="jpeg", quality=80, show_cursor=True)
 )
 print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```
@@ -1062,7 +1062,6 @@ Options for screenshot compression and display.
 **Attributes**:
 
 - `show_cursor` _bool | None_ - Whether to show the cursor in the screenshot.
-- `fmt` _str | None_ - Image format (e.g., 'png', 'jpeg', 'webp').
+- `fmt` _str | None_ - Image format (e.g., 'png', 'jpeg').
 - `quality` _int | None_ - Compression quality (0-100).
 - `scale` _float | None_ - Scale factor for the screenshot.
-
