@@ -422,6 +422,7 @@ export class Sandbox {
       this.state === SandboxState.ERROR &&
       this.backupState === BackupState.COMPLETED &&
       this.backupSnapshot &&
+      this.backupRegistryId &&
       isApiRecoverableError(this.errorReason)
     ) {
       changes.recoverable = true
