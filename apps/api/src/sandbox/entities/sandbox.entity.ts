@@ -24,6 +24,7 @@ import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
 import { nanoid } from 'nanoid'
 import { SandboxLastActivity } from './sandbox-last-activity.entity'
+import { isApiRecoverableError } from '../constants/errors-for-recovery'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -417,7 +418,12 @@ export class Sandbox {
       changes.backupState = BackupState.NONE
     }
 
-    if (this.state === SandboxState.ERROR && this.backupState === BackupState.COMPLETED && this.backupSnapshot) {
+    if (
+      this.state === SandboxState.ERROR &&
+      this.backupState === BackupState.COMPLETED &&
+      this.backupSnapshot &&
+      isApiRecoverableError(this.errorReason)
+    ) {
       changes.recoverable = true
     }
 
