@@ -47,4 +47,5 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages \
 USER daytona
 # Cache FlashInfer cubins as daytona so they land in a runtime-readable home.
 RUN flashinfer download-cubin
+RUN python3 -c "import torch, vllm, flashinfer"
 ENTRYPOINT ["sleep", "infinity"]
