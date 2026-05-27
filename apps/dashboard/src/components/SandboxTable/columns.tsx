@@ -12,7 +12,7 @@ import { SandboxState as SandboxStateComponent } from '@/components/sandboxes/Sa
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getRelativeTimeString } from '@/lib/utils'
+import { getRelativeTimeString, truncateUUID } from '@/lib/utils'
 import { SandboxDesiredState, SandboxListItem } from '@daytona/api-client'
 import { Column, ColumnDef, RowData, Table } from '@tanstack/react-table'
 import { Loader2 } from 'lucide-react'
@@ -176,10 +176,9 @@ const columns: ColumnDef<SandboxListItem>[] = [
     accessorKey: 'id',
     cell: ({ row }) => {
       const id = row.original.id
-      const truncated = id.length > 12 ? `${id.slice(0, 8)}...${id.slice(-4)}` : id
       return (
-        <div className="group/copy-button flex w-full items-center gap-1 truncate">
-          <span className="block truncate text-muted-foreground">{truncated}</span>
+        <div className="w-full truncate flex items-center gap-1 group/copy-button">
+          <span className="truncate block text-muted-foreground">{truncateUUID(id)}</span>
           <CopyButton value={id} size="icon-xs" autoHide tooltipText="Copy UUID" />
         </div>
       )

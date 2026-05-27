@@ -4,6 +4,7 @@
  */
 
 import { useCommandPaletteActions } from '@/components/CommandPalette'
+import { CopyButton } from '@/components/CopyButton'
 import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
 import { SearchInput } from '@/components/SearchInput'
@@ -28,7 +29,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { cn, getRelativeTimeString } from '@/lib/utils'
+import { cn, getRelativeTimeString, truncateUUID } from '@/lib/utils'
 import { getColumnSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
 import {
@@ -432,6 +433,23 @@ const columns: ColumnDef<VolumeDto>[] = [
     },
     cell: ({ row }) => {
       return <div className="w-40">{row.original.name}</div>
+    },
+  },
+  {
+    accessorKey: 'id',
+    size: 180,
+    maxSize: 180,
+    header: 'ID',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const id = row.original.id
+
+      return (
+        <div className="w-full truncate flex items-center gap-1 group/copy-button">
+          <span className="truncate block text-muted-foreground">{truncateUUID(id)}</span>
+          <CopyButton value={id} size="icon-xs" autoHide tooltipText="Copy ID" />
+        </div>
+      )
     },
   },
   {

@@ -59,7 +59,7 @@ export function getRelativeTimeString(
       date,
       relativeTimeString: isFuture ? `in ${years}y` : `${years}y ago`,
     }
-  } catch (e) {
+  } catch {
     return { date: new Date(), relativeTimeString: fallback }
   }
 }
@@ -104,6 +104,10 @@ export function pluralize(count: number, singular: string, plural: string): stri
 export function isValidUUID(str: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
   return uuidRegex.test(str)
+}
+
+export function truncateUUID(uuid: string): string {
+  return uuid.length > 12 ? `${uuid.slice(0, 8)}…${uuid.slice(-4)}` : uuid
 }
 
 export function formatTimestamp(timestamp: string | Date | undefined | null): string {

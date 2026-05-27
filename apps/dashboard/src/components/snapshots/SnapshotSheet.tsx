@@ -16,7 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getSnapshotQueryErrorStatus, useSnapshotQuery } from '@/hooks/queries/useSnapshotsQuery'
-import { cn, getRelativeTimeString } from '@/lib/utils'
+import { cn, getRelativeTimeString, truncateUUID } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { ChevronDown, ChevronUp, CircleAlert, Pause, Play, Trash2, X } from 'lucide-react'
@@ -79,16 +79,18 @@ function InfoRow({
 
 function CopyValue({
   value,
+  displayValue = value,
   tooltipText = 'Copy',
   className,
 }: {
   value: string
+  displayValue?: string
   tooltipText?: string
   className?: string
 }) {
   return (
     <div className="flex items-center gap-1 min-w-0">
-      <span className={cn('truncate', className)}>{value}</span>
+      <span className={cn('truncate', className)}>{displayValue}</span>
       <CopyButton value={value} tooltipText={tooltipText} size="icon-xs" />
     </div>
   )
@@ -152,7 +154,7 @@ function TimestampRow({ label, value }: { label: string; value: Date | null | un
 }
 
 function SnapshotSheetSkeleton() {
-  const overviewRows = ['name', 'image', 'size', 'entrypoint', 'state']
+  const overviewRows = ['name', 'id', 'image', 'size', 'entrypoint', 'state']
   const timestampRows = ['created', 'updated', 'last-used']
 
   return (
@@ -300,6 +302,14 @@ export function SnapshotSheet({
               <InfoSection>
                 <InfoRow label="Name" className="-mr-2">
                   <CopyValue value={activeSnapshot.name} tooltipText="Copy name" />
+                </InfoRow>
+                <InfoRow label="ID" className="-mr-2">
+                  <CopyValue
+                    value={activeSnapshot.id}
+                    displayValue={truncateUUID(activeSnapshot.id)}
+                    tooltipText="Copy ID"
+                    className="font-mono text-muted-foreground"
+                  />
                 </InfoRow>
                 <InfoRow label="Image" className="-mr-2">
                   {activeSnapshot.imageName ? (
