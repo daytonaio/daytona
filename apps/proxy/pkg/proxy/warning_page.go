@@ -5,6 +5,7 @@ package proxy
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"net/url"
 	"slices"
@@ -297,8 +298,19 @@ func serveWarningPage(c *gin.Context, https bool) {
 	redirectPath := protocol + c.Request.Host + c.Request.URL.String()
 	redirectUrl := ACCEPT_PREVIEW_PAGE_WARNING_PATH + "?redirect=" + url.QueryEscape(redirectPath)
 
+	// Defense-in-depth: this page has no inline scripts and loads no external
+	// resources, so deny everything by default. style-src 'unsafe-inline' keeps
+	// the embedded <style> block working; form-action 'self' pins the consent POST.
+	// Any future contributor adding scripts/images/fonts/external CSS to this page
+	// must extend this policy.
+	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'")
+	c.Header("X-Content-Type-Options", "nosniff")
 	c.Header("Content-Type", "text/html; charset=utf-8")
-	c.String(http.StatusOK, fmt.Sprintf(htmlContent, redirectPath, redirectUrl))
+	// redirectPath is escaped because it is interpolated into HTML body context.
+	// redirectUrl is safe in action="..." because url.QueryEscape percent-encodes
+	// quotes and HTML-special characters; the constant prefix contains none of them.
+	// Any future interpolation should re-evaluate the contextual escaping requirement.
+	c.String(http.StatusOK, fmt.Sprintf(htmlContent, html.EscapeString(redirectPath), redirectUrl))
 }
 
 // isBrowser checks if the request is coming from a web browser
