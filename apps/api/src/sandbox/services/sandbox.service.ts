@@ -1987,13 +1987,9 @@ export class SandboxService {
       if (
         isApiRecoverableError(sandbox.errorReason) &&
         sandbox.backupState === BackupState.COMPLETED &&
-        sandbox.backupSnapshot
+        sandbox.backupSnapshot &&
+        sandbox.backupRegistryId
       ) {
-        const cooldownKey = `sandbox:recover-from-backup:${sandbox.id}`
-        const alreadyAttempted = await this.redis.set(cooldownKey, '1', 'EX', 3600, 'NX')
-        if (!alreadyAttempted) {
-          throw new ConflictException('Sandbox recovery has been attempted recently. Please try again later')
-        }
         return await this.recoverFromBackup(sandbox, organization, region)
       }
 
@@ -2005,6 +2001,12 @@ export class SandboxService {
   }
 
   private async recoverFromBackup(sandbox: Sandbox, organization: Organization, region: Region): Promise<Sandbox> {
+    const cooldownKey = `sandbox:recover-from-backup:${sandbox.id}`
+    const existing = await this.redis.get(cooldownKey)
+    if (existing) {
+      throw new ConflictException('Sandbox recovery has been attempted recently. Please try again later')
+    }
+
     // The sandbox will be fully recreated from backup on a new runner, so reserve all resources.
     const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
       await this.validateOrganizationQuotas(
@@ -2035,6 +2037,8 @@ export class SandboxService {
         updateData,
         whereCondition: { recoverable: true, pending: false, state: SandboxState.ERROR },
       })
+
+      await this.redis.set(cooldownKey, '1', 'EX', 3600)
 
       this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(updatedSandbox))
 
