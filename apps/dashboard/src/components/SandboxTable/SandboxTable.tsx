@@ -162,7 +162,9 @@ export function SandboxTable({
       minSize: 0,
     },
     enableRowSelection: (row) =>
-      deletePermitted && !sandboxIsLoading[row.original.id] && row.original.state !== SandboxState.DESTROYED,
+      (writePermitted || deletePermitted) &&
+      !sandboxIsLoading[row.original.id] &&
+      row.original.state !== SandboxState.DESTROYED,
     meta: {
       sandbox: {
         sandboxIsLoading,
