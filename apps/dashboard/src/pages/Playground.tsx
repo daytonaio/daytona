@@ -91,9 +91,9 @@ const Playground: React.FC = () => {
     <PageLayout className="max-h-[100vh] overflow-auto">
       <PageHeader />
 
-      <PageContent size="full" className="!p-0 h-full flex flex-col flex-1 overflow-auto" ref={pageContentRef}>
-        <PageIntro title="Playground" className="mb-8 px-4 pt-4" />
-        <div className="min-h-0 flex-1">
+      <PageContent size="full" className="h-full flex flex-col flex-1 overflow-auto" ref={pageContentRef}>
+        <PageIntro title="Playground" className="mb-8" />
+        <div className="min-h-0 flex-1 -mx-4 flex flex-col">
           <PlaygroundProvider>
             <PlaygroundSandboxProvider activeTab={playgroundCategory}>
               <Tabs

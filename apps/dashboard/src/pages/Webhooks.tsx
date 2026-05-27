@@ -125,10 +125,10 @@ const Webhooks: React.FC = () => {
     <PageLayout contained>
       <PageHeader />
 
-      <PageContent size="full" className="!p-0 overflow-hidden">
+      <PageContent size="full" className="overflow-hidden">
         <PageIntro
           title="Webhooks"
-          className="mb-8 px-4 pt-4"
+          className="mb-8"
           actions={
             <UpsertEndpointSheet
               onSuccess={handleSuccess}
@@ -137,32 +137,34 @@ const Webhooks: React.FC = () => {
             />
           }
         />
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
-          <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border">
-            <TabsList variant="underline">
-              <TabsTrigger value="endpoints">Endpoints</TabsTrigger>
-              <TabsTrigger value="messages">Messages</TabsTrigger>
-            </TabsList>
-          </div>
-          <TabsContent
-            value="endpoints"
-            className="min-h-0 p-4 data-[state=active]:flex data-[state=active]:flex-1 flex-col"
-          >
-            <WebhooksEndpointTable
-              data={endpoints.data || []}
-              loading={endpoints.loading}
-              isLoadingEndpoint={isLoadingEndpoint}
-              onDisable={handleDisable}
-              onDelete={handleDelete}
-            />
-          </TabsContent>
-          <TabsContent
-            value="messages"
-            className="min-h-0 p-4 data-[state=active]:flex data-[state=active]:flex-1 flex-col"
-          >
-            <WebhooksMessagesTable />
-          </TabsContent>
-        </Tabs>
+        <div className="min-h-0 flex-1 -mx-4 flex flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col gap-0">
+            <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border">
+              <TabsList variant="underline">
+                <TabsTrigger value="endpoints">Endpoints</TabsTrigger>
+                <TabsTrigger value="messages">Messages</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent
+              value="endpoints"
+              className="min-h-0 p-4 data-[state=active]:flex data-[state=active]:flex-1 flex-col"
+            >
+              <WebhooksEndpointTable
+                data={endpoints.data || []}
+                loading={endpoints.loading}
+                isLoadingEndpoint={isLoadingEndpoint}
+                onDisable={handleDisable}
+                onDelete={handleDelete}
+              />
+            </TabsContent>
+            <TabsContent
+              value="messages"
+              className="min-h-0 p-4 data-[state=active]:flex data-[state=active]:flex-1 flex-col"
+            >
+              <WebhooksMessagesTable />
+            </TabsContent>
+          </Tabs>
+        </div>
       </PageContent>
       <PageFooter />
     </PageLayout>

@@ -6,7 +6,6 @@
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarInset,
@@ -92,10 +91,6 @@ const LoadingFallback = () => {
             </div>
           ))}
         </SidebarContent>
-
-        <SidebarFooter className="pb-4">
-          <Skeleton className="mx-2 h-3 w-20 group-data-[collapsible=icon]:hidden" />
-        </SidebarFooter>
       </SidebarComponent>
       <SidebarInset className="overflow-hidden">
         <div className="absolute inset-0 p-6 bg-background z-[3]">
