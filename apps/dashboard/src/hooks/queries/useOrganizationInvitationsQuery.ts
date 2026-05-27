@@ -9,7 +9,7 @@ import { useApi } from '../useApi'
 import { useSelectedOrganization } from '../useSelectedOrganization'
 import { queryKeys } from './queryKeys'
 
-export function useOrganizationInvitationsQuery() {
+export function useOrganizationInvitationsQuery({ enabled = true }: { enabled?: boolean } = {}) {
   const { organizationsApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
 
@@ -23,6 +23,6 @@ export function useOrganizationInvitationsQuery() {
       const response = await organizationsApi.listOrganizationInvitations(selectedOrganization.id)
       return response.data
     },
-    enabled: !!selectedOrganization,
+    enabled: enabled && !!selectedOrganization,
   })
 }
