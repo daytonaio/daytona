@@ -37,6 +37,7 @@ permissions: {}
 
 jobs:
   publish:
+    if: github.repository == 'daytonaio/daytona'
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
     permissions:
       contents: read

@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   docker-build:
+    if: github.repository == 'daytonaio/daytona'
     name: Docker build
     runs-on: ubuntu-latest
     timeout-minutes: 40
