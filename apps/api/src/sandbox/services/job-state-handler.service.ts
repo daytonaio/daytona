@@ -609,49 +609,44 @@ export class JobStateHandlerService {
     if (!sandboxId) return
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-      if (!sandbox) {
-        this.logger.warn(`Sandbox ${sandboxId} not found for RESIZE_SANDBOX job ${job.id}`)
-        return
-      }
-
-      if (sandbox.state !== SandboxState.RESIZING) {
-        this.logger.warn(
-          `Sandbox ${sandboxId} is not in RESIZING state for RESIZE_SANDBOX job ${job.id}. State: ${sandbox.state}`,
-        )
-        return
-      }
-
-      // Determine the previous state (STARTED or STOPPED based on desiredState)
-      const previousState =
-        sandbox.desiredState === SandboxDesiredState.STARTED
-          ? SandboxState.STARTED
-          : sandbox.desiredState === SandboxDesiredState.STOPPED
-            ? SandboxState.STOPPED
-            : null
-
-      if (!previousState) {
-        this.logger.error(
-          `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.desiredState} for RESIZE_SANDBOX job ${job.id}`,
-        )
-        return
-      }
-
-      // Calculate deltas before updating sandbox
-      const payload = job.getPayload<{ cpu?: number; memory?: number; disk?: number }>() ?? {}
-
-      // For cold resize (previousState === STOPPED), cpu/memory don't affect org quota.
-      const isHotResize = previousState === SandboxState.STARTED
-      const cpuDeltaForQuota = isHotResize ? (payload.cpu ?? sandbox.cpu) - sandbox.cpu : 0
-      const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
-      const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
-
-      // Runner deltas — mirror what the admission gate reserved, to release the slot.
-      const cpuDeltaForRunner = Math.max(0, (payload.cpu ?? sandbox.cpu) - sandbox.cpu)
-      const memDeltaForRunner = Math.max(0, (payload.memory ?? sandbox.mem) - sandbox.mem)
-      const diskDeltaForRunner = Math.max(0, (payload.disk ?? sandbox.disk) - sandbox.disk)
-
       try {
+        const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+        if (!sandbox) {
+          this.logger.warn(`Sandbox ${sandboxId} not found for RESIZE_SANDBOX job ${job.id}`)
+          return
+        }
+
+        if (sandbox.state !== SandboxState.RESIZING) {
+          this.logger.warn(
+            `Sandbox ${sandboxId} is not in RESIZING state for RESIZE_SANDBOX job ${job.id}. State: ${sandbox.state}`,
+          )
+          return
+        }
+
+        // Determine the previous state (STARTED or STOPPED based on desiredState)
+        const previousState =
+          sandbox.desiredState === SandboxDesiredState.STARTED
+            ? SandboxState.STARTED
+            : sandbox.desiredState === SandboxDesiredState.STOPPED
+              ? SandboxState.STOPPED
+              : null
+
+        if (!previousState) {
+          this.logger.error(
+            `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.desiredState} for RESIZE_SANDBOX job ${job.id}`,
+          )
+          return
+        }
+
+        // Calculate deltas before updating sandbox
+        const payload = job.getPayload<{ cpu?: number; memory?: number; disk?: number }>() ?? {}
+
+        // For cold resize (previousState === STOPPED), cpu/memory don't affect org quota.
+        const isHotResize = previousState === SandboxState.STARTED
+        const cpuDeltaForQuota = isHotResize ? (payload.cpu ?? sandbox.cpu) - sandbox.cpu : 0
+        const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
+        const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
+
         const updateData: Partial<Sandbox> = {}
 
         if (job.status === JobStatus.COMPLETED) {
@@ -694,15 +689,9 @@ export class JobStateHandlerService {
 
         await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
       } finally {
-        // Release the per-runner pending usage slot on COMPLETED or FAILED — either way the
-        // runner is done resizing. Safe-wrapped so a Redis blip can't shadow the original
-        // error; the 2-minute TTL is the backstop.
-        await this.runnerUsageService.safeDecrementPendingRunnerUsage(
-          job.runnerId,
-          cpuDeltaForRunner,
-          memDeltaForRunner,
-          diskDeltaForRunner,
-        )
+        // Release runs on every exit path including the early returns above; the
+        // reservation amount is keyed by sandboxId in Redis, no sandbox row needed.
+        await this.runnerUsageService.safeReleasePendingRunnerUsageForResize(job.runnerId, sandboxId)
       }
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)

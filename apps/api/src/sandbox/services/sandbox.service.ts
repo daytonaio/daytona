@@ -2372,7 +2372,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
-    let admittedRunnerUsage: { runnerId: string; cpu: number; memory: number; disk: number } | undefined
+    let admittedRunnerReservation: { runnerId: string; sandboxId: string } | undefined
     let pendingGpuIncrement: number | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
@@ -2529,27 +2529,24 @@ export class SandboxService {
         throw new BadRequestError('Sandbox must be in started or stopped state to resize')
       }
 
-      // Per-runner admission gate (lock-free, mirrors OrganizationUsageService): reserve the
-      // usage first via atomic HINCRBY, then project the score from the post-reservation
-      // hash — so concurrent resizes each see the others' reservations and none can
-      // over-admit. Below threshold → throw; the outer catch releases the reservation.
-      // Cold cpu/mem resizes are gated too, as a proxy until start is also gated.
-      await this.runnerUsageService.incrementPendingRunnerUsage(
-        runner.id,
-        cpuDeltaForRunner,
-        memDeltaForRunner,
-        diskDeltaForRunner,
-      )
-      admittedRunnerUsage = {
-        runnerId: runner.id,
-        cpu: cpuDeltaForRunner,
-        memory: memDeltaForRunner,
-        disk: diskDeltaForRunner,
-      }
-      const projectedScore = await this.runnerService.getProjectedAvailabilityScore(runner)
-      const resizeScoreThreshold = this.configService.getOrThrow('runnerScore.thresholds.resize')
-      if (projectedScore < resizeScoreThreshold) {
-        throw new ConflictException('Sandbox runner is temporarily at capacity. Please retry the resize shortly.')
+      // Lock-free admission: reserve first, then project the score from the post-reservation
+      // hash so concurrent resizes can't over-admit. Cold cpu/mem are gated as a proxy until
+      // start is also gated. Pure downsizes skip the gate — they only free resources, so a
+      // congested runner shouldn't 409 them.
+      if (cpuDeltaForRunner > 0 || memDeltaForRunner > 0 || diskDeltaForRunner > 0) {
+        await this.runnerUsageService.reservePendingRunnerUsageForResize(
+          runner.id,
+          sandbox.id,
+          cpuDeltaForRunner,
+          memDeltaForRunner,
+          diskDeltaForRunner,
+        )
+        admittedRunnerReservation = { runnerId: runner.id, sandboxId: sandbox.id }
+        const projectedScore = await this.runnerService.getProjectedAvailabilityScore(runner)
+        const resizeScoreThreshold = this.configService.getOrThrow('runnerScore.thresholds.resize')
+        if (projectedScore < resizeScoreThreshold) {
+          throw new ConflictException('Sandbox runner is temporarily at capacity. Please retry the resize shortly.')
+        }
       }
 
       // Now transition to RESIZING state
@@ -2605,19 +2602,13 @@ export class SandboxService {
             0,
           )
 
-          // Release the slot — V0 applies the resize synchronously. (Brief under-counting
-          // until the next healthcheck refreshes currentAllocatedCpu is accepted.)
-          await this.runnerUsageService.safeDecrementPendingRunnerUsage(
-            runner.id,
-            cpuDeltaForRunner,
-            memDeltaForRunner,
-            diskDeltaForRunner,
-          )
-          admittedRunnerUsage = undefined
+          // V0 applies the resize synchronously; release now. Brief under-counting until
+          // the next healthcheck refreshes currentAllocatedCpu is accepted.
+          await this.runnerUsageService.safeReleasePendingRunnerUsageForResize(runner.id, sandbox.id)
+          admittedRunnerReservation = undefined
         } else {
-          // V2: job enqueued — handler now owns state + slot release; clear to avoid a
-          // double-release in the outer catch.
-          admittedRunnerUsage = undefined
+          // V2: completion handler owns the release. Clear so the outer catch doesn't double-release.
+          admittedRunnerReservation = undefined
         }
       } catch (error) {
         // resize failed — revert RESIZING. Excludes the findOneByIdOrName below, which
@@ -2645,12 +2636,10 @@ export class SandboxService {
         pendingDiskIncrement,
         pendingGpuIncrement,
       )
-      if (admittedRunnerUsage) {
-        await this.runnerUsageService.safeDecrementPendingRunnerUsage(
-          admittedRunnerUsage.runnerId,
-          admittedRunnerUsage.cpu,
-          admittedRunnerUsage.memory,
-          admittedRunnerUsage.disk,
+      if (admittedRunnerReservation) {
+        await this.runnerUsageService.safeReleasePendingRunnerUsageForResize(
+          admittedRunnerReservation.runnerId,
+          admittedRunnerReservation.sandboxId,
         )
       }
       throw error

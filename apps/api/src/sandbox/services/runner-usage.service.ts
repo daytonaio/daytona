@@ -29,11 +29,20 @@ export class RunnerUsageService {
     return `runner:${runnerId}:usage:pending`
   }
 
-  /**
-   * Atomically adjusts the per-runner pending usage hash and refreshes its TTL.
-   * Signed deltas; each field is clamped at 0 so a double-release can't go negative.
-   */
-  async incrementPendingRunnerUsage(runnerId: string, cpu: number, memory: number, disk: number): Promise<void> {
+  // Per-resize sidecar: stamps this resize's contribution to the runner hash so the
+  // release path can look it up by sandboxId without needing the sandbox row.
+  private getResizeReservationKey(runnerId: string, sandboxId: string): string {
+    return `runner:${runnerId}:resize:${sandboxId}`
+  }
+
+  // Atomic: bump the per-runner hash and write the matching sidecar in one EVAL.
+  async reservePendingRunnerUsageForResize(
+    runnerId: string,
+    sandboxId: string,
+    cpu: number,
+    memory: number,
+    disk: number,
+  ): Promise<void> {
     const script = `
       local function adjust(field, delta)
         local value = redis.call("HINCRBY", KEYS[1], field, delta)
@@ -45,11 +54,15 @@ export class RunnerUsageService {
       adjust("memory", ARGV[2])
       adjust("disk",   ARGV[3])
       redis.call("EXPIRE", KEYS[1], ARGV[4])
+
+      redis.call("HSET", KEYS[2], "cpu", ARGV[1], "memory", ARGV[2], "disk", ARGV[3])
+      redis.call("EXPIRE", KEYS[2], ARGV[4])
     `
     await this.redis.eval(
       script,
-      1,
+      2,
       this.getPendingUsageKey(runnerId),
+      this.getResizeReservationKey(runnerId, sandboxId),
       cpu.toString(),
       memory.toString(),
       disk.toString(),
@@ -57,23 +70,41 @@ export class RunnerUsageService {
     )
   }
 
-  /**
-   * Releases a pending usage slot. Symmetric with incrementPendingRunnerUsage — passes
-   * negatives through the same Lua so behavior (incl. TTL refresh) stays identical.
-   */
-  async decrementPendingRunnerUsage(runnerId: string, cpu: number, memory: number, disk: number): Promise<void> {
-    return this.incrementPendingRunnerUsage(runnerId, -cpu, -memory, -disk)
-  }
-
-  /**
-   * decrementPendingRunnerUsage that swallows + warns on failure, so a Redis blip in a
-   * terminal hook never shadows the original error; the TTL is the safety net.
-   */
-  async safeDecrementPendingRunnerUsage(runnerId: string, cpu: number, memory: number, disk: number): Promise<void> {
+  // Atomic: read sidecar → decrement runner hash by it → delete sidecar. Missing sidecar
+  // is a no-op, so double-release is safe. Swallows Redis errors; TTL is the backstop.
+  // HINCRBY rejects `-0` / float-stringified deltas — skip zero-deltas and format the
+  // negated integer explicitly so the script stays safe across field combinations.
+  async safeReleasePendingRunnerUsageForResize(runnerId: string, sandboxId: string): Promise<void> {
+    const script = `
+      local reserved = redis.call("HMGET", KEYS[2], "cpu", "memory", "disk")
+      if not reserved[1] and not reserved[2] and not reserved[3] then
+        return 0
+      end
+      local function adjust(field, delta_str)
+        local d = tonumber(delta_str)
+        if d == nil or d == 0 then return end
+        local value = redis.call("HINCRBY", KEYS[1], field, string.format("%d", -d))
+        if value < 0 then
+          redis.call("HSET", KEYS[1], field, 0)
+        end
+      end
+      adjust("cpu",    reserved[1])
+      adjust("memory", reserved[2])
+      adjust("disk",   reserved[3])
+      redis.call("EXPIRE", KEYS[1], ARGV[1])
+      redis.call("DEL", KEYS[2])
+      return 1
+    `
     try {
-      await this.decrementPendingRunnerUsage(runnerId, cpu, memory, disk)
+      await this.redis.eval(
+        script,
+        2,
+        this.getPendingUsageKey(runnerId),
+        this.getResizeReservationKey(runnerId, sandboxId),
+        this.PENDING_USAGE_TTL_S.toString(),
+      )
     } catch (e) {
-      this.logger.warn(`Failed to decrement pending runner usage for ${runnerId}: ${e}`)
+      this.logger.warn(`Failed to release pending runner usage for ${runnerId}/${sandboxId}: ${e}`)
     }
   }
 
