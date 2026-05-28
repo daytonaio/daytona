@@ -164,7 +164,7 @@ const runCode = tool({
   }),
   execute: async ({ code, language }) => {
     const ext = { python: 'py', javascript: 'js', typescript: 'ts' }[language]
-    const path = `/tmp/_run_${Date.now()}.${ext}`
+    const path = `/tmp/_run_${randomUUID()}.${ext}`
     await sandbox!.fs.uploadFile(Buffer.from(code, 'utf-8'), path)
     const cmd = {
       python: `python3 ${path}`,

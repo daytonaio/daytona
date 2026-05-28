@@ -7,6 +7,7 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { Daytona, Sandbox } from '@daytona/sdk'
 import { ToolLoopAgent, stepCountIs, tool } from 'ai'
 import { writeFileSync } from 'fs'
+import { randomUUID } from 'node:crypto'
 import * as dotenv from 'dotenv'
 import { z } from 'zod'
 
@@ -60,7 +61,7 @@ async function main(): Promise<void> {
       }),
       execute: async ({ code, language }) => {
         const ext = { python: 'py', javascript: 'js', typescript: 'ts' }[language]
-        const path = `/tmp/_run_${Date.now()}.${ext}`
+        const path = `/tmp/_run_${randomUUID()}.${ext}`
         await sandbox!.fs.uploadFile(Buffer.from(code, 'utf-8'), path)
         const cmd = {
           python: `python3 ${path}`,
