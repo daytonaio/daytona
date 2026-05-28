@@ -66,9 +66,9 @@ export function SvixProvider({ children }: SvixProviderProps) {
         <PageHeader />
         <PageContent
           size={isWebhooksListPage ? 'full' : 'default'}
-          className={cn({ '!p-0 overflow-hidden': isWebhooksListPage })}
+          className={cn({ 'overflow-hidden': isWebhooksListPage })}
         >
-          <PageIntro title="Webhooks" className={cn({ 'mb-8 px-4 pt-4': isWebhooksListPage })} />
+          <PageIntro title="Webhooks" className={cn({ 'mb-8': isWebhooksListPage })} />
           <Card className={cn({ 'mx-4': isWebhooksListPage })}>
             <CardHeader>
               <CardTitle className="text-center">Oops, something went wrong</CardTitle>
