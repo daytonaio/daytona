@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 
 	recordingservice "github.com/daytonaio/daemon/pkg/recording"
@@ -21,30 +22,31 @@ import (
 //	@Produce		json
 //	@Param			request	body		StopRecordingRequest	true	"Recording ID to stop"
 //	@Success		200		{object}	RecordingDTO
-//	@Failure		400		{object}	map[string]string
-//	@Failure		404		{object}	map[string]string
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //	@Router			/computeruse/recordings/stop [post]
 //
 //	@id				StopRecording
 func (r *RecordingController) StopRecording(ctx *gin.Context) {
 	var request StopRecordingRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: id is required"})
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
 	if request.ID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+		ctx.Error(common_errors.NewBadRequestError(errors.New("id is required")))
 		return
 	}
 
 	recording, err := r.recordingService.StopRecording(request.ID)
 	if err != nil {
 		if errors.Is(err, recordingservice.ErrRecordingNotFound) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "recording not found"})
+			ctx.Error(common_errors.NewNotFoundError(errors.New("recording not found")))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 

@@ -13,7 +13,7 @@ import io.daytona.sdk.exception.DaytonaNotFoundException;
 import io.daytona.sdk.exception.DaytonaRateLimitException;
 import io.daytona.sdk.exception.DaytonaServerException;
 import io.daytona.sdk.exception.DaytonaTimeoutException;
-import io.daytona.sdk.exception.DaytonaValidationException;
+import io.daytona.sdk.exception.DaytonaUnprocessableEntityException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -55,7 +55,7 @@ class ExceptionTypesTest {
         assertThat(new DaytonaForbiddenException("forbidden").getStatusCode()).isEqualTo(403);
         assertThat(new DaytonaNotFoundException("missing").getStatusCode()).isEqualTo(404);
         assertThat(new DaytonaConflictException("conflict").getStatusCode()).isEqualTo(409);
-        assertThat(new DaytonaValidationException("invalid").getStatusCode()).isEqualTo(422);
+        assertThat(new DaytonaUnprocessableEntityException("invalid").getStatusCode()).isEqualTo(422);
         assertThat(new DaytonaRateLimitException("slow down").getStatusCode()).isEqualTo(429);
         assertThat(new DaytonaServerException(503, "server").getStatusCode()).isEqualTo(503);
     }

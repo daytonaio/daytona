@@ -32,15 +32,44 @@ export { Process } from './Process'
 // export { LspServer } from './LspServer'
 // export type { LspLanguageId, Position } from './LspServer'
 export {
-  DaytonaAuthenticationError,
-  DaytonaAuthorizationError,
-  DaytonaConflictError,
-  DaytonaConnectionError,
+  // Base + status-code classes
   DaytonaError,
-  DaytonaNotFoundError,
-  DaytonaRateLimitError,
-  DaytonaTimeoutError,
+  DaytonaBadRequestError,
+  // Deprecated aliases
   DaytonaValidationError,
+  DaytonaAuthenticationError,
+  DaytonaForbiddenError,
+  // Deprecated alias
+  DaytonaAuthorizationError,
+  DaytonaNotFoundError,
+  DaytonaTimeoutError,
+  DaytonaConflictError,
+  DaytonaGoneError,
+  DaytonaUnprocessableEntityError,
+  DaytonaRateLimitError,
+  DaytonaInternalServerError,
+  DaytonaBadGatewayError,
+  DaytonaServiceUnavailableError,
+  DaytonaConnectionError,
+  DaytonaConnectionTimeoutError,
+  // Domain-specific subclasses
+  DaytonaGitAuthFailedError,
+  DaytonaGitRepoNotFoundError,
+  DaytonaGitBranchNotFoundError,
+  DaytonaGitBranchExistsError,
+  DaytonaGitPushRejectedError,
+  DaytonaGitDirtyWorktreeError,
+  DaytonaGitMergeConflictError,
+  DaytonaFileNotFoundError,
+  DaytonaFileAccessDeniedError,
+  DaytonaLspServerNotInitializedError,
+  DaytonaProcessExecutionTimeoutError,
+  DaytonaProcessNotFoundError,
+  DaytonaSessionEndedError,
+  DaytonaCommandAlreadyCompletedError,
+  DaytonaA11yUnavailableError,
+  DaytonaRecordingStillActiveError,
+  DaytonaRecordingFfmpegNotFoundError,
 } from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'

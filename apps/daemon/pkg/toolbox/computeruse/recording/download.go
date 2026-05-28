@@ -5,9 +5,9 @@ package recording
 
 import (
 	"errors"
-	"net/http"
 	"os"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/pkg/recording"
 	"github.com/gin-gonic/gin"
 )
@@ -20,26 +20,34 @@ import (
 //	@Produce		octet-stream
 //	@Param			id	path		string	true	"Recording ID"
 //	@Success		200	{file}		binary
-//	@Failure		404	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/computeruse/recordings/{id}/download [get]
 //
 //	@id				DownloadRecording
 func (r *RecordingController) DownloadRecording(ctx *gin.Context) {
 	id := ctx.Param("id")
+	if id == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("id is required")))
+		return
+	}
 
 	rec, err := r.recordingService.GetRecording(id)
 	if err != nil {
 		if errors.Is(err, recording.ErrRecordingNotFound) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "recording not found"})
+			ctx.Error(common_errors.NewNotFoundError(errors.New("recording not found")))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
 	if _, err := os.Stat(rec.FilePath); os.IsNotExist(err) {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
+		ctx.Error(common_errors.NewNotFoundError(errors.New("recording file not found")))
+		return
+	} else if err != nil {
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 

@@ -119,6 +119,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.CreateSessionRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.DisplayInfo.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.DisplayInfoResponse.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ErrorResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ExecuteRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.ExecuteResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new io.daytona.toolbox.client.model.FileInfo.CustomTypeAdapterFactory());

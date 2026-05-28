@@ -44,7 +44,7 @@ func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 			}
 		}
 
-		proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+		proxy.NewProxyRequestHandler(getProxyTarget, nil, nil)(ctx)
 	}
 }
 

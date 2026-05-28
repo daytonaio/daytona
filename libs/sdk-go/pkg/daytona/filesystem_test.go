@@ -282,8 +282,7 @@ func TestDownloadFileStreamNotFound(t *testing.T) {
 	require.Nil(t, stream)
 	require.Error(t, err)
 
-	var notFoundErr *sdkerrors.DaytonaNotFoundError
-	assert.ErrorAs(t, err, &notFoundErr)
+	assert.ErrorIs(t, err, sdkerrors.ErrNotFound)
 	assert.Contains(t, err.Error(), "file not found")
 }
 

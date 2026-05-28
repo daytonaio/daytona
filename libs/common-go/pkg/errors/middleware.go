@@ -15,7 +15,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) ErrorResponse) gin.HandlerFunc {
+// DefaultInternalServerErrorHandler always returns a 500 envelope with the
+// raw err.Error(). Use as the defaultErrorHandler when a service has no
+// custom classification (recording dashboard, tests).
+func DefaultInternalServerErrorHandler(source string) func(*gin.Context, error) ErrorResponse {
+	return func(ctx *gin.Context, err error) ErrorResponse {
+		return NewErrorResponseForCtx(ctx, http.StatusInternalServerError, source, err.Error())
+	}
+}
+
+func NewErrorMiddleware(source string, defaultErrorHandler func(ctx *gin.Context, err error) ErrorResponse) gin.HandlerFunc {
+	if defaultErrorHandler == nil {
+		defaultErrorHandler = DefaultInternalServerErrorHandler(source)
+	}
+
 	return func(ctx *gin.Context) {
 		ctx.Next()
 
@@ -27,110 +40,14 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 		errs := ctx.Errors
 		if len(errs) > 0 {
 			var errorResponse ErrorResponse
-			err := errs.Last()
+			// Unwrap *gin.Error once so the default handler never has to.
+			underlying := errs.Last().Err
 
-			switch e := err.Err.(type) {
-			case *CustomError:
-				errorResponse = ErrorResponse{
-					StatusCode: e.StatusCode,
-					Message:    e.Message,
-					Code:       e.Code,
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *NotFoundError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusNotFound,
-					Message:    err.Err.Error(),
-					Code:       "NOT_FOUND",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *UnauthorizedError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusUnauthorized,
-					Message:    err.Err.Error(),
-					Code:       "UNAUTHORIZED",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *InvalidBodyRequestError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusBadRequest,
-					Message:    err.Err.Error(),
-					Code:       "INVALID_REQUEST_BODY",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *ConflictError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusConflict,
-					Message:    err.Err.Error(),
-					Code:       "CONFLICT",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *BadRequestError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusBadRequest,
-					Message:    ExtractErrorPart(err.Err.Error()),
-					Code:       "BAD_REQUEST",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *ForbiddenError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusForbidden,
-					Message:    err.Err.Error(),
-					Code:       "FORBIDDEN",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *RequestTimeoutError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusRequestTimeout,
-					Message:    err.Err.Error(),
-					Code:       "REQUEST_TIMEOUT",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *GoneError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusGone,
-					Message:    err.Err.Error(),
-					Code:       "GONE",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *InternalServerError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusInternalServerError,
-					Message:    err.Err.Error(),
-					Code:       "INTERNAL_SERVER_ERROR",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			case *UnprocessableEntityError:
-				errorResponse = ErrorResponse{
-					StatusCode: http.StatusUnprocessableEntity,
-					Message:    err.Err.Error(),
-					Code:       "UNPROCESSABLE_ENTITY",
-					Timestamp:  time.Now(),
-					Path:       ctx.Request.URL.Path,
-					Method:     ctx.Request.Method,
-				}
-			default:
-				errorResponse = defaultErrorHandler(ctx, err)
+			// Self-describing errors go straight to the wire.
+			if he, ok := underlying.(HTTPError); ok {
+				errorResponse = NewErrorResponseFromHTTPError(ctx, source, he)
+			} else {
+				errorResponse = defaultErrorHandler(ctx, underlying)
 			}
 
 			if errorResponse.StatusCode == http.StatusInternalServerError {
@@ -153,6 +70,31 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 			ctx.JSON(errorResponse.StatusCode, errorResponse)
 		}
 	}
+}
+
+// NewErrorResponseForCtx builds an ErrorResponse with path/method/timestamp
+// populated from ctx. For default error handlers.
+func NewErrorResponseForCtx(ctx *gin.Context, statusCode int, source, message string) ErrorResponse {
+	return ErrorResponse{
+		StatusCode: statusCode,
+		Message:    message,
+		Source:     source,
+		Timestamp:  time.Now(),
+		Path:       ctx.Request.URL.Path,
+		Method:     ctx.Request.Method,
+	}
+}
+
+// NewErrorResponseFromHTTPError builds an ErrorResponse from a self-describing
+// HTTPError. BadRequestError messages are rewritten by ExtractErrorPart.
+func NewErrorResponseFromHTTPError(ctx *gin.Context, source string, he HTTPError) ErrorResponse {
+	msg := he.Error()
+	if _, isBadReq := he.(*BadRequestError); isBadReq {
+		msg = ExtractErrorPart(msg)
+	}
+	resp := NewErrorResponseForCtx(ctx, he.HTTPStatusCode(), source, msg)
+	resp.Code = he.ErrorCode()
+	return resp
 }
 
 func ExtractErrorPart(errorMsg string) string {

@@ -23,6 +23,10 @@ import (
 //	@Param			commandId	path	string					true	"Command ID"
 //	@Param			request		body	SessionSendInputRequest	true	"Input send request"
 //	@Success		204
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		410	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/process/session/{sessionId}/command/{commandId}/input [post]
 //
 //	@id				SendInput

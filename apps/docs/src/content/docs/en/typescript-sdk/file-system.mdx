@@ -669,8 +669,9 @@ Structured error metadata for a failed bulk file download item.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code for the per-file failure.
+- `code?` _string_ - Machine-readable error code for the per-file failure.
 - `message` _string_ - Human-readable error message.
+- `source?` _string_ - Originating service from the wire envelope (e.g. DAYTONA_DAEMON).
 - `statusCode?` _number_ - HTTP-style status code for the per-file failure.
 ## FileDownloadRequest
 

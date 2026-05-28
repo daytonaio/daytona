@@ -201,12 +201,12 @@ class TestFilesystemTypes:
         response = FileDownloadResponse(
             source="/remote/file.txt",
             error="not found",
-            error_details=FileDownloadErrorDetails(message="missing", status_code=404, error_code="NOT_FOUND"),
+            error_details=FileDownloadErrorDetails(message="missing", status_code=404, code="NOT_FOUND"),
         )
         error = create_file_download_error(response)
         assert error.message == "missing"
         assert error.status_code == 404
-        assert error.error_code == "NOT_FOUND"
+        assert error.code == "NOT_FOUND"
 
     def test_parse_file_download_error_payload_json(self):
         message, details = parse_file_download_error_payload(
@@ -214,7 +214,7 @@ class TestFilesystemTypes:
             "application/json",
         )
         assert message == "missing"
-        assert details == FileDownloadErrorDetails(message="missing", status_code=404, error_code="NOT_FOUND")
+        assert details == FileDownloadErrorDetails(message="missing", status_code=404, code="NOT_FOUND")
 
     def test_parse_file_download_error_payload_plain_text(self):
         message, details = parse_file_download_error_payload(b"plain failure", "text/plain")
@@ -226,19 +226,22 @@ class TestFilesystemTypes:
             create_file_download_error(FileDownloadResponse(source="/tmp/file"))
 
     def test_parse_file_download_error_payload_supports_snake_case_keys(self):
+        # The runner emits camelCase, but the parser also accepts snake_case for
+        # status_code as defensive backwards compat. `code` itself has no snake_case
+        # variant — payload uses the canonical key.
         message, details = parse_file_download_error_payload(
-            b'{"message":"missing","status_code":404,"error_code":"NOT_FOUND"}',
+            b'{"message":"missing","status_code":404,"code":"NOT_FOUND"}',
             "application/json",
         )
         assert message == "missing"
-        assert details == FileDownloadErrorDetails(message="missing", status_code=404, error_code="NOT_FOUND")
+        assert details == FileDownloadErrorDetails(message="missing", status_code=404, code="NOT_FOUND")
 
     def test_create_file_download_error_maps_structured_status_code(self):
         error = create_file_download_error(
             FileDownloadResponse(
                 source="/tmp/file",
                 error="not found",
-                error_details=FileDownloadErrorDetails(message="missing", status_code=404, error_code="NOT_FOUND"),
+                error_details=FileDownloadErrorDetails(message="missing", status_code=404, code="NOT_FOUND"),
             )
         )
         assert isinstance(error, DaytonaNotFoundError)

@@ -9,6 +9,9 @@ package io.daytona.sdk.exception;
  * <p>This exception is generated client-side and is not tied to a single HTTP status code.
  */
 public class DaytonaTimeoutException extends DaytonaException {
+    /** HTTP status code carried by every instance of this class. */
+    public static final int STATUS_CODE = 408;
+
     /**
      * Creates a timeout exception with a cause.
      *
@@ -26,5 +29,13 @@ public class DaytonaTimeoutException extends DaytonaException {
      */
     public DaytonaTimeoutException(String message) {
         super(message);
+    }
+
+    public DaytonaTimeoutException(String message, String code, String source) {
+        super(STATUS_CODE, message, code, source);
+    }
+
+    public DaytonaTimeoutException(String message, Throwable cause, String code, String source) {
+        super(STATUS_CODE, message, cause, code, source);
     }
 }

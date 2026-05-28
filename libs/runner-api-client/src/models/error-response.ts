@@ -22,6 +22,7 @@ export interface ErrorResponse {
     'message': string;
     'method'?: string;
     'path': string;
+    'source'?: string;
     'statusCode': number;
     'timestamp': string;
 }

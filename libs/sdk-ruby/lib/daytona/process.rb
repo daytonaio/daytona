@@ -66,6 +66,8 @@ module Daytona
         result:,
         artifacts: ExecutionArtifacts.new(result, [])
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to execute command')
     end
 
     # Execute code in the Sandbox using the appropriate language runtime
@@ -97,6 +99,8 @@ module Daytona
           Charts.parse_chart(c)
         end)
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to run code')
     end
 
     # Creates a new long-running background session in the Sandbox
@@ -116,6 +120,8 @@ module Daytona
     #   sandbox.process.delete_session(session_id)
     def create_session(session_id)
       toolbox_api.create_session(DaytonaToolboxApiClient::CreateSessionRequest.new(session_id:))
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to create session')
     end
 
     # Gets a session in the Sandbox
@@ -128,7 +134,11 @@ module Daytona
     #   session.commands.each do |cmd|
     #     puts "Command: #{cmd.command}"
     #   end
-    def get_session(session_id) = toolbox_api.get_session(session_id)
+    def get_session(session_id)
+      toolbox_api.get_session(session_id)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get session')
+    end
 
     # Gets the Sandbox entrypoint session
     #
@@ -139,7 +149,11 @@ module Daytona
     #   session.commands.each do |cmd|
     #     puts "Command: #{cmd.command}"
     #   end
-    def get_entrypoint_session = toolbox_api.get_entrypoint_session
+    def get_entrypoint_session
+      toolbox_api.get_entrypoint_session
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get entrypoint session')
+    end
 
     # Gets information about a specific command executed in a session
     #
@@ -154,6 +168,8 @@ module Daytona
     #   end
     def get_session_command(session_id:, command_id:)
       toolbox_api.get_session_command(session_id, command_id)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get session command')
     end
 
     # Executes a command in the session
@@ -194,6 +210,8 @@ module Daytona
         exit_code: response.exit_code,
         additional_properties: {}
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to execute session command')
     end
 
     # Get the logs for a command executed in a session
@@ -209,6 +227,8 @@ module Daytona
     def get_session_command_logs(session_id:, command_id:)
       response = toolbox_api.get_session_command_logs(session_id, command_id)
       SessionCommandLogsResponse.new(output: response.output, stdout: response.stdout, stderr: response.stderr)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get session command logs')
     end
 
     # Asynchronously retrieves and processes the logs for a command executed in a session as they become available
@@ -280,6 +300,8 @@ module Daytona
     def get_entrypoint_logs
       response = toolbox_api.get_entrypoint_logs
       SessionCommandLogsResponse.new(output: response.output, stdout: response.stdout, stderr: response.stderr)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get entrypoint logs')
     end
 
     # Asynchronously retrieves and processes the sandbox entrypoint logs as they become available
@@ -351,6 +373,8 @@ module Daytona
         command_id,
         DaytonaToolboxApiClient::SessionSendInputRequest.new(data:)
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to send session command input')
     end
 
     #
@@ -362,7 +386,11 @@ module Daytona
     #     puts "Session #{session.session_id}:"
     #     puts "  Commands: #{session.commands.length}"
     #   end
-    def list_sessions = toolbox_api.list_sessions
+    def list_sessions
+      toolbox_api.list_sessions
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to list sessions')
+    end
 
     # Terminates and removes a session from the Sandbox, cleaning up any resources associated with it
     #
@@ -375,7 +403,11 @@ module Daytona
     #
     #   # Clean up when done
     #   sandbox.process.delete_session("temp-session")
-    def delete_session(session_id) = toolbox_api.delete_session(session_id)
+    def delete_session(session_id)
+      toolbox_api.delete_session(session_id)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to delete session')
+    end
 
     # Creates a new PTY (pseudo-terminal) session in the Sandbox.
     #
@@ -423,6 +455,8 @@ module Daytona
       )
 
       connect_pty_session(response.session_id)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to create PTY session')
     end
 
     # Connects to an existing PTY session in the Sandbox.
@@ -480,6 +514,8 @@ module Daytona
           rows: pty_size.rows
         )
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to resize PTY session')
     end
 
     # Deletes a PTY session, terminating the associated process
@@ -491,6 +527,8 @@ module Daytona
     #   sandbox.process.delete_pty_session("my-pty")
     def delete_pty_session(session_id)
       toolbox_api.delete_pty_session(session_id)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to delete PTY session')
     end
 
     # Lists all PTY sessions in the Sandbox
@@ -507,6 +545,8 @@ module Daytona
       return [] if response.nil?
 
       response.respond_to?(:sessions) ? (response.sessions || []) : response
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to list PTY sessions')
     end
 
     # Gets detailed information about a specific PTY session
@@ -527,6 +567,8 @@ module Daytona
     #   puts "Terminal Size: #{session_info.cols}x#{session_info.rows}"
     def get_pty_session_info(session_id)
       toolbox_api.get_pty_session(session_id)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get PTY session info')
     end
 
     instrument :exec, :code_run, :create_session, :get_session, :get_session_command,

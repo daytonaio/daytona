@@ -15,13 +15,16 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaForbiddenException extends DaytonaException {
+    /** HTTP status code carried by every instance of this class. */
+    public static final int STATUS_CODE = 403;
+
     /**
      * Creates a forbidden exception.
      *
      * @param message error description from the API
      */
     public DaytonaForbiddenException(String message) {
-        super(403, message);
+        super(STATUS_CODE, message);
     }
 
     /**
@@ -29,6 +32,14 @@ public class DaytonaForbiddenException extends DaytonaException {
      * @param cause root cause
      */
     public DaytonaForbiddenException(String message, Throwable cause) {
-        super(403, message, cause);
+        super(STATUS_CODE, message, cause);
+    }
+
+    public DaytonaForbiddenException(String message, String code, String source) {
+        super(STATUS_CODE, message, code, source);
+    }
+
+    public DaytonaForbiddenException(String message, Throwable cause, String code, String source) {
+        super(STATUS_CODE, message, cause, code, source);
     }
 }

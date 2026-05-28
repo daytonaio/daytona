@@ -27,6 +27,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.IsPortInUseResponse;
 import io.daytona.toolbox.client.model.PortList;
 
@@ -201,6 +202,7 @@ public class PortApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call isPortInUseCall(@javax.annotation.Nonnull Integer port, final ApiCallback _callback) throws ApiException {
@@ -270,6 +272,7 @@ public class PortApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public IsPortInUseResponse isPortInUse(@javax.annotation.Nonnull Integer port) throws ApiException {
@@ -288,6 +291,7 @@ public class PortApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<IsPortInUseResponse> isPortInUseWithHttpInfo(@javax.annotation.Nonnull Integer port) throws ApiException {
@@ -308,6 +312,7 @@ public class PortApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call isPortInUseAsync(@javax.annotation.Nonnull Integer port, final ApiCallback<IsPortInUseResponse> _callback) throws ApiException {

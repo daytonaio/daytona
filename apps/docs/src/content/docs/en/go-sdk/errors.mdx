@@ -10,39 +10,114 @@ hideTitleOnPage: true
 import "github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 ```
 
+Package errors defines the typed error model used by the Daytona Go SDK.
+
+Every error returned by the SDK is a \`\*DaytonaError\` carrying a human\-readable message, the HTTP \`StatusCode\` \(when applicable\), an optional machine\-readable \`Code\` / \`Source\` pair, and the response \`Headers\`. There are no per\-status struct types — a single concrete type keeps the surface small and unambiguous.
+
+Branching is done with \`errors.Is\` against the package\-level sentinels:
+
+```
+if errors.Is(err, sdkerrors.ErrNotFound) {
+    // any HTTP 404 from any source
+}
+if errors.Is(err, sdkerrors.ErrGitAuthFailed) {
+    // precisely DAYTONA_DAEMON / GIT_AUTH_FAILED
+}
+if errors.Is(err, sdkerrors.ErrAuthentication) {
+    // the same git-auth error ALSO matches the broader 401 sentinel,
+    // mirroring the inheritance hierarchy of the other Daytona SDKs.
+}
+```
+
+Reading metadata off an error is done with \`errors.As\`:
+
+```
+var de *sdkerrors.DaytonaError
+if errors.As(err, &de) {
+    log.Printf("status=%d code=%s source=%s", de.StatusCode, de.Code, de.Source)
+}
+```
+
 ## Index
 
+- [Constants](<#constants>)
+- [Variables](<#variables>)
 - [func ConvertAPIError\(err error, httpResp \*http.Response\) error](<#ConvertAPIError>)
 - [func ConvertToolboxError\(err error, httpResp \*http.Response\) error](<#ConvertToolboxError>)
-- [func NewDaytonaErrorFromBody\(body \[\]byte, statusCode int, headers http.Header\) error](<#NewDaytonaErrorFromBody>)
-- [type DaytonaAuthenticationError](<#DaytonaAuthenticationError>)
-  - [func NewDaytonaAuthenticationError\(message string, headers http.Header\) \*DaytonaAuthenticationError](<#NewDaytonaAuthenticationError>)
-  - [func \(e \*DaytonaAuthenticationError\) Error\(\) string](<#DaytonaAuthenticationError.Error>)
-- [type DaytonaConflictError](<#DaytonaConflictError>)
-  - [func NewDaytonaConflictError\(message string, headers http.Header\) \*DaytonaConflictError](<#NewDaytonaConflictError>)
-  - [func \(e \*DaytonaConflictError\) Error\(\) string](<#DaytonaConflictError.Error>)
 - [type DaytonaError](<#DaytonaError>)
+  - [func NewDaytonaConnectionError\(message string\) \*DaytonaError](<#NewDaytonaConnectionError>)
   - [func NewDaytonaError\(message string, statusCode int, headers http.Header\) \*DaytonaError](<#NewDaytonaError>)
+  - [func NewDaytonaErrorFromBody\(body \[\]byte, statusCode int, headers http.Header\) \*DaytonaError](<#NewDaytonaErrorFromBody>)
+  - [func NewDaytonaTimeoutError\(message string\) \*DaytonaError](<#NewDaytonaTimeoutError>)
   - [func \(e \*DaytonaError\) Error\(\) string](<#DaytonaError.Error>)
-- [type DaytonaForbiddenError](<#DaytonaForbiddenError>)
-  - [func NewDaytonaForbiddenError\(message string, headers http.Header\) \*DaytonaForbiddenError](<#NewDaytonaForbiddenError>)
-  - [func \(e \*DaytonaForbiddenError\) Error\(\) string](<#DaytonaForbiddenError.Error>)
-- [type DaytonaNotFoundError](<#DaytonaNotFoundError>)
-  - [func NewDaytonaNotFoundError\(message string, headers http.Header\) \*DaytonaNotFoundError](<#NewDaytonaNotFoundError>)
-  - [func \(e \*DaytonaNotFoundError\) Error\(\) string](<#DaytonaNotFoundError.Error>)
-- [type DaytonaRateLimitError](<#DaytonaRateLimitError>)
-  - [func NewDaytonaRateLimitError\(message string, headers http.Header\) \*DaytonaRateLimitError](<#NewDaytonaRateLimitError>)
-  - [func \(e \*DaytonaRateLimitError\) Error\(\) string](<#DaytonaRateLimitError.Error>)
-- [type DaytonaServerError](<#DaytonaServerError>)
-  - [func NewDaytonaServerError\(message string, statusCode int, headers http.Header\) \*DaytonaServerError](<#NewDaytonaServerError>)
-  - [func \(e \*DaytonaServerError\) Error\(\) string](<#DaytonaServerError.Error>)
-- [type DaytonaTimeoutError](<#DaytonaTimeoutError>)
-  - [func NewDaytonaTimeoutError\(message string\) \*DaytonaTimeoutError](<#NewDaytonaTimeoutError>)
-  - [func \(e \*DaytonaTimeoutError\) Error\(\) string](<#DaytonaTimeoutError.Error>)
-- [type DaytonaValidationError](<#DaytonaValidationError>)
-  - [func NewDaytonaValidationError\(message string, headers http.Header\) \*DaytonaValidationError](<#NewDaytonaValidationError>)
-  - [func \(e \*DaytonaValidationError\) Error\(\) string](<#DaytonaValidationError.Error>)
+  - [func \(e \*DaytonaError\) Is\(target error\) bool](<#DaytonaError.Is>)
 
+
+## Constants
+
+<a name="SourceAPI"></a>
+
+```go
+const (
+    SourceAPI    = "DAYTONA_API"
+    SourceDaemon = "DAYTONA_DAEMON"
+    SourceProxy  = "DAYTONA_PROXY"
+)
+```
+
+## Variables
+
+<a name="ErrBadRequest"></a>
+
+```go
+var (
+    // HTTP status-class sentinels. Names follow HTTP terminology.
+    ErrBadRequest          = &DaytonaError{StatusCode: http.StatusBadRequest}
+    ErrAuthentication      = &DaytonaError{StatusCode: http.StatusUnauthorized}
+    ErrForbidden           = &DaytonaError{StatusCode: http.StatusForbidden}
+    ErrNotFound            = &DaytonaError{StatusCode: http.StatusNotFound}
+    ErrTimeout             = &DaytonaError{StatusCode: http.StatusRequestTimeout}
+    ErrConflict            = &DaytonaError{StatusCode: http.StatusConflict}
+    ErrGone                = &DaytonaError{StatusCode: http.StatusGone}
+    ErrUnprocessableEntity = &DaytonaError{StatusCode: http.StatusUnprocessableEntity}
+    ErrRateLimit           = &DaytonaError{StatusCode: http.StatusTooManyRequests}
+    ErrInternalServer      = &DaytonaError{StatusCode: http.StatusInternalServerError}
+    ErrBadGateway          = &DaytonaError{StatusCode: http.StatusBadGateway}
+    ErrServiceUnavailable  = &DaytonaError{StatusCode: http.StatusServiceUnavailable}
+
+    // Deprecated: use ErrBadRequest. Kept so existing callers do not break.
+    ErrValidation = ErrBadRequest
+    // Deprecated: use ErrForbidden. Kept so existing callers do not break.
+    ErrAuthorization = ErrForbidden
+
+    // Daemon: git.
+    ErrGitAuthFailed     = &DaytonaError{Source: SourceDaemon, Code: "GIT_AUTH_FAILED"}
+    ErrGitRepoNotFound   = &DaytonaError{Source: SourceDaemon, Code: "GIT_REPO_NOT_FOUND"}
+    ErrGitBranchNotFound = &DaytonaError{Source: SourceDaemon, Code: "GIT_BRANCH_NOT_FOUND"}
+    ErrGitBranchExists   = &DaytonaError{Source: SourceDaemon, Code: "GIT_BRANCH_EXISTS"}
+    ErrGitPushRejected   = &DaytonaError{Source: SourceDaemon, Code: "GIT_PUSH_REJECTED"}
+    ErrGitDirtyWorktree  = &DaytonaError{Source: SourceDaemon, Code: "GIT_DIRTY_WORKTREE"}
+    ErrGitMergeConflict  = &DaytonaError{Source: SourceDaemon, Code: "GIT_MERGE_CONFLICT"}
+
+    // Daemon: filesystem.
+    ErrFileNotFound     = &DaytonaError{Source: SourceDaemon, Code: "FILE_NOT_FOUND"}
+    ErrFileAccessDenied = &DaytonaError{Source: SourceDaemon, Code: "FILE_ACCESS_DENIED"}
+
+    // Daemon: LSP.
+    ErrLspServerNotInitialized = &DaytonaError{Source: SourceDaemon, Code: "LSP_SERVER_NOT_INITIALIZED"}
+
+    // Daemon: process / session.
+    ErrProcessExecutionTimeout = &DaytonaError{Source: SourceDaemon, Code: "PROCESS_EXECUTION_TIMEOUT"}
+    ErrProcessNotFound         = &DaytonaError{Source: SourceDaemon, Code: "PROCESS_NOT_FOUND"}
+    ErrSessionEnded            = &DaytonaError{Source: SourceDaemon, Code: "SESSION_ENDED"}
+    ErrCommandAlreadyCompleted = &DaytonaError{Source: SourceDaemon, Code: "COMMAND_ALREADY_COMPLETED"}
+
+    // Daemon: computer-use.
+    ErrA11yUnavailable         = &DaytonaError{Source: SourceDaemon, Code: "A11Y_UNAVAILABLE"}
+    ErrRecordingStillActive    = &DaytonaError{Source: SourceDaemon, Code: "RECORDING_STILL_ACTIVE"}
+    ErrRecordingFfmpegNotFound = &DaytonaError{Source: SourceDaemon, Code: "RECORDING_FFMPEG_NOT_FOUND"}
+)
+```
 
 <a name="ConvertAPIError"></a>
 ## func ConvertAPIError
@@ -51,7 +126,7 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 func ConvertAPIError(err error, httpResp *http.Response) error
 ```
 
-ConvertAPIError converts api\-client\-go errors to SDK error types
+ConvertAPIError converts an error returned by the generated api\-client\-go \(and an optional \`\*http.Response\`\) into a \`\*DaytonaError\`.
 
 <a name="ConvertToolboxError"></a>
 ## func ConvertToolboxError
@@ -60,87 +135,31 @@ ConvertAPIError converts api\-client\-go errors to SDK error types
 func ConvertToolboxError(err error, httpResp *http.Response) error
 ```
 
-ConvertToolboxError converts toolbox\-api\-client\-go errors to SDK error types
-
-<a name="NewDaytonaErrorFromBody"></a>
-## func NewDaytonaErrorFromBody
-
-```go
-func NewDaytonaErrorFromBody(body []byte, statusCode int, headers http.Header) error
-```
-
-NewDaytonaErrorFromBody parses a JSON response body and maps the status code to the appropriate SDK error type. Falls back to the raw body as the message.
-
-<a name="DaytonaAuthenticationError"></a>
-## type DaytonaAuthenticationError
-
-DaytonaAuthenticationError represents an authentication error \(401\)
-
-```go
-type DaytonaAuthenticationError struct {
-    *DaytonaError
-}
-```
-
-<a name="NewDaytonaAuthenticationError"></a>
-### func NewDaytonaAuthenticationError
-
-```go
-func NewDaytonaAuthenticationError(message string, headers http.Header) *DaytonaAuthenticationError
-```
-
-
-
-<a name="DaytonaAuthenticationError.Error"></a>
-### func \(\*DaytonaAuthenticationError\) Error
-
-```go
-func (e *DaytonaAuthenticationError) Error() string
-```
-
-
-
-<a name="DaytonaConflictError"></a>
-## type DaytonaConflictError
-
-DaytonaConflictError represents a conflict error \(409\)
-
-```go
-type DaytonaConflictError struct {
-    *DaytonaError
-}
-```
-
-<a name="NewDaytonaConflictError"></a>
-### func NewDaytonaConflictError
-
-```go
-func NewDaytonaConflictError(message string, headers http.Header) *DaytonaConflictError
-```
-
-
-
-<a name="DaytonaConflictError.Error"></a>
-### func \(\*DaytonaConflictError\) Error
-
-```go
-func (e *DaytonaConflictError) Error() string
-```
-
-
+ConvertToolboxError converts an error returned by the generated toolbox\-api\-client\-go into a \`\*DaytonaError\`.
 
 <a name="DaytonaError"></a>
 ## type DaytonaError
 
-DaytonaError is the base error type for all Daytona SDK errors
+DaytonaError is the single error type returned by the SDK. Use \`errors.As\(err, &target \*DaytonaError\)\` to read its fields and \`errors.Is\(err, sentinel\)\` to branch on the kind.
 
 ```go
 type DaytonaError struct {
     Message    string
     StatusCode int
+    Code       string
+    Source     string
     Headers    http.Header
 }
 ```
+
+<a name="NewDaytonaConnectionError"></a>
+### func NewDaytonaConnectionError
+
+```go
+func NewDaytonaConnectionError(message string) *DaytonaError
+```
+
+NewDaytonaConnectionError is a convenience constructor for transport\-level failures with no HTTP response \(DNS, dial, TLS, mid\-request drop\).
 
 <a name="NewDaytonaError"></a>
 ### func NewDaytonaError
@@ -149,7 +168,25 @@ type DaytonaError struct {
 func NewDaytonaError(message string, statusCode int, headers http.Header) *DaytonaError
 ```
 
-NewDaytonaError creates a new DaytonaError
+NewDaytonaError builds a DaytonaError with the given message, status code and headers. \`Source\` is left empty — set it explicitly via \`SourceSDK\` for SDK\-internal errors, or via the translation layer for server\-side errors. Most callers should use this directly; the sentinels below are for branching with \`errors.Is\`, not for constructing errors.
+
+<a name="NewDaytonaErrorFromBody"></a>
+### func NewDaytonaErrorFromBody
+
+```go
+func NewDaytonaErrorFromBody(body []byte, statusCode int, headers http.Header) *DaytonaError
+```
+
+NewDaytonaErrorFromBody parses a JSON response body and builds a DaytonaError. When the body carries its own \`statusCode\` field that overrides the caller\-supplied one \(server\-side envelopes are authoritative\).
+
+<a name="NewDaytonaTimeoutError"></a>
+### func NewDaytonaTimeoutError
+
+```go
+func NewDaytonaTimeoutError(message string) *DaytonaError
+```
+
+NewDaytonaTimeoutError is a convenience constructor for client\-side timeouts. Equivalent to \`NewDaytonaError\(message, http.StatusRequestTimeout, nil\)\`.
 
 <a name="DaytonaError.Error"></a>
 ### func \(\*DaytonaError\) Error
@@ -160,177 +197,17 @@ func (e *DaytonaError) Error() string
 
 
 
-<a name="DaytonaForbiddenError"></a>
-## type DaytonaForbiddenError
-
-DaytonaForbiddenError represents a forbidden/authorization error \(403\)
+<a name="DaytonaError.Is"></a>
+### func \(\*DaytonaError\) Is
 
 ```go
-type DaytonaForbiddenError struct {
-    *DaytonaError
-}
+func (e *DaytonaError) Is(target error) bool
 ```
 
-<a name="NewDaytonaForbiddenError"></a>
-### func NewDaytonaForbiddenError
+Is implements the \`errors.Is\` contract. A target matches when it is one of the package\-level sentinels and either:
 
-```go
-func NewDaytonaForbiddenError(message string, headers http.Header) *DaytonaForbiddenError
-```
+- the target carries a non\-empty \`Code\`, in which case BOTH \`Source\` and \`Code\` must match exactly \(domain\-code sentinel\), or
+- the target carries a non\-zero \`StatusCode\`, in which case the receiver's \`StatusCode\` must match \(status\-class sentinel\).
 
-
-
-<a name="DaytonaForbiddenError.Error"></a>
-### func \(\*DaytonaForbiddenError\) Error
-
-```go
-func (e *DaytonaForbiddenError) Error() string
-```
-
-
-
-<a name="DaytonaNotFoundError"></a>
-## type DaytonaNotFoundError
-
-DaytonaNotFoundError represents a resource not found error \(404\)
-
-```go
-type DaytonaNotFoundError struct {
-    *DaytonaError
-}
-```
-
-<a name="NewDaytonaNotFoundError"></a>
-### func NewDaytonaNotFoundError
-
-```go
-func NewDaytonaNotFoundError(message string, headers http.Header) *DaytonaNotFoundError
-```
-
-NewDaytonaNotFoundError creates a new DaytonaNotFoundError
-
-<a name="DaytonaNotFoundError.Error"></a>
-### func \(\*DaytonaNotFoundError\) Error
-
-```go
-func (e *DaytonaNotFoundError) Error() string
-```
-
-
-
-<a name="DaytonaRateLimitError"></a>
-## type DaytonaRateLimitError
-
-DaytonaRateLimitError represents a rate limit error \(429\)
-
-```go
-type DaytonaRateLimitError struct {
-    *DaytonaError
-}
-```
-
-<a name="NewDaytonaRateLimitError"></a>
-### func NewDaytonaRateLimitError
-
-```go
-func NewDaytonaRateLimitError(message string, headers http.Header) *DaytonaRateLimitError
-```
-
-NewDaytonaRateLimitError creates a new DaytonaRateLimitError
-
-<a name="DaytonaRateLimitError.Error"></a>
-### func \(\*DaytonaRateLimitError\) Error
-
-```go
-func (e *DaytonaRateLimitError) Error() string
-```
-
-
-
-<a name="DaytonaServerError"></a>
-## type DaytonaServerError
-
-DaytonaServerError represents a server error \(5xx\)
-
-```go
-type DaytonaServerError struct {
-    *DaytonaError
-}
-```
-
-<a name="NewDaytonaServerError"></a>
-### func NewDaytonaServerError
-
-```go
-func NewDaytonaServerError(message string, statusCode int, headers http.Header) *DaytonaServerError
-```
-
-
-
-<a name="DaytonaServerError.Error"></a>
-### func \(\*DaytonaServerError\) Error
-
-```go
-func (e *DaytonaServerError) Error() string
-```
-
-
-
-<a name="DaytonaTimeoutError"></a>
-## type DaytonaTimeoutError
-
-DaytonaTimeoutError represents a timeout error
-
-```go
-type DaytonaTimeoutError struct {
-    *DaytonaError
-}
-```
-
-<a name="NewDaytonaTimeoutError"></a>
-### func NewDaytonaTimeoutError
-
-```go
-func NewDaytonaTimeoutError(message string) *DaytonaTimeoutError
-```
-
-
-
-<a name="DaytonaTimeoutError.Error"></a>
-### func \(\*DaytonaTimeoutError\) Error
-
-```go
-func (e *DaytonaTimeoutError) Error() string
-```
-
-
-
-<a name="DaytonaValidationError"></a>
-## type DaytonaValidationError
-
-DaytonaValidationError represents a validation/bad request error \(400\)
-
-```go
-type DaytonaValidationError struct {
-    *DaytonaError
-}
-```
-
-<a name="NewDaytonaValidationError"></a>
-### func NewDaytonaValidationError
-
-```go
-func NewDaytonaValidationError(message string, headers http.Header) *DaytonaValidationError
-```
-
-
-
-<a name="DaytonaValidationError.Error"></a>
-### func \(\*DaytonaValidationError\) Error
-
-```go
-func (e *DaytonaValidationError) Error() string
-```
-
-
+Because the SDK always stamps the HTTP status alongside the domain code, \`errors.Is\(err, ErrGitAuthFailed\)\` and \`errors.Is\(err, ErrAuthentication\)\` both match the same underlying error — mirroring the inheritance hierarchy used by the Python/TypeScript/Java SDKs.
 

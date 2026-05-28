@@ -232,8 +232,8 @@ module Daytona
     def create_context(cwd: nil)
       request = DaytonaToolboxApiClient::CreateContextRequest.new(cwd:)
       @toolbox_api.create_interpreter_context(request)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to create interpreter context: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to create interpreter context')
     end
 
     # List all user-created interpreter contexts.
@@ -252,8 +252,8 @@ module Daytona
     def list_contexts
       response = @toolbox_api.list_interpreter_contexts
       response.contexts || []
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to list interpreter contexts: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to list interpreter contexts')
     end
 
     # Delete an interpreter context and shut down all associated processes.
@@ -272,8 +272,8 @@ module Daytona
     def delete_context(context)
       @toolbox_api.delete_interpreter_context(context.id)
       nil
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to delete interpreter context: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to delete interpreter context')
     end
 
     instrument :run_code, :create_context, :list_contexts, :delete_context,

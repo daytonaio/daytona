@@ -47,8 +47,8 @@ func TestOpenDownloadFile(t *testing.T) {
 			t.Fatalf("expected status %d, got %d", http.StatusBadRequest, errorResponse.StatusCode)
 		}
 
-		if errorResponse.Code != "INVALID_FILE_PATH" {
-			t.Fatalf("expected INVALID_FILE_PATH, got %s", errorResponse.Code)
+		if errorResponse.Code != "" {
+			t.Fatalf("expected no error code, got %s", errorResponse.Code)
 		}
 
 		if errorResponse.Method != http.MethodPost {
@@ -74,8 +74,8 @@ func TestOpenDownloadFile(t *testing.T) {
 			t.Fatalf("expected status %d, got %d", http.StatusBadRequest, errorResponse.StatusCode)
 		}
 
-		if errorResponse.Code != "INVALID_FILE_PATH" {
-			t.Fatalf("expected INVALID_FILE_PATH, got %s", errorResponse.Code)
+		if errorResponse.Code != "" {
+			t.Fatalf("expected no error code, got %s", errorResponse.Code)
 		}
 
 		if !strings.Contains(errorResponse.Message, "directory") {

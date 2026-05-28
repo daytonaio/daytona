@@ -23,13 +23,18 @@ import (
 //	@Produce		json
 //	@Param			request	body	GitCloneRequest	true	"Clone repository request"
 //	@Success		200
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		401	{object}	common.ErrorResponse
+//	@Failure		403	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/git/clone [post]
 //
 //	@id				CloneRepository
 func CloneRepository(c *gin.Context) {
 	var req GitCloneRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
+		c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
 	}
 

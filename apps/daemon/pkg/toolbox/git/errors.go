@@ -5,9 +5,9 @@ package git
 
 import (
 	"errors"
-	"net/http"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 	go_git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -15,39 +15,49 @@ import (
 )
 
 func classifyGitError(err error) error {
-	if errors.Is(err, transport.ErrAuthenticationRequired) ||
-		errors.Is(err, transport.ErrInvalidAuthMethod) {
-		return common_errors.NewUnauthorizedError(err)
-	}
+	switch {
+	case errors.Is(err, transport.ErrAuthenticationRequired),
+		errors.Is(err, transport.ErrInvalidAuthMethod):
+		return common.NewGitAuthFailedError(err.Error())
 
-	if errors.Is(err, transport.ErrAuthorizationFailed) {
+	case errors.Is(err, transport.ErrRepositoryNotFound),
+		errors.Is(err, go_git.ErrRepositoryNotExists):
+		return common.NewGitRepoNotFoundError(err.Error())
+
+	case errors.Is(err, go_git.ErrBranchNotFound):
+		return common.NewGitBranchNotFoundError(err.Error())
+
+	case errors.Is(err, go_git.ErrBranchExists):
+		return common.NewGitBranchExistsError(err.Error())
+
+	case errors.Is(err, go_git.ErrNonFastForwardUpdate):
+		return common.NewGitPushRejectedError(err.Error())
+
+	case errors.Is(err, go_git.ErrWorktreeNotClean),
+		errors.Is(err, go_git.ErrUnstagedChanges):
+		return common.NewGitDirtyWorktreeError(err.Error())
+
+	case errors.Is(err, go_git.ErrFastForwardMergeNotPossible):
+		return common.NewGitMergeConflictError(err.Error())
+
+	case errors.Is(err, transport.ErrAuthorizationFailed):
 		return common_errors.NewForbiddenError(err)
-	}
 
-	if errors.Is(err, transport.ErrRepositoryNotFound) ||
-		errors.Is(err, transport.ErrEmptyRemoteRepository) ||
-		errors.Is(err, go_git.ErrRepositoryNotExists) ||
-		errors.Is(err, go_git.ErrBranchNotFound) ||
-		errors.Is(err, go_git.ErrRemoteNotFound) ||
-		errors.Is(err, go_git.ErrTagNotFound) ||
-		errors.Is(err, plumbing.ErrReferenceNotFound) ||
-		errors.Is(err, plumbing.ErrObjectNotFound) {
+	case errors.Is(err, transport.ErrEmptyRemoteRepository),
+		errors.Is(err, go_git.ErrRemoteNotFound),
+		errors.Is(err, go_git.ErrTagNotFound),
+		errors.Is(err, plumbing.ErrReferenceNotFound),
+		errors.Is(err, plumbing.ErrObjectNotFound):
 		return common_errors.NewNotFoundError(err)
-	}
 
-	if errors.Is(err, go_git.ErrNonFastForwardUpdate) ||
-		errors.Is(err, go_git.ErrWorktreeNotClean) ||
-		errors.Is(err, go_git.ErrUnstagedChanges) ||
-		errors.Is(err, go_git.ErrRepositoryAlreadyExists) ||
-		errors.Is(err, go_git.ErrBranchExists) ||
-		errors.Is(err, go_git.ErrFastForwardMergeNotPossible) {
+	case errors.Is(err, go_git.ErrRepositoryAlreadyExists):
 		return common_errors.NewConflictError(err)
-	}
 
-	return common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR")
+	default:
+		return common_errors.NewInternalServerError(err)
+	}
 }
 
 func abortWithGitError(c *gin.Context, err error) {
-	_ = c.Error(classifyGitError(err))
-	c.Abort()
+	c.Error(classifyGitError(err))
 }

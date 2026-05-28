@@ -59,6 +59,8 @@ module Daytona
           position: DaytonaApiClient::Position.new(line: position.line, character: position.character)
         )
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get LSP completions')
     end
 
     # Notify the language server that a file has been closed.
@@ -71,6 +73,8 @@ module Daytona
       toolbox_api.did_close(
         DaytonaToolboxApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to notify LSP server of closed document')
     end
 
     # Notifies the language server that a file has been opened.
@@ -84,20 +88,30 @@ module Daytona
       toolbox_api.did_open(
         DaytonaToolboxApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to notify LSP server of opened document')
     end
 
     # Gets symbol information (functions, classes, variables, etc.) from a document.
     #
     # @param path [String]
     # @return [Array<DaytonaToolboxApiClient::LspSymbol]
-    def document_symbols(path) = toolbox_api.document_symbols(language_id, path_to_project, uri(path))
+    def document_symbols(path)
+      toolbox_api.document_symbols(language_id, path_to_project, uri(path))
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get LSP document symbols')
+    end
 
     # Searches for symbols matching the query string across all files
     # in the Sandbox.
     #
     # @param query [String]
     # @return [Array<DaytonaToolboxApiClient::LspSymbol]
-    def sandbox_symbols(query) = toolbox_api.workspace_symbols(query, language_id, path_to_project)
+    def sandbox_symbols(query)
+      toolbox_api.workspace_symbols(query, language_id, path_to_project)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get LSP workspace symbols')
+    end
 
     # Starts the language server.
     # This method must be called before using any other LSP functionality.
@@ -108,6 +122,8 @@ module Daytona
       toolbox_api.start(
         DaytonaToolboxApiClient::LspServerRequest.new(language_id:, path_to_project:)
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to start LSP server')
     end
 
     # Stops the language server.
@@ -119,6 +135,8 @@ module Daytona
       toolbox_api.stop(
         DaytonaToolboxApiClient::LspServerRequest.new(language_id:, path_to_project:)
       )
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to stop LSP server')
     end
 
     instrument :completions, :did_close, :did_open, :document_symbols, :sandbox_symbols,

@@ -349,7 +349,7 @@ class TestSyncFileSystem:
             list(fs.download_file_stream(remote_path))
 
         assert exc_info.value.status_code == 404
-        assert exc_info.value.error_code == "not_found"
+        assert exc_info.value.code == "not_found"
 
     def test_download_file_stream_cancel_event_aborts(self):
         import threading
@@ -573,7 +573,7 @@ class TestAsyncFileSystem:
             [chunk async for chunk in await fs.download_file_stream(remote_path)]
 
         assert exc_info.value.status_code == 404
-        assert exc_info.value.error_code == "not_found"
+        assert exc_info.value.code == "not_found"
 
     @pytest.mark.asyncio
     async def test_download_file_stream_cancel_event_aborts(self):

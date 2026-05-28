@@ -95,8 +95,8 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpreterContext",
-            '400': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -164,8 +164,8 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpreterContext",
-            '400': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -233,8 +233,8 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpreterContext",
-            '400': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -374,8 +374,9 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Dict[str, str]",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -443,8 +444,9 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Dict[str, str]",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -512,8 +514,9 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Dict[str, str]",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -881,6 +884,7 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListContextsResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -944,6 +948,7 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListContextsResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1007,6 +1012,7 @@ class InterpreterApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListContextsResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,

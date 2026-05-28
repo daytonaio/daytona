@@ -4,40 +4,86 @@ hideTitleOnPage: true
 ---
 
 
-## DaytonaAuthenticationError
+## DaytonaA11yUnavailableError
 
-Error thrown when authentication fails (HTTP 401).
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaServiceUnavailableError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaServiceUnavailableError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaServiceUnavailableError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaServiceUnavailableError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaServiceUnavailableError`
+
+### Constructors
+
+#### new DaytonaA11yUnavailableError()
+
+```ts
+new DaytonaA11yUnavailableError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaA11yUnavailableError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaA11yUnavailableError`
+
+##### Inherited from
+
+`DaytonaServiceUnavailableError`.`constructor`
+## DaytonaAuthenticationError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
 
-**Example:**
-
-```ts
-try {
-  for await (const sandbox of daytona.list()) {
-    console.log(sandbox.id)
-  }
-} catch (error) {
-  if (error instanceof DaytonaAuthenticationError) {
-    console.log(error.statusCode)
-  }
-}
-```
-
 **Extends:**
 
 - `DaytonaError`
+
+### Extended by
+
+- `DaytonaGitAuthFailedError`
 
 ### Constructors
 
@@ -48,7 +94,8 @@ new DaytonaAuthenticationError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaAuthenticationError
+   code?: string, 
+   source?: string): DaytonaAuthenticationError
 ```
 
 **Parameters**:
@@ -56,7 +103,8 @@ new DaytonaAuthenticationError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -66,34 +114,25 @@ new DaytonaAuthenticationError(
 ##### Inherited from
 
 `DaytonaError`.`constructor`
-## DaytonaAuthorizationError
+## DaytonaBadGatewayError
 
-Error thrown when the request is forbidden (HTTP 403).
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
-
-**Example:**
-
-```ts
-try {
-  await daytona.get('sandbox-without-access')
-} catch (error) {
-  if (error instanceof DaytonaAuthorizationError) {
-    console.log(error.message)
-  }
-}
-```
 
 **Extends:**
 
@@ -101,14 +140,15 @@ try {
 
 ### Constructors
 
-#### new DaytonaAuthorizationError()
+#### new DaytonaBadGatewayError()
 
 ```ts
-new DaytonaAuthorizationError(
+new DaytonaBadGatewayError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaAuthorizationError
+   code?: string, 
+   source?: string): DaytonaBadGatewayError
 ```
 
 **Parameters**:
@@ -116,48 +156,158 @@ new DaytonaAuthorizationError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
 
-- `DaytonaAuthorizationError`
+- `DaytonaBadGatewayError`
 
 ##### Inherited from
 
 `DaytonaError`.`constructor`
-## DaytonaConflictError
+## DaytonaBadRequestError
 
-Error thrown when a resource conflict occurs (HTTP 409).
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
 
-**Example:**
+**Extends:**
+
+- `DaytonaError`
+
+### Extended by
+
+- `DaytonaLspServerNotInitializedError`
+
+### Constructors
+
+#### new DaytonaBadRequestError()
 
 ```ts
-try {
-  await daytona.create({ name: 'existing-sandbox' })
-} catch (error) {
-  if (error instanceof DaytonaConflictError) {
-    console.log(error.errorCode)
-  }
-}
+new DaytonaBadRequestError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaBadRequestError
 ```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaBadRequestError`
+
+##### Inherited from
+
+`DaytonaError`.`constructor`
+## DaytonaCommandAlreadyCompletedError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaGoneError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaGoneError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaGoneError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaGoneError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaGoneError`
+
+### Constructors
+
+#### new DaytonaCommandAlreadyCompletedError()
+
+```ts
+new DaytonaCommandAlreadyCompletedError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaCommandAlreadyCompletedError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaCommandAlreadyCompletedError`
+
+##### Inherited from
+
+`DaytonaGoneError`.`constructor`
+## DaytonaConflictError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
 
 **Extends:**
 
 - `DaytonaError`
+
+### Extended by
+
+- `DaytonaGitBranchExistsError`
+- `DaytonaGitPushRejectedError`
+- `DaytonaGitDirtyWorktreeError`
+- `DaytonaGitMergeConflictError`
+- `DaytonaRecordingStillActiveError`
 
 ### Constructors
 
@@ -168,7 +318,8 @@ new DaytonaConflictError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaConflictError
+   code?: string, 
+   source?: string): DaytonaConflictError
 ```
 
 **Parameters**:
@@ -176,7 +327,8 @@ new DaytonaConflictError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -188,36 +340,29 @@ new DaytonaConflictError(
 `DaytonaError`.`constructor`
 ## DaytonaConnectionError
 
-Error thrown when a network connection fails.
+Network connection failure (can't connect or mid-request drop).
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
 
-**Example:**
-
-```ts
-try {
-  await ptyHandle.waitForConnection()
-} catch (error) {
-  if (error instanceof DaytonaConnectionError) {
-    console.log(error.message)
-  }
-}
-```
-
 **Extends:**
 
 - `DaytonaError`
+
+### Extended by
+
+- `DaytonaConnectionTimeoutError`
 
 ### Constructors
 
@@ -228,7 +373,8 @@ new DaytonaConnectionError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaConnectionError
+   code?: string, 
+   source?: string): DaytonaConnectionError
 ```
 
 **Parameters**:
@@ -236,7 +382,8 @@ new DaytonaConnectionError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -246,33 +393,72 @@ new DaytonaConnectionError(
 ##### Inherited from
 
 `DaytonaError`.`constructor`
-## DaytonaError
+## DaytonaConnectionTimeoutError
 
-Base error for Daytona SDK.
+Transport-layer timeout (connect / read). Subclass of DaytonaConnectionError.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-- `headers?` _AxiosHeaders_ - Response headers if available
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `code?` _string_
+    - _Inherited from_: `DaytonaConnectionError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaConnectionError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaConnectionError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaConnectionError.statusCode`
 
 
 
 
-**Example:**
+**Extends:**
+
+- `DaytonaConnectionError`
+
+### Constructors
+
+#### new DaytonaConnectionTimeoutError()
 
 ```ts
-try {
-  await daytona.get('missing-sandbox')
-} catch (error) {
-  if (error instanceof DaytonaError) {
-    console.log(error.statusCode)
-    console.log(error.errorCode)
-    console.log(error.message)
-  }
-}
+new DaytonaConnectionTimeoutError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaConnectionTimeoutError
 ```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaConnectionTimeoutError`
+
+##### Inherited from
+
+`DaytonaConnectionError`.`constructor`
+## DaytonaError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+- `headers?` _AxiosHeaders_
+- `source?` _string_
+- `statusCode?` _number_
+
+
+
 
 **Extends:**
 
@@ -280,13 +466,18 @@ try {
 
 ### Extended by
 
-- `DaytonaNotFoundError`
-- `DaytonaRateLimitError`
+- `DaytonaBadRequestError`
 - `DaytonaAuthenticationError`
-- `DaytonaAuthorizationError`
-- `DaytonaConflictError`
-- `DaytonaValidationError`
+- `DaytonaForbiddenError`
+- `DaytonaNotFoundError`
 - `DaytonaTimeoutError`
+- `DaytonaConflictError`
+- `DaytonaGoneError`
+- `DaytonaUnprocessableEntityError`
+- `DaytonaRateLimitError`
+- `DaytonaInternalServerError`
+- `DaytonaBadGatewayError`
+- `DaytonaServiceUnavailableError`
 - `DaytonaConnectionError`
 
 ### Constructors
@@ -298,7 +489,8 @@ new DaytonaError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaError
+   code?: string, 
+   source?: string): DaytonaError
 ```
 
 **Parameters**:
@@ -306,7 +498,8 @@ new DaytonaError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -318,38 +511,734 @@ new DaytonaError(
 ```ts
 Error.constructor
 ```
-## DaytonaNotFoundError
+## DaytonaFileAccessDeniedError
 
-Error thrown when a resource is not found (HTTP 404).
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaForbiddenError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaForbiddenError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaForbiddenError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaForbiddenError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaForbiddenError`
+
+### Constructors
+
+#### new DaytonaFileAccessDeniedError()
+
+```ts
+new DaytonaFileAccessDeniedError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaFileAccessDeniedError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaFileAccessDeniedError`
+
+##### Inherited from
+
+`DaytonaForbiddenError`.`constructor`
+## DaytonaFileNotFoundError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaNotFoundError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaNotFoundError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaNotFoundError`
+
+### Constructors
+
+#### new DaytonaFileNotFoundError()
+
+```ts
+new DaytonaFileNotFoundError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaFileNotFoundError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaFileNotFoundError`
+
+##### Inherited from
+
+`DaytonaNotFoundError`.`constructor`
+## DaytonaForbiddenError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
 
-**Example:**
+**Extends:**
+
+- `DaytonaError`
+
+### Extended by
+
+- `DaytonaFileAccessDeniedError`
+
+### Constructors
+
+#### new DaytonaForbiddenError()
 
 ```ts
-try {
-  await sandbox.fs.downloadFile('/workspace/missing.txt')
-} catch (error) {
-  if (error instanceof DaytonaNotFoundError) {
-    console.log(error.statusCode)
-  }
-}
+new DaytonaForbiddenError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaForbiddenError
 ```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaForbiddenError`
+
+##### Inherited from
+
+`DaytonaError`.`constructor`
+## DaytonaGitAuthFailedError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaAuthenticationError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaAuthenticationError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaAuthenticationError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaAuthenticationError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaAuthenticationError`
+
+### Constructors
+
+#### new DaytonaGitAuthFailedError()
+
+```ts
+new DaytonaGitAuthFailedError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGitAuthFailedError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGitAuthFailedError`
+
+##### Inherited from
+
+`DaytonaAuthenticationError`.`constructor`
+## DaytonaGitBranchExistsError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaConflictError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaConflictError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaConflictError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaConflictError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaConflictError`
+
+### Constructors
+
+#### new DaytonaGitBranchExistsError()
+
+```ts
+new DaytonaGitBranchExistsError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGitBranchExistsError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGitBranchExistsError`
+
+##### Inherited from
+
+`DaytonaConflictError`.`constructor`
+## DaytonaGitBranchNotFoundError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaNotFoundError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaNotFoundError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaNotFoundError`
+
+### Constructors
+
+#### new DaytonaGitBranchNotFoundError()
+
+```ts
+new DaytonaGitBranchNotFoundError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGitBranchNotFoundError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGitBranchNotFoundError`
+
+##### Inherited from
+
+`DaytonaNotFoundError`.`constructor`
+## DaytonaGitDirtyWorktreeError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaConflictError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaConflictError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaConflictError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaConflictError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaConflictError`
+
+### Constructors
+
+#### new DaytonaGitDirtyWorktreeError()
+
+```ts
+new DaytonaGitDirtyWorktreeError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGitDirtyWorktreeError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGitDirtyWorktreeError`
+
+##### Inherited from
+
+`DaytonaConflictError`.`constructor`
+## DaytonaGitMergeConflictError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaConflictError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaConflictError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaConflictError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaConflictError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaConflictError`
+
+### Constructors
+
+#### new DaytonaGitMergeConflictError()
+
+```ts
+new DaytonaGitMergeConflictError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGitMergeConflictError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGitMergeConflictError`
+
+##### Inherited from
+
+`DaytonaConflictError`.`constructor`
+## DaytonaGitPushRejectedError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaConflictError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaConflictError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaConflictError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaConflictError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaConflictError`
+
+### Constructors
+
+#### new DaytonaGitPushRejectedError()
+
+```ts
+new DaytonaGitPushRejectedError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGitPushRejectedError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGitPushRejectedError`
+
+##### Inherited from
+
+`DaytonaConflictError`.`constructor`
+## DaytonaGitRepoNotFoundError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaNotFoundError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaNotFoundError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaNotFoundError`
+
+### Constructors
+
+#### new DaytonaGitRepoNotFoundError()
+
+```ts
+new DaytonaGitRepoNotFoundError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGitRepoNotFoundError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGitRepoNotFoundError`
+
+##### Inherited from
+
+`DaytonaNotFoundError`.`constructor`
+## DaytonaGoneError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
 
 **Extends:**
 
 - `DaytonaError`
+
+### Extended by
+
+- `DaytonaSessionEndedError`
+- `DaytonaCommandAlreadyCompletedError`
+
+### Constructors
+
+#### new DaytonaGoneError()
+
+```ts
+new DaytonaGoneError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaGoneError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaGoneError`
+
+##### Inherited from
+
+`DaytonaError`.`constructor`
+## DaytonaInternalServerError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaInternalServerError()
+
+```ts
+new DaytonaInternalServerError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaInternalServerError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaInternalServerError`
+
+##### Inherited from
+
+`DaytonaError`.`constructor`
+## DaytonaLspServerNotInitializedError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaBadRequestError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaBadRequestError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaBadRequestError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaBadRequestError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaBadRequestError`
+
+### Constructors
+
+#### new DaytonaLspServerNotInitializedError()
+
+```ts
+new DaytonaLspServerNotInitializedError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaLspServerNotInitializedError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaLspServerNotInitializedError`
+
+##### Inherited from
+
+`DaytonaBadRequestError`.`constructor`
+## DaytonaNotFoundError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaError`
+
+### Extended by
+
+- `DaytonaGitRepoNotFoundError`
+- `DaytonaGitBranchNotFoundError`
+- `DaytonaFileNotFoundError`
+- `DaytonaProcessNotFoundError`
 
 ### Constructors
 
@@ -360,7 +1249,8 @@ new DaytonaNotFoundError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaNotFoundError
+   code?: string, 
+   source?: string): DaytonaNotFoundError
 ```
 
 **Parameters**:
@@ -368,7 +1258,8 @@ new DaytonaNotFoundError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -378,36 +1269,131 @@ new DaytonaNotFoundError(
 ##### Inherited from
 
 `DaytonaError`.`constructor`
-## DaytonaRateLimitError
+## DaytonaProcessExecutionTimeoutError
 
-Error thrown when rate limit is exceeded.
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaTimeoutError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaTimeoutError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaTimeoutError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaTimeoutError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaTimeoutError`
+
+### Constructors
+
+#### new DaytonaProcessExecutionTimeoutError()
+
+```ts
+new DaytonaProcessExecutionTimeoutError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaProcessExecutionTimeoutError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaProcessExecutionTimeoutError`
+
+##### Inherited from
+
+`DaytonaTimeoutError`.`constructor`
+## DaytonaProcessNotFoundError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaNotFoundError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaNotFoundError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaNotFoundError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaNotFoundError`
+
+### Constructors
+
+#### new DaytonaProcessNotFoundError()
+
+```ts
+new DaytonaProcessNotFoundError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaProcessNotFoundError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaProcessNotFoundError`
+
+##### Inherited from
+
+`DaytonaNotFoundError`.`constructor`
+## DaytonaRateLimitError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
-
-**Example:**
-
-```ts
-try {
-  for await (const sandbox of daytona.list()) {
-    console.log(sandbox.id)
-  }
-} catch (error) {
-  if (error instanceof DaytonaRateLimitError) {
-    console.log(error.errorCode)
-  }
-}
-```
 
 **Extends:**
 
@@ -422,7 +1408,8 @@ new DaytonaRateLimitError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaRateLimitError
+   code?: string, 
+   source?: string): DaytonaRateLimitError
 ```
 
 **Parameters**:
@@ -430,7 +1417,8 @@ new DaytonaRateLimitError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -440,38 +1428,250 @@ new DaytonaRateLimitError(
 ##### Inherited from
 
 `DaytonaError`.`constructor`
-## DaytonaTimeoutError
+## DaytonaRecordingFfmpegNotFoundError
 
-Error thrown when a timeout occurs.
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaServiceUnavailableError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaServiceUnavailableError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaServiceUnavailableError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaServiceUnavailableError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaServiceUnavailableError`
+
+### Constructors
+
+#### new DaytonaRecordingFfmpegNotFoundError()
+
+```ts
+new DaytonaRecordingFfmpegNotFoundError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaRecordingFfmpegNotFoundError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaRecordingFfmpegNotFoundError`
+
+##### Inherited from
+
+`DaytonaServiceUnavailableError`.`constructor`
+## DaytonaRecordingStillActiveError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaConflictError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaConflictError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaConflictError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaConflictError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaConflictError`
+
+### Constructors
+
+#### new DaytonaRecordingStillActiveError()
+
+```ts
+new DaytonaRecordingStillActiveError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaRecordingStillActiveError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaRecordingStillActiveError`
+
+##### Inherited from
+
+`DaytonaConflictError`.`constructor`
+## DaytonaServiceUnavailableError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
 
-**Example:**
+**Extends:**
+
+- `DaytonaError`
+
+### Extended by
+
+- `DaytonaA11yUnavailableError`
+- `DaytonaRecordingFfmpegNotFoundError`
+
+### Constructors
+
+#### new DaytonaServiceUnavailableError()
 
 ```ts
-try {
-  await sandbox.waitUntilStarted(1)
-} catch (error) {
-  if (error instanceof DaytonaTimeoutError) {
-    console.log(error.message)
-  }
-}
+new DaytonaServiceUnavailableError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaServiceUnavailableError
 ```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaServiceUnavailableError`
+
+##### Inherited from
+
+`DaytonaError`.`constructor`
+## DaytonaSessionEndedError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaGoneError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaGoneError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaGoneError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaGoneError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaGoneError`
+
+### Constructors
+
+#### new DaytonaSessionEndedError()
+
+```ts
+new DaytonaSessionEndedError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders, 
+   code?: string, 
+   source?: string): DaytonaSessionEndedError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `code?` _string_
+- `source?` _string_
+
+
+**Returns**:
+
+- `DaytonaSessionEndedError`
+
+##### Inherited from
+
+`DaytonaGoneError`.`constructor`
+## DaytonaTimeoutError
+
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
+
+**Properties**:
+
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
+    - _Inherited from_: `DaytonaError.headers`
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
 
 **Extends:**
 
 - `DaytonaError`
+
+### Extended by
+
+- `DaytonaProcessExecutionTimeoutError`
 
 ### Constructors
 
@@ -482,7 +1682,8 @@ new DaytonaTimeoutError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaTimeoutError
+   code?: string, 
+   source?: string): DaytonaTimeoutError
 ```
 
 **Parameters**:
@@ -490,7 +1691,8 @@ new DaytonaTimeoutError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -500,34 +1702,25 @@ new DaytonaTimeoutError(
 ##### Inherited from
 
 `DaytonaError`.`constructor`
-## DaytonaValidationError
+## DaytonaUnprocessableEntityError
 
-Error thrown when input validation fails (HTTP 400 or client-side validation).
+Base error for Daytona SDK. `statusCode` and `code` are populated only
+for errors translated from a server response. `source` is `undefined`
+unless the caller (or the translation layer) sets it.
 
 **Properties**:
 
-- `errorCode?` _string_ - Machine-readable error code if available
-    - _Inherited from_: `DaytonaError.errorCode`
-- `headers?` _AxiosHeaders_ - Response headers if available
+- `code?` _string_
+    - _Inherited from_: `DaytonaError.code`
+- `headers?` _AxiosHeaders_
     - _Inherited from_: `DaytonaError.headers`
-- `statusCode?` _number_ - HTTP status code if available
-    
+- `source?` _string_
+    - _Inherited from_: `DaytonaError.source`
+- `statusCode?` _number_
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
-
-**Example:**
-
-```ts
-try {
-  Image.debianSlim('3.8' as never)
-} catch (error) {
-  if (error instanceof DaytonaValidationError) {
-    console.log(error.message)
-  }
-}
-```
 
 **Extends:**
 
@@ -535,14 +1728,15 @@ try {
 
 ### Constructors
 
-#### new DaytonaValidationError()
+#### new DaytonaUnprocessableEntityError()
 
 ```ts
-new DaytonaValidationError(
+new DaytonaUnprocessableEntityError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaValidationError
+   code?: string, 
+   source?: string): DaytonaUnprocessableEntityError
 ```
 
 **Parameters**:
@@ -550,12 +1744,13 @@ new DaytonaValidationError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
 
-- `DaytonaValidationError`
+- `DaytonaUnprocessableEntityError`
 
 ##### Inherited from
 
@@ -566,7 +1761,10 @@ new DaytonaValidationError(
 function createAxiosDaytonaError(error: AxiosError): DaytonaError
 ```
 
-Creates the appropriate Daytona error subclass from an Axios error.
+Creates the appropriate Daytona error subclass from an Axios error. Maps
+client-side timeouts to DaytonaConnectionTimeoutError, networking failures
+(no response received) to DaytonaConnectionError, and HTTP responses to
+the most specific subclass via `createDaytonaError`.
 
 **Parameters**:
 
@@ -587,17 +1785,21 @@ function createDaytonaError(
    message: string, 
    statusCode?: number, 
    headers?: AxiosHeaders, 
-   errorCode?: string): DaytonaError
+   code?: string, 
+   source?: string): DaytonaError
 ```
 
 Creates the appropriate Daytona error subclass from structured error metadata.
+
+Resolution order: (source, code) override -> HTTP status code -> DaytonaError.
 
 **Parameters**:
 
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
-- `errorCode?` _string_
+- `code?` _string_
+- `source?` _string_
 
 
 **Returns**:
@@ -627,8 +1829,93 @@ Maps an HTTP status code to the corresponding Daytona error class.
 ***
 
 
+## ~~DaytonaAuthorizationError~~
+
+```ts
+type DaytonaAuthorizationError = DaytonaForbiddenError;
+```
+
+### Deprecated
+
+Use DaytonaForbiddenError instead.
+
+***
+
+
+## ~~DaytonaValidationError~~
+
+```ts
+type DaytonaValidationError = DaytonaBadRequestError;
+```
+
+### Deprecated
+
+Use DaytonaBadRequestError instead.
+
+***
+
+
 ## ResponseHeaders
 
 ```ts
 type ResponseHeaders = InstanceType<typeof AxiosHeaders>;
+```
+
+***
+
+
+## ~~DaytonaAuthorizationError~~
+
+```ts
+const DaytonaAuthorizationError: typeof DaytonaForbiddenError = DaytonaForbiddenError;
+```
+
+### Deprecated
+
+Use DaytonaForbiddenError instead.
+
+***
+
+
+## ~~DaytonaValidationError~~
+
+```ts
+const DaytonaValidationError: typeof DaytonaBadRequestError = DaytonaBadRequestError;
+```
+
+### Deprecated
+
+Use DaytonaBadRequestError instead. Re-exported so
+existing `catch (err) { if (err instanceof DaytonaValidationError) ... }`
+blocks keep working.
+
+***
+
+
+## SOURCE\_API
+
+```ts
+const SOURCE_API: "DAYTONA_API" = 'DAYTONA_API';
+```
+
+Wire-format `source` identifiers set by the translation layer when a
+Daytona service stamps them on the wire envelope. `source = undefined`
+means the response did not carry a structured envelope (treat as opaque).
+
+***
+
+
+## SOURCE\_DAEMON
+
+```ts
+const SOURCE_DAEMON: "DAYTONA_DAEMON" = 'DAYTONA_DAEMON';
+```
+
+***
+
+
+## SOURCE\_PROXY
+
+```ts
+const SOURCE_PROXY: "DAYTONA_PROXY" = 'DAYTONA_PROXY';
 ```

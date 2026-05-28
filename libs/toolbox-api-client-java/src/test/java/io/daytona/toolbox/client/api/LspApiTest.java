@@ -15,6 +15,7 @@ package io.daytona.toolbox.client.api;
 
 import io.daytona.toolbox.client.ApiException;
 import io.daytona.toolbox.client.model.CompletionList;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.LspCompletionParams;
 import io.daytona.toolbox.client.model.LspDocumentRequest;
 import io.daytona.toolbox.client.model.LspServerRequest;

@@ -4,6 +4,7 @@
 package fs
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,13 +28,14 @@ type fileResult struct {
 //	@Tags			file-system
 //	@Accept			multipart/form-data
 //	@Success		200
+//	@Failure		400	{object}	common.ErrorResponse
 //	@Router			/files/bulk-upload [post]
 //
 //	@id				UploadFiles
 func UploadFiles(c *gin.Context) {
 	reader, err := c.Request.MultipartReader()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errors": []string{"invalid multipart form"}})
+		c.Error(common_errors.NewBadRequestError(errors.New("invalid multipart form")))
 		return
 	}
 

@@ -3,6 +3,16 @@ title: "Errors"
 hideTitleOnPage: true
 ---
 
+##### SOURCE\_API
+
+```python
+SOURCE_API = "DAYTONA_API"
+```
+
+Wire-format ``source`` identifiers set by the translation layer when a
+Daytona service stamps them on the wire envelope. ``source = None`` means
+the response did not carry a structured envelope (treat as opaque).
+
 ## DaytonaError
 
 ```python
@@ -18,7 +28,7 @@ try:
     sandbox = daytona.get("missing-sandbox")
 except DaytonaError as exc:
     print(exc.status_code)
-    print(exc.error_code)
+    print(exc.code)
     print(exc.message)
 ```
   
@@ -26,9 +36,14 @@ except DaytonaError as exc:
 **Attributes**:
 
 - `message` _str_ - Error message
-- `status_code` _int | None_ - HTTP status code if available
-- `error_code` _str | None_ - Machine-readable error code if available
-- `headers` _dict[str, Any]_ - Response headers
+- `status_code` _int | None_ - HTTP status code (set only for errors translated
+  from an HTTP response; ``None`` for client-side errors).
+- `code` _str | None_ - Machine-readable error code from the server envelope
+  (``None`` for client-side errors).
+- `source` _str | None_ - Originating service. ``None`` when the response
+  did not carry a structured envelope. Otherwise one of
+  :data:`SOURCE_API`, :data:`SOURCE_DAEMON`, :data:`SOURCE_PROXY`.
+- `headers` _dict[str, Any]_ - Response headers (empty for client-side errors).
 
 #### DaytonaError.\_\_init\_\_
 
@@ -36,7 +51,8 @@ except DaytonaError as exc:
 def __init__(message: str,
              status_code: int | None = None,
              headers: Mapping[str, Any] | None = None,
-             error_code: str | None = None)
+             code: str | None = None,
+             source: str | None = None)
 ```
 
 Initialize Daytona error.
@@ -44,10 +60,24 @@ Initialize Daytona error.
 **Arguments**:
 
 - `message` _str_ - Error message
-- `status_code` _int | None_ - HTTP status code if available
+- `status_code` _int | None_ - HTTP status code if the error came from a
+  Daytona service response.
 - `headers` _Mapping[str, Any] | None_ - Response headers if available
-- `error_code` _str | None_ - Machine-readable error code if available
+- `code` _str | None_ - Machine-readable error code from the wire envelope
+- `source` _str | None_ - Originating service from the wire envelope.
+  Left as ``None`` for SDK-side errors and for responses from
+  services that don't emit the envelope.
 
+
+##### SOURCE\_API
+
+```python
+SOURCE_API = "DAYTONA_API"
+```
+
+Wire-format ``source`` identifiers set by the translation layer when a
+Daytona service stamps them on the wire envelope. ``source = None`` means
+the response did not carry a structured envelope (treat as opaque).
 
 ## DaytonaNotFoundError
 
@@ -84,10 +114,10 @@ except DaytonaAuthenticationError as exc:
     print(exc.status_code)
 ```
 
-## DaytonaAuthorizationError
+## DaytonaForbiddenError
 
 ```python
-class DaytonaAuthorizationError(DaytonaError)
+class DaytonaForbiddenError(DaytonaError)
 ```
 
 Error for when the request is forbidden (HTTP 403).
@@ -97,9 +127,19 @@ Error for when the request is forbidden (HTTP 403).
 ```python
 try:
     daytona.get("sandbox-without-access")
-except DaytonaAuthorizationError as exc:
+except DaytonaForbiddenError as exc:
     print(exc.message)
 ```
+
+##### DaytonaAuthorizationError
+
+```python
+DaytonaAuthorizationError = DaytonaForbiddenError
+```
+
+Deprecated alias for :class:`DaytonaForbiddenError`. Kept so existing
+``except DaytonaAuthorizationError`` blocks continue to work; new code
+should use ``DaytonaForbiddenError`` directly.
 
 ## DaytonaRateLimitError
 
@@ -116,7 +156,7 @@ try:
     for sandbox in daytona.list():
         print(sandbox.id)
 except DaytonaRateLimitError as exc:
-    print(exc.error_code)
+    print(exc.code)
 ```
 
 ## DaytonaConflictError
@@ -134,25 +174,35 @@ try:
     params = CreateSandboxFromSnapshotParams(name="existing-sandbox")
     daytona.create(params)
 except DaytonaConflictError as exc:
-    print(exc.error_code)
+    print(exc.code)
 ```
 
-## DaytonaValidationError
+## DaytonaBadRequestError
 
 ```python
-class DaytonaValidationError(DaytonaError)
+class DaytonaBadRequestError(DaytonaError)
 ```
 
-Error for when input validation fails (HTTP 400 or client-side validation).
+Error for when the request is malformed or fails server-side validation (HTTP 400).
 
 **Example**:
 
 ```python
 try:
     Image.debian_slim("3.8")
-except DaytonaValidationError as exc:
+except DaytonaBadRequestError as exc:
     print(exc.message)
 ```
+
+##### DaytonaValidationError
+
+```python
+DaytonaValidationError = DaytonaBadRequestError
+```
+
+Deprecated alias for :class:`DaytonaBadRequestError`. Kept so existing
+``except DaytonaValidationError`` blocks continue to work; new code
+should use ``DaytonaBadRequestError`` directly.
 
 ## DaytonaTimeoutError
 
@@ -177,16 +227,191 @@ except DaytonaTimeoutError as exc:
 class DaytonaConnectionError(DaytonaError)
 ```
 
-Error for when a network connection fails.
+Error for when a network connection fails (can't connect or mid-request drop).
 
-**Example**:
+## DaytonaConnectionTimeoutError
 
 ```python
-try:
-    pty_handle.wait_for_connection()
-except DaytonaConnectionError as exc:
-    print(exc.message)
+class DaytonaConnectionTimeoutError(DaytonaConnectionError)
 ```
+
+Error for when the transport layer times out connecting or reading from a Daytona service.
+
+## DaytonaGoneError
+
+```python
+class DaytonaGoneError(DaytonaError)
+```
+
+Error for HTTP 410 — the target resource is permanently gone.
+
+## DaytonaUnprocessableEntityError
+
+```python
+class DaytonaUnprocessableEntityError(DaytonaError)
+```
+
+Error for HTTP 422 — request is well-formed but semantically invalid.
+
+## DaytonaInternalServerError
+
+```python
+class DaytonaInternalServerError(DaytonaError)
+```
+
+Error for HTTP 500 — server-side bug or unhandled condition.
+
+## DaytonaBadGatewayError
+
+```python
+class DaytonaBadGatewayError(DaytonaError)
+```
+
+Error for HTTP 502 — an upstream dependency rejected or dropped the request.
+
+## DaytonaServiceUnavailableError
+
+```python
+class DaytonaServiceUnavailableError(DaytonaError)
+```
+
+Error for HTTP 503 — the service is temporarily refusing traffic.
+
+## DaytonaGitAuthFailedError
+
+```python
+class DaytonaGitAuthFailedError(DaytonaAuthenticationError)
+```
+
+Git auth credentials were rejected by the remote.
+
+## DaytonaGitRepoNotFoundError
+
+```python
+class DaytonaGitRepoNotFoundError(DaytonaNotFoundError)
+```
+
+The requested git repository does not exist.
+
+## DaytonaGitBranchNotFoundError
+
+```python
+class DaytonaGitBranchNotFoundError(DaytonaNotFoundError)
+```
+
+The requested git branch does not exist.
+
+## DaytonaGitBranchExistsError
+
+```python
+class DaytonaGitBranchExistsError(DaytonaConflictError)
+```
+
+A git branch with this name already exists.
+
+## DaytonaGitPushRejectedError
+
+```python
+class DaytonaGitPushRejectedError(DaytonaConflictError)
+```
+
+Git push was rejected (non-fast-forward / stale ref).
+
+## DaytonaGitDirtyWorktreeError
+
+```python
+class DaytonaGitDirtyWorktreeError(DaytonaConflictError)
+```
+
+Worktree has uncommitted changes.
+
+## DaytonaGitMergeConflictError
+
+```python
+class DaytonaGitMergeConflictError(DaytonaConflictError)
+```
+
+Git merge has conflicts that need manual resolution.
+
+## DaytonaFileNotFoundError
+
+```python
+class DaytonaFileNotFoundError(DaytonaNotFoundError)
+```
+
+Filesystem entry was not found.
+
+## DaytonaFileAccessDeniedError
+
+```python
+class DaytonaFileAccessDeniedError(DaytonaForbiddenError)
+```
+
+Insufficient permissions for the filesystem operation.
+
+## DaytonaLspServerNotInitializedError
+
+```python
+class DaytonaLspServerNotInitializedError(DaytonaBadRequestError)
+```
+
+LSP server must be started via /lsp/start first.
+
+## DaytonaProcessExecutionTimeoutError
+
+```python
+class DaytonaProcessExecutionTimeoutError(DaytonaTimeoutError)
+```
+
+A process exceeded its configured execution timeout.
+
+## DaytonaProcessNotFoundError
+
+```python
+class DaytonaProcessNotFoundError(DaytonaNotFoundError)
+```
+
+The requested process is not running.
+
+## DaytonaSessionEndedError
+
+```python
+class DaytonaSessionEndedError(DaytonaGoneError)
+```
+
+The shell session has ended.
+
+## DaytonaCommandAlreadyCompletedError
+
+```python
+class DaytonaCommandAlreadyCompletedError(DaytonaGoneError)
+```
+
+The shell command already finished.
+
+## DaytonaA11yUnavailableError
+
+```python
+class DaytonaA11yUnavailableError(DaytonaServiceUnavailableError)
+```
+
+The accessibility (AT-SPI) bus is not reachable.
+
+## DaytonaRecordingStillActiveError
+
+```python
+class DaytonaRecordingStillActiveError(DaytonaConflictError)
+```
+
+The recording is still running; stop it first.
+
+## DaytonaRecordingFfmpegNotFoundError
+
+```python
+class DaytonaRecordingFfmpegNotFoundError(DaytonaServiceUnavailableError)
+```
+
+ffmpeg binary is not installed; required for recording.
 
 #### error\_class\_from\_status\_code
 
@@ -203,8 +428,12 @@ Map an HTTP status code to the corresponding DaytonaError subclass.
 def create_daytona_error(message: str,
                          status_code: int | None = None,
                          headers: Mapping[str, Any] | None = None,
-                         error_code: str | None = None) -> DaytonaError
+                         code: str | None = None,
+                         source: str | None = None) -> DaytonaError
 ```
 
 Create the appropriate DaytonaError subclass from structured error metadata.
+
+Resolution order: ``(source, code)`` exact match → HTTP status code → base
+:class:`DaytonaError`.
 

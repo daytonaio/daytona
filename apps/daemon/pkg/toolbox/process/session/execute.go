@@ -26,6 +26,10 @@ import (
 //	@Param			request		body		SessionExecuteRequest	true	"Command execution request"
 //	@Success		200			{object}	SessionExecuteResponse
 //	@Success		202			{object}	SessionExecuteResponse
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/process/session/{sessionId}/exec [post]
 //
 //	@id				SessionExecuteCommand
@@ -39,13 +43,13 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 
 	var request SessionExecuteRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
 	}
 
 	// Validate command is not empty (if not already handled by binding)
 	if strings.TrimSpace(request.Command) == "" {
-		c.AbortWithError(http.StatusBadRequest, errors.New("command cannot be empty"))
+		c.Error(common_errors.NewBadRequestError(errors.New("command cannot be empty")))
 		return
 	}
 

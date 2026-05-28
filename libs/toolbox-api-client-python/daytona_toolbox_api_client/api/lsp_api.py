@@ -97,6 +97,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CompletionList",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -164,6 +165,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CompletionList",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -231,6 +233,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CompletionList",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -370,6 +373,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -437,6 +441,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -504,6 +509,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -544,6 +550,13 @@ class LspApi:
             _body_params = request
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -636,6 +649,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -703,6 +717,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -770,6 +785,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -810,6 +826,13 @@ class LspApi:
             _body_params = request
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -910,6 +933,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[LspSymbol]",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -985,6 +1009,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[LspSymbol]",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1060,6 +1085,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[LspSymbol]",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1198,6 +1224,8 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1265,6 +1293,8 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1332,6 +1362,8 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1372,6 +1404,13 @@ class LspApi:
             _body_params = request
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -1464,6 +1503,8 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1531,6 +1572,8 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1598,6 +1641,8 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': None,
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1638,6 +1683,13 @@ class LspApi:
             _body_params = request
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -1738,6 +1790,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[LspSymbol]",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1813,6 +1866,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[LspSymbol]",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1888,6 +1942,7 @@ class LspApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[LspSymbol]",
+            '400': "ErrorResponse",
         }
         response_data = self.api_client.call_api(
             *_param,

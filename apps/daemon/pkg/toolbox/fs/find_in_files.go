@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,9 +21,10 @@ import (
 //	@Description	Search for text pattern within files in a directory
 //	@Tags			file-system
 //	@Produce		json
-//	@Param			path	query	string	true	"Directory path to search in"
-//	@Param			pattern	query	string	true	"Text pattern to search for"
-//	@Success		200		{array}	Match
+//	@Param			path	query		string	true	"Directory path to search in"
+//	@Param			pattern	query		string	true	"Text pattern to search for"
+//	@Success		200		{array}		Match
+//	@Failure		400		{object}	common.ErrorResponse
 //	@Router			/files/find [get]
 //
 //	@id				FindInFiles
@@ -30,7 +32,7 @@ func FindInFiles(c *gin.Context) {
 	path := c.Query("path")
 	pattern := c.Query("pattern")
 	if path == "" || pattern == "" {
-		c.AbortWithError(http.StatusBadRequest, errors.New("path and pattern are required"))
+		c.Error(common_errors.NewBadRequestError(errors.New("path and pattern are required")))
 		return
 	}
 
@@ -84,7 +86,7 @@ func FindInFiles(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.Error(common_errors.NewBadRequestError(err))
 		return
 	}
 

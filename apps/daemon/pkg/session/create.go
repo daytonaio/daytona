@@ -30,7 +30,7 @@ func (s *SessionService) Create(sessionId string, isLegacy bool) error {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			cancel()
-			return fmt.Errorf("failed to obtain user home directory for legacy SDK compatibility: %w", err)
+			return common_errors.NewInternalServerError(fmt.Errorf("failed to obtain user home directory for legacy SDK compatibility: %w", err))
 		}
 
 		cmd.Dir = homeDir
@@ -44,13 +44,13 @@ func (s *SessionService) Create(sessionId string, isLegacy bool) error {
 	stdinWriter, err := cmd.StdinPipe()
 	if err != nil {
 		cancel()
-		return err
+		return common_errors.NewInternalServerError(fmt.Errorf("failed to open shell stdin: %w", err))
 	}
 
 	err = cmd.Start()
 	if err != nil {
 		cancel()
-		return err
+		return common_errors.NewInternalServerError(fmt.Errorf("failed to start shell: %w", err))
 	}
 
 	session := &session{
@@ -65,7 +65,7 @@ func (s *SessionService) Create(sessionId string, isLegacy bool) error {
 
 	err = os.MkdirAll(session.Dir(s.configDir), 0755)
 	if err != nil {
-		return err
+		return common_errors.NewInternalServerError(fmt.Errorf("failed to create session config directory: %w", err))
 	}
 
 	return nil

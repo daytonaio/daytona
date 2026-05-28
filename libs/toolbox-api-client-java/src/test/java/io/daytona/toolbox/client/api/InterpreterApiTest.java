@@ -15,6 +15,7 @@ package io.daytona.toolbox.client.api;
 
 import io.daytona.toolbox.client.ApiException;
 import io.daytona.toolbox.client.model.CreateContextRequest;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.InterpreterContext;
 import io.daytona.toolbox.client.model.ListContextsResponse;
 import org.junit.jupiter.api.Disabled;

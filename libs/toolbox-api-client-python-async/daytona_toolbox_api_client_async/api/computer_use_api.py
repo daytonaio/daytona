@@ -123,6 +123,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MouseClickResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -190,6 +192,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MouseClickResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -257,6 +261,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MouseClickResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -396,9 +402,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -466,9 +473,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -536,9 +544,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '409': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -665,8 +674,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "bytes",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -734,8 +744,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "bytes",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -803,8 +814,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "bytes",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -931,6 +943,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MouseDragResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -998,6 +1012,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MouseDragResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1065,6 +1081,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MouseDragResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1204,10 +1222,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "AccessibilityNodesResponse",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1275,10 +1293,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "AccessibilityNodesResponse",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1346,10 +1364,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "AccessibilityNodesResponse",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1489,10 +1507,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1560,10 +1578,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1631,10 +1649,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1782,10 +1800,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "AccessibilityTreeResponse",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1861,10 +1879,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "AccessibilityTreeResponse",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1940,10 +1958,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "AccessibilityTreeResponse",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2323,6 +2341,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ComputerUseStatusResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2386,6 +2405,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ComputerUseStatusResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2449,6 +2469,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ComputerUseStatusResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2568,6 +2589,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DisplayInfoResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2631,6 +2653,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DisplayInfoResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2694,6 +2717,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DisplayInfoResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2813,6 +2837,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MousePositionResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2876,6 +2901,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MousePositionResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2939,6 +2965,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MousePositionResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3842,8 +3869,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Recording",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3911,8 +3939,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Recording",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3980,8 +4009,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Recording",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4104,6 +4134,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "WindowsResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4167,6 +4198,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "WindowsResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4230,6 +4262,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "WindowsResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4353,10 +4386,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4424,10 +4457,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4495,10 +4528,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4634,7 +4667,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListRecordingsResponse",
-            '500': "Dict[str, str]",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4698,7 +4731,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListRecordingsResponse",
-            '500': "Dict[str, str]",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4762,7 +4795,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListRecordingsResponse",
-            '500': "Dict[str, str]",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4886,6 +4919,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MousePositionResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4953,6 +4988,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MousePositionResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5020,6 +5057,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "MousePositionResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5159,6 +5198,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5226,6 +5267,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5293,6 +5336,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5432,6 +5477,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5499,6 +5546,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5566,6 +5615,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5965,6 +6016,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScrollResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6032,6 +6085,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScrollResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6099,6 +6154,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScrollResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6238,10 +6295,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6309,10 +6366,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6380,10 +6437,10 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
-            '500': "Dict[str, str]",
-            '503': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6768,8 +6825,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "Recording",
-            '400': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6837,8 +6895,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "Recording",
-            '400': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6906,8 +6965,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "Recording",
-            '400': "Dict[str, str]",
-            '500': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
+            '503': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7292,8 +7352,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Recording",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7361,8 +7422,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Recording",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7430,8 +7492,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Recording",
-            '400': "Dict[str, str]",
-            '404': "Dict[str, str]",
+            '400': "ErrorResponse",
+            '404': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7599,6 +7662,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7694,6 +7759,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7789,6 +7856,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7964,6 +8033,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8043,6 +8114,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8122,6 +8195,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8281,6 +8356,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8364,6 +8441,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8447,6 +8526,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8595,6 +8676,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8662,6 +8745,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8729,6 +8814,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ScreenshotResponse",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8857,6 +8944,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8924,6 +9013,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -8991,6 +9082,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "object",
+            '400': "ErrorResponse",
+            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,

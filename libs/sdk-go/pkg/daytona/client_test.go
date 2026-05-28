@@ -14,6 +14,7 @@ import (
 	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
+	sdkerrors "github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -294,12 +295,12 @@ func TestGetAuthContext(t *testing.T) {
 // TestHandleAPIError tests the handleAPIError method
 func TestHandleAPIError(t *testing.T) {
 	tests := []struct {
-		name           string
-		err            error
-		httpResp       *http.Response
-		expectedError  string
-		expectedType   string
-		expectedStatus int
+		name             string
+		err              error
+		httpResp         *http.Response
+		expectedError    string
+		expectedSentinel error
+		expectedStatus   int
 	}{
 		{
 			name: "not found error",
@@ -308,9 +309,9 @@ func TestHandleAPIError(t *testing.T) {
 				StatusCode: http.StatusNotFound,
 				Header:     http.Header{},
 			},
-			expectedError:  "Resource not found",
-			expectedType:   "*errors.DaytonaNotFoundError",
-			expectedStatus: http.StatusNotFound,
+			expectedError:    "not found",
+			expectedSentinel: sdkerrors.ErrNotFound,
+			expectedStatus:   http.StatusNotFound,
 		},
 		{
 			name: "rate limit error",
@@ -319,9 +320,9 @@ func TestHandleAPIError(t *testing.T) {
 				StatusCode: http.StatusTooManyRequests,
 				Header:     http.Header{},
 			},
-			expectedError:  "Rate limit exceeded",
-			expectedType:   "*errors.DaytonaRateLimitError",
-			expectedStatus: http.StatusTooManyRequests,
+			expectedError:    "rate limit exceeded",
+			expectedSentinel: sdkerrors.ErrRateLimit,
+			expectedStatus:   http.StatusTooManyRequests,
 		},
 		{
 			name: "generic error with status code",
@@ -330,16 +331,16 @@ func TestHandleAPIError(t *testing.T) {
 				StatusCode: http.StatusInternalServerError,
 				Header:     http.Header{},
 			},
-			expectedError:  "internal server error",
-			expectedType:   "*errors.DaytonaError",
-			expectedStatus: http.StatusInternalServerError,
+			expectedError:    "internal server error",
+			expectedSentinel: sdkerrors.ErrInternalServer,
+			expectedStatus:   http.StatusInternalServerError,
 		},
 		{
-			name:          "error without http response",
-			err:           fmt.Errorf("network error"),
-			httpResp:      nil,
-			expectedError: "network error",
-			expectedType:  "*errors.DaytonaError",
+			name:           "error without http response",
+			err:            fmt.Errorf("network error"),
+			httpResp:       nil,
+			expectedError:  "network error",
+			expectedStatus: 0,
 		},
 	}
 
@@ -350,7 +351,14 @@ func TestHandleAPIError(t *testing.T) {
 
 			require.Error(t, err)
 			assert.Contains(t, err.Error(), tt.expectedError)
-			assert.Equal(t, tt.expectedType, fmt.Sprintf("%T", err))
+
+			var de *sdkerrors.DaytonaError
+			require.ErrorAs(t, err, &de)
+			assert.Equal(t, tt.expectedStatus, de.StatusCode)
+
+			if tt.expectedSentinel != nil {
+				assert.ErrorIs(t, err, tt.expectedSentinel)
+			}
 		})
 	}
 }
@@ -858,9 +866,9 @@ func TestHandleAPIErrorUsesOpenAPIBody(t *testing.T) {
 
 	converted := client.handleAPIError(apiErr, httpResp)
 	require.Error(t, converted)
-	assert.Contains(t, converted.Error(), "Rate limit exceeded")
+	assert.Contains(t, converted.Error(), "slow down")
 	assert.Equal(t, "30", httpResp.Header.Get("Retry-After"))
-	assert.Equal(t, "*errors.DaytonaRateLimitError", fmt.Sprintf("%T", converted))
+	assert.ErrorIs(t, converted, sdkerrors.ErrRateLimit)
 }
 
 func TestClientCreateSuccessRequestMapping(t *testing.T) {
