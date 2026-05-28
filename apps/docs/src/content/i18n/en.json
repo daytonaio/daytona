@@ -147,6 +147,7 @@
   "sidebarconfig.opencode": "OpenCode",
   "sidebarconfig.claude": "Claude",
   "sidebarconfig.openclaw": "OpenClaw",
+  "sidebarconfig.vercelAiSdk": "Vercel AI SDK",
   "sidebarconfig.codex": "Codex",
   "sidebarconfig.amp": "Amp Code",
   "sidebarconfig.googleAdk": "Google ADK",

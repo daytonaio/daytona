@@ -572,6 +572,18 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/vercel-ai-sdk/vercel-ai-sdk-multi-language-benchmark-agent-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.vercelAiSdk'),
+          disablePagination: true,
+          attrs: {
+            icon: 'vercel.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/codex/codex-sdk-interactive-terminal-sandbox',
             locale
           ),
