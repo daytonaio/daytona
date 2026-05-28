@@ -455,7 +455,7 @@ export class SnapshotService {
   async getSnapshotWithRegions(snapshotIdOrName: string, organizationId: string): Promise<Snapshot> {
     const where: FindOptionsWhere<Snapshot>[] = [
       { name: snapshotIdOrName, organizationId },
-      { name: snapshotIdOrName, general: true },
+      { name: snapshotIdOrName, general: true, hideFromUsers: false },
     ]
     if (isUUID(snapshotIdOrName)) {
       where.push({ id: snapshotIdOrName })
@@ -488,7 +488,7 @@ export class SnapshotService {
     if (!snapshot) {
       //  check if the snapshot is general
       const generalSnapshot = await this.snapshotRepository.findOne({
-        where: { name: snapshotName, general: true },
+        where: { name: snapshotName, general: true, hideFromUsers: false },
       })
       if (generalSnapshot) {
         return generalSnapshot

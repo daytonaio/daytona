@@ -460,13 +460,13 @@ export class SandboxService {
 
       const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
         { organizationId: organization.id, name: snapshotIdOrName },
-        { general: true, name: snapshotIdOrName },
+        { general: true, hideFromUsers: false, name: snapshotIdOrName },
       ]
 
       if (isValidUuid(snapshotIdOrName)) {
         snapshotFilter.push(
           { organizationId: organization.id, id: snapshotIdOrName },
-          { general: true, id: snapshotIdOrName },
+          { general: true, hideFromUsers: false, id: snapshotIdOrName },
         )
       }
 
