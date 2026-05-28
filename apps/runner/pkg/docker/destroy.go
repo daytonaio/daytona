@@ -26,6 +26,20 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 	}()
 
+	// Tear down the per-sandbox link network on every "container is gone" path
+	// — NotFound on inspect, already destroyed/destroying, NotFound on remove,
+	// and the normal success paths. Skipped only when we bail with a hard
+	// error and the container is still around, so a retry can finish cleanup.
+	teardownLinkNetwork := false
+	defer func() {
+		if !teardownLinkNetwork {
+			return
+		}
+		if err := d.teardownOwnedLinkNetwork(ctx, containerId); err != nil {
+			d.logger.WarnContext(ctx, "Failed to teardown owned link network", "sandboxId", containerId, "error", err)
+		}
+	}()
+
 	// Cancel a backup if it's already in progress
 	backup_context, ok := backup_context_map.Get(containerId)
 	if ok {
@@ -35,6 +49,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	ct, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		if common_errors.IsNotFoundError(err) {
+			teardownLinkNetwork = true
 			return nil
 		}
 		return err
@@ -44,6 +59,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	state, _ := d.getSandboxState(ct)
 	if state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying {
 		d.logger.DebugContext(ctx, "Sandbox is already destroyed or destroying", "containerId", containerId)
+		teardownLinkNetwork = true
 		return nil
 	}
 
@@ -61,15 +77,13 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 				}
 			}()
 
-			if err := d.teardownOwnedLinkNetwork(ctx, containerId); err != nil {
-				d.logger.WarnContext(ctx, "Failed to teardown owned link network", "sandboxId", containerId, "error", err)
-			}
-
+			teardownLinkNetwork = true
 			return nil
 		}
 
 		// Handle not found case
 		if errdefs.IsNotFound(err) {
+			teardownLinkNetwork = true
 			return nil
 		}
 
@@ -93,6 +107,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	if err != nil {
 		// Handle NotFound error case
 		if errdefs.IsNotFound(err) {
+			teardownLinkNetwork = true
 			return nil
 		}
 		return err
@@ -106,9 +121,6 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 	}()
 
-	if err := d.teardownOwnedLinkNetwork(ctx, containerId); err != nil {
-		d.logger.WarnContext(ctx, "Failed to teardown owned link network", "sandboxId", containerId, "error", err)
-	}
-
+	teardownLinkNetwork = true
 	return nil
 }

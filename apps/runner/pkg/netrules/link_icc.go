@@ -3,7 +3,11 @@
 
 package netrules
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/coreos/go-iptables/iptables"
+)
 
 // AllowSubnetICC inserts a DOCKER-USER rule that ACCEPTs traffic that enters
 // the host on the named bridge interface and has both source and destination
@@ -21,8 +25,12 @@ import "strings"
 // input-interface match, packets that don't actually originate on this
 // bridge can't satisfy the rule.
 //
-// The rule is idempotent: InsertUnique is a no-op if an identical rule already
-// exists at any position in the chain.
+// The rule is installed just before Docker's terminal `-j RETURN` so that
+// per-sandbox egress jumps — which are inserted at DOCKER-USER position 1 —
+// still get evaluated first. Otherwise the ACCEPT here would short-circuit
+// every per-sandbox egress policy for intra-link traffic.
+//
+// Idempotent: a no-op if an identical rule already exists at any position.
 func (manager *NetRulesManager) AllowSubnetICC(bridgeName, subnet string) error {
 	if bridgeName == "" || subnet == "" {
 		return nil
@@ -31,7 +39,7 @@ func (manager *NetRulesManager) AllowSubnetICC(bridgeName, subnet string) error 
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
-	return manager.ipt.InsertUnique("filter", "DOCKER-USER", 1,
+	return manager.insertDockerUserBeforeReturn(
 		"-i", bridgeName, "-s", subnet, "-d", subnet, "-j", "ACCEPT")
 }
 
@@ -71,6 +79,10 @@ func (manager *NetRulesManager) RemoveSubnetICC(bridgeName, subnet string) error
 // We install both this rule and the subnet rule because they catch slightly
 // different traffic shapes (interface vs. address) and the cost of the
 // duplicate is a single extra iptables rule per link network.
+//
+// Installed just before Docker's terminal `-j RETURN` so per-sandbox egress
+// jumps (inserted at DOCKER-USER position 1) still fire first — see
+// AllowSubnetICC for the rationale.
 func (manager *NetRulesManager) AllowBridgeICC(bridgeName string) error {
 	if bridgeName == "" {
 		return nil
@@ -79,8 +91,59 @@ func (manager *NetRulesManager) AllowBridgeICC(bridgeName string) error {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
-	return manager.ipt.InsertUnique("filter", "DOCKER-USER", 1,
+	return manager.insertDockerUserBeforeReturn(
 		"-i", bridgeName, "-o", bridgeName, "-j", "ACCEPT")
+}
+
+// insertDockerUserBeforeReturn inserts a rule into DOCKER-USER at the position
+// just before Docker's terminal `-j RETURN`. This keeps link-network ACCEPT
+// rules from short-circuiting per-sandbox egress jumps (which stay at
+// position 1). Callers must hold `manager.mu`.
+//
+// Idempotent: a no-op if an identical rule already exists at any position.
+// If no terminal RETURN is present the rule is appended to the chain.
+func (manager *NetRulesManager) insertDockerUserBeforeReturn(rulespec ...string) error {
+	exists, err := manager.ipt.Exists("filter", "DOCKER-USER", rulespec...)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+
+	pos, hasTerminator, err := dockerUserReturnPos(manager.ipt)
+	if err != nil {
+		return err
+	}
+	if !hasTerminator {
+		return manager.ipt.Append("filter", "DOCKER-USER", rulespec...)
+	}
+	return manager.ipt.Insert("filter", "DOCKER-USER", pos, rulespec...)
+}
+
+// dockerUserReturnPos returns the 1-indexed position of Docker's default
+// `-A DOCKER-USER -j RETURN` terminator. The second return value indicates
+// whether the terminator was found. Callers that find it should Insert at
+// that position so the new rule lands immediately before the RETURN.
+func dockerUserReturnPos(ipt *iptables.IPTables) (int, bool, error) {
+	rules, err := ipt.List("filter", "DOCKER-USER")
+	if err != nil {
+		return 0, false, err
+	}
+
+	// ipt.List output is the `iptables -S` rendering: one `-N <chain>` entry
+	// followed by one `-A <chain> ...` entry per rule, in chain order.
+	pos := 0
+	for _, r := range rules {
+		if !strings.HasPrefix(r, "-A ") {
+			continue
+		}
+		pos++
+		if r == "-A DOCKER-USER -j RETURN" {
+			return pos, true, nil
+		}
+	}
+	return 0, false, nil
 }
 
 // RemoveBridgeICC removes the rule installed by AllowBridgeICC. Missing-rule
