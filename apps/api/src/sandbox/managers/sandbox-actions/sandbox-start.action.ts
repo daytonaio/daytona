@@ -30,6 +30,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { WithSpan } from '../../../common/decorators/otel.decorator'
 import { SandboxActivityService } from '../../services/sandbox-activity.service'
+import { getRunnerSandboxClass } from '../../utils/sandbox-class.util'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -212,6 +213,10 @@ export class SandboxStartAction extends SandboxAction {
     for (const snapshotRunner of snapshotRunners) {
       // Consider removing the runner usage rate check or improving it
       const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
+
+      if (runner.sandboxClass !== getRunnerSandboxClass(sandbox.sandboxClass)) {
+        continue
+      }
 
       // Mirror the GPU class filter in findAvailableRunners - getSnapshotRunners
       // can return GPU/non-GPU mismatched runners via stale snapshot_runner rows.
