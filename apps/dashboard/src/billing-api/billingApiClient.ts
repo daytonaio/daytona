@@ -43,8 +43,10 @@ export class BillingApiClient {
   private checkoutUrlApi: CheckoutUrlApi
   private portalUrlApi: PortalUrlApi
   private billingInfoApi: BillingInfoApi
+  private axiosInstance: AxiosInstance
 
   constructor(configuration: Configuration, axiosInstance: AxiosInstance) {
+    this.axiosInstance = axiosInstance
     this.walletApi = new WalletApi(configuration, undefined, axiosInstance)
     this.usageApi = new UsageApi(configuration, undefined, axiosInstance)
     this.tierApi = new TierApi(configuration, undefined, axiosInstance)
@@ -107,6 +109,13 @@ export class BillingApiClient {
     const response = v2
       ? await this.portalUrlApi.getV2PortalURL(organizationId)
       : await this.portalUrlApi.getPortalUrl(organizationId)
+    return response.data
+  }
+
+  public async getOrganizationSetupCheckoutUrl(organizationId: string): Promise<string> {
+    const response = await this.axiosInstance.get<string>(
+      `/v2/organization/${encodeURIComponent(organizationId)}/setup-checkout-url`,
+    )
     return response.data
   }
 

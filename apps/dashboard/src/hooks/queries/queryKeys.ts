@@ -56,6 +56,8 @@ export const queryKeys = {
       [...queryKeys.billing.all, organizationId, 'portal-url', { v2 }] as const,
     checkoutUrl: (organizationId: string, v2: boolean) =>
       [...queryKeys.billing.all, organizationId, 'checkout-url', { v2 }] as const,
+    setupCheckoutUrl: (organizationId: string) =>
+      [...queryKeys.billing.all, organizationId, 'setup-checkout-url'] as const,
     usagePortalUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'usage-portal-url'] as const,
     billingInfo: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'billing-info'] as const,
     paymentMethods: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'payment-methods'] as const,

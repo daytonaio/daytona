@@ -9,8 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { useOrganizationBillingPortalUrlQuery } from '@/hooks/queries/useOrganizationBillingPortalUrlQuery'
 import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
+import { useSetupCheckoutUrlQuery } from '@/hooks/queries/useSetupCheckoutUrlQuery'
 import { PaymentMethod } from '@daytona/billing-api-client'
-import { CreditCardIcon, PencilIcon } from 'lucide-react'
+import { CreditCardIcon, PencilIcon, PlusIcon } from 'lucide-react'
+import { useCallback } from 'react'
+import { toast } from 'sonner'
 
 interface PaymentMethodsCardProps {
   organizationId: string
@@ -19,8 +22,24 @@ interface PaymentMethodsCardProps {
 export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) {
   const paymentMethodsQuery = usePaymentMethodsQuery({ organizationId })
   const portalUrlQuery = useOrganizationBillingPortalUrlQuery({ organizationId })
+  const fetchSetupCheckoutUrl = useSetupCheckoutUrlQuery(organizationId)
   const methods = paymentMethodsQuery.data ?? []
   const portalUrl = portalUrlQuery.data
+
+  const handleAddPaymentMethod = useCallback(async () => {
+    const newWindow = window.open('', '_blank')
+    try {
+      const url = await fetchSetupCheckoutUrl()
+      if (newWindow) {
+        newWindow.location.href = url
+      }
+    } catch (error) {
+      newWindow?.close()
+      toast.error('Failed to fetch payment method setup url', {
+        description: String(error),
+      })
+    }
+  }, [fetchSetupCheckoutUrl])
 
   return (
     <Card>
@@ -29,19 +48,20 @@ export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) 
           <CardTitle>Payment methods</CardTitle>
           <CardDescription>Cards on file. The default is used for automatic charges and invoices.</CardDescription>
         </div>
-        {portalUrl ? (
-          <Button variant="secondary" size="sm" asChild>
-            <a href={portalUrl} target="_blank" rel="noopener noreferrer">
+        {methods.length > 0 &&
+          (portalUrl ? (
+            <Button variant="secondary" size="sm" asChild>
+              <a href={portalUrl} target="_blank" rel="noopener noreferrer">
+                <PencilIcon />
+                Edit
+              </a>
+            </Button>
+          ) : (
+            <Button variant="secondary" size="sm" disabled>
               <PencilIcon />
               Edit
-            </a>
-          </Button>
-        ) : (
-          <Button variant="secondary" size="sm" disabled>
-            <PencilIcon />
-            Edit
-          </Button>
-        )}
+            </Button>
+          ))}
       </CardHeader>
 
       <CardContent className="border-t border-border p-0">
@@ -52,7 +72,13 @@ export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) 
             ))}
           </div>
         ) : methods.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground">No cards on file yet.</p>
+          <div className="p-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">No cards on file yet.</p>
+            <Button variant="secondary" size="sm" onClick={handleAddPaymentMethod}>
+              <PlusIcon />
+              Add payment method
+            </Button>
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {methods.map((method, index) => (
