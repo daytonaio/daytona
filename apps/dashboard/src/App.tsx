@@ -11,12 +11,21 @@ import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizatio
 import { initPylon } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
-import React, { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, type ReactNode } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom'
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  redirect,
+  RouterProvider,
+  useLocation,
+  useNavigation,
+} from 'react-router-dom'
 import { BannerProvider } from './components/Banner'
 import { CommandPaletteProvider } from './components/CommandPalette'
 import LoadingFallback from './components/LoadingFallback'
+import { LoadingFallbackContent } from './components/LoadingFallbackContent'
 import { Button } from './components/ui/button'
 import {
   Dialog,
@@ -28,7 +37,7 @@ import {
 } from './components/ui/dialog'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import { FeatureFlags } from './enums/FeatureFlags'
-import { RoutePath, getRouteSubPath, trimLeadingSlash } from './enums/RoutePath'
+import { getRouteSubPath, RoutePath, trimLeadingSlash } from './enums/RoutePath'
 import { useConfig } from './hooks/useConfig'
 import Dashboard from './pages/Dashboard'
 import LandingPage from './pages/LandingPage'
@@ -39,23 +48,6 @@ import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 import { SvixProvider } from './providers/SvixProvider'
 import { lazyRoutes } from './routes'
-
-// Simple redirection components for external URLs
-const DocsRedirect = () => {
-  React.useEffect(() => {
-    window.open(DAYTONA_DOCS_URL, '_blank')
-    window.location.href = RoutePath.DASHBOARD
-  }, [])
-  return null
-}
-
-const SlackRedirect = () => {
-  React.useEffect(() => {
-    window.open(DAYTONA_SLACK_URL, '_blank')
-    window.location.href = RoutePath.DASHBOARD
-  }, [])
-  return null
-}
 
 function AppRoot() {
   const config = useConfig()
@@ -112,7 +104,11 @@ function AppRoot() {
   return <Outlet />
 }
 
-function DashboardRoute() {
+function DashboardOutlet() {
+  const location = useLocation()
+  const navigation = useNavigation()
+  const isRouteLoading = navigation.state === 'loading' && navigation.location?.pathname !== location.pathname
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <ApiProvider>
@@ -123,7 +119,15 @@ function DashboardRoute() {
                 <NotificationSocketProvider>
                   <CommandPaletteProvider>
                     <BannerProvider>
-                      <Dashboard />
+                      <Dashboard>
+                        {isRouteLoading ? (
+                          <div className="flex min-h-screen w-full items-center justify-center bg-background p-6">
+                            <LoadingFallbackContent />
+                          </div>
+                        ) : (
+                          <Outlet />
+                        )}
+                      </Dashboard>
                     </BannerProvider>
                   </CommandPaletteProvider>
                 </NotificationSocketProvider>
@@ -142,17 +146,7 @@ function DashboardIndexRedirect() {
   return <Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />
 }
 
-function NonPersonalOrganizationPageWrapper({ children }: { children: React.ReactNode }) {
-  const { selectedOrganization } = useSelectedOrganization()
-
-  if (selectedOrganization?.personal) {
-    return <Navigate to={RoutePath.DASHBOARD} replace />
-  }
-
-  return children
-}
-
-function OwnerAccessOrganizationPageWrapper({ children }: { children: React.ReactNode }) {
+function OwnerAccessOrganizationPageWrapper({ children }: { children: ReactNode }) {
   const { authenticatedUserOrganizationMember } = useSelectedOrganization()
 
   if (authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
@@ -166,7 +160,7 @@ function RequiredPermissionsOrganizationPageWrapper({
   children,
   requiredPermissions,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   requiredPermissions: OrganizationRolePermissionsEnum[]
 }) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -178,7 +172,7 @@ function RequiredPermissionsOrganizationPageWrapper({
   return children
 }
 
-function RequiredFeatureFlagWrapper({ children, flagKey }: { children: React.ReactNode; flagKey: FeatureFlags }) {
+function RequiredFeatureFlagWrapper({ children, flagKey }: { children: ReactNode; flagKey: FeatureFlags }) {
   const flagEnabled = useFeatureFlagEnabled(flagKey)
 
   if (!flagEnabled) {
@@ -265,11 +259,11 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <LandingPage /> },
       { path: trimLeadingSlash(RoutePath.LOGOUT), element: <Logout /> },
-      { path: trimLeadingSlash(RoutePath.DOCS), element: <DocsRedirect /> },
-      { path: trimLeadingSlash(RoutePath.SLACK), element: <SlackRedirect /> },
+      { path: trimLeadingSlash(RoutePath.DOCS), loader: () => redirect(DAYTONA_DOCS_URL) },
+      { path: trimLeadingSlash(RoutePath.SLACK), loader: () => redirect(DAYTONA_SLACK_URL) },
       {
         path: trimLeadingSlash(RoutePath.DASHBOARD),
-        element: <DashboardRoute />,
+        element: <DashboardOutlet />,
         children: [
           { index: true, element: <DashboardIndexRedirect /> },
           { path: getRouteSubPath(RoutePath.KEYS), lazy: lazyRoutes.Keys },

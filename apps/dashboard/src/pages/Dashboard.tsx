@@ -4,11 +4,9 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet, useLocation, useNavigation } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { CommandPalette, useRegisterCommands, type CommandConfig } from '@/components/CommandPalette'
-import { LoadingFallbackContent } from '@/components/LoadingFallbackContent'
 import {
   SetDefaultRegionDialog,
   type SetDefaultRegionDialogRef,
@@ -71,14 +69,15 @@ function useDashboardCommands() {
   useRegisterCommands(globalCommands, { groupId: 'global', groupLabel: 'Global', groupOrder: 5 })
 }
 
-const Dashboard: React.FC = () => {
+type DashboardProps = {
+  children: React.ReactNode
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ children }) => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const setDefaultRegionDialogRef = useRef<SetDefaultRegionDialogRef>(null)
   const config = useConfig()
-  const location = useLocation()
-  const navigation = useNavigation()
-  const isRouteLoading = navigation.state === 'loading' && navigation.location?.pathname !== location.pathname
 
   useOwnerWalletQuery() // prefetch wallet
 
@@ -141,13 +140,7 @@ const Dashboard: React.FC = () => {
         <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
         <SidebarInset className="overflow-y-auto">
           <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
-            {isRouteLoading ? (
-              <div className="flex min-h-screen w-full items-center justify-center bg-background p-6">
-                <LoadingFallbackContent />
-              </div>
-            ) : (
-              <Outlet />
-            )}
+            {children}
             <CommandPalette />
           </div>
         </SidebarInset>
