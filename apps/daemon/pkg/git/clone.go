@@ -25,10 +25,9 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 	}
 
 	cloneOptions := &git.CloneOptions{
-		URL:             repo.Url,
-		SingleBranch:    true,
-		InsecureSkipTLS: true,
-		Auth:            auth,
+		URL:          repo.Url,
+		SingleBranch: true,
+		Auth:         auth,
 	}
 
 	if s.LogWriter != nil {
@@ -131,7 +130,6 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
 
 	args := []string{
 		"-c", "credential.helper=", // prevent any inherited helper from persisting the token
-		"-c", "http.sslVerify=false", // parity with go-git InsecureSkipTLS
 		"-c", "core.hooksPath=/dev/null", // disable post-checkout (and any inherited core.hooksPath) — defense-in-depth so hooks can't read GIT_USERNAME / GIT_PASSWORD
 		"clone",
 		"--single-branch",

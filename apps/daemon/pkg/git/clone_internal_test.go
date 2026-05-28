@@ -36,7 +36,6 @@ func TestBuildCloneArgs(t *testing.T) {
 			workDir: "/work-dir",
 			expected: []string{
 				"-c", "credential.helper=",
-				"-c", "http.sslVerify=false",
 				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--branch", "main",
@@ -52,7 +51,6 @@ func TestBuildCloneArgs(t *testing.T) {
 			workDir: "/work-dir",
 			expected: []string{
 				"-c", "credential.helper=",
-				"-c", "http.sslVerify=false",
 				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--branch", "main",
@@ -68,7 +66,6 @@ func TestBuildCloneArgs(t *testing.T) {
 			workDir: "/work-dir",
 			expected: []string{
 				"-c", "credential.helper=",
-				"-c", "http.sslVerify=false",
 				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--branch", "main",
@@ -83,7 +80,6 @@ func TestBuildCloneArgs(t *testing.T) {
 			workDir: "/work-dir",
 			expected: []string{
 				"-c", "credential.helper=",
-				"-c", "http.sslVerify=false",
 				"-c", "core.hooksPath=/dev/null",
 				"clone", "--single-branch", "--progress",
 				"--", "https://github.com/daytonaio/daytona", "/work-dir",
@@ -95,6 +91,11 @@ func TestBuildCloneArgs(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			got := buildCloneArgs(tc.repo, tc.workDir)
 			require.Equal(t, tc.expected, got)
+
+			for _, arg := range got {
+				require.NotEqual(t, "http.sslVerify=false", arg,
+					"regression: GHSA-375h-72g4-hc9c — daemon git clone must not disable TLS verification")
+			}
 		})
 	}
 }
