@@ -54,3 +54,11 @@ export enum RoutePath {
 export const getRouteSubPath = (path: RoutePath): string => {
   return path.replace('/dashboard/', '')
 }
+
+/**
+ * Returns a route path without the leading slash.
+ * Useful for nested route definitions that expect relative paths.
+ */
+export const trimLeadingSlash = (path: RoutePath): string => {
+  return path.replace(/^\//, '')
+}

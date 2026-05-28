@@ -18,7 +18,10 @@ export function lazyWithPreload<T extends ComponentType<any>>(
   let modulePromise: Promise<LazyModule<T>> | null = null
 
   const load = () => {
-    modulePromise ??= loadModule()
+    modulePromise ??= loadModule().catch((error) => {
+      modulePromise = null
+      throw error
+    })
     return modulePromise
   }
 

@@ -4,14 +4,16 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation, useNavigation } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { CommandPalette, useRegisterCommands, type CommandConfig } from '@/components/CommandPalette'
+import { LoadingFallbackContent } from '@/components/LoadingFallbackContent'
 import {
   SetDefaultRegionDialog,
   type SetDefaultRegionDialogRef,
 } from '@/components/Organizations/SetDefaultRegionDialog'
+import { PrivacyBanner } from '@/components/PrivacyBanner'
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
@@ -26,7 +28,6 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
 import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
-import { PrivacyBanner } from '@/components/PrivacyBanner'
 
 function useDashboardCommands() {
   const { theme, setTheme } = useTheme()
@@ -75,6 +76,10 @@ const Dashboard: React.FC = () => {
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const setDefaultRegionDialogRef = useRef<SetDefaultRegionDialogRef>(null)
   const config = useConfig()
+  const location = useLocation()
+  const navigation = useNavigation()
+  const isRouteLoading = navigation.state === 'loading' && navigation.location?.pathname !== location.pathname
+
   useOwnerWalletQuery() // prefetch wallet
 
   useDashboardCommands()
@@ -136,7 +141,13 @@ const Dashboard: React.FC = () => {
         <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
         <SidebarInset className="overflow-y-auto">
           <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
-            <Outlet />
+            {isRouteLoading ? (
+              <div className="flex min-h-screen w-full items-center justify-center bg-background p-6">
+                <LoadingFallbackContent />
+              </div>
+            ) : (
+              <Outlet />
+            )}
             <CommandPalette />
           </div>
         </SidebarInset>
