@@ -1,10 +1,13 @@
-FROM node:24-slim AS daytona
+# ── builder ──────────────────────────────────────────────────────────────
+FROM node:24-slim AS builder
 
 ENV CI=true
 
-# Install dependencies (apt instead of apk)
-RUN apt-get update && apt-get install -y --no-install-recommends bash curl python3 make g++ && \
-  rm -rf /var/lib/apt/lists/*
+# Build toolchain (python3/make/g++) is only needed to compile the bundle and
+# any native devDependencies — it stays out of the runtime image.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      bash curl python3 make g++ && \
+    rm -rf /var/lib/apt/lists/*
 RUN npm install -g corepack && corepack enable
 
 WORKDIR /daytona
@@ -34,6 +37,30 @@ ENV NX_DAEMON=false
 RUN yarn nx build api --configuration=production --nxBail=true
 
 RUN VITE_API_URL=%DAYTONA_BASE_API_URL%/api yarn nx build dashboard --configuration=production --nxBail=true --output-style=stream
+
+# ── runtime ──────────────────────────────────────────────────────────────
+FROM node:24-slim AS daytona
+
+ENV CI=true
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+RUN npm install -g corepack && corepack enable
+
+WORKDIR /daytona
+
+# Nx (generatePackageJson) emits a pruned manifest + pruned lockfile carrying
+# only the api bundle's runtime closure. apps/api/package.json augments it with
+# runtime deps Nx's static scan misses: @openfeature/core (a non-optional peer
+# of @openfeature/server-sdk) and pg (typeorm's Postgres driver, loaded via a
+# dynamic require). corepack hydrates yarn from the manifest's packageManager
+# field; .yarnrc.yml carries the supply-chain age gate into this install.
+COPY --from=builder /daytona/dist/apps/api/package.json /daytona/dist/apps/api/yarn.lock ./
+COPY --from=builder /daytona/.yarnrc.yml ./
+
+RUN yarn install --immutable
+
+COPY --from=builder /daytona/dist ./dist
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
