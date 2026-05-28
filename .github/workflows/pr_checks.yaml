@@ -20,6 +20,7 @@ env:
 
 jobs:
   go-work:
+    if: github.repository == 'daytonaio/daytona'
     name: Go work
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +38,7 @@ jobs:
           git diff --exit-code -- 'go.work*' '*/go.mod' '*/go.sum' || (echo "Go workspace files are not up to date! Please run 'go work sync' and commit the changes." && exit 1)
 
   cli-docs:
+    if: github.repository == 'daytonaio/daytona'
     name: CLI docs
     runs-on: ubuntu-latest
     steps:
@@ -63,6 +65,7 @@ jobs:
           git diff --exit-code -- src/content/docs/en/tools/cli.mdx || (echo "CLI reference docs on the docs site are out of sync! Please run 'cd apps/docs && node tools/update-cli-reference.js --local' and commit the changes." && exit 1)
 
   golangci:
+    if: github.repository == 'daytonaio/daytona'
     name: Go lint
     runs-on: ubuntu-latest
     strategy:
@@ -90,6 +93,7 @@ jobs:
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
 
   lint-computer-use:
+    if: github.repository == 'daytonaio/daytona'
     name: Go lint (Computer Use)
     runs-on: ubuntu-latest
     steps:
@@ -115,6 +119,7 @@ jobs:
           args: --timeout=5m ./...
 
   lint-python:
+    if: github.repository == 'daytonaio/daytona'
     name: Python lint
     runs-on: ubuntu-latest
     steps:
@@ -145,6 +150,7 @@ jobs:
           yarn lint:py
 
   format-lint-api-clients:
+    if: github.repository == 'daytonaio/daytona'
     name: Format, lint and generate API clients
     runs-on: ubuntu-latest
     steps:
@@ -171,6 +177,7 @@ jobs:
           git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
 
   typecheck-sdk-typescript:
+    if: github.repository == 'daytonaio/daytona'
     name: TypeScript SDK type check
     runs-on: ubuntu-latest
     steps:
@@ -197,6 +204,7 @@ jobs:
             --module preserve --moduleResolution bundler
 
   test:
+    if: github.repository == 'daytonaio/daytona'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -215,6 +223,7 @@ jobs:
         run: yarn test
 
   build:
+    if: github.repository == 'daytonaio/daytona'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -227,6 +236,7 @@ jobs:
           VERSION=v0.0.0-dev yarn build --nxBail=true
 
   license-check:
+    if: github.repository == 'daytonaio/daytona'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -248,6 +258,7 @@ jobs:
           mode: 'check'
 
   yarnrc-lint:
+    if: github.repository == 'daytonaio/daytona'
     name: Yarnrc integrity check
     runs-on: ubuntu-latest
     steps:

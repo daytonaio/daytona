@@ -21,6 +21,7 @@ env:
 
 jobs:
   docker_build:
+    if: github.repository == 'daytonaio/daytona'
     strategy:
       fail-fast: false
       matrix:
