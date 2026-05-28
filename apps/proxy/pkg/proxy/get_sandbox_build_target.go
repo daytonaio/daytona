@@ -56,10 +56,7 @@ func (p *Proxy) getSandboxBuildTarget(ctx *gin.Context) (*url.URL, map[string]st
 	}
 	target.RawQuery = queryParams.Encode()
 
-	return target, map[string]string{
-		"X-Daytona-Authorization": fmt.Sprintf("Bearer %s", runnerInfo.ApiKey),
-		"X-Forwarded-Host":        ctx.Request.Host,
-	}, nil
+	return target, BuildExtraHeaders(runnerInfo.ApiKey, ctx.Request.Header.Get("X-Forwarded-Host"), ctx.Request.Host), nil
 }
 
 func (p *Proxy) getSandbox(ctx *gin.Context, sandboxId string) (*apiclient.Sandbox, error) {

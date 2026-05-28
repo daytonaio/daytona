@@ -168,3 +168,115 @@ func TestNewProxyRequestHandler_PreservesPathEncoding(t *testing.T) {
 		})
 	}
 }
+
+// TestNewProxyRequestHandler_ExtraHeadersUseSetSemantics verifies that
+// extra headers passed via getProxyTarget replace (not append to) any
+// same-named header already present on the incoming request.
+//
+// Regression for: https://github.com/daytonaio/daytona/issues/4846
+// Before fix: req.Header.Add caused "upstream-value, proxy-value" on the wire.
+// After fix:  req.Header.Set causes only "proxy-value" to reach the backend.
+//
+// Note: this test validates Option A (Add→Set semantics in the shared proxy
+// helper). Option B (conditional X-Forwarded-Host injection in the target
+// builders) is validated by inspection — those callers omit the header from
+// extraHeaders when the incoming request already carries one, so the upstream
+// value passes through to the backend without any modification.
+func TestNewProxyRequestHandler_ExtraHeadersUseSetSemantics(t *testing.T) {
+	cases := []struct {
+		name            string
+		incomingHeaders map[string]string // headers on the incoming request
+		extraHeaders    map[string]string // headers returned by getProxyTarget
+		wantHeaders     map[string]string // exact single value expected at backend
+	}{
+		{
+			name: "upstream X-Forwarded-Host is replaced by proxy value",
+			incomingHeaders: map[string]string{
+				"X-Forwarded-Host": "customer-host.example.com",
+			},
+			extraHeaders: map[string]string{
+				"X-Forwarded-Host": "3000-sandboxid.proxy.daytona.work",
+			},
+			wantHeaders: map[string]string{
+				"X-Forwarded-Host": "3000-sandboxid.proxy.daytona.work",
+			},
+		},
+		{
+			name:            "no upstream X-Forwarded-Host: proxy value forwarded",
+			incomingHeaders: map[string]string{},
+			extraHeaders: map[string]string{
+				"X-Forwarded-Host": "3000-sandboxid.proxy.daytona.work",
+			},
+			wantHeaders: map[string]string{
+				"X-Forwarded-Host": "3000-sandboxid.proxy.daytona.work",
+			},
+		},
+		{
+			name: "X-Daytona-Authorization always set by proxy regardless of incoming",
+			incomingHeaders: map[string]string{
+				"X-Daytona-Authorization": "Bearer old-token",
+			},
+			extraHeaders: map[string]string{
+				"X-Daytona-Authorization": "Bearer new-token",
+			},
+			wantHeaders: map[string]string{
+				"X-Daytona-Authorization": "Bearer new-token",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Backend records the headers it receives.
+			backendHeaders := make(http.Header)
+			backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				for k := range tc.wantHeaders {
+					backendHeaders[k] = r.Header[http.CanonicalHeaderKey(k)]
+				}
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer backend.Close()
+
+			backendURL, _ := url.Parse(backend.URL)
+
+			capturedExtra := tc.extraHeaders
+			getTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
+				target := &url.URL{
+					Scheme: backendURL.Scheme,
+					Host:   backendURL.Host,
+					Path:   "/",
+				}
+				return target, capturedExtra, nil
+			}
+
+			router := gin.New()
+			router.GET("/*path", proxy.NewProxyRequestHandler(getTarget, nil))
+
+			proxyServer := httptest.NewServer(router)
+			defer proxyServer.Close()
+
+			req, _ := http.NewRequest(http.MethodGet, proxyServer.URL+"/", nil)
+			for k, v := range tc.incomingHeaders {
+				req.Header.Set(k, v)
+			}
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				t.Fatalf("proxy request failed: %v", err)
+			}
+			resp.Body.Close()
+
+			for header, wantValue := range tc.wantHeaders {
+				got := backendHeaders[http.CanonicalHeaderKey(header)]
+				if len(got) != 1 {
+					t.Errorf("header %q: got %d values %v, want exactly 1", header, len(got), got)
+					continue
+				}
+				if got[0] != wantValue {
+					t.Errorf("header %q: got %q, want %q", header, got[0], wantValue)
+				}
+			}
+		})
+	}
+}

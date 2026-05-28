@@ -61,7 +61,7 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 					req.URL.RawQuery = target.RawQuery + "&" + req.URL.RawQuery
 				}
 				for key, value := range extraHeaders {
-					req.Header.Add(key, value)
+					req.Header.Set(key, value)
 				}
 			},
 			Transport:      proxyTransport,
