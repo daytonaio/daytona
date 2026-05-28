@@ -1172,6 +1172,650 @@ public class App {
 </TabItem>
 </Tabs>
 
+## Mount a Tigris bucket
+
+Mount a Tigris bucket with the same `mount-s3` tool used for S3. Pass `--endpoint-url https://t3.storage.dev`, because Tigris uses one global endpoint with no per-account subdomain. Tigris also supports bucket snapshots and copy-on-write forks through request headers, so each sandbox can use an isolated writable bucket without duplicating source data.
+
+**Credentials** — set `TIGRIS_STORAGE_ACCESS_KEY_ID` and `TIGRIS_STORAGE_SECRET_ACCESS_KEY` in your local environment. The snippets below pass these into the sandbox via `envVars` under the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names that `mount-s3` expects.
+
+### Pre-built snapshot
+
+Build a snapshot with `mount-s3` preinstalled, then launch Tigris sandboxes from that snapshot. The mount flow matches S3 except for the Tigris `--endpoint-url`, and startup stays fast because installation happens once during snapshot build.
+
+#### Build a snapshot
+
+Create a reusable snapshot that installs `mount-s3`. Because Tigris is S3-compatible, this setup matches S3 and only the runtime mount command changes.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSnapshotParams, Daytona, Image
+
+daytona = Daytona()
+
+image = (
+  Image.base("daytonaio/sandbox")
+  .run_commands(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget",
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" '
+    '&& wget -O /tmp/mount-s3.deb '
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" '
+    "&& sudo apt-get install -y /tmp/mount-s3.deb "
+    "&& rm /tmp/mount-s3.deb",
+  )
+)
+
+daytona.snapshot.create(
+    CreateSnapshotParams(name="fuse-tigris", image=image),
+    on_logs=print,
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona, Image } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const image = Image.base('daytonaio/sandbox').runCommands(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+  'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' +
+    '&& wget -O /tmp/mount-s3.deb ' +
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' +
+    '&& sudo apt-get install -y /tmp/mount-s3.deb ' +
+    '&& rm /tmp/mount-s3.deb',
+)
+
+await daytona.snapshot.create(
+  { name: 'fuse-tigris', image },
+  { onLogs: console.log },
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+image = Daytona::Image
+  .base('daytonaio/sandbox')
+  .run_commands(
+    'sudo apt-get update ' \
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' \
+    '&& wget -O /tmp/mount-s3.deb ' \
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' \
+    '&& sudo apt-get install -y /tmp/mount-s3.deb ' \
+    '&& rm /tmp/mount-s3.deb'
+  )
+
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(name: 'fuse-tigris', image: image),
+  on_logs: proc { |chunk| print(chunk) }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+image := daytona.Base("daytonaio/sandbox").
+	Run("sudo apt-get update && sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget").
+	Run(`arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" && ` +
+		`wget -O /tmp/mount-s3.deb "https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" && ` +
+		`sudo apt-get install -y /tmp/mount-s3.deb && rm /tmp/mount-s3.deb`)
+
+_, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+	Name:  "fuse-tigris",
+	Image: image,
+})
+if err != nil {
+	log.Fatal(err)
+}
+for line := range logChan {
+	fmt.Print(line)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Image;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Image image = Image.base("daytonaio/sandbox")
+                .runCommands(
+                    "sudo apt-get update "
+                        + "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget",
+                    "arch=\"$(dpkg --print-architecture | sed s/amd64/x86_64/)\" "
+                        + "&& wget -O /tmp/mount-s3.deb "
+                        + "\"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb\" "
+                        + "&& sudo apt-get install -y /tmp/mount-s3.deb "
+                        + "&& rm /tmp/mount-s3.deb"
+                );
+
+            daytona.snapshot().create("fuse-tigris", image, System.out::println);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+#### Launch and mount
+
+Pass Tigris credentials into the sandbox as `AWS_*` environment variables, then mount with the Tigris endpoint URL. This keeps authentication compatible with `mount-s3` while targeting your Tigris account.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="fuse-tigris",
+        env_vars={
+            "AWS_ACCESS_KEY_ID": os.environ["TIGRIS_STORAGE_ACCESS_KEY_ID"],
+            "AWS_SECRET_ACCESS_KEY": os.environ["TIGRIS_STORAGE_SECRET_ACCESS_KEY"],
+        },
+    )
+)
+
+mount_path = "/home/daytona/tigris"
+
+sandbox.process.exec(f"mkdir -p {mount_path}")
+sandbox.process.exec(
+    f"mount-s3 --endpoint-url https://t3.storage.dev "
+    f"my-tigris-bucket {mount_path}"
+)
+
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const sandbox = await daytona.create({
+  snapshot: 'fuse-tigris',
+  envVars: {
+    AWS_ACCESS_KEY_ID: process.env.TIGRIS_STORAGE_ACCESS_KEY_ID!,
+    AWS_SECRET_ACCESS_KEY: process.env.TIGRIS_STORAGE_SECRET_ACCESS_KEY!,
+  },
+})
+
+const mountPath = '/home/daytona/tigris'
+
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(
+  `mount-s3 --endpoint-url https://t3.storage.dev ` +
+    `my-tigris-bucket ${mountPath}`,
+)
+
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'fuse-tigris',
+    env_vars: {
+      'AWS_ACCESS_KEY_ID' => ENV.fetch('TIGRIS_STORAGE_ACCESS_KEY_ID'),
+      'AWS_SECRET_ACCESS_KEY' => ENV.fetch('TIGRIS_STORAGE_SECRET_ACCESS_KEY')
+    }
+  )
+)
+
+mount_path = '/home/daytona/tigris'
+
+sandbox.process.exec(command: "mkdir -p #{mount_path}")
+sandbox.process.exec(
+  command: 'mount-s3 --endpoint-url https://t3.storage.dev ' \
+           "my-tigris-bucket #{mount_path}"
+)
+
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	Snapshot: "fuse-tigris",
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"AWS_ACCESS_KEY_ID":     os.Getenv("TIGRIS_STORAGE_ACCESS_KEY_ID"),
+			"AWS_SECRET_ACCESS_KEY": os.Getenv("TIGRIS_STORAGE_SECRET_ACCESS_KEY"),
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+mountPath := "/home/daytona/tigris"
+
+if _, err := sandbox.Process.ExecuteCommand(ctx, "mkdir -p "+mountPath); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"mount-s3 --endpoint-url https://t3.storage.dev "+
+		"my-tigris-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setSnapshot("fuse-tigris");
+            params.setEnvVars(Map.of(
+                "AWS_ACCESS_KEY_ID", System.getenv("TIGRIS_STORAGE_ACCESS_KEY_ID"),
+                "AWS_SECRET_ACCESS_KEY", System.getenv("TIGRIS_STORAGE_SECRET_ACCESS_KEY")
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            String mountPath = "/home/daytona/tigris";
+
+            sandbox.getProcess().executeCommand("mkdir -p " + mountPath);
+            sandbox.getProcess().executeCommand(
+                "mount-s3 --endpoint-url https://t3.storage.dev "
+                    + "my-tigris-bucket " + mountPath);
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Runtime install
+
+Start from a default sandbox, install `mount-s3` during startup, then mount with the Tigris `--endpoint-url`. This path is convenient for prototyping or one-off tasks, but each new sandbox repeats package installation.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+import os
+from daytona import CreateSandboxBaseParams, Daytona
+
+daytona = Daytona()
+
+sandbox = daytona.create(
+    CreateSandboxBaseParams(
+        env_vars={
+            "AWS_ACCESS_KEY_ID": os.environ["TIGRIS_STORAGE_ACCESS_KEY_ID"],
+            "AWS_SECRET_ACCESS_KEY": os.environ["TIGRIS_STORAGE_SECRET_ACCESS_KEY"],
+        },
+    )
+)
+
+# Install mount-s3
+sandbox.process.exec(
+    "sudo apt-get update "
+    "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget"
+)
+sandbox.process.exec(
+    'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" '
+    '&& wget -O /tmp/mount-s3.deb '
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" '
+    "&& sudo apt-get install -y /tmp/mount-s3.deb"
+)
+
+# Mount with Tigris endpoint
+mount_path = "/home/daytona/tigris"
+sandbox.process.exec(
+    f"mkdir -p {mount_path} && "
+    f"mount-s3 --endpoint-url https://t3.storage.dev "
+    f"my-tigris-bucket {mount_path}"
+)
+response = sandbox.process.exec(f"ls {mount_path}")
+print(response.result)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytona/sdk'
+
+const daytona = new Daytona()
+
+const sandbox = await daytona.create({
+  envVars: {
+    AWS_ACCESS_KEY_ID: process.env.TIGRIS_STORAGE_ACCESS_KEY_ID!,
+    AWS_SECRET_ACCESS_KEY: process.env.TIGRIS_STORAGE_SECRET_ACCESS_KEY!,
+  },
+})
+
+// Install mount-s3
+await sandbox.process.executeCommand(
+  'sudo apt-get update ' +
+    '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget',
+)
+await sandbox.process.executeCommand(
+  'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' +
+    '&& wget -O /tmp/mount-s3.deb ' +
+    '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' +
+    '&& sudo apt-get install -y /tmp/mount-s3.deb',
+)
+
+// Mount with Tigris endpoint
+const mountPath = '/home/daytona/tigris'
+await sandbox.process.executeCommand(
+  `mkdir -p ${mountPath} && ` +
+    `mount-s3 --endpoint-url https://t3.storage.dev ` +
+    `my-tigris-bucket ${mountPath}`,
+)
+const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+console.log(response.result)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+sandbox = daytona.create(
+  Daytona::CreateSandboxBaseParams.new(
+    env_vars: {
+      'AWS_ACCESS_KEY_ID' => ENV.fetch('TIGRIS_STORAGE_ACCESS_KEY_ID'),
+      'AWS_SECRET_ACCESS_KEY' => ENV.fetch('TIGRIS_STORAGE_SECRET_ACCESS_KEY')
+    }
+  )
+)
+
+# Install mount-s3
+sandbox.process.exec(
+  command: 'sudo apt-get update ' \
+           '&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget'
+)
+sandbox.process.exec(
+  command: 'arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" ' \
+           '&& wget -O /tmp/mount-s3.deb ' \
+           '"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" ' \
+           '&& sudo apt-get install -y /tmp/mount-s3.deb'
+)
+
+# Mount with Tigris endpoint
+mount_path = '/home/daytona/tigris'
+sandbox.process.exec(
+  command: "mkdir -p #{mount_path} && " \
+           'mount-s3 --endpoint-url https://t3.storage.dev ' \
+           "my-tigris-bucket #{mount_path}"
+)
+response = sandbox.process.exec(command: "ls #{mount_path}")
+puts response.result
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+	SandboxBaseParams: types.SandboxBaseParams{
+		EnvVars: map[string]string{
+			"AWS_ACCESS_KEY_ID":     os.Getenv("TIGRIS_STORAGE_ACCESS_KEY_ID"),
+			"AWS_SECRET_ACCESS_KEY": os.Getenv("TIGRIS_STORAGE_SECRET_ACCESS_KEY"),
+		},
+	},
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Install mount-s3
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"sudo apt-get update && sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget"); err != nil {
+	log.Fatal(err)
+}
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	`arch="$(dpkg --print-architecture | sed s/amd64/x86_64/)" && `+
+		`wget -O /tmp/mount-s3.deb "https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb" && `+
+		`sudo apt-get install -y /tmp/mount-s3.deb`); err != nil {
+	log.Fatal(err)
+}
+
+// Mount with Tigris endpoint
+mountPath := "/home/daytona/tigris"
+if _, err := sandbox.Process.ExecuteCommand(ctx,
+	"mkdir -p "+mountPath+" && "+
+		"mount-s3 --endpoint-url https://t3.storage.dev "+
+		"my-tigris-bucket "+mountPath); err != nil {
+	log.Fatal(err)
+}
+response, err := sandbox.Process.ExecuteCommand(ctx, "ls "+mountPath)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(response.Result)
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxBaseParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+import java.util.Map;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxBaseParams params = new CreateSandboxBaseParams();
+            params.setEnvVars(Map.of(
+                "AWS_ACCESS_KEY_ID", System.getenv("TIGRIS_STORAGE_ACCESS_KEY_ID"),
+                "AWS_SECRET_ACCESS_KEY", System.getenv("TIGRIS_STORAGE_SECRET_ACCESS_KEY")
+            ));
+            Sandbox sandbox = daytona.create(params);
+
+            // Install mount-s3
+            sandbox.getProcess().executeCommand(
+                "sudo apt-get update "
+                    + "&& sudo apt-get install -y --no-install-recommends libfuse2 ca-certificates wget");
+            sandbox.getProcess().executeCommand(
+                "arch=\"$(dpkg --print-architecture | sed s/amd64/x86_64/)\" "
+                    + "&& wget -O /tmp/mount-s3.deb "
+                    + "\"https://s3.amazonaws.com/mountpoint-s3-release/latest/${arch}/mount-s3.deb\" "
+                    + "&& sudo apt-get install -y /tmp/mount-s3.deb");
+
+            // Mount with Tigris endpoint
+            String mountPath = "/home/daytona/tigris";
+            sandbox.getProcess().executeCommand(
+                "mkdir -p " + mountPath + " && "
+                    + "mount-s3 --endpoint-url https://t3.storage.dev "
+                    + "my-tigris-bucket " + mountPath);
+
+            ExecuteResponse response = sandbox.getProcess().executeCommand("ls " + mountPath);
+            System.out.println(response.getResult());
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Mount a copy-on-write fork per sandbox
+
+A Tigris bucket fork is a new bucket created from a snapshot of a source bucket. The fork shares underlying storage with the source until written to — new writes go only to the fork, and the source bucket and other forks are unaffected. Fork creation is constant-time regardless of source bucket size.
+
+This pattern fits Daytona sandboxes when each sandbox needs a writable copy of a shared dataset (model weights, fixtures, golden data) without duplicating it on every launch.
+
+**Prerequisite** — the source bucket must be created with snapshots enabled. This is a one-time setup, done outside the per-sandbox flow:
+
+```typescript
+import { createBucket } from '@tigrisdata/storage'
+
+await createBucket('my-source-bucket', { enableSnapshot: true })
+```
+
+In any S3 SDK, send a `CreateBucket` request with the header `X-Tigris-Enable-Snapshot: true`.
+
+The `@tigrisdata/agent-kit` package wraps this workflow as `createForks()`. It snapshots the source bucket and creates one or more forks in a single call. Passing `credentials: { role: 'Editor' }` also creates a scoped access key per fork, so each sandbox can read and write only its own fork bucket instead of the full account.
+
+```typescript
+import { createForks, teardownForks } from '@tigrisdata/agent-kit'
+import { Daytona } from '@daytona/sdk'
+
+const SOURCE_BUCKET = 'my-source-bucket'
+
+// 1. Snapshot the source and create a fork with a scoped access key
+const { data: forkSet, error } = await createForks(SOURCE_BUCKET, 1, {
+  credentials: { role: 'Editor' },
+})
+if (error) throw error
+const fork = forkSet.forks[0]
+
+// 2. Launch the sandbox with the fork's scoped credentials
+const daytona = new Daytona()
+const sandbox = await daytona.create({
+  snapshot: 'fuse-tigris',
+  envVars: {
+    AWS_ACCESS_KEY_ID: fork.credentials!.accessKeyId,
+    AWS_SECRET_ACCESS_KEY: fork.credentials!.secretAccessKey,
+  },
+})
+
+// 3. Mount the fork bucket
+const mountPath = '/home/daytona/tigris'
+await sandbox.process.executeCommand(`mkdir -p ${mountPath}`)
+await sandbox.process.executeCommand(
+  `mount-s3 --endpoint-url https://t3.storage.dev ${fork.bucket} ${mountPath}`,
+)
+
+try {
+  const response = await sandbox.process.executeCommand(`ls ${mountPath}`)
+  console.log(response.result)
+} finally {
+  await daytona.delete(sandbox)
+  await teardownForks(forkSet) // revokes the scoped key and deletes the fork bucket
+}
+```
+
+To run the same workflow from a language without an `agent-kit` equivalent, use any S3 SDK and send the headers documented below. Send `X-Tigris-Snapshot: true` on `CreateBucket` for the source name, then capture `X-Tigris-Snapshot-Version` from the response. Next, send `CreateBucket` for the fork name with `X-Tigris-Fork-Source-Bucket` and `X-Tigris-Fork-Source-Bucket-Snapshot`. Mount the fork with the same `mount-s3` snippets shown above, replacing the bucket name with the fork bucket.
+
+#### Reference: Tigris-specific headers
+
+These headers drive snapshot and fork operations over the S3 API. Use them with any AWS SDK (boto3, aws-sdk-go-v2, aws-sdk-java-v2, aws-sdk-ruby) by attaching a request interceptor.
+
+| Header                                     | Sent on                                   | Purpose                                                                        |
+| ------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------ |
+| **`X-Tigris-Enable-Snapshot: true`**       | **`CreateBucket`** (new source)           | Enable snapshots on a new bucket. Required before snapshotting it.             |
+| **`X-Tigris-Snapshot: true`**              | **`CreateBucket`** (existing source name) | Take a snapshot of the bucket. Optional **`; name=<label>`** suffix labels it. |
+| **`X-Tigris-Snapshot-Version`**            | Response to snapshot create               | Snapshot version ID returned to the caller — pass to fork creation.            |
+| **`X-Tigris-Fork-Source-Bucket`**          | **`CreateBucket`** (new fork name)        | Source bucket to fork from.                                                    |
+| **`X-Tigris-Fork-Source-Bucket-Snapshot`** | **`CreateBucket`** (new fork name)        | Source snapshot version to fork from.                                          |
+
+Source: [**`tigrisdata/storage`**](https://github.com/tigrisdata/storage). See **`shared/headers.ts`** for the full header set.
+
 ## Mount a Google Cloud Storage bucket
 
 Mount a GCS bucket using [gcsfuse ↗](https://github.com/GoogleCloudPlatform/gcsfuse) — Google's official FUSE client.
