@@ -7,6 +7,7 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
+import { CreateOrganizationSheet } from '@/components/Organizations/CreateOrganizationSheet'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
@@ -18,16 +19,19 @@ import { useUpdateOrganizationInvitationMutation } from '@/hooks/mutations/useUp
 import { useUpdateOrganizationMemberAccessMutation } from '@/hooks/mutations/useUpdateOrganizationMemberAccessMutation'
 import { useOrganizationInvitationsQuery } from '@/hooks/queries/useOrganizationInvitationsQuery'
 import { useOrganizationMembersQuery } from '@/hooks/queries/useOrganizationMembersQuery'
+import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { usePendingMutationKeys } from '@/hooks/usePendingMutationKeys'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import {
   CreateOrganizationInvitationRoleEnum,
+  type Organization,
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytona/api-client'
-import { AlertCircle, PlusIcon, RefreshCw } from 'lucide-react'
+import { AlertCircle, Building2, PlusIcon, RefreshCw } from 'lucide-react'
 import React, { useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
@@ -53,10 +57,13 @@ function usePendingInvitationIds() {
 const OrganizationMembers: React.FC = () => {
   const { user } = useAuth()
 
+  const { organizationsApi } = useApi()
   const { refreshOrganizations } = useOrganizations()
+  const { sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const isPersonalOrganization = !!selectedOrganization?.personal
   const { data: organizationMembers = [], isLoading: loadingMembers } = useOrganizationMembersQuery(
-    selectedOrganization?.id,
+    isPersonalOrganization ? null : selectedOrganization?.id,
   )
 
   const {
@@ -64,13 +71,14 @@ const OrganizationMembers: React.FC = () => {
     isLoading: loadingInvitations,
     isError: invitationsError,
     refetch: refetchInvitations,
-  } = useOrganizationInvitationsQuery()
+  } = useOrganizationInvitationsQuery({ enabled: !isPersonalOrganization })
   const updateMemberAccessMutation = useUpdateOrganizationMemberAccessMutation()
   const removeMemberMutation = useDeleteOrganizationMemberMutation()
   const createInvitationMutation = useCreateOrganizationInvitationMutation()
   const updateInvitationMutation = useUpdateOrganizationInvitationMutation()
   const cancelInvitationMutation = useCancelOrganizationInvitationMutation()
   const createInvitationSheetRef = useRef<{ open: () => void }>(null)
+  const createOrganizationSheetRef = useRef<{ open: () => void }>(null)
 
   const pendingMemberIds = usePendingMemberIds()
   const pendingInvitationIds = usePendingInvitationIds()
@@ -178,9 +186,10 @@ const OrganizationMembers: React.FC = () => {
   }
 
   const authenticatedUserIsOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+  const canInviteMembers = authenticatedUserIsOwner && !isPersonalOrganization
 
   const rootCommands: CommandConfig[] = useMemo(() => {
-    if (!authenticatedUserIsOwner) {
+    if (!canInviteMembers) {
       return []
     }
 
@@ -192,9 +201,26 @@ const OrganizationMembers: React.FC = () => {
         onSelect: () => createInvitationSheetRef.current?.open(),
       },
     ]
-  }, [authenticatedUserIsOwner])
+  }, [canInviteMembers])
 
   useRegisterCommands(rootCommands, { groupId: 'member-actions', groupLabel: 'Member actions', groupOrder: 0 })
+
+  const handleCreateOrganization = async (name: string, defaultRegionId: string): Promise<Organization | null> => {
+    try {
+      const organization = (
+        await organizationsApi.createOrganization({
+          name: name.trim(),
+          defaultRegionId,
+        })
+      ).data
+      toast.success('Organization created successfully')
+      await refreshOrganizations(organization.id)
+      return organization
+    } catch (error) {
+      handleApiError(error, 'Failed to create organization')
+      return null
+    }
+  }
 
   return (
     <PageLayout>
@@ -204,7 +230,7 @@ const OrganizationMembers: React.FC = () => {
         <PageIntro
           title="Members"
           actions={
-            authenticatedUserIsOwner ? (
+            canInviteMembers ? (
               <UpsertOrganizationAccessSheet
                 mode="create"
                 onSubmit={({ email, role, assignedRoleIds }) => handleCreateInvitation(email, role, assignedRoleIds)}
@@ -213,51 +239,79 @@ const OrganizationMembers: React.FC = () => {
             ) : undefined
           }
         />
-        <div className="flex flex-col gap-14">
-          <OrganizationMemberTable
-            data={organizationMembers}
-            loadingData={loadingMembers}
-            onUpdateMemberAccess={handleUpdateMemberAccess}
-            onRemoveMember={handleRemoveMember}
-            pendingMemberIds={pendingMemberIds}
-            ownerMode={authenticatedUserIsOwner}
-            currentUserId={user?.profile.sub}
-          />
+        {isPersonalOrganization ? (
+          <>
+            <Empty className="flex-none py-12 rounded-md border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Building2 />
+                </EmptyMedia>
+                <EmptyTitle>Organizations support member invitations</EmptyTitle>
+                <EmptyDescription>
+                  Personal accounts cannot invite members. Create an organization to collaborate with other users.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button variant="secondary" size="sm" onClick={() => createOrganizationSheetRef.current?.open()}>
+                  <PlusIcon />
+                  Create Organization
+                </Button>
+              </EmptyContent>
+            </Empty>
+            <CreateOrganizationSheet
+              ref={createOrganizationSheetRef}
+              regions={regions}
+              loadingRegions={loadingRegions}
+              onCreateOrganization={handleCreateOrganization}
+            />
+          </>
+        ) : (
+          <div className="flex flex-col gap-14">
+            <OrganizationMemberTable
+              data={organizationMembers}
+              loadingData={loadingMembers}
+              onUpdateMemberAccess={handleUpdateMemberAccess}
+              onRemoveMember={handleRemoveMember}
+              pendingMemberIds={pendingMemberIds}
+              ownerMode={authenticatedUserIsOwner}
+              currentUserId={user?.profile.sub}
+            />
 
-          {authenticatedUserIsOwner && (
-            <div>
-              <h1 className="text-2xl font-medium mb-3">Invitations</h1>
+            {authenticatedUserIsOwner && (
+              <div>
+                <h1 className="text-2xl font-medium mb-3">Invitations</h1>
 
-              {invitationsError ? (
-                <Empty className="py-12 rounded-md border">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
-                      <AlertCircle />
-                    </EmptyMedia>
-                    <EmptyTitle className="text-destructive">Failed to load invitations</EmptyTitle>
-                    <EmptyDescription>
-                      Something went wrong while fetching organization invitations. Please try again.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  <EmptyContent>
-                    <Button variant="secondary" size="sm" onClick={() => refetchInvitations()}>
-                      <RefreshCw />
-                      Retry
-                    </Button>
-                  </EmptyContent>
-                </Empty>
-              ) : (
-                <OrganizationInvitationTable
-                  data={invitations}
-                  loadingData={loadingInvitations}
-                  onCancelInvitation={handleCancelInvitation}
-                  onUpdateInvitation={handleUpdateInvitation}
-                  pendingInvitationIds={pendingInvitationIds}
-                />
-              )}
-            </div>
-          )}
-        </div>
+                {invitationsError ? (
+                  <Empty className="py-12 rounded-md border">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                        <AlertCircle />
+                      </EmptyMedia>
+                      <EmptyTitle className="text-destructive">Failed to load invitations</EmptyTitle>
+                      <EmptyDescription>
+                        Something went wrong while fetching organization invitations. Please try again.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent>
+                      <Button variant="secondary" size="sm" onClick={() => refetchInvitations()}>
+                        <RefreshCw />
+                        Retry
+                      </Button>
+                    </EmptyContent>
+                  </Empty>
+                ) : (
+                  <OrganizationInvitationTable
+                    data={invitations}
+                    loadingData={loadingInvitations}
+                    onCancelInvitation={handleCancelInvitation}
+                    onUpdateInvitation={handleUpdateInvitation}
+                    pendingInvitationIds={pendingInvitationIds}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </PageContent>
     </PageLayout>
   )

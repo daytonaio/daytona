@@ -19,7 +19,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { Organization } from '@daytona/api-client'
 import { Building2, ChevronsUpDown, Copy, PlusCircle, SquareUserRound } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { CommandHighlight, useRegisterCommands, type CommandConfig } from '../CommandPalette'
 import { CreateOrganizationSheet } from './CreateOrganizationSheet'
@@ -75,6 +75,7 @@ export const OrganizationPicker: React.FC = () => {
 
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)
+  const createOrganizationSheetRef = useRef<{ open: () => void }>(null)
 
   useOrganizationCommands()
 
@@ -96,8 +97,6 @@ export const OrganizationPicker: React.FC = () => {
     }
     setLoadingSelectOrganization(false)
   }
-
-  const [showCreateOrganizationSheet, setShowCreateOrganizationSheet] = useState(false)
 
   const handleCreateOrganization = async (name: string, defaultRegionId: string) => {
     try {
@@ -174,7 +173,7 @@ export const OrganizationPicker: React.FC = () => {
           <div>
             <DropdownMenuItem
               className="cursor-pointer text-primary flex items-center gap-2"
-              onClick={() => setShowCreateOrganizationSheet(true)}
+              onClick={() => createOrganizationSheetRef.current?.open()}
             >
               <PlusCircle className="w-4 h-4 flex-shrink-0" />
               <span>Create Organization</span>
@@ -184,8 +183,7 @@ export const OrganizationPicker: React.FC = () => {
       </DropdownMenu>
 
       <CreateOrganizationSheet
-        open={showCreateOrganizationSheet}
-        onOpenChange={setShowCreateOrganizationSheet}
+        ref={createOrganizationSheetRef}
         regions={regions}
         loadingRegions={loadingRegions}
         onCreateOrganization={handleCreateOrganization}

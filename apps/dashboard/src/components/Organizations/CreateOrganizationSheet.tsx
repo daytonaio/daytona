@@ -14,15 +14,16 @@ import { Spinner } from '@/components/ui/spinner'
 import { Organization, Region } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
 import { TriangleAlertIcon } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { z } from 'zod'
 
 interface CreateOrganizationSheetProps {
-  open: boolean
+  open?: boolean
   regions: Region[]
   loadingRegions: boolean
-  onOpenChange: (open: boolean) => void
+  onOpenChange?: (open: boolean) => void
   onCreateOrganization: (name: string, defaultRegionId: string) => Promise<Organization | null>
+  ref?: Ref<{ open: () => void }>
 }
 
 const formSchema = z.object({
@@ -43,9 +44,23 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
   loadingRegions,
   onOpenChange,
   onCreateOrganization,
+  ref,
 }) => {
+  const [internalOpen, setInternalOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const defaultRegionIdRef = useRef<string>(regions[0]?.id ?? '')
+  const isControlled = open !== undefined
+  const isOpen = open ?? internalOpen
+
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      if (!isControlled) {
+        setInternalOpen(isOpen)
+      }
+      onOpenChange?.(isOpen)
+    },
+    [isControlled, onOpenChange],
+  )
 
   const form = useForm({
     defaultValues,
@@ -62,24 +77,13 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
       }
     },
     onSubmit: async ({ value }) => {
-      await onCreateOrganization(value.name.trim(), value.defaultRegionId)
+      const organization = await onCreateOrganization(value.name.trim(), value.defaultRegionId)
+      if (organization) {
+        handleOpenChange(false)
+      }
     },
   })
   const { reset: resetForm } = form
-
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    if (!form.getFieldValue('defaultRegionId') && regions[0]?.id) {
-      form.setFieldValue('defaultRegionId', regions[0].id)
-    }
-  }, [form, open, regions])
-
-  useEffect(() => {
-    defaultRegionIdRef.current = regions[0]?.id ?? ''
-  }, [regions])
 
   const resetState = useCallback(() => {
     resetForm({
@@ -88,22 +92,32 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
     })
   }, [resetForm])
 
+  useImperativeHandle(ref, () => ({
+    open: () => handleOpenChange(true),
+  }))
+
   useEffect(() => {
-    if (open) {
+    if (!isOpen) {
+      return
+    }
+
+    if (!form.getFieldValue('defaultRegionId') && regions[0]?.id) {
+      form.setFieldValue('defaultRegionId', regions[0].id)
+    }
+  }, [form, isOpen, regions])
+
+  useEffect(() => {
+    defaultRegionIdRef.current = regions[0]?.id ?? ''
+  }, [regions])
+
+  useEffect(() => {
+    if (isOpen) {
       resetState()
     }
-  }, [open, resetState])
+  }, [isOpen, resetState])
 
   return (
-    <Sheet
-      open={open}
-      onOpenChange={(isOpen) => {
-        onOpenChange(isOpen)
-        if (!isOpen) {
-          resetState()
-        }
-      }}
-    >
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
           <SheetTitle>Create Organization</SheetTitle>
@@ -195,7 +209,7 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
         </ScrollArea>
 
         <SheetFooter className="border-t border-border p-4 px-5">
-          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="secondary" onClick={() => handleOpenChange(false)}>
             Cancel
           </Button>
           <form.Subscribe

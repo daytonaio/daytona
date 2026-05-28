@@ -92,8 +92,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const { pathname, search } = useLocation()
   const sidebar = useSidebar()
   const { isMobile, setOpenMobile } = sidebar
-  const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
-    useSelectedOrganization()
+  const { authenticatedUserOrganizationMember, authenticatedUserHasPermission } = useSelectedOrganization()
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
 
   const sidebarItems = useMemo(() => {
@@ -152,17 +151,15 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       })
     }
 
-    if (!selectedOrganization?.personal) {
-      arr.push({
-        icon: <Users size={16} strokeWidth={1.5} />,
-        label: 'Members',
-        path: RoutePath.MEMBERS,
-      })
-      // TODO: uncomment when we allow creating custom roles
-      // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
-      //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
-      // }
-    }
+    arr.push({
+      icon: <Users size={16} strokeWidth={1.5} />,
+      label: 'Members',
+      path: RoutePath.MEMBERS,
+    })
+    // TODO: uncomment when we allow creating custom roles
+    // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
+    //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
+    // }
 
     arr.push({
       icon: <Settings size={16} strokeWidth={1.5} />,
@@ -171,7 +168,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     })
 
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal])
+  }, [authenticatedUserOrganizationMember?.role])
 
   const billingItems = useMemo(() => {
     if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {

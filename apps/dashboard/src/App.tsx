@@ -21,6 +21,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { BannerProvider } from './components/Banner'
 import { CommandPaletteProvider } from './components/CommandPalette'
 import LoadingFallback from './components/LoadingFallback'
+import { SandboxDetails } from './components/sandboxes'
 import { Button } from './components/ui/button'
 import {
   Dialog,
@@ -54,7 +55,6 @@ import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import WebhookEndpointDetails from './pages/WebhookEndpointDetails'
 import Webhooks from './pages/Webhooks'
-import { SandboxDetails } from './components/sandboxes'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 import { SvixProvider } from './providers/SvixProvider'
@@ -203,14 +203,7 @@ function App() {
             <Route path={getRouteSubPath(RoutePath.EMAIL_VERIFY)} element={<EmailVerify />} />
           </>
         )}
-        <Route
-          path={getRouteSubPath(RoutePath.MEMBERS)}
-          element={
-            <NonPersonalOrganizationPageWrapper>
-              <OrganizationMembers />
-            </NonPersonalOrganizationPageWrapper>
-          }
-        />
+        <Route path={getRouteSubPath(RoutePath.MEMBERS)} element={<OrganizationMembers />} />
         {
           // TODO: uncomment when we allow creating custom roles
           /* <Route
