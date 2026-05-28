@@ -42,7 +42,8 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages \
       tensorboard==2.20.0 \
       jupyterlab==4.5.7 \
       ipykernel==7.2.0 \
-      ipywidgets==8.1.8
+      ipywidgets==8.1.8 \
+      transformers==5.9.0
 
 USER daytona
 # Cache FlashInfer cubins as daytona so they land in a runtime-readable home.
