@@ -235,10 +235,14 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       totalCpuQuota: createDto.totalCpuQuota,
       totalMemoryQuota: createDto.totalMemoryQuota,
       totalDiskQuota: createDto.totalDiskQuota,
+      totalGpuQuota: createDto.totalGpuQuota,
       maxCpuPerSandbox: createDto.maxCpuPerSandbox ?? null,
       maxMemoryPerSandbox: createDto.maxMemoryPerSandbox ?? null,
       maxDiskPerSandbox: createDto.maxDiskPerSandbox ?? null,
       maxDiskPerNonEphemeralSandbox: createDto.maxDiskPerNonEphemeralSandbox ?? null,
+      maxCpuPerGpuSandbox: createDto.maxCpuPerGpuSandbox ?? null,
+      maxMemoryPerGpuSandbox: createDto.maxMemoryPerGpuSandbox ?? null,
+      maxDiskPerGpuSandbox: createDto.maxDiskPerGpuSandbox ?? null,
     })
 
     const saved = await this.regionQuotaRepository.save(regionQuota)

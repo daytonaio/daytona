@@ -53,7 +53,19 @@ export interface SnapshotDto {
      * The snapshot reference
      */
     'ref'?: string;
+    /**
+     * The sandbox class of the snapshot
+     */
+    'sandboxClass'?: SnapshotDtoSandboxClassEnum;
 }
 
+export const SnapshotDtoSandboxClassEnum = {
+    LINUX_VM: 'linux-vm',
+    CONTAINER: 'container',
+    ANDROID: 'android',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+} as const;
+
+export type SnapshotDtoSandboxClassEnum = typeof SnapshotDtoSandboxClassEnum[keyof typeof SnapshotDtoSandboxClassEnum];
 
 

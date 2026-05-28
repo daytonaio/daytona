@@ -886,6 +886,7 @@ export class Sandbox {
       this.env = sandboxDto.env
       this.networkBlockAll = sandboxDto.networkBlockAll
       this.networkAllowList = sandboxDto.networkAllowList
+      this.linkedSandboxId = sandboxDto.linkedSandboxId
       this.volumes = sandboxDto.volumes
       this.buildInfo = sandboxDto.buildInfo
       this.backupCreatedAt = sandboxDto.backupCreatedAt

@@ -412,6 +412,9 @@ export class OrganizationController {
         maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
         maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
         maxDiskPerNonEphemeralSandbox: req.body?.maxDiskPerNonEphemeralSandbox,
+        maxCpuPerGpuSandbox: req.body?.maxCpuPerGpuSandbox,
+        maxMemoryPerGpuSandbox: req.body?.maxMemoryPerGpuSandbox,
+        maxDiskPerGpuSandbox: req.body?.maxDiskPerGpuSandbox,
       }),
     },
   })

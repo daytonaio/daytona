@@ -136,20 +136,4 @@ public class CreateOrganizationRegionQuotaTest {
         // TODO: test maxDiskPerGpuSandbox
     }
 
-    /**
-     * Test the property 'maxCpuPerNonEphemeralSandbox'
-     */
-    @Test
-    public void maxCpuPerNonEphemeralSandboxTest() {
-        // TODO: test maxCpuPerNonEphemeralSandbox
-    }
-
-    /**
-     * Test the property 'maxMemoryPerNonEphemeralSandbox'
-     */
-    @Test
-    public void maxMemoryPerNonEphemeralSandboxTest() {
-        // TODO: test maxMemoryPerNonEphemeralSandbox
-    }
-
 }

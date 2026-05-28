@@ -63,14 +63,4 @@ export class CreateOrganizationRegionQuotaDto {
   @IsNumber()
   @IsOptional()
   maxDiskPerGpuSandbox?: number | null
-
-  @ApiPropertyOptional({ nullable: true })
-  @IsNumber()
-  @IsOptional()
-  maxCpuPerNonEphemeralSandbox?: number | null
-
-  @ApiPropertyOptional({ nullable: true })
-  @IsNumber()
-  @IsOptional()
-  maxMemoryPerNonEphemeralSandbox?: number | null
 }

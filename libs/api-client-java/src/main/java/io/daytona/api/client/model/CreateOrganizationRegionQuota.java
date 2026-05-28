@@ -113,16 +113,6 @@ public class CreateOrganizationRegionQuota {
   @javax.annotation.Nullable
   private BigDecimal maxDiskPerGpuSandbox;
 
-  public static final String SERIALIZED_NAME_MAX_CPU_PER_NON_EPHEMERAL_SANDBOX = "maxCpuPerNonEphemeralSandbox";
-  @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_NON_EPHEMERAL_SANDBOX)
-  @javax.annotation.Nullable
-  private BigDecimal maxCpuPerNonEphemeralSandbox;
-
-  public static final String SERIALIZED_NAME_MAX_MEMORY_PER_NON_EPHEMERAL_SANDBOX = "maxMemoryPerNonEphemeralSandbox";
-  @SerializedName(SERIALIZED_NAME_MAX_MEMORY_PER_NON_EPHEMERAL_SANDBOX)
-  @javax.annotation.Nullable
-  private BigDecimal maxMemoryPerNonEphemeralSandbox;
-
   public CreateOrganizationRegionQuota() {
   }
 
@@ -353,44 +343,6 @@ public class CreateOrganizationRegionQuota {
     this.maxDiskPerGpuSandbox = maxDiskPerGpuSandbox;
   }
 
-
-  public CreateOrganizationRegionQuota maxCpuPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxCpuPerNonEphemeralSandbox) {
-    this.maxCpuPerNonEphemeralSandbox = maxCpuPerNonEphemeralSandbox;
-    return this;
-  }
-
-  /**
-   * Get maxCpuPerNonEphemeralSandbox
-   * @return maxCpuPerNonEphemeralSandbox
-   */
-  @javax.annotation.Nullable
-  public BigDecimal getMaxCpuPerNonEphemeralSandbox() {
-    return maxCpuPerNonEphemeralSandbox;
-  }
-
-  public void setMaxCpuPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxCpuPerNonEphemeralSandbox) {
-    this.maxCpuPerNonEphemeralSandbox = maxCpuPerNonEphemeralSandbox;
-  }
-
-
-  public CreateOrganizationRegionQuota maxMemoryPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxMemoryPerNonEphemeralSandbox) {
-    this.maxMemoryPerNonEphemeralSandbox = maxMemoryPerNonEphemeralSandbox;
-    return this;
-  }
-
-  /**
-   * Get maxMemoryPerNonEphemeralSandbox
-   * @return maxMemoryPerNonEphemeralSandbox
-   */
-  @javax.annotation.Nullable
-  public BigDecimal getMaxMemoryPerNonEphemeralSandbox() {
-    return maxMemoryPerNonEphemeralSandbox;
-  }
-
-  public void setMaxMemoryPerNonEphemeralSandbox(@javax.annotation.Nullable BigDecimal maxMemoryPerNonEphemeralSandbox) {
-    this.maxMemoryPerNonEphemeralSandbox = maxMemoryPerNonEphemeralSandbox;
-  }
-
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -457,9 +409,7 @@ public class CreateOrganizationRegionQuota {
         Objects.equals(this.maxDiskPerNonEphemeralSandbox, createOrganizationRegionQuota.maxDiskPerNonEphemeralSandbox) &&
         Objects.equals(this.maxCpuPerGpuSandbox, createOrganizationRegionQuota.maxCpuPerGpuSandbox) &&
         Objects.equals(this.maxMemoryPerGpuSandbox, createOrganizationRegionQuota.maxMemoryPerGpuSandbox) &&
-        Objects.equals(this.maxDiskPerGpuSandbox, createOrganizationRegionQuota.maxDiskPerGpuSandbox) &&
-        Objects.equals(this.maxCpuPerNonEphemeralSandbox, createOrganizationRegionQuota.maxCpuPerNonEphemeralSandbox) &&
-        Objects.equals(this.maxMemoryPerNonEphemeralSandbox, createOrganizationRegionQuota.maxMemoryPerNonEphemeralSandbox)&&
+        Objects.equals(this.maxDiskPerGpuSandbox, createOrganizationRegionQuota.maxDiskPerGpuSandbox)&&
         Objects.equals(this.additionalProperties, createOrganizationRegionQuota.additionalProperties);
   }
 
@@ -469,7 +419,7 @@ public class CreateOrganizationRegionQuota {
 
   @Override
   public int hashCode() {
-    return Objects.hash(sandboxClass, totalCpuQuota, totalMemoryQuota, totalDiskQuota, totalGpuQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, maxCpuPerNonEphemeralSandbox, maxMemoryPerNonEphemeralSandbox, additionalProperties);
+    return Objects.hash(sandboxClass, totalCpuQuota, totalMemoryQuota, totalDiskQuota, totalGpuQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, additionalProperties);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -495,8 +445,6 @@ public class CreateOrganizationRegionQuota {
     sb.append("    maxCpuPerGpuSandbox: ").append(toIndentedString(maxCpuPerGpuSandbox)).append("\n");
     sb.append("    maxMemoryPerGpuSandbox: ").append(toIndentedString(maxMemoryPerGpuSandbox)).append("\n");
     sb.append("    maxDiskPerGpuSandbox: ").append(toIndentedString(maxDiskPerGpuSandbox)).append("\n");
-    sb.append("    maxCpuPerNonEphemeralSandbox: ").append(toIndentedString(maxCpuPerNonEphemeralSandbox)).append("\n");
-    sb.append("    maxMemoryPerNonEphemeralSandbox: ").append(toIndentedString(maxMemoryPerNonEphemeralSandbox)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -516,7 +464,7 @@ public class CreateOrganizationRegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox", "maxCpuPerNonEphemeralSandbox", "maxMemoryPerNonEphemeralSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota"));

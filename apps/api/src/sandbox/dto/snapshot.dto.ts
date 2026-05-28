@@ -7,7 +7,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { BuildInfoDto } from './build-info.dto'
-import { IsOptional } from 'class-validator'
+import { IsEnum, IsOptional } from 'class-validator'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 
 export class SnapshotDto {
   @ApiProperty()
@@ -89,6 +90,16 @@ export class SnapshotDto {
   @IsOptional()
   ref?: string
 
+  @ApiPropertyOptional({
+    description: 'The sandbox class of the snapshot',
+    enum: SandboxClass,
+    example: SandboxClass.LINUX_VM,
+    required: false,
+  })
+  @IsEnum(SandboxClass)
+  @IsOptional()
+  sandboxClass?: SandboxClass
+
   static fromSnapshot(snapshot: Snapshot): SnapshotDto {
     return {
       id: snapshot.id,
@@ -119,6 +130,7 @@ export class SnapshotDto {
       regionIds: snapshot.snapshotRegions?.map((sr) => sr.regionId) ?? undefined,
       initialRunnerId: snapshot.initialRunnerId,
       ref: snapshot.ref,
+      sandboxClass: snapshot.sandboxClass,
     }
   }
 }

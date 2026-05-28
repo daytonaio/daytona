@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client_async.models.build_info import BuildInfo
 from daytona_api_client_async.models.snapshot_state import SnapshotState
@@ -53,8 +53,9 @@ class SnapshotDto(BaseModel):
     region_ids: Optional[List[StrictStr]] = Field(default=None, description="IDs of regions where the snapshot is available", serialization_alias="regionIds")
     initial_runner_id: Optional[StrictStr] = Field(default=None, description="The initial runner ID of the snapshot", serialization_alias="initialRunnerId")
     ref: Optional[StrictStr] = Field(default=None, description="The snapshot reference")
+    sandbox_class: Optional[StrictStr] = Field(default=None, description="The sandbox class of the snapshot", serialization_alias="sandboxClass")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -155,7 +156,8 @@ class SnapshotDto(BaseModel):
             "build_info": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
             "region_ids": obj.get("regionIds"),
             "initial_runner_id": obj.get("initialRunnerId"),
-            "ref": obj.get("ref")
+            "ref": obj.get("ref"),
+            "sandbox_class": obj.get("sandboxClass")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

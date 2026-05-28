@@ -13847,6 +13847,7 @@ components:
         state: ""
         initialRunnerId: runner123
         updatedAt: 2000-01-23T04:56:07.000+00:00
+        sandboxClass: linux-vm
       properties:
         id:
           type: string
@@ -13907,6 +13908,14 @@ components:
           description: The snapshot reference
           example: daytonaio/sandbox:latest
           type: string
+        sandboxClass:
+          description: The sandbox class of the snapshot
+          enum:
+          - linux-vm
+          - container
+          - android
+          example: linux-vm
+          type: string
       required:
       - cpu
       - createdAt
@@ -13953,6 +13962,7 @@ components:
           state: ""
           initialRunnerId: runner123
           updatedAt: 2000-01-23T04:56:07.000+00:00
+          sandboxClass: linux-vm
         - imageName: imageName
           buildInfo: ""
           cpu: 6.027456183070403
@@ -13977,6 +13987,7 @@ components:
           state: ""
           initialRunnerId: runner123
           updatedAt: 2000-01-23T04:56:07.000+00:00
+          sandboxClass: linux-vm
       properties:
         items:
           items:
@@ -14733,18 +14744,16 @@ components:
     CreateOrganizationRegionQuota:
       example:
         totalCpuQuota: 0.8008281904610115
-        maxDiskPerGpuSandbox: 4.145608029883936
-        totalGpuQuota: 5.962133916683182
-        maxMemoryPerNonEphemeralSandbox: 1.2315135367772556
-        maxCpuPerNonEphemeralSandbox: 7.386281948385884
-        maxCpuPerGpuSandbox: 3.616076749251911
         maxCpuPerSandbox: 5.637376656633329
         maxDiskPerSandbox: 7.061401241503109
         maxDiskPerNonEphemeralSandbox: 9.301444243932576
+        maxDiskPerGpuSandbox: 4.145608029883936
         maxMemoryPerSandbox: 2.3021358869347655
+        totalGpuQuota: 5.962133916683182
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
         sandboxClass: ""
+        maxCpuPerGpuSandbox: 3.616076749251911
         maxMemoryPerGpuSandbox: 2.027123023002322
       properties:
         sandboxClass:
@@ -14777,12 +14786,6 @@ components:
           nullable: true
           type: number
         maxDiskPerGpuSandbox:
-          nullable: true
-          type: number
-        maxCpuPerNonEphemeralSandbox:
-          nullable: true
-          type: number
-        maxMemoryPerNonEphemeralSandbox:
           nullable: true
           type: number
       required:

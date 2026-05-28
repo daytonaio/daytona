@@ -46,6 +46,8 @@ type SnapshotDto struct {
 	InitialRunnerId *string `json:"initialRunnerId,omitempty"`
 	// The snapshot reference
 	Ref *string `json:"ref,omitempty"`
+	// The sandbox class of the snapshot
+	SandboxClass *string `json:"sandboxClass,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -618,6 +620,38 @@ func (o *SnapshotDto) SetRef(v string) {
 	o.Ref = &v
 }
 
+// GetSandboxClass returns the SandboxClass field value if set, zero value otherwise.
+func (o *SnapshotDto) GetSandboxClass() string {
+	if o == nil || IsNil(o.SandboxClass) {
+		var ret string
+		return ret
+	}
+	return *o.SandboxClass
+}
+
+// GetSandboxClassOk returns a tuple with the SandboxClass field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetSandboxClassOk() (*string, bool) {
+	if o == nil || IsNil(o.SandboxClass) {
+		return nil, false
+	}
+	return o.SandboxClass, true
+}
+
+// HasSandboxClass returns a boolean if a field has been set.
+func (o *SnapshotDto) HasSandboxClass() bool {
+	if o != nil && !IsNil(o.SandboxClass) {
+		return true
+	}
+
+	return false
+}
+
+// SetSandboxClass gets a reference to the given string and assigns it to the SandboxClass field.
+func (o *SnapshotDto) SetSandboxClass(v string) {
+	o.SandboxClass = &v
+}
+
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -661,6 +695,9 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Ref) {
 		toSerialize["ref"] = o.Ref
+	}
+	if !IsNil(o.SandboxClass) {
+		toSerialize["sandboxClass"] = o.SandboxClass
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -738,6 +775,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "regionIds")
 		delete(additionalProperties, "initialRunnerId")
 		delete(additionalProperties, "ref")
+		delete(additionalProperties, "sandboxClass")
 		o.AdditionalProperties = additionalProperties
 	}
 

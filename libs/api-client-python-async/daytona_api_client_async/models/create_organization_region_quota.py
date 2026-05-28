@@ -43,10 +43,8 @@ class CreateOrganizationRegionQuota(BaseModel):
     max_cpu_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxCpuPerGpuSandbox")
     max_memory_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxMemoryPerGpuSandbox")
     max_disk_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerGpuSandbox")
-    max_cpu_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxCpuPerNonEphemeralSandbox")
-    max_memory_per_non_ephemeral_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxMemoryPerNonEphemeralSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox", "maxCpuPerNonEphemeralSandbox", "maxMemoryPerNonEphemeralSandbox"]
+    __properties: ClassVar[List[str]] = ["sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -128,16 +126,6 @@ class CreateOrganizationRegionQuota(BaseModel):
         if self.max_disk_per_gpu_sandbox is None and "max_disk_per_gpu_sandbox" in self.model_fields_set:
             _dict['maxDiskPerGpuSandbox'] = None
 
-        # set to None if max_cpu_per_non_ephemeral_sandbox (nullable) is None
-        # and model_fields_set contains the field
-        if self.max_cpu_per_non_ephemeral_sandbox is None and "max_cpu_per_non_ephemeral_sandbox" in self.model_fields_set:
-            _dict['maxCpuPerNonEphemeralSandbox'] = None
-
-        # set to None if max_memory_per_non_ephemeral_sandbox (nullable) is None
-        # and model_fields_set contains the field
-        if self.max_memory_per_non_ephemeral_sandbox is None and "max_memory_per_non_ephemeral_sandbox" in self.model_fields_set:
-            _dict['maxMemoryPerNonEphemeralSandbox'] = None
-
         return _dict
 
     @classmethod
@@ -161,9 +149,7 @@ class CreateOrganizationRegionQuota(BaseModel):
             "max_disk_per_non_ephemeral_sandbox": obj.get("maxDiskPerNonEphemeralSandbox"),
             "max_cpu_per_gpu_sandbox": obj.get("maxCpuPerGpuSandbox"),
             "max_memory_per_gpu_sandbox": obj.get("maxMemoryPerGpuSandbox"),
-            "max_disk_per_gpu_sandbox": obj.get("maxDiskPerGpuSandbox"),
-            "max_cpu_per_non_ephemeral_sandbox": obj.get("maxCpuPerNonEphemeralSandbox"),
-            "max_memory_per_non_ephemeral_sandbox": obj.get("maxMemoryPerNonEphemeralSandbox")
+            "max_disk_per_gpu_sandbox": obj.get("maxDiskPerGpuSandbox")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
