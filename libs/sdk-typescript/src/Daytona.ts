@@ -669,10 +669,6 @@ export class Daytona implements AsyncDisposable {
   public list(query?: ListSandboxesQuery): AsyncIterableIterator<Sandbox> {
     const { sandboxApi, clientConfig } = this
     const tracer = trace.getTracer('')
-    // Clone once per list() call — the config is read-only after construction
-    // and each Sandbox holds its own reference; cloning per page or per item
-    // would be wasteful.
-    const clonedConfig = structuredClone(clientConfig)
 
     async function* generator(): AsyncGenerator<Sandbox> {
       let cursor: string | undefined = undefined
@@ -741,7 +737,8 @@ export class Daytona implements AsyncDisposable {
         firstPage = false
 
         for (const sandbox of response.data.items) {
-          yield new Sandbox(sandbox, clonedConfig, Daytona.createAxiosInstance(), sandboxApi)
+          // Sandbox ctor mutates clientConfig.basePath — clone per item.
+          yield new Sandbox(sandbox, structuredClone(clientConfig), Daytona.createAxiosInstance(), sandboxApi)
         }
 
         cursor = response.data.nextCursor ?? undefined

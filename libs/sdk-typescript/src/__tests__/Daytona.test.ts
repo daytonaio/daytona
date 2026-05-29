@@ -98,7 +98,7 @@ jest.mock('../Volume', () => ({
 }))
 
 jest.mock('../Sandbox', () => ({
-  Sandbox: jest.fn().mockImplementation((dto: { id: string; state?: string }) => {
+  Sandbox: jest.fn().mockImplementation((dto: { id: string; state?: string }, ...rest: unknown[]) => {
     const sandbox = {
       ...dto,
       start: jest.fn(),
@@ -107,7 +107,7 @@ jest.mock('../Sandbox', () => ({
       waitUntilStarted: jest.fn(),
       _experimental_fork: jest.fn(),
     }
-    mockSandboxCtor(dto)
+    mockSandboxCtor(dto, ...rest)
     return sandbox
   }),
 }))
@@ -409,6 +409,30 @@ describe('Daytona', () => {
     await expect(instance.create({ language: 'python' }, { timeout: 7 })).rejects.toThrow(
       'Failed to create and start sandbox within 7 seconds. Operation timed out.',
     )
+  })
+
+  it('gives each listed sandbox its own Configuration instance', async () => {
+    const { Daytona } = await import('../Daytona')
+    const instance = new Daytona({ apiKey: 'k', apiUrl: 'http://api', target: 'us' })
+
+    mockSandboxApi.listSandboxes.mockResolvedValue(
+      createApiResponse({
+        items: [
+          { id: 'sb-1', labels: {} },
+          { id: 'sb-2', labels: {} },
+          { id: 'sb-3', labels: {} },
+        ],
+        nextCursor: null,
+      }),
+    )
+
+    for await (const _ of instance.list()) {
+      void _
+    }
+
+    expect(mockSandboxCtor).toHaveBeenCalledTimes(3)
+    const configs = mockSandboxCtor.mock.calls.map((call: unknown[]) => call[1])
+    expect(new Set(configs).size).toBe(3)
   })
 
   it('serializes label filters when listing sandboxes', async () => {
