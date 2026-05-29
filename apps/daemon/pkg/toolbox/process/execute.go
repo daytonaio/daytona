@@ -33,7 +33,6 @@ import (
 //	@Success		200		{object}	ExecuteResponse
 //	@Failure		400		{object}	common.ErrorResponse
 //	@Failure		408		{object}	common.ErrorResponse
-//	@Failure		500		{object}	common.ErrorResponse
 //	@Router			/process/execute [post]
 //
 //	@id				ExecuteCommand

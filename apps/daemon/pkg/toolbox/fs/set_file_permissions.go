@@ -74,7 +74,7 @@ func SetFilePermissions(c *gin.Context) {
 		}
 
 		if err := os.Chmod(absPath, os.FileMode(modeNum)); err != nil {
-			c.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to change mode: %w", err)))
+			c.Error(classifyChmodChownError(absPath, "failed to change mode", err))
 			return
 		}
 	}
@@ -123,10 +123,24 @@ func SetFilePermissions(c *gin.Context) {
 		}
 
 		if err := os.Chown(absPath, uid, gid); err != nil {
-			c.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to change ownership: %w", err)))
+			c.Error(classifyChmodChownError(absPath, "failed to change ownership", err))
 			return
 		}
 	}
 
 	c.Status(http.StatusOK)
+}
+
+// classifyChmodChownError preserves typed daemon error codes for permission
+// metadata mutations: not-found and access-denied conditions surface as
+// FILE_NOT_FOUND / FILE_ACCESS_DENIED rather than a generic 400.
+func classifyChmodChownError(path, action string, err error) error {
+	wrapped := fmt.Errorf("%s for %s: %w", action, path, err)
+	if os.IsNotExist(err) {
+		return common.NewFileNotFoundError(wrapped.Error())
+	}
+	if os.IsPermission(err) {
+		return common.NewFileAccessDeniedError(wrapped.Error())
+	}
+	return common_errors.NewBadRequestError(wrapped)
 }

@@ -1754,7 +1754,6 @@ class ProcessApi:
             '200': "ExecuteResponse",
             '400': "ErrorResponse",
             '408': "ErrorResponse",
-            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1824,7 +1823,6 @@ class ProcessApi:
             '200': "ExecuteResponse",
             '400': "ErrorResponse",
             '408': "ErrorResponse",
-            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1894,7 +1892,6 @@ class ProcessApi:
             '200': "ExecuteResponse",
             '400': "ErrorResponse",
             '408': "ErrorResponse",
-            '500': "ErrorResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,

@@ -2416,12 +2416,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
           description: Request Timeout
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-          description: Internal Server Error
       summary: Execute a command
       tags:
       - process

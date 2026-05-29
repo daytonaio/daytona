@@ -164,6 +164,9 @@ def parse_file_download_error_payload(
     if status_code is None:
         status_code = payload_dict.get("status_code")
     code = payload_dict.get("code")
+    if code is None:
+        # Older daemon/runner builds emitted `error_code` instead of `code`.
+        code = payload_dict.get("error_code")
     source = payload_dict.get("source")
 
     if isinstance(structured_message, str):

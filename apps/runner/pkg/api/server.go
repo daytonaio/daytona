@@ -106,7 +106,7 @@ func (a *ApiServer) Start(ctx context.Context) error {
 		a.router.Use(sloggin.New(a.logger))
 	}
 	a.router.Use(otelgin.Middleware("daytona-runner"))
-	a.router.Use(common_errors.NewErrorMiddleware("DAYTONA_RUNNER", common.HandlePossibleDockerError))
+	a.router.Use(common_errors.NewErrorMiddleware("", common.HandlePossibleDockerError))
 	a.router.Use(middlewares.RecoverableErrorsMiddleware())
 
 	public := a.router.Group("/")

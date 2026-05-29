@@ -138,7 +138,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		common_errors.Recovery()(ctx)
 	})
 
-	router.Use(common_errors.NewErrorMiddleware("DAYTONA_PROXY", func(ctx *gin.Context, err error) common_errors.ErrorResponse {
+	router.Use(common_errors.NewErrorMiddleware("", func(ctx *gin.Context, err error) common_errors.ErrorResponse {
 		return common_errors.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
 			Message:    err.Error(),

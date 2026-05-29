@@ -911,7 +911,6 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call executeCommandCall(@javax.annotation.Nonnull ExecuteRequest request, final ApiCallback _callback) throws ApiException {
@@ -983,7 +982,6 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ExecuteResponse executeCommand(@javax.annotation.Nonnull ExecuteRequest request) throws ApiException {
@@ -1004,7 +1002,6 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ExecuteResponse> executeCommandWithHttpInfo(@javax.annotation.Nonnull ExecuteRequest request) throws ApiException {
@@ -1027,7 +1024,6 @@ public class ProcessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
-        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call executeCommandAsync(@javax.annotation.Nonnull ExecuteRequest request, final ApiCallback<ExecuteResponse> _callback) throws ApiException {

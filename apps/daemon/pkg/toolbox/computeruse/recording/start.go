@@ -32,11 +32,8 @@ import (
 func (h *RecordingController) StartRecording(ctx *gin.Context) {
 	var request StartRecordingRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		if ctx.Request.ContentLength > 0 {
-			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
-			return
-		}
 
+		// Allow empty body - label is optional
 		request = StartRecordingRequest{}
 	}
 
