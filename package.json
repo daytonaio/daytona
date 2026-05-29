@@ -184,6 +184,7 @@
     "posthog-js": "^1.217.6",
     "posthog-node": "^4.10.1",
     "prism-react-renderer": "^2.4.1",
+    "protobufjs": "7.5.5",
     "raw-body": "^3.0.0",
     "react": "^19.1.0",
     "react-day-picker": "^9.7.0",
