@@ -86,6 +86,7 @@ updates:
 
   - package-ecosystem: pip
     directories:
+      - "/libs/sdk-python"
       - "/libs/api-client-python"
       - "/libs/api-client-python-async"
       - "/libs/toolbox-api-client-python"
