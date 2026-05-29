@@ -7,6 +7,7 @@ api/checkout-url-api.ts
 api/invoices-api.ts
 api/organization-api.ts
 api/portal-url-api.ts
+api/setup-checkout-url-api.ts
 api/tier-api.ts
 api/usage-api.ts
 api/wallet-api.ts
@@ -39,6 +40,7 @@ docs/Paginated[T]Invoice.md
 docs/PaymentMethod.md
 docs/PaymentUrl.md
 docs/PortalUrlApi.md
+docs/SetupCheckoutUrlApi.md
 docs/Tier.md
 docs/TierApi.md
 docs/TierLimit.md
