@@ -454,7 +454,9 @@ This feature is experimental. To request access, contact [support@daytona.io](ma
 
 Daytona provides methods to create GPU snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona/#type-snapshotservice), [Java](/docs/en/java-sdk/snapshot) **SDKs**, or [API](/docs/en/tools/api#daytona/tag/snapshots).
 
-GPU snapshots fit into the same snapshot creation flow as other snapshots, but with the additional option to enable the GPU. Create a GPU snapshot first, then use it as the source when creating a [GPU sandbox](/docs/en/sandboxes#gpu-sandboxes).
+GPU snapshots fit into the same snapshot creation flow as other snapshots, but with the additional option to enable the GPU.
+
+Use the pre-built `daytona-gpu` system snapshot directly when creating a [GPU sandbox](/docs/en/sandboxes#gpu-sandboxes). Create a custom GPU snapshot only when you need to customize the image or dependencies.
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
@@ -1262,6 +1264,8 @@ When a sandbox is created with no snapshot specified, Daytona uses a default sna
 | **`daytona-large`**  | 4        | 8GiB       | 10GiB       |
 
 All default snapshots are based on the `daytonaio/sandbox:<version>` image. For more information, see the [Dockerfile](https://github.com/daytonaio/daytona/blob/main/images/sandbox/Dockerfile).
+
+For GPU workloads, Daytona also provides a pre-built `daytona-gpu` system snapshot. Use it directly for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes), or create a custom GPU snapshot when you need custom dependencies.
 
 ### Python packages (pip)
 

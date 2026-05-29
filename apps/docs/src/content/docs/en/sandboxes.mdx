@@ -305,26 +305,25 @@ Daytona provides methods to create GPU sandboxes using the [Daytona Dashboard �
 
 Daytona supports NVIDIA GPU devices for snapshot-based sandbox creation. This allows you to run GPU workloads such as model inference, fine-tuning, and CUDA-accelerated compute inside a sandbox created from a [GPU snapshot](/docs/en/snapshots#gpu-snapshots). GPU sandboxes must be ephemeral.
 
-Each GPU sandbox supports up to **16 vCPUs**, **192GB RAM**, and **512GB disk**.
+Use the pre-built `daytona-gpu` system snapshot to create a ready-to-use GPU environment. Create a custom GPU snapshot only when you need different packages, tooling, or configuration. Each GPU sandbox supports up to **16 vCPUs**, **192GB RAM**, and **512GB disk**.
 
-1. Create a [GPU Snapshot](/docs/en/snapshots#gpu-snapshots)
-2. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
-3. Click **Create Sandbox**
-4. Select your GPU snapshot
-5. Click **Create** to create a GPU sandbox
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click **Create Sandbox**
+3. Select a GPU snapshot
+4. Click **Create** to create a GPU sandbox
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
+from daytona import Daytona, DaytonaConfig, CreateSandboxFromSnapshotParams
 
-daytona = Daytona()
+daytona = Daytona(DaytonaConfig(target="us-east-1"))
 sandbox = daytona.create(
-    CreateSandboxFromSnapshotParams(
-        snapshot="my-gpu-snapshot",
-        ephemeral=True,
-    )
+        CreateSandboxFromSnapshotParams(
+            snapshot="daytona-gpu",
+            auto_delete_interval=0
+            ),
 )
 ```
 
@@ -334,9 +333,11 @@ sandbox = daytona.create(
 ```typescript
 import { Daytona } from "@daytona/sdk";
 
-const daytona = new Daytona();
+const daytona = new Daytona({
+  target: "us-east-1",
+});
 const sandbox = await daytona.create({
-  snapshot: "my-gpu-snapshot",
+  snapshot: "daytona-gpu",
   ephemeral: true,
 });
 ```
@@ -347,10 +348,13 @@ const sandbox = await daytona.create({
 ```ruby
 require 'daytona'
 
-daytona = Daytona::Daytona.new
+config = Daytona::Config.new(
+  target: "us-east-1"
+)
+daytona = Daytona::Daytona.new(config)
 sandbox = daytona.create(
   Daytona::CreateSandboxFromSnapshotParams.new(
-    snapshot: 'my-gpu-snapshot',
+    snapshot: 'daytona-gpu',
     ephemeral: true
   )
 )
@@ -369,10 +373,12 @@ import (
 )
 
 func main() {
-	client, _ := daytona.NewClient()
+	client, _ := daytona.NewClientWithConfig(&types.DaytonaConfig{
+		Target: "us-east-1",
+	})
 	ctx := context.Background()
 	params := types.SnapshotParams{
-		Snapshot: "my-gpu-snapshot",
+		Snapshot: "daytona-gpu",
 		SandboxBaseParams: types.SandboxBaseParams{
 			Ephemeral: true,
 		},
@@ -386,14 +392,20 @@ func main() {
 
 ```java
 import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DaytonaConfig;
 import io.daytona.sdk.Sandbox;
 import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
 
 public class App {
     public static void main(String[] args) {
-        try (Daytona daytona = new Daytona()) {
+        DaytonaConfig config = new DaytonaConfig.Builder()
+                .apiKey(System.getenv("DAYTONA_API_KEY"))
+                .target("us-east-1")
+                .build();
+
+        try (Daytona daytona = new Daytona(config)) {
             CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
-            params.setSnapshot("my-gpu-snapshot");
+            params.setSnapshot("daytona-gpu");
             params.setAutoDeleteInterval(0);
             Sandbox sandbox = daytona.create(params);
         }
@@ -405,7 +417,7 @@ public class App {
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona create --snapshot my-gpu-snapshot --auto-delete 0
+daytona create --snapshot daytona-gpu --target us-east-1 --auto-delete 0
 ```
 
 </TabItem>
@@ -417,7 +429,8 @@ curl 'https://app.daytona.io/api/sandbox' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
-  "snapshot": "my-gpu-snapshot",
+  "target": "us-east-1",
+  "snapshot": "daytona-gpu",
   "autoDeleteInterval": 0
 }'
 ```
