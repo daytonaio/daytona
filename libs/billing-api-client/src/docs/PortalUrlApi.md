@@ -99,7 +99,7 @@ const { status, data } = await apiInstance.getV2PortalURL(
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: text/plain
 
 ### HTTP response details
 

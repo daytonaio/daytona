@@ -47,7 +47,7 @@ const { status, data } = await apiInstance.getV2SetupCheckoutURL(
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: text/plain
 
 ### HTTP response details
 
