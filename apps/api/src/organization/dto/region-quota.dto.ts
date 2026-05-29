@@ -5,6 +5,7 @@
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { RegionQuota } from '../entities/region-quota.entity'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
 @ApiSchema({ name: 'RegionQuota' })
 export class RegionQuotaDto {
@@ -13,6 +14,9 @@ export class RegionQuotaDto {
 
   @ApiProperty()
   regionId: string
+
+  @ApiProperty({ enum: SandboxClass, enumName: 'SandboxClass' })
+  sandboxClass: SandboxClass
 
   @ApiProperty()
   totalCpuQuota: number
@@ -50,6 +54,7 @@ export class RegionQuotaDto {
   constructor(regionQuota: RegionQuota) {
     this.organizationId = regionQuota.organizationId
     this.regionId = regionQuota.regionId
+    this.sandboxClass = regionQuota.sandboxClass
     this.totalCpuQuota = regionQuota.totalCpuQuota
     this.totalMemoryQuota = regionQuota.totalMemoryQuota
     this.totalDiskQuota = regionQuota.totalDiskQuota

@@ -46,6 +46,8 @@ import { SnapshotInfoResponse } from '@daytona/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
+import { getRunnerSandboxClass } from '../utils/sandbox-class.util'
 
 /** Fisher-Yates shuffle — uniform random permutation in O(n). */
 function shuffleArray<T>(array: T[]): T[] {
@@ -115,8 +117,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const snapshots = await this.snapshotRepository
       .createQueryBuilder('snapshot')
       .innerJoin('organization', 'org', 'org.id = snapshot.organizationId')
-      .innerJoin('region_quota', 'rq', 'rq."organizationId" = org.id AND rq."regionId" = org."defaultRegionId"')
-      .select(['snapshot.*', 'rq.total_cpu_quota'])
+      .select(['snapshot.*'])
       .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
       .andWhere('org.suspended = false')
       .orderBy('snapshot.createdAt', 'ASC')
@@ -343,6 +344,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
           gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
+          // Temporary: Android snapshots can go to container runners
+          sandboxClass: getRunnerSandboxClass(snapshot.sandboxClass),
         },
       })
 
@@ -658,7 +661,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                   // Get an available runner in the same region with the same class
                   const targetRunner = await this.runnerService.getRandomAvailableRunner({
                     regions: [sandbox.region],
-                    sandboxClass: sandbox.class,
+                    sandboxClass: sandbox.sandboxClass,
                     excludedRunnerIds: [runner.id],
                     gpu: sandbox.gpu,
                   })
@@ -1129,6 +1132,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
         initialRunner = await this.runnerService.getRandomAvailableRunner({
           regions: regions.map((region) => region.id),
+          // Temporary: Android snapshots can go to container runners
+          sandboxClass: getRunnerSandboxClass(snapshot.sandboxClass),
           excludedRunnerIds: excludedRunnerIds,
           availabilityScoreThreshold: availabilityThreshold,
           gpu: snapshot.gpu,

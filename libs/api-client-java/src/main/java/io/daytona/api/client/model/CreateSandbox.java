@@ -96,67 +96,6 @@ public class CreateSandbox {
   @javax.annotation.Nullable
   private String networkAllowList;
 
-  /**
-   * The sandbox class type
-   */
-  @JsonAdapter(PropertyClassEnum.Adapter.class)
-  public enum PropertyClassEnum {
-    SMALL("small"),
-    
-    MEDIUM("medium"),
-    
-    LARGE("large"),
-    
-    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
-
-    private String value;
-
-    PropertyClassEnum(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    public static PropertyClassEnum fromValue(String value) {
-      for (PropertyClassEnum b : PropertyClassEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      return UNKNOWN_DEFAULT_OPEN_API;
-    }
-
-    public static class Adapter extends TypeAdapter<PropertyClassEnum> {
-      @Override
-      public void write(final JsonWriter jsonWriter, final PropertyClassEnum enumeration) throws IOException {
-        jsonWriter.value(enumeration.getValue());
-      }
-
-      @Override
-      public PropertyClassEnum read(final JsonReader jsonReader) throws IOException {
-        String value =  jsonReader.nextString();
-        return PropertyClassEnum.fromValue(value);
-      }
-    }
-
-    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      String value = jsonElement.getAsString();
-      PropertyClassEnum.fromValue(value);
-    }
-  }
-
-  public static final String SERIALIZED_NAME_PROPERTY_CLASS = "class";
-  @SerializedName(SERIALIZED_NAME_PROPERTY_CLASS)
-  @javax.annotation.Nullable
-  private PropertyClassEnum propertyClass;
-
   public static final String SERIALIZED_NAME_TARGET = "target";
   @SerializedName(SERIALIZED_NAME_TARGET)
   @javax.annotation.Nullable
@@ -206,6 +145,11 @@ public class CreateSandbox {
   @SerializedName(SERIALIZED_NAME_BUILD_INFO)
   @javax.annotation.Nullable
   private CreateBuildInfo buildInfo;
+
+  public static final String SERIALIZED_NAME_LINKED_SANDBOX = "linkedSandbox";
+  @SerializedName(SERIALIZED_NAME_LINKED_SANDBOX)
+  @javax.annotation.Nullable
+  private String linkedSandbox;
 
   public CreateSandbox() {
   }
@@ -375,25 +319,6 @@ public class CreateSandbox {
 
   public void setNetworkAllowList(@javax.annotation.Nullable String networkAllowList) {
     this.networkAllowList = networkAllowList;
-  }
-
-
-  public CreateSandbox propertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
-    return this;
-  }
-
-  /**
-   * The sandbox class type
-   * @return propertyClass
-   */
-  @javax.annotation.Nullable
-  public PropertyClassEnum getPropertyClass() {
-    return propertyClass;
-  }
-
-  public void setPropertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
   }
 
 
@@ -594,6 +519,25 @@ public class CreateSandbox {
     this.buildInfo = buildInfo;
   }
 
+
+  public CreateSandbox linkedSandbox(@javax.annotation.Nullable String linkedSandbox) {
+    this.linkedSandbox = linkedSandbox;
+    return this;
+  }
+
+  /**
+   * ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval&#x3D;0) and cannot themselves be linked to another sandbox.
+   * @return linkedSandbox
+   */
+  @javax.annotation.Nullable
+  public String getLinkedSandbox() {
+    return linkedSandbox;
+  }
+
+  public void setLinkedSandbox(@javax.annotation.Nullable String linkedSandbox) {
+    this.linkedSandbox = linkedSandbox;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -657,7 +601,6 @@ public class CreateSandbox {
         Objects.equals(this._public, createSandbox._public) &&
         Objects.equals(this.networkBlockAll, createSandbox.networkBlockAll) &&
         Objects.equals(this.networkAllowList, createSandbox.networkAllowList) &&
-        Objects.equals(this.propertyClass, createSandbox.propertyClass) &&
         Objects.equals(this.target, createSandbox.target) &&
         Objects.equals(this.cpu, createSandbox.cpu) &&
         Objects.equals(this.gpu, createSandbox.gpu) &&
@@ -667,13 +610,14 @@ public class CreateSandbox {
         Objects.equals(this.autoArchiveInterval, createSandbox.autoArchiveInterval) &&
         Objects.equals(this.autoDeleteInterval, createSandbox.autoDeleteInterval) &&
         Objects.equals(this.volumes, createSandbox.volumes) &&
-        Objects.equals(this.buildInfo, createSandbox.buildInfo)&&
+        Objects.equals(this.buildInfo, createSandbox.buildInfo) &&
+        Objects.equals(this.linkedSandbox, createSandbox.linkedSandbox)&&
         Objects.equals(this.additionalProperties, createSandbox.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, propertyClass, target, cpu, gpu, memory, disk, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, additionalProperties);
+    return Objects.hash(name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, linkedSandbox, additionalProperties);
   }
 
   @Override
@@ -688,7 +632,6 @@ public class CreateSandbox {
     sb.append("    _public: ").append(toIndentedString(_public)).append("\n");
     sb.append("    networkBlockAll: ").append(toIndentedString(networkBlockAll)).append("\n");
     sb.append("    networkAllowList: ").append(toIndentedString(networkAllowList)).append("\n");
-    sb.append("    propertyClass: ").append(toIndentedString(propertyClass)).append("\n");
     sb.append("    target: ").append(toIndentedString(target)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
@@ -699,6 +642,7 @@ public class CreateSandbox {
     sb.append("    autoDeleteInterval: ").append(toIndentedString(autoDeleteInterval)).append("\n");
     sb.append("    volumes: ").append(toIndentedString(volumes)).append("\n");
     sb.append("    buildInfo: ").append(toIndentedString(buildInfo)).append("\n");
+    sb.append("    linkedSandbox: ").append(toIndentedString(linkedSandbox)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -718,7 +662,7 @@ public class CreateSandbox {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo"));
+    openapiFields = new HashSet<String>(Arrays.asList("name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -749,13 +693,6 @@ public class CreateSandbox {
       if ((jsonObj.get("networkAllowList") != null && !jsonObj.get("networkAllowList").isJsonNull()) && !jsonObj.get("networkAllowList").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `networkAllowList` to be a primitive type in the JSON string but got `%s`", jsonObj.get("networkAllowList").toString()));
       }
-      if ((jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) && !jsonObj.get("class").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `class` to be a primitive type in the JSON string but got `%s`", jsonObj.get("class").toString()));
-      }
-      // validate the optional field `class`
-      if (jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) {
-        PropertyClassEnum.validateJsonElement(jsonObj.get("class"));
-      }
       if ((jsonObj.get("target") != null && !jsonObj.get("target").isJsonNull()) && !jsonObj.get("target").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `target` to be a primitive type in the JSON string but got `%s`", jsonObj.get("target").toString()));
       }
@@ -776,6 +713,9 @@ public class CreateSandbox {
       // validate the optional field `buildInfo`
       if (jsonObj.get("buildInfo") != null && !jsonObj.get("buildInfo").isJsonNull()) {
         CreateBuildInfo.validateJsonElement(jsonObj.get("buildInfo"));
+      }
+      if ((jsonObj.get("linkedSandbox") != null && !jsonObj.get("linkedSandbox").isJsonNull()) && !jsonObj.get("linkedSandbox").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `linkedSandbox` to be a primitive type in the JSON string but got `%s`", jsonObj.get("linkedSandbox").toString()));
       }
   }
 

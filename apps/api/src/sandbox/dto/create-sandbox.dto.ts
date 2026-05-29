@@ -5,7 +5,6 @@
 
 import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray, Max, Min } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 import { IsSafeDisplayString } from '../../common/validators'
@@ -80,15 +79,6 @@ export class CreateSandboxDto {
   @IsOptional()
   @IsString()
   networkAllowList?: string
-
-  @ApiPropertyOptional({
-    description: 'The sandbox class type',
-    enum: SandboxClass,
-    example: Object.values(SandboxClass)[0],
-  })
-  @IsOptional()
-  @IsEnum(SandboxClass)
-  class?: SandboxClass
 
   @ApiPropertyOptional({
     description: 'The target (region) where the sandbox will be created',
@@ -183,4 +173,13 @@ export class CreateSandboxDto {
   @IsOptional()
   @IsObject()
   buildInfo?: CreateBuildInfoDto
+
+  @ApiPropertyOptional({
+    description:
+      'ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.',
+    example: 'sandbox123',
+  })
+  @IsOptional()
+  @IsString()
+  linkedSandbox?: string
 }

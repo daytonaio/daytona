@@ -45,6 +45,7 @@ model_create_linked_account.go
 model_create_organization.go
 model_create_organization_invitation.go
 model_create_organization_quota.go
+model_create_organization_region_quota.go
 model_create_organization_role.go
 model_create_region.go
 model_create_region_response.go

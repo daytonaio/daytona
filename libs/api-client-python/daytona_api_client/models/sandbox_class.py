@@ -21,15 +21,15 @@ from typing_extensions import Self
 
 class SandboxClass(str, Enum):
     """
-    The class of the runner
+    SandboxClass
     """
 
     """
     allowed enum values
     """
-    SMALL = 'small'
-    MEDIUM = 'medium'
-    LARGE = 'large'
+    LINUX_MINUS_VM = 'linux-vm'
+    CONTAINER = 'container'
+    ANDROID = 'android'
     UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod

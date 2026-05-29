@@ -4,6 +4,7 @@
  */
 
 import {
+  Boxes,
   Calendar,
   CalendarPlus,
   Camera,
@@ -41,6 +42,7 @@ import { LabelFilter, LabelFilterIndicator } from './filters/LabelFilter'
 import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFilter'
 import { RegionFilter, RegionFilterIndicator } from './filters/RegionFilter'
 import { ResourceFilter, ResourceFilterIndicator, ResourceFilterValue } from './filters/ResourceFilter'
+import { SandboxClassFilter, SandboxClassFilterIndicator } from './filters/SandboxClassFilter'
 import { SnapshotFilter, SnapshotFilterIndicator } from './filters/SnapshotFilter'
 import { StateFilter, StateFilterIndicator } from './filters/StateFilter'
 import { SandboxTableHeaderProps } from './types'
@@ -55,6 +57,7 @@ const SANDBOX_TABLE_COLUMN_LABELS: Record<string, string> = {
   name: 'Name',
   id: 'UUID',
   state: 'State',
+  class: 'Class',
   snapshot: 'Snapshot',
   region: 'Region',
   resources: 'Resources',
@@ -74,7 +77,9 @@ export function SandboxTableHeader({
   onRefresh,
   isRefreshing = false,
 }: SandboxTableHeaderProps) {
+  const classColumnAvailable = Boolean(table.getColumn('sandboxClass'))
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
+  const hasClassFilter = ((table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
   const hasRegionFilter = ((table.getColumn('region')?.getFilterValue() as string[]) || []).length > 0
   const hasLabelsFilter = ((table.getColumn('labels')?.getFilterValue() as string[]) || []).length > 0
@@ -88,6 +93,7 @@ export function SandboxTableHeader({
 
   const hasActiveFilters =
     hasStateFilter ||
+    hasClassFilter ||
     hasSnapshotFilter ||
     hasRegionFilter ||
     hasLabelsFilter ||
@@ -131,6 +137,22 @@ export function SandboxTableHeader({
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
+              {classColumnAvailable && (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Boxes className="w-4 h-4" />
+                    Class
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent className="p-0 w-64">
+                      <SandboxClassFilter
+                        value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
+                        onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
+                      />
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              )}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <Camera className="w-4 h-4" />
@@ -289,6 +311,12 @@ export function SandboxTableHeader({
               snapshotsDataIsLoading={snapshotsDataIsLoading}
               snapshotsDataHasMore={snapshotsDataHasMore}
               onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+            />
+          )}
+          {hasClassFilter && (
+            <SandboxClassFilterIndicator
+              value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
+              onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
             />
           )}
           {hasRegionFilter && (

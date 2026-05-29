@@ -21,6 +21,7 @@ var _ MappedNullable = &UpdateOrganizationRegionQuota{}
 
 // UpdateOrganizationRegionQuota struct for UpdateOrganizationRegionQuota
 type UpdateOrganizationRegionQuota struct {
+	SandboxClass *SandboxClass `json:"sandboxClass,omitempty"`
 	TotalCpuQuota NullableFloat32 `json:"totalCpuQuota"`
 	TotalMemoryQuota NullableFloat32 `json:"totalMemoryQuota"`
 	TotalDiskQuota NullableFloat32 `json:"totalDiskQuota"`
@@ -56,6 +57,38 @@ func NewUpdateOrganizationRegionQuota(totalCpuQuota NullableFloat32, totalMemory
 func NewUpdateOrganizationRegionQuotaWithDefaults() *UpdateOrganizationRegionQuota {
 	this := UpdateOrganizationRegionQuota{}
 	return &this
+}
+
+// GetSandboxClass returns the SandboxClass field value if set, zero value otherwise.
+func (o *UpdateOrganizationRegionQuota) GetSandboxClass() SandboxClass {
+	if o == nil || IsNil(o.SandboxClass) {
+		var ret SandboxClass
+		return ret
+	}
+	return *o.SandboxClass
+}
+
+// GetSandboxClassOk returns a tuple with the SandboxClass field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateOrganizationRegionQuota) GetSandboxClassOk() (*SandboxClass, bool) {
+	if o == nil || IsNil(o.SandboxClass) {
+		return nil, false
+	}
+	return o.SandboxClass, true
+}
+
+// HasSandboxClass returns a boolean if a field has been set.
+func (o *UpdateOrganizationRegionQuota) HasSandboxClass() bool {
+	if o != nil && !IsNil(o.SandboxClass) {
+		return true
+	}
+
+	return false
+}
+
+// SetSandboxClass gets a reference to the given SandboxClass and assigns it to the SandboxClass field.
+func (o *UpdateOrganizationRegionQuota) SetSandboxClass(v SandboxClass) {
+	o.SandboxClass = &v
 }
 
 // GetTotalCpuQuota returns the TotalCpuQuota field value
@@ -466,6 +499,9 @@ func (o UpdateOrganizationRegionQuota) MarshalJSON() ([]byte, error) {
 
 func (o UpdateOrganizationRegionQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.SandboxClass) {
+		toSerialize["sandboxClass"] = o.SandboxClass
+	}
 	toSerialize["totalCpuQuota"] = o.TotalCpuQuota.Get()
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota.Get()
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota.Get()
@@ -537,6 +573,7 @@ func (o *UpdateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "totalCpuQuota")
 		delete(additionalProperties, "totalMemoryQuota")
 		delete(additionalProperties, "totalDiskQuota")

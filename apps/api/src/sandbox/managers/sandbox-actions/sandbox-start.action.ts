@@ -30,6 +30,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { WithSpan } from '../../../common/decorators/otel.decorator'
 import { SandboxActivityService } from '../../services/sandbox-activity.service'
+import { getRunnerSandboxClass } from '../../utils/sandbox-class.util'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -186,7 +187,7 @@ export class SandboxStartAction extends SandboxAction {
     try {
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        sandboxClass: sandbox.sandboxClass,
         snapshotRef: snapshotRef,
         gpu: sandbox.gpu,
         ...(buildInfoOverloadedRunnerIds.length > 0 && { excludedRunnerIds: buildInfoOverloadedRunnerIds }),
@@ -212,6 +213,10 @@ export class SandboxStartAction extends SandboxAction {
     for (const snapshotRunner of snapshotRunners) {
       // Consider removing the runner usage rate check or improving it
       const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
+
+      if (runner.sandboxClass !== getRunnerSandboxClass(sandbox.sandboxClass)) {
+        continue
+      }
 
       // Mirror the GPU class filter in findAvailableRunners - getSnapshotRunners
       // can return GPU/non-GPU mismatched runners via stale snapshot_runner rows.
@@ -263,7 +268,7 @@ export class SandboxStartAction extends SandboxAction {
     try {
       runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        sandboxClass: sandbox.sandboxClass,
         gpu: sandbox.gpu,
         excludedRunnerIds: excludedRunnerIds,
         ...(isBuild &&
@@ -482,7 +487,7 @@ export class SandboxStartAction extends SandboxAction {
         if (runner.availabilityScore < this.configService.getOrThrow('runnerScore.thresholds.availability')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
             regions: [sandbox.region],
-            sandboxClass: sandbox.class,
+            sandboxClass: sandbox.sandboxClass,
             gpu: sandbox.gpu,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== originalRunnerId)
@@ -760,7 +765,7 @@ export class SandboxStartAction extends SandboxAction {
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
           regions: [sandbox.region],
-          sandboxClass: sandbox.class,
+          sandboxClass: sandbox.sandboxClass,
           snapshotRef,
           excludedRunnerIds,
           gpu: sandbox.gpu,
@@ -772,6 +777,7 @@ export class SandboxStartAction extends SandboxAction {
       //  if no runner has the base snapshot, get all available runners
       availableRunners = await this.runnerService.findAvailableRunners({
         regions: [sandbox.region],
+        sandboxClass: sandbox.sandboxClass,
         excludedRunnerIds,
         gpu: sandbox.gpu,
       })

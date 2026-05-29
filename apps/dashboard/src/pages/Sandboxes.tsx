@@ -63,6 +63,7 @@ import {
   OrganizationRolePermissionsEnum,
   OrganizationUserRoleEnum,
   Sandbox,
+  SandboxClass,
   SandboxDesiredState,
   SandboxListItem,
   SandboxListSortDirection,
@@ -100,6 +101,7 @@ const SANDBOX_SORT_FIELDS: SandboxListSortField[] = [
 ]
 const SANDBOX_SORT_DIRECTIONS = Object.values(SandboxListSortDirection)
 const SANDBOX_STATES = Object.values(SandboxState)
+const SANDBOX_CLASSES = Object.values(SandboxClass)
 const DEFAULT_SANDBOXES: SandboxListItem[] = []
 const SANDBOX_LIST_REVALIDATION_DEBOUNCE_MS = 2000
 
@@ -121,6 +123,7 @@ const sandboxViewSearchParams = {
   states: parseAsArrayOf(parseAsString).withDefault([]),
   snapshots: parseAsArrayOf(parseAsString).withDefault([]),
   regions: parseAsArrayOf(parseAsString).withDefault([]),
+  sandboxClasses: parseAsArrayOf(parseAsString).withDefault([]),
   labels: labelsParser,
   minCpu: parseAsFloat,
   maxCpu: parseAsFloat,
@@ -158,6 +161,10 @@ function normalizeSorting(field: string, direction: string): SandboxSorting {
 
 function getValidatedStates(states: string[]): SandboxState[] {
   return states.filter((state): state is SandboxState => SANDBOX_STATES.includes(state as SandboxState))
+}
+
+function getValidatedSandboxClasses(classes: string[]): SandboxClass[] {
+  return classes.filter((c): c is SandboxClass => SANDBOX_CLASSES.includes(c as SandboxClass))
 }
 
 function getNonEmptyLabels(labels: Record<string, string>) {
@@ -299,9 +306,11 @@ const Sandboxes: React.FC = () => {
     const search = viewParams.search.trim()
     const states = getValidatedStates(viewParams.states)
     const labels = getNonEmptyLabels(viewParams.labels)
+    const sandboxClasses = getValidatedSandboxClasses(viewParams.sandboxClasses)
 
     if (search) nextFilters.name = search
     if (states.length > 0) nextFilters.states = states
+    if (sandboxClasses.length > 0) nextFilters.sandboxClasses = sandboxClasses
     if (viewParams.snapshots.length > 0) nextFilters.snapshots = viewParams.snapshots
     if (viewParams.regions.length > 0) nextFilters.regions = viewParams.regions
     if (Object.keys(labels).length > 0) nextFilters.labels = labels
@@ -334,6 +343,7 @@ const Sandboxes: React.FC = () => {
     viewParams.minDisk,
     viewParams.minMemory,
     viewParams.regions,
+    viewParams.sandboxClasses,
     viewParams.search,
     viewParams.snapshots,
     viewParams.states,
@@ -408,6 +418,7 @@ const Sandboxes: React.FC = () => {
         states: newFilters.states?.length ? newFilters.states : null,
         snapshots: newFilters.snapshots?.length ? newFilters.snapshots : null,
         regions: newFilters.regions?.length ? newFilters.regions : null,
+        sandboxClasses: newFilters.sandboxClasses?.length ? newFilters.sandboxClasses : null,
         labels: Object.keys(labels).length > 0 ? labels : null,
         minCpu: newFilters.minCpu ?? null,
         maxCpu: newFilters.maxCpu ?? null,

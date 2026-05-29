@@ -59,8 +59,9 @@ export class SandboxCreatedWebhookDto extends BaseWebhookEventDto {
     description: 'Sandbox class',
     enum: SandboxClass,
     enumName: 'SandboxClass',
+    example: SandboxClass.LINUX_VM,
   })
-  class: SandboxClass
+  sandboxClass: SandboxClass
 
   @ApiProperty({
     description: 'When the sandbox was created',
@@ -76,7 +77,7 @@ export class SandboxCreatedWebhookDto extends BaseWebhookEventDto {
       id: event.sandbox.id,
       organizationId: event.sandbox.organizationId,
       state: event.sandbox.state,
-      class: event.sandbox.class,
+      sandboxClass: event.sandbox.sandboxClass,
       createdAt: event.sandbox.createdAt.toISOString(),
     }
   }

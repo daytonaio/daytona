@@ -279,11 +279,11 @@ public class SandboxTest {
     }
 
     /**
-     * Test the property 'propertyClass'
+     * Test the property 'sandboxClass'
      */
     @Test
-    public void propertyClassTest() {
-        // TODO: test propertyClass
+    public void sandboxClassTest() {
+        // TODO: test sandboxClass
     }
 
     /**
@@ -300,6 +300,14 @@ public class SandboxTest {
     @Test
     public void runnerIdTest() {
         // TODO: test runnerId
+    }
+
+    /**
+     * Test the property 'linkedSandboxId'
+     */
+    @Test
+    public void linkedSandboxIdTest() {
+        // TODO: test linkedSandboxId
     }
 
     /**

@@ -18,6 +18,7 @@ import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { v4 as uuidv4, validate as isUUID } from 'uuid'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
@@ -173,6 +174,8 @@ export class SnapshotService {
         throw new BadRequestException(imageValidationError)
       }
 
+      const sandboxClass = createSnapshotDto.sandboxClass ?? this.configService.getOrThrow('defaultSandboxClass')
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const newSnapshotCount = 1
@@ -180,6 +183,7 @@ export class SnapshotService {
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
         region,
+        sandboxClass,
         newSnapshotCount,
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
@@ -200,6 +204,7 @@ export class SnapshotService {
           ...createSnapshotDto,
           entrypoint: this.processEntrypoint(entrypoint),
           mem: createSnapshotDto.memory, // Map memory to mem
+          sandboxClass,
           state,
           ref,
           general,
@@ -242,6 +247,8 @@ export class SnapshotService {
         throw new BadRequestException(nameValidationError)
       }
 
+      const sandboxClass = createSnapshotDto.sandboxClass ?? this.configService.getOrThrow('defaultSandboxClass')
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const newSnapshotCount = 1
@@ -249,6 +256,7 @@ export class SnapshotService {
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
         region,
+        sandboxClass,
         newSnapshotCount,
         createSnapshotDto.cpu,
         createSnapshotDto.memory,
@@ -270,6 +278,7 @@ export class SnapshotService {
         ...createSnapshotDto,
         entrypoint: this.processEntrypoint(entrypoint),
         mem: createSnapshotDto.memory, // Map memory to mem
+        sandboxClass,
         state: SnapshotState.PENDING,
         general,
         snapshotRegions: [{ snapshotId, regionId: region.id }],
@@ -538,6 +547,7 @@ export class SnapshotService {
   async validateOrganizationQuotas(
     organization: Organization,
     region: Region,
+    sandboxClass: SandboxClass,
     addedSnapshotCount: number,
     cpu?: number,
     memory?: number,
@@ -547,7 +557,7 @@ export class SnapshotService {
     pendingSnapshotCountIncremented: boolean
   }> {
     const regionQuota = region.enforceQuotas
-      ? await this.organizationService.getRegionQuota(organization.id, region.id)
+      ? await this.organizationService.getRegionQuota(organization.id, region.id, sandboxClass)
       : null
 
     // validate per-sandbox quotas
@@ -674,6 +684,7 @@ export class SnapshotService {
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
         region,
+        snapshot.sandboxClass,
         activatedSnapshotCount,
         snapshot.cpu,
         snapshot.mem,

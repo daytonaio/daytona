@@ -74,9 +74,25 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 			return "", "", err
 		}
 
+		// Re-assert link-network wiring on retries so idempotent creates still end
+		// up with both sandboxes connected to the shared network.
+		if _, err := d.reconcileFollowerLinkNetwork(ctx, sandboxDto); err != nil {
+			return "", "", err
+		}
+
 		containerIP := GetContainerIpAddress(ctx, c)
 		if containerIP == "" {
 			return "", "", errors.New("sandbox IP not found? Is the sandbox started?")
+		}
+
+		// Android-device sandboxes do not run the daytona daemon; their readiness is
+		// signaled by the ADB port accepting TCP connections. Match Start's behavior
+		// by branching on the inspected container label rather than the DTO.
+		if isAndroidDeviceContainer(c) {
+			if err := d.waitForAdbRunning(ctx, containerIP); err != nil {
+				return "", "", err
+			}
+			return sandboxDto.Id, "", nil
 		}
 
 		daemonVersion, err := d.waitForDaemonRunning(ctx, containerIP, sandboxDto.AuthToken)
@@ -88,6 +104,12 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	if state == enums.SandboxStateStopped || state == enums.SandboxStateCreating {
+		// A follower whose first Create attempt crashed between ContainerCreate and
+		// NetworkConnect lands here on retry. Reconcile the link network BEFORE Start
+		if _, err := d.reconcileFollowerLinkNetwork(ctx, sandboxDto); err != nil {
+			return "", "", err
+		}
+
 		metadata := maps.Clone(sandboxDto.Metadata)
 		if len(sandboxDto.Volumes) > 0 {
 			if metadata == nil {
@@ -104,6 +126,16 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 
 		return sandboxDto.Id, daemonVersion, nil
+	}
+
+	// Validate linked-sandbox preconditions and prep the shared network before we
+	// pull the image / create the container, so failures show up early without any
+	// wasted work. At this point the follower container does not yet exist, so we
+	// only run the owner-side prep — the follower-side attach happens after
+	// ContainerCreate below.
+	linkedOwnerId, err := d.prepareLinkedSandboxNetwork(ctx, sandboxDto)
+	if err != nil {
+		return "", "", err
 	}
 
 	image, err := d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry, &sandboxDto.Id)
@@ -174,6 +206,24 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	if releaseGpu != nil {
 		releaseGpu()
 		releaseGpu = nil
+	}
+
+	// Attach the follower to the owner's link network before it starts so DNS
+	// resolution between the two sandboxes works from the very first boot.
+	// Android-device followers are already created directly on the link network
+	// (see getContainerNetworkingConfig) so that the link network becomes eth0
+	// and docker-android's eth0-bound socat forwarders reach their ADB port; for
+	// those we skip the post-create connect — but we still need to clear the
+	// bridge port isolation Docker stamps on the freshly-created veth, since
+	// connectFollowerToLinkNetwork is what does that for non-android followers.
+	if linkedOwnerId != "" {
+		if !sandboxDto.IsAndroidSandbox() {
+			if err := d.connectFollowerToLinkNetwork(ctx, linkedOwnerId, sandboxDto.Id, sandboxDto.Name); err != nil {
+				return "", "", err
+			}
+		} else {
+			d.clearLinkNetworkIsolation(ctx, linkedOwnerId)
+		}
 	}
 
 	// Skip starting the container if explicitly requested

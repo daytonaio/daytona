@@ -85,11 +85,11 @@ public class SandboxListItem {
    */
   @JsonAdapter(SandboxClassEnum.Adapter.class)
   public enum SandboxClassEnum {
-    SMALL("small"),
+    LINUX_VM("linux-vm"),
     
-    MEDIUM("medium"),
+    CONTAINER("container"),
     
-    LARGE("large"),
+    ANDROID("android"),
     
     UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 

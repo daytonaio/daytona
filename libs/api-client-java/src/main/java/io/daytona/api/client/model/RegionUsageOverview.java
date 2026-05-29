@@ -19,6 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -55,6 +56,11 @@ public class RegionUsageOverview {
   @SerializedName(SERIALIZED_NAME_REGION_ID)
   @javax.annotation.Nonnull
   private String regionId;
+
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
+  @javax.annotation.Nonnull
+  private SandboxClass sandboxClass;
 
   public static final String SERIALIZED_NAME_TOTAL_CPU_QUOTA = "totalCpuQuota";
   @SerializedName(SERIALIZED_NAME_TOTAL_CPU_QUOTA)
@@ -150,6 +156,25 @@ public class RegionUsageOverview {
 
   public void setRegionId(@javax.annotation.Nonnull String regionId) {
     this.regionId = regionId;
+  }
+
+
+  public RegionUsageOverview sandboxClass(@javax.annotation.Nonnull SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
+    return this;
+  }
+
+  /**
+   * Get sandboxClass
+   * @return sandboxClass
+   */
+  @javax.annotation.Nonnull
+  public SandboxClass getSandboxClass() {
+    return sandboxClass;
+  }
+
+  public void setSandboxClass(@javax.annotation.Nonnull SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
   }
 
 
@@ -493,6 +518,7 @@ public class RegionUsageOverview {
     }
     RegionUsageOverview regionUsageOverview = (RegionUsageOverview) o;
     return Objects.equals(this.regionId, regionUsageOverview.regionId) &&
+        Objects.equals(this.sandboxClass, regionUsageOverview.sandboxClass) &&
         Objects.equals(this.totalCpuQuota, regionUsageOverview.totalCpuQuota) &&
         Objects.equals(this.currentCpuUsage, regionUsageOverview.currentCpuUsage) &&
         Objects.equals(this.totalMemoryQuota, regionUsageOverview.totalMemoryQuota) &&
@@ -513,7 +539,7 @@ public class RegionUsageOverview {
 
   @Override
   public int hashCode() {
-    return Objects.hash(regionId, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, totalGpuQuota, currentGpuUsage, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, additionalProperties);
+    return Objects.hash(regionId, sandboxClass, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, totalGpuQuota, currentGpuUsage, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, additionalProperties);
   }
 
   @Override
@@ -521,6 +547,7 @@ public class RegionUsageOverview {
     StringBuilder sb = new StringBuilder();
     sb.append("class RegionUsageOverview {\n");
     sb.append("    regionId: ").append(toIndentedString(regionId)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    totalCpuQuota: ").append(toIndentedString(totalCpuQuota)).append("\n");
     sb.append("    currentCpuUsage: ").append(toIndentedString(currentCpuUsage)).append("\n");
     sb.append("    totalMemoryQuota: ").append(toIndentedString(totalMemoryQuota)).append("\n");
@@ -555,10 +582,10 @@ public class RegionUsageOverview {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
   }
 
   /**
@@ -584,6 +611,8 @@ public class RegionUsageOverview {
       if (!jsonObj.get("regionId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
       }
+      // validate the required field `sandboxClass`
+      SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

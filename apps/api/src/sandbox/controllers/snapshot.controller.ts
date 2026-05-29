@@ -105,6 +105,7 @@ export class SnapshotController {
         disk: req.body?.disk,
         gpu: req.body?.gpu,
         buildInfo: req.body?.buildInfo,
+        sandboxClass: req.body?.sandboxClass,
       }),
     },
   })

@@ -153,6 +153,9 @@ func run() int {
 		ComputerUsePluginPath:        pluginPath,
 		NetRulesManager:              netRulesManager,
 		ResourceLimitsDisabled:       cfg.ResourceLimitsDisabled,
+		DaemonStartTimeoutSec:        cfg.DaemonStartTimeoutSec,
+		SandboxStartTimeoutSec:       cfg.SandboxStartTimeoutSec,
+		AndroidBootTimeoutSec:        cfg.AndroidBootTimeoutSec,
 		UseSnapshotEntrypoint:        cfg.UseSnapshotEntrypoint,
 		VolumeCleanupInterval:        cfg.VolumeCleanupInterval,
 		VolumeCleanupDryRun:          cfg.VolumeCleanupDryRun,
@@ -165,6 +168,7 @@ func run() int {
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
 		InterSandboxNetworkEnabled:   cfg.InterSandboxNetworkEnabled,
 		GpuEnabled:                   cfg.GpuEnabled,
+		MountKvmToAndroidSandbox:     cfg.MountKvmToAndroidSandbox,
 	})
 	if err != nil {
 		logger.Error("Error creating Docker client wrapper", "error", err)

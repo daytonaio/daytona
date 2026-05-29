@@ -203,4 +203,12 @@ public class SnapshotDtoTest {
         // TODO: test ref
     }
 
+    /**
+     * Test the property 'sandboxClass'
+     */
+    @Test
+    public void sandboxClassTest() {
+        // TODO: test sandboxClass
+    }
+
 }

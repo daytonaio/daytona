@@ -59,6 +59,9 @@ module DaytonaApiClient
     # The snapshot reference
     attr_accessor :ref
 
+    # The sandbox class of the snapshot
+    attr_accessor :sandbox_class
+
     class EnumAttributeValidator
       attr_reader :datatype
       attr_reader :allowable_values
@@ -103,7 +106,8 @@ module DaytonaApiClient
         :'build_info' => :'buildInfo',
         :'region_ids' => :'regionIds',
         :'initial_runner_id' => :'initialRunnerId',
-        :'ref' => :'ref'
+        :'ref' => :'ref',
+        :'sandbox_class' => :'sandboxClass'
       }
     end
 
@@ -139,7 +143,8 @@ module DaytonaApiClient
         :'build_info' => :'BuildInfo',
         :'region_ids' => :'Array<String>',
         :'initial_runner_id' => :'String',
-        :'ref' => :'String'
+        :'ref' => :'String',
+        :'sandbox_class' => :'String'
       }
     end
 
@@ -280,6 +285,10 @@ module DaytonaApiClient
       if attributes.key?(:'ref')
         self.ref = attributes[:'ref']
       end
+
+      if attributes.key?(:'sandbox_class')
+        self.sandbox_class = attributes[:'sandbox_class']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -344,6 +353,8 @@ module DaytonaApiClient
       return false if @disk.nil?
       return false if @created_at.nil?
       return false if @updated_at.nil?
+      sandbox_class_validator = EnumAttributeValidator.new('String', ["linux-vm", "container", "android", "unknown_default_open_api"])
+      return false unless sandbox_class_validator.valid?(@sandbox_class)
       true
     end
 
@@ -447,6 +458,16 @@ module DaytonaApiClient
       @updated_at = updated_at
     end
 
+    # Custom attribute writer method checking allowed values (enum).
+    # @param [Object] sandbox_class Object to be assigned
+    def sandbox_class=(sandbox_class)
+      validator = EnumAttributeValidator.new('String', ["linux-vm", "container", "android", "unknown_default_open_api"])
+      unless validator.valid?(sandbox_class)
+        fail ArgumentError, "invalid value for \"sandbox_class\", must be one of #{validator.allowable_values}."
+      end
+      @sandbox_class = sandbox_class
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -471,7 +492,8 @@ module DaytonaApiClient
           build_info == o.build_info &&
           region_ids == o.region_ids &&
           initial_runner_id == o.initial_runner_id &&
-          ref == o.ref
+          ref == o.ref &&
+          sandbox_class == o.sandbox_class
     end
 
     # @see the `==` method
@@ -483,7 +505,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, general, name, image_name, state, size, entrypoint, cpu, gpu, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info, region_ids, initial_runner_id, ref].hash
+      [id, organization_id, general, name, image_name, state, size, entrypoint, cpu, gpu, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info, region_ids, initial_runner_id, ref, sandbox_class].hash
     end
 
     # Builds the object from hash

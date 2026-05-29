@@ -145,9 +145,8 @@ export interface Sandbox {
     'lastActivityAt'?: string;
     /**
      * The class of the sandbox
-     * @deprecated
      */
-    'class'?: SandboxClassEnum;
+    'sandboxClass'?: SandboxSandboxClassEnum;
     /**
      * The version of the daemon running in the sandbox
      */
@@ -156,6 +155,10 @@ export interface Sandbox {
      * The runner ID of the sandbox
      */
     'runnerId'?: string;
+    /**
+     * ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+     */
+    'linkedSandboxId'?: string;
     /**
      * The toolbox proxy URL for the sandbox
      */
@@ -172,13 +175,13 @@ export const SandboxBackupStateEnum = {
 } as const;
 
 export type SandboxBackupStateEnum = typeof SandboxBackupStateEnum[keyof typeof SandboxBackupStateEnum];
-export const SandboxClassEnum = {
-    SMALL: 'small',
-    MEDIUM: 'medium',
-    LARGE: 'large',
+export const SandboxSandboxClassEnum = {
+    LINUX_VM: 'linux-vm',
+    CONTAINER: 'container',
+    ANDROID: 'android',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 
-export type SandboxClassEnum = typeof SandboxClassEnum[keyof typeof SandboxClassEnum];
+export type SandboxSandboxClassEnum = typeof SandboxSandboxClassEnum[keyof typeof SandboxSandboxClassEnum];
 
 

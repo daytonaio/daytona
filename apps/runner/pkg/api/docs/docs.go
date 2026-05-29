@@ -1578,6 +1578,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "linkedSandboxId": {
+                    "description": "LinkedSandboxId identifies an existing sandbox this sandbox should be co-located with.\nWhen set, the runner should attach both sandboxes to a shared local network so they can communicate.",
+                    "type": "string"
+                },
                 "memoryQuota": {
                     "type": "integer",
                     "minimum": 1
@@ -1587,6 +1591,10 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "name": {
+                    "description": "Name is the human-readable sandbox name. When present, it is used as the\nnetwork alias for link networks so linked sandboxes can resolve each other\nby name.",
+                    "type": "string"
                 },
                 "networkAllowList": {
                     "type": "string"
@@ -1609,6 +1617,10 @@ const docTemplate = `{
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "sandboxClass": {
+                    "description": "Optional for backward compatibility, but when provided, indicates the class of sandbox to create.",
+                    "type": "string"
                 },
                 "skipStart": {
                     "type": "boolean"

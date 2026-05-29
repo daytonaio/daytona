@@ -103,13 +103,16 @@ module DaytonaApiClient
     attr_accessor :last_activity_at
 
     # The class of the sandbox
-    attr_accessor :_class
+    attr_accessor :sandbox_class
 
     # The version of the daemon running in the sandbox
     attr_accessor :daemon_version
 
     # The runner ID of the sandbox
     attr_accessor :runner_id
+
+    # ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+    attr_accessor :linked_sandbox_id
 
     # The toolbox proxy URL for the sandbox
     attr_accessor :toolbox_proxy_url
@@ -168,9 +171,10 @@ module DaytonaApiClient
         :'created_at' => :'createdAt',
         :'updated_at' => :'updatedAt',
         :'last_activity_at' => :'lastActivityAt',
-        :'_class' => :'class',
+        :'sandbox_class' => :'sandboxClass',
         :'daemon_version' => :'daemonVersion',
         :'runner_id' => :'runnerId',
+        :'linked_sandbox_id' => :'linkedSandboxId',
         :'toolbox_proxy_url' => :'toolboxProxyUrl'
       }
     end
@@ -217,9 +221,10 @@ module DaytonaApiClient
         :'created_at' => :'String',
         :'updated_at' => :'String',
         :'last_activity_at' => :'String',
-        :'_class' => :'String',
+        :'sandbox_class' => :'String',
         :'daemon_version' => :'String',
         :'runner_id' => :'String',
+        :'linked_sandbox_id' => :'String',
         :'toolbox_proxy_url' => :'String'
       }
     end
@@ -394,8 +399,8 @@ module DaytonaApiClient
         self.last_activity_at = attributes[:'last_activity_at']
       end
 
-      if attributes.key?(:'_class')
-        self._class = attributes[:'_class']
+      if attributes.key?(:'sandbox_class')
+        self.sandbox_class = attributes[:'sandbox_class']
       end
 
       if attributes.key?(:'daemon_version')
@@ -404,6 +409,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'runner_id')
         self.runner_id = attributes[:'runner_id']
+      end
+
+      if attributes.key?(:'linked_sandbox_id')
+        self.linked_sandbox_id = attributes[:'linked_sandbox_id']
       end
 
       if attributes.key?(:'toolbox_proxy_url')
@@ -496,8 +505,8 @@ module DaytonaApiClient
       return false if @disk.nil?
       backup_state_validator = EnumAttributeValidator.new('String', ["None", "Pending", "InProgress", "Completed", "Error", "unknown_default_open_api"])
       return false unless backup_state_validator.valid?(@backup_state)
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      return false unless _class_validator.valid?(@_class)
+      sandbox_class_validator = EnumAttributeValidator.new('String', ["linux-vm", "container", "android", "unknown_default_open_api"])
+      return false unless sandbox_class_validator.valid?(@sandbox_class)
       return false if @toolbox_proxy_url.nil?
       true
     end
@@ -643,13 +652,13 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] _class Object to be assigned
-    def _class=(_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      unless validator.valid?(_class)
-        fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
+    # @param [Object] sandbox_class Object to be assigned
+    def sandbox_class=(sandbox_class)
+      validator = EnumAttributeValidator.new('String', ["linux-vm", "container", "android", "unknown_default_open_api"])
+      unless validator.valid?(sandbox_class)
+        fail ArgumentError, "invalid value for \"sandbox_class\", must be one of #{validator.allowable_values}."
       end
-      @_class = _class
+      @sandbox_class = sandbox_class
     end
 
     # Custom attribute writer method with validation
@@ -696,9 +705,10 @@ module DaytonaApiClient
           created_at == o.created_at &&
           updated_at == o.updated_at &&
           last_activity_at == o.last_activity_at &&
-          _class == o._class &&
+          sandbox_class == o.sandbox_class &&
           daemon_version == o.daemon_version &&
           runner_id == o.runner_id &&
+          linked_sandbox_id == o.linked_sandbox_id &&
           toolbox_proxy_url == o.toolbox_proxy_url
     end
 
@@ -711,7 +721,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, _class, daemon_version, runner_id, toolbox_proxy_url].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

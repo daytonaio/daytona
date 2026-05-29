@@ -107,7 +107,7 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
               name: { type: 'keyword' },
               region: { type: 'keyword' },
               runnerId: { type: 'keyword' },
-              class: { type: 'keyword' },
+              sandboxClass: { type: 'keyword' },
               state: { type: 'keyword' },
               desiredState: { type: 'keyword' },
               snapshot: { type: 'keyword' },
@@ -196,6 +196,11 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
     // Regions filter
     if (filters.regionIds?.length) {
       must.push({ terms: { region: filters.regionIds } })
+    }
+
+    // Sandbox class filter
+    if (filters.sandboxClasses?.length) {
+      must.push({ terms: { sandboxClass: filters.sandboxClasses } })
     }
 
     // CPU range filter
@@ -358,7 +363,7 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
       name: source.name,
       target: source.region,
       runnerId: source.runnerId,
-      sandboxClass: source.class,
+      sandboxClass: source.sandboxClass,
       state: source.state as SandboxState,
       desiredState: source.desiredState as SandboxDesiredState | undefined,
       snapshot: source.snapshot,

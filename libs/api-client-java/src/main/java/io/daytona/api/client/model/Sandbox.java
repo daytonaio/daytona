@@ -267,19 +267,19 @@ public class Sandbox {
   /**
    * The class of the sandbox
    */
-  @JsonAdapter(PropertyClassEnum.Adapter.class)
-  public enum PropertyClassEnum {
-    SMALL("small"),
+  @JsonAdapter(SandboxClassEnum.Adapter.class)
+  public enum SandboxClassEnum {
+    LINUX_VM("linux-vm"),
     
-    MEDIUM("medium"),
+    CONTAINER("container"),
     
-    LARGE("large"),
+    ANDROID("android"),
     
     UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
     private String value;
 
-    PropertyClassEnum(String value) {
+    SandboxClassEnum(String value) {
       this.value = value;
     }
 
@@ -292,8 +292,8 @@ public class Sandbox {
       return String.valueOf(value);
     }
 
-    public static PropertyClassEnum fromValue(String value) {
-      for (PropertyClassEnum b : PropertyClassEnum.values()) {
+    public static SandboxClassEnum fromValue(String value) {
+      for (SandboxClassEnum b : SandboxClassEnum.values()) {
         if (b.value.equals(value)) {
           return b;
         }
@@ -301,30 +301,29 @@ public class Sandbox {
       return UNKNOWN_DEFAULT_OPEN_API;
     }
 
-    public static class Adapter extends TypeAdapter<PropertyClassEnum> {
+    public static class Adapter extends TypeAdapter<SandboxClassEnum> {
       @Override
-      public void write(final JsonWriter jsonWriter, final PropertyClassEnum enumeration) throws IOException {
+      public void write(final JsonWriter jsonWriter, final SandboxClassEnum enumeration) throws IOException {
         jsonWriter.value(enumeration.getValue());
       }
 
       @Override
-      public PropertyClassEnum read(final JsonReader jsonReader) throws IOException {
+      public SandboxClassEnum read(final JsonReader jsonReader) throws IOException {
         String value =  jsonReader.nextString();
-        return PropertyClassEnum.fromValue(value);
+        return SandboxClassEnum.fromValue(value);
       }
     }
 
     public static void validateJsonElement(JsonElement jsonElement) throws IOException {
       String value = jsonElement.getAsString();
-      PropertyClassEnum.fromValue(value);
+      SandboxClassEnum.fromValue(value);
     }
   }
 
-  public static final String SERIALIZED_NAME_PROPERTY_CLASS = "class";
-  @Deprecated
-  @SerializedName(SERIALIZED_NAME_PROPERTY_CLASS)
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
   @javax.annotation.Nullable
-  private PropertyClassEnum propertyClass;
+  private SandboxClassEnum sandboxClass;
 
   public static final String SERIALIZED_NAME_DAEMON_VERSION = "daemonVersion";
   @SerializedName(SERIALIZED_NAME_DAEMON_VERSION)
@@ -335,6 +334,11 @@ public class Sandbox {
   @SerializedName(SERIALIZED_NAME_RUNNER_ID)
   @javax.annotation.Nullable
   private String runnerId;
+
+  public static final String SERIALIZED_NAME_LINKED_SANDBOX_ID = "linkedSandboxId";
+  @SerializedName(SERIALIZED_NAME_LINKED_SANDBOX_ID)
+  @javax.annotation.Nullable
+  private String linkedSandboxId;
 
   public static final String SERIALIZED_NAME_TOOLBOX_PROXY_URL = "toolboxProxyUrl";
   @SerializedName(SERIALIZED_NAME_TOOLBOX_PROXY_URL)
@@ -919,26 +923,22 @@ public class Sandbox {
   }
 
 
-  @Deprecated
-  public Sandbox propertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
+  public Sandbox sandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
     return this;
   }
 
   /**
    * The class of the sandbox
-   * @return propertyClass
-   * @deprecated
+   * @return sandboxClass
    */
-  @Deprecated
   @javax.annotation.Nullable
-  public PropertyClassEnum getPropertyClass() {
-    return propertyClass;
+  public SandboxClassEnum getSandboxClass() {
+    return sandboxClass;
   }
 
-  @Deprecated
-  public void setPropertyClass(@javax.annotation.Nullable PropertyClassEnum propertyClass) {
-    this.propertyClass = propertyClass;
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
   }
 
 
@@ -977,6 +977,25 @@ public class Sandbox {
 
   public void setRunnerId(@javax.annotation.Nullable String runnerId) {
     this.runnerId = runnerId;
+  }
+
+
+  public Sandbox linkedSandboxId(@javax.annotation.Nullable String linkedSandboxId) {
+    this.linkedSandboxId = linkedSandboxId;
+    return this;
+  }
+
+  /**
+   * ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+   * @return linkedSandboxId
+   */
+  @javax.annotation.Nullable
+  public String getLinkedSandboxId() {
+    return linkedSandboxId;
+  }
+
+  public void setLinkedSandboxId(@javax.annotation.Nullable String linkedSandboxId) {
+    this.linkedSandboxId = linkedSandboxId;
   }
 
 
@@ -1082,16 +1101,17 @@ public class Sandbox {
         Objects.equals(this.createdAt, sandbox.createdAt) &&
         Objects.equals(this.updatedAt, sandbox.updatedAt) &&
         Objects.equals(this.lastActivityAt, sandbox.lastActivityAt) &&
-        Objects.equals(this.propertyClass, sandbox.propertyClass) &&
+        Objects.equals(this.sandboxClass, sandbox.sandboxClass) &&
         Objects.equals(this.daemonVersion, sandbox.daemonVersion) &&
         Objects.equals(this.runnerId, sandbox.runnerId) &&
+        Objects.equals(this.linkedSandboxId, sandbox.linkedSandboxId) &&
         Objects.equals(this.toolboxProxyUrl, sandbox.toolboxProxyUrl)&&
         Objects.equals(this.additionalProperties, sandbox.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, propertyClass, daemonVersion, runnerId, toolboxProxyUrl, additionalProperties);
+    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, sandboxClass, daemonVersion, runnerId, linkedSandboxId, toolboxProxyUrl, additionalProperties);
   }
 
   @Override
@@ -1127,9 +1147,10 @@ public class Sandbox {
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("    lastActivityAt: ").append(toIndentedString(lastActivityAt)).append("\n");
-    sb.append("    propertyClass: ").append(toIndentedString(propertyClass)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    daemonVersion: ").append(toIndentedString(daemonVersion)).append("\n");
     sb.append("    runnerId: ").append(toIndentedString(runnerId)).append("\n");
+    sb.append("    linkedSandboxId: ").append(toIndentedString(linkedSandboxId)).append("\n");
     sb.append("    toolboxProxyUrl: ").append(toIndentedString(toolboxProxyUrl)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
@@ -1150,7 +1171,7 @@ public class Sandbox {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "class", "daemonVersion", "runnerId", "toolboxProxyUrl"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "linkedSandboxId", "toolboxProxyUrl"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "user", "env", "labels", "public", "networkBlockAll", "target", "cpu", "gpu", "memory", "disk", "toolboxProxyUrl"));
@@ -1245,18 +1266,21 @@ public class Sandbox {
       if ((jsonObj.get("lastActivityAt") != null && !jsonObj.get("lastActivityAt").isJsonNull()) && !jsonObj.get("lastActivityAt").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `lastActivityAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("lastActivityAt").toString()));
       }
-      if ((jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) && !jsonObj.get("class").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `class` to be a primitive type in the JSON string but got `%s`", jsonObj.get("class").toString()));
+      if ((jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) && !jsonObj.get("sandboxClass").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sandboxClass` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sandboxClass").toString()));
       }
-      // validate the optional field `class`
-      if (jsonObj.get("class") != null && !jsonObj.get("class").isJsonNull()) {
-        PropertyClassEnum.validateJsonElement(jsonObj.get("class"));
+      // validate the optional field `sandboxClass`
+      if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
+        SandboxClassEnum.validateJsonElement(jsonObj.get("sandboxClass"));
       }
       if ((jsonObj.get("daemonVersion") != null && !jsonObj.get("daemonVersion").isJsonNull()) && !jsonObj.get("daemonVersion").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `daemonVersion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("daemonVersion").toString()));
       }
       if ((jsonObj.get("runnerId") != null && !jsonObj.get("runnerId").isJsonNull()) && !jsonObj.get("runnerId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `runnerId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("runnerId").toString()));
+      }
+      if ((jsonObj.get("linkedSandboxId") != null && !jsonObj.get("linkedSandboxId").isJsonNull()) && !jsonObj.get("linkedSandboxId").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `linkedSandboxId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("linkedSandboxId").toString()));
       }
       if (!jsonObj.get("toolboxProxyUrl").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `toolboxProxyUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("toolboxProxyUrl").toString()));

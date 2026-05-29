@@ -108,14 +108,6 @@ public class CreateSandboxTest {
     }
 
     /**
-     * Test the property 'propertyClass'
-     */
-    @Test
-    public void propertyClassTest() {
-        // TODO: test propertyClass
-    }
-
-    /**
      * Test the property 'target'
      */
     @Test
@@ -193,6 +185,14 @@ public class CreateSandboxTest {
     @Test
     public void buildInfoTest() {
         // TODO: test buildInfo
+    }
+
+    /**
+     * Test the property 'linkedSandbox'
+     */
+    @Test
+    public void linkedSandboxTest() {
+        // TODO: test linkedSandbox
     }
 
 }

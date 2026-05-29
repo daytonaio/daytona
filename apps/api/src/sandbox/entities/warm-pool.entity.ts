@@ -4,10 +4,9 @@
  */
 
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 
 @Entity()
-@Index('warm_pool_find_idx', ['snapshot', 'target', 'class', 'cpu', 'mem', 'disk', 'gpu', 'osUser', 'env'])
+@Index('warm_pool_find_idx', ['snapshot', 'target', 'cpu', 'mem', 'disk', 'gpu', 'osUser', 'env'])
 export class WarmPool {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -35,13 +34,6 @@ export class WarmPool {
 
   @Column()
   gpuType: string
-
-  @Column({
-    type: 'enum',
-    enum: SandboxClass,
-    default: SandboxClass.SMALL,
-  })
-  class: SandboxClass
 
   @Column()
   osUser: string

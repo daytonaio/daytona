@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.CreateBuildInfo;
+import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +98,11 @@ public class CreateSnapshot {
   @SerializedName(SERIALIZED_NAME_REGION_ID)
   @javax.annotation.Nullable
   private String regionId;
+
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
+  @javax.annotation.Nullable
+  private SandboxClass sandboxClass;
 
   public CreateSnapshot() {
   }
@@ -279,6 +285,25 @@ public class CreateSnapshot {
     this.regionId = regionId;
   }
 
+
+  public CreateSnapshot sandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
+    return this;
+  }
+
+  /**
+   * Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
+   * @return sandboxClass
+   */
+  @javax.annotation.Nullable
+  public SandboxClass getSandboxClass() {
+    return sandboxClass;
+  }
+
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
+    this.sandboxClass = sandboxClass;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -342,13 +367,14 @@ public class CreateSnapshot {
         Objects.equals(this.memory, createSnapshot.memory) &&
         Objects.equals(this.disk, createSnapshot.disk) &&
         Objects.equals(this.buildInfo, createSnapshot.buildInfo) &&
-        Objects.equals(this.regionId, createSnapshot.regionId)&&
+        Objects.equals(this.regionId, createSnapshot.regionId) &&
+        Objects.equals(this.sandboxClass, createSnapshot.sandboxClass)&&
         Objects.equals(this.additionalProperties, createSnapshot.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, imageName, entrypoint, cpu, gpu, memory, disk, buildInfo, regionId, additionalProperties);
+    return Objects.hash(name, imageName, entrypoint, cpu, gpu, memory, disk, buildInfo, regionId, sandboxClass, additionalProperties);
   }
 
   @Override
@@ -364,6 +390,7 @@ public class CreateSnapshot {
     sb.append("    disk: ").append(toIndentedString(disk)).append("\n");
     sb.append("    buildInfo: ").append(toIndentedString(buildInfo)).append("\n");
     sb.append("    regionId: ").append(toIndentedString(regionId)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -383,7 +410,7 @@ public class CreateSnapshot {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("name", "imageName", "entrypoint", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId"));
+    openapiFields = new HashSet<String>(Arrays.asList("name", "imageName", "entrypoint", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId", "sandboxClass"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("name"));
@@ -425,6 +452,10 @@ public class CreateSnapshot {
       }
       if ((jsonObj.get("regionId") != null && !jsonObj.get("regionId").isJsonNull()) && !jsonObj.get("regionId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
+      }
+      // validate the optional field `sandboxClass`
+      if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
+        SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
       }
   }
 

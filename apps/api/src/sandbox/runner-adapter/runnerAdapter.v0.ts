@@ -198,6 +198,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   ): Promise<StartSandboxResponse | undefined> {
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
+      name: sandbox.name,
       userId: sandbox.organizationId,
       snapshot: snapshotRef,
       osUser: sandbox.osUser,
@@ -228,6 +229,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       skipStart: skipStart,
       organizationId: sandbox.organizationId,
       regionId: sandbox.region,
+      linkedSandboxId: sandbox.linkedSandboxId ?? undefined,
+      sandboxClass: sandbox.sandboxClass,
     }
 
     const response = await this.sandboxApiClient.create(createSandboxDto)

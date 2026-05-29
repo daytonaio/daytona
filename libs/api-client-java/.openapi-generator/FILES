@@ -63,6 +63,7 @@ src/main/java/io/daytona/api/client/model/CreateLinkedAccount.java
 src/main/java/io/daytona/api/client/model/CreateOrganization.java
 src/main/java/io/daytona/api/client/model/CreateOrganizationInvitation.java
 src/main/java/io/daytona/api/client/model/CreateOrganizationQuota.java
+src/main/java/io/daytona/api/client/model/CreateOrganizationRegionQuota.java
 src/main/java/io/daytona/api/client/model/CreateOrganizationRole.java
 src/main/java/io/daytona/api/client/model/CreateRegion.java
 src/main/java/io/daytona/api/client/model/CreateRegionResponse.java
@@ -261,6 +262,7 @@ src/test/java/io/daytona/api/client/model/CreateDockerRegistryTest.java
 src/test/java/io/daytona/api/client/model/CreateLinkedAccountTest.java
 src/test/java/io/daytona/api/client/model/CreateOrganizationInvitationTest.java
 src/test/java/io/daytona/api/client/model/CreateOrganizationQuotaTest.java
+src/test/java/io/daytona/api/client/model/CreateOrganizationRegionQuotaTest.java
 src/test/java/io/daytona/api/client/model/CreateOrganizationRoleTest.java
 src/test/java/io/daytona/api/client/model/CreateOrganizationTest.java
 src/test/java/io/daytona/api/client/model/CreateRegionResponseTest.java

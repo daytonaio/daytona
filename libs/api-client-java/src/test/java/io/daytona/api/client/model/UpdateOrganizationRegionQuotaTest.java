@@ -18,6 +18,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -37,6 +38,14 @@ public class UpdateOrganizationRegionQuotaTest {
     @Test
     public void testUpdateOrganizationRegionQuota() {
         // TODO: test UpdateOrganizationRegionQuota
+    }
+
+    /**
+     * Test the property 'sandboxClass'
+     */
+    @Test
+    public void sandboxClassTest() {
+        // TODO: test sandboxClass
     }
 
     /**

@@ -6,6 +6,7 @@
 import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/queries/useSandboxesQuery'
 import {
   Region,
+  SandboxClass,
   SandboxListItem,
   SandboxListSortDirection,
   SandboxListSortField,
@@ -147,6 +148,9 @@ export function convertApiFiltersToTableFilters(filters: SandboxFilters): Column
   if (filters.regions?.length) {
     columnFilters.push({ id: 'region', value: filters.regions })
   }
+  if (filters.sandboxClasses?.length) {
+    columnFilters.push({ id: 'sandboxClass', value: filters.sandboxClasses })
+  }
   if (filters.labels && Object.keys(filters.labels).length > 0) {
     const labelStrings = Object.entries(filters.labels).map(([key, value]) => `${key}: ${value}`)
     columnFilters.push({ id: 'labels', value: labelStrings })
@@ -205,6 +209,11 @@ export function convertTableFiltersToApiFilters(tableFilters: ColumnFiltersState
       case 'region':
         if (Array.isArray(filter.value) && filter.value.length > 0) {
           filters.regions = filter.value as string[]
+        }
+        break
+      case 'sandboxClass':
+        if (Array.isArray(filter.value) && filter.value.length > 0) {
+          filters.sandboxClasses = filter.value as SandboxClass[]
         }
         break
       case 'labels': {

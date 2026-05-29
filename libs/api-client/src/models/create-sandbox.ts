@@ -54,10 +54,6 @@ export interface CreateSandbox {
      */
     'networkAllowList'?: string;
     /**
-     * The sandbox class type
-     */
-    'class'?: CreateSandboxClassEnum;
-    /**
      * The target (region) where the sandbox will be created
      */
     'target'?: string;
@@ -97,15 +93,9 @@ export interface CreateSandbox {
      * Build information for the sandbox
      */
     'buildInfo'?: CreateBuildInfo;
+    /**
+     * ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.
+     */
+    'linkedSandbox'?: string;
 }
-
-export const CreateSandboxClassEnum = {
-    SMALL: 'small',
-    MEDIUM: 'medium',
-    LARGE: 'large',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
-} as const;
-
-export type CreateSandboxClassEnum = typeof CreateSandboxClassEnum[keyof typeof CreateSandboxClassEnum];
-
 

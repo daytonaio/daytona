@@ -56,6 +56,11 @@ definitions:
         type: integer
       id:
         type: string
+      linkedSandboxId:
+        description: |-
+          LinkedSandboxId identifies an existing sandbox this sandbox should be co-located with.
+          When set, the runner should attach both sandboxes to a shared local network so they can communicate.
+        type: string
       memoryQuota:
         minimum: 1
         type: integer
@@ -63,6 +68,12 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      name:
+        description: |-
+          Name is the human-readable sandbox name. When present, it is used as the
+          network alias for link networks so linked sandboxes can resolve each other
+          by name.
+        type: string
       networkAllowList:
         type: string
       networkBlockAll:
@@ -78,6 +89,10 @@ definitions:
         type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      sandboxClass:
+        description: Optional for backward compatibility, but when provided, indicates
+          the class of sandbox to create.
+        type: string
       skipStart:
         type: boolean
       snapshot:

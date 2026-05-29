@@ -37,6 +37,20 @@ type AdminAPI interface {
 	AdminCanCleanupImageExecute(r AdminAPIAdminCanCleanupImageRequest) (bool, *http.Response, error)
 
 	/*
+	AdminCreateOrganizationRegionQuota Create organization region quota
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@param regionId ID of the region the new quota applies to
+	@return AdminAPIAdminCreateOrganizationRegionQuotaRequest
+	*/
+	AdminCreateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminCreateOrganizationRegionQuotaRequest
+
+	// AdminCreateOrganizationRegionQuotaExecute executes the request
+	//  @return RegionQuota
+	AdminCreateOrganizationRegionQuotaExecute(r AdminAPIAdminCreateOrganizationRegionQuotaRequest) (*RegionQuota, *http.Response, error)
+
+	/*
 	AdminCreateRunner Create runner
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -58,6 +72,20 @@ type AdminAPI interface {
 
 	// AdminCreateUserExecute executes the request
 	AdminCreateUserExecute(r AdminAPIAdminCreateUserRequest) (*http.Response, error)
+
+	/*
+	AdminDeleteOrganizationRegionQuota Delete organization region quota
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@param regionId Region ID
+	@param sandboxClass Sandbox class
+	@return AdminAPIAdminDeleteOrganizationRegionQuotaRequest
+	*/
+	AdminDeleteOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminDeleteOrganizationRegionQuotaRequest
+
+	// AdminDeleteOrganizationRegionQuotaExecute executes the request
+	AdminDeleteOrganizationRegionQuotaExecute(r AdminAPIAdminDeleteOrganizationRegionQuotaRequest) (*http.Response, error)
 
 	/*
 	AdminDeleteRunner Delete runner
@@ -96,6 +124,21 @@ type AdminAPI interface {
 	// AdminGetMessageAttemptsExecute executes the request
 	//  @return []map[string]interface{}
 	AdminGetMessageAttemptsExecute(r AdminAPIAdminGetMessageAttemptsRequest) ([]map[string]interface{}, *http.Response, error)
+
+	/*
+	AdminGetOrganizationRegionQuota Get organization region quota
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@param regionId Region ID
+	@param sandboxClass Sandbox class
+	@return AdminAPIAdminGetOrganizationRegionQuotaRequest
+	*/
+	AdminGetOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminGetOrganizationRegionQuotaRequest
+
+	// AdminGetOrganizationRegionQuotaExecute executes the request
+	//  @return RegionQuota
+	AdminGetOrganizationRegionQuotaExecute(r AdminAPIAdminGetOrganizationRegionQuotaRequest) (*RegionQuota, *http.Response, error)
 
 	/*
 	AdminGetRunnerById Get runner by ID
@@ -234,6 +277,19 @@ type AdminAPI interface {
 	AdminSetSnapshotGeneralStatusExecute(r AdminAPIAdminSetSnapshotGeneralStatusRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
+	AdminUpdateOrganizationRegionQuota Update organization region quota
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@param regionId Region ID
+	@return AdminAPIAdminUpdateOrganizationRegionQuotaRequest
+	*/
+	AdminUpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminUpdateOrganizationRegionQuotaRequest
+
+	// AdminUpdateOrganizationRegionQuotaExecute executes the request
+	AdminUpdateOrganizationRegionQuotaExecute(r AdminAPIAdminUpdateOrganizationRegionQuotaRequest) (*http.Response, error)
+
+	/*
 	AdminUpdateRunnerScheduling Update runner scheduling status
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -320,6 +376,122 @@ func (a *AdminAPIService) AdminCanCleanupImageExecute(r AdminAPIAdminCanCleanupI
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type AdminAPIAdminCreateOrganizationRegionQuotaRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	organizationId string
+	regionId string
+	createOrganizationRegionQuota *CreateOrganizationRegionQuota
+}
+
+func (r AdminAPIAdminCreateOrganizationRegionQuotaRequest) CreateOrganizationRegionQuota(createOrganizationRegionQuota CreateOrganizationRegionQuota) AdminAPIAdminCreateOrganizationRegionQuotaRequest {
+	r.createOrganizationRegionQuota = &createOrganizationRegionQuota
+	return r
+}
+
+func (r AdminAPIAdminCreateOrganizationRegionQuotaRequest) Execute() (*RegionQuota, *http.Response, error) {
+	return r.ApiService.AdminCreateOrganizationRegionQuotaExecute(r)
+}
+
+/*
+AdminCreateOrganizationRegionQuota Create organization region quota
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @param regionId ID of the region the new quota applies to
+ @return AdminAPIAdminCreateOrganizationRegionQuotaRequest
+*/
+func (a *AdminAPIService) AdminCreateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminCreateOrganizationRegionQuotaRequest {
+	return AdminAPIAdminCreateOrganizationRegionQuotaRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+		regionId: regionId,
+	}
+}
+
+// Execute executes the request
+//  @return RegionQuota
+func (a *AdminAPIService) AdminCreateOrganizationRegionQuotaExecute(r AdminAPIAdminCreateOrganizationRegionQuotaRequest) (*RegionQuota, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *RegionQuota
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminCreateOrganizationRegionQuota")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"regionId"+"}", url.PathEscape(parameterValueToString(r.regionId, "regionId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.createOrganizationRegionQuota == nil {
+		return localVarReturnValue, nil, reportError("createOrganizationRegionQuota is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.createOrganizationRegionQuota
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -534,6 +706,104 @@ func (a *AdminAPIService) AdminCreateUserExecute(r AdminAPIAdminCreateUserReques
 	}
 	// body params
 	localVarPostBody = r.createUser
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type AdminAPIAdminDeleteOrganizationRegionQuotaRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	organizationId string
+	regionId string
+	sandboxClass SandboxClass
+}
+
+func (r AdminAPIAdminDeleteOrganizationRegionQuotaRequest) Execute() (*http.Response, error) {
+	return r.ApiService.AdminDeleteOrganizationRegionQuotaExecute(r)
+}
+
+/*
+AdminDeleteOrganizationRegionQuota Delete organization region quota
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @param regionId Region ID
+ @param sandboxClass Sandbox class
+ @return AdminAPIAdminDeleteOrganizationRegionQuotaRequest
+*/
+func (a *AdminAPIService) AdminDeleteOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminDeleteOrganizationRegionQuotaRequest {
+	return AdminAPIAdminDeleteOrganizationRegionQuotaRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+		regionId: regionId,
+		sandboxClass: sandboxClass,
+	}
+}
+
+// Execute executes the request
+func (a *AdminAPIService) AdminDeleteOrganizationRegionQuotaExecute(r AdminAPIAdminDeleteOrganizationRegionQuotaRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminDeleteOrganizationRegionQuota")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"regionId"+"}", url.PathEscape(parameterValueToString(r.regionId, "regionId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxClass"+"}", url.PathEscape(parameterValueToString(r.sandboxClass, "sandboxClass")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
@@ -853,6 +1123,115 @@ func (a *AdminAPIService) AdminGetMessageAttemptsExecute(r AdminAPIAdminGetMessa
 	localVarPath := localBasePath + "/admin/webhooks/organizations/{organizationId}/messages/{messageId}/attempts"
 	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"messageId"+"}", url.PathEscape(parameterValueToString(r.messageId, "messageId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type AdminAPIAdminGetOrganizationRegionQuotaRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	organizationId string
+	regionId string
+	sandboxClass SandboxClass
+}
+
+func (r AdminAPIAdminGetOrganizationRegionQuotaRequest) Execute() (*RegionQuota, *http.Response, error) {
+	return r.ApiService.AdminGetOrganizationRegionQuotaExecute(r)
+}
+
+/*
+AdminGetOrganizationRegionQuota Get organization region quota
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @param regionId Region ID
+ @param sandboxClass Sandbox class
+ @return AdminAPIAdminGetOrganizationRegionQuotaRequest
+*/
+func (a *AdminAPIService) AdminGetOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string, sandboxClass SandboxClass) AdminAPIAdminGetOrganizationRegionQuotaRequest {
+	return AdminAPIAdminGetOrganizationRegionQuotaRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+		regionId: regionId,
+		sandboxClass: sandboxClass,
+	}
+}
+
+// Execute executes the request
+//  @return RegionQuota
+func (a *AdminAPIService) AdminGetOrganizationRegionQuotaExecute(r AdminAPIAdminGetOrganizationRegionQuotaRequest) (*RegionQuota, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *RegionQuota
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminGetOrganizationRegionQuota")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}/{sandboxClass}"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"regionId"+"}", url.PathEscape(parameterValueToString(r.regionId, "regionId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxClass"+"}", url.PathEscape(parameterValueToString(r.sandboxClass, "sandboxClass")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1997,6 +2376,111 @@ func (a *AdminAPIService) AdminSetSnapshotGeneralStatusExecute(r AdminAPIAdminSe
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type AdminAPIAdminUpdateOrganizationRegionQuotaRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	organizationId string
+	regionId string
+	updateOrganizationRegionQuota *UpdateOrganizationRegionQuota
+}
+
+func (r AdminAPIAdminUpdateOrganizationRegionQuotaRequest) UpdateOrganizationRegionQuota(updateOrganizationRegionQuota UpdateOrganizationRegionQuota) AdminAPIAdminUpdateOrganizationRegionQuotaRequest {
+	r.updateOrganizationRegionQuota = &updateOrganizationRegionQuota
+	return r
+}
+
+func (r AdminAPIAdminUpdateOrganizationRegionQuotaRequest) Execute() (*http.Response, error) {
+	return r.ApiService.AdminUpdateOrganizationRegionQuotaExecute(r)
+}
+
+/*
+AdminUpdateOrganizationRegionQuota Update organization region quota
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @param regionId Region ID
+ @return AdminAPIAdminUpdateOrganizationRegionQuotaRequest
+*/
+func (a *AdminAPIService) AdminUpdateOrganizationRegionQuota(ctx context.Context, organizationId string, regionId string) AdminAPIAdminUpdateOrganizationRegionQuotaRequest {
+	return AdminAPIAdminUpdateOrganizationRegionQuotaRequest{
+		ApiService: a,
+		ctx: ctx,
+		organizationId: organizationId,
+		regionId: regionId,
+	}
+}
+
+// Execute executes the request
+func (a *AdminAPIService) AdminUpdateOrganizationRegionQuotaExecute(r AdminAPIAdminUpdateOrganizationRegionQuotaRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminUpdateOrganizationRegionQuota")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/organizations/{organizationId}/quota/{regionId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"regionId"+"}", url.PathEscape(parameterValueToString(r.regionId, "regionId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateOrganizationRegionQuota == nil {
+		return nil, reportError("updateOrganizationRegionQuota is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.updateOrganizationRegionQuota
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type AdminAPIAdminUpdateRunnerSchedulingRequest struct {

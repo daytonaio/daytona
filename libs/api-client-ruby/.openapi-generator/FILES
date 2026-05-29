@@ -49,6 +49,7 @@ lib/daytona_api_client/models/create_linked_account.rb
 lib/daytona_api_client/models/create_organization.rb
 lib/daytona_api_client/models/create_organization_invitation.rb
 lib/daytona_api_client/models/create_organization_quota.rb
+lib/daytona_api_client/models/create_organization_region_quota.rb
 lib/daytona_api_client/models/create_organization_role.rb
 lib/daytona_api_client/models/create_region.rb
 lib/daytona_api_client/models/create_region_response.rb

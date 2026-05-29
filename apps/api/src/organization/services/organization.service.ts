@@ -16,6 +16,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
 import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
+import { CreateOrganizationRegionQuotaDto } from '../dto/create-organization-region-quota.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
@@ -44,6 +45,7 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RegionQuota } from '../entities/region-quota.entity'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
+import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
@@ -199,14 +201,68 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.organizationRepository.save(organization)
   }
 
+  async createRegionQuota(
+    organizationId: string,
+    regionId: string,
+    createDto: CreateOrganizationRegionQuotaDto,
+  ): Promise<RegionQuotaDto> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    const region = await this.regionService.findOne(regionId)
+    if (!region) {
+      throw new NotFoundException(`Region with ID ${regionId} not found`)
+    }
+    if (!region.enforceQuotas) {
+      throw new BadRequestException(`Region ${regionId} does not enforce quotas`)
+    }
+
+    const existing = await this.regionQuotaRepository.findOne({
+      where: { organizationId, regionId, sandboxClass: createDto.sandboxClass },
+    })
+    if (existing) {
+      throw new ConflictException(
+        `Region quota for organization ${organizationId}, region ${regionId}, sandbox class ${createDto.sandboxClass} already exists`,
+      )
+    }
+
+    const regionQuota = new RegionQuota({
+      organizationId,
+      regionId,
+      sandboxClass: createDto.sandboxClass,
+      totalCpuQuota: createDto.totalCpuQuota,
+      totalMemoryQuota: createDto.totalMemoryQuota,
+      totalDiskQuota: createDto.totalDiskQuota,
+      totalGpuQuota: createDto.totalGpuQuota,
+      maxCpuPerSandbox: createDto.maxCpuPerSandbox ?? null,
+      maxMemoryPerSandbox: createDto.maxMemoryPerSandbox ?? null,
+      maxDiskPerSandbox: createDto.maxDiskPerSandbox ?? null,
+      maxDiskPerNonEphemeralSandbox: createDto.maxDiskPerNonEphemeralSandbox ?? null,
+      maxCpuPerGpuSandbox: createDto.maxCpuPerGpuSandbox ?? null,
+      maxMemoryPerGpuSandbox: createDto.maxMemoryPerGpuSandbox ?? null,
+      maxDiskPerGpuSandbox: createDto.maxDiskPerGpuSandbox ?? null,
+    })
+
+    const saved = await this.regionQuotaRepository.save(regionQuota)
+    return new RegionQuotaDto(saved)
+  }
+
   async updateRegionQuota(
     organizationId: string,
     regionId: string,
     updateDto: UpdateOrganizationRegionQuotaDto,
   ): Promise<void> {
-    const regionQuota = await this.regionQuotaRepository.findOne({ where: { organizationId, regionId } })
+    const sandboxClass = updateDto.sandboxClass ?? this.configService.getOrThrow('defaultSandboxClass')
+
+    const regionQuota = await this.regionQuotaRepository.findOne({
+      where: { organizationId, regionId, sandboxClass },
+    })
     if (!regionQuota) {
-      throw new NotFoundException('Region not found')
+      throw new NotFoundException(
+        `Region quota for organization ${organizationId}, region ${regionId}, sandbox class ${sandboxClass} not found`,
+      )
     }
 
     regionQuota.totalCpuQuota = updateDto.totalCpuQuota ?? regionQuota.totalCpuQuota
@@ -239,13 +295,45 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.regionQuotaRepository.save(regionQuota)
   }
 
+  async deleteRegionQuota(organizationId: string, regionId: string, sandboxClass: SandboxClass): Promise<void> {
+    const regionQuota = await this.regionQuotaRepository.findOne({
+      where: { organizationId, regionId, sandboxClass },
+    })
+    if (!regionQuota) {
+      throw new NotFoundException(
+        `Region quota for organization ${organizationId}, region ${regionId}, sandbox class ${sandboxClass} not found`,
+      )
+    }
+
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+
+    if (regionId === organization?.defaultRegionId) {
+      const defaultRegionQuotas = await this.regionQuotaRepository.count({
+        where: { organizationId, regionId: organization.defaultRegionId },
+      })
+      if (defaultRegionQuotas <= 1) {
+        throw new ConflictException(
+          `Organization must keep at least one quota for its default region (${organization.defaultRegionId})`,
+        )
+      }
+    }
+
+    await this.regionQuotaRepository.remove(regionQuota)
+  }
+
   async getRegionQuotas(organizationId: string): Promise<RegionQuotaDto[]> {
     const regionQuotas = await this.regionQuotaRepository.find({ where: { organizationId } })
     return regionQuotas.map((regionQuota) => new RegionQuotaDto(regionQuota))
   }
 
-  async getRegionQuota(organizationId: string, regionId: string): Promise<RegionQuotaDto | null> {
-    const regionQuota = await this.regionQuotaRepository.findOne({ where: { organizationId, regionId } })
+  async getRegionQuota(
+    organizationId: string,
+    regionId: string,
+    sandboxClass: SandboxClass,
+  ): Promise<RegionQuotaDto | null> {
+    const regionQuota = await this.regionQuotaRepository.findOne({
+      where: { organizationId, regionId, sandboxClass },
+    })
     if (!regionQuota) {
       return null
     }
@@ -259,7 +347,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     if (!sandbox) {
       return null
     }
-    return this.getRegionQuota(sandbox.organizationId, sandbox.region)
+    return this.getRegionQuota(sandbox.organizationId, sandbox.region, sandbox.sandboxClass)
   }
 
   /**
@@ -374,6 +462,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       const regionQuota = new RegionQuota({
         organizationId: organization.id,
         regionId: defaultRegionId,
+        sandboxClass: this.configService.getOrThrow('defaultSandboxClass'),
         totalCpuQuota: this.defaultOrganizationQuota.totalCpuQuota,
         totalMemoryQuota: this.defaultOrganizationQuota.totalMemoryQuota,
         totalDiskQuota: this.defaultOrganizationQuota.totalDiskQuota,
@@ -566,6 +655,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
         const regionQuota = new RegionQuota({
           organizationId: organization.id,
           regionId: createOrganizationDto.defaultRegionId,
+          sandboxClass: this.configService.getOrThrow('defaultSandboxClass'),
           totalCpuQuota: quota.totalCpuQuota,
           totalMemoryQuota: quota.totalMemoryQuota,
           totalDiskQuota: quota.totalDiskQuota,

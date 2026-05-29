@@ -28,8 +28,16 @@ export interface CreateSandboxDTO {
     'fromVolumeId'?: string;
     'gpuQuota'?: number;
     'id': string;
+    /**
+     * LinkedSandboxId identifies an existing sandbox this sandbox should be co-located with. When set, the runner should attach both sandboxes to a shared local network so they can communicate.
+     */
+    'linkedSandboxId'?: string;
     'memoryQuota'?: number;
     'metadata'?: { [key: string]: string; };
+    /**
+     * Name is the human-readable sandbox name. When present, it is used as the network alias for link networks so linked sandboxes can resolve each other by name.
+     */
+    'name'?: string;
     'networkAllowList'?: string;
     'networkBlockAll'?: boolean;
     /**
@@ -40,6 +48,10 @@ export interface CreateSandboxDTO {
     'otelEndpoint'?: string;
     'regionId'?: string;
     'registry'?: RegistryDTO;
+    /**
+     * Optional for backward compatibility, but when provided, indicates the class of sandbox to create.
+     */
+    'sandboxClass'?: string;
     'skipStart'?: boolean;
     'snapshot': string;
     'storageQuota'?: number;

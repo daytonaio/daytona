@@ -167,6 +167,7 @@ export class SandboxService {
   private async validateOrganizationQuotas(
     organization: Organization,
     region: Region,
+    sandboxClass: SandboxClass,
     cpu: number,
     memory: number,
     disk: number,
@@ -186,7 +187,7 @@ export class SandboxService {
     pendingGpuIncremented: boolean
   }> {
     if (!regionQuota && region.enforceQuotas) {
-      regionQuota = await this.organizationService.getRegionQuota(organization.id, region.id)
+      regionQuota = await this.organizationService.getRegionQuota(organization.id, region.id, sandboxClass)
     }
 
     // validate per-sandbox quotas
@@ -233,7 +234,9 @@ export class SandboxService {
     if (!regionQuota) {
       if (region.regionType === RegionType.SHARED) {
         // region is public, but the organization does not have a quota for it
-        throw new ForbiddenException(`Region ${region.id} is not available to the organization`)
+        throw new ForbiddenException(
+          `Region ${region.id} is not available to the organization for class ${sandboxClass}`,
+        )
       } else {
         // region is not public, respond as if the region was not found
         throw new NotFoundException('Region not found')
@@ -254,6 +257,7 @@ export class SandboxService {
     } = await this.organizationUsageService.incrementPendingSandboxUsage(
       organization.id,
       region.id,
+      sandboxClass,
       cpu,
       memory,
       disk,
@@ -264,6 +268,7 @@ export class SandboxService {
     const usageOverview = await this.organizationUsageService.getSandboxUsageOverview(
       organization.id,
       region.id,
+      sandboxClass,
       excludeSandboxId,
     )
 
@@ -297,6 +302,7 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         region.id,
+        sandboxClass,
         pendingCpuIncremented ? cpu : undefined,
         pendingMemoryIncremented ? memory : undefined,
         pendingDiskIncremented ? disk : undefined,
@@ -316,6 +322,7 @@ export class SandboxService {
   async rollbackPendingUsage(
     organizationId: string,
     regionId: string,
+    sandboxClass: SandboxClass,
     pendingCpuIncrement?: number,
     pendingMemoryIncrement?: number,
     pendingDiskIncrement?: number,
@@ -329,6 +336,7 @@ export class SandboxService {
       await this.organizationUsageService.decrementPendingSandboxUsage(
         organizationId,
         regionId,
+        sandboxClass,
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
@@ -379,7 +387,6 @@ export class SandboxService {
 
     sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
 
-    sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
     //  TODO: default user should be configurable
     sandbox.osUser = 'daytona'
@@ -402,6 +409,8 @@ export class SandboxService {
 
     let gpuRunnerAssignmentLockKey: string | undefined
 
+    sandbox.sandboxClass = snapshot.sandboxClass
+
     try {
       // Same per-region GPU runner assignment serialization as createFromSnapshot.
       if (sandbox.gpu > 0) {
@@ -412,7 +421,7 @@ export class SandboxService {
 
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        sandboxClass: sandbox.sandboxClass,
         snapshotRef: snapshot.ref,
         gpu: sandbox.gpu,
       })
@@ -446,12 +455,11 @@ export class SandboxService {
     let pendingDiskIncrement: number | undefined
     let pendingGpuIncrement: number | undefined
     let gpuRunnerAssignmentLockKey: string | undefined
+    let sandboxClass: SandboxClass | undefined
 
     const region = await this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
 
     try {
-      const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
-
       let snapshotIdOrName = createSandboxDto.snapshot
 
       if (!createSandboxDto.snapshot?.trim()) {
@@ -508,10 +516,33 @@ export class SandboxService {
         throw new BadRequestError('GPU sandboxes must be ephemeral - set autoDeleteInterval to 0')
       }
 
+      if (snapshot.sandboxClass === SandboxClass.ANDROID && !createSandboxDto.linkedSandbox) {
+        throw new BadRequestError('Android sandboxes must be linked to another sandbox')
+      }
+
+      // Resolve and validate an optional linked sandbox. When set, the new sandbox is pinned
+      // to the same runner as the linked sandbox so a local network can be established.
+      // Constraints:
+      //   - linked sandbox must exist in the same org, be STARTED or STOPPED, and have a runnerId
+      //   - linked sandbox cannot itself be linked to another sandbox (no chains)
+      //   - new sandbox must be ephemeral (autoDeleteInterval === 0)
+      const linkedSandbox = await this.resolveLinkedSandbox(createSandboxDto, organization.id)
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
+      sandboxClass = snapshot.sandboxClass
+
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
-        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, gpu, isEphemeral(createSandboxDto))
+        await this.validateOrganizationQuotas(
+          organization,
+          region,
+          snapshot.sandboxClass,
+          cpu,
+          mem,
+          disk,
+          gpu,
+          isEphemeral(createSandboxDto),
+        )
 
       if (pendingCpuIncremented) {
         pendingCpuIncrement = cpu
@@ -535,7 +566,7 @@ export class SandboxService {
         if (volumeIdOrNames.length > 0) {
           await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
         }
-      } else if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
+      } else if (!linkedSandbox && (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0)) {
         const skipWarmPool = (await this.redis.exists(`warm-pool:skip:${snapshot.id}`)) === 1
 
         if (!skipWarmPool) {
@@ -543,7 +574,6 @@ export class SandboxService {
             organizationId: organization.id,
             snapshot,
             target: region.id,
-            class: createSandboxDto.class,
             cpu: cpu,
             mem: mem,
             disk: disk,
@@ -557,7 +587,7 @@ export class SandboxService {
             return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
           }
         }
-      } else {
+      } else if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
         const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
@@ -574,19 +604,31 @@ export class SandboxService {
         gpuRunnerAssignmentLockKey = key
       }
 
-      const runner = await this.runnerService.getRandomAvailableRunner({
-        regions: [region.id],
-        sandboxClass,
-        snapshotRef: snapshot.ref,
-        gpu,
-      })
+      let runner: Runner
+      if (linkedSandbox && linkedSandbox.runnerId) {
+        runner = await this.runnerService.findOneOrFail(linkedSandbox.runnerId)
+
+        if (runner.region !== region.id) {
+          throw new BadRequestError(
+            `Runner hosting linked sandbox is in region ${runner.region}, which does not match requested region ${region.id}`,
+          )
+        }
+
+        this.runnerService.assertRunnerCanHost(runner)
+      } else {
+        runner = await this.runnerService.getRandomAvailableRunner({
+          regions: [region.id],
+          sandboxClass: snapshot.sandboxClass,
+          snapshotRef: snapshot.ref,
+          gpu,
+        })
+      }
 
       const sandbox = new Sandbox({ region: region.id, name: createSandboxDto.name })
 
       sandbox.organizationId = organization.id
 
-      //  TODO: make configurable
-      sandbox.class = sandboxClass
+      sandbox.sandboxClass = snapshot.sandboxClass
       sandbox.snapshot = snapshot.name
       //  TODO: default user should be configurable
       sandbox.osUser = createSandboxDto.user || 'daytona'
@@ -625,6 +667,7 @@ export class SandboxService {
       }
 
       sandbox.runnerId = runner.id
+      sandbox.linkedSandboxId = linkedSandbox?.id ?? null
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
@@ -643,14 +686,17 @@ export class SandboxService {
 
       return this.toSandboxDto(insertedSandbox)
     } catch (error) {
-      await this.rollbackPendingUsage(
-        organization.id,
-        region.id,
-        pendingCpuIncrement,
-        pendingMemoryIncrement,
-        pendingDiskIncrement,
-        pendingGpuIncrement,
-      )
+      if (sandboxClass) {
+        await this.rollbackPendingUsage(
+          organization.id,
+          region.id,
+          sandboxClass,
+          pendingCpuIncrement,
+          pendingMemoryIncrement,
+          pendingDiskIncrement,
+          pendingGpuIncrement,
+        )
+      }
 
       if (error.code === '23505') {
         throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
@@ -664,6 +710,43 @@ export class SandboxService {
           .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
       }
     }
+  }
+
+  /**
+   * Validates and resolves the optional linkedSandbox reference on a snapshot-based sandbox create request.
+   *
+   * Returns the linked Sandbox entity when linking is requested, otherwise undefined.
+   *
+   * @throws {BadRequestError} If any link precondition is not met.
+   * @throws {NotFoundException} If the linked sandbox does not exist for the organization.
+   */
+  private async resolveLinkedSandbox(
+    createSandboxDto: CreateSandboxDto,
+    organizationId: string,
+  ): Promise<Sandbox | undefined> {
+    if (!createSandboxDto.linkedSandbox) {
+      return undefined
+    }
+
+    if (!isEphemeral(createSandboxDto)) {
+      throw new BadRequestError('Linked sandboxes must be ephemeral (set autoDeleteInterval to 0)')
+    }
+
+    const linkedSandbox = await this.findOneByIdOrName(createSandboxDto.linkedSandbox, organizationId)
+
+    if (linkedSandbox.linkedSandboxId) {
+      throw new BadRequestError(
+        `Linked sandbox ${linkedSandbox.id} is itself linked to another sandbox; chained links are not allowed`,
+      )
+    }
+
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(linkedSandbox.state) || !linkedSandbox.runnerId) {
+      throw new BadRequestError(
+        `Linked sandbox must be in STARTED or STOPPED state with an assigned runner (current: ${linkedSandbox.state})`,
+      )
+    }
+
+    return linkedSandbox
   }
 
   private async assignWarmPoolSandbox(
@@ -758,8 +841,6 @@ export class SandboxService {
     const region = await this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
 
     try {
-      const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
-
       const cpu = createSandboxDto.cpu || DEFAULT_CPU
       const mem = createSandboxDto.memory || DEFAULT_MEMORY
       const disk = createSandboxDto.disk || DEFAULT_DISK
@@ -773,7 +854,16 @@ export class SandboxService {
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
-        await this.validateOrganizationQuotas(organization, region, cpu, mem, disk, gpu, isEphemeral(createSandboxDto))
+        await this.validateOrganizationQuotas(
+          organization,
+          region,
+          SandboxClass.CONTAINER,
+          cpu,
+          mem,
+          disk,
+          gpu,
+          isEphemeral(createSandboxDto),
+        )
 
       if (pendingCpuIncremented) {
         pendingCpuIncrement = cpu
@@ -797,7 +887,7 @@ export class SandboxService {
 
       sandbox.organizationId = organization.id
 
-      sandbox.class = sandboxClass
+      sandbox.sandboxClass = SandboxClass.CONTAINER
       sandbox.osUser = createSandboxDto.user || 'daytona'
       sandbox.env = createSandboxDto.env || {}
       sandbox.labels = createSandboxDto.labels || {}
@@ -832,6 +922,10 @@ export class SandboxService {
         sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
       }
 
+      if (sandbox.sandboxClass !== SandboxClass.CONTAINER) {
+        throw new BadRequestError('Declarative builds are only supported for container-class sandboxes')
+      }
+
       const buildInfoSnapshotRef = generateBuildSnapshotRef(
         createSandboxDto.buildInfo.dockerfileContent,
         createSandboxDto.buildInfo.contextHashes,
@@ -864,7 +958,7 @@ export class SandboxService {
             : []
         runner = await this.runnerService.getRandomAvailableRunner({
           regions: [sandbox.region],
-          sandboxClass: sandbox.class,
+          sandboxClass: sandbox.sandboxClass,
           snapshotRef: buildInfoSnapshotRef,
           gpu: sandbox.gpu,
           ...(excludedRunnerIds.length > 0 && { excludedRunnerIds }),
@@ -931,6 +1025,7 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         region.id,
+        SandboxClass.CONTAINER,
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
@@ -1006,7 +1101,7 @@ export class SandboxService {
       // Copy all properties from source sandbox to forked sandbox
       const forkedSandbox = new Sandbox({ region: sourceSandbox.region, name: dto.name })
       forkedSandbox.organizationId = organization.id
-      forkedSandbox.class = sourceSandbox.class
+      forkedSandbox.sandboxClass = sourceSandbox.sandboxClass
       forkedSandbox.snapshot = sourceSandbox.snapshot
       forkedSandbox.osUser = sourceSandbox.osUser
       forkedSandbox.env = { ...sourceSandbox.env }
@@ -1033,6 +1128,7 @@ export class SandboxService {
         await this.validateOrganizationQuotas(
           organization,
           region,
+          forkedSandbox.sandboxClass,
           forkedSandbox.cpu,
           forkedSandbox.mem,
           forkedSandbox.disk,
@@ -1108,6 +1204,7 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         region.id,
+        sourceSandbox.sandboxClass,
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
@@ -1222,6 +1319,7 @@ export class SandboxService {
       const { pendingSnapshotCountIncremented } = await this.snapshotService.validateOrganizationQuotas(
         organization,
         region,
+        sandbox.sandboxClass,
         1,
         sandbox.cpu,
         sandbox.mem,
@@ -1342,6 +1440,7 @@ export class SandboxService {
         ref: result.ref,
         runnerId: runner.id,
         regionId: sandbox.region,
+        sandboxClass: sandbox.sandboxClass,
         cpu: sandbox.cpu,
         gpu: sandbox.gpu,
         mem: sandbox.mem,
@@ -1515,6 +1614,7 @@ export class SandboxService {
         states: query.states,
         snapshots: query.snapshots,
         regionIds: query.regionIds,
+        sandboxClasses: query.sandboxClasses,
         minCpu: query.minCpu,
         maxCpu: query.maxCpu,
         minMemoryGiB: query.minMemoryGiB,
@@ -1948,6 +2048,7 @@ export class SandboxService {
         await this.validateOrganizationQuotas(
           organization,
           region,
+          sandbox.sandboxClass,
           sandbox.cpu,
           sandbox.mem,
           sandbox.disk,
@@ -1987,6 +2088,7 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         sandbox.region,
+        sandbox.sandboxClass,
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
@@ -2092,6 +2194,7 @@ export class SandboxService {
       await this.validateOrganizationQuotas(
         organization,
         region,
+        sandbox.sandboxClass,
         sandbox.cpu,
         sandbox.mem,
         sandbox.disk,
@@ -2127,6 +2230,7 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         sandbox.region,
+        sandbox.sandboxClass,
         pendingCpuIncremented ? sandbox.cpu : undefined,
         pendingMemoryIncremented ? sandbox.mem : undefined,
         pendingDiskIncremented ? sandbox.disk : undefined,
@@ -2154,6 +2258,7 @@ export class SandboxService {
       await this.validateOrganizationQuotas(
         organization,
         region,
+        sandbox.sandboxClass,
         willStartOnV2 ? sandbox.cpu : 0,
         willStartOnV2 ? sandbox.mem : 0,
         sandbox.disk,
@@ -2232,6 +2337,7 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         sandbox.region,
+        sandbox.sandboxClass,
         pendingCpuIncremented ? sandbox.cpu : undefined,
         pendingMemoryIncremented ? sandbox.mem : undefined,
         pendingDiskIncremented ? sandbox.disk : undefined,
@@ -2307,7 +2413,7 @@ export class SandboxService {
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const regionQuota = region.enforceQuotas
-        ? await this.organizationService.getRegionQuota(organization.id, region.id)
+        ? await this.organizationService.getRegionQuota(organization.id, region.id, sandbox.sandboxClass)
         : null
 
       const { maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox } =
@@ -2354,6 +2460,7 @@ export class SandboxService {
           await this.validateOrganizationQuotas(
             organization,
             region,
+            sandbox.sandboxClass,
             cpuDeltaForQuota,
             memDeltaForQuota,
             diskDeltaForQuota,
@@ -2440,6 +2547,7 @@ export class SandboxService {
           await this.organizationUsageService.applyResizeUsageChange(
             organization.id,
             sandbox.region,
+            sandbox.sandboxClass,
             cpuDeltaForQuota,
             memDeltaForQuota,
             diskDeltaForQuota,
@@ -2465,6 +2573,7 @@ export class SandboxService {
       await this.rollbackPendingUsage(
         organization.id,
         sandbox.region,
+        sandbox.sandboxClass,
         pendingCpuIncrement,
         pendingMemoryIncrement,
         pendingDiskIncrement,
@@ -2621,18 +2730,6 @@ export class SandboxService {
     }
 
     return region
-  }
-
-  private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {
-    if (!sandboxClass) {
-      return SandboxClass.SMALL
-    }
-
-    if (Object.values(SandboxClass).includes(sandboxClass)) {
-      return sandboxClass
-    } else {
-      throw new BadRequestError('Invalid class')
-    }
   }
 
   async replaceLabels(
@@ -3040,6 +3137,38 @@ export class SandboxService {
       //  log the error for now, but don't throw it as it will be retried
       this.logger.error(`Error stopping sandbox from suspended organization. SandboxId: ${event.sandboxId}: `, error)
     })
+  }
+
+  /**
+   * Cascade-destroys any sandboxes that are linked to the just-destroyed sandbox.
+   * Linked sandboxes are co-located on the same runner as their owner and share a
+   * runner-local network with it; once the owner is gone the followers lose the
+   * network and have no reason to exist (they are always ephemeral by design).
+   */
+  @OnEvent(SandboxEvents.DESTROYED)
+  async handleSandboxDestroyedCascadeLinked(event: SandboxDestroyedEvent) {
+    if (!event.sandbox?.id) {
+      return
+    }
+
+    const followers = await this.sandboxRepository.find({
+      where: {
+        linkedSandboxId: event.sandbox.id,
+        desiredState: Not(SandboxDesiredState.DESTROYED),
+      },
+    })
+
+    for (const follower of followers) {
+      try {
+        await this.destroy(follower.id, follower.organizationId)
+      } catch (err) {
+        this.logger.warn(
+          `Failed to cascade-destroy linked follower ${follower.id} after owner ${event.sandbox.id} was destroyed: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        )
+      }
+    }
   }
 
   private resolveAutoStopInterval(autoStopInterval: number): number {

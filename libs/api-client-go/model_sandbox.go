@@ -80,12 +80,13 @@ type Sandbox struct {
 	// The last activity timestamp of the sandbox
 	LastActivityAt *string `json:"lastActivityAt,omitempty"`
 	// The class of the sandbox
-	// Deprecated
-	Class *string `json:"class,omitempty"`
+	SandboxClass *string `json:"sandboxClass,omitempty"`
 	// The version of the daemon running in the sandbox
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
 	// The runner ID of the sandbox
 	RunnerId *string `json:"runnerId,omitempty"`
+	// ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.
+	LinkedSandboxId *string `json:"linkedSandboxId,omitempty"`
 	// The toolbox proxy URL for the sandbox
 	ToolboxProxyUrl string `json:"toolboxProxyUrl"`
 	AdditionalProperties map[string]interface{}
@@ -948,39 +949,36 @@ func (o *Sandbox) SetLastActivityAt(v string) {
 	o.LastActivityAt = &v
 }
 
-// GetClass returns the Class field value if set, zero value otherwise.
-// Deprecated
-func (o *Sandbox) GetClass() string {
-	if o == nil || IsNil(o.Class) {
+// GetSandboxClass returns the SandboxClass field value if set, zero value otherwise.
+func (o *Sandbox) GetSandboxClass() string {
+	if o == nil || IsNil(o.SandboxClass) {
 		var ret string
 		return ret
 	}
-	return *o.Class
+	return *o.SandboxClass
 }
 
-// GetClassOk returns a tuple with the Class field value if set, nil otherwise
+// GetSandboxClassOk returns a tuple with the SandboxClass field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// Deprecated
-func (o *Sandbox) GetClassOk() (*string, bool) {
-	if o == nil || IsNil(o.Class) {
+func (o *Sandbox) GetSandboxClassOk() (*string, bool) {
+	if o == nil || IsNil(o.SandboxClass) {
 		return nil, false
 	}
-	return o.Class, true
+	return o.SandboxClass, true
 }
 
-// HasClass returns a boolean if a field has been set.
-func (o *Sandbox) HasClass() bool {
-	if o != nil && !IsNil(o.Class) {
+// HasSandboxClass returns a boolean if a field has been set.
+func (o *Sandbox) HasSandboxClass() bool {
+	if o != nil && !IsNil(o.SandboxClass) {
 		return true
 	}
 
 	return false
 }
 
-// SetClass gets a reference to the given string and assigns it to the Class field.
-// Deprecated
-func (o *Sandbox) SetClass(v string) {
-	o.Class = &v
+// SetSandboxClass gets a reference to the given string and assigns it to the SandboxClass field.
+func (o *Sandbox) SetSandboxClass(v string) {
+	o.SandboxClass = &v
 }
 
 // GetDaemonVersion returns the DaemonVersion field value if set, zero value otherwise.
@@ -1045,6 +1043,38 @@ func (o *Sandbox) HasRunnerId() bool {
 // SetRunnerId gets a reference to the given string and assigns it to the RunnerId field.
 func (o *Sandbox) SetRunnerId(v string) {
 	o.RunnerId = &v
+}
+
+// GetLinkedSandboxId returns the LinkedSandboxId field value if set, zero value otherwise.
+func (o *Sandbox) GetLinkedSandboxId() string {
+	if o == nil || IsNil(o.LinkedSandboxId) {
+		var ret string
+		return ret
+	}
+	return *o.LinkedSandboxId
+}
+
+// GetLinkedSandboxIdOk returns a tuple with the LinkedSandboxId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetLinkedSandboxIdOk() (*string, bool) {
+	if o == nil || IsNil(o.LinkedSandboxId) {
+		return nil, false
+	}
+	return o.LinkedSandboxId, true
+}
+
+// HasLinkedSandboxId returns a boolean if a field has been set.
+func (o *Sandbox) HasLinkedSandboxId() bool {
+	if o != nil && !IsNil(o.LinkedSandboxId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLinkedSandboxId gets a reference to the given string and assigns it to the LinkedSandboxId field.
+func (o *Sandbox) SetLinkedSandboxId(v string) {
+	o.LinkedSandboxId = &v
 }
 
 // GetToolboxProxyUrl returns the ToolboxProxyUrl field value
@@ -1142,14 +1172,17 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.LastActivityAt) {
 		toSerialize["lastActivityAt"] = o.LastActivityAt
 	}
-	if !IsNil(o.Class) {
-		toSerialize["class"] = o.Class
+	if !IsNil(o.SandboxClass) {
+		toSerialize["sandboxClass"] = o.SandboxClass
 	}
 	if !IsNil(o.DaemonVersion) {
 		toSerialize["daemonVersion"] = o.DaemonVersion
 	}
 	if !IsNil(o.RunnerId) {
 		toSerialize["runnerId"] = o.RunnerId
+	}
+	if !IsNil(o.LinkedSandboxId) {
+		toSerialize["linkedSandboxId"] = o.LinkedSandboxId
 	}
 	toSerialize["toolboxProxyUrl"] = o.ToolboxProxyUrl
 
@@ -1237,9 +1270,10 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "lastActivityAt")
-		delete(additionalProperties, "class")
+		delete(additionalProperties, "sandboxClass")
 		delete(additionalProperties, "daemonVersion")
 		delete(additionalProperties, "runnerId")
+		delete(additionalProperties, "linkedSandboxId")
 		delete(additionalProperties, "toolboxProxyUrl")
 		o.AdditionalProperties = additionalProperties
 	}

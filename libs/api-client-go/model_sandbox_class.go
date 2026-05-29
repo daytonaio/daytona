@@ -15,22 +15,22 @@ import (
 	"encoding/json"
 )
 
-// SandboxClass The class of the runner
+// SandboxClass the model 'SandboxClass'
 type SandboxClass string
 
 // List of SandboxClass
 const (
-	SANDBOXCLASS_SMALL SandboxClass = "small"
-	SANDBOXCLASS_MEDIUM SandboxClass = "medium"
-	SANDBOXCLASS_LARGE SandboxClass = "large"
+	SANDBOXCLASS_LINUX_VM SandboxClass = "linux-vm"
+	SANDBOXCLASS_CONTAINER SandboxClass = "container"
+	SANDBOXCLASS_ANDROID SandboxClass = "android"
 	SANDBOXCLASS_UNKNOWN_DEFAULT_OPEN_API SandboxClass = "11184809"
 )
 
 // All allowed values of SandboxClass enum
 var AllowedSandboxClassEnumValues = []SandboxClass{
-	"small",
-	"medium",
-	"large",
+	"linux-vm",
+	"container",
+	"android",
 	"11184809",
 }
 

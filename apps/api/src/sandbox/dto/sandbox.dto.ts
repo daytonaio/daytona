@@ -254,13 +254,12 @@ export class SandboxDto {
   @ApiPropertyOptional({
     description: 'The class of the sandbox',
     enum: SandboxClass,
-    example: Object.values(SandboxClass)[0],
+    example: SandboxClass.LINUX_VM,
     required: false,
-    deprecated: true,
   })
   @IsEnum(SandboxClass)
   @IsOptional()
-  class?: SandboxClass
+  sandboxClass?: SandboxClass
 
   @ApiPropertyOptional({
     description: 'The version of the daemon running in the sandbox',
@@ -277,6 +276,15 @@ export class SandboxDto {
   })
   @IsOptional()
   runnerId?: string
+
+  @ApiPropertyOptional({
+    description:
+      'ID of the sandbox this sandbox is linked to. When set, the sandbox is co-located on the same runner as the linked sandbox.',
+    example: 'sandbox123',
+    required: false,
+  })
+  @IsOptional()
+  linkedSandboxId?: string
 
   @ApiProperty({
     description: 'The toolbox proxy URL for the sandbox',
@@ -311,7 +319,7 @@ export class SandboxDto {
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
       autoDeleteInterval: sandbox.autoDeleteInterval,
-      class: sandbox.class,
+      sandboxClass: sandbox.sandboxClass,
       createdAt: sandbox.createdAt ? new Date(sandbox.createdAt).toISOString() : undefined,
       updatedAt: sandbox.updatedAt ? new Date(sandbox.updatedAt).toISOString() : undefined,
       lastActivityAt: sandbox.lastActivityAt?.lastActivityAt
@@ -328,6 +336,7 @@ export class SandboxDto {
         : undefined,
       daemonVersion: sandbox.daemonVersion,
       runnerId: sandbox.runnerId,
+      linkedSandboxId: sandbox.linkedSandboxId ?? undefined,
       toolboxProxyUrl,
     }
   }

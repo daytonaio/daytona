@@ -156,6 +156,67 @@ public class SnapshotDto {
   @javax.annotation.Nullable
   private String ref;
 
+  /**
+   * The sandbox class of the snapshot
+   */
+  @JsonAdapter(SandboxClassEnum.Adapter.class)
+  public enum SandboxClassEnum {
+    LINUX_VM("linux-vm"),
+    
+    CONTAINER("container"),
+    
+    ANDROID("android"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
+
+    private String value;
+
+    SandboxClassEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static SandboxClassEnum fromValue(String value) {
+      for (SandboxClassEnum b : SandboxClassEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      return UNKNOWN_DEFAULT_OPEN_API;
+    }
+
+    public static class Adapter extends TypeAdapter<SandboxClassEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final SandboxClassEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public SandboxClassEnum read(final JsonReader jsonReader) throws IOException {
+        String value =  jsonReader.nextString();
+        return SandboxClassEnum.fromValue(value);
+      }
+    }
+
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+      String value = jsonElement.getAsString();
+      SandboxClassEnum.fromValue(value);
+    }
+  }
+
+  public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
+  @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
+  @javax.annotation.Nullable
+  private SandboxClassEnum sandboxClass;
+
   public SnapshotDto() {
   }
 
@@ -554,6 +615,25 @@ public class SnapshotDto {
     this.ref = ref;
   }
 
+
+  public SnapshotDto sandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
+    return this;
+  }
+
+  /**
+   * The sandbox class of the snapshot
+   * @return sandboxClass
+   */
+  @javax.annotation.Nullable
+  public SandboxClassEnum getSandboxClass() {
+    return sandboxClass;
+  }
+
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+    this.sandboxClass = sandboxClass;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -628,13 +708,14 @@ public class SnapshotDto {
         Objects.equals(this.buildInfo, snapshotDto.buildInfo) &&
         Objects.equals(this.regionIds, snapshotDto.regionIds) &&
         Objects.equals(this.initialRunnerId, snapshotDto.initialRunnerId) &&
-        Objects.equals(this.ref, snapshotDto.ref)&&
+        Objects.equals(this.ref, snapshotDto.ref) &&
+        Objects.equals(this.sandboxClass, snapshotDto.sandboxClass)&&
         Objects.equals(this.additionalProperties, snapshotDto.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, general, name, imageName, state, size, entrypoint, cpu, gpu, mem, disk, errorReason, createdAt, updatedAt, lastUsedAt, buildInfo, regionIds, initialRunnerId, ref, additionalProperties);
+    return Objects.hash(id, organizationId, general, name, imageName, state, size, entrypoint, cpu, gpu, mem, disk, errorReason, createdAt, updatedAt, lastUsedAt, buildInfo, regionIds, initialRunnerId, ref, sandboxClass, additionalProperties);
   }
 
   @Override
@@ -661,6 +742,7 @@ public class SnapshotDto {
     sb.append("    regionIds: ").append(toIndentedString(regionIds)).append("\n");
     sb.append("    initialRunnerId: ").append(toIndentedString(initialRunnerId)).append("\n");
     sb.append("    ref: ").append(toIndentedString(ref)).append("\n");
+    sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -680,7 +762,7 @@ public class SnapshotDto {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "general", "name", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt"));
@@ -742,6 +824,13 @@ public class SnapshotDto {
       }
       if ((jsonObj.get("ref") != null && !jsonObj.get("ref").isJsonNull()) && !jsonObj.get("ref").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `ref` to be a primitive type in the JSON string but got `%s`", jsonObj.get("ref").toString()));
+      }
+      if ((jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) && !jsonObj.get("sandboxClass").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sandboxClass` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sandboxClass").toString()));
+      }
+      // validate the optional field `sandboxClass`
+      if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
+        SandboxClassEnum.validateJsonElement(jsonObj.get("sandboxClass"));
       }
   }
 

@@ -39,9 +39,6 @@ module DaytonaApiClient
     # Comma-separated list of allowed CIDR network addresses for the sandbox
     attr_accessor :network_allow_list
 
-    # The sandbox class type
-    attr_accessor :_class
-
     # The target (region) where the sandbox will be created
     attr_accessor :target
 
@@ -72,27 +69,8 @@ module DaytonaApiClient
     # Build information for the sandbox
     attr_accessor :build_info
 
-    class EnumAttributeValidator
-      attr_reader :datatype
-      attr_reader :allowable_values
-
-      def initialize(datatype, allowable_values)
-        @allowable_values = allowable_values.map do |value|
-          case datatype.to_s
-          when /Integer/i
-            value.to_i
-          when /Float/i
-            value.to_f
-          else
-            value
-          end
-        end
-      end
-
-      def valid?(value)
-        !value || allowable_values.include?(value)
-      end
-    end
+    # ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.
+    attr_accessor :linked_sandbox
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
@@ -105,7 +83,6 @@ module DaytonaApiClient
         :'public' => :'public',
         :'network_block_all' => :'networkBlockAll',
         :'network_allow_list' => :'networkAllowList',
-        :'_class' => :'class',
         :'target' => :'target',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
@@ -115,7 +92,8 @@ module DaytonaApiClient
         :'auto_archive_interval' => :'autoArchiveInterval',
         :'auto_delete_interval' => :'autoDeleteInterval',
         :'volumes' => :'volumes',
-        :'build_info' => :'buildInfo'
+        :'build_info' => :'buildInfo',
+        :'linked_sandbox' => :'linkedSandbox'
       }
     end
 
@@ -140,7 +118,6 @@ module DaytonaApiClient
         :'public' => :'Boolean',
         :'network_block_all' => :'Boolean',
         :'network_allow_list' => :'String',
-        :'_class' => :'String',
         :'target' => :'String',
         :'cpu' => :'Integer',
         :'gpu' => :'Integer',
@@ -150,7 +127,8 @@ module DaytonaApiClient
         :'auto_archive_interval' => :'Integer',
         :'auto_delete_interval' => :'Integer',
         :'volumes' => :'Array<SandboxVolume>',
-        :'build_info' => :'CreateBuildInfo'
+        :'build_info' => :'CreateBuildInfo',
+        :'linked_sandbox' => :'String'
       }
     end
 
@@ -212,10 +190,6 @@ module DaytonaApiClient
         self.network_allow_list = attributes[:'network_allow_list']
       end
 
-      if attributes.key?(:'_class')
-        self._class = attributes[:'_class']
-      end
-
       if attributes.key?(:'target')
         self.target = attributes[:'target']
       end
@@ -257,6 +231,10 @@ module DaytonaApiClient
       if attributes.key?(:'build_info')
         self.build_info = attributes[:'build_info']
       end
+
+      if attributes.key?(:'linked_sandbox')
+        self.linked_sandbox = attributes[:'linked_sandbox']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -271,19 +249,7 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      return false unless _class_validator.valid?(@_class)
       true
-    end
-
-    # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] _class Object to be assigned
-    def _class=(_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large", "unknown_default_open_api"])
-      unless validator.valid?(_class)
-        fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
-      end
-      @_class = _class
     end
 
     # Checks equality by comparing each attribute.
@@ -299,7 +265,6 @@ module DaytonaApiClient
           public == o.public &&
           network_block_all == o.network_block_all &&
           network_allow_list == o.network_allow_list &&
-          _class == o._class &&
           target == o.target &&
           cpu == o.cpu &&
           gpu == o.gpu &&
@@ -309,7 +274,8 @@ module DaytonaApiClient
           auto_archive_interval == o.auto_archive_interval &&
           auto_delete_interval == o.auto_delete_interval &&
           volumes == o.volumes &&
-          build_info == o.build_info
+          build_info == o.build_info &&
+          linked_sandbox == o.linked_sandbox
     end
 
     # @see the `==` method
@@ -321,7 +287,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, snapshot, user, env, labels, public, network_block_all, network_allow_list, _class, target, cpu, gpu, memory, disk, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info].hash
+      [name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, linked_sandbox].hash
     end
 
     # Builds the object from hash
