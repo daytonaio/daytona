@@ -65,3 +65,39 @@ updates:
           - "version-update:semver-major"
     commit-message:
       prefix: "chore(deps)"
+
+  # npm: scope to production manifests only.
+  # NOTE: This config controls Dependabot PR creation, NOT GitHub Advisory
+  # Database alert recurrence. Alerts in guides/ and runtime-tests/ paths
+  # are dismissed in GitHub directly (see scripts/dependabot-dismiss.sh
+  # for the auditable dismissal manifest and rationale).
+  - package-ecosystem: npm
+    directories:
+      - "/"
+      - "/libs/sdk-typescript"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      npm-prod:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: pip
+    directories:
+      - "/libs/sdk-python"
+      - "/libs/api-client-python"
+      - "/libs/api-client-python-async"
+      - "/libs/toolbox-api-client-python"
+      - "/libs/toolbox-api-client-python-async"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      pip-prod:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(deps)"
