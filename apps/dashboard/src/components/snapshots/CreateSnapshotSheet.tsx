@@ -273,34 +273,36 @@ export const CreateSnapshotSheet = ({
               )}
             </form.Field>
 
-            <form.Field name="sandboxClass">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Sandbox Class</FieldLabel>
-                  <Select
-                    value={field.state.value ?? SandboxClass.CONTAINER}
-                    onValueChange={(value) => field.handleChange(value as SandboxClass)}
-                    disabled={!selectedRegionId}
-                  >
-                    <SelectTrigger className="h-8" id={field.name}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SANDBOX_CLASS_OPTIONS.filter((option) => availableSandboxClasses.includes(option.value)).map(
-                        (option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ),
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription>
-                    The target platform sandboxes created from this snapshot will run on.
-                  </FieldDescription>
-                </Field>
-              )}
-            </form.Field>
+            {availableSandboxClasses.length > 1 && (
+              <form.Field name="sandboxClass">
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Sandbox Class</FieldLabel>
+                    <Select
+                      value={field.state.value ?? SandboxClass.CONTAINER}
+                      onValueChange={(value) => field.handleChange(value as SandboxClass)}
+                      disabled={!selectedRegionId}
+                    >
+                      <SelectTrigger className="h-8" id={field.name}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SANDBOX_CLASS_OPTIONS.filter((option) => availableSandboxClasses.includes(option.value)).map(
+                          (option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>
+                      The target platform sandboxes created from this snapshot will run on.
+                    </FieldDescription>
+                  </Field>
+                )}
+              </form.Field>
+            )}
 
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-medium">Resources</Label>
