@@ -325,6 +325,18 @@ type SandboxAPI interface {
 	GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxesForRunnerRequest) ([]Sandbox, *http.Response, error)
 
 	/*
+	GetSandboxesSummary Get sandboxes summary
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIGetSandboxesSummaryRequest
+	*/
+	GetSandboxesSummary(ctx context.Context) SandboxAPIGetSandboxesSummaryRequest
+
+	// GetSandboxesSummaryExecute executes the request
+	//  @return SandboxesSummary
+	GetSandboxesSummaryExecute(r SandboxAPIGetSandboxesSummaryRequest) (*SandboxesSummary, *http.Response, error)
+
+	/*
 	GetSignedPortPreviewUrl Get signed preview URL for a sandbox port
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -3212,6 +3224,349 @@ func (a *SandboxAPIService) GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxe
 	}
 	if r.skipReconcilingSandboxes != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "skipReconcilingSandboxes", r.skipReconcilingSandboxes, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxesSummaryRequest struct {
+	ctx context.Context
+	ApiService SandboxAPI
+	xDaytonaOrganizationID *string
+	id *string
+	name *string
+	labels *string
+	includeErroredDeleted *bool
+	states *[]SandboxState
+	snapshots *[]string
+	regionIds *[]string
+	sandboxClasses *[]SandboxClass
+	minCpu *float32
+	maxCpu *float32
+	minMemoryGiB *float32
+	maxMemoryGiB *float32
+	minDiskGiB *float32
+	maxDiskGiB *float32
+	isPublic *bool
+	isRecoverable *bool
+	createdAtAfter *time.Time
+	createdAtBefore *time.Time
+	lastEventAfter *time.Time
+	lastEventBefore *time.Time
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxesSummaryRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxesSummaryRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Filter by ID prefix (case-insensitive)
+func (r SandboxAPIGetSandboxesSummaryRequest) Id(id string) SandboxAPIGetSandboxesSummaryRequest {
+	r.id = &id
+	return r
+}
+
+// Filter by name prefix (case-insensitive)
+func (r SandboxAPIGetSandboxesSummaryRequest) Name(name string) SandboxAPIGetSandboxesSummaryRequest {
+	r.name = &name
+	return r
+}
+
+// JSON encoded labels to filter by
+func (r SandboxAPIGetSandboxesSummaryRequest) Labels(labels string) SandboxAPIGetSandboxesSummaryRequest {
+	r.labels = &labels
+	return r
+}
+
+// Include results with errored state and deleted desired state
+func (r SandboxAPIGetSandboxesSummaryRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIGetSandboxesSummaryRequest {
+	r.includeErroredDeleted = &includeErroredDeleted
+	return r
+}
+
+// List of states to filter by.
+func (r SandboxAPIGetSandboxesSummaryRequest) States(states []SandboxState) SandboxAPIGetSandboxesSummaryRequest {
+	r.states = &states
+	return r
+}
+
+// List of snapshot names to filter by
+func (r SandboxAPIGetSandboxesSummaryRequest) Snapshots(snapshots []string) SandboxAPIGetSandboxesSummaryRequest {
+	r.snapshots = &snapshots
+	return r
+}
+
+// List of regions IDs to filter by
+func (r SandboxAPIGetSandboxesSummaryRequest) RegionIds(regionIds []string) SandboxAPIGetSandboxesSummaryRequest {
+	r.regionIds = &regionIds
+	return r
+}
+
+// List of sandbox classes to filter by
+func (r SandboxAPIGetSandboxesSummaryRequest) SandboxClasses(sandboxClasses []SandboxClass) SandboxAPIGetSandboxesSummaryRequest {
+	r.sandboxClasses = &sandboxClasses
+	return r
+}
+
+// Minimum CPU
+func (r SandboxAPIGetSandboxesSummaryRequest) MinCpu(minCpu float32) SandboxAPIGetSandboxesSummaryRequest {
+	r.minCpu = &minCpu
+	return r
+}
+
+// Maximum CPU
+func (r SandboxAPIGetSandboxesSummaryRequest) MaxCpu(maxCpu float32) SandboxAPIGetSandboxesSummaryRequest {
+	r.maxCpu = &maxCpu
+	return r
+}
+
+// Minimum memory in GiB
+func (r SandboxAPIGetSandboxesSummaryRequest) MinMemoryGiB(minMemoryGiB float32) SandboxAPIGetSandboxesSummaryRequest {
+	r.minMemoryGiB = &minMemoryGiB
+	return r
+}
+
+// Maximum memory in GiB
+func (r SandboxAPIGetSandboxesSummaryRequest) MaxMemoryGiB(maxMemoryGiB float32) SandboxAPIGetSandboxesSummaryRequest {
+	r.maxMemoryGiB = &maxMemoryGiB
+	return r
+}
+
+// Minimum disk space in GiB
+func (r SandboxAPIGetSandboxesSummaryRequest) MinDiskGiB(minDiskGiB float32) SandboxAPIGetSandboxesSummaryRequest {
+	r.minDiskGiB = &minDiskGiB
+	return r
+}
+
+// Maximum disk space in GiB
+func (r SandboxAPIGetSandboxesSummaryRequest) MaxDiskGiB(maxDiskGiB float32) SandboxAPIGetSandboxesSummaryRequest {
+	r.maxDiskGiB = &maxDiskGiB
+	return r
+}
+
+// Filter by public status
+func (r SandboxAPIGetSandboxesSummaryRequest) IsPublic(isPublic bool) SandboxAPIGetSandboxesSummaryRequest {
+	r.isPublic = &isPublic
+	return r
+}
+
+// Filter by recoverable status
+func (r SandboxAPIGetSandboxesSummaryRequest) IsRecoverable(isRecoverable bool) SandboxAPIGetSandboxesSummaryRequest {
+	r.isRecoverable = &isRecoverable
+	return r
+}
+
+// Include items created after this timestamp
+func (r SandboxAPIGetSandboxesSummaryRequest) CreatedAtAfter(createdAtAfter time.Time) SandboxAPIGetSandboxesSummaryRequest {
+	r.createdAtAfter = &createdAtAfter
+	return r
+}
+
+// Include items created before this timestamp
+func (r SandboxAPIGetSandboxesSummaryRequest) CreatedAtBefore(createdAtBefore time.Time) SandboxAPIGetSandboxesSummaryRequest {
+	r.createdAtBefore = &createdAtBefore
+	return r
+}
+
+// Include items with last event after this timestamp
+func (r SandboxAPIGetSandboxesSummaryRequest) LastEventAfter(lastEventAfter time.Time) SandboxAPIGetSandboxesSummaryRequest {
+	r.lastEventAfter = &lastEventAfter
+	return r
+}
+
+// Include items with last event before this timestamp
+func (r SandboxAPIGetSandboxesSummaryRequest) LastEventBefore(lastEventBefore time.Time) SandboxAPIGetSandboxesSummaryRequest {
+	r.lastEventBefore = &lastEventBefore
+	return r
+}
+
+func (r SandboxAPIGetSandboxesSummaryRequest) Execute() (*SandboxesSummary, *http.Response, error) {
+	return r.ApiService.GetSandboxesSummaryExecute(r)
+}
+
+/*
+GetSandboxesSummary Get sandboxes summary
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SandboxAPIGetSandboxesSummaryRequest
+*/
+func (a *SandboxAPIService) GetSandboxesSummary(ctx context.Context) SandboxAPIGetSandboxesSummaryRequest {
+	return SandboxAPIGetSandboxesSummaryRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return SandboxesSummary
+func (a *SandboxAPIService) GetSandboxesSummaryExecute(r SandboxAPIGetSandboxesSummaryRequest) (*SandboxesSummary, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SandboxesSummary
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxesSummary")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/summary"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.id != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "form", "")
+	}
+	if r.name != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "name", r.name, "form", "")
+	}
+	if r.labels != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
+	}
+	if r.includeErroredDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	} else {
+		var defaultValue bool = false
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", defaultValue, "form", "")
+		r.includeErroredDeleted = &defaultValue
+	}
+	if r.states != nil {
+		t := *r.states
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "states", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "states", t, "form", "multi")
+		}
+	}
+	if r.snapshots != nil {
+		t := *r.snapshots
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", t, "form", "multi")
+		}
+	}
+	if r.regionIds != nil {
+		t := *r.regionIds
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "regionIds", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "regionIds", t, "form", "multi")
+		}
+	}
+	if r.sandboxClasses != nil {
+		t := *r.sandboxClasses
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "sandboxClasses", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "sandboxClasses", t, "form", "multi")
+		}
+	}
+	if r.minCpu != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minCpu", r.minCpu, "form", "")
+	}
+	if r.maxCpu != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxCpu", r.maxCpu, "form", "")
+	}
+	if r.minMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGiB", r.minMemoryGiB, "form", "")
+	}
+	if r.maxMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGiB", r.maxMemoryGiB, "form", "")
+	}
+	if r.minDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGiB", r.minDiskGiB, "form", "")
+	}
+	if r.maxDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGiB", r.maxDiskGiB, "form", "")
+	}
+	if r.isPublic != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "isPublic", r.isPublic, "form", "")
+	}
+	if r.isRecoverable != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "isRecoverable", r.isRecoverable, "form", "")
+	}
+	if r.createdAtAfter != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "createdAtAfter", r.createdAtAfter, "form", "")
+	}
+	if r.createdAtBefore != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "createdAtBefore", r.createdAtBefore, "form", "")
+	}
+	if r.lastEventAfter != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventAfter", r.lastEventAfter, "form", "")
+	}
+	if r.lastEventBefore != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

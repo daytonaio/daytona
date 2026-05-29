@@ -164,9 +164,11 @@ models/sandbox-labels.ts
 models/sandbox-list-item.ts
 models/sandbox-list-sort-direction.ts
 models/sandbox-list-sort-field.ts
+models/sandbox-state-count.ts
 models/sandbox-state.ts
 models/sandbox-volume.ts
 models/sandbox.ts
+models/sandboxes-summary.ts
 models/screenshot-response.ts
 models/search-files-response.ts
 models/send-webhook-dto.ts

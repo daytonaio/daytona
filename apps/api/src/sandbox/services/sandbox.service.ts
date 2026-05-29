@@ -112,6 +112,8 @@ import { Region } from '../../region/entities/region.entity'
 import { SandboxActivityService } from './sandbox-activity.service'
 import { ListSandboxesResponseDto } from '../dto/list-sandboxes-response.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
+import { GetSandboxesSummaryQueryDto } from '../dto/get-sandboxes-summary-query.dto'
+import { SandboxesSummaryDto } from '../dto/sandboxes-summary.dto'
 import { SANDBOX_SEARCH_ADAPTER } from '../constants/sandbox-tokens'
 import { SandboxSearchAdapter } from '../interfaces/sandbox-search.interface'
 
@@ -1595,14 +1597,7 @@ export class SandboxService {
    * @throws BadRequestError if the cursor is invalid
    */
   async search(organizationId: string, query: ListSandboxesQueryDto): Promise<ListSandboxesResponseDto> {
-    let parsedLabels: { [key: string]: string } | undefined
-    if (query.labels) {
-      try {
-        parsedLabels = JSON.parse(query.labels)
-      } catch {
-        throw new BadRequestError('Invalid labels JSON format')
-      }
-    }
+    const parsedLabels = this.parseLabels(query.labels)
 
     const result = await this.sandboxSearchAdapter.search({
       filters: {
@@ -1651,6 +1646,47 @@ export class SandboxService {
         return item
       }),
       nextCursor: result.nextCursor,
+    }
+  }
+
+  async getSummary(organizationId: string, query: GetSandboxesSummaryQueryDto): Promise<SandboxesSummaryDto> {
+    const parsedLabels = this.parseLabels(query.labels)
+
+    return this.sandboxSearchAdapter.summary({
+      filters: {
+        organizationId,
+        idPrefix: query.id,
+        namePrefix: query.name,
+        labels: parsedLabels,
+        includeErroredDeleted: query.includeErroredDeleted,
+        states: query.states,
+        snapshots: query.snapshots,
+        regionIds: query.regionIds,
+        sandboxClasses: query.sandboxClasses,
+        minCpu: query.minCpu,
+        maxCpu: query.maxCpu,
+        minMemoryGiB: query.minMemoryGiB,
+        maxMemoryGiB: query.maxMemoryGiB,
+        minDiskGiB: query.minDiskGiB,
+        maxDiskGiB: query.maxDiskGiB,
+        isPublic: query.isPublic,
+        isRecoverable: query.isRecoverable,
+        createdAtAfter: query.createdAtAfter,
+        createdAtBefore: query.createdAtBefore,
+        lastEventAfter: query.lastEventAfter,
+        lastEventBefore: query.lastEventBefore,
+      },
+    })
+  }
+
+  private parseLabels(rawLabels: string | undefined): { [key: string]: string } | undefined {
+    if (!rawLabels) {
+      return undefined
+    }
+    try {
+      return JSON.parse(rawLabels)
+    } catch {
+      throw new BadRequestError('Invalid labels JSON format')
     }
   }
 

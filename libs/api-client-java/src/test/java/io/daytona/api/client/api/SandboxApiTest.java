@@ -34,6 +34,7 @@ import io.daytona.api.client.model.SandboxLabels;
 import io.daytona.api.client.model.SandboxListSortDirection;
 import io.daytona.api.client.model.SandboxListSortField;
 import io.daytona.api.client.model.SandboxState;
+import io.daytona.api.client.model.SandboxesSummary;
 import io.daytona.api.client.model.SignedPortPreviewUrl;
 import io.daytona.api.client.model.SshAccessDto;
 import io.daytona.api.client.model.SshAccessValidationDto;
@@ -375,6 +376,38 @@ public class SandboxApiTest {
         String states = null;
         Boolean skipReconcilingSandboxes = null;
         List<Sandbox> response = api.getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes);
+        // TODO: test validations
+    }
+
+    /**
+     * Get sandboxes summary
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSandboxesSummaryTest() throws ApiException {
+        String xDaytonaOrganizationID = null;
+        String id = null;
+        String name = null;
+        String labels = null;
+        Boolean includeErroredDeleted = null;
+        List<SandboxState> states = null;
+        List<String> snapshots = null;
+        List<String> regionIds = null;
+        List<SandboxClass> sandboxClasses = null;
+        BigDecimal minCpu = null;
+        BigDecimal maxCpu = null;
+        BigDecimal minMemoryGiB = null;
+        BigDecimal maxMemoryGiB = null;
+        BigDecimal minDiskGiB = null;
+        BigDecimal maxDiskGiB = null;
+        Boolean isPublic = null;
+        Boolean isRecoverable = null;
+        OffsetDateTime createdAtAfter = null;
+        OffsetDateTime createdAtBefore = null;
+        OffsetDateTime lastEventAfter = null;
+        OffsetDateTime lastEventBefore = null;
+        SandboxesSummary response = api.getSandboxesSummary(xDaytonaOrganizationID, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore);
         // TODO: test validations
     }
 

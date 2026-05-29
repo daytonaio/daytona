@@ -7,7 +7,7 @@ import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common'
 import { OpensearchClient } from 'nestjs-opensearch'
 import { Search_RequestBody } from '@opensearch-project/opensearch/api/index.js'
 import { QueryContainer } from '@opensearch-project/opensearch/api/_types/_common.query_dsl.js'
-import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxState, VALID_QUERY_SANDBOX_STATES } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { TypedConfigService } from '../../config/typed-config.service'
 import {
@@ -17,6 +17,7 @@ import {
   SandboxSearchResult,
   SandboxSearchSort,
   SandboxSearchSortField,
+  SandboxesSummaryResult,
 } from '../interfaces/sandbox-search.interface'
 import { SandboxListItemDto } from '../dto/sandbox-list-item.dto'
 
@@ -144,6 +145,32 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
     const searchBody = this.buildSearchBody(query, params.pagination, params.sort)
     const response = await this.executeSearch(searchBody)
     return this.processSearchResponse(response, params.pagination.limit)
+  }
+
+  async summary(params: { filters: SandboxSearchFilters }): Promise<SandboxesSummaryResult> {
+    const query = this.buildSearchQuery(params.filters)
+    const searchBody: Search_RequestBody = {
+      size: 0,
+      track_total_hits: true,
+      query,
+      aggs: {
+        by_state: {
+          terms: { field: 'state', size: VALID_QUERY_SANDBOX_STATES.length + 5 },
+        },
+        recoverable_errors: {
+          filter: {
+            bool: {
+              must: [
+                { terms: { state: [SandboxState.ERROR, SandboxState.BUILD_FAILED] } },
+                { term: { recoverable: true } },
+              ],
+            },
+          },
+        },
+      },
+    }
+    const response = await this.client.search({ index: this.indexName, body: searchBody })
+    return this.processSummaryResponse(response)
   }
 
   private buildSearchQuery(filters: SandboxSearchFilters): QueryContainer {
@@ -349,6 +376,23 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
       items: items.map((hit: any) => this.mapSourceToDto(hit._source)),
       nextCursor,
     }
+  }
+
+  private processSummaryResponse(response: any): SandboxesSummaryResult {
+    const total: number = response.body.hits?.total?.value ?? 0
+    const aggregations = response.body.aggregations ?? {}
+
+    const buckets: Array<{ key: string; doc_count: number }> = aggregations.by_state?.buckets ?? []
+    const countByState = new Map<string, number>(buckets.map((bucket) => [bucket.key, bucket.doc_count]))
+
+    const byState = VALID_QUERY_SANDBOX_STATES.map((state) => ({
+      state,
+      count: countByState.get(state) ?? 0,
+    }))
+
+    const recoverableErrorCount: number = aggregations.recoverable_errors?.doc_count ?? 0
+
+    return { total, byState, recoverableErrorCount }
   }
 
   private mapSourceToDto(source: any): SandboxListItemDto {

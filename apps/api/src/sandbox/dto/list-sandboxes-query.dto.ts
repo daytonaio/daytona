@@ -6,7 +6,7 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { IsBoolean, IsOptional, IsString, IsArray, IsEnum, IsInt, Min, IsDate } from 'class-validator'
 import { Transform, Type } from 'class-transformer'
-import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxState, VALID_QUERY_SANDBOX_STATES } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { ToArray } from '../../common/decorators/to-array.decorator'
 import { PageLimit } from '../../common/decorators/page-limit.decorator'
@@ -27,10 +27,6 @@ export enum SandboxListSortDirection {
 
 export const DEFAULT_SANDBOX_LIST_SORT_FIELD = SandboxListSortField.LAST_ACTIVITY_AT
 export const DEFAULT_SANDBOX_LIST_SORT_DIRECTION = SandboxListSortDirection.DESC
-
-const LIST_SANDBOXES_QUERY_VALID_STATES = Object.values(SandboxState).filter(
-  (state) => state !== SandboxState.DESTROYED,
-)
 
 @ApiSchema({ name: 'ListSandboxesQuery' })
 export class ListSandboxesQueryDto {
@@ -101,9 +97,9 @@ export class ListSandboxesQueryDto {
   @IsOptional()
   @ToArray()
   @IsArray()
-  @IsEnum(LIST_SANDBOXES_QUERY_VALID_STATES, {
+  @IsEnum(VALID_QUERY_SANDBOX_STATES, {
     each: true,
-    message: `each value must be one of the following values: ${LIST_SANDBOXES_QUERY_VALID_STATES.join(', ')}`,
+    message: `each value must be one of the following values: ${VALID_QUERY_SANDBOX_STATES.join(', ')}`,
   })
   states?: SandboxState[]
 

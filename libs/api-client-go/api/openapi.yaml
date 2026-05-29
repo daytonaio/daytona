@@ -1858,6 +1858,218 @@ paths:
       summary: Create a new sandbox
       tags:
       - sandbox
+  /sandbox/summary:
+    get:
+      operationId: getSandboxesSummary
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: Filter by ID prefix (case-insensitive)
+        explode: true
+        in: query
+        name: id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by name prefix (case-insensitive)
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: JSON encoded labels to filter by
+        explode: true
+        in: query
+        name: labels
+        required: false
+        schema:
+          example: "{\"label1\": \"value1\", \"label2\": \"value2\"}"
+          type: string
+        style: form
+      - description: Include results with errored state and deleted desired state
+        explode: true
+        in: query
+        name: includeErroredDeleted
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - description: List of states to filter by.
+        explode: true
+        in: query
+        name: states
+        required: false
+        schema:
+          items:
+            $ref: "#/components/schemas/SandboxState"
+          type: array
+        style: form
+      - description: List of snapshot names to filter by
+        explode: true
+        in: query
+        name: snapshots
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: List of regions IDs to filter by
+        explode: true
+        in: query
+        name: regionIds
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: List of sandbox classes to filter by
+        explode: true
+        in: query
+        name: sandboxClasses
+        required: false
+        schema:
+          items:
+            $ref: "#/components/schemas/SandboxClass"
+          type: array
+        style: form
+      - description: Minimum CPU
+        explode: true
+        in: query
+        name: minCpu
+        required: false
+        schema:
+          minimum: 1
+          type: number
+        style: form
+      - description: Maximum CPU
+        explode: true
+        in: query
+        name: maxCpu
+        required: false
+        schema:
+          minimum: 1
+          type: number
+        style: form
+      - description: Minimum memory in GiB
+        explode: true
+        in: query
+        name: minMemoryGiB
+        required: false
+        schema:
+          minimum: 1
+          type: number
+        style: form
+      - description: Maximum memory in GiB
+        explode: true
+        in: query
+        name: maxMemoryGiB
+        required: false
+        schema:
+          minimum: 1
+          type: number
+        style: form
+      - description: Minimum disk space in GiB
+        explode: true
+        in: query
+        name: minDiskGiB
+        required: false
+        schema:
+          minimum: 1
+          type: number
+        style: form
+      - description: Maximum disk space in GiB
+        explode: true
+        in: query
+        name: maxDiskGiB
+        required: false
+        schema:
+          minimum: 1
+          type: number
+        style: form
+      - description: Filter by public status
+        explode: true
+        in: query
+        name: isPublic
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Filter by recoverable status
+        explode: true
+        in: query
+        name: isRecoverable
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Include items created after this timestamp
+        explode: true
+        in: query
+        name: createdAtAfter
+        required: false
+        schema:
+          example: 2024-01-01T00:00:00Z
+          format: date-time
+          type: string
+        style: form
+      - description: Include items created before this timestamp
+        explode: true
+        in: query
+        name: createdAtBefore
+        required: false
+        schema:
+          example: 2024-12-31T23:59:59Z
+          format: date-time
+          type: string
+        style: form
+      - description: Include items with last event after this timestamp
+        explode: true
+        in: query
+        name: lastEventAfter
+        required: false
+        schema:
+          example: 2024-01-01T00:00:00Z
+          format: date-time
+          type: string
+        style: form
+      - description: Include items with last event before this timestamp
+        explode: true
+        in: query
+        name: lastEventBefore
+        required: false
+        schema:
+          example: 2024-12-31T23:59:59Z
+          format: date-time
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxesSummary"
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get sandboxes summary
+      tags:
+      - sandbox
   /sandbox/paginated:
     get:
       deprecated: true
@@ -10863,6 +11075,53 @@ components:
       required:
       - items
       - nextCursor
+      type: object
+    SandboxStateCount:
+      example:
+        count: 12
+        state: started
+      properties:
+        state:
+          allOf:
+          - $ref: "#/components/schemas/SandboxState"
+          description: Sandbox state.
+          example: started
+        count:
+          description: Number of sandboxes in this state matching the query filters.
+          example: 12
+          type: number
+      required:
+      - count
+      - state
+      type: object
+    SandboxesSummary:
+      example:
+        total: 42
+        recoverableErrorCount: 2
+        byState:
+        - count: 12
+          state: started
+        - count: 12
+          state: started
+      properties:
+        total:
+          description: Total number of sandboxes matching the query filters.
+          example: 42
+          type: number
+        byState:
+          description: Summary of sandboxes by state.
+          items:
+            $ref: "#/components/schemas/SandboxStateCount"
+          type: array
+        recoverableErrorCount:
+          description: Number of sandboxes currently in an errored state that are
+            flagged as recoverable.
+          example: 2
+          type: number
+      required:
+      - byState
+      - recoverableErrorCount
+      - total
       type: object
     SandboxVolume:
       example:

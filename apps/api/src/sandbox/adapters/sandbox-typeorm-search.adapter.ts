@@ -4,9 +4,9 @@
  */
 
 import { BadRequestException, Logger } from '@nestjs/common'
-import { Repository, Brackets } from 'typeorm'
+import { Repository, Brackets, SelectQueryBuilder } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
-import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxState, VALID_QUERY_SANDBOX_STATES } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import {
   SandboxSearchAdapter,
@@ -16,6 +16,7 @@ import {
   SandboxSearchSort,
   SandboxSearchSortDirection,
   SandboxSearchSortField,
+  SandboxesSummaryResult,
 } from '../interfaces/sandbox-search.interface'
 import { SandboxListItemDto } from '../dto/sandbox-list-item.dto'
 
@@ -37,98 +38,7 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
     const qb = this.sandboxRepository.createQueryBuilder('sandbox')
     qb.leftJoinAndSelect('sandbox.lastActivityAt', 'lastActivity')
 
-    // Base filters
-    qb.andWhere('sandbox.organizationId = :organizationId', { organizationId: filters.organizationId })
-
-    if (filters.idPrefix) {
-      qb.andWhere('LOWER(sandbox.id) LIKE LOWER(:idPrefix)', { idPrefix: `${filters.idPrefix}%` })
-    }
-    if (filters.namePrefix) {
-      qb.andWhere('LOWER(sandbox.name) LIKE LOWER(:namePrefix)', { namePrefix: `${filters.namePrefix}%` })
-    }
-    if (filters.labels) {
-      qb.andWhere('sandbox.labels @> :labels', { labels: filters.labels })
-    }
-    if (filters.snapshots?.length) {
-      qb.andWhere('sandbox.snapshot IN (:...snapshots)', { snapshots: filters.snapshots })
-    }
-    if (filters.regionIds?.length) {
-      qb.andWhere('sandbox.region IN (:...regionIds)', { regionIds: filters.regionIds })
-    }
-    if (filters.sandboxClasses?.length) {
-      qb.andWhere('sandbox.sandboxClass IN (:...sandboxClasses)', { sandboxClasses: filters.sandboxClasses })
-    }
-    if (filters.isPublic !== undefined) {
-      qb.andWhere('sandbox.public = :isPublic', { isPublic: filters.isPublic })
-    }
-    if (filters.isRecoverable !== undefined) {
-      qb.andWhere('sandbox.recoverable = :isRecoverable', { isRecoverable: filters.isRecoverable })
-    }
-
-    // Range filters
-    if (filters.minCpu !== undefined) {
-      qb.andWhere('sandbox.cpu >= :minCpu', { minCpu: filters.minCpu })
-    }
-    if (filters.maxCpu !== undefined) {
-      qb.andWhere('sandbox.cpu <= :maxCpu', { maxCpu: filters.maxCpu })
-    }
-    if (filters.minMemoryGiB !== undefined) {
-      qb.andWhere('sandbox.mem >= :minMemoryGiB', { minMemoryGiB: filters.minMemoryGiB })
-    }
-    if (filters.maxMemoryGiB !== undefined) {
-      qb.andWhere('sandbox.mem <= :maxMemoryGiB', { maxMemoryGiB: filters.maxMemoryGiB })
-    }
-    if (filters.minDiskGiB !== undefined) {
-      qb.andWhere('sandbox.disk >= :minDiskGiB', { minDiskGiB: filters.minDiskGiB })
-    }
-    if (filters.maxDiskGiB !== undefined) {
-      qb.andWhere('sandbox.disk <= :maxDiskGiB', { maxDiskGiB: filters.maxDiskGiB })
-    }
-    if (filters.createdAtAfter) {
-      qb.andWhere('sandbox.createdAt >= :createdAtAfter', { createdAtAfter: filters.createdAtAfter })
-    }
-    if (filters.createdAtBefore) {
-      qb.andWhere('sandbox.createdAt <= :createdAtBefore', { createdAtBefore: filters.createdAtBefore })
-    }
-    if (filters.lastEventAfter) {
-      qb.andWhere('lastActivity.lastActivityAt >= :lastEventAfter', { lastEventAfter: filters.lastEventAfter })
-    }
-    if (filters.lastEventBefore) {
-      qb.andWhere('lastActivity.lastActivityAt <= :lastEventBefore', { lastEventBefore: filters.lastEventBefore })
-    }
-
-    // State filtering with error state handling
-    const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
-    const statesToInclude = (filters.states || Object.values(SandboxState)).filter(
-      (state) => state !== SandboxState.DESTROYED,
-    )
-    const nonErrorStatesToInclude = statesToInclude.filter((state) => !errorStates.includes(state))
-    const errorStatesToInclude = statesToInclude.filter((state) => errorStates.includes(state))
-
-    if (nonErrorStatesToInclude.length > 0 || errorStatesToInclude.length > 0) {
-      qb.andWhere(
-        new Brackets((stateQb) => {
-          if (nonErrorStatesToInclude.length > 0) {
-            stateQb.orWhere('sandbox.state IN (:...nonErrorStates)', { nonErrorStates: nonErrorStatesToInclude })
-          }
-          if (errorStatesToInclude.length > 0) {
-            if (filters.includeErroredDeleted) {
-              stateQb.orWhere('sandbox.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
-            } else {
-              stateQb.orWhere(
-                new Brackets((errorQb) => {
-                  errorQb
-                    .where('sandbox.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
-                    .andWhere('sandbox.desiredState != :destroyedState', {
-                      destroyedState: SandboxDesiredState.DESTROYED,
-                    })
-                }),
-              )
-            }
-          }
-        }),
-      )
-    }
+    this.applyFilters(qb, filters)
 
     // Cursor-based pagination
     if (pagination.cursor) {
@@ -169,6 +79,136 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
     return {
       items: returnItems.map((sandbox) => this.mapEntityToDto(sandbox)),
       nextCursor,
+    }
+  }
+
+  async summary(params: { filters: SandboxSearchFilters }): Promise<SandboxesSummaryResult> {
+    const { filters } = params
+
+    const buildBaseQb = (): SelectQueryBuilder<Sandbox> => {
+      const qb = this.sandboxRepository.createQueryBuilder('sandbox')
+      qb.leftJoin('sandbox.lastActivityAt', 'lastActivity')
+      this.applyFilters(qb, filters)
+      return qb
+    }
+
+    const summaryRow = await buildBaseQb()
+      .select('COUNT(*)', 'total')
+      .addSelect(
+        'SUM(CASE WHEN sandbox.state IN (:...summaryRecErrStates) AND sandbox.recoverable THEN 1 ELSE 0 END)',
+        'recoverable_error_count',
+      )
+      .setParameter('summaryRecErrStates', [SandboxState.ERROR, SandboxState.BUILD_FAILED])
+      .getRawOne<{ total: string; recoverable_error_count: string | null }>()
+
+    const stateRows = await buildBaseQb()
+      .select('sandbox.state', 'state')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('sandbox.state')
+      .getRawMany<{ state: string; count: string }>()
+
+    const countByState = new Map<string, number>(stateRows.map((row) => [row.state, Number(row.count)]))
+    const byState = VALID_QUERY_SANDBOX_STATES.map((state) => ({
+      state,
+      count: countByState.get(state) ?? 0,
+    }))
+
+    return {
+      total: Number(summaryRow?.total ?? 0),
+      byState,
+      recoverableErrorCount: Number(summaryRow?.recoverable_error_count ?? 0),
+    }
+  }
+
+  private applyFilters(qb: SelectQueryBuilder<Sandbox>, filters: SandboxSearchFilters): void {
+    qb.andWhere('sandbox.organizationId = :organizationId', { organizationId: filters.organizationId })
+
+    if (filters.idPrefix) {
+      qb.andWhere('LOWER(sandbox.id) LIKE LOWER(:idPrefix)', { idPrefix: `${filters.idPrefix}%` })
+    }
+    if (filters.namePrefix) {
+      qb.andWhere('LOWER(sandbox.name) LIKE LOWER(:namePrefix)', { namePrefix: `${filters.namePrefix}%` })
+    }
+    if (filters.labels) {
+      qb.andWhere('sandbox.labels @> :labels', { labels: filters.labels })
+    }
+    if (filters.snapshots?.length) {
+      qb.andWhere('sandbox.snapshot IN (:...snapshots)', { snapshots: filters.snapshots })
+    }
+    if (filters.regionIds?.length) {
+      qb.andWhere('sandbox.region IN (:...regionIds)', { regionIds: filters.regionIds })
+    }
+    if (filters.sandboxClasses?.length) {
+      qb.andWhere('sandbox.sandboxClass IN (:...sandboxClasses)', { sandboxClasses: filters.sandboxClasses })
+    }
+    if (filters.isPublic !== undefined) {
+      qb.andWhere('sandbox.public = :isPublic', { isPublic: filters.isPublic })
+    }
+    if (filters.isRecoverable !== undefined) {
+      qb.andWhere('sandbox.recoverable = :isRecoverable', { isRecoverable: filters.isRecoverable })
+    }
+
+    if (filters.minCpu !== undefined) {
+      qb.andWhere('sandbox.cpu >= :minCpu', { minCpu: filters.minCpu })
+    }
+    if (filters.maxCpu !== undefined) {
+      qb.andWhere('sandbox.cpu <= :maxCpu', { maxCpu: filters.maxCpu })
+    }
+    if (filters.minMemoryGiB !== undefined) {
+      qb.andWhere('sandbox.mem >= :minMemoryGiB', { minMemoryGiB: filters.minMemoryGiB })
+    }
+    if (filters.maxMemoryGiB !== undefined) {
+      qb.andWhere('sandbox.mem <= :maxMemoryGiB', { maxMemoryGiB: filters.maxMemoryGiB })
+    }
+    if (filters.minDiskGiB !== undefined) {
+      qb.andWhere('sandbox.disk >= :minDiskGiB', { minDiskGiB: filters.minDiskGiB })
+    }
+    if (filters.maxDiskGiB !== undefined) {
+      qb.andWhere('sandbox.disk <= :maxDiskGiB', { maxDiskGiB: filters.maxDiskGiB })
+    }
+    if (filters.createdAtAfter) {
+      qb.andWhere('sandbox.createdAt >= :createdAtAfter', { createdAtAfter: filters.createdAtAfter })
+    }
+    if (filters.createdAtBefore) {
+      qb.andWhere('sandbox.createdAt <= :createdAtBefore', { createdAtBefore: filters.createdAtBefore })
+    }
+    if (filters.lastEventAfter) {
+      qb.andWhere('lastActivity.lastActivityAt >= :lastEventAfter', { lastEventAfter: filters.lastEventAfter })
+    }
+    if (filters.lastEventBefore) {
+      qb.andWhere('lastActivity.lastActivityAt <= :lastEventBefore', { lastEventBefore: filters.lastEventBefore })
+    }
+
+    const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
+    const statesToInclude = (filters.states || Object.values(SandboxState)).filter(
+      (state) => state !== SandboxState.DESTROYED,
+    )
+    const nonErrorStatesToInclude = statesToInclude.filter((state) => !errorStates.includes(state))
+    const errorStatesToInclude = statesToInclude.filter((state) => errorStates.includes(state))
+
+    if (nonErrorStatesToInclude.length > 0 || errorStatesToInclude.length > 0) {
+      qb.andWhere(
+        new Brackets((stateQb) => {
+          if (nonErrorStatesToInclude.length > 0) {
+            stateQb.orWhere('sandbox.state IN (:...nonErrorStates)', { nonErrorStates: nonErrorStatesToInclude })
+          }
+          if (errorStatesToInclude.length > 0) {
+            if (filters.includeErroredDeleted) {
+              stateQb.orWhere('sandbox.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
+            } else {
+              stateQb.orWhere(
+                new Brackets((errorQb) => {
+                  errorQb
+                    .where('sandbox.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
+                    .andWhere('sandbox.desiredState != :destroyedState', {
+                      destroyedState: SandboxDesiredState.DESTROYED,
+                    })
+                }),
+              )
+            }
+          }
+        }),
+      )
     }
   }
 

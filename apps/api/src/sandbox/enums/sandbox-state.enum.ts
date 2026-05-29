@@ -24,3 +24,7 @@ export enum SandboxState {
   SNAPSHOTTING = 'snapshotting',
   FORKING = 'forking',
 }
+
+export const VALID_QUERY_SANDBOX_STATES: SandboxState[] = Object.values(SandboxState).filter(
+  (state) => state !== SandboxState.DESTROYED,
+)

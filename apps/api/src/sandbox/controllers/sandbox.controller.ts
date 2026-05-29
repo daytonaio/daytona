@@ -92,6 +92,8 @@ import { OrganizationDto } from '../../organization/dto/organization.dto'
 import { RegionQuotaDto } from '../../organization/dto/region-quota.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { ListSandboxesResponseDto } from '../dto/list-sandboxes-response.dto'
+import { GetSandboxesSummaryQueryDto } from '../dto/get-sandboxes-summary-query.dto'
+import { SandboxesSummaryDto } from '../dto/sandboxes-summary.dto'
 
 @Controller('sandbox')
 @ApiTags('sandbox')
@@ -143,6 +145,23 @@ export class SandboxController {
     @Query() query: ListSandboxesQueryDto,
   ): Promise<ListSandboxesResponseDto> {
     return this.sandboxService.search(authContext.organizationId, query)
+  }
+
+  @Get('summary')
+  @ApiOperation({
+    summary: 'Get sandboxes summary',
+    operationId: 'getSandboxesSummary',
+  })
+  @ApiResponse({
+    status: 200,
+    type: SandboxesSummaryDto,
+  })
+  @UseGuards(OrganizationAuthContextGuard)
+  async getSandboxesSummary(
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
+    @Query() query: GetSandboxesSummaryQueryDto,
+  ): Promise<SandboxesSummaryDto> {
+    return this.sandboxService.getSummary(authContext.organizationId, query)
   }
 
   @Get('paginated')

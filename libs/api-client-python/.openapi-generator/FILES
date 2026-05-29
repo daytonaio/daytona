@@ -166,7 +166,9 @@ daytona_api_client/models/sandbox_list_item.py
 daytona_api_client/models/sandbox_list_sort_direction.py
 daytona_api_client/models/sandbox_list_sort_field.py
 daytona_api_client/models/sandbox_state.py
+daytona_api_client/models/sandbox_state_count.py
 daytona_api_client/models/sandbox_volume.py
+daytona_api_client/models/sandboxes_summary.py
 daytona_api_client/models/screenshot_response.py
 daytona_api_client/models/search_files_response.py
 daytona_api_client/models/send_webhook_dto.py

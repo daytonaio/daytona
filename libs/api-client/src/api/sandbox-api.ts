@@ -58,6 +58,8 @@ import type { SandboxListSortField } from '../models';
 // @ts-ignore
 import type { SandboxState } from '../models';
 // @ts-ignore
+import type { SandboxesSummary } from '../models';
+// @ts-ignore
 import type { SignedPortPreviewUrl } from '../models';
 // @ts-ignore
 import type { SshAccessDto } from '../models';
@@ -1171,6 +1173,154 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
             if (skipReconcilingSandboxes !== undefined) {
                 localVarQueryParameter['skipReconcilingSandboxes'] = skipReconcilingSandboxes;
+            }
+
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get sandboxes summary
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {string} [id] Filter by ID prefix (case-insensitive)
+         * @param {string} [name] Filter by name prefix (case-insensitive)
+         * @param {string} [labels] JSON encoded labels to filter by
+         * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+         * @param {Array<SandboxState>} [states] List of states to filter by.
+         * @param {Array<string>} [snapshots] List of snapshot names to filter by
+         * @param {Array<string>} [regionIds] List of regions IDs to filter by
+         * @param {Array<SandboxClass>} [sandboxClasses] List of sandbox classes to filter by
+         * @param {number} [minCpu] Minimum CPU
+         * @param {number} [maxCpu] Maximum CPU
+         * @param {number} [minMemoryGiB] Minimum memory in GiB
+         * @param {number} [maxMemoryGiB] Maximum memory in GiB
+         * @param {number} [minDiskGiB] Minimum disk space in GiB
+         * @param {number} [maxDiskGiB] Maximum disk space in GiB
+         * @param {boolean} [isPublic] Filter by public status
+         * @param {boolean} [isRecoverable] Filter by recoverable status
+         * @param {Date} [createdAtAfter] Include items created after this timestamp
+         * @param {Date} [createdAtBefore] Include items created before this timestamp
+         * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+         * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSandboxesSummary: async (xDaytonaOrganizationID?: string, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, sandboxClasses?: Array<SandboxClass>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/sandbox/summary`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            if (id !== undefined) {
+                localVarQueryParameter['id'] = id;
+            }
+
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
+            if (labels !== undefined) {
+                localVarQueryParameter['labels'] = labels;
+            }
+
+            if (includeErroredDeleted !== undefined) {
+                localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted;
+            }
+
+            if (states) {
+                localVarQueryParameter['states'] = states;
+            }
+
+            if (snapshots) {
+                localVarQueryParameter['snapshots'] = snapshots;
+            }
+
+            if (regionIds) {
+                localVarQueryParameter['regionIds'] = regionIds;
+            }
+
+            if (sandboxClasses) {
+                localVarQueryParameter['sandboxClasses'] = sandboxClasses;
+            }
+
+            if (minCpu !== undefined) {
+                localVarQueryParameter['minCpu'] = minCpu;
+            }
+
+            if (maxCpu !== undefined) {
+                localVarQueryParameter['maxCpu'] = maxCpu;
+            }
+
+            if (minMemoryGiB !== undefined) {
+                localVarQueryParameter['minMemoryGiB'] = minMemoryGiB;
+            }
+
+            if (maxMemoryGiB !== undefined) {
+                localVarQueryParameter['maxMemoryGiB'] = maxMemoryGiB;
+            }
+
+            if (minDiskGiB !== undefined) {
+                localVarQueryParameter['minDiskGiB'] = minDiskGiB;
+            }
+
+            if (maxDiskGiB !== undefined) {
+                localVarQueryParameter['maxDiskGiB'] = maxDiskGiB;
+            }
+
+            if (isPublic !== undefined) {
+                localVarQueryParameter['isPublic'] = isPublic;
+            }
+
+            if (isRecoverable !== undefined) {
+                localVarQueryParameter['isRecoverable'] = isRecoverable;
+            }
+
+            if (createdAtAfter !== undefined) {
+                localVarQueryParameter['createdAtAfter'] = (createdAtAfter as any instanceof Date) ?
+                    (createdAtAfter as any).toISOString() :
+                    createdAtAfter;
+            }
+
+            if (createdAtBefore !== undefined) {
+                localVarQueryParameter['createdAtBefore'] = (createdAtBefore as any instanceof Date) ?
+                    (createdAtBefore as any).toISOString() :
+                    createdAtBefore;
+            }
+
+            if (lastEventAfter !== undefined) {
+                localVarQueryParameter['lastEventAfter'] = (lastEventAfter as any instanceof Date) ?
+                    (lastEventAfter as any).toISOString() :
+                    lastEventAfter;
+            }
+
+            if (lastEventBefore !== undefined) {
+                localVarQueryParameter['lastEventBefore'] = (lastEventBefore as any instanceof Date) ?
+                    (lastEventBefore as any).toISOString() :
+                    lastEventBefore;
             }
 
             localVarHeaderParameter['Accept'] = 'application/json';
@@ -2604,6 +2754,39 @@ export const SandboxApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get sandboxes summary
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {string} [id] Filter by ID prefix (case-insensitive)
+         * @param {string} [name] Filter by name prefix (case-insensitive)
+         * @param {string} [labels] JSON encoded labels to filter by
+         * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+         * @param {Array<SandboxState>} [states] List of states to filter by.
+         * @param {Array<string>} [snapshots] List of snapshot names to filter by
+         * @param {Array<string>} [regionIds] List of regions IDs to filter by
+         * @param {Array<SandboxClass>} [sandboxClasses] List of sandbox classes to filter by
+         * @param {number} [minCpu] Minimum CPU
+         * @param {number} [maxCpu] Maximum CPU
+         * @param {number} [minMemoryGiB] Minimum memory in GiB
+         * @param {number} [maxMemoryGiB] Maximum memory in GiB
+         * @param {number} [minDiskGiB] Minimum disk space in GiB
+         * @param {number} [maxDiskGiB] Maximum disk space in GiB
+         * @param {boolean} [isPublic] Filter by public status
+         * @param {boolean} [isRecoverable] Filter by recoverable status
+         * @param {Date} [createdAtAfter] Include items created after this timestamp
+         * @param {Date} [createdAtBefore] Include items created before this timestamp
+         * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+         * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSandboxesSummary(xDaytonaOrganizationID?: string, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, sandboxClasses?: Array<SandboxClass>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SandboxesSummary>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxesSummary(xDaytonaOrganizationID, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SandboxApi.getSandboxesSummary']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Get signed preview URL for a sandbox port
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {number} port Port number to get signed preview URL for
@@ -3187,6 +3370,36 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Get sandboxes summary
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {string} [id] Filter by ID prefix (case-insensitive)
+         * @param {string} [name] Filter by name prefix (case-insensitive)
+         * @param {string} [labels] JSON encoded labels to filter by
+         * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+         * @param {Array<SandboxState>} [states] List of states to filter by.
+         * @param {Array<string>} [snapshots] List of snapshot names to filter by
+         * @param {Array<string>} [regionIds] List of regions IDs to filter by
+         * @param {Array<SandboxClass>} [sandboxClasses] List of sandbox classes to filter by
+         * @param {number} [minCpu] Minimum CPU
+         * @param {number} [maxCpu] Maximum CPU
+         * @param {number} [minMemoryGiB] Minimum memory in GiB
+         * @param {number} [maxMemoryGiB] Maximum memory in GiB
+         * @param {number} [minDiskGiB] Minimum disk space in GiB
+         * @param {number} [maxDiskGiB] Maximum disk space in GiB
+         * @param {boolean} [isPublic] Filter by public status
+         * @param {boolean} [isRecoverable] Filter by recoverable status
+         * @param {Date} [createdAtAfter] Include items created after this timestamp
+         * @param {Date} [createdAtBefore] Include items created before this timestamp
+         * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+         * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSandboxesSummary(xDaytonaOrganizationID?: string, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, sandboxClasses?: Array<SandboxClass>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, options?: RawAxiosRequestConfig): AxiosPromise<SandboxesSummary> {
+            return localVarFp.getSandboxesSummary(xDaytonaOrganizationID, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get signed preview URL for a sandbox port
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {number} port Port number to get signed preview URL for
@@ -3732,6 +3945,37 @@ export class SandboxApi extends BaseAPI {
      */
     public getSandboxesForRunner(xDaytonaOrganizationID?: string, states?: string, skipReconcilingSandboxes?: boolean, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get sandboxes summary
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [id] Filter by ID prefix (case-insensitive)
+     * @param {string} [name] Filter by name prefix (case-insensitive)
+     * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+     * @param {Array<SandboxState>} [states] List of states to filter by.
+     * @param {Array<string>} [snapshots] List of snapshot names to filter by
+     * @param {Array<string>} [regionIds] List of regions IDs to filter by
+     * @param {Array<SandboxClass>} [sandboxClasses] List of sandbox classes to filter by
+     * @param {number} [minCpu] Minimum CPU
+     * @param {number} [maxCpu] Maximum CPU
+     * @param {number} [minMemoryGiB] Minimum memory in GiB
+     * @param {number} [maxMemoryGiB] Maximum memory in GiB
+     * @param {number} [minDiskGiB] Minimum disk space in GiB
+     * @param {number} [maxDiskGiB] Maximum disk space in GiB
+     * @param {boolean} [isPublic] Filter by public status
+     * @param {boolean} [isRecoverable] Filter by recoverable status
+     * @param {Date} [createdAtAfter] Include items created after this timestamp
+     * @param {Date} [createdAtBefore] Include items created before this timestamp
+     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getSandboxesSummary(xDaytonaOrganizationID?: string, id?: string, name?: string, labels?: string, includeErroredDeleted?: boolean, states?: Array<SandboxState>, snapshots?: Array<string>, regionIds?: Array<string>, sandboxClasses?: Array<SandboxClass>, minCpu?: number, maxCpu?: number, minMemoryGiB?: number, maxMemoryGiB?: number, minDiskGiB?: number, maxDiskGiB?: number, isPublic?: boolean, isRecoverable?: boolean, createdAtAfter?: Date, createdAtBefore?: Date, lastEventAfter?: Date, lastEventBefore?: Date, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).getSandboxesSummary(xDaytonaOrganizationID, id, name, labels, includeErroredDeleted, states, snapshots, regionIds, sandboxClasses, minCpu, maxCpu, minMemoryGiB, maxMemoryGiB, minDiskGiB, maxDiskGiB, isPublic, isRecoverable, createdAtAfter, createdAtBefore, lastEventAfter, lastEventBefore, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

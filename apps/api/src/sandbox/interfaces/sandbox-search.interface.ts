@@ -127,6 +127,17 @@ export interface SandboxSearchResult {
   nextCursor: string | null
 }
 
+export interface SandboxesSummaryStateCount {
+  state: SandboxState
+  count: number
+}
+
+export interface SandboxesSummaryResult {
+  total: number
+  byState: SandboxesSummaryStateCount[]
+  recoverableErrorCount: number
+}
+
 /**
  * Interface for sandbox search operations
  * Provides search functionality for sandboxes with filtering and cursor-based pagination
@@ -145,4 +156,13 @@ export interface SandboxSearchAdapter {
     pagination: SandboxSearchPagination
     sort: SandboxSearchSort
   }): Promise<SandboxSearchResult>
+
+  /**
+   * Compute aggregate counts for sandboxes matching the given filters.
+   * Uses the same filter semantics as {@link SandboxSearchAdapter.search}.
+   * @param params - Summary parameters
+   * @param params.filters - Filters to apply (identical semantics to `search`)
+   * @returns Aggregate counts: total, per-state breakdown, recoverable errors
+   */
+  summary(params: { filters: SandboxSearchFilters }): Promise<SandboxesSummaryResult>
 }

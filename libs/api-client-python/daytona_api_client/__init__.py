@@ -195,7 +195,9 @@ if TYPE_CHECKING:
     from daytona_api_client.models.sandbox_list_sort_direction import SandboxListSortDirection
     from daytona_api_client.models.sandbox_list_sort_field import SandboxListSortField
     from daytona_api_client.models.sandbox_state import SandboxState
+    from daytona_api_client.models.sandbox_state_count import SandboxStateCount
     from daytona_api_client.models.sandbox_volume import SandboxVolume
+    from daytona_api_client.models.sandboxes_summary import SandboxesSummary
     from daytona_api_client.models.screenshot_response import ScreenshotResponse
     from daytona_api_client.models.search_files_response import SearchFilesResponse
     from daytona_api_client.models.send_webhook_dto import SendWebhookDto
@@ -409,7 +411,9 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "SandboxListSortDirection": "daytona_api_client.models.sandbox_list_sort_direction",
     "SandboxListSortField": "daytona_api_client.models.sandbox_list_sort_field",
     "SandboxState": "daytona_api_client.models.sandbox_state",
+    "SandboxStateCount": "daytona_api_client.models.sandbox_state_count",
     "SandboxVolume": "daytona_api_client.models.sandbox_volume",
+    "SandboxesSummary": "daytona_api_client.models.sandboxes_summary",
     "ScreenshotResponse": "daytona_api_client.models.screenshot_response",
     "SearchFilesResponse": "daytona_api_client.models.search_files_response",
     "SendWebhookDto": "daytona_api_client.models.send_webhook_dto",
@@ -637,7 +641,9 @@ __all__ = [
     "SandboxListSortDirection",
     "SandboxListSortField",
     "SandboxState",
+    "SandboxStateCount",
     "SandboxVolume",
+    "SandboxesSummary",
     "ScreenshotResponse",
     "SearchFilesResponse",
     "SendWebhookDto",

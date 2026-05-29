@@ -1559,6 +1559,148 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get sandboxes summary
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [String] :id Filter by ID prefix (case-insensitive)
+    # @option opts [String] :name Filter by name prefix (case-insensitive)
+    # @option opts [String] :labels JSON encoded labels to filter by
+    # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
+    # @option opts [Array<SandboxState>] :states List of states to filter by.
+    # @option opts [Array<String>] :snapshots List of snapshot names to filter by
+    # @option opts [Array<String>] :region_ids List of regions IDs to filter by
+    # @option opts [Array<SandboxClass>] :sandbox_classes List of sandbox classes to filter by
+    # @option opts [Float] :min_cpu Minimum CPU
+    # @option opts [Float] :max_cpu Maximum CPU
+    # @option opts [Float] :min_memory_gi_b Minimum memory in GiB
+    # @option opts [Float] :max_memory_gi_b Maximum memory in GiB
+    # @option opts [Float] :min_disk_gi_b Minimum disk space in GiB
+    # @option opts [Float] :max_disk_gi_b Maximum disk space in GiB
+    # @option opts [Boolean] :is_public Filter by public status
+    # @option opts [Boolean] :is_recoverable Filter by recoverable status
+    # @option opts [Time] :created_at_after Include items created after this timestamp
+    # @option opts [Time] :created_at_before Include items created before this timestamp
+    # @option opts [Time] :last_event_after Include items with last event after this timestamp
+    # @option opts [Time] :last_event_before Include items with last event before this timestamp
+    # @return [SandboxesSummary]
+    def get_sandboxes_summary(opts = {})
+      data, _status_code, _headers = get_sandboxes_summary_with_http_info(opts)
+      data
+    end
+
+    # Get sandboxes summary
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [String] :id Filter by ID prefix (case-insensitive)
+    # @option opts [String] :name Filter by name prefix (case-insensitive)
+    # @option opts [String] :labels JSON encoded labels to filter by
+    # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
+    # @option opts [Array<SandboxState>] :states List of states to filter by.
+    # @option opts [Array<String>] :snapshots List of snapshot names to filter by
+    # @option opts [Array<String>] :region_ids List of regions IDs to filter by
+    # @option opts [Array<SandboxClass>] :sandbox_classes List of sandbox classes to filter by
+    # @option opts [Float] :min_cpu Minimum CPU
+    # @option opts [Float] :max_cpu Maximum CPU
+    # @option opts [Float] :min_memory_gi_b Minimum memory in GiB
+    # @option opts [Float] :max_memory_gi_b Maximum memory in GiB
+    # @option opts [Float] :min_disk_gi_b Minimum disk space in GiB
+    # @option opts [Float] :max_disk_gi_b Maximum disk space in GiB
+    # @option opts [Boolean] :is_public Filter by public status
+    # @option opts [Boolean] :is_recoverable Filter by recoverable status
+    # @option opts [Time] :created_at_after Include items created after this timestamp
+    # @option opts [Time] :created_at_before Include items created before this timestamp
+    # @option opts [Time] :last_event_after Include items with last event after this timestamp
+    # @option opts [Time] :last_event_before Include items with last event before this timestamp
+    # @return [Array<(SandboxesSummary, Integer, Hash)>] SandboxesSummary data, response status code and response headers
+    def get_sandboxes_summary_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandboxes_summary ...'
+      end
+      if @api_client.config.client_side_validation && !opts[:'min_cpu'].nil? && opts[:'min_cpu'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_cpu"]" when calling SandboxApi.get_sandboxes_summary, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'max_cpu'].nil? && opts[:'max_cpu'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_cpu"]" when calling SandboxApi.get_sandboxes_summary, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'min_memory_gi_b'].nil? && opts[:'min_memory_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_memory_gi_b"]" when calling SandboxApi.get_sandboxes_summary, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'max_memory_gi_b'].nil? && opts[:'max_memory_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_memory_gi_b"]" when calling SandboxApi.get_sandboxes_summary, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'min_disk_gi_b'].nil? && opts[:'min_disk_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_disk_gi_b"]" when calling SandboxApi.get_sandboxes_summary, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'max_disk_gi_b'].nil? && opts[:'max_disk_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_disk_gi_b"]" when calling SandboxApi.get_sandboxes_summary, must be greater than or equal to 1.'
+      end
+
+      # resource path
+      local_var_path = '/sandbox/summary'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'id'] = opts[:'id'] if !opts[:'id'].nil?
+      query_params[:'name'] = opts[:'name'] if !opts[:'name'].nil?
+      query_params[:'labels'] = opts[:'labels'] if !opts[:'labels'].nil?
+      query_params[:'includeErroredDeleted'] = opts[:'include_errored_deleted'] if !opts[:'include_errored_deleted'].nil?
+      query_params[:'states'] = @api_client.build_collection_param(opts[:'states'], :multi) if !opts[:'states'].nil?
+      query_params[:'snapshots'] = @api_client.build_collection_param(opts[:'snapshots'], :multi) if !opts[:'snapshots'].nil?
+      query_params[:'regionIds'] = @api_client.build_collection_param(opts[:'region_ids'], :multi) if !opts[:'region_ids'].nil?
+      query_params[:'sandboxClasses'] = @api_client.build_collection_param(opts[:'sandbox_classes'], :multi) if !opts[:'sandbox_classes'].nil?
+      query_params[:'minCpu'] = opts[:'min_cpu'] if !opts[:'min_cpu'].nil?
+      query_params[:'maxCpu'] = opts[:'max_cpu'] if !opts[:'max_cpu'].nil?
+      query_params[:'minMemoryGiB'] = opts[:'min_memory_gi_b'] if !opts[:'min_memory_gi_b'].nil?
+      query_params[:'maxMemoryGiB'] = opts[:'max_memory_gi_b'] if !opts[:'max_memory_gi_b'].nil?
+      query_params[:'minDiskGiB'] = opts[:'min_disk_gi_b'] if !opts[:'min_disk_gi_b'].nil?
+      query_params[:'maxDiskGiB'] = opts[:'max_disk_gi_b'] if !opts[:'max_disk_gi_b'].nil?
+      query_params[:'isPublic'] = opts[:'is_public'] if !opts[:'is_public'].nil?
+      query_params[:'isRecoverable'] = opts[:'is_recoverable'] if !opts[:'is_recoverable'].nil?
+      query_params[:'createdAtAfter'] = opts[:'created_at_after'] if !opts[:'created_at_after'].nil?
+      query_params[:'createdAtBefore'] = opts[:'created_at_before'] if !opts[:'created_at_before'].nil?
+      query_params[:'lastEventAfter'] = opts[:'last_event_after'] if !opts[:'last_event_after'].nil?
+      query_params[:'lastEventBefore'] = opts[:'last_event_before'] if !opts[:'last_event_before'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'SandboxesSummary'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandboxes_summary",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandboxes_summary\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get signed preview URL for a sandbox port
     # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param port [Integer] Port number to get signed preview URL for

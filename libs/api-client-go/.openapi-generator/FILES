@@ -164,7 +164,9 @@ model_sandbox_list_item.go
 model_sandbox_list_sort_direction.go
 model_sandbox_list_sort_field.go
 model_sandbox_state.go
+model_sandbox_state_count.go
 model_sandbox_volume.go
+model_sandboxes_summary.go
 model_screenshot_response.go
 model_search_files_response.go
 model_send_webhook_dto.go
