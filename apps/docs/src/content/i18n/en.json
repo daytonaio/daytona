@@ -139,6 +139,7 @@
   "sidebarconfig.security": "Security",
   "sidebarconfig.integrations": "Guides",
   "sidebarconfig.langchain": "LangChain",
+  "sidebarconfig.langgraph": "LangGraph",
   "sidebarconfig.claudeCode": "Claude Code",
   "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.mastra": "Mastra",

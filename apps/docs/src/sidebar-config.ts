@@ -465,6 +465,18 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath(
+            '/docs/guides/langgraph/langgraph-plan-and-execute-data-agent',
+            locale
+          ),
+          label: t('sidebarconfig.langgraph'),
+          disablePagination: true,
+          attrs: {
+            icon: 'langgraph.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/mastra/mastra-coding-agent', locale),
           label: t('sidebarconfig.mastra'),
           disablePagination: true,
