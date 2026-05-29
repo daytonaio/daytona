@@ -18,6 +18,7 @@ env:
   VERSION: ${{ inputs.version }}
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   REGISTRY_IMAGE: daytonaio/sandbox
+  GPU_REGISTRY_IMAGE: daytonaio/sandbox-gpu
 
 jobs:
   docker_build:
@@ -116,6 +117,37 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+      - name: Build and push sandbox-gpu by digest
+        if: matrix.platform == 'linux/amd64'
+        id: build-sandbox-gpu
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: ./images/sandbox-gpu
+          file: ./images/sandbox-gpu/Dockerfile
+          platforms: linux/amd64
+          tags: ${{ env.GPU_REGISTRY_IMAGE }}
+          build-args: |
+            SANDBOX_IMAGE=${{ env.REGISTRY_IMAGE }}@${{ steps.build-sandbox.outputs.digest }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=registry,ref=daytonaio/sandbox-gpu:buildcache-linux-amd64
+          cache-to: type=registry,ref=daytonaio/sandbox-gpu:buildcache-linux-amd64,mode=max
+
+      - name: Export sandbox-gpu digest
+        if: matrix.platform == 'linux/amd64'
+        run: |
+          mkdir -p ${{ runner.temp }}/digests/sandbox-gpu
+          digest="${{ steps.build-sandbox-gpu.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/sandbox-gpu/${digest#sha256:}"
+
+      - name: Upload sandbox-gpu digest
+        if: matrix.platform == 'linux/amd64'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: digests-gpu-linux-amd64
+          path: ${{ runner.temp }}/digests/sandbox-gpu/*
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Cleanup credentials
         if: always()
         run: |
@@ -140,6 +172,13 @@ jobs:
         with:
           path: ${{ runner.temp }}/digests/sandbox-slim
           pattern: digests-slim-*
+          merge-multiple: true
+
+      - name: Download sandbox-gpu digest
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: ${{ runner.temp }}/digests/sandbox-gpu
+          pattern: digests-gpu-*
           merge-multiple: true
 
       - name: Set up Docker Buildx
@@ -176,10 +215,23 @@ jobs:
           docker buildx imagetools create $TAGS \
             $(printf "${REGISTRY_IMAGE}@sha256:%s " *)
 
+      - name: Create and push sandbox-gpu manifest
+        working-directory: ${{ runner.temp }}/digests/sandbox-gpu
+        env:
+          PUSH_LATEST: ${{ inputs.push_latest }}
+        run: |
+          TAGS="-t ${GPU_REGISTRY_IMAGE}:${VERSION}"
+          if [ "$PUSH_LATEST" = "true" ]; then
+            TAGS="$TAGS -t ${GPU_REGISTRY_IMAGE}:latest"
+          fi
+          docker buildx imagetools create $TAGS \
+            $(printf "${GPU_REGISTRY_IMAGE}@sha256:%s " *)
+
       - name: Inspect images
         run: |
           docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}"
           docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}-slim"
+          docker buildx imagetools inspect "${GPU_REGISTRY_IMAGE}:${VERSION}"
 
       - name: Cleanup credentials
         if: always()

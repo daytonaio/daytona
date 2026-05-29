@@ -37,6 +37,7 @@ updates:
       - "/apps/docs"
       - "/images/sandbox"
       - "/images/sandbox-slim"
+      - "/images/sandbox-gpu"
     schedule:
       interval: weekly
       day: monday
