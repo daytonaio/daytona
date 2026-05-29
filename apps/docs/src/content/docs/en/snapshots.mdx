@@ -29,8 +29,7 @@ Daytona provides methods to create snapshots. You can create a snapshot from:
 - **Snapshot name**: identifier used to reference the snapshot
 - **Image**: base image for the snapshot, must include either a tag or a digest (e.g., **`ubuntu:22.04`**); the `latest`/`lts`/`stable` tags are not supported
 - **Entrypoint** (optional): entrypoint command for the snapshot; ensure that the entrypoint is a long-running command; if not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default
-- [**Resources**](/docs/en/sandboxes#resources) (optional): resources you want the underlying sandboxes to have; by default, Daytona sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**
-- [**GPU**](#gpu-snapshots) (optional): GPU resources for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes)
+- [**Resources**](/docs/en/sandboxes#resources) (optional): resources underlying sandboxes have; by default, sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**; use [GPU snapshots](#gpu-snapshots) for GPU sandboxes
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
