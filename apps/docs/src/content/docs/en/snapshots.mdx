@@ -8,25 +8,6 @@ import Label from '@components/Label.astro'
 
 Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
-Daytona supports running [Docker](#run-docker-in-a-sandbox) and [Kubernetes](#run-kubernetes-in-a-sandbox) workloads inside sandboxes using snapshots.
-
-## Snapshot lifecycle
-
-A snapshot can have several different states. Each state reflects the current status of your snapshot.
-
-- **Pending**: the snapshot creation has been requested
-- **Building**: the snapshot is being built
-- **Pulling**: the snapshot image is being pulled from a registry
-- **Active**: the snapshot is ready to use for creating sandboxes
-- **Inactive**: the snapshot is deactivated
-- **Error**: the snapshot creation failed
-- **Build Failed**: the snapshot build process failed
-- **Removing**: the snapshot is being deleted
-
-:::note
-Inactive snapshots cannot be used to create sandboxes. They must be explicitly [re-activated](#activate-snapshots) before use. When activated, the snapshot returns to `pending` state and is re-processed before becoming `active` again.
-:::
-
 ## Create Snapshots
 
 Daytona provides methods to create snapshots. You can create a snapshot from:
@@ -152,7 +133,8 @@ curl https://app.daytona.io/api/snapshots \
 </TabItem>
 </Tabs>
 
-### Using public images
+<a id="using-public-images"></a>
+### Public images
 
 Daytona supports creating snapshots from any publicly accessible image or container registry.
 
@@ -269,7 +251,8 @@ curl https://app.daytona.io/api/snapshots \
 </TabItem>
 </Tabs>
 
-### Using local images
+<a id="using-local-images"></a>
+### Local images
 
 Daytona supports creating snapshots from local images or from local Dockerfiles. To create a snapshot from a local image or from a local Dockerfile, use the [Daytona CLI](/docs/en/tools/cli#daytona-snapshot).
 
@@ -312,7 +295,8 @@ Step 1/5 : FROM alpine:latest
  ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
 ```
 
-### Using images from private registries
+<a id="using-images-from-private-registries"></a>
+### Images from private registries
 
 Daytona supports creating snapshots from images from [Docker Hub](#docker-hub), [Google Artifact Registry](#google-artifact-registry), [GitHub Container Registry](#github-container-registry-ghcr), [Amazon ECR](#amazon-elastic-container-registry-ecr) or other private container registries.
 
@@ -352,7 +336,8 @@ Daytona supports creating snapshots from images from Google Artifact Registry, a
    Username is auto-filled with `_json_key` (required by Google for service-account auth) and not shown in the form.
 3. Create the snapshot using the full image reference, e.g. `us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`.
 
-#### GitHub Container Registry (GHCR)
+<a id="github-container-registry-ghcr"></a>
+#### GitHub Container Registry
 
 Daytona supports creating snapshots from images from GitHub Container Registry.
 
@@ -364,7 +349,9 @@ Daytona supports creating snapshots from images from GitHub Container Registry.
    Registry URL is auto-filled with `ghcr.io` and not shown in the form.
 3. Create the snapshot using the full image reference, e.g. `ghcr.io/<owner>/<image>:<tag>`.
 
-#### Amazon Elastic Container Registry (ECR)
+
+<a id="amazon-elastic-container-registry-ecr"></a>
+#### Amazon Elastic Container Registry
 
 Daytona pulls private ECR images via cross-account IAM role assumption — you create a role in your AWS account that trusts Daytona's broker principal, and Daytona assumes it on every pull to fetch a short-lived ECR token. No long-lived AWS credentials are shared, and no manual token rotation is needed.
 
@@ -439,10 +426,6 @@ Daytona sends a `daytona-<orgId>-pull` session name on every AssumeRole call. Yo
   "sts:RoleSessionName": "daytona-<YOUR_EXTERNAL_ID>-*"
 }
 ```
-
-### Using the declarative builder
-
-[Declarative Builder](/docs/en/declarative-builder) provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona [SDKs](/docs/en/getting-started#sdks).
 
 ### GPU Snapshots
 
@@ -599,6 +582,11 @@ curl https://app.daytona.io/api/snapshots \
 
 </TabItem>
 </Tabs>
+
+<a id="using-the-declarative-builder"></a>
+### Declarative builder
+
+[Declarative Builder](/docs/en/declarative-builder) provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona [SDKs](/docs/en/getting-started#sdks).
 
 ### Resources
 
@@ -1035,6 +1023,23 @@ curl https://app.daytona.io/api/snapshots/my-awesome-snapshot \
 </TabItem>
 </Tabs>
 
+## Snapshot lifecycle
+
+A snapshot can have several different states. Each state reflects the snapshot's current status.
+
+- **Pending**: the snapshot creation has been requested
+- **Building**: the snapshot is being built
+- **Pulling**: the snapshot image is being pulled from a registry
+- **Active**: the snapshot is ready to use for creating sandboxes
+- **Inactive**: the snapshot is deactivated
+- **Error**: the snapshot creation failed
+- **Build Failed**: the snapshot build process failed
+- **Removing**: the snapshot is being deleted
+
+:::note
+Inactive snapshots cannot be used to create sandboxes. They must be explicitly [re-activated](#activate-snapshots) before use. When activated, the snapshot returns to `pending` state and is re-processed before becoming `active` again.
+:::
+
 ## Run Docker in a Sandbox
 
 Daytona Sandboxes can run Docker containers inside them (**Docker-in-Docker**), enabling you to build, test, and deploy containerized applications. This is particularly useful when your projects have dependencies on external services like databases, message queues, or other microservices.
@@ -1283,8 +1288,6 @@ When a sandbox is created with no snapshot specified, Daytona uses a default sna
 | **`daytona-large`**  | 4        | 8GiB       | 10GiB       |
 
 All default snapshots are based on the `daytonaio/sandbox:<version>` image. For more information, see the [Dockerfile](https://github.com/daytonaio/daytona/blob/main/images/sandbox/Dockerfile).
-
-For GPU workloads, Daytona also provides a pre-built `daytona-gpu` system snapshot. Use it directly for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes), or create a custom GPU snapshot when you need custom dependencies.
 
 ### Python packages (pip)
 
