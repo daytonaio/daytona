@@ -29,9 +29,7 @@ Inactive snapshots cannot be used to create sandboxes. They must be explicitly [
 
 ## Create Snapshots
 
-Daytona provides methods to create snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#SnapshotService), [Java](/docs/en/java-sdk/snapshot) **SDKs**, [CLI](/docs/en/tools/cli#daytona-snapshot), or [API](/docs/en/tools/api#daytona/tag/snapshots).
-
-Snapshots can be created using:
+Daytona provides methods to create snapshots. You can create a snapshot from:
 
 - [public images](#using-public-images)
 - [local images](#using-local-images)
@@ -47,7 +45,7 @@ Snapshots can be created using:
 - **Image**: Base image for the snapshot. Must include either a tag or a digest (e.g., **`ubuntu:22.04`**). The **`latest`** tag is not allowed. Since images tagged `latest` get frequent updates, only specific tags are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
 - **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
 - [**Resources**](/docs/en/sandboxes#resources) (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
-- **GPU** (optional): Enable the **GPU** option to create a GPU snapshot for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes).
+- **GPU** (optional): create a GPU snapshot for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes).
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -452,30 +450,30 @@ Daytona sends a `daytona-<orgId>-pull` session name on every AssumeRole call. Yo
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to create GPU snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona/#type-snapshotservice), [Java](/docs/en/java-sdk/snapshot) **SDKs**, or [API](/docs/en/tools/api#daytona/tag/snapshots).
+Daytona provides methods to create GPU snapshots.
 
-GPU snapshots fit into the same snapshot creation flow as other snapshots, but with the additional option to enable the GPU.
+Daytona provides a pre-built `daytona-gpu` system snapshot for GPU sandboxes. You can use this snapshot to create GPU sandboxes or create a custom GPU snapshot. GPU snapshots fit into the same snapshot creation flow, but with the additional option to enable and provide GPU resources.
 
 Use the pre-built `daytona-gpu` system snapshot directly when creating a [GPU sandbox](/docs/en/sandboxes#gpu-sandboxes). Create a custom GPU snapshot only when you need to customize the image or dependencies.
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
-3. Configure snapshot details and enable the GPU option
+3. Configure GPU snapshot
 
-To create a GPU-enabled snapshot programmatically, set GPU resources for the snapshot. The `gpu` value defines how many GPU units each sandbox created from this snapshot will request. If `gpu` is not set, it defaults to `0`, which creates a non-GPU snapshot.
+To create a GPU snapshot programmatically, set the `gpu` value to the number of GPU units you want to allocate and target `us-east-1` region. If `gpu` is not set, it defaults to `0`, which creates a non-GPU snapshot.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-from daytona import Daytona, CreateSnapshotParams, Resources
+from daytona import CreateSnapshotParams, Daytona, DaytonaConfig, Image, Resources
 
-daytona = Daytona()
+daytona = Daytona(DaytonaConfig(target="us-east-1"))
 snapshot = daytona.snapshot.create(
     CreateSnapshotParams(
         name="my-gpu-snapshot",
-        image="python:3.12",
-        resources=Resources(gpu=1),
+        image=Image.base("python:3.12"),
+        resources=Resources(cpu=1, memory=1, disk=1, gpu=1),
     ),
 )
 ```
@@ -486,11 +484,11 @@ snapshot = daytona.snapshot.create(
 ```typescript
 import { Daytona } from "@daytona/sdk";
 
-const daytona = new Daytona();
+const daytona = new Daytona({ target: "us-east-1" });
 const snapshot = await daytona.snapshot.create({
   name: "my-gpu-snapshot",
   image: "python:3.12",
-  resources: { gpu: 1 },
+  resources: { cpu: 1, memory: 1, disk: 1, gpu: 1 },
 });
 ```
 
@@ -500,12 +498,15 @@ const snapshot = await daytona.snapshot.create({
 ```ruby
 require 'daytona'
 
-daytona = Daytona::Daytona.new
+config = Daytona::Config.new(
+  target: "us-east-1"
+)
+daytona = Daytona::Daytona.new(config)
 snapshot = daytona.snapshot.create(
   Daytona::CreateSnapshotParams.new(
     name: 'my-gpu-snapshot',
     image: 'python:3.12',
-    resources: Daytona::Resources.new(gpu: 1)
+    resources: Daytona::Resources.new(cpu: 1, memory: 1, disk: 1, gpu: 1)
   )
 )
 ```
@@ -523,12 +524,17 @@ import (
 )
 
 func main() {
-	client, _ := daytona.NewClient()
+	client, _ := daytona.NewClientWithConfig(&types.DaytonaConfig{
+		Target: "us-east-1",
+	})
 	ctx := context.Background()
 	snapshot, logCh, _ := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
 		Name:  "my-gpu-snapshot",
 		Image: "python:3.12",
 		Resources: &types.Resources{
+			CPU: 1,
+			Memory: 1,
+			Disk: 1,
 			GPU: 1,
 		},
 	})
@@ -543,14 +549,23 @@ func main() {
 
 ```java
 import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DaytonaConfig;
 import io.daytona.sdk.Image;
 import io.daytona.sdk.model.Resources;
 import io.daytona.sdk.model.Snapshot;
 
 final class CreateGpuSnapshot {
     public static void main(String[] args) {
-        try (Daytona daytona = new Daytona()) {
+        DaytonaConfig config = new DaytonaConfig.Builder()
+                .apiKey(System.getenv("DAYTONA_API_KEY"))
+                .target("us-east-1")
+                .build();
+
+        try (Daytona daytona = new Daytona(config)) {
             Resources resources = new Resources();
+            resources.setCpu(1);
+            resources.setMemory(1);
+            resources.setDisk(1);
             resources.setGpu(1);
             Snapshot snapshot = daytona.snapshot().create(
                 "my-gpu-snapshot",
@@ -574,6 +589,10 @@ curl https://app.daytona.io/api/snapshots \
   --data '{
     "name": "my-gpu-snapshot",
     "imageName": "python:3.12",
+    "regionId": "us-east-1",
+    "cpu": 1,
+    "memory": 1,
+    "disk": 1,
     "gpu": 1
   }'
 ```
