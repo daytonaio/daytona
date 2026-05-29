@@ -21,9 +21,11 @@ import {
   RouterProvider,
   useLocation,
   useNavigation,
+  useRouteError,
 } from 'react-router-dom'
 import { BannerProvider } from './components/Banner'
 import { CommandPaletteProvider } from './components/CommandPalette'
+import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
 import LoadingFallback from './components/LoadingFallback'
 import { LoadingFallbackContent } from './components/LoadingFallbackContent'
 import { Button } from './components/ui/button'
@@ -48,6 +50,26 @@ import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 import { SvixProvider } from './providers/SvixProvider'
 import { lazyRoutes } from './routes'
+
+function normalizeRouteError(error: unknown) {
+  if (error instanceof Error) {
+    return error
+  }
+
+  if (typeof error === 'string') {
+    return new Error(error)
+  }
+
+  return new Error('Unknown route error')
+}
+
+function RouteErrorFallback() {
+  const error = useRouteError()
+
+  return (
+    <ErrorBoundaryFallback error={normalizeRouteError(error)} resetErrorBoundary={() => window.location.reload()} />
+  )
+}
 
 function AppRoot() {
   const config = useConfig()
@@ -256,6 +278,7 @@ const router = createBrowserRouter([
   {
     path: RoutePath.LANDING,
     element: <AppRoot />,
+    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <LandingPage /> },
       { path: trimLeadingSlash(RoutePath.LOGOUT), element: <Logout /> },
