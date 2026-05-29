@@ -20,6 +20,7 @@ import {
   PaymentMethod,
   PaymentUrl,
   PortalUrlApi,
+  SetupCheckoutUrlApi,
   Tier,
   TierApi,
   UsageApi,
@@ -41,18 +42,18 @@ export class BillingApiClient {
   private invoicesApi: InvoicesApi
   private organizationApi: OrganizationApi
   private checkoutUrlApi: CheckoutUrlApi
+  private setupCheckoutUrlApi: SetupCheckoutUrlApi
   private portalUrlApi: PortalUrlApi
   private billingInfoApi: BillingInfoApi
-  private axiosInstance: AxiosInstance
 
   constructor(configuration: Configuration, axiosInstance: AxiosInstance) {
-    this.axiosInstance = axiosInstance
     this.walletApi = new WalletApi(configuration, undefined, axiosInstance)
     this.usageApi = new UsageApi(configuration, undefined, axiosInstance)
     this.tierApi = new TierApi(configuration, undefined, axiosInstance)
     this.invoicesApi = new InvoicesApi(configuration, undefined, axiosInstance)
     this.organizationApi = new OrganizationApi(configuration, undefined, axiosInstance)
     this.checkoutUrlApi = new CheckoutUrlApi(configuration, undefined, axiosInstance)
+    this.setupCheckoutUrlApi = new SetupCheckoutUrlApi(configuration, undefined, axiosInstance)
     this.portalUrlApi = new PortalUrlApi(configuration, undefined, axiosInstance)
     this.billingInfoApi = new BillingInfoApi(configuration, undefined, axiosInstance)
   }
@@ -113,9 +114,7 @@ export class BillingApiClient {
   }
 
   public async getOrganizationSetupCheckoutUrl(organizationId: string): Promise<string> {
-    const response = await this.axiosInstance.get<string>(
-      `/v2/organization/${encodeURIComponent(organizationId)}/setup-checkout-url`,
-    )
+    const response = await this.setupCheckoutUrlApi.getV2SetupCheckoutURL(organizationId)
     return response.data
   }
 

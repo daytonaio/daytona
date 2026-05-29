@@ -28,10 +28,17 @@ export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) 
 
   const handleAddPaymentMethod = useCallback(async () => {
     const newWindow = window.open('', '_blank')
+    // Sever the opener link so the checkout page can't reach back into this tab.
+    if (newWindow) {
+      newWindow.opener = null
+    }
     try {
       const url = await fetchSetupCheckoutUrl()
       if (newWindow) {
         newWindow.location.href = url
+      } else {
+        // Popup was blocked — fall back to navigating the current tab.
+        window.location.href = url
       }
     } catch (error) {
       newWindow?.close()
