@@ -17,14 +17,16 @@ import { toast } from 'sonner'
 
 interface PaymentMethodsCardProps {
   organizationId: string
+  creditCardConnectedCreditsGranted?: boolean
 }
 
-export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) {
+export function PaymentMethodsCard({ organizationId, creditCardConnectedCreditsGranted }: PaymentMethodsCardProps) {
   const paymentMethodsQuery = usePaymentMethodsQuery({ organizationId })
   const portalUrlQuery = useOrganizationBillingPortalUrlQuery({ organizationId })
   const fetchSetupCheckoutUrl = useSetupCheckoutUrlQuery(organizationId)
   const methods = paymentMethodsQuery.data ?? []
   const portalUrl = portalUrlQuery.data
+  const showAddButton = methods.length === 0 && !creditCardConnectedCreditsGranted
 
   const handleAddPaymentMethod = useCallback(async () => {
     const newWindow = window.open('', '_blank')
@@ -81,10 +83,12 @@ export function PaymentMethodsCard({ organizationId }: PaymentMethodsCardProps) 
         ) : methods.length === 0 ? (
           <div className="p-4 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">No cards on file yet.</p>
-            <Button variant="secondary" size="sm" onClick={handleAddPaymentMethod}>
-              <PlusIcon />
-              Add payment method
-            </Button>
+            {showAddButton && (
+              <Button variant="secondary" size="sm" onClick={handleAddPaymentMethod}>
+                <PlusIcon />
+                Add payment method
+              </Button>
+            )}
           </div>
         ) : (
           <ul className="divide-y divide-border">

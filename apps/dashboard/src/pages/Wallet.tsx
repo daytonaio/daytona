@@ -440,7 +440,10 @@ const Wallet = () => {
             {isBillingV2 && selectedOrganization && (
               <>
                 <BillingInfoCard organizationId={selectedOrganization.id} />
-                <PaymentMethodsCard organizationId={selectedOrganization.id} />
+                <PaymentMethodsCard
+                  organizationId={selectedOrganization.id}
+                  creditCardConnectedCreditsGranted={wallet?.creditCardConnectedCreditsGranted}
+                />
               </>
             )}
 
