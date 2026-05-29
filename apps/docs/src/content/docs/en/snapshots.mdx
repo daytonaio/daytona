@@ -8,14 +8,18 @@ import Label from '@components/Label.astro'
 
 Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
+- **Snapshot SDKs**: [TypeScript](/docs/en/typescript-sdk/snapshot), [Python](/docs/en/python-sdk/sync/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#type-snapshotservice), [Java](/docs/en/java-sdk/snapshot)
+- **Snapshot API**: [RESTful API](/docs/en/tools/api/#daytona/tag/snapshots) ([OpenAPI spec](/docs/openapi.json)), [Toolbox API](/docs/en/tools/api#daytona-toolbox) ([OpenAPI spec](/docs/toolbox-openapi.json))
+- **Snapshot CLI**: [Mac/Linux/Windows](/docs/en/tools/cli)
+
 ## Create Snapshots
 
 Daytona provides methods to create snapshots. You can create a snapshot from:
 
-- [public images](#using-public-images)
-- [local images](#using-local-images)
-- [images from private registries](#using-images-from-private-registries)
-- [the declarative builder](#using-the-declarative-builder)
+- [public images](#public-images)
+- [local images](#local-images)
+- [images from private registries](#images-from-private-registries)
+- [the declarative builder](#declarative-builder)
 - [GPU snapshots](#gpu-snapshots) (for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes))
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
