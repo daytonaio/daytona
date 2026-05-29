@@ -394,6 +394,16 @@ export class FileSystem {
             resolvedStream = fileStream as Readable
           }
           resolve(resolvedStream)
+
+          if (options.signal) {
+            const onAbort = () => {
+              if (resolvedStream && !resolvedStream.destroyed) {
+                resolvedStream.destroy(toDownloadCancelledError())
+              }
+            }
+            options.signal.addEventListener('abort', onAbort, { once: true })
+            resolvedStream.once('close', () => options.signal!.removeEventListener('abort', onAbort))
+          }
         },
       )
         .then(() => {
