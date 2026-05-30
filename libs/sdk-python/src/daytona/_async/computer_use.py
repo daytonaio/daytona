@@ -368,12 +368,12 @@ class AsyncScreenshot:
 
             # High quality JPEG
             jpeg = await sandbox.computer_use.screenshot.take_compressed(
-                ScreenshotOptions(format="jpeg", quality=95, show_cursor=True)
+                ScreenshotOptions(fmt="jpeg", quality=95, show_cursor=True)
             )
 
             # Scaled down PNG
             scaled = await sandbox.computer_use.screenshot.take_compressed(
-                ScreenshotOptions(format="png", scale=0.5)
+                ScreenshotOptions(fmt="png", scale=0.5)
             )
             ```
         """
@@ -407,7 +407,7 @@ class AsyncScreenshot:
             region = ScreenshotRegion(x=0, y=0, width=800, height=600)
             screenshot = await sandbox.computer_use.screenshot.take_compressed_region(
                 region,
-                ScreenshotOptions(format="jpeg", quality=80, show_cursor=True)
+                ScreenshotOptions(fmt="jpeg", quality=80, show_cursor=True)
             )
             print(f"Compressed size: {screenshot.size_bytes} bytes")
             ```
