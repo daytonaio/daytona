@@ -1738,6 +1738,9 @@ const docTemplate = `{
                 "snapshot"
             ],
             "properties": {
+                "class": {
+                    "type": "string"
+                },
                 "destinationRef": {
                     "type": "string"
                 },

@@ -54,6 +54,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
 import { SnapshotState } from '../enums/snapshot-state.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { UrlDto } from '../../common/dto/url.dto'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
@@ -113,6 +114,12 @@ export class SnapshotController {
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createSnapshotDto: CreateSnapshotDto,
   ): Promise<SnapshotDto> {
+    if (createSnapshotDto.sandboxClass === SandboxClass.WINDOWS) {
+      throw new BadRequestError(
+        'Windows snapshots cannot be created via this endpoint; they are produced by snapshot-from-sandbox flows.',
+      )
+    }
+
     if (createSnapshotDto.buildInfo) {
       if (createSnapshotDto.imageName) {
         throw new BadRequestError('Cannot specify an image name when using a build info entry')

@@ -12,6 +12,7 @@ import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { RunnerServiceInfo } from '../common/runner-service-info'
 
@@ -110,6 +111,7 @@ export interface RunnerAdapter {
     destinationRegistry?: DockerRegistry,
     destinationRef?: string,
     newTag?: string,
+    sandboxClass?: SandboxClass,
   ): Promise<void>
   snapshotExists(snapshotRef: string): Promise<boolean>
   getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>

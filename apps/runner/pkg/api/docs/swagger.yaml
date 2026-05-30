@@ -176,6 +176,8 @@ definitions:
     type: object
   PullSnapshotRequestDTO:
     properties:
+      class:
+        type: string
       destinationRef:
         type: string
       destinationRegistry:

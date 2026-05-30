@@ -1619,6 +1619,9 @@
       "type": "object",
       "required": ["snapshot"],
       "properties": {
+        "class": {
+          "type": "string"
+        },
         "destinationRef": {
           "type": "string"
         },

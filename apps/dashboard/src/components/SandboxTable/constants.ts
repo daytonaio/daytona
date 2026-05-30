@@ -13,6 +13,7 @@ import {
   Container,
   Server,
   Smartphone,
+  Monitor,
   LucideIcon,
 } from 'lucide-react'
 import { FacetedFilterOption } from './types'
@@ -115,6 +116,7 @@ const SANDBOX_CLASS_LABEL_MAPPING: Record<SandboxClass, string> = {
   [SandboxClass.CONTAINER]: 'Container',
   [SandboxClass.LINUX_VM]: 'Linux VM',
   [SandboxClass.ANDROID]: 'Android',
+  [SandboxClass.WINDOWS]: 'Windows',
   [SandboxClass.UNKNOWN_DEFAULT_OPEN_API]: 'Unknown',
 }
 
@@ -122,6 +124,7 @@ const SANDBOX_CLASS_ICON_MAPPING: Record<SandboxClass, LucideIcon> = {
   [SandboxClass.CONTAINER]: Container,
   [SandboxClass.LINUX_VM]: Server,
   [SandboxClass.ANDROID]: Smartphone,
+  [SandboxClass.WINDOWS]: Monitor,
   [SandboxClass.UNKNOWN_DEFAULT_OPEN_API]: Container,
 }
 
@@ -140,6 +143,11 @@ export const SANDBOX_CLASS_OPTIONS: FacetedFilterOption[] = [
     label: SANDBOX_CLASS_LABEL_MAPPING[SandboxClass.ANDROID],
     value: SandboxClass.ANDROID,
     icon: SANDBOX_CLASS_ICON_MAPPING[SandboxClass.ANDROID],
+  },
+  {
+    label: SANDBOX_CLASS_LABEL_MAPPING[SandboxClass.WINDOWS],
+    value: SandboxClass.WINDOWS,
+    icon: SANDBOX_CLASS_ICON_MAPPING[SandboxClass.WINDOWS],
   },
 ]
 

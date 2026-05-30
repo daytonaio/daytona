@@ -30,7 +30,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { WithSpan } from '../../../common/decorators/otel.decorator'
 import { SandboxActivityService } from '../../services/sandbox-activity.service'
-import { getRunnerSandboxClass } from '../../utils/sandbox-class.util'
+import { getRunnerSandboxClass, isRegistryBasedSandboxClass } from '../../utils/sandbox-class.util'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -319,18 +319,26 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   async pullSnapshotToRunner(snapshot: Snapshot, runner: Runner) {
-    const internalRegistry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
-      snapshot.ref,
-      runner.region,
-    )
-    if (!internalRegistry) {
-      throw new Error('No internal registry found for sandbox snapshot')
+    let internalRegistry: DockerRegistry | undefined
+    if (isRegistryBasedSandboxClass(snapshot.sandboxClass)) {
+      const found = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshot.ref, runner.region)
+      if (!found) {
+        throw new Error('No internal registry found for sandbox snapshot')
+      }
+      internalRegistry = found
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     // Fire the pull request (runner returns 202 immediately)
-    await runnerAdapter.pullSnapshot(snapshot.ref, internalRegistry)
+    await runnerAdapter.pullSnapshot(
+      snapshot.ref,
+      internalRegistry,
+      undefined,
+      undefined,
+      undefined,
+      snapshot.sandboxClass,
+    )
 
     const pollTimeoutMs = 60 * 60 * 1_000 // 1 hour
     const pollIntervalMs = 5 * 1_000 // 5 seconds
@@ -407,7 +415,7 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    let internalRegistry: DockerRegistry
+    let internalRegistry: DockerRegistry | undefined
     let entrypoint: string[]
     let snapshotRef: string
     if (!sandbox.buildInfo) {
@@ -415,9 +423,12 @@ export class SandboxStartAction extends SandboxAction {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       snapshotRef = snapshot.ref
 
-      internalRegistry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshotRef, runner.region)
-      if (!internalRegistry) {
-        throw new Error('No registry found for snapshot')
+      if (isRegistryBasedSandboxClass(snapshot.sandboxClass)) {
+        const found = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshotRef, runner.region)
+        if (!found) {
+          throw new Error('No registry found for snapshot')
+        }
+        internalRegistry = found
       }
 
       entrypoint = snapshot.entrypoint
