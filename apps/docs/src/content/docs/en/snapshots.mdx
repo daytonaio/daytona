@@ -23,13 +23,11 @@ Daytona provides methods to create snapshots. You can create a snapshot from:
 - [GPU snapshots](#gpu-snapshots) (for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes))
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
-2. Click the **Create Snapshot** button
-3. Enter the snapshot name and image (tag or digest)
+2. Click **Create Snapshot**
+3. Enter the snapshot **name** and **image**
 
 - **Snapshot name**: identifier used to reference the snapshot
 - **Image**: base image for the snapshot, must include either a tag or a digest (e.g., **`ubuntu:22.04`**); the `latest`/`lts`/`stable` tags are not supported
-- **Entrypoint** (optional): entrypoint command for the snapshot; ensure that the entrypoint is a long-running command; if not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default
-- [**Resources**](/docs/en/sandboxes#resources) (optional): resources underlying sandboxes have; by default, sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**; use [GPU snapshots](#gpu-snapshots) for GPU sandboxes
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -138,19 +136,16 @@ curl https://app.daytona.io/api/snapshots \
 
 ### GPU Snapshots
 
-:::caution[Experimental]
-This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
-:::
-
 Daytona provides methods to create GPU snapshots.
 
-GPU snapshots are used to create [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes). Daytona provides a pre-built `daytona-gpu` system snapshot for creating GPU sandboxes. You can also create a custom GPU snapshot to customize the image or dependencies.
-
-GPU snapshots follow the same snapshot creation flow, but with the additional option to enable and provide GPU resources.
+GPU snapshots are used to create [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes). Daytona provides a pre-built `daytona-gpu` system snapshot for creating GPU sandboxes.
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
-2. Click the **Create Snapshot** button
-3. Configure GPU snapshot details and enable the GPU option
+2. Click **Create Snapshot**
+3. Enter the snapshot **name** and **image**
+4. Select **`us-east-1`** region
+5. Check the **Allocate GPU** option
+6. Click **Create** to create a GPU snapshot
 
 To create a GPU snapshot programmatically, set the `gpu` value to the number of GPU units you want to allocate and target `us-east-1` region. If `gpu` is not set, it defaults to `0`, which creates a non-GPU snapshot.
 
