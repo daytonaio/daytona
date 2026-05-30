@@ -993,6 +993,559 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/hotk
 
 Common aliases like `Return` → `enter`, `control` → `ctrl`, `command` / `meta` / `win` → `cmd`, and `option` → `alt` are normalized automatically. Unsupported or malformed inputs return an error, sometimes with a suggested alternative.
 
+## Accessibility operations
+
+Use Linux accessibility operations to inspect the AT-SPI tree and interact with UI elements by node ID. Start Computer Use before calling accessibility methods.
+
+:::note[App accessibility support]
+Accessibility operations read the semantic UI information that applications expose over AT-SPI. Apps or custom widgets that do not expose accessibility objects may return sparse nodes, generic roles, or no actionable nodes; mouse, keyboard, and screenshot operations remain available for those cases.
+:::
+
+### Get tree
+
+Read an accessibility tree for the focused app, a specific process, or all apps.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Focused app
+focused_tree = sandbox.computer_use.accessibility.get_tree(scope="focused", max_depth=2)
+
+# Specific process
+process_tree = sandbox.computer_use.accessibility.get_tree(
+    scope="pid",
+    pid=1234,
+    max_depth=2,
+)
+
+# All apps
+desktop_tree = sandbox.computer_use.accessibility.get_tree(scope="all", max_depth=2)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Focused app
+const focusedTree = await sandbox.computerUse.accessibility.getTree({
+  scope: 'focused',
+  maxDepth: 2,
+});
+
+// Specific process
+const processTree = await sandbox.computerUse.accessibility.getTree({
+  scope: 'pid',
+  pid: 1234,
+  maxDepth: 2,
+});
+
+// All apps
+const desktopTree = await sandbox.computerUse.accessibility.getTree({
+  scope: 'all',
+  maxDepth: 2,
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Focused app
+focused_tree = sandbox.computer_use.accessibility.get_tree(scope: "focused", max_depth: 2)
+
+# Specific process
+process_tree = sandbox.computer_use.accessibility.get_tree(
+  scope: "pid",
+  pid: 1234,
+  max_depth: 2
+)
+
+# All apps
+desktop_tree = sandbox.computer_use.accessibility.get_tree(scope: "all", max_depth: 2)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+maxDepth := 2
+
+// Focused app
+focusedScope := "focused"
+focusedTree, err := sandbox.ComputerUse.Accessibility().GetTree(ctx, &daytona.AccessibilityTreeOptions{
+	Scope:    &focusedScope,
+	MaxDepth: &maxDepth,
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Specific process
+processScope := "pid"
+pid := 1234
+processTree, err := sandbox.ComputerUse.Accessibility().GetTree(ctx, &daytona.AccessibilityTreeOptions{
+	Scope:    &processScope,
+	PID:      &pid,
+	MaxDepth: &maxDepth,
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+// All apps
+allScope := "all"
+desktopTree, err := sandbox.ComputerUse.Accessibility().GetTree(ctx, &daytona.AccessibilityTreeOptions{
+	Scope:    &allScope,
+	MaxDepth: &maxDepth,
+})
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Focused app
+var focusedTree = sandbox.computerUse.getAccessibilityTree("focused", null, 2);
+
+// Specific process
+var processTree = sandbox.computerUse.getAccessibilityTree("pid", 1234, 2);
+
+// All apps
+var desktopTree = sandbox.computerUse.getAccessibilityTree("all", null, 2);
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Focused app
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/tree?scope=focused&maxDepth=2'
+
+# Specific process
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/tree?scope=pid&pid=1234&maxDepth=2'
+
+# All apps
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/tree?scope=all&maxDepth=2'
+```
+
+</TabItem>
+</Tabs>
+
+### Find nodes
+
+Search the accessibility tree by role, accessible name, state, and scope.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Find buttons by accessible name
+buttons = sandbox.computer_use.accessibility.find_nodes(
+    scope="focused",
+    role="button",
+    name="Submit",
+    name_match="substring",
+    limit=10,
+)
+
+# Find text entries in a process
+entries = sandbox.computer_use.accessibility.find_nodes(
+    scope="pid",
+    pid=1234,
+    role="entry",
+    states=["enabled", "focusable"],
+    limit=10,
+)
+
+# Find visible nodes across all apps
+visible_nodes = sandbox.computer_use.accessibility.find_nodes(
+    scope="all",
+    states=["visible"],
+    limit=20,
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Find buttons by accessible name
+const buttons = await sandbox.computerUse.accessibility.findNodes({
+  scope: 'focused',
+  role: 'button',
+  name: 'Submit',
+  nameMatch: 'substring',
+  limit: 10,
+});
+
+// Find text entries in a process
+const entries = await sandbox.computerUse.accessibility.findNodes({
+  scope: 'pid',
+  pid: 1234,
+  role: 'entry',
+  states: ['enabled', 'focusable'],
+  limit: 10,
+});
+
+// Find visible nodes across all apps
+const visibleNodes = await sandbox.computerUse.accessibility.findNodes({
+  scope: 'all',
+  states: ['visible'],
+  limit: 20,
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Find buttons by accessible name
+buttons = sandbox.computer_use.accessibility.find_nodes(
+  scope: "focused",
+  role: "button",
+  name: "Submit",
+  name_match: "substring",
+  limit: 10
+)
+
+# Find text entries in a process
+entries = sandbox.computer_use.accessibility.find_nodes(
+  scope: "pid",
+  pid: 1234,
+  role: "entry",
+  states: ["enabled", "focusable"],
+  limit: 10
+)
+
+# Find visible nodes across all apps
+visible_nodes = sandbox.computer_use.accessibility.find_nodes(
+  scope: "all",
+  states: ["visible"],
+  limit: 20
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+limit := 10
+
+// Find buttons by accessible name
+focusedScope := "focused"
+buttonRole := "button"
+submitName := "Submit"
+substringMatch := "substring"
+buttons, err := sandbox.ComputerUse.Accessibility().FindNodes(ctx, &daytona.AccessibilityFindOptions{
+	Scope:     &focusedScope,
+	Role:      &buttonRole,
+	Name:      &submitName,
+	NameMatch: &substringMatch,
+	Limit:     &limit,
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Find text entries in a process
+processScope := "pid"
+pid := 1234
+entryRole := "entry"
+entries, err := sandbox.ComputerUse.Accessibility().FindNodes(ctx, &daytona.AccessibilityFindOptions{
+	Scope:  &processScope,
+	PID:    &pid,
+	Role:   &entryRole,
+	States: []string{"enabled", "focusable"},
+	Limit:  &limit,
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+// Find visible nodes across all apps
+allScope := "all"
+visibleLimit := 20
+visibleNodes, err := sandbox.ComputerUse.Accessibility().FindNodes(ctx, &daytona.AccessibilityFindOptions{
+	Scope:  &allScope,
+	States: []string{"visible"},
+	Limit:  &visibleLimit,
+})
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Find buttons by accessible name
+var buttons = sandbox.computerUse.findAccessibilityNodes(
+    new FindAccessibilityNodesRequest()
+        .scope("focused")
+        .role("button")
+        .name("Submit")
+        .nameMatch("substring")
+        .limit(10)
+);
+
+// Find text entries in a process
+var entries = sandbox.computerUse.findAccessibilityNodes(
+    new FindAccessibilityNodesRequest()
+        .scope("pid")
+        .pid(1234)
+        .role("entry")
+        .states(java.util.List.of("enabled", "focusable"))
+        .limit(10)
+);
+
+// Find visible nodes across all apps
+var visibleNodes = sandbox.computerUse.findAccessibilityNodes(
+    new FindAccessibilityNodesRequest()
+        .scope("all")
+        .states(java.util.List.of("visible"))
+        .limit(20)
+);
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Find buttons by accessible name
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/find' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "scope": "focused",
+  "role": "button",
+  "name": "Submit",
+  "nameMatch": "substring",
+  "limit": 10
+}'
+
+# Find text entries in a process
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/find' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "scope": "pid",
+  "pid": 1234,
+  "role": "entry",
+  "states": ["enabled", "focusable"],
+  "limit": 10
+}'
+
+# Find visible nodes across all apps
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/find' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "scope": "all",
+  "states": ["visible"],
+  "limit": 20
+}'
+```
+
+</TabItem>
+</Tabs>
+
+### Focus node
+
+Move keyboard focus to a node returned by `get_tree` or `find_nodes`.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+sandbox.computer_use.accessibility.focus_node("node-id")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+await sandbox.computerUse.accessibility.focusNode('node-id');
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox.computer_use.accessibility.focus_node(id: "node-id")
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+if err := sandbox.ComputerUse.Accessibility().FocusNode(ctx, "node-id"); err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.computerUse.focusAccessibilityNode("node-id");
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/node/focus' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"id":"node-id"}'
+```
+
+</TabItem>
+</Tabs>
+
+### Invoke node
+
+Run a node action, such as pressing a button.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Invoke the primary action
+sandbox.computer_use.accessibility.invoke_node("node-id")
+
+# Invoke a named action
+sandbox.computer_use.accessibility.invoke_node("node-id", action="click")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Invoke the primary action
+await sandbox.computerUse.accessibility.invokeNode('node-id');
+
+// Invoke a named action
+await sandbox.computerUse.accessibility.invokeNode('node-id', 'click');
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Invoke the primary action
+sandbox.computer_use.accessibility.invoke_node(id: "node-id")
+
+# Invoke a named action
+sandbox.computer_use.accessibility.invoke_node(id: "node-id", action: "click")
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Invoke the primary action
+if err := sandbox.ComputerUse.Accessibility().InvokeNode(ctx, "node-id", nil); err != nil {
+	log.Fatal(err)
+}
+
+// Invoke a named action
+action := "click"
+if err := sandbox.ComputerUse.Accessibility().InvokeNode(ctx, "node-id", &action); err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+// Invoke the primary action
+sandbox.computerUse.invokeAccessibilityNode("node-id");
+
+// Invoke a named action
+sandbox.computerUse.invokeAccessibilityNode("node-id", "click");
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Invoke the primary action
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/node/invoke' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"id":"node-id"}'
+
+# Invoke a named action
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/node/invoke' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"id":"node-id","action":"click"}'
+```
+
+</TabItem>
+</Tabs>
+
+### Set node value
+
+Write text or value content to nodes that support value changes.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+sandbox.computer_use.accessibility.set_node_value("node-id", "hello")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+await sandbox.computerUse.accessibility.setNodeValue('node-id', 'hello');
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox.computer_use.accessibility.set_node_value(id: "node-id", value: "hello")
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+if err := sandbox.ComputerUse.Accessibility().SetNodeValue(ctx, "node-id", "hello"); err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+sandbox.computerUse.setAccessibilityNodeValue("node-id", "hello");
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/a11y/node/value' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"id":"node-id","value":"hello"}'
+```
+
+</TabItem>
+</Tabs>
+
 ## Screenshot operations
 
 ### Take full screen
