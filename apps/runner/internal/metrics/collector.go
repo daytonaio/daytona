@@ -17,11 +17,14 @@ import (
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/system"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/mem"
 )
+
+const defaultDockerDataRoot = "/var/lib/docker"
 
 // CollectorConfig holds configuration for the metrics collector
 type CollectorConfig struct {
@@ -30,6 +33,9 @@ type CollectorConfig struct {
 	WindowSize                         int
 	CPUUsageSnapshotInterval           time.Duration
 	AllocatedResourcesSnapshotInterval time.Duration
+	// Optional override for the path used to measure Docker-backed disk usage.
+	// Empty means use DockerRootDir reported by the daemon.
+	DockerDataRoot string
 }
 
 // Collector collects system metrics
@@ -50,6 +56,9 @@ type Collector struct {
 	// Intervals for snapshotting metrics in seconds
 	cpuUsageSnapshotInterval           time.Duration
 	allocatedResourcesSnapshotInterval time.Duration
+	dockerDataRoot                     string
+	dockerInfo                         func(context.Context) (system.Info, error)
+	dockerDataRootFallbackWarnOnce     sync.Once
 }
 
 // CPUSnapshot represents a point-in-time CPU measurement
@@ -82,6 +91,10 @@ func NewCollector(cfg CollectorConfig) *Collector {
 		cpuRing:                            ring.New(cfg.WindowSize),
 		cpuUsageSnapshotInterval:           cfg.CPUUsageSnapshotInterval,
 		allocatedResourcesSnapshotInterval: cfg.AllocatedResourcesSnapshotInterval,
+		dockerDataRoot:                     cfg.DockerDataRoot,
+		dockerInfo: func(ctx context.Context) (system.Info, error) {
+			return cfg.Docker.ApiClient().Info(ctx)
+		},
 	}
 }
 
@@ -97,14 +110,23 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	var lastErr error
+	attempt := 0
 	for {
 		select {
 		case <-timeoutCtx.Done():
+			if lastErr != nil {
+				return nil, fmt.Errorf("timeout collecting metrics: %w", lastErr)
+			}
 			return nil, errors.New("timeout collecting metrics")
 		default:
 			metrics, err := c.collect(timeoutCtx)
 			if err != nil {
-				c.log.DebugContext(ctx, "Failed to collect metrics", "error", err)
+				lastErr = err
+				attempt++
+				if attempt == 1 || attempt%5 == 0 {
+					c.log.WarnContext(ctx, "Failed to collect metrics", "attempt", attempt, "error", err)
+				}
 				time.Sleep(1 * time.Second)
 				continue
 			}
@@ -151,8 +173,10 @@ func (c *Collector) collect(ctx context.Context) (*Metrics, error) {
 	// Convert bytes to GiB (1 GiB = 1024^3 bytes)
 	metrics.TotalRAMGiB = float32(memStats.Total) / (1024 * 1024 * 1024)
 
+	info, dockerDataRoot, infoErr := c.dockerInfoAndDataRoot(ctx)
+
 	// Collect disk usage and total
-	diskStats, err := disk.UsageWithContext(ctx, "/var/lib/docker")
+	diskStats, err := disk.UsageWithContext(ctx, dockerDataRoot)
 	if err != nil {
 		return nil, fmt.Errorf("failed to collect disk usage: %v", err)
 	}
@@ -161,9 +185,8 @@ func (c *Collector) collect(ctx context.Context) (*Metrics, error) {
 	metrics.TotalDiskGiB = float32(diskStats.Total) / (1024 * 1024 * 1024)
 
 	// Get snapshot count
-	info, err := c.docker.ApiClient().Info(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get snapshot count: %v", err)
+	if infoErr != nil {
+		return nil, fmt.Errorf("failed to get Docker info: %w", infoErr)
 	}
 	metrics.SnapshotCount = float32(info.Images)
 
@@ -175,6 +198,28 @@ func (c *Collector) collect(ctx context.Context) (*Metrics, error) {
 	c.resourcesMutex.RUnlock()
 
 	return metrics, nil
+}
+
+func (c *Collector) dockerInfoAndDataRoot(ctx context.Context) (system.Info, string, error) {
+	info, err := c.dockerInfo(ctx)
+	if c.dockerDataRoot != "" {
+		return info, c.dockerDataRoot, err
+	}
+	if err != nil {
+		c.warnDockerDataRootFallback(ctx, err)
+		return info, defaultDockerDataRoot, err
+	}
+	if info.DockerRootDir == "" {
+		c.warnDockerDataRootFallback(ctx, errors.New("Docker info did not include DockerRootDir"))
+		return info, defaultDockerDataRoot, nil
+	}
+	return info, info.DockerRootDir, nil
+}
+
+func (c *Collector) warnDockerDataRootFallback(ctx context.Context, err error) {
+	c.dockerDataRootFallbackWarnOnce.Do(func() {
+		c.log.WarnContext(ctx, "Falling back to default Docker data root", "path", defaultDockerDataRoot, "error", err)
+	})
 }
 
 // snapshotCPUUsage runs in a background goroutine, continuously monitoring CPU usage

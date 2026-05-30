@@ -32,6 +32,7 @@ type Config struct {
 	Environment                        string        `envconfig:"ENVIRONMENT"`
 	ContainerRuntime                   string        `envconfig:"CONTAINER_RUNTIME"`
 	ContainerNetwork                   string        `envconfig:"CONTAINER_NETWORK"`
+	DockerDataRoot                     string        `envconfig:"DOCKER_DATA_ROOT"`
 	InterSandboxNetworkEnabled         bool          `envconfig:"INTER_SANDBOX_NETWORK_ENABLED" default:"true"`
 	GpuEnabled                         bool          `envconfig:"GPU_ENABLED" default:"false"`
 	LogFilePath                        string        `envconfig:"LOG_FILE_PATH"`
