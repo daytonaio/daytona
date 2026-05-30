@@ -1328,6 +1328,29 @@ final class CreateSandboxResources {
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+# --memory is in MB; --disk is in GB
+daytona create --cpu 2 --memory 4096 --disk 8
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "cpu": 2,
+  "memory": 4,
+  "disk": 8
+}'
+```
+
+</TabItem>
 </Tabs>
 
 ## Start Sandboxes
