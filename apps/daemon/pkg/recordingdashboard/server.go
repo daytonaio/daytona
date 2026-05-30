@@ -11,12 +11,36 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/daytonaio/daemon/pkg/recording"
-	recordingcontroller "github.com/daytonaio/daemon/pkg/toolbox/computeruse/recording"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/gin-gonic/gin"
 )
+
+type recordingDTO struct {
+	ID              string     `json:"id"`
+	FileName        string     `json:"fileName"`
+	FilePath        string     `json:"filePath"`
+	StartTime       time.Time  `json:"startTime"`
+	EndTime         *time.Time `json:"endTime,omitempty"`
+	Status          string     `json:"status"`
+	DurationSeconds *float64   `json:"durationSeconds,omitempty"`
+	SizeBytes       *int64     `json:"sizeBytes,omitempty"`
+}
+
+func toRecordingDTO(r recording.Recording) recordingDTO {
+	return recordingDTO{
+		ID:              r.ID,
+		FileName:        r.FileName,
+		FilePath:        r.FilePath,
+		StartTime:       r.StartTime,
+		EndTime:         r.EndTime,
+		Status:          r.Status,
+		DurationSeconds: r.DurationSeconds,
+		SizeBytes:       r.SizeBytes,
+	}
+}
 
 // DashboardServer serves the recording dashboard
 type DashboardServer struct {
@@ -90,9 +114,9 @@ func (s *DashboardServer) listRecordings(ctx *gin.Context) {
 		return
 	}
 
-	recordingDTOs := make([]recordingcontroller.RecordingDTO, 0, len(recordings))
+	recordingDTOs := make([]recordingDTO, 0, len(recordings))
 	for _, rec := range recordings {
-		recordingDTOs = append(recordingDTOs, *recordingcontroller.RecordingToDTO(&rec))
+		recordingDTOs = append(recordingDTOs, toRecordingDTO(rec))
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"recordings": recordingDTOs})

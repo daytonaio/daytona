@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"syscall"
 
 	"github.com/daytonaio/daemon/pkg/common"
 	cmap "github.com/orcaman/concurrent-map/v2"
@@ -24,7 +23,7 @@ func (s *SessionService) Create(sessionId string, isLegacy bool) error {
 	cmd.Env = os.Environ()
 	// Put the shell in its own process group so we can signal the entire
 	// group (shell + every non-job-control descendant) atomically on Delete.
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	setNewProcessGroup(cmd)
 
 	if isLegacy {
 		homeDir, err := os.UserHomeDir()

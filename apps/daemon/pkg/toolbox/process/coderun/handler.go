@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"strings"
 	"sync/atomic"
-	"syscall"
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -54,7 +53,7 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 		runCommand := toolbox.GetRunCommand(request.Code, request.Argv)
 		cmd := exec.Command(common.GetShell())
 		cmd.Stdin = strings.NewReader(runCommand)
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		setNewProcessGroup(cmd)
 		common.ApplyEnvs(cmd, request.Envs)
 
 		var outputBuf bytes.Buffer
@@ -74,7 +73,7 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 			timeout := time.Duration(*request.Timeout) * time.Second
 			timer := time.AfterFunc(timeout, func() {
 				timeoutReached.Store(true)
-				if killErr := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); killErr != nil {
+				if killErr := killProcessGroupHard(cmd.Process.Pid); killErr != nil {
 					logger.Error("failed to kill process group", "error", killErr)
 				}
 			})

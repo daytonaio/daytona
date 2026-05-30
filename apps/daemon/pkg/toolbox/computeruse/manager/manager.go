@@ -1,3 +1,5 @@
+//go:build linux
+
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
@@ -10,7 +12,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/daytonaio/daemon/pkg/childreap"
@@ -251,9 +252,7 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 	pluginName := filepath.Base(path)
 	pluginBasePath := filepath.Dir(path)
 
-	if runtime.GOOS == "windows" && strings.HasSuffix(path, ".exe") {
-		pluginName = strings.TrimSuffix(pluginName, ".exe")
-	}
+	pluginName = strings.TrimSuffix(pluginName, ".exe")
 
 	// Pre-flight check: detect critical issues (missing shared libraries, wrong
 	// architecture, permission errors) before starting the go-plugin client.

@@ -11,7 +11,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"go.opentelemetry.io/contrib/instrumentation/host"
@@ -208,24 +207,6 @@ func readUint64FromFile(filepath string) (uint64, error) {
 		return 0, err
 	}
 	return strconv.ParseUint(strings.TrimSpace(string(data)), 10, 64)
-}
-
-func getDiskStats(path string) (*DiskStats, error) {
-	var stat syscall.Statfs_t
-	if err := syscall.Statfs(path, &stat); err != nil {
-		return nil, err
-	}
-
-	total := stat.Blocks * uint64(stat.Bsize)
-	available := stat.Bavail * uint64(stat.Bsize)
-	used := total - (stat.Bfree * uint64(stat.Bsize))
-
-	return &DiskStats{
-		Total:     total,
-		Used:      used,
-		Available: available,
-		Path:      path,
-	}, nil
 }
 
 // registerLimitsMetrics registers gauges for resource limits

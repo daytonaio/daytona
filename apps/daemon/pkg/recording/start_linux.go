@@ -1,4 +1,6 @@
-// Copyright Daytona Platforms Inc.
+//go:build linux
+
+// Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package recording
@@ -8,50 +10,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/google/uuid"
 )
-
-// validateLabel validates a user-provided label to prevent path injection
-// and ensure it's safe for use in a filename. Returns error if invalid.
-func validateLabel(label string) error {
-	const maxLabelLength = 100
-
-	// Trim whitespace for validation
-	trimmed := strings.TrimSpace(label)
-
-	// Check if label is empty after trimming
-	if trimmed == "" {
-		return ErrInvalidLabel
-	}
-
-	// Check length
-	if len(label) > maxLabelLength {
-		return ErrInvalidLabel
-	}
-
-	// Check for path separators (directory traversal)
-	if strings.Contains(label, "/") || strings.Contains(label, "\\") {
-		return ErrInvalidLabel
-	}
-
-	// Check for leading dots (hidden files)
-	if strings.HasPrefix(trimmed, ".") {
-		return ErrInvalidLabel
-	}
-
-	// Only allow safe characters: alphanumeric, spaces, dots, underscores, and hyphens
-	safePattern := regexp.MustCompile(`^[A-Za-z0-9.\s_-]+$`)
-	if !safePattern.MatchString(label) {
-		return ErrInvalidLabel
-	}
-
-	return nil
-}
 
 // StartRecording starts a new screen recording session
 func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
