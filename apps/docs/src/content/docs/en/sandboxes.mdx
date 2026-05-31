@@ -10,7 +10,7 @@ Daytona provides **full composable computers** &mdash; **sandboxes** &mdash; for
 
 Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. Organizations get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**.
 
-Sandboxes use [snapshots](/docs/en/snapshots) to capture a fully configured environment (base OS, installed packages, dependencies, and configuration) to create new sandboxes.
+Sandboxes can use [snapshots](/docs/en/snapshots) to capture a fully configured environment (base operating system, installed packages, dependencies and configuration) to create new sandboxes.
 
 Each sandbox has its own network stack with per-sandbox firewall rules. By default, sandboxes follow standard network policies, but you can restrict egress to a specific set of allowed destinations or block all outbound traffic entirely.
 
@@ -115,9 +115,9 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 Daytona provides methods to create GPU sandboxes.
 
-Daytona supports NVIDIA GPU devices for sandbox creation. You can use GPU sandboxes for workloads such as model inference, fine-tuning, and CUDA-accelerated compute.
+Daytona supports NVIDIA GPU devices for creating GPU sandboxes. Use GPU sandboxes for workloads such as model inference, fine-tuning, and CUDA-accelerated compute.
 
-Daytona provides a pre-built `daytona-gpu` snapshot for GPU sandboxes. Each GPU sandbox is ephemeral and supports up to **16 vCPUs**, **192GB RAM**, and **512GB disk**.
+Daytona provides a pre-built `daytona-gpu` snapshot for creating GPU sandboxes. Each GPU sandbox is ephemeral and supports up to **16 vCPUs**, **192GB RAM**, and **512GB disk**.
 
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
@@ -258,9 +258,9 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 Daytona provides methods to create Windows sandboxes. 
 
-Windows sandboxes are Windows OS runtime environments that can be used to run Windows applications. They provide a consistent Windows baseline, so you can run Windows-specific tools and workflows in an isolated sandbox.
+Windows sandboxes are Windows OS runtime environments used to run Windows applications. They provide a consistent Windows baseline, so you can run Windows-specific tools and workflows in an isolated sandbox.
 
-Daytona provides a pre-built `windows-server-2025` snapshot for Windows sandboxes. The snapshot uses **2 vCPU**, **8GiB** memory, and **30GiB** disk.
+Daytona provides a pre-built `windows-server-2025` snapshot for creating Windows sandboxes. The snapshot uses **2 vCPU**, **8GiB** memory, and **30GiB** disk.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click **Create Sandbox**

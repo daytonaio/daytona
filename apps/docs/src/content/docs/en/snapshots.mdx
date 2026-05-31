@@ -6,7 +6,11 @@ description: Pre-configured sandbox templates you can use to create sandboxes.
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
 
-Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
+Snapshots are reusable sandbox templates built from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use snapshots to provide a consistent and reproducible environment for your dependencies, settings, and resources.
+
+A snapshot defines the base operating system, language runtimes, system packages, and project-level setup that should exist when a sandbox starts. Instead of repeating bootstrap steps on every sandbox creation, you capture that setup once as a snapshot and reuse it.
+
+You start with default snapshots for common stacks, or create custom snapshots for your own toolchain and constraints. Custom snapshots are useful when your workflow depends on specific package versions, private dependencies, startup scripts, or filesystem layout.
 
 - **Snapshot SDKs**: [TypeScript](/docs/en/typescript-sdk/snapshot), [Python](/docs/en/python-sdk/sync/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#type-snapshotservice), [Java](/docs/en/java-sdk/snapshot)
 - **Snapshot API**: [RESTful API](/docs/en/tools/api/#daytona/tag/snapshots) ([OpenAPI spec](/docs/openapi.json)), [Toolbox API](/docs/en/tools/api#daytona-toolbox) ([OpenAPI spec](/docs/toolbox-openapi.json))
@@ -16,18 +20,20 @@ Snapshots are sandbox templates created from [Docker](https://www.docker.com/) o
 
 Daytona provides methods to create snapshots. You can create a snapshot from:
 
+- [GPU snapshots](#gpu-snapshots) (for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes))
 - [public images](#public-images)
 - [local images](#local-images)
 - [images from private registries](#images-from-private-registries)
-- [the declarative builder](#declarative-builder)
-- [GPU snapshots](#gpu-snapshots) (for [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes))
+- [declarative builder](#declarative-builder)
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click **Create Snapshot**
 3. Enter the snapshot **name** and **image**
 
 - **Snapshot name**: identifier used to reference the snapshot
-- **Image**: base image for the snapshot, must include either a tag or a digest (e.g., **`ubuntu:22.04`**); the `latest`/`lts`/`stable` tags are not supported
+- **Snapshot image**: base image for the snapshot, must include either a tag or a digest (e.g., **`ubuntu:22.04`**); the `latest`/`lts`/`stable` tags not supported due to frequent changes
+
+4. Click **Create** to create a snapshot
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -138,16 +144,16 @@ curl https://app.daytona.io/api/snapshots \
 
 Daytona provides methods to create GPU snapshots.
 
-GPU snapshots are used to create [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes). Daytona provides a pre-built `daytona-gpu` system snapshot for creating GPU sandboxes.
+GPU snapshots are used to create [GPU sandboxes](/docs/en/sandboxes#gpu-sandboxes). Daytona provides a pre-built `daytona-gpu` snapshot for creating GPU sandboxes.
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click **Create Snapshot**
 3. Enter the snapshot **name** and **image**
 4. Select **`us-east-1`** region
-5. Check the **Allocate GPU** option
+5. Select the **Allocate GPU** checkbox
 6. Click **Create** to create a GPU snapshot
 
-To create a GPU snapshot programmatically, set the `gpu` value to the number of GPU units you want to allocate and target `us-east-1` region. If `gpu` is not set, it defaults to `0`, which creates a non-GPU snapshot.
+To create a GPU snapshot programmatically, set the `gpu` value to `1` and target `us-east-1` region. If `gpu` is not set, it defaults to `0`, which creates a non-GPU snapshot.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
