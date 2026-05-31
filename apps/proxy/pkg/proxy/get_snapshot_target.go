@@ -65,9 +65,14 @@ func (p *Proxy) getSnapshotTarget(ctx *gin.Context) (*url.URL, map[string]string
 	}
 	target.RawQuery = queryParams.Encode()
 
+	xForwardedHost := ctx.Request.Header.Get("X-Forwarded-Host")
+	if xForwardedHost == "" {
+		xForwardedHost = ctx.Request.Host
+	}
+
 	return target, map[string]string{
 		"X-Daytona-Authorization": fmt.Sprintf("Bearer %s", runnerInfo.ApiKey),
-		"X-Forwarded-Host":        ctx.Request.Host,
+		"X-Forwarded-Host":        xForwardedHost,
 	}, nil
 }
 
