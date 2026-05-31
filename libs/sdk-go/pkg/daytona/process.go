@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/common"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
@@ -105,6 +106,12 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 		}
 		if execOpts.Timeout != nil {
 			req.SetTimeout(int32(execOpts.Timeout.Seconds()))
+			// Set a context deadline slightly beyond the command timeout so the
+			// HTTP connection is cancelled if the server never responds after
+			// the command times out on its end.
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, *execOpts.Timeout+30*time.Second)
+			defer cancel()
 		}
 		if execOpts.Env != nil {
 			req.SetEnvs(execOpts.Env)

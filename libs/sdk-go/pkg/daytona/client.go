@@ -314,7 +314,13 @@ func (c *Client) createToolboxClient(proxyURL string, sandboxID string) (*toolbo
 	cfg := toolbox.NewConfiguration()
 	cfg.Host = common.ExtractHost(toolboxURL)
 	cfg.Scheme = common.ExtractScheme(toolboxURL)
-	cfg.HTTPClient = c.httpClient
+	// Use a dedicated client with no fixed timeout so that long-running
+	// ExecuteCommand calls are not killed by the default 60-second limit.
+	// Each call is responsible for providing an appropriate context deadline.
+	cfg.HTTPClient = &http.Client{
+		Timeout:   0,
+		Transport: c.httpClient.Transport,
+	}
 
 	// Set base path
 	basePath := common.ExtractPath(toolboxURL)
