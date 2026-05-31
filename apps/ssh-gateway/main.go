@@ -331,6 +331,10 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 		if err != nil {
 			log.Printf("Client to runner copy error: %v", err)
 		}
+		// Client disconnected (clean or abrupt). Close the runner channel so
+		// the main goroutine's io.Copy(clientChannel, runnerChannel) unblocks,
+		// which lets defer cancel() fire and stop the keepalive goroutine.
+		runnerChannel.Close()
 	}()
 
 	keepAliveContext, cancel := context.WithCancel(context.Background())
