@@ -1217,6 +1217,106 @@ ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
 - **Custom images**: Build and register custom base snapshots using the same Dockerfile-based flow as other sandboxes, with two requirements: the snapshot must be built in the `android` region and use the `android` class
 - **Custom device snapshots**: Available on request. Device images are built by Daytona from a specification you provide. Contact [support@daytona.io](mailto:support@daytona.io) for more information.
 
+### Ephemeral Sandboxes
+
+Daytona provides methods to create ephemeral sandboxes. 
+
+Ephemeral sandboxes are automatically deleted once they are stopped. They are useful for short-lived tasks or testing purposes.
+
+To create an ephemeral sandbox, set the `ephemeral` parameter to `True` when creating a sandbox. Setting [**`autoDeleteInterval: 0`**](#auto-delete-interval) (ephemeral) has the same effect.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+params = CreateSandboxFromSnapshotParams(
+    ephemeral=True,
+    auto_stop_interval=5,  # delete after 5 minutes of inactivity
+)
+sandbox = daytona.create(params)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from "@daytona/sdk";
+
+const daytona = new Daytona();
+const sandbox = await daytona.create({
+  ephemeral: true,
+  autoStopInterval: 5, // delete after 5 minutes of inactivity
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  ephemeral: true,
+  auto_stop_interval: 5 # delete after 5 minutes of inactivity
+)
+sandbox = daytona.create(params)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+
+	autoStopInterval := 5 // delete after 5 minutes of inactivity
+	params := types.SnapshotParams{
+		SandboxBaseParams: types.SandboxBaseParams{
+			Language:         types.CodeLanguagePython,
+			Ephemeral:        true,
+			AutoStopInterval: &autoStopInterval,
+		},
+	}
+	_, _ = client.Create(ctx, params)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
+            params.setAutoDeleteInterval(0); // same effect as ephemeral: true
+            params.setAutoStopInterval(5); // delete after 5 minutes of inactivity
+            Sandbox sandbox = daytona.create(params);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
 ### Resources
 
 Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. Organizations get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**.
