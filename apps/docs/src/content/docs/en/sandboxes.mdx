@@ -873,10 +873,6 @@ final class CreateSandboxResources {
 
 ### Linked Sandboxes
 
-:::caution[Experimental]
-This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
-:::
-
 Daytona provides methods to link sandboxes to existing sandboxes. A linked sandbox is attached to an existing parent sandbox at creation time.
 
 Create the parent sandbox first, then create one or more children whose create request references the parent's sandbox ID. The API records the relationship on the child sandbox as the linked sandbox ID. Omitting the linked sandbox parameter yields an unlinked sandbox.
@@ -1036,10 +1032,6 @@ curl 'https://app.daytona.io/api/sandbox' \
 </Tabs>
 
 ### Android Sandboxes
-
-:::caution[Experimental]
-This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
-:::
 
 Daytona provides methods to create Android sandboxes to run Android emulators alongside a standard Linux development environment.
 
