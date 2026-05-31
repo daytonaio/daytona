@@ -129,7 +129,7 @@ func createSandboxRequest(args CreateSandboxArgs) (*apiclient.CreateSandbox, err
 		if args.Snapshot != nil && *args.Snapshot != "" {
 			return nil, fmt.Errorf("cannot specify a snapshot when using a build info entry")
 		}
-	} else {
+	} else if args.Snapshot != nil && *args.Snapshot != "" {
 		if args.Cpu != nil || args.Gpu != nil || args.Memory != nil || args.Disk != nil {
 			return nil, fmt.Errorf("cannot specify sandbox resources when using a snapshot")
 		}
