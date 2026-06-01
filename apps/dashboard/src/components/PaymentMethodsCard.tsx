@@ -26,7 +26,8 @@ export function PaymentMethodsCard({ organizationId, creditCardConnectedCreditsG
   const fetchSetupCheckoutUrl = useSetupCheckoutUrlQuery(organizationId)
   const methods = paymentMethodsQuery.data ?? []
   const portalUrl = portalUrlQuery.data
-  const showAddButton = methods.length === 0 && !creditCardConnectedCreditsGranted
+  const showSetupCheckout = methods.length === 0 && !creditCardConnectedCreditsGranted
+  const showPortalEdit = methods.length > 0 || creditCardConnectedCreditsGranted
 
   const handleAddPaymentMethod = useCallback(async () => {
     const newWindow = window.open('', '_blank')
@@ -57,7 +58,7 @@ export function PaymentMethodsCard({ organizationId, creditCardConnectedCreditsG
           <CardTitle>Payment methods</CardTitle>
           <CardDescription>Cards on file. The default is used for automatic charges and invoices.</CardDescription>
         </div>
-        {methods.length > 0 &&
+        {showPortalEdit &&
           (portalUrl ? (
             <Button variant="secondary" size="sm" asChild>
               <a href={portalUrl} target="_blank" rel="noopener noreferrer">
@@ -83,7 +84,7 @@ export function PaymentMethodsCard({ organizationId, creditCardConnectedCreditsG
         ) : methods.length === 0 ? (
           <div className="p-4 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">No cards on file yet.</p>
-            {showAddButton && (
+            {showSetupCheckout && (
               <Button variant="secondary" size="sm" onClick={handleAddPaymentMethod}>
                 <PlusIcon />
                 Add payment method
