@@ -36,8 +36,21 @@ writeJson(path.join(cjsDir, 'package.json'), { type: 'commonjs' })
 
 const esmImportJs = path.join(esmDir, 'utils', 'Import.js')
 if (fs.existsSync(esmImportJs)) {
-  const shim = `import * as _m from 'module';\nconst require = (() => { try { return _m.createRequire(import.meta.url); } catch { return (id) => { throw new Error('require("' + id + '") unavailable'); }; } })();\n`
-  fs.writeFileSync(esmImportJs, shim + fs.readFileSync(esmImportJs, 'utf8'))
+  // Named `__esmRequire` (not `require`) to avoid shadowing the host CJS
+  // `require` when a bundler re-compiles this ESM output to CommonJS.
+  const shim =
+    `import * as _m from 'module';\n` +
+    `const __esmRequire = (() => {\n` +
+    `  try { return _m.createRequire(import.meta.url); } catch {}\n` +
+    `  try { if (typeof require !== 'undefined') return require; } catch {}\n` +
+    `  return (id) => { throw new Error(\n` +
+    `    'cannot require("' + id + '"): no CommonJS require available. ' +\n` +
+    `    'If re-bundling @daytona/sdk to CJS, ensure createRequire or the host require is accessible.'\n` +
+    `  ); };\n` +
+    `})();\n`
+  const original = fs.readFileSync(esmImportJs, 'utf8')
+  const rewritten = original.replace(/\brequire\s*\(/g, '__esmRequire(')
+  fs.writeFileSync(esmImportJs, shim + rewritten)
 }
 
 writeJson(path.join(distDir, 'package.json'), pkg)

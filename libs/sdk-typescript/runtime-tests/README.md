@@ -42,6 +42,7 @@ The orchestrator iterates every subdirectory that contains a `run.sh`, packs the
 | `remix` | `remix vite:build` + `remix-serve` + `curl` | Production Remix server |
 | `cloudflare-workers` | `wrangler dev --local` + `curl` | Real `workerd` (Cloudflare's actual Workers runtime) |
 | `aws-lambda` | `esbuild` bundle + [`lambda-local`](https://github.com/ashiina/lambda-local) (real Lambda event/context shapes, env vars, timeout) | Lambda emulator |
+| `esbuild-cjs` | `esbuild` bundle (`--platform=node --format=cjs`) + `node` runs the bundle and exercises `dynamicRequire` | Node.js |
 | `azure-functions` | `func start` (Azure Functions Core Tools host) + `curl` | Real Functions host |
 
 ## Required external tools

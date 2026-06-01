@@ -2,10 +2,8 @@
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: Apache-2.0
  *
- * Note: the ESM build of this file is prepended with a `createRequire` shim by
- * `scripts/post-build.js` so that synchronous `require()` works in ESM Node.js
- * (and any runtime that supports `createRequire(import.meta.url)`). The CJS
- * build uses the native `require`. See that script for the exact shim source.
+ * post-build.js rewrites every `require(` in the ESM output of this file to
+ * `__esmRequire(` — avoid that literal token in string literals here.
  */
 
 import { DaytonaError } from '../errors/DaytonaError'
