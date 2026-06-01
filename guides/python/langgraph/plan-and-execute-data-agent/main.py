@@ -251,7 +251,7 @@ def main() -> None:
     model = ChatAnthropic(
         model_name="claude-opus-4-6",
         temperature=0,
-        timeout=None,
+        timeout=120,
         max_retries=2,
         stop=None,
     )
