@@ -18,11 +18,11 @@
 import type { RegistryDTO } from './registry-dto';
 
 export interface PullSnapshotRequestDTO {
-    'class'?: string;
     'destinationRef'?: string;
     'destinationRegistry'?: RegistryDTO;
     'newTag'?: string;
     'registry'?: RegistryDTO;
+    'sandboxClass'?: string;
     'snapshot': string;
 }
 

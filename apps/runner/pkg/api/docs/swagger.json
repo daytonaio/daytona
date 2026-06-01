@@ -1619,9 +1619,6 @@
       "type": "object",
       "required": ["snapshot"],
       "properties": {
-        "class": {
-          "type": "string"
-        },
         "destinationRef": {
           "type": "string"
         },
@@ -1633,6 +1630,9 @@
         },
         "registry": {
           "$ref": "#/definitions/RegistryDTO"
+        },
+        "sandboxClass": {
+          "type": "string"
         },
         "snapshot": {
           "type": "string"
