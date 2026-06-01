@@ -76,7 +76,11 @@ hallucinate values that are not present in the stdout. If a step failed, say so 
 class Plan(BaseModel):
     """Structured-output schema for the planner LLM call."""
 
-    steps: list[str] = Field(description="Atomic plan steps the executor will implement, in order.")
+    steps: list[str] = Field(
+        description="Atomic plan steps the executor will implement, in order.",
+        min_length=1,
+        max_length=10,
+    )
 
 
 class AgentState(TypedDict):
