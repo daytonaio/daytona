@@ -125,6 +125,11 @@ export class OrganizationController {
     @IsUserAuthContext() authContext: UserAuthContext,
     @Param('invitationId') invitationId: string,
   ): Promise<OrganizationInvitationDto> {
+    const user = await this.userService.findOne(authContext.userId)
+    if (!user.emailVerified && !this.configService.get('skipUserEmailVerification')) {
+      throw new ForbiddenException('Please verify your email address')
+    }
+
     try {
       const invitation = await this.organizationInvitationService.findOneOrFail(invitationId)
       if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
@@ -162,6 +167,11 @@ export class OrganizationController {
     @IsUserAuthContext() authContext: UserAuthContext,
     @Param('invitationId') invitationId: string,
   ): Promise<void> {
+    const user = await this.userService.findOne(authContext.userId)
+    if (!user.emailVerified && !this.configService.get('skipUserEmailVerification')) {
+      throw new ForbiddenException('Please verify your email address')
+    }
+
     try {
       const invitation = await this.organizationInvitationService.findOneOrFail(invitationId)
       if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
