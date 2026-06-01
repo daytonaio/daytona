@@ -176,6 +176,12 @@ export class SnapshotService {
 
       const sandboxClass = createSnapshotDto.sandboxClass ?? this.configService.getOrThrow('defaultSandboxClass')
 
+      if (sandboxClass === SandboxClass.WINDOWS) {
+        throw new BadRequestException(
+          'Windows snapshots cannot be created via this endpoint; they are produced by snapshot-from-sandbox flows.',
+        )
+      }
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const newSnapshotCount = 1
@@ -248,6 +254,12 @@ export class SnapshotService {
       }
 
       const sandboxClass = createSnapshotDto.sandboxClass ?? this.configService.getOrThrow('defaultSandboxClass')
+
+      if (sandboxClass === SandboxClass.WINDOWS) {
+        throw new BadRequestException(
+          'Windows snapshots cannot be created via this endpoint; they are produced by snapshot-from-sandbox flows.',
+        )
+      }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
