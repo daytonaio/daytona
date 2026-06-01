@@ -4,7 +4,6 @@
 package session
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -19,7 +18,7 @@ import (
 func (s *SessionService) SendInput(sessionId, commandId string, data string) error {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
-		return common_errors.NewNotFoundError(errors.New("session not found"))
+		return common.NewProcessNotFoundError("session not found")
 	}
 
 	// Check if the session process is still active
@@ -30,7 +29,7 @@ func (s *SessionService) SendInput(sessionId, commandId string, data string) err
 	// Verify the command exists
 	command, ok := session.commands.Get(commandId)
 	if !ok {
-		return common_errors.NewNotFoundError(errors.New("command not found"))
+		return common.NewProcessNotFoundError("command not found")
 	}
 
 	// Check if the command is still running (exit code not set means still running)

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/google/uuid"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -23,7 +24,7 @@ import (
 func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombinedOutput, skipServerDemux, suppressInputEcho bool) (*SessionExecute, error) {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
-		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
+		return nil, common.NewProcessNotFoundError("session not found")
 	}
 
 	if cmdId == util.EmptyCommandID {

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gorilla/websocket"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -29,12 +30,12 @@ type FetchLogsOptions struct {
 func (s *SessionService) GetSessionCommandLogs(sessionId, commandId string, request *http.Request, responseWriter http.ResponseWriter, opts FetchLogsOptions) ([]byte, error) {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
-		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
+		return nil, common.NewProcessNotFoundError("session not found")
 	}
 
 	command, ok := session.commands.Get(commandId)
 	if !ok {
-		return nil, common_errors.NewNotFoundError(errors.New("command not found"))
+		return nil, common.NewProcessNotFoundError("command not found")
 	}
 
 	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
