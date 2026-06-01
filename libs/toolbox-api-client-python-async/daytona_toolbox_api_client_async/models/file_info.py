@@ -31,14 +31,15 @@ class FileInfo(BaseModel):
     """ # noqa: E501
     group: StrictStr
     is_dir: StrictBool = Field(serialization_alias="isDir")
-    mod_time: StrictStr = Field(serialization_alias="modTime")
+    mod_time: StrictStr = Field(description="Deprecated: ModTime uses Go's time.String() layout which is not a standard format. Use ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.", serialization_alias="modTime")
     mode: StrictStr
+    modified_at: StrictStr = Field(serialization_alias="modifiedAt")
     name: StrictStr
     owner: StrictStr
     permissions: StrictStr
     size: StrictInt
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["group", "isDir", "modTime", "mode", "name", "owner", "permissions", "size"]
+    __properties: ClassVar[List[str]] = ["group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "permissions", "size"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -101,6 +102,7 @@ class FileInfo(BaseModel):
             "is_dir": obj.get("isDir"),
             "mod_time": obj.get("modTime"),
             "mode": obj.get("mode"),
+            "modified_at": obj.get("modifiedAt"),
             "name": obj.get("name"),
             "owner": obj.get("owner"),
             "permissions": obj.get("permissions"),

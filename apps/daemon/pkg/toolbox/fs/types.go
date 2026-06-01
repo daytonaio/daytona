@@ -3,15 +3,20 @@
 
 package fs
 
+import "time"
+
 type FileInfo struct {
-	Name        string `json:"name" validate:"required"`
-	Size        int64  `json:"size" validate:"required"`
-	Mode        string `json:"mode" validate:"required"`
-	ModTime     string `json:"modTime" validate:"required"`
-	IsDir       bool   `json:"isDir" validate:"required"`
-	Owner       string `json:"owner" validate:"required"`
-	Group       string `json:"group" validate:"required"`
-	Permissions string `json:"permissions" validate:"required"`
+	Name string `json:"name" validate:"required"`
+	Size int64  `json:"size" validate:"required"`
+	Mode string `json:"mode" validate:"required"`
+	// Deprecated: ModTime uses Go's time.String() layout which is not a standard format.
+	// Use ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.
+	ModTime     string    `json:"modTime" validate:"required"`
+	ModifiedAt  time.Time `json:"modifiedAt" validate:"required"`
+	IsDir       bool      `json:"isDir" validate:"required"`
+	Owner       string    `json:"owner" validate:"required"`
+	Group       string    `json:"group" validate:"required"`
+	Permissions string    `json:"permissions" validate:"required"`
 } //	@name	FileInfo
 
 type ReplaceRequest struct {

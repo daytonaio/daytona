@@ -23,8 +23,10 @@ var _ MappedNullable = &FileInfo{}
 type FileInfo struct {
 	Group string `json:"group"`
 	IsDir bool `json:"isDir"`
+	// Deprecated: ModTime uses Go's time.String() layout which is not a standard format. Use ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.
 	ModTime string `json:"modTime"`
 	Mode string `json:"mode"`
+	ModifiedAt string `json:"modifiedAt"`
 	Name string `json:"name"`
 	Owner string `json:"owner"`
 	Permissions string `json:"permissions"`
@@ -37,12 +39,13 @@ type _FileInfo FileInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFileInfo(group string, isDir bool, modTime string, mode string, name string, owner string, permissions string, size int32) *FileInfo {
+func NewFileInfo(group string, isDir bool, modTime string, mode string, modifiedAt string, name string, owner string, permissions string, size int32) *FileInfo {
 	this := FileInfo{}
 	this.Group = group
 	this.IsDir = isDir
 	this.ModTime = modTime
 	this.Mode = mode
+	this.ModifiedAt = modifiedAt
 	this.Name = name
 	this.Owner = owner
 	this.Permissions = permissions
@@ -152,6 +155,30 @@ func (o *FileInfo) GetModeOk() (*string, bool) {
 // SetMode sets field value
 func (o *FileInfo) SetMode(v string) {
 	o.Mode = v
+}
+
+// GetModifiedAt returns the ModifiedAt field value
+func (o *FileInfo) GetModifiedAt() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ModifiedAt
+}
+
+// GetModifiedAtOk returns a tuple with the ModifiedAt field value
+// and a boolean to check if the value has been set.
+func (o *FileInfo) GetModifiedAtOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ModifiedAt, true
+}
+
+// SetModifiedAt sets field value
+func (o *FileInfo) SetModifiedAt(v string) {
+	o.ModifiedAt = v
 }
 
 // GetName returns the Name field value
@@ -264,6 +291,7 @@ func (o FileInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["isDir"] = o.IsDir
 	toSerialize["modTime"] = o.ModTime
 	toSerialize["mode"] = o.Mode
+	toSerialize["modifiedAt"] = o.ModifiedAt
 	toSerialize["name"] = o.Name
 	toSerialize["owner"] = o.Owner
 	toSerialize["permissions"] = o.Permissions
@@ -280,6 +308,7 @@ func (o *FileInfo) UnmarshalJSON(data []byte) (err error) {
 		"isDir",
 		"modTime",
 		"mode",
+		"modifiedAt",
 		"name",
 		"owner",
 		"permissions",

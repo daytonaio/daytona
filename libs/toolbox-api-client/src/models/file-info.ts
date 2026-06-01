@@ -17,8 +17,12 @@
 export interface FileInfo {
     'group': string;
     'isDir': boolean;
+    /**
+     * Deprecated: ModTime uses Go\'s time.String() layout which is not a standard format. Use ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.
+     */
     'modTime': string;
     'mode': string;
+    'modifiedAt': string;
     'name': string;
     'owner': string;
     'permissions': string;

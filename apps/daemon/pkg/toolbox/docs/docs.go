@@ -3782,6 +3782,7 @@ const docTemplate = `{
                 "isDir",
                 "modTime",
                 "mode",
+                "modifiedAt",
                 "name",
                 "owner",
                 "permissions",
@@ -3795,9 +3796,13 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "modTime": {
+                    "description": "Deprecated: ModTime uses Go's time.String() layout which is not a standard format.\nUse ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.",
                     "type": "string"
                 },
                 "mode": {
+                    "type": "string"
+                },
+                "modifiedAt": {
                     "type": "string"
                 },
                 "name": {

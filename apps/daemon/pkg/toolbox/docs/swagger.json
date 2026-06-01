@@ -3314,7 +3314,7 @@
     },
     "FileInfo": {
       "type": "object",
-      "required": ["group", "isDir", "modTime", "mode", "name", "owner", "permissions", "size"],
+      "required": ["group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "permissions", "size"],
       "properties": {
         "group": {
           "type": "string"
@@ -3323,9 +3323,13 @@
           "type": "boolean"
         },
         "modTime": {
+          "description": "Deprecated: ModTime uses Go's time.String() layout which is not a standard format.\nUse ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.",
           "type": "string"
         },
         "mode": {
+          "type": "string"
+        },
+        "modifiedAt": {
           "type": "string"
         },
         "name": {
