@@ -64,6 +64,18 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+// Reject if `promise` doesn't settle within `ms`. The sandbox stops servicing
+// new commands while opencode runs its one-time DB migration on first start, so
+// a poll issued during that window can hang indefinitely. Without a client-side
+// timeout that single stuck call wedges the health-poll loop — and thus the
+// whole workspace creation — forever, even after the server is healthy.
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`timed out after ${ms}ms`)), ms)),
+  ])
+}
+
 // Debug log to a fixed file (stdout is kept clean for the UI). Synchronous append
 // so entries flush even if the very next step hangs. Tail with:
 //   tail -f /tmp/daytona-plugin.log
@@ -232,18 +244,26 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
         debug('create: server launched; polling health')
 
         for (let i = 0; i < 60; i++) {
-          const result = await sandbox.process.executeCommand(`curl -fsS ${sh(HEALTH_URL)}`)
-          debug(`create: health poll ${i + 1}/60 exit=${result.exitCode}`)
-          if (result.exitCode === 0) {
-            debug('create: server healthy; done ✅')
-            return
+          try {
+            const result = await withTimeout(sandbox.process.executeCommand(`curl -fsS ${sh(HEALTH_URL)}`), 5000)
+            debug(`create: health poll ${i + 1}/60 exit=${result.exitCode}`)
+            if (result.exitCode === 0) {
+              debug('create: server healthy; done ✅')
+              return
+            }
+          } catch (err) {
+            // Timed-out or errored poll: treat as not-ready-yet and keep polling.
+            debug(`create: health poll ${i + 1}/60 ${err instanceof Error ? err.message : String(err)}`)
           }
           await sleep(1000)
         }
 
         debug('create: health poll exhausted; server never became ready ❌')
-        const log = await sandbox.process.executeCommand('test -f /tmp/opencode.log && cat /tmp/opencode.log || true')
-        throw new Error(log.result || 'Daytona workspace server did not become ready in time')
+        const log = await withTimeout(
+          sandbox.process.executeCommand('test -f /tmp/opencode.log && cat /tmp/opencode.log || true'),
+          5000,
+        ).catch(() => undefined)
+        throw new Error(log?.result || 'Daytona workspace server did not become ready in time')
       } catch (err) {
         debug(`create: ERROR ${err instanceof Error ? err.message : String(err)}`)
         // Don't leak the sandbox if anything after Daytona.create() throws.
