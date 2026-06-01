@@ -70,6 +70,14 @@ public class FileInfoTest {
     }
 
     /**
+     * Test the property 'modifiedAt'
+     */
+    @Test
+    public void modifiedAtTest() {
+        // TODO: test modifiedAt
+    }
+
+    /**
      * Test the property 'name'
      */
     @Test

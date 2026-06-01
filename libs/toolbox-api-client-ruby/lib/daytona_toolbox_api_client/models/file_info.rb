@@ -19,9 +19,12 @@ module DaytonaToolboxApiClient
 
     attr_accessor :is_dir
 
+    # Deprecated: ModTime uses Go's time.String() layout which is not a standard format. Use ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.
     attr_accessor :mod_time
 
     attr_accessor :mode
+
+    attr_accessor :modified_at
 
     attr_accessor :name
 
@@ -38,6 +41,7 @@ module DaytonaToolboxApiClient
         :'is_dir' => :'isDir',
         :'mod_time' => :'modTime',
         :'mode' => :'mode',
+        :'modified_at' => :'modifiedAt',
         :'name' => :'name',
         :'owner' => :'owner',
         :'permissions' => :'permissions',
@@ -62,6 +66,7 @@ module DaytonaToolboxApiClient
         :'is_dir' => :'Boolean',
         :'mod_time' => :'String',
         :'mode' => :'String',
+        :'modified_at' => :'String',
         :'name' => :'String',
         :'owner' => :'String',
         :'permissions' => :'String',
@@ -115,6 +120,12 @@ module DaytonaToolboxApiClient
         self.mode = nil
       end
 
+      if attributes.key?(:'modified_at')
+        self.modified_at = attributes[:'modified_at']
+      else
+        self.modified_at = nil
+      end
+
       if attributes.key?(:'name')
         self.name = attributes[:'name']
       else
@@ -161,6 +172,10 @@ module DaytonaToolboxApiClient
         invalid_properties.push('invalid value for "mode", mode cannot be nil.')
       end
 
+      if @modified_at.nil?
+        invalid_properties.push('invalid value for "modified_at", modified_at cannot be nil.')
+      end
+
       if @name.nil?
         invalid_properties.push('invalid value for "name", name cannot be nil.')
       end
@@ -188,6 +203,7 @@ module DaytonaToolboxApiClient
       return false if @is_dir.nil?
       return false if @mod_time.nil?
       return false if @mode.nil?
+      return false if @modified_at.nil?
       return false if @name.nil?
       return false if @owner.nil?
       return false if @permissions.nil?
@@ -233,6 +249,16 @@ module DaytonaToolboxApiClient
       end
 
       @mode = mode
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] modified_at Value to be assigned
+    def modified_at=(modified_at)
+      if modified_at.nil?
+        fail ArgumentError, 'modified_at cannot be nil'
+      end
+
+      @modified_at = modified_at
     end
 
     # Custom attribute writer method with validation
@@ -284,6 +310,7 @@ module DaytonaToolboxApiClient
           is_dir == o.is_dir &&
           mod_time == o.mod_time &&
           mode == o.mode &&
+          modified_at == o.modified_at &&
           name == o.name &&
           owner == o.owner &&
           permissions == o.permissions &&
@@ -299,7 +326,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [group, is_dir, mod_time, mode, name, owner, permissions, size].hash
+      [group, is_dir, mod_time, mode, modified_at, name, owner, permissions, size].hash
     end
 
     # Builds the object from hash

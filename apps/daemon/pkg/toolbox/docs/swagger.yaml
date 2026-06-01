@@ -314,8 +314,13 @@ definitions:
       isDir:
         type: boolean
       modTime:
+        description: |-
+          Deprecated: ModTime uses Go's time.String() layout which is not a standard format.
+          Use ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.
         type: string
       mode:
+        type: string
+      modifiedAt:
         type: string
       name:
         type: string
@@ -330,6 +335,7 @@ definitions:
       - isDir
       - modTime
       - mode
+      - modifiedAt
       - name
       - owner
       - permissions

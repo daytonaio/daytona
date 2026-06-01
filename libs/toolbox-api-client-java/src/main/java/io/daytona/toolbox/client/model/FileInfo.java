@@ -70,6 +70,11 @@ public class FileInfo {
   @javax.annotation.Nonnull
   private String mode;
 
+  public static final String SERIALIZED_NAME_MODIFIED_AT = "modifiedAt";
+  @SerializedName(SERIALIZED_NAME_MODIFIED_AT)
+  @javax.annotation.Nonnull
+  private String modifiedAt;
+
   public static final String SERIALIZED_NAME_NAME = "name";
   @SerializedName(SERIALIZED_NAME_NAME)
   @javax.annotation.Nonnull
@@ -137,7 +142,7 @@ public class FileInfo {
   }
 
   /**
-   * Get modTime
+   * Deprecated: ModTime uses Go&#39;s time.String() layout which is not a standard format. Use ModifiedAt instead, which is serialized as ISO 8601 / RFC 3339.
    * @return modTime
    */
   @javax.annotation.Nonnull
@@ -166,6 +171,25 @@ public class FileInfo {
 
   public void setMode(@javax.annotation.Nonnull String mode) {
     this.mode = mode;
+  }
+
+
+  public FileInfo modifiedAt(@javax.annotation.Nonnull String modifiedAt) {
+    this.modifiedAt = modifiedAt;
+    return this;
+  }
+
+  /**
+   * Get modifiedAt
+   * @return modifiedAt
+   */
+  @javax.annotation.Nonnull
+  public String getModifiedAt() {
+    return modifiedAt;
+  }
+
+  public void setModifiedAt(@javax.annotation.Nonnull String modifiedAt) {
+    this.modifiedAt = modifiedAt;
   }
 
 
@@ -303,6 +327,7 @@ public class FileInfo {
         Objects.equals(this.isDir, fileInfo.isDir) &&
         Objects.equals(this.modTime, fileInfo.modTime) &&
         Objects.equals(this.mode, fileInfo.mode) &&
+        Objects.equals(this.modifiedAt, fileInfo.modifiedAt) &&
         Objects.equals(this.name, fileInfo.name) &&
         Objects.equals(this.owner, fileInfo.owner) &&
         Objects.equals(this.permissions, fileInfo.permissions) &&
@@ -312,7 +337,7 @@ public class FileInfo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(group, isDir, modTime, mode, name, owner, permissions, size, additionalProperties);
+    return Objects.hash(group, isDir, modTime, mode, modifiedAt, name, owner, permissions, size, additionalProperties);
   }
 
   @Override
@@ -323,6 +348,7 @@ public class FileInfo {
     sb.append("    isDir: ").append(toIndentedString(isDir)).append("\n");
     sb.append("    modTime: ").append(toIndentedString(modTime)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
+    sb.append("    modifiedAt: ").append(toIndentedString(modifiedAt)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
@@ -346,10 +372,10 @@ public class FileInfo {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("group", "isDir", "modTime", "mode", "name", "owner", "permissions", "size"));
+    openapiFields = new HashSet<String>(Arrays.asList("group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "permissions", "size"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("group", "isDir", "modTime", "mode", "name", "owner", "permissions", "size"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "permissions", "size"));
   }
 
   /**
@@ -380,6 +406,9 @@ public class FileInfo {
       }
       if (!jsonObj.get("mode").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `mode` to be a primitive type in the JSON string but got `%s`", jsonObj.get("mode").toString()));
+      }
+      if (!jsonObj.get("modifiedAt").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `modifiedAt` to be a primitive type in the JSON string but got `%s`", jsonObj.get("modifiedAt").toString()));
       }
       if (!jsonObj.get("name").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
