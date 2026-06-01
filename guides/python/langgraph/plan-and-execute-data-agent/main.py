@@ -275,12 +275,28 @@ def main() -> None:
         "step_codes": [],
         "final_answer": "",
     }
-    final_state = app.invoke(initial_state, config={"recursion_limit": 50})
+
+    # Stream the graph so we always have the latest state snapshot. If anything
+    # in the run raises before the `cleanup` node executes, the finally block
+    # will still see the live sandbox in `final_state` and delete it.
+    final_state: AgentState | None = None
+    try:
+        for chunk in app.stream(initial_state, config={"recursion_limit": 50}, stream_mode="values"):
+            final_state = chunk  # type: ignore[assignment]
+    finally:
+        if final_state is not None:
+            sandbox = final_state.get("sandbox")
+            if sandbox is not None:
+                try:
+                    sandbox.delete()
+                    print("\n[main] defensive cleanup: deleted orphaned sandbox")
+                except Exception as e:  # noqa: BLE001
+                    print(f"\n[main] defensive cleanup failed: {e}")
 
     print("\n" + "=" * 60)
     print("FINAL ANSWER")
     print("=" * 60)
-    print(final_state["final_answer"])
+    print(final_state["final_answer"] if final_state else "(run did not produce a final state)")
 
 
 if __name__ == "__main__":
