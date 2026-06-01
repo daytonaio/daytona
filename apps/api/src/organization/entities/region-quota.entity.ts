@@ -7,6 +7,10 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn,
 import { Organization } from './organization.entity'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 
+const DEFAULT_MAX_CPU_PER_GPU_SANDBOX = 16
+const DEFAULT_MAX_MEMORY_PER_GPU_SANDBOX = 192
+const DEFAULT_MAX_DISK_PER_GPU_SANDBOX = 512
+
 @Entity()
 export class RegionQuota {
   @PrimaryColumn()
@@ -92,6 +96,7 @@ export class RegionQuota {
   @Column({
     type: 'int',
     nullable: true,
+    default: DEFAULT_MAX_CPU_PER_GPU_SANDBOX,
     name: 'max_cpu_per_gpu_sandbox',
   })
   maxCpuPerGpuSandbox: number | null
@@ -103,6 +108,7 @@ export class RegionQuota {
   @Column({
     type: 'int',
     nullable: true,
+    default: DEFAULT_MAX_MEMORY_PER_GPU_SANDBOX,
     name: 'max_memory_per_gpu_sandbox',
   })
   maxMemoryPerGpuSandbox: number | null
@@ -114,6 +120,7 @@ export class RegionQuota {
   @Column({
     type: 'int',
     nullable: true,
+    default: DEFAULT_MAX_DISK_PER_GPU_SANDBOX,
     name: 'max_disk_per_gpu_sandbox',
   })
   maxDiskPerGpuSandbox: number | null
@@ -156,8 +163,8 @@ export class RegionQuota {
     this.maxMemoryPerSandbox = params.maxMemoryPerSandbox ?? null
     this.maxDiskPerSandbox = params.maxDiskPerSandbox ?? null
     this.maxDiskPerNonEphemeralSandbox = params.maxDiskPerNonEphemeralSandbox ?? null
-    this.maxCpuPerGpuSandbox = params.maxCpuPerGpuSandbox ?? null
-    this.maxMemoryPerGpuSandbox = params.maxMemoryPerGpuSandbox ?? null
-    this.maxDiskPerGpuSandbox = params.maxDiskPerGpuSandbox ?? null
+    this.maxCpuPerGpuSandbox = params.maxCpuPerGpuSandbox ?? DEFAULT_MAX_CPU_PER_GPU_SANDBOX
+    this.maxMemoryPerGpuSandbox = params.maxMemoryPerGpuSandbox ?? DEFAULT_MAX_MEMORY_PER_GPU_SANDBOX
+    this.maxDiskPerGpuSandbox = params.maxDiskPerGpuSandbox ?? DEFAULT_MAX_DISK_PER_GPU_SANDBOX
   }
 }
