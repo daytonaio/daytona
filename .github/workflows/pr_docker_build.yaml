@@ -17,7 +17,7 @@ jobs:
   docker-build:
     if: github.repository == 'daytonaio/daytona'
     name: Docker build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
     timeout-minutes: 40
     env:
       VERSION: v0.0.0-pr
