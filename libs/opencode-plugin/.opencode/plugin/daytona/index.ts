@@ -122,12 +122,12 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
       })
 
       try {
-        // Stream sandbox command output to host stdout; throw on non-zero exit.
+        // Run a sandbox command, throwing its output on non-zero exit. Output is
+        // surfaced only on failure: streaming every command's stdout (the opencode
+        // installer's progress bar and banner, tar, etc.) floods the host terminal
+        // with noise during workspace creation.
         const run = async (command: string): Promise<void> => {
           const result = await sandbox.process.executeCommand(command)
-          if (result.result) {
-            process.stdout.write(result.result)
-          }
           if (result.exitCode !== 0) {
             throw new Error(result.result || `Sandbox command failed: ${command}`)
           }
