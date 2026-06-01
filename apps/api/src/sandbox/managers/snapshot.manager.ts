@@ -584,7 +584,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const retryTimeoutMs = retryTimeoutMinutes * 60 * 1000
     if (Date.now() - snapshotRunner.createdAt.getTime() > retryTimeoutMs) {
       const snapshot = await this.snapshotRepository.findOne({ where: { ref: snapshotRunner.snapshotRef } })
-      const sandboxClass = snapshot?.sandboxClass
+      let sandboxClass = snapshot?.sandboxClass
+      if (!sandboxClass) {
+        // Backup-snapshot refs do not have a Snapshot row; fall back to the owning sandbox's class.
+        const sandbox = await this.sandboxRepository.findOne({
+          where: { backupSnapshot: snapshotRunner.snapshotRef },
+        })
+        sandboxClass = sandbox?.sandboxClass
+      }
       let internalRegistry: DockerRegistry | undefined
       if (!sandboxClass || isRegistryBasedSandboxClass(sandboxClass)) {
         const found = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
