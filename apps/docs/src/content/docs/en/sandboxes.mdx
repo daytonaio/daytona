@@ -126,8 +126,6 @@ Daytona provides a pre-built `daytona-gpu` snapshot for creating GPU sandboxes. 
 4. Select **`us-east-1`** region
 4. Click **Create** to create a GPU sandbox
 
-To create a GPU sandbox programmatically, use the pre-built `daytona-gpu` snapshot, target `us-east-1` region, and set `auto_delete_interval` to `0` (ephemeral).
-
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
@@ -260,15 +258,13 @@ Daytona provides methods to create Windows sandboxes.
 
 Windows sandboxes are Windows OS runtime environments used to run Windows applications. They provide a consistent Windows baseline, so you can run Windows-specific tools and workflows in an isolated sandbox.
 
-Daytona provides a pre-built `windows-server-2025` snapshot for creating Windows sandboxes. The snapshot uses **2 vCPU**, **8GiB** memory, and **30GiB** disk.
+Daytona provides a pre-built `windows` snapshot for creating Windows sandboxes. The snapshot uses **2 vCPU**, **8GiB** memory, and **30GiB** disk.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click **Create Sandbox**
-3. Select a Windows snapshot (**`windows-server-2025`**)
+3. Select a Windows snapshot (**`windows`**)
 4. Select **`us`** region
 5. Click **Create** to create a Windows sandbox
-
-To create a Windows sandbox programmatically, use the pre-built `windows-server-2025` snapshot and target `us` region.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
