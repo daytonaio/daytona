@@ -49,7 +49,9 @@ if (fs.existsSync(esmImportJs)) {
     `  ); };\n` +
     `})();\n`
   const original = fs.readFileSync(esmImportJs, 'utf8')
-  const rewritten = original.replace(/\brequire\s*\(/g, '__esmRequire(')
+  const rewritten = original
+    .replace(/require\s*\(\s*['"]\.\.\/\.\.\/package\.json['"]\s*\)/g, JSON.stringify({ name: pkg.name, version: pkg.version }))
+    .replace(/\brequire\s*\(/g, '__esmRequire(')
   fs.writeFileSync(esmImportJs, shim + rewritten)
 }
 
