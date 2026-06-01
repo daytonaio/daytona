@@ -40,7 +40,8 @@ func (d *DockerClient) BuildSnapshot(ctx context.Context, req dto.BuildSnapshotR
 	}
 
 	if req.PushToInternalRegistry {
-		err = d.PushImage(ctx, tag, req.Registry)
+		// Snapshot build path has no sandbox context.
+		err = d.PushImage(ctx, tag, req.Registry, nil)
 		if err != nil {
 			return err
 		}

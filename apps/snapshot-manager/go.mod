@@ -5,8 +5,8 @@ go 1.25.0
 require (
 	github.com/distribution/distribution/v3 v3.1.1
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lmittmann/tint v1.1.2
-	github.com/mattn/go-isatty v0.0.20
+	github.com/lmittmann/tint v1.1.3
+	github.com/mattn/go-isatty v0.0.22
 	github.com/sirupsen/logrus v1.9.4
 	golang.org/x/crypto v0.50.0
 )
@@ -49,7 +49,7 @@ require (
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.18.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.19.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.42.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.42.0 // indirect

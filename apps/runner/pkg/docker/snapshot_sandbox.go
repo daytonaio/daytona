@@ -130,7 +130,7 @@ func (d *DockerClient) CreateSnapshotFromSandbox(ctx context.Context, sandboxID 
 		}
 	}()
 
-	if err := d.PushImage(ctx, canonicalRef, registry); err != nil {
+	if err := d.PushImage(ctx, canonicalRef, registry, &sandboxID); err != nil {
 		return nil, err
 	}
 	pushedOK = true
