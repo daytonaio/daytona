@@ -56,7 +56,7 @@ User:
 Cleaning up...
 ```
 
-The agent can also host web apps and provide you with a preview link using the [Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
+The agent can also host web apps and provide you with a preview link using the [Daytona Preview Links](https://www.daytona.io/docs/en/preview/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
 
 <Image
   src={codexSdkLunarLanderResult}
@@ -128,7 +128,7 @@ This example consists of two main components:
 On initialization, the main program:
 1. Creates a new [Daytona sandbox](/docs/en/sandboxes) with your OpenAI API key included in the environment variables.
 2. Configures the Codex system prompt with Daytona-specific instructions and writes it to a `.codex/config.toml` file in the sandbox.
-3. Uploads the agent package to the sandbox with [file uploading](/docs/file-system-operations#uploading-a-single-file).
+3. Uploads the agent package to the sandbox with [file uploading](/docs/en/file-system-operations#upload-a-single-file).
 4. Installs the agent dependencies by running `npm install` in the uploaded agent directory.
 5. Waits for user input and runs the agent asynchronously for each prompt.
 

@@ -69,7 +69,7 @@ Enjoy your adventure! 🗡️✨
 User:
 ```
 
-The agent can also host web apps and provide you with a preview link using the [Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
+The agent can also host web apps and provide you with a preview link using the [Daytona Preview Links](https://www.daytona.io/docs/en/preview/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
 
 <Image
   src={claudeAgentSDKInteractiveTerminalSandboxResult}
@@ -226,9 +226,9 @@ This example consists of two main components:
 On initialization, the main program:
 
 1. Creates a new [Daytona sandbox](/docs/en/sandboxes) with your Anthropic API key included in the environment variables.
-2. Installs the Claude Agent SDK by running `pip install` in the sandbox with [process execution](/docs/en/process-code-execution#process-execution).
-3. Creates a new [code interpreter context](/docs/en/process-code-execution#stateful-code-interpreter).
-4. Uploads the coding agent script to the sandbox with [file uploading](/docs/file-system-operations#uploading-a-single-file).
+2. Installs the Claude Agent SDK by running `pip install` in the sandbox with [process execution](/docs/en/process-code-execution#command-execution).
+3. Creates a new [code interpreter context](/docs/en/process-code-execution#run-code-stateful).
+4. Uploads the coding agent script to the sandbox with [file uploading](/docs/en/file-system-operations#upload-a-single-file).
 5. Initializes the Claude Agent SDK by running `import coding_agent` in the code interpreter context.
 6. Waits for user input and sends prompts to the agent in the code interpreter context as shown below.
 
@@ -254,7 +254,7 @@ The `onStdout` and `onStderr` callbacks are used to pass the agent's output back
 #### Sandbox Agent Code
 
 The sandbox agent uses the [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) to create a customized coding agent based on Claude Code.
-The agent is initialized with a system prompt that includes the workspace directory and an example of the [preview URL format](/docs/en/preview-and-authentication):
+The agent is initialized with a system prompt that includes the workspace directory and an example of the [preview URL format](/docs/en/preview):
 
 ```python
 system_prompt = """
