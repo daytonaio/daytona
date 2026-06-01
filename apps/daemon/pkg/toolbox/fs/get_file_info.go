@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,7 +61,7 @@ func getFileInfo(path string) (FileInfo, error) {
 		Name:        info.Name(),
 		Size:        info.Size(),
 		Mode:        info.Mode().String(),
-		ModTime:     info.ModTime().String(),
+		ModTime:     info.ModTime().Format(time.RFC3339Nano),
 		IsDir:       info.IsDir(),
 		Owner:       strconv.FormatUint(uint64(stat.Uid), 10),
 		Group:       strconv.FormatUint(uint64(stat.Gid), 10),
