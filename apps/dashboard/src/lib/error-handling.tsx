@@ -1,8 +1,9 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { RoutePath } from '@/enums/RoutePath'
 import LinkifyIt from 'linkify-it'
 import { type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -61,7 +62,9 @@ function getInternalLinkTo(url: string): string | undefined {
   }
 
   const parsedUrl = new URL(url)
-  if (parsedUrl.origin !== window.location.origin) {
+  const isDashboardPath = `${parsedUrl.pathname}/`.startsWith(`${RoutePath.DASHBOARD}/`)
+
+  if (parsedUrl.origin !== window.location.origin || !isDashboardPath) {
     return undefined
   }
 
