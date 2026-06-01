@@ -275,7 +275,7 @@ from daytona import Daytona, DaytonaConfig, CreateSandboxFromSnapshotParams
 daytona = Daytona(DaytonaConfig(target="us"))
 sandbox = daytona.create(
     CreateSandboxFromSnapshotParams(
-        snapshot="windows-server-2025",
+        snapshot="windows",
     )
 )
 ```
@@ -290,7 +290,7 @@ const daytona = new Daytona({
   target: "us",
 });
 const sandbox = await daytona.create({
-  snapshot: "windows-server-2025",
+  snapshot: "windows",
 });
 ```
 
@@ -306,7 +306,7 @@ config = Daytona::Config.new(
 daytona = Daytona::Daytona.new(config)
 sandbox = daytona.create(
   Daytona::CreateSandboxFromSnapshotParams.new(
-    snapshot: 'windows-server-2025'
+    snapshot: 'windows'
   )
 )
 ```
@@ -329,7 +329,7 @@ func main() {
 	})
 	ctx := context.Background()
 	params := types.SnapshotParams{
-		Snapshot: "windows-server-2025",
+		Snapshot: "windows",
 	}
 	_, _ = client.Create(ctx, params)
 }
@@ -353,7 +353,7 @@ public class App {
 
         try (Daytona daytona = new Daytona(config)) {
             CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
-            params.setSnapshot("windows-server-2025");
+            params.setSnapshot("windows");
             Sandbox sandbox = daytona.create(params);
         }
     }
@@ -364,7 +364,7 @@ public class App {
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona create --snapshot windows-server-2025 --target us
+daytona create --snapshot windows --target us
 ```
 
 </TabItem>
@@ -377,7 +377,7 @@ curl 'https://app.daytona.io/api/sandbox' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "target": "us",
-  "snapshot": "windows-server-2025"
+  "snapshot": "windows"
 }'
 ```
 
