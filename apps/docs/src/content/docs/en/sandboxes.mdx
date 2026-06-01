@@ -540,6 +540,357 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
+### Linked Sandboxes
+
+Daytona provides methods to create linked sandboxes. 
+
+Linked sandboxes are attached to an existing parent sandbox at creation time.
+
+Create the parent sandbox first, then create one or more children whose create request references the parent's sandbox ID. This records the relationship on the child sandbox as the linked sandbox ID. Omitting the linked sandbox parameter yields an unlinked sandbox.
+
+- **Lifecycle**
+
+  Linked sandboxes are always ephemeral and cannot be persisted or resumed after stop. The [auto-delete interval](#auto-delete-interval) must be exactly `0` on create; this is enforced, not a default. The [auto-stop interval](#auto-stop-interval) sets the idle period in minutes after which the child sandbox stops. Once stopped, linked children are auto-deleted. Deleting the parent deletes all of its linked children (cascade). One parent may have many linked children (1:N).
+- **Networking**
+
+  TCP connections establish from the parent sandbox to the child sandbox using the child sandbox's ID as the host. The traffic stays on the internal link network. For example: `telnet DEVICE_SANDBOX_ID 5555` reaches port `5555` on the linked child sandbox.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+parent = daytona.create()
+
+child = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        linked_sandbox=parent.id,
+        ephemeral=True,
+    )
+)
+
+# The link network registers each sandbox under its name as a DNS alias
+response = child.process.exec(f"curl http://{parent.name}:3000/")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from "@daytona/sdk";
+
+const daytona = new Daytona();
+
+const parent = await daytona.create();
+
+const child = await daytona.create({
+  linkedSandbox: parent.id,
+  ephemeral: true,
+});
+
+// The link network registers each sandbox under its name as a DNS alias
+const response = await child.process.executeCommand(
+  `curl http://${parent.name}:3000/`
+);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+parent = daytona.create
+
+child = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    linked_sandbox: parent.id,
+    ephemeral: true
+  )
+)
+
+# The link network also registers each sandbox under its ID as a DNS alias
+response = child.process.exec(command: "curl http://#{parent.id}:3000/")
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+
+	parent, _ := client.Create(ctx, types.SnapshotParams{})
+
+	child, _ := client.Create(ctx, types.SnapshotParams{
+		SandboxBaseParams: types.SandboxBaseParams{
+			LinkedSandbox: parent.ID,
+			Ephemeral:     true,
+		},
+	})
+
+	// The link network registers each sandbox under its name as a DNS alias
+	response, _ := child.Process.ExecuteCommand(ctx, fmt.Sprintf("curl http://%s:3000/", parent.Name))
+	fmt.Println(response.Result)
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+import io.daytona.sdk.model.ExecuteResponse;
+
+public class App {
+    public static void main(String[] args) {
+        try (Daytona daytona = new Daytona()) {
+            Sandbox parent = daytona.create();
+
+            CreateSandboxFromSnapshotParams childParams = new CreateSandboxFromSnapshotParams();
+            childParams.setLinkedSandbox(parent.getId());
+            childParams.setAutoDeleteInterval(0); // linked sandboxes must be ephemeral
+            Sandbox child = daytona.create(childParams);
+
+            // The link network registers each sandbox under its name as a DNS alias
+            ExecuteResponse response = child.getProcess()
+                    .executeCommand("curl http://" + parent.getName() + ":3000/");
+        }
+    }
+}
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Create parent sandbox
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{}'
+
+# Create linked child sandbox (replace PARENT_SANDBOX_ID with the id from the first response)
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "linkedSandbox": "PARENT_SANDBOX_ID",
+  "autoDeleteInterval": 0
+}'
+```
+
+</TabItem>
+</Tabs>
+
+### Android Sandboxes
+
+Daytona provides methods to create Android sandboxes. 
+
+Android sandboxes are used to run Android emulators alongside a standard Linux sandbox.
+
+- **Base sandbox**: a standard Linux sandbox where your code runs (git, builds, POSIX tooling)
+- **Device sandbox(es)**: one or more Android emulator devices, attached as [linked sandboxes](#linked-sandboxes)
+
+You run your code in the base sandbox and reach each device over adb.
+
+- **Region**
+  
+  Android workloads require the `android` target region on every sandbox in the setup (base and devices). Set `DAYTONA_TARGET=android` in the environment, or pass the `android` target parameter
+- **Snapshots**
+
+  Base: `android-base`. 
+  
+  Devices (x86_64, AOSP, the numbers correspond to Android SDK levels / OS versions):
+
+  `android-device-12-aosp`, `android-device-13-aosp`, `android-device-14-aosp`, `android-device-15-aosp`, `android-device-16-aosp`
+- **adb from the base sandbox**
+
+  Connect using the device sandbox ID and port `5555`: 
+
+  `adb connect DEVICE_SANDBOX_ID:5555`
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSandboxFromSnapshotParams, Daytona, DaytonaConfig
+
+daytona = Daytona(DaytonaConfig(target="android"))
+
+base = daytona.create(CreateSandboxFromSnapshotParams(snapshot="android-base"))
+device = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="android-device-14-aosp",
+        linked_sandbox=base.id,
+        auto_delete_interval=0,
+        auto_stop_interval=30,
+    ),
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from "@daytona/sdk";
+
+const daytona = new Daytona({ target: "android" });
+const base = await daytona.create({ snapshot: "android-base" });
+const device = await daytona.create({
+  snapshot: "android-device-14-aosp",
+  linkedSandbox: base.id,
+  autoDeleteInterval: 0,
+  autoStopInterval: 30,
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+config = Daytona::Config.new(target: 'android')
+daytona = Daytona::Daytona.new(config)
+
+base = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: 'android-base')
+)
+device = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'android-device-14-aosp',
+    linked_sandbox: base.id,
+    auto_delete_interval: 0,
+    auto_stop_interval: 30
+  )
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClientWithConfig(&types.DaytonaConfig{Target: "android"})
+	ctx := context.Background()
+
+	base, _ := client.Create(ctx, types.SnapshotParams{Snapshot: "android-base"})
+
+	autoStopInterval := 30
+	autoDeleteInterval := 0
+	_, _ = client.Create(ctx, types.SnapshotParams{
+		Snapshot:      "android-device-14-aosp",
+		LinkedSandbox: base.ID,
+		SandboxBaseParams: types.SandboxBaseParams{
+			AutoStopInterval:   &autoStopInterval,
+			AutoDeleteInterval: &autoDeleteInterval,
+		},
+	})
+}
+```
+
+</TabItem>
+<TabItem label="Java" icon="seti:java">
+
+```java
+import io.daytona.sdk.Daytona;
+import io.daytona.sdk.DaytonaConfig;
+import io.daytona.sdk.Sandbox;
+import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
+
+public class App {
+    public static void main(String[] args) {
+        DaytonaConfig config = new DaytonaConfig.Builder().target("android").build();
+        try (Daytona daytona = new Daytona(config)) {
+            CreateSandboxFromSnapshotParams baseParams = new CreateSandboxFromSnapshotParams();
+            baseParams.setSnapshot("android-base");
+            Sandbox base = daytona.create(baseParams);
+
+            CreateSandboxFromSnapshotParams deviceParams = new CreateSandboxFromSnapshotParams();
+            deviceParams.setSnapshot("android-device-14-aosp");
+            deviceParams.setLinkedSandbox(base.getId());
+            deviceParams.setAutoDeleteInterval(0);
+            deviceParams.setAutoStopInterval(30);
+            Sandbox device = daytona.create(deviceParams);
+        }
+    }
+}
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Create base sandbox
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "snapshot": "android-base",
+  "target": "android"
+}'
+
+# Create linked device sandbox (replace BASE_SANDBOX_ID with the id from the first response)
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "snapshot": "android-device-14-aosp",
+  "target": "android",
+  "linkedSandbox": "BASE_SANDBOX_ID",
+  "autoDeleteInterval": 0,
+  "autoStopInterval": 30
+}'
+```
+
+</TabItem>
+</Tabs>
+
+##### SSH port forwarding
+
+For connecting tools like Android Studio from your machine, tunnel through the base sandbox, not the device. In the following snippet, the device appears as `localhost:5555`:
+
+```bash
+ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
+```
+
+##### Customization rules
+
+- **Custom images**: Build and register custom base snapshots using the same Dockerfile-based flow as other sandboxes, with two requirements: the snapshot must be built in the `android` region and use the `android` class
+- **Custom device snapshots**: Available on request. Device images are built by Daytona from a specification you provide. Contact [support@daytona.io](mailto:support@daytona.io) for more information.
+
 ### Ephemeral Sandboxes
 
 Daytona provides methods to create ephemeral sandboxes.
@@ -866,596 +1217,6 @@ final class CreateSandboxResources {
         }
     }
 }
-```
-
-</TabItem>
-</Tabs>
-
-### Linked Sandboxes
-
-Daytona provides methods to create linked sandboxes. 
-
-Linked sandboxes are attached to an existing parent sandbox at creation time.
-
-Create the parent sandbox first, then create one or more children whose create request references the parent's sandbox ID. This records the relationship on the child sandbox as the linked sandbox ID. Omitting the linked sandbox parameter yields an unlinked sandbox.
-
-- **Lifecycle**
-
-  Linked sandboxes are always ephemeral and cannot be persisted or resumed after stop. The [auto-delete interval](#auto-delete-interval) must be exactly `0` on create; this is enforced, not a default. The [auto-stop interval](#auto-stop-interval) sets the idle period in minutes after which the child sandbox stops. Once stopped, linked children are auto-deleted. Deleting the parent deletes all of its linked children (cascade). One parent may have many linked children (1:N).
-- **Networking**
-
-  TCP connections establish from the parent sandbox to the child sandbox using the child sandbox's ID as the host. The traffic stays on the internal link network. For example: `telnet DEVICE_SANDBOX_ID 5555` reaches port `5555` on the linked child sandbox.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-from daytona import CreateSandboxFromSnapshotParams, Daytona, DaytonaConfig
-
-daytona = Daytona(DaytonaConfig(target="android"))
-
-parent = daytona.create(
-    CreateSandboxFromSnapshotParams(snapshot="android-base"),
-)
-child = daytona.create(
-    CreateSandboxFromSnapshotParams(
-        snapshot="android-device-14-aosp",
-        linked_sandbox=parent.id,
-        auto_delete_interval=0,
-        auto_stop_interval=30,
-    ),
-)
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```typescript
-import { Daytona } from "@daytona/sdk";
-
-const daytona = new Daytona({ target: "android" });
-
-const parent = await daytona.create({ snapshot: "android-base" });
-const child = await daytona.create({
-  snapshot: "android-device-14-aosp",
-  linkedSandbox: parent.id,
-  autoDeleteInterval: 0,
-  autoStopInterval: 30,
-});
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-require 'daytona'
-
-config = Daytona::Config.new(target: 'android')
-daytona = Daytona::Daytona.new(config)
-
-parent = daytona.create(
-  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: 'android-base')
-)
-child = daytona.create(
-  Daytona::CreateSandboxFromSnapshotParams.new(
-    snapshot: 'android-device-14-aosp',
-    linked_sandbox: parent.id,
-    auto_delete_interval: 0,
-    auto_stop_interval: 30
-  )
-)
-```
-
-</TabItem>
-<TabItem label="Go" icon="seti:go">
-
-```go
-package main
-
-import (
-	"context"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, _ := daytona.NewClientWithConfig(&types.DaytonaConfig{Target: "android"})
-	ctx := context.Background()
-
-	parent, _ := client.Create(ctx, types.SnapshotParams{Snapshot: "android-base"})
-
-	autoStopInterval := 30
-	autoDeleteInterval := 0
-	_, _ = client.Create(ctx, types.SnapshotParams{
-		Snapshot:      "android-device-14-aosp",
-		LinkedSandbox: parent.ID,
-		SandboxBaseParams: types.SandboxBaseParams{
-			AutoStopInterval:   &autoStopInterval,
-			AutoDeleteInterval: &autoDeleteInterval,
-		},
-	})
-}
-```
-
-</TabItem>
-<TabItem label="Java" icon="seti:java">
-
-```java
-import io.daytona.sdk.Daytona;
-import io.daytona.sdk.DaytonaConfig;
-import io.daytona.sdk.Sandbox;
-import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
-
-public class App {
-    public static void main(String[] args) {
-        DaytonaConfig config = new DaytonaConfig.Builder().target("android").build();
-        try (Daytona daytona = new Daytona(config)) {
-            CreateSandboxFromSnapshotParams parentParams = new CreateSandboxFromSnapshotParams();
-            parentParams.setSnapshot("android-base");
-            Sandbox parent = daytona.create(parentParams);
-
-            CreateSandboxFromSnapshotParams childParams = new CreateSandboxFromSnapshotParams();
-            childParams.setSnapshot("android-device-14-aosp");
-            childParams.setLinkedSandbox(parent.getId());
-            childParams.setAutoDeleteInterval(0);
-            childParams.setAutoStopInterval(30);
-            Sandbox child = daytona.create(childParams);
-        }
-    }
-}
-```
-
-</TabItem>
-<TabItem label="API" icon="seti:json">
-
-```bash
-# Create parent sandbox
-curl 'https://app.daytona.io/api/sandbox' \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "snapshot": "android-base",
-  "target": "android"
-}'
-
-# Create linked child sandbox (replace PARENT_SANDBOX_ID with the id from the first response)
-curl 'https://app.daytona.io/api/sandbox' \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "snapshot": "android-device-14-aosp",
-  "target": "android",
-  "linkedSandbox": "PARENT_SANDBOX_ID",
-  "autoDeleteInterval": 0,
-  "autoStopInterval": 30
-}'
-```
-
-</TabItem>
-</Tabs>
-
-### Android Sandboxes
-
-Daytona provides methods to create Android sandboxes. 
-
-Android sandboxes are used to run Android emulators alongside a standard Linux sandbox.
-
-- **Base sandbox**: a standard Linux sandbox where your code runs (git, builds, POSIX tooling)
-- **Device sandbox(es)**: one or more Android emulator devices, attached as [linked sandboxes](#linked-sandboxes)
-
-You run your code in the base sandbox and reach each device over adb.
-
-- **Region**
-  
-  Android workloads require the `android` target region on every sandbox in the setup (base and devices). Set `DAYTONA_TARGET=android` in the environment, or pass the `android` target parameter
-- **Snapshots**
-
-  Base: `android-base`. 
-  
-  Devices (x86_64, AOSP, the numbers correspond to Android SDK levels / OS versions):
-
-  `android-device-12-aosp`, `android-device-13-aosp`, `android-device-14-aosp`, `android-device-15-aosp`, `android-device-16-aosp`
-- **adb from the base sandbox**
-
-  Connect using the device sandbox ID and port `5555`: 
-
-  `adb connect DEVICE_SANDBOX_ID:5555`
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-from daytona import CreateSandboxFromSnapshotParams, Daytona, DaytonaConfig
-
-daytona = Daytona(DaytonaConfig(target="android"))
-
-base = daytona.create(CreateSandboxFromSnapshotParams(snapshot="android-base"))
-device = daytona.create(
-    CreateSandboxFromSnapshotParams(
-        snapshot="android-device-14-aosp",
-        linked_sandbox=base.id,
-        auto_delete_interval=0,
-        auto_stop_interval=30,
-    ),
-)
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```typescript
-import { Daytona } from "@daytona/sdk";
-
-const daytona = new Daytona({ target: "android" });
-const base = await daytona.create({ snapshot: "android-base" });
-const device = await daytona.create({
-  snapshot: "android-device-14-aosp",
-  linkedSandbox: base.id,
-  autoDeleteInterval: 0,
-  autoStopInterval: 30,
-});
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-require 'daytona'
-
-config = Daytona::Config.new(target: 'android')
-daytona = Daytona::Daytona.new(config)
-
-base = daytona.create(
-  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: 'android-base')
-)
-device = daytona.create(
-  Daytona::CreateSandboxFromSnapshotParams.new(
-    snapshot: 'android-device-14-aosp',
-    linked_sandbox: base.id,
-    auto_delete_interval: 0,
-    auto_stop_interval: 30
-  )
-)
-```
-
-</TabItem>
-<TabItem label="Go" icon="seti:go">
-
-```go
-package main
-
-import (
-	"context"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, _ := daytona.NewClientWithConfig(&types.DaytonaConfig{Target: "android"})
-	ctx := context.Background()
-
-	base, _ := client.Create(ctx, types.SnapshotParams{Snapshot: "android-base"})
-
-	autoStopInterval := 30
-	autoDeleteInterval := 0
-	_, _ = client.Create(ctx, types.SnapshotParams{
-		Snapshot:      "android-device-14-aosp",
-		LinkedSandbox: base.ID,
-		SandboxBaseParams: types.SandboxBaseParams{
-			AutoStopInterval:   &autoStopInterval,
-			AutoDeleteInterval: &autoDeleteInterval,
-		},
-	})
-}
-```
-
-</TabItem>
-<TabItem label="Java" icon="seti:java">
-
-```java
-import io.daytona.sdk.Daytona;
-import io.daytona.sdk.DaytonaConfig;
-import io.daytona.sdk.Sandbox;
-import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
-
-public class App {
-    public static void main(String[] args) {
-        DaytonaConfig config = new DaytonaConfig.Builder().target("android").build();
-        try (Daytona daytona = new Daytona(config)) {
-            CreateSandboxFromSnapshotParams baseParams = new CreateSandboxFromSnapshotParams();
-            baseParams.setSnapshot("android-base");
-            Sandbox base = daytona.create(baseParams);
-
-            CreateSandboxFromSnapshotParams deviceParams = new CreateSandboxFromSnapshotParams();
-            deviceParams.setSnapshot("android-device-14-aosp");
-            deviceParams.setLinkedSandbox(base.getId());
-            deviceParams.setAutoDeleteInterval(0);
-            deviceParams.setAutoStopInterval(30);
-            Sandbox device = daytona.create(deviceParams);
-        }
-    }
-}
-```
-
-</TabItem>
-<TabItem label="API" icon="seti:json">
-
-```bash
-# Create base sandbox
-curl 'https://app.daytona.io/api/sandbox' \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "snapshot": "android-base",
-  "target": "android"
-}'
-
-# Create linked device sandbox (replace BASE_SANDBOX_ID with the id from the first response)
-curl 'https://app.daytona.io/api/sandbox' \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "snapshot": "android-device-14-aosp",
-  "target": "android",
-  "linkedSandbox": "BASE_SANDBOX_ID",
-  "autoDeleteInterval": 0,
-  "autoStopInterval": 30
-}'
-```
-
-</TabItem>
-</Tabs>
-
-##### SSH port forwarding
-
-For connecting tools like Android Studio from your machine, tunnel through the base sandbox, not the device. In the following snippet, the device appears as `localhost:5555`:
-
-```bash
-ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
-```
-
-##### Customization rules
-
-- **Custom images**: Build and register custom base snapshots using the same Dockerfile-based flow as other sandboxes, with two requirements: the snapshot must be built in the `android` region and use the `android` class
-- **Custom device snapshots**: Available on request. Device images are built by Daytona from a specification you provide. Contact [support@daytona.io](mailto:support@daytona.io) for more information.
-
-### Ephemeral Sandboxes
-
-Daytona provides methods to create ephemeral sandboxes. 
-
-Ephemeral sandboxes are automatically deleted once they are stopped. They are useful for short-lived tasks or testing purposes.
-
-To create an ephemeral sandbox, set the `ephemeral` parameter to `True` when creating a sandbox. Setting [**`autoDeleteInterval: 0`**](#auto-delete-interval) (ephemeral) has the same effect.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
-
-daytona = Daytona()
-params = CreateSandboxFromSnapshotParams(
-    ephemeral=True,
-    auto_stop_interval=5,  # delete after 5 minutes of inactivity
-)
-sandbox = daytona.create(params)
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```typescript
-import { Daytona } from "@daytona/sdk";
-
-const daytona = new Daytona();
-const sandbox = await daytona.create({
-  ephemeral: true,
-  autoStopInterval: 5, // delete after 5 minutes of inactivity
-});
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-require 'daytona'
-
-daytona = Daytona::Daytona.new
-params = Daytona::CreateSandboxFromSnapshotParams.new(
-  ephemeral: true,
-  auto_stop_interval: 5 # delete after 5 minutes of inactivity
-)
-sandbox = daytona.create(params)
-```
-
-</TabItem>
-<TabItem label="Go" icon="seti:go">
-
-```go
-package main
-
-import (
-	"context"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, _ := daytona.NewClient()
-	ctx := context.Background()
-
-	autoStopInterval := 5 // delete after 5 minutes of inactivity
-	params := types.SnapshotParams{
-		SandboxBaseParams: types.SandboxBaseParams{
-			Language:         types.CodeLanguagePython,
-			Ephemeral:        true,
-			AutoStopInterval: &autoStopInterval,
-		},
-	}
-	_, _ = client.Create(ctx, params)
-}
-```
-
-</TabItem>
-<TabItem label="Java" icon="seti:java">
-
-```java
-import io.daytona.sdk.Daytona;
-import io.daytona.sdk.Sandbox;
-import io.daytona.sdk.model.CreateSandboxFromSnapshotParams;
-
-public class App {
-    public static void main(String[] args) {
-        try (Daytona daytona = new Daytona()) {
-            CreateSandboxFromSnapshotParams params = new CreateSandboxFromSnapshotParams();
-            params.setAutoDeleteInterval(0); // same effect as ephemeral: true
-            params.setAutoStopInterval(5); // delete after 5 minutes of inactivity
-            Sandbox sandbox = daytona.create(params);
-        }
-    }
-}
-```
-
-</TabItem>
-</Tabs>
-
-### Resources
-
-Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. Organizations get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**.
-
-| **Resource** | **Unit** | **Default** | **Minimum** | **Maximum** |
-| ------------ | -------- | ----------- | ----------- | ----------- |
-| CPU          | vCPU     | **`1`**     | **`1`**     | **`4`**     |
-| Memory       | GiB      | **`1`**     | **`1`**     | **`8`**     |
-| Disk         | GiB      | **`3`**     | **`1`**     | **`10`**    |
-
-To set custom sandbox resources, use the `Resources` class. All resource parameters are optional and must be integers. If not specified, Daytona will use the default values. Maximum values are per-sandbox limits set at the organization level.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-from daytona import Daytona, CreateSandboxFromImageParams, Image, Resources
-
-daytona = Daytona()
-sandbox = daytona.create(
-    CreateSandboxFromImageParams(
-        image=Image.debian_slim("3.12"),
-        resources=Resources(cpu=2, memory=4, disk=8),
-    )
-)
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```typescript
-import { Daytona, Image } from "@daytona/sdk";
-
-const daytona = new Daytona();
-const sandbox = await daytona.create({
-  image: Image.debianSlim("3.12"),
-  resources: { cpu: 2, memory: 4, disk: 8 },
-});
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-require 'daytona'
-
-daytona = Daytona::Daytona.new
-sandbox = daytona.create(
-  Daytona::CreateSandboxFromImageParams.new(
-    image: Daytona::Image.debian_slim('3.12'),
-    resources: Daytona::Resources.new(
-      cpu: 2,
-      memory: 4,
-      disk: 8
-    )
-  )
-)
-```
-
-</TabItem>
-<TabItem label="Go" icon="seti:go">
-
-```go
-package main
-
-import (
-	"context"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, _ := daytona.NewClient()
-	ctx := context.Background()
-	_, _ = client.Create(ctx, types.ImageParams{
-		Image: "python:3.12",
-		Resources: &types.Resources{
-			CPU:    2,
-			Memory: 4,
-			Disk:   8,
-		},
-	})
-}
-```
-
-</TabItem>
-<TabItem label="Java" icon="seti:java">
-
-```java
-import io.daytona.sdk.Daytona;
-import io.daytona.sdk.Sandbox;
-import io.daytona.sdk.model.CreateSandboxFromImageParams;
-import io.daytona.sdk.model.Resources;
-
-final class CreateSandboxResources {
-    public static void main(String[] args) {
-        try (Daytona daytona = new Daytona()) {
-            CreateSandboxFromImageParams params = new CreateSandboxFromImageParams();
-            params.setImage("python:3.12");
-            Resources resources = new Resources();
-            resources.setCpu(2);
-            resources.setMemory(4);
-            resources.setDisk(8);
-            params.setResources(resources);
-            Sandbox sandbox = daytona.create(params);
-        }
-    }
-}
-```
-
-</TabItem>
-<TabItem label="CLI" icon="seti:shell">
-
-```bash
-# --memory is in MB; --disk is in GB
-daytona create --cpu 2 --memory 4096 --disk 8
-```
-
-</TabItem>
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/sandbox' \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "cpu": 2,
-  "memory": 4,
-  "disk": 8
-}'
 ```
 
 </TabItem>
