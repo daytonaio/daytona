@@ -75,6 +75,7 @@ When you delete a Daytona workspace from OpenCode, the associated sandbox is aut
 Verify the plugin source parses and ESM-links through bun's CLI:
 
 ```bash
+cd libs/opencode-plugin
 bun -e 'import("./.opencode/plugin/index.ts").catch(e => { console.error(e); process.exit(1) })'
 ```
 
@@ -85,6 +86,7 @@ Bun's CLI honors the project's `tsconfig.json` while OpenCode's embedded runtime
 Confirm OpenCode itself registers the Daytona adaptor:
 
 ```bash
+cd /tmp/myproject
 OPENCODE_EXPERIMENTAL_WORKSPACES=true DAYTONA_API_KEY=x opencode serve --port 4096 >/dev/null 2>&1 &
 sleep 4
 curl -s http://127.0.0.1:4096/experimental/workspace/adapter | grep -q daytona && echo OK || echo FAIL
