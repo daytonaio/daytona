@@ -14,6 +14,7 @@
  * This approach preserves static generation benefits while enabling dynamic language routing.
  */
 import config from '../../gt.config.json'
+import { acceptsMarkdown } from '../utils/content-negotiation'
 
 const defaultLocale = config.defaultLocale
 const allLocales = [defaultLocale, ...config.locales]
@@ -163,9 +164,10 @@ export async function handleLanguageRouting(
 
   const serveCustom404 = async (): Promise<Response> => {
     const response = await proxyLocalizedContent('/docs/404', request)
+    const wantsMarkdown = acceptsMarkdown(request.headers.get('accept') ?? '')
     return new Response(response.body, {
-      status: 404,
-      statusText: 'Not Found',
+      status: wantsMarkdown ? 200 : 404,
+      statusText: wantsMarkdown ? 'OK' : 'Not Found',
       headers: response.headers,
     })
   }

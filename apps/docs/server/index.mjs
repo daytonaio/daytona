@@ -34,7 +34,9 @@ app.use((req, res, next) => {
 app.use('/docs', express.static('client/'))
 app.use(ssrHandler)
 app.use((req, res) => {
-  res.sendFile('404.html', { root: 'client/' })
+  const accept = (req.headers.accept ?? '').toLowerCase()
+  const wantsMarkdown = accept.includes('text/markdown')
+  res.status(wantsMarkdown ? 200 : 404).sendFile('404.html', { root: 'client/' })
 })
 
 app.listen(env.FUNCTIONS_PORT, () => {
