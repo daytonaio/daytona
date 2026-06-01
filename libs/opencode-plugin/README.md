@@ -162,13 +162,22 @@ Set `DAYTONA_API_KEY` to run the full test suite including sandbox cleanup tests
 To test the plugin locally, create a symlink in your test project:
 
 ```bash
-mkdir ~/myproject && cd ~/myproject
+mkdir /tmp/myproject && cd /tmp/myproject
 ln -s [ABSOLUTE_PATH_TO_DAYTONA]/libs/opencode-plugin/.opencode .opencode
 git init
 OPENCODE_EXPERIMENTAL_WORKSPACES=true opencode
 ```
 
 > **Note:** When developing locally with a symlink, OpenCode loads the TypeScript source directly, so no build step is required.
+
+### Running against a local OpenCode build
+
+To test against a from-source OpenCode checkout (e.g. `~/opencode`) instead of the installed binary, run its `dev` script with the test project (`/tmp/myproject` from above) as a trailing argument:
+
+```bash
+cd ~/opencode
+OPENCODE_EXPERIMENTAL_WORKSPACES=true bun dev /tmp/myproject
+```
 
 ### Building
 
