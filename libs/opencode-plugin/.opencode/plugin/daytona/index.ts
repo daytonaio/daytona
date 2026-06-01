@@ -58,10 +58,11 @@ function sleep(ms: number): Promise<void> {
 }
 
 // Runs a host-side command (not in the sandbox); rejects with aggregated stderr on non-zero exit.
-async function spawnAsync(cmd: string[], options: { cwd?: string } = {}): Promise<void> {
+async function spawnAsync(cmd: string[], options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}): Promise<void> {
   return new Promise((resolve, reject) => {
     const proc = nodeSpawn(cmd[0], cmd.slice(1), {
       cwd: options.cwd,
+      env: options.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     })
 
@@ -148,7 +149,15 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
         // plugins, instructions). The sandbox runs its own opencode and copying
         // the host's would clobber the plugin's own .opencode/ writes — and
         // breaks outright if .opencode is a symlink (the local-dev recipe).
-        await spawnAsync(['tar', '--exclude=repo/.opencode', '-czf', tar, '-C', temp, 'repo'])
+        //
+        // --no-xattrs and COPYFILE_DISABLE=1 keep macOS bsdtar from embedding
+        // Apple extended attributes (e.g. com.apple.provenance) as LIBARCHIVE.xattr.*
+        // pax headers and AppleDouble ._* entries. Without them the sandbox's GNU
+        // tar floods stdout with "Ignoring unknown extended header keyword" warnings
+        // and litters the repo with ._* files. Both are no-ops on Linux hosts.
+        await spawnAsync(['tar', '--no-xattrs', '--exclude=repo/.opencode', '-czf', tar, '-C', temp, 'repo'], {
+          env: { ...process.env, COPYFILE_DISABLE: '1' },
+        })
 
         await sandbox.fs.uploadFile(tar, 'repo.tgz')
         await run(
