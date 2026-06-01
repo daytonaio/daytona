@@ -48,6 +48,12 @@ const INSTALL_BIN = '/home/daytona/.opencode/bin/opencode'
 const SERVER_PORT = 3096
 const HEALTH_URL = `http://127.0.0.1:${SERVER_PORT}/global/health`
 
+// Pin the opencode version installed in the sandbox. Passing VERSION to the
+// installer skips its "latest release" lookup against api.github.com, which is
+// rate-limited (HTTP 429) and fails with "Failed to fetch version information"
+// when many sandboxes install in a short window. Bump as needed.
+const OPENCODE_VERSION = '1.15.13'
+
 // POSIX-safe single-quote escape: close quote, emit literal ', reopen quote.
 function sh(value: string): string {
   return `'${value.replace(/'/g, "'\"'\"'")}'`
@@ -165,7 +171,7 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
         )
 
         await run(
-          `mkdir -p "$HOME/.opencode/bin" && OPENCODE_INSTALL_DIR="$HOME/.opencode/bin" curl -fsSL https://opencode.ai/install | bash`,
+          `mkdir -p "$HOME/.opencode/bin" && curl -fsSL https://opencode.ai/install | VERSION=${OPENCODE_VERSION} OPENCODE_INSTALL_DIR="$HOME/.opencode/bin" bash`,
         )
 
         await sandbox.fs.uploadFile(Buffer.from(`${project.id}\n`), `${REPO_PATH}/.git/opencode`)
