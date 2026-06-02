@@ -344,6 +344,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
           gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
+          gpuType: snapshot.gpuType ? snapshot.gpuType : IsNull(),
           // Temporary: Android snapshots can go to container runners
           sandboxClass: getRunnerSandboxClass(snapshot.sandboxClass),
         },
@@ -477,6 +478,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           state: RunnerState.READY,
           unschedulable: Not(true),
           region: In(sharedRegionIds),
+          gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
+          gpuType: snapshot.gpuType ? snapshot.gpuType : IsNull(),
+          sandboxClass: getRunnerSandboxClass(snapshot.sandboxClass),
         },
       })
 
