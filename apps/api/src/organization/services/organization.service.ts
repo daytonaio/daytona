@@ -487,6 +487,45 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
   }
 
+  async setDefaultVolumeBackend(organizationId: string, defaultVolumeBackend: string): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    organization.defaultVolumeBackend = defaultVolumeBackend
+    await this.organizationRepository.save(organization)
+  }
+
+  async setCustomBucketConfig(
+    organizationId: string,
+    config: { bucketName: string; endpoint?: string; region?: string; accessKeyId: string; secretAccessKey: string },
+  ): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    organization.customBucketConfig = {
+      bucketName: config.bucketName,
+      endpoint: config.endpoint,
+      region: config.region,
+      accessKeyIdEnc: await this.encryptionService.encrypt(config.accessKeyId),
+      secretAccessKeyEnc: await this.encryptionService.encrypt(config.secretAccessKey),
+    }
+    await this.organizationRepository.save(organization)
+  }
+
+  async deleteCustomBucketConfig(organizationId: string): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    organization.customBucketConfig = null
+    await this.organizationRepository.save(organization)
+  }
+
   async updateExperimentalConfig(
     organizationId: string,
     experimentalConfig: Record<string, any> | null,

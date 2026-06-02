@@ -62,4 +62,12 @@ public class UpdateRegionTest {
         // TODO: test snapshotManagerUrl
     }
 
+    /**
+     * Test the property 'storageRegion'
+     */
+    @Test
+    public void storageRegionTest() {
+        // TODO: test storageRegion
+    }
+
 }

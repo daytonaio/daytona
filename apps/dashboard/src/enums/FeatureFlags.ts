@@ -8,4 +8,5 @@ export enum FeatureFlags {
   ORGANIZATION_EXPERIMENTS = 'organization_experiments',
   SANDBOX_LINUX_VM = 'sandbox_linux_vm',
   BILLING_PROVIDER_V2 = 'billing_provider_v2',
+  VOLUME_BACKEND_PICKER = 'volume_backend_picker',
 }

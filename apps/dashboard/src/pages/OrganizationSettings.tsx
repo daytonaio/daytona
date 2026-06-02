@@ -17,15 +17,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDeleteOrganizationMutation } from '@/hooks/mutations/useDeleteOrganizationMutation'
 import { useLeaveOrganizationMutation } from '@/hooks/mutations/useLeaveOrganizationMutation'
+import { useSetOrganizationDefaultVolumeBackendMutation } from '@/hooks/mutations/useSetOrganizationDefaultVolumeBackendMutation'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { FeatureFlags } from '@/enums/FeatureFlags'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationUserRoleEnum } from '@daytona/api-client'
 import React, { useRef } from 'react'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { toast } from 'sonner'
+import { useCopyToClipboard } from 'usehooks-ts'
 
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
@@ -35,6 +40,9 @@ const OrganizationSettings: React.FC = () => {
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()
   const setDefaultRegionDialogRef = useRef<SetDefaultRegionDialogRef>(null)
+  const setDefaultVolumeBackendMutation = useSetOrganizationDefaultVolumeBackendMutation()
+  const volumeBackendPickerEnabled = useFeatureFlagEnabled(FeatureFlags.VOLUME_BACKEND_PICKER)
+  const [copied, copyToClipboard] = useCopyToClipboard()
 
   if (!selectedOrganization) {
     return null
@@ -61,6 +69,19 @@ const OrganizationSettings: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to leave organization')
       return false
+    }
+  }
+
+  const handleSetDefaultVolumeBackend = async (value: string) => {
+    try {
+      await setDefaultVolumeBackendMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        defaultVolumeBackend: value,
+      })
+      toast.success('Volume backend updated successfully')
+      await refreshOrganizations(selectedOrganization.id)
+    } catch (error) {
+      handleApiError(error, 'Failed to update volume backend')
     }
   }
 
@@ -133,6 +154,35 @@ const OrganizationSettings: React.FC = () => {
         </Card>
 
         {isOwner && <OtelConfigCard />}
+
+        {volumeBackendPickerEnabled && isOwner && (
+          <Card>
+            <CardHeader className="p-4">
+              <CardTitle>Volume Backend</CardTitle>
+            </CardHeader>
+            <CardContent className="border-t border-border">
+              <Field className="grid sm:grid-cols-2 items-center">
+                <FieldContent className="flex-1">
+                  <FieldLabel htmlFor="volume-backend">Storage Backend</FieldLabel>
+                  <FieldDescription>Select the storage backend for sandbox volumes.</FieldDescription>
+                </FieldContent>
+                <Select
+                  value={(selectedOrganization as Record<string, any>).defaultVolumeBackend ?? 's3fuse'}
+                  onValueChange={handleSetDefaultVolumeBackend}
+                  disabled={setDefaultVolumeBackendMutation.isPending}
+                >
+                  <SelectTrigger id="volume-backend" className="flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="s3fuse">Standard</SelectItem>
+                    <SelectItem value="layered">Layered</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            </CardContent>
+          </Card>
+        )}
 
         {!selectedOrganization.personal && authenticatedUserOrganizationMember !== null && (
           <Card className="bg-destructive-background border-destructive-separator">

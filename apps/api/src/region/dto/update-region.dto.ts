@@ -30,4 +30,13 @@ export class UpdateRegionDto {
     required: false,
   })
   snapshotManagerUrl?: string
+
+  @ApiProperty({
+    description:
+      'Provider-prefixed storage region slug (e.g. "aws-us-east-1") used to pin layered volumes to a specific AWS S3 region. Pass null to clear.',
+    example: 'aws-us-east-1',
+    nullable: true,
+    required: false,
+  })
+  storageRegion?: string | null
 }

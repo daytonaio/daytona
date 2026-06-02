@@ -50,7 +50,22 @@ export interface VolumeDto {
      * The error reason of the volume
      */
     'errorReason': string | null;
+    /**
+     * Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.
+     */
+    'backend': VolumeDtoBackendEnum;
+    /**
+     * Daytona Region ID the volume is pinned to. Populated for layered volumes; null for s3fuse or for legacy layered volumes created before region pinning was introduced.
+     */
+    'regionId'?: string | null;
 }
 
+export const VolumeDtoBackendEnum = {
+    S3FUSE: 's3fuse',
+    LAYERED: 'layered',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+} as const;
+
+export type VolumeDtoBackendEnum = typeof VolumeDtoBackendEnum[keyof typeof VolumeDtoBackendEnum];
 
 

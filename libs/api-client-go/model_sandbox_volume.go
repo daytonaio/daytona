@@ -27,6 +27,8 @@ type SandboxVolume struct {
 	MountPath string `json:"mountPath"`
 	// Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
 	Subpath *string `json:"subpath,omitempty"`
+	// Mount the volume read-only inside this sandbox. The volume itself is unchanged; this is a per-mount attribute, so the same volume can be mounted read-write in one sandbox and read-only in another. Defaults to false.
+	ReadOnly *bool `json:"readOnly,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -40,6 +42,8 @@ func NewSandboxVolume(volumeId string, mountPath string) *SandboxVolume {
 	this := SandboxVolume{}
 	this.VolumeId = volumeId
 	this.MountPath = mountPath
+	var readOnly bool = false
+	this.ReadOnly = &readOnly
 	return &this
 }
 
@@ -48,6 +52,8 @@ func NewSandboxVolume(volumeId string, mountPath string) *SandboxVolume {
 // but it doesn't guarantee that properties required by API are set
 func NewSandboxVolumeWithDefaults() *SandboxVolume {
 	this := SandboxVolume{}
+	var readOnly bool = false
+	this.ReadOnly = &readOnly
 	return &this
 }
 
@@ -131,6 +137,38 @@ func (o *SandboxVolume) SetSubpath(v string) {
 	o.Subpath = &v
 }
 
+// GetReadOnly returns the ReadOnly field value if set, zero value otherwise.
+func (o *SandboxVolume) GetReadOnly() bool {
+	if o == nil || IsNil(o.ReadOnly) {
+		var ret bool
+		return ret
+	}
+	return *o.ReadOnly
+}
+
+// GetReadOnlyOk returns a tuple with the ReadOnly field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SandboxVolume) GetReadOnlyOk() (*bool, bool) {
+	if o == nil || IsNil(o.ReadOnly) {
+		return nil, false
+	}
+	return o.ReadOnly, true
+}
+
+// HasReadOnly returns a boolean if a field has been set.
+func (o *SandboxVolume) HasReadOnly() bool {
+	if o != nil && !IsNil(o.ReadOnly) {
+		return true
+	}
+
+	return false
+}
+
+// SetReadOnly gets a reference to the given bool and assigns it to the ReadOnly field.
+func (o *SandboxVolume) SetReadOnly(v bool) {
+	o.ReadOnly = &v
+}
+
 func (o SandboxVolume) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -145,6 +183,9 @@ func (o SandboxVolume) ToMap() (map[string]interface{}, error) {
 	toSerialize["mountPath"] = o.MountPath
 	if !IsNil(o.Subpath) {
 		toSerialize["subpath"] = o.Subpath
+	}
+	if !IsNil(o.ReadOnly) {
+		toSerialize["readOnly"] = o.ReadOnly
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -193,6 +234,7 @@ func (o *SandboxVolume) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "volumeId")
 		delete(additionalProperties, "mountPath")
 		delete(additionalProperties, "subpath")
+		delete(additionalProperties, "readOnly")
 		o.AdditionalProperties = additionalProperties
 	}
 

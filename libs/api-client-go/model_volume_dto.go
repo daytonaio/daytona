@@ -37,6 +37,10 @@ type VolumeDto struct {
 	LastUsedAt NullableString `json:"lastUsedAt,omitempty"`
 	// The error reason of the volume
 	ErrorReason NullableString `json:"errorReason"`
+	// Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.
+	Backend string `json:"backend"`
+	// Daytona Region ID the volume is pinned to. Populated for layered volumes; null for s3fuse or for legacy layered volumes created before region pinning was introduced.
+	RegionId NullableString `json:"regionId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -46,7 +50,7 @@ type _VolumeDto VolumeDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, errorReason NullableString) *VolumeDto {
+func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, errorReason NullableString, backend string) *VolumeDto {
 	this := VolumeDto{}
 	this.Id = id
 	this.Name = name
@@ -55,6 +59,7 @@ func NewVolumeDto(id string, name string, organizationId string, state VolumeSta
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	this.ErrorReason = errorReason
+	this.Backend = backend
 	return &this
 }
 
@@ -278,6 +283,72 @@ func (o *VolumeDto) SetErrorReason(v string) {
 	o.ErrorReason.Set(&v)
 }
 
+// GetBackend returns the Backend field value
+func (o *VolumeDto) GetBackend() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Backend
+}
+
+// GetBackendOk returns a tuple with the Backend field value
+// and a boolean to check if the value has been set.
+func (o *VolumeDto) GetBackendOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Backend, true
+}
+
+// SetBackend sets field value
+func (o *VolumeDto) SetBackend(v string) {
+	o.Backend = v
+}
+
+// GetRegionId returns the RegionId field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *VolumeDto) GetRegionId() string {
+	if o == nil || IsNil(o.RegionId.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.RegionId.Get()
+}
+
+// GetRegionIdOk returns a tuple with the RegionId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *VolumeDto) GetRegionIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.RegionId.Get(), o.RegionId.IsSet()
+}
+
+// HasRegionId returns a boolean if a field has been set.
+func (o *VolumeDto) HasRegionId() bool {
+	if o != nil && o.RegionId.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetRegionId gets a reference to the given NullableString and assigns it to the RegionId field.
+func (o *VolumeDto) SetRegionId(v string) {
+	o.RegionId.Set(&v)
+}
+// SetRegionIdNil sets the value for RegionId to be an explicit nil
+func (o *VolumeDto) SetRegionIdNil() {
+	o.RegionId.Set(nil)
+}
+
+// UnsetRegionId ensures that no value is present for RegionId, not even an explicit nil
+func (o *VolumeDto) UnsetRegionId() {
+	o.RegionId.Unset()
+}
+
 func (o VolumeDto) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -298,6 +369,10 @@ func (o VolumeDto) ToMap() (map[string]interface{}, error) {
 		toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	}
 	toSerialize["errorReason"] = o.ErrorReason.Get()
+	toSerialize["backend"] = o.Backend
+	if o.RegionId.IsSet() {
+		toSerialize["regionId"] = o.RegionId.Get()
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -318,6 +393,7 @@ func (o *VolumeDto) UnmarshalJSON(data []byte) (err error) {
 		"createdAt",
 		"updatedAt",
 		"errorReason",
+		"backend",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -355,6 +431,8 @@ func (o *VolumeDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "lastUsedAt")
 		delete(additionalProperties, "errorReason")
+		delete(additionalProperties, "backend")
+		delete(additionalProperties, "regionId")
 		o.AdditionalProperties = additionalProperties
 	}
 

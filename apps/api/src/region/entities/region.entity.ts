@@ -92,6 +92,11 @@ export class Region {
   @Column({ nullable: true })
   snapshotManagerUrl: string | null
 
+  // Provider-prefixed storage slug (e.g. "aws-us-east-1") for layered
+  // volumes. NULL falls back to LAYERED_DEFAULT_STORAGE_REGION.
+  @Column({ nullable: true })
+  storageRegion: string | null
+
   constructor(params?: {
     name: string
     enforceQuotas: boolean
@@ -104,6 +109,7 @@ export class Region {
     proxyApiKeyHash?: string | null
     sshGatewayApiKeyHash?: string | null
     snapshotManagerUrl?: string | null
+    storageRegion?: string | null
   }) {
     if (!params) return
     this.name = params.name
@@ -125,6 +131,7 @@ export class Region {
     this.proxyApiKeyHash = params.proxyApiKeyHash ?? null
     this.sshGatewayApiKeyHash = params.sshGatewayApiKeyHash ?? null
     this.snapshotManagerUrl = params.snapshotManagerUrl ?? null
+    this.storageRegion = params.storageRegion ?? null
   }
 
   @BeforeInsert()

@@ -9,6 +9,14 @@ import { OrganizationRole } from './organization-role.entity'
 import { OrganizationInvitation } from './organization-invitation.entity'
 import { RegionQuota } from './region-quota.entity'
 
+export interface CustomBucketConfig {
+  bucketName: string
+  endpoint?: string
+  region?: string
+  accessKeyIdEnc: string
+  secretAccessKeyEnc: string
+}
+
 @Entity()
 export class Organization {
   @PrimaryGeneratedColumn('uuid')
@@ -192,11 +200,32 @@ export class Organization {
   updatedAt: Date
 
   @Column({
+    default: 's3fuse',
+  })
+  defaultVolumeBackend: string
+
+  // Per-org S3 bucket backing all layered volumes. Lazily created on the
+  // first layered volume and persisted for reuse. Null until then.
+  @Column({
+    nullable: true,
+    name: 'layeredBucketName',
+  })
+  layeredBucketName?: string | null
+
+  // BYOB bucket config for the layered backend; when set, used instead of
+  // the platform S3 config. Secret fields are stored encrypted.
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'customBucketConfig',
+  })
+  customBucketConfig?: CustomBucketConfig | null
+
+  @Column({
     type: 'jsonb',
     nullable: true,
     name: 'experimentalConfig',
   })
-  // configuration for experimental features
   _experimentalConfig: Record<string, any> | null
 
   @Column({
@@ -211,6 +240,9 @@ export class Organization {
       organizationId: this.id,
       organizationName: this.name,
       limitNetworkEgress: String(this.sandboxLimitedNetworkEgress),
+      // volumeBackend is intentionally NOT defaulted here; it's stamped
+      // per-sandbox in `applyVolumeBackendMetadata`, so volume-less sandboxes
+      // carry no backend hint that could route to the wrong mounter.
     }
   }
 

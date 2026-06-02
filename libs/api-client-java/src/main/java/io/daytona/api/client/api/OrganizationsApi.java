@@ -44,7 +44,9 @@ import io.daytona.api.client.model.OtelConfig;
 import io.daytona.api.client.model.RegenerateApiKeyResponse;
 import io.daytona.api.client.model.Region;
 import io.daytona.api.client.model.SnapshotManagerCredentials;
+import io.daytona.api.client.model.UpdateOrganizationCustomBucket;
 import io.daytona.api.client.model.UpdateOrganizationDefaultRegion;
+import io.daytona.api.client.model.UpdateOrganizationDefaultVolumeBackend;
 import io.daytona.api.client.model.UpdateOrganizationInvitation;
 import io.daytona.api.client.model.UpdateOrganizationMemberAccess;
 import io.daytona.api.client.model.UpdateOrganizationQuota;
@@ -1010,6 +1012,128 @@ public class OrganizationsApi {
     public okhttp3.Call declineOrganizationInvitationAsync(@javax.annotation.Nonnull String invitationId, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = declineOrganizationInvitationValidateBeforeCall(invitationId, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for deleteCustomBucketConfig
+     * @param organizationId Organization ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration removed successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteCustomBucketConfigCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/organizations/{organizationId}/custom-bucket"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call deleteCustomBucketConfigValidateBeforeCall(@javax.annotation.Nonnull String organizationId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling deleteCustomBucketConfig(Async)");
+        }
+
+        return deleteCustomBucketConfigCall(organizationId, _callback);
+
+    }
+
+    /**
+     * Remove custom bucket configuration (revert to platform-managed bucket)
+     * 
+     * @param organizationId Organization ID (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration removed successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void deleteCustomBucketConfig(@javax.annotation.Nonnull String organizationId) throws ApiException {
+        deleteCustomBucketConfigWithHttpInfo(organizationId);
+    }
+
+    /**
+     * Remove custom bucket configuration (revert to platform-managed bucket)
+     * 
+     * @param organizationId Organization ID (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration removed successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> deleteCustomBucketConfigWithHttpInfo(@javax.annotation.Nonnull String organizationId) throws ApiException {
+        okhttp3.Call localVarCall = deleteCustomBucketConfigValidateBeforeCall(organizationId, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Remove custom bucket configuration (revert to platform-managed bucket) (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration removed successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteCustomBucketConfigAsync(@javax.annotation.Nonnull String organizationId, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = deleteCustomBucketConfigValidateBeforeCall(organizationId, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
@@ -3682,6 +3806,270 @@ public class OrganizationsApi {
         okhttp3.Call localVarCall = regenerateSshGatewayApiKeyValidateBeforeCall(id, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<RegenerateApiKeyResponse>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for setCustomBucketConfig
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationCustomBucket  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setCustomBucketConfigCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationCustomBucket updateOrganizationCustomBucket, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = updateOrganizationCustomBucket;
+
+        // create path and map variables
+        String localVarPath = "/organizations/{organizationId}/custom-bucket"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call setCustomBucketConfigValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationCustomBucket updateOrganizationCustomBucket, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling setCustomBucketConfig(Async)");
+        }
+
+        // verify the required parameter 'updateOrganizationCustomBucket' is set
+        if (updateOrganizationCustomBucket == null) {
+            throw new ApiException("Missing the required parameter 'updateOrganizationCustomBucket' when calling setCustomBucketConfig(Async)");
+        }
+
+        return setCustomBucketConfigCall(organizationId, updateOrganizationCustomBucket, _callback);
+
+    }
+
+    /**
+     * Set custom bucket configuration for layered volumes
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationCustomBucket  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void setCustomBucketConfig(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationCustomBucket updateOrganizationCustomBucket) throws ApiException {
+        setCustomBucketConfigWithHttpInfo(organizationId, updateOrganizationCustomBucket);
+    }
+
+    /**
+     * Set custom bucket configuration for layered volumes
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationCustomBucket  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> setCustomBucketConfigWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationCustomBucket updateOrganizationCustomBucket) throws ApiException {
+        okhttp3.Call localVarCall = setCustomBucketConfigValidateBeforeCall(organizationId, updateOrganizationCustomBucket, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Set custom bucket configuration for layered volumes (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationCustomBucket  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Custom bucket configuration updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setCustomBucketConfigAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationCustomBucket updateOrganizationCustomBucket, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = setCustomBucketConfigValidateBeforeCall(organizationId, updateOrganizationCustomBucket, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for setDefaultVolumeBackend
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setDefaultVolumeBackendCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = updateOrganizationDefaultVolumeBackend;
+
+        // create path and map variables
+        String localVarPath = "/organizations/{organizationId}/default-volume-backend"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call setDefaultVolumeBackendValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling setDefaultVolumeBackend(Async)");
+        }
+
+        // verify the required parameter 'updateOrganizationDefaultVolumeBackend' is set
+        if (updateOrganizationDefaultVolumeBackend == null) {
+            throw new ApiException("Missing the required parameter 'updateOrganizationDefaultVolumeBackend' when calling setDefaultVolumeBackend(Async)");
+        }
+
+        return setDefaultVolumeBackendCall(organizationId, updateOrganizationDefaultVolumeBackend, _callback);
+
+    }
+
+    /**
+     * Set default volume backend
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void setDefaultVolumeBackend(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
+        setDefaultVolumeBackendWithHttpInfo(organizationId, updateOrganizationDefaultVolumeBackend);
+    }
+
+    /**
+     * Set default volume backend
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> setDefaultVolumeBackendWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend) throws ApiException {
+        okhttp3.Call localVarCall = setDefaultVolumeBackendValidateBeforeCall(organizationId, updateOrganizationDefaultVolumeBackend, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Set default volume backend (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param updateOrganizationDefaultVolumeBackend  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Default volume backend updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setDefaultVolumeBackendAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = setDefaultVolumeBackendValidateBeforeCall(organizationId, updateOrganizationDefaultVolumeBackend, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**

@@ -97,6 +97,11 @@ public class Region {
   @javax.annotation.Nullable
   private String snapshotManagerUrl;
 
+  public static final String SERIALIZED_NAME_STORAGE_REGION = "storageRegion";
+  @SerializedName(SERIALIZED_NAME_STORAGE_REGION)
+  @javax.annotation.Nullable
+  private String storageRegion;
+
   public Region() {
   }
 
@@ -270,6 +275,25 @@ public class Region {
     this.snapshotManagerUrl = snapshotManagerUrl;
   }
 
+
+  public Region storageRegion(@javax.annotation.Nullable String storageRegion) {
+    this.storageRegion = storageRegion;
+    return this;
+  }
+
+  /**
+   * Provider-prefixed storage region slug (e.g. \&quot;aws-us-east-1\&quot;) used to pin layered volumes to a specific AWS S3 region. NULL means no layered storage is configured for this region. Operator-set.
+   * @return storageRegion
+   */
+  @javax.annotation.Nullable
+  public String getStorageRegion() {
+    return storageRegion;
+  }
+
+  public void setStorageRegion(@javax.annotation.Nullable String storageRegion) {
+    this.storageRegion = storageRegion;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -333,7 +357,8 @@ public class Region {
         Objects.equals(this.updatedAt, region.updatedAt) &&
         Objects.equals(this.proxyUrl, region.proxyUrl) &&
         Objects.equals(this.sshGatewayUrl, region.sshGatewayUrl) &&
-        Objects.equals(this.snapshotManagerUrl, region.snapshotManagerUrl)&&
+        Objects.equals(this.snapshotManagerUrl, region.snapshotManagerUrl) &&
+        Objects.equals(this.storageRegion, region.storageRegion)&&
         Objects.equals(this.additionalProperties, region.additionalProperties);
   }
 
@@ -343,7 +368,7 @@ public class Region {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, organizationId, regionType, createdAt, updatedAt, proxyUrl, sshGatewayUrl, snapshotManagerUrl, additionalProperties);
+    return Objects.hash(id, name, organizationId, regionType, createdAt, updatedAt, proxyUrl, sshGatewayUrl, snapshotManagerUrl, storageRegion, additionalProperties);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -366,6 +391,7 @@ public class Region {
     sb.append("    proxyUrl: ").append(toIndentedString(proxyUrl)).append("\n");
     sb.append("    sshGatewayUrl: ").append(toIndentedString(sshGatewayUrl)).append("\n");
     sb.append("    snapshotManagerUrl: ").append(toIndentedString(snapshotManagerUrl)).append("\n");
+    sb.append("    storageRegion: ").append(toIndentedString(storageRegion)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -385,7 +411,7 @@ public class Region {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "organizationId", "regionType", "createdAt", "updatedAt", "proxyUrl", "sshGatewayUrl", "snapshotManagerUrl"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "organizationId", "regionType", "createdAt", "updatedAt", "proxyUrl", "sshGatewayUrl", "snapshotManagerUrl", "storageRegion"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "regionType", "createdAt", "updatedAt"));
@@ -436,6 +462,9 @@ public class Region {
       }
       if ((jsonObj.get("snapshotManagerUrl") != null && !jsonObj.get("snapshotManagerUrl").isJsonNull()) && !jsonObj.get("snapshotManagerUrl").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `snapshotManagerUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("snapshotManagerUrl").toString()));
+      }
+      if ((jsonObj.get("storageRegion") != null && !jsonObj.get("storageRegion").isJsonNull()) && !jsonObj.get("storageRegion").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `storageRegion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("storageRegion").toString()));
       }
   }
 

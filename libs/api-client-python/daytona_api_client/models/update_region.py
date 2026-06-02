@@ -33,8 +33,9 @@ class UpdateRegion(BaseModel):
     proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", serialization_alias="proxyUrl")
     ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", serialization_alias="sshGatewayUrl")
     snapshot_manager_url: Optional[StrictStr] = Field(default=None, description="Snapshot Manager URL for the region", serialization_alias="snapshotManagerUrl")
+    storage_region: Optional[StrictStr] = Field(default=None, description="Provider-prefixed storage region slug (e.g. \"aws-us-east-1\") used to pin layered volumes to a specific AWS S3 region. Pass null to clear.", serialization_alias="storageRegion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["proxyUrl", "sshGatewayUrl", "snapshotManagerUrl"]
+    __properties: ClassVar[List[str]] = ["proxyUrl", "sshGatewayUrl", "snapshotManagerUrl", "storageRegion"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,6 +97,11 @@ class UpdateRegion(BaseModel):
         if self.snapshot_manager_url is None and "snapshot_manager_url" in self.model_fields_set:
             _dict['snapshotManagerUrl'] = None
 
+        # set to None if storage_region (nullable) is None
+        # and model_fields_set contains the field
+        if self.storage_region is None and "storage_region" in self.model_fields_set:
+            _dict['storageRegion'] = None
+
         return _dict
 
     @classmethod
@@ -110,7 +116,8 @@ class UpdateRegion(BaseModel):
         _obj = cls.model_validate({
             "proxy_url": obj.get("proxyUrl"),
             "ssh_gateway_url": obj.get("sshGatewayUrl"),
-            "snapshot_manager_url": obj.get("snapshotManagerUrl")
+            "snapshot_manager_url": obj.get("snapshotManagerUrl"),
+            "storage_region": obj.get("storageRegion")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

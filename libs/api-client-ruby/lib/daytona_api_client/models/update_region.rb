@@ -24,12 +24,16 @@ module DaytonaApiClient
     # Snapshot Manager URL for the region
     attr_accessor :snapshot_manager_url
 
+    # Provider-prefixed storage region slug (e.g. \"aws-us-east-1\") used to pin layered volumes to a specific AWS S3 region. Pass null to clear.
+    attr_accessor :storage_region
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'proxy_url' => :'proxyUrl',
         :'ssh_gateway_url' => :'sshGatewayUrl',
-        :'snapshot_manager_url' => :'snapshotManagerUrl'
+        :'snapshot_manager_url' => :'snapshotManagerUrl',
+        :'storage_region' => :'storageRegion'
       }
     end
 
@@ -48,7 +52,8 @@ module DaytonaApiClient
       {
         :'proxy_url' => :'String',
         :'ssh_gateway_url' => :'String',
-        :'snapshot_manager_url' => :'String'
+        :'snapshot_manager_url' => :'String',
+        :'storage_region' => :'String'
       }
     end
 
@@ -57,7 +62,8 @@ module DaytonaApiClient
       Set.new([
         :'proxy_url',
         :'ssh_gateway_url',
-        :'snapshot_manager_url'
+        :'snapshot_manager_url',
+        :'storage_region'
       ])
     end
 
@@ -88,6 +94,10 @@ module DaytonaApiClient
       if attributes.key?(:'snapshot_manager_url')
         self.snapshot_manager_url = attributes[:'snapshot_manager_url']
       end
+
+      if attributes.key?(:'storage_region')
+        self.storage_region = attributes[:'storage_region']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -112,7 +122,8 @@ module DaytonaApiClient
       self.class == o.class &&
           proxy_url == o.proxy_url &&
           ssh_gateway_url == o.ssh_gateway_url &&
-          snapshot_manager_url == o.snapshot_manager_url
+          snapshot_manager_url == o.snapshot_manager_url &&
+          storage_region == o.storage_region
     end
 
     # @see the `==` method
@@ -124,7 +135,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [proxy_url, ssh_gateway_url, snapshot_manager_url].hash
+      [proxy_url, ssh_gateway_url, snapshot_manager_url, storage_region].hash
     end
 
     # Builds the object from hash
