@@ -939,9 +939,9 @@ export class RunnerService {
    * with `runner.gpu = N` can host up to N concurrent GPU sandboxes; this
    * method returns runners where the count of GPU sandboxes is `>= N`.
    *
-   * Every GPU sandbox in any state other than DESTROYED / ARCHIVED counts
-   * toward capacity - including STOPPED, ERROR, RESIZING, SNAPSHOTTING, etc. -
-   * because the GPU index is pinned into the container's
+   * Every GPU sandbox in any state other than DESTROYED / ARCHIVED /
+   * BUILD_FAILED counts toward capacity - including STOPPED, ERROR, RESIZING,
+   * SNAPSHOTTING, etc. - because the GPU index is pinned into the container's
    * HostConfig.DeviceRequests at create time and survives any subsequent
    * restart, so the physical card stays reserved for that sandbox until it
    * is fully destroyed.
@@ -950,6 +950,9 @@ export class RunnerService {
    * ephemeral (see SandboxService) so they cannot legitimately reach the
    * archived state, but if one ever does (legacy data, manual bypass) the
    * container is no longer on the runner and the card is effectively free.
+   *
+   * BUILD_FAILED is excluded because the build failed before a GPU container
+   * was created on the runner, so no physical card is reserved.
    */
   async getRunnersAtGpuCapacity(): Promise<string[]> {
     const rows = await this.sandboxRepository
@@ -960,7 +963,7 @@ export class RunnerService {
       .andWhere('sandbox.gpu > 0')
       .andWhere('runner.gpu IS NOT NULL AND runner.gpu > 0')
       .andWhere('sandbox.state NOT IN (:...freeStates)', {
-        freeStates: [SandboxState.DESTROYED, SandboxState.ARCHIVED],
+        freeStates: [SandboxState.DESTROYED, SandboxState.ARCHIVED, SandboxState.BUILD_FAILED],
       })
       .groupBy('sandbox.runnerId')
       .addGroupBy('runner.gpu')
