@@ -471,6 +471,7 @@ func TestFileSystemListAndInfoConversions(t *testing.T) {
 				"size":        12,
 				"mode":        "0644",
 				"modTime":     time.Now().UTC().Format(time.RFC3339),
+				"modifiedAt":  time.Now().UTC().Format(time.RFC3339),
 				"isDir":       false,
 			}, {
 				"group":       "staff",
@@ -480,6 +481,7 @@ func TestFileSystemListAndInfoConversions(t *testing.T) {
 				"size":        0,
 				"mode":        "0755",
 				"modTime":     "not-a-timestamp",
+				"modifiedAt":  "not-a-timestamp",
 				"isDir":       true,
 			}})
 		}))
@@ -504,6 +506,7 @@ func TestFileSystemListAndInfoConversions(t *testing.T) {
 				"size":        44,
 				"mode":        "0644",
 				"modTime":     time.Now().UTC().Format(time.RFC3339),
+				"modifiedAt":  time.Now().UTC().Format(time.RFC3339),
 				"isDir":       false,
 			})
 		}))
