@@ -415,7 +415,7 @@ export const CreateSnapshotSheet = ({
                             gpuEnabled && allowedGpuTypes.length > 0 ? (
                               <form.Field name="gpuType">
                                 {(field) => (
-                                  <Field className="pl-6">
+                                  <Field>
                                     <FieldLabel htmlFor={field.name}>GPU type</FieldLabel>
                                     <Select
                                       value={field.state.value ?? allowedGpuTypes[0]}
