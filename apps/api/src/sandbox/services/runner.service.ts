@@ -46,6 +46,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
+import { normalizeGpuType } from '../utils/gpu-type-normalizer.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
@@ -475,7 +476,11 @@ export class RunnerService {
         updateData.gpu = metrics.gpu
       }
       if (metrics.gpuType !== undefined) {
-        updateData.gpuType = metrics.gpuType
+        const normalized = normalizeGpuType(metrics.gpuType)
+        if (metrics.gpuType && !normalized) {
+          this.logger.warn(`Runner ${runnerId} reported unrecognized GPU type: "${metrics.gpuType}"`)
+        }
+        updateData.gpuType = normalized
       }
 
       updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
