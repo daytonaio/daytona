@@ -61,6 +61,7 @@ export class Runner {
   gpu: number | null
 
   @Column({
+    type: 'character varying',
     nullable: true,
   })
   gpuType: GpuType | null
