@@ -40,7 +40,7 @@ ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   VERSION=$VERSION yarn nx build proxy --configuration=production --nxBail=true
 
-FROM alpine:3.22 AS proxy
+FROM alpine:3.23 AS proxy
 
 RUN apk update && apk upgrade --no-cache openssl pcre2 \
   && apk add --no-cache curl
