@@ -63,6 +63,7 @@ export const SnapshotDtoSandboxClassEnum = {
     LINUX_VM: 'linux-vm',
     CONTAINER: 'container',
     ANDROID: 'android',
+    WINDOWS: 'windows',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 

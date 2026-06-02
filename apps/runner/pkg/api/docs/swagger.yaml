@@ -184,6 +184,8 @@ definitions:
         type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      sandboxClass:
+        type: string
       snapshot:
         type: string
     required:

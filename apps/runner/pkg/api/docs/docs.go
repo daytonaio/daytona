@@ -1750,6 +1750,9 @@ const docTemplate = `{
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
                 },
+                "sandboxClass": {
+                    "type": "string"
+                },
                 "snapshot": {
                     "type": "string"
                 }

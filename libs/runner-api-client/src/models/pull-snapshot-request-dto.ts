@@ -22,6 +22,7 @@ export interface PullSnapshotRequestDTO {
     'destinationRegistry'?: RegistryDTO;
     'newTag'?: string;
     'registry'?: RegistryDTO;
+    'sandboxClass'?: string;
     'snapshot': string;
 }
 

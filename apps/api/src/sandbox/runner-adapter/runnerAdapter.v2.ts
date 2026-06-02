@@ -22,6 +22,7 @@ import { Job } from '../entities/job.entity'
 import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 import { JobType } from '../enums/job-type.enum'
 import { JobStatus } from '../enums/job-status.enum'
 import { ResourceType } from '../enums/resource-type.enum'
@@ -348,10 +349,12 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     destinationRegistry?: DockerRegistry,
     destinationRef?: string,
     newTag?: string,
+    sandboxClass?: SandboxClass,
   ): Promise<void> {
     const payload: PullSnapshotRequestDTO = {
       snapshot: snapshotName,
       newTag,
+      sandboxClass,
     }
 
     if (registry) {

@@ -37,6 +37,8 @@ import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotService } from '../services/snapshot.service'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { parseDockerImage } from '../../common/utils/docker-image.util'
+import { getRunnerSandboxClass, isRegistryBasedSandboxClass } from '../utils/sandbox-class.util'
+import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
@@ -46,8 +48,6 @@ import { SnapshotInfoResponse } from '@daytona/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RegionType } from '../../region/enums/region-type.enum'
-import { SandboxClass } from '../enums/sandbox-class.enum'
-import { getRunnerSandboxClass } from '../utils/sandbox-class.util'
 
 /** Fisher-Yates shuffle — uniform random permutation in O(n). */
 function shuffleArray<T>(array: T[]): T[] {
@@ -404,18 +404,21 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       // regionId -> registry
       const internalRegistriesMap = new Map<string, DockerRegistry>()
+      const registryBased = isRegistryBasedSandboxClass(snapshot.sandboxClass)
 
-      for (const regionId of [...sharedRegionIds, ...organizationRegionIds]) {
-        const registry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshot.ref, regionId)
-        if (registry) {
-          internalRegistriesMap.set(regionId, registry)
+      if (registryBased) {
+        for (const regionId of [...sharedRegionIds, ...organizationRegionIds]) {
+          const registry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshot.ref, regionId)
+          if (registry) {
+            internalRegistriesMap.set(regionId, registry)
+          }
         }
       }
 
       const results = await Promise.allSettled(
         runnersToPropagateTo.map(async (runner) => {
           const internalRegistry = internalRegistriesMap.get(runner.region)
-          if (!internalRegistry) {
+          if (registryBased && !internalRegistry) {
             throw new Error(`No internal registry found for snapshot ${snapshot.ref} in region ${runner.region}`)
           }
 
@@ -428,7 +431,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                 snapshot.ref,
                 SnapshotRunnerState.PULLING_SNAPSHOT,
               )
-              await this.pullSnapshotRunner(runner, snapshot.ref, internalRegistry)
+              await this.pullSnapshotRunner(
+                runner,
+                snapshot.ref,
+                internalRegistry,
+                undefined,
+                undefined,
+                snapshot.sandboxClass,
+              )
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
               await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
             }
@@ -531,10 +541,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     registry?: DockerRegistry,
     destinationRegistry?: DockerRegistry,
     destinationRef?: string,
+    sandboxClass?: SandboxClass,
   ) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     // Runner returns immediately; polling for completion is handled by syncRunnerSnapshotStates cron
-    await runnerAdapter.pullSnapshot(snapshotRef, registry, destinationRegistry, destinationRef)
+    await runnerAdapter.pullSnapshot(
+      snapshotRef,
+      registry,
+      destinationRegistry,
+      destinationRef,
+      undefined,
+      sandboxClass,
+    )
   }
 
   async handleSnapshotRunnerStatePullingSnapshot(snapshotRunner: SnapshotRunner, runner: Runner) {
@@ -565,16 +583,36 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const retryTimeoutMinutes = 10
     const retryTimeoutMs = retryTimeoutMinutes * 60 * 1000
     if (Date.now() - snapshotRunner.createdAt.getTime() > retryTimeoutMs) {
-      const internalRegistry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
-        snapshotRunner.snapshotRef,
-        runner.region,
-      )
-      if (!internalRegistry) {
-        throw new Error(
-          `No internal registry found for snapshot ${snapshotRunner.snapshotRef} in region ${runner.region}`,
-        )
+      const snapshot = await this.snapshotRepository.findOne({ where: { ref: snapshotRunner.snapshotRef } })
+      let sandboxClass = snapshot?.sandboxClass
+      if (!sandboxClass) {
+        // Backup-snapshot refs do not have a Snapshot row; fall back to the owning sandbox's class.
+        const sandbox = await this.sandboxRepository.findOne({
+          where: { backupSnapshot: snapshotRunner.snapshotRef },
+        })
+        sandboxClass = sandbox?.sandboxClass
       }
-      await this.pullSnapshotRunner(runner, snapshotRunner.snapshotRef, internalRegistry)
+      let internalRegistry: DockerRegistry | undefined
+      if (!sandboxClass || isRegistryBasedSandboxClass(sandboxClass)) {
+        const found = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
+          snapshotRunner.snapshotRef,
+          runner.region,
+        )
+        if (!found) {
+          throw new Error(
+            `No internal registry found for snapshot ${snapshotRunner.snapshotRef} in region ${runner.region}`,
+          )
+        }
+        internalRegistry = found
+      }
+      await this.pullSnapshotRunner(
+        runner,
+        snapshotRunner.snapshotRef,
+        internalRegistry,
+        undefined,
+        undefined,
+        sandboxClass,
+      )
       return
     }
   }
@@ -687,15 +725,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                     }
                   }
 
-                  // Find the backup registry to use as source for the pull
+                  // Find the backup registry to use as source for the pull.
+                  // Non-registry-based classes (e.g. Windows) reference an S3 key rather than a
+                  // Docker registry, so skip the registry lookup for them.
                   const registry = sandbox.backupRegistryId
                     ? await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
-                    : await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
-                        sandbox.backupSnapshot,
-                        targetRunner.region,
-                      )
+                    : isRegistryBasedSandboxClass(sandbox.sandboxClass)
+                      ? await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
+                          sandbox.backupSnapshot,
+                          targetRunner.region,
+                        )
+                      : undefined
 
-                  if (!registry) {
+                  if (isRegistryBasedSandboxClass(sandbox.sandboxClass) && !registry) {
                     this.logger.warn(
                       `No registry found for backup snapshot ${sandbox.backupSnapshot} of sandbox ${sandbox.id}`,
                     )
@@ -709,7 +751,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                     sandbox.backupSnapshot,
                     SnapshotRunnerState.PULLING_SNAPSHOT,
                   )
-                  await this.pullSnapshotRunner(targetRunner, sandbox.backupSnapshot, registry)
+                  await this.pullSnapshotRunner(
+                    targetRunner,
+                    sandbox.backupSnapshot,
+                    registry,
+                    undefined,
+                    undefined,
+                    sandbox.sandboxClass,
+                  )
 
                   this.logger.log(
                     `Created snapshot runner entry for sandbox ${sandbox.id} backup ${sandbox.backupSnapshot} on runner ${targetRunner.id} (migrating from draining runner ${runner.id})`,
@@ -927,12 +976,17 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     })
 
     if (snapshot.ref && snapshotRunner) {
-      if (snapshotRunner.state === SnapshotRunnerState.READY && snapshot.size != null) {
+      const readyForActive = isRegistryBasedSandboxClass(snapshot.sandboxClass) ? snapshot.size != null : true
+      if (snapshotRunner.state === SnapshotRunnerState.READY && readyForActive) {
         await this.updateSnapshotState(snapshot, SnapshotState.ACTIVE)
         return DONT_SYNC_AGAIN
       } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
         await this.snapshotRunnerRepository.delete(snapshotRunner.id)
       }
+    }
+
+    if (!isRegistryBasedSandboxClass(snapshot.sandboxClass)) {
+      return DONT_SYNC_AGAIN
     }
 
     const runner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
@@ -1058,26 +1112,31 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       return DONT_SYNC_AGAIN
     }
 
-    let sourceRegistry = await this.dockerRegistryService.findSourceRegistryBySnapshotImageName(
-      snapshot.imageName,
-      runner.region,
-      snapshot.organizationId,
-    )
-    if (!sourceRegistry) {
-      sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
-    }
-    const destinationRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(runner.region)
-
-    // Fire pull request (runner returns 202 immediately)
-    // Post-processing (digest, cleanup) is handled by handleCheckInitialRunnerSnapshot on the next poll cycle
     try {
-      await this.pullSnapshotRunner(
-        runner,
-        snapshot.imageName,
-        sourceRegistry,
-        destinationRegistry ?? undefined,
-        snapshot.ref ? snapshot.ref : undefined,
-      )
+      if (isRegistryBasedSandboxClass(snapshot.sandboxClass)) {
+        let sourceRegistry =
+          (await this.dockerRegistryService.findSourceRegistryBySnapshotImageName(
+            snapshot.imageName,
+            runner.region,
+            snapshot.organizationId,
+          )) ?? undefined
+        if (!sourceRegistry) {
+          sourceRegistry = (await this.dockerRegistryService.getDefaultDockerHubRegistry()) ?? undefined
+        }
+        const destinationRegistry =
+          (await this.dockerRegistryService.getAvailableInternalRegistry(runner.region)) ?? undefined
+
+        await this.pullSnapshotRunner(
+          runner,
+          snapshot.imageName,
+          sourceRegistry,
+          destinationRegistry,
+          snapshot.ref ? snapshot.ref : undefined,
+          snapshot.sandboxClass,
+        )
+      } else {
+        await this.pullSnapshotRunner(runner, snapshot.ref, undefined, undefined, undefined, snapshot.sandboxClass)
+      }
     } catch (err) {
       // Validation errors are still returned synchronously
       await this.updateSnapshotState(snapshot, SnapshotState.ERROR, err.message)
