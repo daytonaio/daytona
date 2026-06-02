@@ -725,15 +725,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                     }
                   }
 
-                  // Find the backup registry to use as source for the pull
+                  // Find the backup registry to use as source for the pull.
+                  // Non-registry-based classes (e.g. Windows) reference an S3 key rather than a
+                  // Docker registry, so skip the registry lookup for them.
                   const registry = sandbox.backupRegistryId
                     ? await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
-                    : await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
-                        sandbox.backupSnapshot,
-                        targetRunner.region,
-                      )
+                    : isRegistryBasedSandboxClass(sandbox.sandboxClass)
+                      ? await this.dockerRegistryService.findInternalRegistryBySnapshotRef(
+                          sandbox.backupSnapshot,
+                          targetRunner.region,
+                        )
+                      : undefined
 
-                  if (!registry) {
+                  if (isRegistryBasedSandboxClass(sandbox.sandboxClass) && !registry) {
                     this.logger.warn(
                       `No registry found for backup snapshot ${sandbox.backupSnapshot} of sandbox ${sandbox.id}`,
                     )
