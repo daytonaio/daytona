@@ -123,7 +123,7 @@ func (f *FileSystemService) ListFiles(ctx context.Context, path string) ([]*type
 		// Convert toolbox.FileInfo to types.FileInfo
 		result := make([]*types.FileInfo, len(files))
 		for i, file := range files {
-			modTime, _ := time.Parse(time.RFC3339, file.GetModTime())
+			modTime, _ := time.Parse(time.RFC3339, file.GetModifiedAt())
 			result[i] = &types.FileInfo{
 				Name:         file.GetName(),
 				Size:         int64(file.GetSize()),
@@ -160,7 +160,7 @@ func (f *FileSystemService) GetFileInfo(ctx context.Context, path string) (*type
 			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
 
-		modTime, _ := time.Parse(time.RFC3339, fileInfo.GetModTime())
+		modTime, _ := time.Parse(time.RFC3339, fileInfo.GetModifiedAt())
 		return &types.FileInfo{
 			Name:         fileInfo.GetName(),
 			Size:         int64(fileInfo.GetSize()),

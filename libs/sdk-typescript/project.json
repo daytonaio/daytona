@@ -15,7 +15,10 @@
     "test": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["default", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }, { "env": "DAYTONA_JWT_TOKEN" }, { "env": "DAYTONA_ORGANIZATION_ID" }, { "env": "DAYTONA_TARGET" }],
+      "inputs": [
+        "default",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
@@ -43,7 +46,6 @@
     },
     "test:runtime": {
       "executor": "nx:run-commands",
-      "inputs": ["{projectRoot}/runtime-tests/**/*", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }],
       "options": {
         "cwd": "{projectRoot}/runtime-tests",
         "command": "bash run-all.sh"

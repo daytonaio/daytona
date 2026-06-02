@@ -69,7 +69,11 @@
     "test": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["default", { "env": "DAYTONA_API_KEY" }, { "env": "DAYTONA_API_URL" }, { "env": "DAYTONA_JWT_TOKEN" }, { "env": "DAYTONA_ORGANIZATION_ID" }, { "env": "DAYTONA_TARGET" }],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/libs/api-client-java/**/*",
+        "{workspaceRoot}/libs/toolbox-api-client-java/**/*"
+      ],
       "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
@@ -83,5 +87,5 @@
         "command": "./gradlew testE2E --info"
       }
     }
-  }
+}
 }
