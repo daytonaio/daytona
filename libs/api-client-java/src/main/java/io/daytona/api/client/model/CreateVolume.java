@@ -55,6 +55,70 @@ public class CreateVolume {
   @javax.annotation.Nonnull
   private String name;
 
+  /**
+   * Storage backend for this volume. &#39;s3fuse&#39; (default) mounts a dedicated S3 bucket on the runner host. &#39;layered&#39; mounts inside the sandbox via the layered control plane and requires the volume_backend_picker feature flag. When omitted, the organization&#39;s default backend is used.
+   */
+  @JsonAdapter(BackendEnum.Adapter.class)
+  public enum BackendEnum {
+    S3FUSE("s3fuse"),
+    
+    LAYERED("layered"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
+
+    private String value;
+
+    BackendEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static BackendEnum fromValue(String value) {
+      for (BackendEnum b : BackendEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      return UNKNOWN_DEFAULT_OPEN_API;
+    }
+
+    public static class Adapter extends TypeAdapter<BackendEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final BackendEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public BackendEnum read(final JsonReader jsonReader) throws IOException {
+        String value =  jsonReader.nextString();
+        return BackendEnum.fromValue(value);
+      }
+    }
+
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+      String value = jsonElement.getAsString();
+      BackendEnum.fromValue(value);
+    }
+  }
+
+  public static final String SERIALIZED_NAME_BACKEND = "backend";
+  @SerializedName(SERIALIZED_NAME_BACKEND)
+  @javax.annotation.Nullable
+  private BackendEnum backend;
+
+  public static final String SERIALIZED_NAME_REGION_ID = "regionId";
+  @SerializedName(SERIALIZED_NAME_REGION_ID)
+  @javax.annotation.Nullable
+  private String regionId;
+
   public CreateVolume() {
   }
 
@@ -74,6 +138,44 @@ public class CreateVolume {
 
   public void setName(@javax.annotation.Nonnull String name) {
     this.name = name;
+  }
+
+
+  public CreateVolume backend(@javax.annotation.Nullable BackendEnum backend) {
+    this.backend = backend;
+    return this;
+  }
+
+  /**
+   * Storage backend for this volume. &#39;s3fuse&#39; (default) mounts a dedicated S3 bucket on the runner host. &#39;layered&#39; mounts inside the sandbox via the layered control plane and requires the volume_backend_picker feature flag. When omitted, the organization&#39;s default backend is used.
+   * @return backend
+   */
+  @javax.annotation.Nullable
+  public BackendEnum getBackend() {
+    return backend;
+  }
+
+  public void setBackend(@javax.annotation.Nullable BackendEnum backend) {
+    this.backend = backend;
+  }
+
+
+  public CreateVolume regionId(@javax.annotation.Nullable String regionId) {
+    this.regionId = regionId;
+    return this;
+  }
+
+  /**
+   * Daytona Region ID the volume should live in. Only honored for the layered backend; rejected for s3fuse. When omitted, defaults to the organization&#39;s default region.
+   * @return regionId
+   */
+  @javax.annotation.Nullable
+  public String getRegionId() {
+    return regionId;
+  }
+
+  public void setRegionId(@javax.annotation.Nullable String regionId) {
+    this.regionId = regionId;
   }
 
   /**
@@ -131,13 +233,15 @@ public class CreateVolume {
       return false;
     }
     CreateVolume createVolume = (CreateVolume) o;
-    return Objects.equals(this.name, createVolume.name)&&
+    return Objects.equals(this.name, createVolume.name) &&
+        Objects.equals(this.backend, createVolume.backend) &&
+        Objects.equals(this.regionId, createVolume.regionId)&&
         Objects.equals(this.additionalProperties, createVolume.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, additionalProperties);
+    return Objects.hash(name, backend, regionId, additionalProperties);
   }
 
   @Override
@@ -145,6 +249,8 @@ public class CreateVolume {
     StringBuilder sb = new StringBuilder();
     sb.append("class CreateVolume {\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    backend: ").append(toIndentedString(backend)).append("\n");
+    sb.append("    regionId: ").append(toIndentedString(regionId)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -164,7 +270,7 @@ public class CreateVolume {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("name"));
+    openapiFields = new HashSet<String>(Arrays.asList("name", "backend", "regionId"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("name"));
@@ -192,6 +298,16 @@ public class CreateVolume {
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if (!jsonObj.get("name").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+      }
+      if ((jsonObj.get("backend") != null && !jsonObj.get("backend").isJsonNull()) && !jsonObj.get("backend").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `backend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("backend").toString()));
+      }
+      // validate the optional field `backend`
+      if (jsonObj.get("backend") != null && !jsonObj.get("backend").isJsonNull()) {
+        BackendEnum.validateJsonElement(jsonObj.get("backend"));
+      }
+      if ((jsonObj.get("regionId") != null && !jsonObj.get("regionId").isJsonNull()) && !jsonObj.get("regionId").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `regionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("regionId").toString()));
       }
   }
 

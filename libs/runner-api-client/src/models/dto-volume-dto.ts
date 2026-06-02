@@ -15,7 +15,23 @@
 
 
 export interface DtoVolumeDTO {
+    /**
+     * LayeredDisk identifies the layered-volume disk to mount, in the form \"owner/disk-name\" or \"dsk-XXXXXXXXXXXXXXXX\". Required when the sandbox uses the in-container layered backend.
+     */
+    'layeredDisk'?: string;
+    /**
+     * LayeredMountToken is the per-(sandbox, volume) mount token used to authenticate the mount inside the sandbox. The runner forwards it to the daemon via env vars and never stores or logs it. Required when LayeredDisk is set.
+     */
+    'layeredMountToken'?: string;
+    /**
+     * LayeredRegion is the region the layered disk lives in (e.g. \"aws-us-east-1\"). Required when LayeredDisk is set.
+     */
+    'layeredRegion'?: string;
     'mountPath'?: string;
+    /**
+     * ReadOnly mounts the volume read-only for this sandbox. It is a per-mount attribute (not a per-volume one), so the same volume can be mounted RW in one sandbox and RO in another. The s3fuse path enforces it via the Docker bind mode (\":ro\"); the layered path forwards it to the in-container mount binary\'s `--read-only` flag.
+     */
+    'readOnly'?: boolean;
     'subpath'?: string;
     'volumeId'?: string;
 }

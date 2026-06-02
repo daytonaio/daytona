@@ -278,6 +278,10 @@ export class RegionService {
         region.sshGatewayUrl = updateRegion.sshGatewayUrl ?? null
       }
 
+      if (updateRegion.storageRegion !== undefined) {
+        region.storageRegion = updateRegion.storageRegion ?? null
+      }
+
       if (updateRegion.snapshotManagerUrl !== undefined) {
         if (region.snapshotManagerUrl) {
           // If snapshots already exist, prevent changing the snapshot manager URL

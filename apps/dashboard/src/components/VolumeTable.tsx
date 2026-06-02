@@ -28,10 +28,16 @@ import {
 } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn, getRelativeTimeString, truncateUUID } from '@/lib/utils'
 import { getColumnSizeStyles } from '@/lib/utils/table'
-import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
+import {
+  OrganizationDefaultVolumeBackendEnum,
+  OrganizationRolePermissionsEnum,
+  VolumeDto,
+  VolumeState,
+} from '@daytona/api-client'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -57,6 +63,7 @@ type VolumeTableMeta = {
   onDelete: (volume: VolumeDto) => void
   processingVolumeAction: Record<string, boolean>
   deletePermitted: boolean
+  getRegionName: (regionId: string) => string | undefined
 }
 
 declare module '@tanstack/react-table' {
@@ -86,8 +93,9 @@ export function VolumeTable({
   onBulkDelete,
   onCreateVolume,
 }: VolumeTableProps) {
-  const { authenticatedUserHasPermission } = useSelectedOrganization()
+  const { authenticatedUserHasPermission, selectedOrganization } = useSelectedOrganization()
   const { setIsOpen } = useCommandPaletteActions()
+  const { getRegionName } = useRegions()
 
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_VOLUMES),
@@ -97,15 +105,20 @@ export function VolumeTable({
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_VOLUMES),
     [authenticatedUserHasPermission],
   )
+  const isLayeredOrg = selectedOrganization?.defaultVolumeBackend === OrganizationDefaultVolumeBackendEnum.LAYERED
+  const visibleColumns = useMemo(
+    () => (isLayeredOrg ? columns : columns.filter((c) => (c as { id?: string }).id !== 'regionId')),
+    [isLayeredOrg],
+  )
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const table = useReactTable({
     data,
-    columns,
+    columns: visibleColumns,
     meta: {
-      volume: { onDelete, processingVolumeAction, deletePermitted },
+      volume: { onDelete, processingVolumeAction, deletePermitted, getRegionName },
     },
     defaultColumn: {
       minSize: 0,
@@ -478,6 +491,21 @@ const columns: ColumnDef<VolumeDto>[] = [
     accessorKey: 'state',
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
+    },
+  },
+  {
+    id: 'regionId',
+    accessorKey: 'regionId',
+    size: 140,
+    header: 'Region',
+    enableSorting: false,
+    cell: ({ row, table }) => {
+      const { getRegionName } = getMeta(table)
+      const regionId = row.original.regionId
+      if (!regionId) {
+        return <span className="text-muted-foreground">—</span>
+      }
+      return <span className="truncate block">{getRegionName(regionId) ?? regionId}</span>
     },
   },
   {

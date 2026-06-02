@@ -39,6 +39,8 @@ type Region struct {
 	SshGatewayUrl NullableString `json:"sshGatewayUrl,omitempty"`
 	// Snapshot Manager URL for the region
 	SnapshotManagerUrl NullableString `json:"snapshotManagerUrl,omitempty"`
+	// Provider-prefixed storage region slug (e.g. \"aws-us-east-1\") used to pin layered volumes to a specific AWS S3 region. NULL means no layered storage is configured for this region. Operator-set.
+	StorageRegion NullableString `json:"storageRegion,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -354,6 +356,48 @@ func (o *Region) UnsetSnapshotManagerUrl() {
 	o.SnapshotManagerUrl.Unset()
 }
 
+// GetStorageRegion returns the StorageRegion field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *Region) GetStorageRegion() string {
+	if o == nil || IsNil(o.StorageRegion.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.StorageRegion.Get()
+}
+
+// GetStorageRegionOk returns a tuple with the StorageRegion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Region) GetStorageRegionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.StorageRegion.Get(), o.StorageRegion.IsSet()
+}
+
+// HasStorageRegion returns a boolean if a field has been set.
+func (o *Region) HasStorageRegion() bool {
+	if o != nil && o.StorageRegion.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetStorageRegion gets a reference to the given NullableString and assigns it to the StorageRegion field.
+func (o *Region) SetStorageRegion(v string) {
+	o.StorageRegion.Set(&v)
+}
+// SetStorageRegionNil sets the value for StorageRegion to be an explicit nil
+func (o *Region) SetStorageRegionNil() {
+	o.StorageRegion.Set(nil)
+}
+
+// UnsetStorageRegion ensures that no value is present for StorageRegion, not even an explicit nil
+func (o *Region) UnsetStorageRegion() {
+	o.StorageRegion.Unset()
+}
+
 func (o Region) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -380,6 +424,9 @@ func (o Region) ToMap() (map[string]interface{}, error) {
 	}
 	if o.SnapshotManagerUrl.IsSet() {
 		toSerialize["snapshotManagerUrl"] = o.SnapshotManagerUrl.Get()
+	}
+	if o.StorageRegion.IsSet() {
+		toSerialize["storageRegion"] = o.StorageRegion.Get()
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -437,6 +484,7 @@ func (o *Region) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "proxyUrl")
 		delete(additionalProperties, "sshGatewayUrl")
 		delete(additionalProperties, "snapshotManagerUrl")
+		delete(additionalProperties, "storageRegion")
 		o.AdditionalProperties = additionalProperties
 	}
 

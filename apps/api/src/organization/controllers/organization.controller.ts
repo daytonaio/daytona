@@ -43,6 +43,8 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
+import { UpdateOrganizationDefaultVolumeBackendDto } from '../dto/update-organization-default-volume-backend.dto'
+import { UpdateOrganizationCustomBucketDto } from '../dto/update-organization-custom-bucket.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
@@ -680,6 +682,78 @@ export class OrganizationController {
   })
   async deleteOtelConfig(@Param('organizationId') organizationId: string): Promise<void> {
     await this.organizationService.deleteOtelConfig(organizationId)
+  }
+
+  @Put('/:organizationId/default-volume-backend')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'volume_backend_picker', defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Set default volume backend',
+    operationId: 'setDefaultVolumeBackend',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Default volume backend updated successfully',
+  })
+  @HttpCode(204)
+  @UseGuards(OrganizationAuthContextGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  async setDefaultVolumeBackend(
+    @Param('organizationId') organizationId: string,
+    @Body() body: UpdateOrganizationDefaultVolumeBackendDto,
+  ): Promise<void> {
+    await this.organizationService.setDefaultVolumeBackend(organizationId, body.defaultVolumeBackend)
+  }
+
+  @Put('/:organizationId/custom-bucket')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'volume_backend_picker', defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Set custom bucket configuration for layered volumes',
+    operationId: 'setCustomBucketConfig',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Custom bucket configuration updated successfully',
+  })
+  @HttpCode(204)
+  @UseGuards(OrganizationAuthContextGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  async setCustomBucketConfig(
+    @Param('organizationId') organizationId: string,
+    @Body() body: UpdateOrganizationCustomBucketDto,
+  ): Promise<void> {
+    await this.organizationService.setCustomBucketConfig(organizationId, body)
+  }
+
+  @Delete('/:organizationId/custom-bucket')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'volume_backend_picker', defaultValue: false }] })
+  @ApiOperation({
+    summary: 'Remove custom bucket configuration (revert to platform-managed bucket)',
+    operationId: 'deleteCustomBucketConfig',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Custom bucket configuration removed successfully',
+  })
+  @HttpCode(204)
+  @UseGuards(OrganizationAuthContextGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  async deleteCustomBucketConfig(@Param('organizationId') organizationId: string): Promise<void> {
+    await this.organizationService.deleteCustomBucketConfig(organizationId)
   }
 
   @Put('/:organizationId/experimental-config')

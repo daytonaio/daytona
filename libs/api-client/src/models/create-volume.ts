@@ -16,5 +16,22 @@
 
 export interface CreateVolume {
     'name': string;
+    /**
+     * Storage backend for this volume. \'s3fuse\' (default) mounts a dedicated S3 bucket on the runner host. \'layered\' mounts inside the sandbox via the layered control plane and requires the volume_backend_picker feature flag. When omitted, the organization\'s default backend is used.
+     */
+    'backend'?: CreateVolumeBackendEnum;
+    /**
+     * Daytona Region ID the volume should live in. Only honored for the layered backend; rejected for s3fuse. When omitted, defaults to the organization\'s default region.
+     */
+    'regionId'?: string;
 }
+
+export const CreateVolumeBackendEnum = {
+    S3FUSE: 's3fuse',
+    LAYERED: 'layered',
+    UNKNOWN_DEFAULT_OPEN_API: '11184809',
+} as const;
+
+export type CreateVolumeBackendEnum = typeof CreateVolumeBackendEnum[keyof typeof CreateVolumeBackendEnum];
+
 

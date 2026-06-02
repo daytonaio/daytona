@@ -62,6 +62,21 @@ export class VolumeDto {
   })
   errorReason?: string
 
+  @ApiProperty({
+    description:
+      'Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.',
+    example: 's3fuse',
+    enum: ['s3fuse', 'layered'],
+  })
+  backend: string
+
+  @ApiPropertyOptional({
+    description:
+      'Daytona Region ID the volume is pinned to. Populated for layered volumes; null for s3fuse or for legacy layered volumes created before region pinning was introduced.',
+    nullable: true,
+  })
+  regionId?: string | null
+
   static fromVolume(volume: Volume): VolumeDto {
     return {
       id: volume.id,
@@ -72,6 +87,8 @@ export class VolumeDto {
       updatedAt: volume.updatedAt?.toISOString(),
       lastUsedAt: volume.lastUsedAt?.toISOString(),
       errorReason: volume.errorReason,
+      backend: volume.backend,
+      regionId: volume.regionId ?? null,
     }
   }
 }

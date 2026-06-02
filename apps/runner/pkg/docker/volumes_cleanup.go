@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -103,11 +102,11 @@ func (d *DockerClient) unmountAndRemoveDir(ctx context.Context, path string) {
 	}
 
 	if d.isDirectoryMounted(cleanPath) {
-		if err := exec.Command("umount", cleanPath).Run(); err != nil {
+		if err := d.unmountVolume(ctx, cleanPath); err != nil {
 			d.logger.ErrorContext(ctx, "Failed to unmount directory", "path", cleanPath, "error", err)
 			return
 		}
-		// Was FUSE mounted, data is on S3 - safe to remove
+		// Was mounted, backing data is remote — safe to remove local dir
 		if err := os.RemoveAll(cleanPath); err != nil {
 			d.logger.ErrorContext(ctx, "Failed to remove directory", "path", cleanPath, "error", err)
 		}

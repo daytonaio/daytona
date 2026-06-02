@@ -138,6 +138,65 @@ public class Organization {
   @javax.annotation.Nullable
   private String defaultRegionId;
 
+  /**
+   * Default volume backend for sandbox volumes
+   */
+  @JsonAdapter(DefaultVolumeBackendEnum.Adapter.class)
+  public enum DefaultVolumeBackendEnum {
+    S3FUSE("s3fuse"),
+    
+    LAYERED("layered"),
+    
+    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
+
+    private String value;
+
+    DefaultVolumeBackendEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static DefaultVolumeBackendEnum fromValue(String value) {
+      for (DefaultVolumeBackendEnum b : DefaultVolumeBackendEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      return UNKNOWN_DEFAULT_OPEN_API;
+    }
+
+    public static class Adapter extends TypeAdapter<DefaultVolumeBackendEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final DefaultVolumeBackendEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public DefaultVolumeBackendEnum read(final JsonReader jsonReader) throws IOException {
+        String value =  jsonReader.nextString();
+        return DefaultVolumeBackendEnum.fromValue(value);
+      }
+    }
+
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+      String value = jsonElement.getAsString();
+      DefaultVolumeBackendEnum.fromValue(value);
+    }
+  }
+
+  public static final String SERIALIZED_NAME_DEFAULT_VOLUME_BACKEND = "defaultVolumeBackend";
+  @SerializedName(SERIALIZED_NAME_DEFAULT_VOLUME_BACKEND)
+  @javax.annotation.Nonnull
+  private DefaultVolumeBackendEnum defaultVolumeBackend;
+
   public static final String SERIALIZED_NAME_AUTHENTICATED_RATE_LIMIT = "authenticatedRateLimit";
   @SerializedName(SERIALIZED_NAME_AUTHENTICATED_RATE_LIMIT)
   @javax.annotation.Nullable
@@ -504,6 +563,25 @@ public class Organization {
   }
 
 
+  public Organization defaultVolumeBackend(@javax.annotation.Nonnull DefaultVolumeBackendEnum defaultVolumeBackend) {
+    this.defaultVolumeBackend = defaultVolumeBackend;
+    return this;
+  }
+
+  /**
+   * Default volume backend for sandbox volumes
+   * @return defaultVolumeBackend
+   */
+  @javax.annotation.Nonnull
+  public DefaultVolumeBackendEnum getDefaultVolumeBackend() {
+    return defaultVolumeBackend;
+  }
+
+  public void setDefaultVolumeBackend(@javax.annotation.Nonnull DefaultVolumeBackendEnum defaultVolumeBackend) {
+    this.defaultVolumeBackend = defaultVolumeBackend;
+  }
+
+
   public Organization authenticatedRateLimit(@javax.annotation.Nullable BigDecimal authenticatedRateLimit) {
     this.authenticatedRateLimit = authenticatedRateLimit;
     return this;
@@ -727,6 +805,7 @@ public class Organization {
         Objects.equals(this.snapshotDeactivationTimeoutMinutes, organization.snapshotDeactivationTimeoutMinutes) &&
         Objects.equals(this.sandboxLimitedNetworkEgress, organization.sandboxLimitedNetworkEgress) &&
         Objects.equals(this.defaultRegionId, organization.defaultRegionId) &&
+        Objects.equals(this.defaultVolumeBackend, organization.defaultVolumeBackend) &&
         Objects.equals(this.authenticatedRateLimit, organization.authenticatedRateLimit) &&
         Objects.equals(this.sandboxCreateRateLimit, organization.sandboxCreateRateLimit) &&
         Objects.equals(this.sandboxLifecycleRateLimit, organization.sandboxLifecycleRateLimit) &&
@@ -740,7 +819,7 @@ public class Organization {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, createdBy, personal, createdAt, updatedAt, suspended, suspendedAt, suspensionReason, suspendedUntil, suspensionCleanupGracePeriodHours, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, snapshotDeactivationTimeoutMinutes, sandboxLimitedNetworkEgress, defaultRegionId, authenticatedRateLimit, sandboxCreateRateLimit, sandboxLifecycleRateLimit, experimentalConfig, otelConfig, authenticatedRateLimitTtlSeconds, sandboxCreateRateLimitTtlSeconds, sandboxLifecycleRateLimitTtlSeconds, additionalProperties);
+    return Objects.hash(id, name, createdBy, personal, createdAt, updatedAt, suspended, suspendedAt, suspensionReason, suspendedUntil, suspensionCleanupGracePeriodHours, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, snapshotDeactivationTimeoutMinutes, sandboxLimitedNetworkEgress, defaultRegionId, defaultVolumeBackend, authenticatedRateLimit, sandboxCreateRateLimit, sandboxLifecycleRateLimit, experimentalConfig, otelConfig, authenticatedRateLimitTtlSeconds, sandboxCreateRateLimitTtlSeconds, sandboxLifecycleRateLimitTtlSeconds, additionalProperties);
   }
 
   @Override
@@ -764,6 +843,7 @@ public class Organization {
     sb.append("    snapshotDeactivationTimeoutMinutes: ").append(toIndentedString(snapshotDeactivationTimeoutMinutes)).append("\n");
     sb.append("    sandboxLimitedNetworkEgress: ").append(toIndentedString(sandboxLimitedNetworkEgress)).append("\n");
     sb.append("    defaultRegionId: ").append(toIndentedString(defaultRegionId)).append("\n");
+    sb.append("    defaultVolumeBackend: ").append(toIndentedString(defaultVolumeBackend)).append("\n");
     sb.append("    authenticatedRateLimit: ").append(toIndentedString(authenticatedRateLimit)).append("\n");
     sb.append("    sandboxCreateRateLimit: ").append(toIndentedString(sandboxCreateRateLimit)).append("\n");
     sb.append("    sandboxLifecycleRateLimit: ").append(toIndentedString(sandboxLifecycleRateLimit)).append("\n");
@@ -791,10 +871,10 @@ public class Organization {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "defaultVolumeBackend", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultVolumeBackend", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
   }
 
   /**
@@ -832,6 +912,11 @@ public class Organization {
       if ((jsonObj.get("defaultRegionId") != null && !jsonObj.get("defaultRegionId").isJsonNull()) && !jsonObj.get("defaultRegionId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultRegionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultRegionId").toString()));
       }
+      if (!jsonObj.get("defaultVolumeBackend").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `defaultVolumeBackend` to be a primitive type in the JSON string but got `%s`", jsonObj.get("defaultVolumeBackend").toString()));
+      }
+      // validate the required field `defaultVolumeBackend`
+      DefaultVolumeBackendEnum.validateJsonElement(jsonObj.get("defaultVolumeBackend"));
       if (jsonObj.get("otelConfig") != null && !jsonObj.get("otelConfig").isJsonNull()) {
       // validate the required field `otelConfig`
       OtelConfig.validateJsonElement(jsonObj.get("otelConfig"));

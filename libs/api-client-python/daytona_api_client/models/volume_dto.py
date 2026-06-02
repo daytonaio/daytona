@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client.models.volume_state import VolumeState
 from pydantic import TypeAdapter
@@ -39,8 +39,10 @@ class VolumeDto(BaseModel):
     updated_at: StrictStr = Field(description="Last update timestamp", serialization_alias="updatedAt")
     last_used_at: Optional[StrictStr] = Field(default=None, description="Last used timestamp", serialization_alias="lastUsedAt")
     error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", serialization_alias="errorReason")
+    backend: StrictStr = Field(description="Backend that physically stores the volume. Set when the volume is created from the organization default and immutable afterwards.")
+    region_id: Optional[StrictStr] = Field(default=None, description="Daytona Region ID the volume is pinned to. Populated for layered volumes; null for s3fuse or for legacy layered volumes created before region pinning was introduced.", serialization_alias="regionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason", "backend", "regionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -97,6 +99,11 @@ class VolumeDto(BaseModel):
         if self.error_reason is None and "error_reason" in self.model_fields_set:
             _dict['errorReason'] = None
 
+        # set to None if region_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.region_id is None and "region_id" in self.model_fields_set:
+            _dict['regionId'] = None
+
         return _dict
 
     @classmethod
@@ -116,7 +123,9 @@ class VolumeDto(BaseModel):
             "created_at": obj.get("createdAt"),
             "updated_at": obj.get("updatedAt"),
             "last_used_at": obj.get("lastUsedAt"),
-            "error_reason": obj.get("errorReason")
+            "error_reason": obj.get("errorReason"),
+            "backend": obj.get("backend"),
+            "region_id": obj.get("regionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
