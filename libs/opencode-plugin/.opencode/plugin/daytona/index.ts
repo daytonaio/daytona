@@ -33,8 +33,12 @@ function getDaytona(): Daytona {
   return daytonaClient
 }
 
-// Cache preview links so we don't refetch on every target() call.
-const previewCache = new Map<string, { url: string; token: string }>()
+// Cache preview links so we don't re-check the sandbox on every target() call
+// (opencode calls target() in bursts). verifiedAt bounds how long we trust the
+// entry before re-confirming the sandbox is up.
+type PreviewEntry = { url: string; token: string; verifiedAt: number }
+const previewCache = new Map<string, PreviewEntry>()
+const PREVIEW_TTL_MS = 15_000
 
 // Namespace sandboxes to distinguish them from non-opencode sandboxes
 // in the same Daytona account.
@@ -86,6 +90,60 @@ function debug(msg: string): void {
   } catch {
     // never let logging break the plugin
   }
+}
+
+type SandboxHandle = Awaited<ReturnType<Daytona['get']>>
+
+// Build the workspace target opencode connects to (tool calls + the global-sync
+// /global/event stream both go here).
+function toTarget(link: { url: string; token: string }) {
+  return {
+    type: 'remote' as const,
+    url: link.url,
+    headers: {
+      'x-daytona-preview-token': link.token,
+      'x-daytona-skip-preview-warning': 'true',
+      'x-opencode-directory': REPO_PATH,
+    },
+  }
+}
+
+// Command that (re)starts `opencode serve` in the sandbox. Prefers a pre-baked
+// binary if the snapshot ships one; otherwise the version installed at create.
+function serverLaunchCmd(): string {
+  return `cd ${sh(REPO_PATH)} && exe=${sh(LOCAL_BIN)} && if [ ! -x "$exe" ]; then exe=${sh(INSTALL_BIN)}; fi && nohup env "$exe" serve --hostname 0.0.0.0 --port ${SERVER_PORT} >/tmp/opencode.log 2>&1 </dev/null &`
+}
+
+// True if the in-sandbox opencode server answers /global/health. Bounded by
+// withTimeout so a command issued during the DB migration can't hang it.
+async function isServerHealthy(sandbox: SandboxHandle): Promise<boolean> {
+  try {
+    const r = await withTimeout(sandbox.process.executeCommand(`curl -fsS ${sh(HEALTH_URL)}`), 5000)
+    return r.exitCode === 0
+  } catch {
+    return false
+  }
+}
+
+// Ensure `opencode serve` is up, launching it and waiting if not. Used by
+// create() and by target() after resuming a timed-out sandbox — the server
+// process does not survive a sandbox stop/start.
+async function ensureServerRunning(sandbox: SandboxHandle): Promise<void> {
+  if (await isServerHealthy(sandbox)) return
+  debug(`ensureServer: (re)launching opencode serve on ${sandbox.id}`)
+  await sandbox.process.executeCommand(serverLaunchCmd())
+  for (let i = 0; i < 60; i++) {
+    if (await isServerHealthy(sandbox)) {
+      debug('ensureServer: healthy')
+      return
+    }
+    await sleep(1000)
+  }
+  const log = await withTimeout(
+    sandbox.process.executeCommand('test -f /tmp/opencode.log && cat /tmp/opencode.log || true'),
+    5000,
+  ).catch(() => undefined)
+  throw new Error(log?.result || 'Daytona workspace server did not become ready in time')
 }
 
 // Runs a host-side command (not in the sandbox); rejects with aggregated stderr on non-zero exit.
@@ -154,6 +212,11 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
       const sandbox = await d.create({
         name: sandboxName(config.name),
         envVars: toEnvVars(env),
+        // Never auto-delete. A deleted sandbox orphans its OpenCode workspace
+        // entry, which then floods the host with "failed to connect to global
+        // sync". Idle sandboxes only auto-stop (pause); target() resumes them on
+        // demand. (-1 disables auto-delete regardless of account default.)
+        autoDeleteInterval: -1,
       })
       debug(`create: d.create() returned sandbox id=${sandbox.id} state=${sandbox.state}`)
 
@@ -236,34 +299,10 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
         await sandbox.fs.uploadFile(Buffer.from(opencodeConfig), `${REPO_PATH}/opencode.json`)
         debug('create: opencode.json uploaded; starting server')
 
-        // Prefer a pre-baked opencode binary if the snapshot ships one;
-        // otherwise fall back to the version installed above.
-        await run(
-          `cd ${sh(REPO_PATH)} && exe=${sh(LOCAL_BIN)} && if [ ! -x "$exe" ]; then exe=${sh(INSTALL_BIN)}; fi && nohup env "$exe" serve --hostname 0.0.0.0 --port ${SERVER_PORT} >/tmp/opencode.log 2>&1 </dev/null &`,
-        )
-        debug('create: server launched; polling health')
-
-        for (let i = 0; i < 60; i++) {
-          try {
-            const result = await withTimeout(sandbox.process.executeCommand(`curl -fsS ${sh(HEALTH_URL)}`), 5000)
-            debug(`create: health poll ${i + 1}/60 exit=${result.exitCode}`)
-            if (result.exitCode === 0) {
-              debug('create: server healthy; done ✅')
-              return
-            }
-          } catch (err) {
-            // Timed-out or errored poll: treat as not-ready-yet and keep polling.
-            debug(`create: health poll ${i + 1}/60 ${err instanceof Error ? err.message : String(err)}`)
-          }
-          await sleep(1000)
-        }
-
-        debug('create: health poll exhausted; server never became ready ❌')
-        const log = await withTimeout(
-          sandbox.process.executeCommand('test -f /tmp/opencode.log && cat /tmp/opencode.log || true'),
-          5000,
-        ).catch(() => undefined)
-        throw new Error(log?.result || 'Daytona workspace server did not become ready in time')
+        debug('create: starting opencode server')
+        await ensureServerRunning(sandbox)
+        debug('create: server healthy; done ✅')
+        return
       } catch (err) {
         debug(`create: ERROR ${err instanceof Error ? err.message : String(err)}`)
         // Don't leak the sandbox if anything after Daytona.create() throws.
@@ -288,26 +327,32 @@ export const DaytonaWorkspacePlugin = async (input: PluginInput) => {
       debug(`remove: deleted sandbox id=${sandbox.id}`)
     },
 
-    // Remote endpoint opencode proxies tool calls to.
+    // Remote endpoint opencode proxies tool calls to — and where the workspace
+    // global-sync connects (it dials <url>/global/event). A paused sandbox here
+    // surfaces on the host as "failed to connect to global sync". So resume the
+    // sandbox on access: a timed-out (auto-stopped) workspace isn't dead, just
+    // paused, and we bring it back rather than letting opencode treat it as gone.
     async target(config) {
-      debug(`target: start name=${config.name} cached=${previewCache.has(config.name)}`)
-      let link = previewCache.get(config.name)
-      if (!link) {
-        const sandbox = await getDaytona().get(sandboxName(config.name))
-        debug(`target: got sandbox id=${sandbox.id} state=${sandbox.state}; fetching preview link`)
-        link = await sandbox.getPreviewLink(SERVER_PORT)
-        previewCache.set(config.name, link)
+      // Fast path: recently-verified link (target() is called in bursts).
+      const cached = previewCache.get(config.name)
+      if (cached && Date.now() - cached.verifiedAt < PREVIEW_TTL_MS) {
+        return toTarget(cached)
       }
-      debug(`target: returning url=${link.url}`)
-      return {
-        type: 'remote' as const,
-        url: link.url,
-        headers: {
-          'x-daytona-preview-token': link.token,
-          'x-daytona-skip-preview-warning': 'true',
-          'x-opencode-directory': REPO_PATH,
-        },
+
+      const sandbox = await getDaytona().get(sandboxName(config.name))
+      debug(`target: name=${config.name} state=${sandbox.state}`)
+      if (sandbox.state !== 'started') {
+        debug(`target: resuming ${sandboxName(config.name)} (state=${sandbox.state})`)
+        await sandbox.start()
       }
+      // The serve process doesn't survive a stop/start, so (re)launch if needed.
+      await ensureServerRunning(sandbox)
+
+      const link = await sandbox.getPreviewLink(SERVER_PORT)
+      const entry: PreviewEntry = { url: link.url, token: link.token, verifiedAt: Date.now() }
+      previewCache.set(config.name, entry)
+      debug(`target: returning url=${entry.url}`)
+      return toTarget(entry)
     },
   }
 
