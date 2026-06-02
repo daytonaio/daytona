@@ -26,6 +26,7 @@ type CreateOrganizationRegionQuota struct {
 	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
 	TotalDiskQuota float32 `json:"totalDiskQuota"`
 	TotalGpuQuota float32 `json:"totalGpuQuota"`
+	AllowedGpuTypes []GpuType `json:"allowedGpuTypes,omitempty"`
 	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox,omitempty"`
 	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox,omitempty"`
 	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox,omitempty"`
@@ -178,6 +179,39 @@ func (o *CreateOrganizationRegionQuota) GetTotalGpuQuotaOk() (*float32, bool) {
 // SetTotalGpuQuota sets field value
 func (o *CreateOrganizationRegionQuota) SetTotalGpuQuota(v float32) {
 	o.TotalGpuQuota = v
+}
+
+// GetAllowedGpuTypes returns the AllowedGpuTypes field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *CreateOrganizationRegionQuota) GetAllowedGpuTypes() []GpuType {
+	if o == nil {
+		var ret []GpuType
+		return ret
+	}
+	return o.AllowedGpuTypes
+}
+
+// GetAllowedGpuTypesOk returns a tuple with the AllowedGpuTypes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateOrganizationRegionQuota) GetAllowedGpuTypesOk() ([]GpuType, bool) {
+	if o == nil || IsNil(o.AllowedGpuTypes) {
+		return nil, false
+	}
+	return o.AllowedGpuTypes, true
+}
+
+// HasAllowedGpuTypes returns a boolean if a field has been set.
+func (o *CreateOrganizationRegionQuota) HasAllowedGpuTypes() bool {
+	if o != nil && !IsNil(o.AllowedGpuTypes) {
+		return true
+	}
+
+	return false
+}
+
+// SetAllowedGpuTypes gets a reference to the given []GpuType and assigns it to the AllowedGpuTypes field.
+func (o *CreateOrganizationRegionQuota) SetAllowedGpuTypes(v []GpuType) {
+	o.AllowedGpuTypes = v
 }
 
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -489,6 +523,9 @@ func (o CreateOrganizationRegionQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
 	toSerialize["totalGpuQuota"] = o.TotalGpuQuota
+	if o.AllowedGpuTypes != nil {
+		toSerialize["allowedGpuTypes"] = o.AllowedGpuTypes
+	}
 	if o.MaxCpuPerSandbox.IsSet() {
 		toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
 	}
@@ -562,6 +599,7 @@ func (o *CreateOrganizationRegionQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "totalMemoryQuota")
 		delete(additionalProperties, "totalDiskQuota")
 		delete(additionalProperties, "totalGpuQuota")
+		delete(additionalProperties, "allowedGpuTypes")
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")

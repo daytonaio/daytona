@@ -461,20 +461,18 @@ console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
 #### resize()
 
 ```ts
-resize(resources: Resources, timeout?: number): Promise<void>
+resize(resources: Pick<Resources, "cpu" | "memory" | "disk">, timeout?: number): Promise<void>
 ```
 
 Resizes the Sandbox resources.
 
-Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
-sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
+Changes the CPU, memory, or disk allocation. Hot resize (on a running Sandbox) accepts
+only CPU and memory increases. Disk resize requires a stopped Sandbox; disk can only
+grow. GPU is not resizable — to change GPU, create a new Sandbox.
 
 **Parameters**:
 
-- `resources` _Resources_ - New resource configuration. Only specified fields will be updated.
-    - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
-    - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
-    - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
+- `resources` _Pick\<Resources, "cpu" \| "memory" \| "disk"\>_ - New resource configuration (cpu, memory, disk only). Only specified fields are updated.
 - `timeout?` _number = 60_ - Timeout in seconds for the resize operation. 0 means no timeout.
 
 
@@ -484,18 +482,18 @@ sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbo
 
 **Throws**:
 
-- If hot resize constraints are violated, disk resize attempted on running sandbox,
-  disk size decrease is attempted, no resource changes are specified, or resize operation times out.
+If hot-resize constraints are violated, disk resize is attempted on
+  a running Sandbox, disk decrease is attempted, no fields are provided, or the operation times out.
 
-**Example:**
+**Examples:**
 
 ```ts
-// Increase CPU/memory on running sandbox (hot resize)
-await sandbox.resize({ cpu: 4, memory: 8 });
+await sandbox.resize({ cpu: 4, memory: 8 })
+```
 
-// Change disk (sandbox must be stopped)
-await sandbox.stop();
-await sandbox.resize({ cpu: 2, memory: 4, disk: 30 });
+```ts
+await sandbox.stop()
+await sandbox.resize({ cpu: 2, memory: 4, disk: 30 })
 ```
 
 ***

@@ -19,10 +19,13 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -101,6 +104,11 @@ public class RegionUsageOverview {
   @SerializedName(SERIALIZED_NAME_CURRENT_GPU_USAGE)
   @javax.annotation.Nonnull
   private BigDecimal currentGpuUsage;
+
+  public static final String SERIALIZED_NAME_ALLOWED_GPU_TYPES = "allowedGpuTypes";
+  @SerializedName(SERIALIZED_NAME_ALLOWED_GPU_TYPES)
+  @javax.annotation.Nullable
+  private List<GpuType> allowedGpuTypes = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_MAX_CPU_PER_SANDBOX = "maxCpuPerSandbox";
   @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_SANDBOX)
@@ -330,6 +338,33 @@ public class RegionUsageOverview {
   }
 
 
+  public RegionUsageOverview allowedGpuTypes(@javax.annotation.Nullable List<GpuType> allowedGpuTypes) {
+    this.allowedGpuTypes = allowedGpuTypes;
+    return this;
+  }
+
+  public RegionUsageOverview addAllowedGpuTypesItem(GpuType allowedGpuTypesItem) {
+    if (this.allowedGpuTypes == null) {
+      this.allowedGpuTypes = new ArrayList<>();
+    }
+    this.allowedGpuTypes.add(allowedGpuTypesItem);
+    return this;
+  }
+
+  /**
+   * Get allowedGpuTypes
+   * @return allowedGpuTypes
+   */
+  @javax.annotation.Nullable
+  public List<GpuType> getAllowedGpuTypes() {
+    return allowedGpuTypes;
+  }
+
+  public void setAllowedGpuTypes(@javax.annotation.Nullable List<GpuType> allowedGpuTypes) {
+    this.allowedGpuTypes = allowedGpuTypes;
+  }
+
+
   public RegionUsageOverview maxCpuPerSandbox(@javax.annotation.Nullable BigDecimal maxCpuPerSandbox) {
     this.maxCpuPerSandbox = maxCpuPerSandbox;
     return this;
@@ -527,6 +562,7 @@ public class RegionUsageOverview {
         Objects.equals(this.currentDiskUsage, regionUsageOverview.currentDiskUsage) &&
         Objects.equals(this.totalGpuQuota, regionUsageOverview.totalGpuQuota) &&
         Objects.equals(this.currentGpuUsage, regionUsageOverview.currentGpuUsage) &&
+        Objects.equals(this.allowedGpuTypes, regionUsageOverview.allowedGpuTypes) &&
         Objects.equals(this.maxCpuPerSandbox, regionUsageOverview.maxCpuPerSandbox) &&
         Objects.equals(this.maxMemoryPerSandbox, regionUsageOverview.maxMemoryPerSandbox) &&
         Objects.equals(this.maxDiskPerSandbox, regionUsageOverview.maxDiskPerSandbox) &&
@@ -539,7 +575,7 @@ public class RegionUsageOverview {
 
   @Override
   public int hashCode() {
-    return Objects.hash(regionId, sandboxClass, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, totalGpuQuota, currentGpuUsage, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, additionalProperties);
+    return Objects.hash(regionId, sandboxClass, totalCpuQuota, currentCpuUsage, totalMemoryQuota, currentMemoryUsage, totalDiskQuota, currentDiskUsage, totalGpuQuota, currentGpuUsage, allowedGpuTypes, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, additionalProperties);
   }
 
   @Override
@@ -556,6 +592,7 @@ public class RegionUsageOverview {
     sb.append("    currentDiskUsage: ").append(toIndentedString(currentDiskUsage)).append("\n");
     sb.append("    totalGpuQuota: ").append(toIndentedString(totalGpuQuota)).append("\n");
     sb.append("    currentGpuUsage: ").append(toIndentedString(currentGpuUsage)).append("\n");
+    sb.append("    allowedGpuTypes: ").append(toIndentedString(allowedGpuTypes)).append("\n");
     sb.append("    maxCpuPerSandbox: ").append(toIndentedString(maxCpuPerSandbox)).append("\n");
     sb.append("    maxMemoryPerSandbox: ").append(toIndentedString(maxMemoryPerSandbox)).append("\n");
     sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
@@ -582,7 +619,7 @@ public class RegionUsageOverview {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "allowedGpuTypes", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
@@ -613,6 +650,10 @@ public class RegionUsageOverview {
       }
       // validate the required field `sandboxClass`
       SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("allowedGpuTypes") != null && !jsonObj.get("allowedGpuTypes").isJsonNull() && !jsonObj.get("allowedGpuTypes").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `allowedGpuTypes` to be an array in the JSON string but got `%s`", jsonObj.get("allowedGpuTypes").toString()));
+      }
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

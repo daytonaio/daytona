@@ -18,6 +18,9 @@
 import type { BuildInfo } from './build-info';
 // May contain unused imports in some cases
 // @ts-ignore
+import type { GpuType } from './gpu-type';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SnapshotState } from './snapshot-state';
 
 export interface SnapshotDto {
@@ -31,6 +34,10 @@ export interface SnapshotDto {
     'entrypoint': Array<string> | null;
     'cpu': number;
     'gpu': number;
+    /**
+     * The GPU type assigned to the snapshot
+     */
+    'gpuType'?: GpuType;
     'mem': number;
     'disk': number;
     'errorReason': string | null;

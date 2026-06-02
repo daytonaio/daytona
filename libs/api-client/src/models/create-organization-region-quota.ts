@@ -15,6 +15,9 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
+import type { GpuType } from './gpu-type';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxClass } from './sandbox-class';
 
 export interface CreateOrganizationRegionQuota {
@@ -23,6 +26,7 @@ export interface CreateOrganizationRegionQuota {
     'totalMemoryQuota': number;
     'totalDiskQuota': number;
     'totalGpuQuota': number;
+    'allowedGpuTypes'?: Array<GpuType> | null;
     'maxCpuPerSandbox'?: number | null;
     'maxMemoryPerSandbox'?: number | null;
     'maxDiskPerSandbox'?: number | null;

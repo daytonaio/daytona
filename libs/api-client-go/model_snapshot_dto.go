@@ -32,6 +32,8 @@ type SnapshotDto struct {
 	Entrypoint []string `json:"entrypoint"`
 	Cpu float32 `json:"cpu"`
 	Gpu float32 `json:"gpu"`
+	// The GPU type assigned to the snapshot
+	GpuType *GpuType `json:"gpuType,omitempty"`
 	Mem float32 `json:"mem"`
 	Disk float32 `json:"disk"`
 	ErrorReason NullableString `json:"errorReason"`
@@ -342,6 +344,38 @@ func (o *SnapshotDto) GetGpuOk() (*float32, bool) {
 // SetGpu sets field value
 func (o *SnapshotDto) SetGpu(v float32) {
 	o.Gpu = v
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise.
+func (o *SnapshotDto) GetGpuType() GpuType {
+	if o == nil || IsNil(o.GpuType) {
+		var ret GpuType
+		return ret
+	}
+	return *o.GpuType
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetGpuTypeOk() (*GpuType, bool) {
+	if o == nil || IsNil(o.GpuType) {
+		return nil, false
+	}
+	return o.GpuType, true
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *SnapshotDto) HasGpuType() bool {
+	if o != nil && !IsNil(o.GpuType) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given GpuType and assigns it to the GpuType field.
+func (o *SnapshotDto) SetGpuType(v GpuType) {
+	o.GpuType = &v
 }
 
 // GetMem returns the Mem field value
@@ -678,6 +712,9 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["gpu"] = o.Gpu
+	if !IsNil(o.GpuType) {
+		toSerialize["gpuType"] = o.GpuType
+	}
 	toSerialize["mem"] = o.Mem
 	toSerialize["disk"] = o.Disk
 	toSerialize["errorReason"] = o.ErrorReason.Get()
@@ -765,6 +802,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "entrypoint")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "gpuType")
 		delete(additionalProperties, "mem")
 		delete(additionalProperties, "disk")
 		delete(additionalProperties, "errorReason")

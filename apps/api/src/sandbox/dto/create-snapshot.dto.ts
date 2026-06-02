@@ -4,10 +4,12 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsArray, IsEnum, IsObject, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
+import { Transform } from 'class-transformer'
+import { ArrayMinSize, IsArray, IsEnum, IsObject, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 import { IsSafeDisplayString } from '../../common/validators'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 
 @ApiSchema({ name: 'CreateSnapshot' })
 export class CreateSnapshotDto {
@@ -58,6 +60,21 @@ export class CreateSnapshotDto {
   @Min(0)
   @Max(1)
   gpu?: number
+
+  @ApiPropertyOptional({
+    description:
+      'Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.',
+    enum: GpuType,
+    enumName: 'GpuType',
+    isArray: true,
+    example: [GpuType.H100],
+  })
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : value === undefined || value === null ? value : [value]))
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsEnum(GpuType, { each: true })
+  gpuType?: GpuType[]
 
   @ApiPropertyOptional({
     description: 'Memory allocated to the resulting sandbox in GB',

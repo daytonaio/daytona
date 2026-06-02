@@ -531,6 +531,9 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		if resources.GPU > 0 {
 			createReq.SetGpu(int32(resources.GPU))
 		}
+		if len(resources.GpuType) > 0 {
+			createReq.SetGpuType(resources.GpuType)
+		}
 		if resources.Memory > 0 {
 			createReq.SetMemory(int32(resources.Memory))
 		}

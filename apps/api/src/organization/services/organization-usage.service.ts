@@ -122,6 +122,9 @@ export class OrganizationUsageService {
           maxMemoryPerGpuSandbox: rq.maxMemoryPerGpuSandbox,
           maxDiskPerGpuSandbox: rq.maxDiskPerGpuSandbox,
         }
+        if (rq.allowedGpuTypes) {
+          usage.allowedGpuTypes = rq.allowedGpuTypes
+        }
 
         return usage
       }),

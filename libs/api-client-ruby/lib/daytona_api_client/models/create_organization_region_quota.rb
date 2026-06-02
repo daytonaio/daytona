@@ -25,6 +25,8 @@ module DaytonaApiClient
 
     attr_accessor :total_gpu_quota
 
+    attr_accessor :allowed_gpu_types
+
     attr_accessor :max_cpu_per_sandbox
 
     attr_accessor :max_memory_per_sandbox
@@ -69,6 +71,7 @@ module DaytonaApiClient
         :'total_memory_quota' => :'totalMemoryQuota',
         :'total_disk_quota' => :'totalDiskQuota',
         :'total_gpu_quota' => :'totalGpuQuota',
+        :'allowed_gpu_types' => :'allowedGpuTypes',
         :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
         :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
         :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
@@ -97,6 +100,7 @@ module DaytonaApiClient
         :'total_memory_quota' => :'Float',
         :'total_disk_quota' => :'Float',
         :'total_gpu_quota' => :'Float',
+        :'allowed_gpu_types' => :'Array<GpuType>',
         :'max_cpu_per_sandbox' => :'Float',
         :'max_memory_per_sandbox' => :'Float',
         :'max_disk_per_sandbox' => :'Float',
@@ -110,6 +114,7 @@ module DaytonaApiClient
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
+        :'allowed_gpu_types',
         :'max_cpu_per_sandbox',
         :'max_memory_per_sandbox',
         :'max_disk_per_sandbox',
@@ -164,6 +169,12 @@ module DaytonaApiClient
         self.total_gpu_quota = attributes[:'total_gpu_quota']
       else
         self.total_gpu_quota = nil
+      end
+
+      if attributes.key?(:'allowed_gpu_types')
+        if (value = attributes[:'allowed_gpu_types']).is_a?(Array)
+          self.allowed_gpu_types = value
+        end
       end
 
       if attributes.key?(:'max_cpu_per_sandbox')
@@ -295,6 +306,7 @@ module DaytonaApiClient
           total_memory_quota == o.total_memory_quota &&
           total_disk_quota == o.total_disk_quota &&
           total_gpu_quota == o.total_gpu_quota &&
+          allowed_gpu_types == o.allowed_gpu_types &&
           max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
           max_memory_per_sandbox == o.max_memory_per_sandbox &&
           max_disk_per_sandbox == o.max_disk_per_sandbox &&
@@ -313,7 +325,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [sandbox_class, total_cpu_quota, total_memory_quota, total_disk_quota, total_gpu_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox, max_cpu_per_gpu_sandbox, max_memory_per_gpu_sandbox, max_disk_per_gpu_sandbox].hash
+      [sandbox_class, total_cpu_quota, total_memory_quota, total_disk_quota, total_gpu_quota, allowed_gpu_types, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox, max_cpu_per_gpu_sandbox, max_memory_per_gpu_sandbox, max_disk_per_gpu_sandbox].hash
     end
 
     # Builds the object from hash

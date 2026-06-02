@@ -19,6 +19,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.CreateBuildInfo;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,6 +80,14 @@ public class CreateSnapshotTest {
     @Test
     public void gpuTest() {
         // TODO: test gpu
+    }
+
+    /**
+     * Test the property 'gpuType'
+     */
+    @Test
+    public void gpuTypeTest() {
+        // TODO: test gpuType
     }
 
     /**

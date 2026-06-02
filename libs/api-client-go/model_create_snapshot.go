@@ -31,6 +31,8 @@ type CreateSnapshot struct {
 	Cpu *int32 `json:"cpu,omitempty"`
 	// GPU units allocated to the resulting sandbox
 	Gpu *int32 `json:"gpu,omitempty"`
+	// Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.
+	GpuType []GpuType `json:"gpuType,omitempty"`
 	// Memory allocated to the resulting sandbox in GB
 	Memory *int32 `json:"memory,omitempty"`
 	// Disk space allocated to the sandbox in GB
@@ -216,6 +218,38 @@ func (o *CreateSnapshot) SetGpu(v int32) {
 	o.Gpu = &v
 }
 
+// GetGpuType returns the GpuType field value if set, zero value otherwise.
+func (o *CreateSnapshot) GetGpuType() []GpuType {
+	if o == nil || IsNil(o.GpuType) {
+		var ret []GpuType
+		return ret
+	}
+	return o.GpuType
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSnapshot) GetGpuTypeOk() ([]GpuType, bool) {
+	if o == nil || IsNil(o.GpuType) {
+		return nil, false
+	}
+	return o.GpuType, true
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasGpuType() bool {
+	if o != nil && !IsNil(o.GpuType) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given []GpuType and assigns it to the GpuType field.
+func (o *CreateSnapshot) SetGpuType(v []GpuType) {
+	o.GpuType = v
+}
+
 // GetMemory returns the Memory field value if set, zero value otherwise.
 func (o *CreateSnapshot) GetMemory() int32 {
 	if o == nil || IsNil(o.Memory) {
@@ -399,6 +433,9 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Gpu) {
 		toSerialize["gpu"] = o.Gpu
 	}
+	if !IsNil(o.GpuType) {
+		toSerialize["gpuType"] = o.GpuType
+	}
 	if !IsNil(o.Memory) {
 		toSerialize["memory"] = o.Memory
 	}
@@ -462,6 +499,7 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "entrypoint")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "gpuType")
 		delete(additionalProperties, "memory")
 		delete(additionalProperties, "disk")
 		delete(additionalProperties, "buildInfo")

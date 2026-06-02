@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { RegionQuota } from '../entities/region-quota.entity'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
+import { GpuType } from '../../sandbox/enums/gpu-type.enum'
 
 @ApiSchema({ name: 'RegionQuota' })
 export class RegionQuotaDto {
@@ -29,6 +30,9 @@ export class RegionQuotaDto {
 
   @ApiProperty()
   totalGpuQuota: number
+
+  @ApiPropertyOptional({ enum: GpuType, enumName: 'GpuType', isArray: true })
+  allowedGpuTypes?: GpuType[]
 
   @ApiProperty({ nullable: true })
   maxCpuPerSandbox: number | null
@@ -59,6 +63,9 @@ export class RegionQuotaDto {
     this.totalMemoryQuota = regionQuota.totalMemoryQuota
     this.totalDiskQuota = regionQuota.totalDiskQuota
     this.totalGpuQuota = regionQuota.totalGpuQuota
+    if (regionQuota.allowedGpuTypes) {
+      this.allowedGpuTypes = regionQuota.allowedGpuTypes
+    }
     this.maxCpuPerSandbox = regionQuota.maxCpuPerSandbox
     this.maxMemoryPerSandbox = regionQuota.maxMemoryPerSandbox
     this.maxDiskPerSandbox = regionQuota.maxDiskPerSandbox

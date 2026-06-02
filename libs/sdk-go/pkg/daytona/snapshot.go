@@ -250,6 +250,9 @@ func (s *SnapshotService) doCreate(ctx context.Context, params *types.CreateSnap
 			gpu := int32(params.Resources.GPU)
 			createReq.Gpu = &gpu
 		}
+		if len(params.Resources.GpuType) > 0 {
+			createReq.GpuType = params.Resources.GpuType
+		}
 		if params.Resources.Memory > 0 {
 			memory := int32(params.Resources.Memory)
 			createReq.Memory = &memory

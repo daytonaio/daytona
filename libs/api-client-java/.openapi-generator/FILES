@@ -94,6 +94,7 @@ src/main/java/io/daytona/api/client/model/GitCommitResponse.java
 src/main/java/io/daytona/api/client/model/GitDeleteBranchRequest.java
 src/main/java/io/daytona/api/client/model/GitRepoRequest.java
 src/main/java/io/daytona/api/client/model/GitStatus.java
+src/main/java/io/daytona/api/client/model/GpuType.java
 src/main/java/io/daytona/api/client/model/HealthControllerCheck200Response.java
 src/main/java/io/daytona/api/client/model/HealthControllerCheck200ResponseInfoValue.java
 src/main/java/io/daytona/api/client/model/HealthControllerCheck503Response.java
@@ -294,6 +295,7 @@ src/test/java/io/daytona/api/client/model/GitCommitResponseTest.java
 src/test/java/io/daytona/api/client/model/GitDeleteBranchRequestTest.java
 src/test/java/io/daytona/api/client/model/GitRepoRequestTest.java
 src/test/java/io/daytona/api/client/model/GitStatusTest.java
+src/test/java/io/daytona/api/client/model/GpuTypeTest.java
 src/test/java/io/daytona/api/client/model/HealthControllerCheck200ResponseInfoValueTest.java
 src/test/java/io/daytona/api/client/model/HealthControllerCheck200ResponseTest.java
 src/test/java/io/daytona/api/client/model/HealthControllerCheck503ResponseTest.java

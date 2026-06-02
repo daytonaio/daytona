@@ -9,6 +9,7 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 
 interface SandboxListItemDtoFields {
   id: string
@@ -26,6 +27,7 @@ interface SandboxListItemDtoFields {
   public: boolean
   cpu: number
   gpu: number
+  gpuType?: GpuType
   memory: number
   disk: number
   labels: { [key: string]: string }
@@ -152,6 +154,16 @@ export class SandboxListItemDto {
   })
   gpu: number
 
+  @ApiPropertyOptional({
+    description: 'The GPU type assigned to the sandbox',
+    enum: GpuType,
+    enumName: 'GpuType',
+    example: GpuType.H100,
+  })
+  @IsEnum(GpuType)
+  @IsOptional()
+  gpuType?: GpuType
+
   @ApiProperty({
     description: 'The memory quota for the sandbox',
     example: 4,
@@ -261,6 +273,7 @@ export class SandboxListItemDto {
     public: isPublic,
     cpu,
     gpu,
+    gpuType,
     memory,
     disk,
     labels,
@@ -288,6 +301,7 @@ export class SandboxListItemDto {
     this.public = isPublic
     this.cpu = cpu
     this.gpu = gpu
+    this.gpuType = gpuType
     this.memory = memory
     this.disk = disk
     this.labels = labels

@@ -15,6 +15,9 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
+import type { GpuType } from './gpu-type';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxClass } from './sandbox-class';
 
 export interface RegionUsageOverview {
@@ -28,6 +31,7 @@ export interface RegionUsageOverview {
     'currentDiskUsage': number;
     'totalGpuQuota': number;
     'currentGpuUsage': number;
+    'allowedGpuTypes'?: Array<GpuType>;
     'maxCpuPerSandbox': number | null;
     'maxMemoryPerSandbox': number | null;
     'maxDiskPerSandbox': number | null;

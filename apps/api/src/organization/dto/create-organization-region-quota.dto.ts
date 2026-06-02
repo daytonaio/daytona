@@ -4,8 +4,9 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsEnum, IsNumber, IsOptional } from 'class-validator'
+import { IsArray, IsEnum, IsNumber, IsOptional } from 'class-validator'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
+import { GpuType } from '../../sandbox/enums/gpu-type.enum'
 
 @ApiSchema({ name: 'CreateOrganizationRegionQuota' })
 export class CreateOrganizationRegionQuotaDto {
@@ -28,6 +29,12 @@ export class CreateOrganizationRegionQuotaDto {
   @ApiProperty()
   @IsNumber()
   totalGpuQuota: number
+
+  @ApiPropertyOptional({ enum: GpuType, enumName: 'GpuType', isArray: true, nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(GpuType, { each: true })
+  allowedGpuTypes?: GpuType[] | null
 
   @ApiPropertyOptional({ nullable: true })
   @IsNumber()

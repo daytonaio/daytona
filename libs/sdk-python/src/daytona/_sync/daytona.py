@@ -21,18 +21,9 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv.attributes import service_attributes
 
-from daytona_api_client import (
-    ApiClient,
-    ConfigApi,
-    Configuration,
-    CreateBuildInfo,
-    CreateSandbox,
-    ObjectStorageApi,
-    SandboxApi,
-    SandboxState,
-    SandboxVolume,
-    SnapshotsApi,
-)
+from daytona_api_client import ApiClient, ConfigApi, Configuration, CreateBuildInfo, CreateSandbox
+from daytona_api_client import GpuType as SyncGpuType
+from daytona_api_client import ObjectStorageApi, SandboxApi, SandboxState, SandboxVolume, SnapshotsApi
 from daytona_api_client import VolumesApi as VolumesApi
 from daytona_toolbox_api_client import ApiClient as ToolboxApiClient
 
@@ -462,6 +453,13 @@ class Daytona:
                 sandbox_data.memory = params.resources.memory
                 sandbox_data.disk = params.resources.disk
                 sandbox_data.gpu = params.resources.gpu
+                if params.resources.gpu_type is not None:
+                    gpu_types = (
+                        params.resources.gpu_type
+                        if isinstance(params.resources.gpu_type, list)
+                        else [params.resources.gpu_type]
+                    )
+                    sandbox_data.gpu_type = [SyncGpuType(t.value) for t in gpu_types]
 
         response = self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=http_timeout(timeout))
 

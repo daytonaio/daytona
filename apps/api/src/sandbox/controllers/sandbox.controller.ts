@@ -259,6 +259,7 @@ export class SandboxController {
         target: req.body?.target,
         cpu: req.body?.cpu,
         gpu: req.body?.gpu,
+        gpuType: req.body?.gpuType,
         memory: req.body?.memory,
         disk: req.body?.disk,
         autoStopInterval: req.body?.autoStopInterval,
@@ -292,6 +293,11 @@ export class SandboxController {
     } else {
       if (createSandboxDto.cpu || createSandboxDto.gpu || createSandboxDto.memory || createSandboxDto.disk) {
         throw new BadRequestError('Cannot specify Sandbox resources when using a snapshot')
+      }
+      if (createSandboxDto.gpuType && createSandboxDto.gpuType.length > 0) {
+        throw new BadRequestError(
+          'Cannot specify GPU type when creating sandbox from snapshot. GPU type is inherited from snapshot.',
+        )
       }
       sandbox = await this.sandboxService.createFromSnapshot(createSandboxDto, organization)
       if (sandbox.state === SandboxState.STARTED) {

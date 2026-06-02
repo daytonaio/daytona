@@ -22,6 +22,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client_async.models.build_info import BuildInfo
+from daytona_api_client_async.models.gpu_type import GpuType
 from daytona_api_client_async.models.snapshot_state import SnapshotState
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -43,6 +44,7 @@ class SnapshotDto(BaseModel):
     entrypoint: Optional[List[StrictStr]]
     cpu: Union[StrictFloat, StrictInt]
     gpu: Union[StrictFloat, StrictInt]
+    gpu_type: Optional[GpuType] = Field(default=None, description="The GPU type assigned to the snapshot", serialization_alias="gpuType")
     mem: Union[StrictFloat, StrictInt]
     disk: Union[StrictFloat, StrictInt]
     error_reason: Optional[StrictStr] = Field(serialization_alias="errorReason")
@@ -55,7 +57,7 @@ class SnapshotDto(BaseModel):
     ref: Optional[StrictStr] = Field(default=None, description="The snapshot reference")
     sandbox_class: Optional[StrictStr] = Field(default=None, description="The sandbox class of the snapshot", serialization_alias="sandboxClass")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "gpuType", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -147,6 +149,7 @@ class SnapshotDto(BaseModel):
             "entrypoint": obj.get("entrypoint"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),
+            "gpu_type": obj.get("gpuType"),
             "mem": obj.get("mem"),
             "disk": obj.get("disk"),
             "error_reason": obj.get("errorReason"),

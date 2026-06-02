@@ -8,14 +8,9 @@ import threading
 import time
 from typing import Callable, cast
 
-from daytona_api_client import (
-    CreateBuildInfo,
-    CreateSnapshot,
-    ObjectStorageApi,
-    SnapshotDto,
-    SnapshotsApi,
-    SnapshotState,
-)
+from daytona_api_client import CreateBuildInfo, CreateSnapshot
+from daytona_api_client import GpuType as SyncGpuType
+from daytona_api_client import ObjectStorageApi, SnapshotDto, SnapshotsApi, SnapshotState
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
@@ -154,6 +149,13 @@ class SnapshotService:
         if params.resources:
             create_snapshot_req.cpu = params.resources.cpu
             create_snapshot_req.gpu = params.resources.gpu
+            if params.resources.gpu_type is not None:
+                gpu_types = (
+                    params.resources.gpu_type
+                    if isinstance(params.resources.gpu_type, list)
+                    else [params.resources.gpu_type]
+                )
+                create_snapshot_req.gpu_type = [SyncGpuType(t.value) for t in gpu_types]
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 

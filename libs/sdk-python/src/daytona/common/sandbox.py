@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from daytona_api_client import SandboxListSortDirection, SandboxListSortField, SandboxState
+from daytona_api_client_async import GpuType
 
 TOOLBOX_PORT = 2280
 
@@ -20,6 +21,10 @@ class Resources:
         memory (int | None): Amount of memory in GiB to allocate.
         disk (int | None): Amount of disk space in GiB to allocate.
         gpu (int | None): Number of GPUs to allocate.
+        gpu_type (GpuType | list[GpuType] | None): Preferred GPU type. Accepts a single
+            value or an ordered preference list — the scheduler tries each in order and pins
+            the sandbox/snapshot to the first that has capacity. Only valid when creating
+            from a build image; rejected when creating a sandbox from a snapshot.
 
     Example:
         ```python
@@ -27,7 +32,8 @@ class Resources:
             cpu=2,
             memory=4,  # 4GiB RAM
             disk=20,   # 20GiB disk
-            gpu=1
+            gpu=1,
+            gpu_type=GpuType.H100,
         )
         params = CreateSandboxFromImageParams(
             image=Image.debian_slim("3.12"),
@@ -41,6 +47,7 @@ class Resources:
     memory: int | None = None
     disk: int | None = None
     gpu: int | None = None
+    gpu_type: GpuType | list[GpuType] | None = None
 
 
 @dataclass

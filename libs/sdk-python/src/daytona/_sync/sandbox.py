@@ -621,34 +621,33 @@ class Sandbox(SandboxDto):
     def resize(self, resources: Resources, timeout: float | None = 60) -> None:
         """Resizes the Sandbox resources.
 
-        Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
-        sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
+        Changes the CPU, memory, or disk allocation. Hot resize (on a running Sandbox) accepts
+        only CPU and memory increases. Disk resize requires a stopped Sandbox; disk can only
+        grow. GPU is not resizable — to change GPU, create a new Sandbox.
 
         Args:
-            resources (Resources): New resource configuration. Only specified fields will be updated.
-                - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
-                - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
-                - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
-            timeout (Optional[float]): Timeout (in seconds) for the resize operation. 0 means no timeout.
-                Default is 60 seconds.
+            resources (Resources): New resource configuration. Only cpu, memory, and disk are
+                applied; setting gpu or gpu_type raises an error.
+            timeout (Optional[float]): Timeout in seconds for the resize operation. 0 means no
+                timeout. Default is 60 seconds.
 
         Raises:
-            DaytonaError: If hot resize constraints are violated (CPU/memory decrease on running sandbox).
-            DaytonaError: If disk resize attempted on running sandbox.
-            DaytonaError: If disk size decrease is attempted.
-            DaytonaError: If resize operation times out.
-            DaytonaError: If no resource changes are specified.
+            DaytonaError: If hot-resize constraints are violated, disk resize is attempted on
+                a running Sandbox, disk decrease is attempted, no fields are provided, gpu or
+                gpu_type is set, or the operation times out.
 
         Example:
             ```python
-            # Increase CPU/memory on running sandbox (hot resize)
             sandbox.resize(Resources(cpu=4, memory=8))
 
-            # Change disk (sandbox must be stopped)
             sandbox.stop()
             sandbox.resize(Resources(cpu=2, memory=4, disk=30))
             ```
         """
+        if resources.gpu or resources.gpu_type:
+            raise DaytonaValidationError(
+                "Resize does not support changes to gpu or gpu_type — to change GPU, create a new Sandbox"
+            )
         resize_request = ResizeSandbox(
             cpu=resources.cpu,
             memory=resources.memory,

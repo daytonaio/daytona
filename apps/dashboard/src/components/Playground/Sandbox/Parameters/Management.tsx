@@ -10,7 +10,7 @@ import { NumberParameterFormItem, ParameterFormItem } from '@/contexts/Playgroun
 import { usePlayground } from '@/hooks/usePlayground'
 import { getLanguageCodeToRun } from '@/lib/playground'
 import { SnapshotDto } from '@daytona/api-client'
-import { CodeLanguage, Resources } from '@daytona/sdk'
+import { CodeLanguage } from '@daytona/sdk'
 import { HelpCircleIcon } from 'lucide-react'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
@@ -61,7 +61,7 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
       label: 'JavaScript',
     },
   ]
-  const resourcesFormData: (NumberParameterFormItem & { key: keyof Resources })[] = [
+  const resourcesFormData: (NumberParameterFormItem & { key: 'cpu' | 'memory' | 'disk' })[] = [
     { label: 'Compute (vCPU)', key: 'cpu', min: 1, max: Infinity, placeholder: '1' },
     { label: 'Memory (GiB)', key: 'memory', min: 1, max: Infinity, placeholder: '1' },
     { label: 'Storage (GiB)', key: 'disk', min: 1, max: Infinity, placeholder: '3' },

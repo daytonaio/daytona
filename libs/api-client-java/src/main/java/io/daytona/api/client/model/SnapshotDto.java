@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.BuildInfo;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SnapshotState;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -105,6 +106,11 @@ public class SnapshotDto {
   @SerializedName(SERIALIZED_NAME_GPU)
   @javax.annotation.Nonnull
   private BigDecimal gpu;
+
+  public static final String SERIALIZED_NAME_GPU_TYPE = "gpuType";
+  @SerializedName(SERIALIZED_NAME_GPU_TYPE)
+  @javax.annotation.Nullable
+  private GpuType gpuType;
 
   public static final String SERIALIZED_NAME_MEM = "mem";
   @SerializedName(SERIALIZED_NAME_MEM)
@@ -420,6 +426,25 @@ public class SnapshotDto {
   }
 
 
+  public SnapshotDto gpuType(@javax.annotation.Nullable GpuType gpuType) {
+    this.gpuType = gpuType;
+    return this;
+  }
+
+  /**
+   * The GPU type assigned to the snapshot
+   * @return gpuType
+   */
+  @javax.annotation.Nullable
+  public GpuType getGpuType() {
+    return gpuType;
+  }
+
+  public void setGpuType(@javax.annotation.Nullable GpuType gpuType) {
+    this.gpuType = gpuType;
+  }
+
+
   public SnapshotDto mem(@javax.annotation.Nonnull BigDecimal mem) {
     this.mem = mem;
     return this;
@@ -701,6 +726,7 @@ public class SnapshotDto {
         Objects.equals(this.entrypoint, snapshotDto.entrypoint) &&
         Objects.equals(this.cpu, snapshotDto.cpu) &&
         Objects.equals(this.gpu, snapshotDto.gpu) &&
+        Objects.equals(this.gpuType, snapshotDto.gpuType) &&
         Objects.equals(this.mem, snapshotDto.mem) &&
         Objects.equals(this.disk, snapshotDto.disk) &&
         Objects.equals(this.errorReason, snapshotDto.errorReason) &&
@@ -717,7 +743,7 @@ public class SnapshotDto {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, general, name, imageName, state, size, entrypoint, cpu, gpu, mem, disk, errorReason, createdAt, updatedAt, lastUsedAt, buildInfo, regionIds, initialRunnerId, ref, sandboxClass, additionalProperties);
+    return Objects.hash(id, organizationId, general, name, imageName, state, size, entrypoint, cpu, gpu, gpuType, mem, disk, errorReason, createdAt, updatedAt, lastUsedAt, buildInfo, regionIds, initialRunnerId, ref, sandboxClass, additionalProperties);
   }
 
   @Override
@@ -734,6 +760,7 @@ public class SnapshotDto {
     sb.append("    entrypoint: ").append(toIndentedString(entrypoint)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
+    sb.append("    gpuType: ").append(toIndentedString(gpuType)).append("\n");
     sb.append("    mem: ").append(toIndentedString(mem)).append("\n");
     sb.append("    disk: ").append(toIndentedString(disk)).append("\n");
     sb.append("    errorReason: ").append(toIndentedString(errorReason)).append("\n");
@@ -764,7 +791,7 @@ public class SnapshotDto {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "gpuType", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "general", "name", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt"));
@@ -809,6 +836,10 @@ public class SnapshotDto {
         throw new IllegalArgumentException("Expected the field `linkedContent` to be an array in the JSON string but got `null`");
       } else if (!jsonObj.get("entrypoint").isJsonArray() && !jsonObj.get("entrypoint").isJsonNull()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `entrypoint` to be an array in the JSON string but got `%s`", jsonObj.get("entrypoint").toString()));
+      }
+      // validate the optional field `gpuType`
+      if (jsonObj.get("gpuType") != null && !jsonObj.get("gpuType").isJsonNull()) {
+        GpuType.validateJsonElement(jsonObj.get("gpuType"));
       }
       if ((jsonObj.get("errorReason") != null && !jsonObj.get("errorReason").isJsonNull()) && !jsonObj.get("errorReason").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));

@@ -80,6 +80,7 @@ lib/daytona_api_client/models/git_commit_response.rb
 lib/daytona_api_client/models/git_delete_branch_request.rb
 lib/daytona_api_client/models/git_repo_request.rb
 lib/daytona_api_client/models/git_status.rb
+lib/daytona_api_client/models/gpu_type.rb
 lib/daytona_api_client/models/health_controller_check200_response.rb
 lib/daytona_api_client/models/health_controller_check200_response_info_value.rb
 lib/daytona_api_client/models/health_controller_check503_response.rb

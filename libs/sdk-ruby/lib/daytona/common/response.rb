@@ -9,6 +9,7 @@ module Daytona
   SandboxState = DaytonaApiClient::SandboxState
   SandboxListSortField = DaytonaApiClient::SandboxListSortField
   SandboxListSortDirection = DaytonaApiClient::SandboxListSortDirection
+  GpuType = DaytonaApiClient::GpuType
 
   class PaginatedResource
     # @return [Array<Object>]

@@ -35,6 +35,9 @@ module DaytonaApiClient
 
     attr_accessor :gpu
 
+    # The GPU type assigned to the snapshot
+    attr_accessor :gpu_type
+
     attr_accessor :mem
 
     attr_accessor :disk
@@ -97,6 +100,7 @@ module DaytonaApiClient
         :'entrypoint' => :'entrypoint',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
+        :'gpu_type' => :'gpuType',
         :'mem' => :'mem',
         :'disk' => :'disk',
         :'error_reason' => :'errorReason',
@@ -134,6 +138,7 @@ module DaytonaApiClient
         :'entrypoint' => :'Array<String>',
         :'cpu' => :'Float',
         :'gpu' => :'Float',
+        :'gpu_type' => :'GpuType',
         :'mem' => :'Float',
         :'disk' => :'Float',
         :'error_reason' => :'String',
@@ -230,6 +235,10 @@ module DaytonaApiClient
         self.gpu = attributes[:'gpu']
       else
         self.gpu = nil
+      end
+
+      if attributes.key?(:'gpu_type')
+        self.gpu_type = attributes[:'gpu_type']
       end
 
       if attributes.key?(:'mem')
@@ -483,6 +492,7 @@ module DaytonaApiClient
           entrypoint == o.entrypoint &&
           cpu == o.cpu &&
           gpu == o.gpu &&
+          gpu_type == o.gpu_type &&
           mem == o.mem &&
           disk == o.disk &&
           error_reason == o.error_reason &&
@@ -505,7 +515,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, general, name, image_name, state, size, entrypoint, cpu, gpu, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info, region_ids, initial_runner_id, ref, sandbox_class].hash
+      [id, organization_id, general, name, image_name, state, size, entrypoint, cpu, gpu, gpu_type, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info, region_ids, initial_runner_id, ref, sandbox_class].hash
     end
 
     # Builds the object from hash

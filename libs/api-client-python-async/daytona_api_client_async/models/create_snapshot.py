@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client_async.models.create_build_info import CreateBuildInfo
+from daytona_api_client_async.models.gpu_type import GpuType
 from daytona_api_client_async.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -37,13 +38,14 @@ class CreateSnapshot(BaseModel):
     entrypoint: Optional[List[StrictStr]] = Field(default=None, description="The entrypoint command for the snapshot")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the resulting sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the resulting sandbox")
+    gpu_type: Optional[List[GpuType]] = Field(default=None, description="Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.", serialization_alias="gpuType")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", serialization_alias="buildInfo")
     region_id: Optional[StrictStr] = Field(default=None, description="ID of the region where the snapshot will be available. Defaults to organization default region if not specified.", serialization_alias="regionId")
     sandbox_class: Optional[SandboxClass] = Field(default=None, description="Target sandbox class. Determines which runners can host sandboxes created from this snapshot.", serialization_alias="sandboxClass")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId", "sandboxClass"]
+    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "cpu", "gpu", "gpuType", "memory", "disk", "buildInfo", "regionId", "sandboxClass"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -110,6 +112,7 @@ class CreateSnapshot(BaseModel):
             "entrypoint": obj.get("entrypoint"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),
+            "gpu_type": obj.get("gpuType"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "build_info": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,

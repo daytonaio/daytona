@@ -24,6 +24,7 @@ import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
 import { RunnerClass } from '../enums/runner-class.enum'
 import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
@@ -407,6 +408,8 @@ export class SandboxService {
       throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
     }
 
+    sandbox.gpuType = snapshot.gpuType ?? null
+
     let gpuRunnerAssignmentLockKey: string | undefined
 
     sandbox.sandboxClass = snapshot.sandboxClass
@@ -424,6 +427,7 @@ export class SandboxService {
         sandboxClass: sandbox.sandboxClass,
         snapshotRef: snapshot.ref,
         gpu: sandbox.gpu,
+        gpuType: sandbox.gpuType ?? null,
       })
 
       sandbox.runnerId = runner.id
@@ -510,6 +514,7 @@ export class SandboxService {
       const mem = snapshot.mem
       const disk = snapshot.disk
       const gpu = snapshot.gpu
+      const gpuType = snapshot.gpuType ?? null
 
       // GPU sandboxes are always ephemeral.
       if (gpu > 0 && !isEphemeral(createSandboxDto)) {
@@ -621,6 +626,7 @@ export class SandboxService {
           sandboxClass: snapshot.sandboxClass,
           snapshotRef: snapshot.ref,
           gpu,
+          gpuType,
         })
       }
 
@@ -637,6 +643,7 @@ export class SandboxService {
 
       sandbox.cpu = cpu
       sandbox.gpu = gpu
+      sandbox.gpuType = gpuType
       sandbox.mem = mem
       sandbox.disk = disk
 
@@ -853,6 +860,11 @@ export class SandboxService {
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
+      const regionQuota = region.enforceQuotas
+        ? await this.organizationService.getRegionQuota(organization.id, region.id, SandboxClass.CONTAINER)
+        : null
+      const gpuTypePreferences = resolveGpuTypePreferences(gpu, createSandboxDto.gpuType, regionQuota?.allowedGpuTypes)
+
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented, pendingGpuIncremented } =
         await this.validateOrganizationQuotas(
           organization,
@@ -863,6 +875,8 @@ export class SandboxService {
           disk,
           gpu,
           isEphemeral(createSandboxDto),
+          undefined,
+          regionQuota,
         )
 
       if (pendingCpuIncremented) {
@@ -961,6 +975,7 @@ export class SandboxService {
           sandboxClass: sandbox.sandboxClass,
           snapshotRef: buildInfoSnapshotRef,
           gpu: sandbox.gpu,
+          gpuType: gpuTypePreferences ?? null,
           ...(excludedRunnerIds.length > 0 && { excludedRunnerIds }),
           ...(declarativeBuildScoreThreshold !== undefined && {
             availabilityScoreThreshold: declarativeBuildScoreThreshold,
@@ -975,6 +990,7 @@ export class SandboxService {
         }
 
         sandbox.runnerId = runner.id
+        sandbox.gpuType = sandbox.gpu > 0 ? runner.gpuType : null
       } catch (error) {
         if (
           error instanceof BadRequestError == false ||
@@ -1110,6 +1126,7 @@ export class SandboxService {
       forkedSandbox.mem = sourceSandbox.mem
       forkedSandbox.disk = sourceSandbox.disk
       forkedSandbox.gpu = sourceSandbox.gpu
+      forkedSandbox.gpuType = sourceSandbox.gpuType ?? null
       forkedSandbox.public = sourceSandbox.public
       forkedSandbox.autoStopInterval = sourceSandbox.autoStopInterval
       forkedSandbox.autoArchiveInterval = sourceSandbox.autoArchiveInterval

@@ -30,6 +30,7 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 - [type FileUpload](<#FileUpload>)
 - [type GitCommitResponse](<#GitCommitResponse>)
 - [type GitStatus](<#GitStatus>)
+- [type GpuType](<#GpuType>)
 - [type ImageParams](<#ImageParams>)
 - [type LspLanguageID](<#LspLanguageID>)
 - [type OutputMessage](<#OutputMessage>)
@@ -285,6 +286,24 @@ type GitStatus struct {
 }
 ```
 
+<a name="GpuType"></a>
+## type GpuType
+
+GpuType identifies a specific NVIDIA GPU model. Used in \[Resources.GpuType\] as an ordered preference list — the scheduler tries each in order and pins the sandbox/snapshot to the first that has capacity. It is an alias for the API client's GpuType type.
+
+```go
+type GpuType = apiclient.GpuType
+```
+
+<a name="GpuTypeH100"></a>
+
+```go
+const (
+    GpuTypeH100       GpuType = apiclient.GPUTYPE_H100
+    GpuTypeRtxPro6000 GpuType = apiclient.GPUTYPE_RTX_PRO_6000
+)
+```
+
 <a name="ImageParams"></a>
 ## type ImageParams
 
@@ -418,10 +437,15 @@ Resources represents resource allocation for a sandbox.
 
 ```go
 type Resources struct {
-    CPU    int
-    GPU    int
-    Memory int
-    Disk   int
+    CPU int
+    GPU int
+    // GpuType is an ordered preference list of GPU types. The scheduler tries
+    // each in order and pins the sandbox/snapshot to the first that has
+    // capacity. Only valid when creating a sandbox from a build image; rejected
+    // when creating a sandbox from a snapshot (the snapshot pins the GPU type).
+    GpuType []GpuType
+    Memory  int
+    Disk    int
 }
 ```
 

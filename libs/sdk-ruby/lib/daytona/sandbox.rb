@@ -415,13 +415,14 @@ module Daytona
 
     # Resizes the Sandbox resources.
     #
-    # Changes the CPU, memory, or disk allocation for the Sandbox. Resizing a started
-    # sandbox allows increasing CPU and memory. To resize disk or decrease resources,
-    # the sandbox must be stopped first.
+    # Changes the CPU, memory, or disk allocation. Resizing a started sandbox accepts
+    # only CPU and memory increases. Disk resize requires a stopped sandbox; disk can
+    # only grow. GPU is not resizable — to change GPU, create a new sandbox.
     #
-    # @param resources [Daytona::Resources] New resource configuration
+    # @param resources [Daytona::Resources] New resource configuration (cpu, memory, disk only)
     # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s)
     # @return [void]
+    # @raise [Sdk::Error] If resources.gpu or resources.gpu_type is set
     #
     # @example Resize a started sandbox (CPU and memory can be increased)
     #   sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8))
@@ -431,6 +432,11 @@ module Daytona
     #   sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4, disk: 30))
     def resize(resources, timeout = DEFAULT_TIMEOUT)
       raise Sdk::Error, 'Resources must not be nil' if resources.nil?
+
+      if resources.gpu || resources.gpu_type
+        raise Sdk::Error,
+              'Resize does not support changes to gpu or gpu_type — to change GPU, create a new sandbox'
+      end
 
       with_timeout(
         timeout:,

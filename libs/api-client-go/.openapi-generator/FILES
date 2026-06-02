@@ -76,6 +76,7 @@ model_git_commit_response.go
 model_git_delete_branch_request.go
 model_git_repo_request.go
 model_git_status.go
+model_gpu_type.go
 model_health_controller_check_200_response.go
 model_health_controller_check_200_response_info_value.go
 model_health_controller_check_503_response.go

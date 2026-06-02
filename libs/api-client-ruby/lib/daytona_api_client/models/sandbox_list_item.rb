@@ -60,6 +60,9 @@ module DaytonaApiClient
     # The GPU quota for the sandbox
     attr_accessor :gpu
 
+    # The GPU type assigned to the sandbox
+    attr_accessor :gpu_type
+
     # The memory quota for the sandbox
     attr_accessor :memory
 
@@ -136,6 +139,7 @@ module DaytonaApiClient
         :'public' => :'public',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
+        :'gpu_type' => :'gpuType',
         :'memory' => :'memory',
         :'disk' => :'disk',
         :'labels' => :'labels',
@@ -179,6 +183,7 @@ module DaytonaApiClient
         :'public' => :'Boolean',
         :'cpu' => :'Float',
         :'gpu' => :'Float',
+        :'gpu_type' => :'GpuType',
         :'memory' => :'Float',
         :'disk' => :'Float',
         :'labels' => :'Hash<String, String>',
@@ -290,6 +295,10 @@ module DaytonaApiClient
         self.gpu = attributes[:'gpu']
       else
         self.gpu = nil
+      end
+
+      if attributes.key?(:'gpu_type')
+        self.gpu_type = attributes[:'gpu_type']
       end
 
       if attributes.key?(:'memory')
@@ -590,6 +599,7 @@ module DaytonaApiClient
           public == o.public &&
           cpu == o.cpu &&
           gpu == o.gpu &&
+          gpu_type == o.gpu_type &&
           memory == o.memory &&
           disk == o.disk &&
           labels == o.labels &&
@@ -613,7 +623,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, target, runner_id, sandbox_class, state, desired_state, snapshot, user, error_reason, recoverable, public, cpu, gpu, memory, disk, labels, backup_state, auto_stop_interval, auto_archive_interval, auto_delete_interval, created_at, updated_at, last_activity_at, daemon_version, toolbox_proxy_url].hash
+      [id, organization_id, name, target, runner_id, sandbox_class, state, desired_state, snapshot, user, error_reason, recoverable, public, cpu, gpu, gpu_type, memory, disk, labels, backup_state, auto_stop_interval, auto_archive_interval, auto_delete_interval, created_at, updated_at, last_activity_at, daemon_version, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

@@ -702,6 +702,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                     sandboxClass: sandbox.sandboxClass,
                     excludedRunnerIds: [runner.id],
                     gpu: sandbox.gpu,
+                    gpuType: sandbox.gpuType ?? null,
                   })
 
                   // Check if snapshot runner entry already exists
@@ -1196,6 +1197,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           excludedRunnerIds: excludedRunnerIds,
           availabilityScoreThreshold: availabilityThreshold,
           gpu: snapshot.gpu,
+          gpuType: snapshot.gpuType ?? null,
         })
       } catch (error) {
         this.logger.warn(`Failed to get initial runner: ${fromAxiosError(error)}`)

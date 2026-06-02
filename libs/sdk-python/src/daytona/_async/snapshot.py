@@ -157,6 +157,12 @@ class AsyncSnapshotService:
         if params.resources:
             create_snapshot_req.cpu = params.resources.cpu
             create_snapshot_req.gpu = params.resources.gpu
+            if params.resources.gpu_type is not None:
+                create_snapshot_req.gpu_type = (
+                    params.resources.gpu_type
+                    if isinstance(params.resources.gpu_type, list)
+                    else [params.resources.gpu_type]
+                )
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 

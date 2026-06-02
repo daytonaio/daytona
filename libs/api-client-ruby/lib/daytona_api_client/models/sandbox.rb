@@ -54,6 +54,9 @@ module DaytonaApiClient
     # The GPU quota for the sandbox
     attr_accessor :gpu
 
+    # The GPU type assigned to the sandbox
+    attr_accessor :gpu_type
+
     # The memory quota for the sandbox
     attr_accessor :memory
 
@@ -155,6 +158,7 @@ module DaytonaApiClient
         :'target' => :'target',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
+        :'gpu_type' => :'gpuType',
         :'memory' => :'memory',
         :'disk' => :'disk',
         :'state' => :'state',
@@ -205,6 +209,7 @@ module DaytonaApiClient
         :'target' => :'String',
         :'cpu' => :'Float',
         :'gpu' => :'Float',
+        :'gpu_type' => :'GpuType',
         :'memory' => :'Float',
         :'disk' => :'Float',
         :'state' => :'SandboxState',
@@ -327,6 +332,10 @@ module DaytonaApiClient
         self.gpu = attributes[:'gpu']
       else
         self.gpu = nil
+      end
+
+      if attributes.key?(:'gpu_type')
+        self.gpu_type = attributes[:'gpu_type']
       end
 
       if attributes.key?(:'memory')
@@ -689,6 +698,7 @@ module DaytonaApiClient
           target == o.target &&
           cpu == o.cpu &&
           gpu == o.gpu &&
+          gpu_type == o.gpu_type &&
           memory == o.memory &&
           disk == o.disk &&
           state == o.state &&
@@ -721,7 +731,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, gpu_type, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client.models.gpu_type import GpuType
 from daytona_api_client.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -36,6 +37,7 @@ class CreateOrganizationRegionQuota(BaseModel):
     total_memory_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalMemoryQuota")
     total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
     total_gpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalGpuQuota")
+    allowed_gpu_types: Optional[List[GpuType]] = Field(default=None, serialization_alias="allowedGpuTypes")
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerSandbox")
@@ -44,7 +46,7 @@ class CreateOrganizationRegionQuota(BaseModel):
     max_memory_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxMemoryPerGpuSandbox")
     max_disk_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerGpuSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"]
+    __properties: ClassVar[List[str]] = ["sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "allowedGpuTypes", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,6 +92,11 @@ class CreateOrganizationRegionQuota(BaseModel):
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
+
+        # set to None if allowed_gpu_types (nullable) is None
+        # and model_fields_set contains the field
+        if self.allowed_gpu_types is None and "allowed_gpu_types" in self.model_fields_set:
+            _dict['allowedGpuTypes'] = None
 
         # set to None if max_cpu_per_sandbox (nullable) is None
         # and model_fields_set contains the field
@@ -143,6 +150,7 @@ class CreateOrganizationRegionQuota(BaseModel):
             "total_memory_quota": obj.get("totalMemoryQuota"),
             "total_disk_quota": obj.get("totalDiskQuota"),
             "total_gpu_quota": obj.get("totalGpuQuota"),
+            "allowed_gpu_types": obj.get("allowedGpuTypes"),
             "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
             "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
             "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),

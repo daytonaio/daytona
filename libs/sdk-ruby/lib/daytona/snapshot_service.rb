@@ -102,6 +102,10 @@ module Daytona
       if params.resources
         create_snapshot_req.cpu = params.resources.cpu
         create_snapshot_req.gpu = params.resources.gpu
+        if params.resources.gpu_type
+          create_snapshot_req.gpu_type =
+            params.resources.gpu_type.is_a?(Array) ? params.resources.gpu_type : [params.resources.gpu_type]
+        end
         create_snapshot_req.memory = params.resources.memory
         create_snapshot_req.disk = params.resources.disk
       end

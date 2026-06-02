@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.CreateBuildInfo;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,6 +79,11 @@ public class CreateSnapshot {
   @SerializedName(SERIALIZED_NAME_GPU)
   @javax.annotation.Nullable
   private Integer gpu;
+
+  public static final String SERIALIZED_NAME_GPU_TYPE = "gpuType";
+  @SerializedName(SERIALIZED_NAME_GPU_TYPE)
+  @javax.annotation.Nullable
+  private List<GpuType> gpuType = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_MEMORY = "memory";
   @SerializedName(SERIALIZED_NAME_MEMORY)
@@ -207,6 +213,33 @@ public class CreateSnapshot {
 
   public void setGpu(@javax.annotation.Nullable Integer gpu) {
     this.gpu = gpu;
+  }
+
+
+  public CreateSnapshot gpuType(@javax.annotation.Nullable List<GpuType> gpuType) {
+    this.gpuType = gpuType;
+    return this;
+  }
+
+  public CreateSnapshot addGpuTypeItem(GpuType gpuTypeItem) {
+    if (this.gpuType == null) {
+      this.gpuType = new ArrayList<>();
+    }
+    this.gpuType.add(gpuTypeItem);
+    return this;
+  }
+
+  /**
+   * Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.
+   * @return gpuType
+   */
+  @javax.annotation.Nullable
+  public List<GpuType> getGpuType() {
+    return gpuType;
+  }
+
+  public void setGpuType(@javax.annotation.Nullable List<GpuType> gpuType) {
+    this.gpuType = gpuType;
   }
 
 
@@ -364,6 +397,7 @@ public class CreateSnapshot {
         Objects.equals(this.entrypoint, createSnapshot.entrypoint) &&
         Objects.equals(this.cpu, createSnapshot.cpu) &&
         Objects.equals(this.gpu, createSnapshot.gpu) &&
+        Objects.equals(this.gpuType, createSnapshot.gpuType) &&
         Objects.equals(this.memory, createSnapshot.memory) &&
         Objects.equals(this.disk, createSnapshot.disk) &&
         Objects.equals(this.buildInfo, createSnapshot.buildInfo) &&
@@ -374,7 +408,7 @@ public class CreateSnapshot {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, imageName, entrypoint, cpu, gpu, memory, disk, buildInfo, regionId, sandboxClass, additionalProperties);
+    return Objects.hash(name, imageName, entrypoint, cpu, gpu, gpuType, memory, disk, buildInfo, regionId, sandboxClass, additionalProperties);
   }
 
   @Override
@@ -386,6 +420,7 @@ public class CreateSnapshot {
     sb.append("    entrypoint: ").append(toIndentedString(entrypoint)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
+    sb.append("    gpuType: ").append(toIndentedString(gpuType)).append("\n");
     sb.append("    memory: ").append(toIndentedString(memory)).append("\n");
     sb.append("    disk: ").append(toIndentedString(disk)).append("\n");
     sb.append("    buildInfo: ").append(toIndentedString(buildInfo)).append("\n");
@@ -410,7 +445,7 @@ public class CreateSnapshot {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("name", "imageName", "entrypoint", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId", "sandboxClass"));
+    openapiFields = new HashSet<String>(Arrays.asList("name", "imageName", "entrypoint", "cpu", "gpu", "gpuType", "memory", "disk", "buildInfo", "regionId", "sandboxClass"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("name"));
@@ -445,6 +480,10 @@ public class CreateSnapshot {
       // ensure the optional json data is an array if present
       if (jsonObj.get("entrypoint") != null && !jsonObj.get("entrypoint").isJsonNull() && !jsonObj.get("entrypoint").isJsonArray()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `entrypoint` to be an array in the JSON string but got `%s`", jsonObj.get("entrypoint").toString()));
+      }
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("gpuType") != null && !jsonObj.get("gpuType").isJsonNull() && !jsonObj.get("gpuType").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `gpuType` to be an array in the JSON string but got `%s`", jsonObj.get("gpuType").toString()));
       }
       // validate the optional field `buildInfo`
       if (jsonObj.get("buildInfo") != null && !jsonObj.get("buildInfo").isJsonNull()) {

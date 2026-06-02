@@ -734,30 +734,31 @@ export class Sandbox {
   /**
    * Resizes the Sandbox resources.
    *
-   * Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
-   * sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
+   * Changes the CPU, memory, or disk allocation. Hot resize (on a running Sandbox) accepts
+   * only CPU and memory increases. Disk resize requires a stopped Sandbox; disk can only
+   * grow. GPU is not resizable — to change GPU, create a new Sandbox.
    *
-   * @param {Resources} resources - New resource configuration. Only specified fields will be updated.
-   *   - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
-   *   - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
-   *   - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
-   * @param {number} [timeout=60] - Timeout in seconds for the resize operation. 0 means no timeout.
-   * @returns {Promise<void>}
-   * @throws {DaytonaError} - If hot resize constraints are violated, disk resize attempted on running sandbox,
-   *   disk size decrease is attempted, no resource changes are specified, or resize operation times out.
+   * @param resources - New resource configuration (cpu, memory, disk only). Only specified fields are updated.
+   * @param [timeout=60] - Timeout in seconds for the resize operation. 0 means no timeout.
+   * @throws {DaytonaError} If hot-resize constraints are violated, disk resize is attempted on
+   *   a running Sandbox, disk decrease is attempted, no fields are provided, or the operation times out.
    *
    * @example
-   * // Increase CPU/memory on running sandbox (hot resize)
-   * await sandbox.resize({ cpu: 4, memory: 8 });
+   * await sandbox.resize({ cpu: 4, memory: 8 })
    *
-   * // Change disk (sandbox must be stopped)
-   * await sandbox.stop();
-   * await sandbox.resize({ cpu: 2, memory: 4, disk: 30 });
+   * @example
+   * await sandbox.stop()
+   * await sandbox.resize({ cpu: 2, memory: 4, disk: 30 })
    */
   @WithInstrumentation()
-  public async resize(resources: Resources, timeout = 60): Promise<void> {
+  public async resize(resources: Pick<Resources, 'cpu' | 'memory' | 'disk'>, timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaValidationError('Timeout must be a non-negative number')
+    }
+    if ('gpu' in resources || 'gpuType' in resources) {
+      throw new DaytonaValidationError(
+        'Resize does not support changes to gpu or gpuType — to change GPU, create a new Sandbox',
+      )
     }
 
     const startTime = Date.now()

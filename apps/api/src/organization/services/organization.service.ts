@@ -236,6 +236,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       totalMemoryQuota: createDto.totalMemoryQuota,
       totalDiskQuota: createDto.totalDiskQuota,
       totalGpuQuota: createDto.totalGpuQuota,
+      allowedGpuTypes: createDto.allowedGpuTypes ?? null,
       maxCpuPerSandbox: createDto.maxCpuPerSandbox ?? null,
       maxMemoryPerSandbox: createDto.maxMemoryPerSandbox ?? null,
       maxDiskPerSandbox: createDto.maxDiskPerSandbox ?? null,
@@ -269,6 +270,10 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     regionQuota.totalMemoryQuota = updateDto.totalMemoryQuota ?? regionQuota.totalMemoryQuota
     regionQuota.totalDiskQuota = updateDto.totalDiskQuota ?? regionQuota.totalDiskQuota
     regionQuota.totalGpuQuota = updateDto.totalGpuQuota ?? regionQuota.totalGpuQuota
+
+    if (updateDto.allowedGpuTypes !== undefined) {
+      regionQuota.allowedGpuTypes = updateDto.allowedGpuTypes
+    }
 
     if (updateDto.maxCpuPerSandbox !== undefined) {
       regionQuota.maxCpuPerSandbox = updateDto.maxCpuPerSandbox

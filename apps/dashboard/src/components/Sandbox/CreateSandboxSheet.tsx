@@ -31,9 +31,10 @@ import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { parseEnvFile } from '@/lib/env'
 import { handleApiError } from '@/lib/error-handling'
+import { GPU_TYPE_LABELS } from '@/lib/gpu-types'
 import { imageNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
-import { OrganizationUserRoleEnum } from '@daytona/api-client'
+import { GpuType, OrganizationUserRoleEnum } from '@daytona/api-client'
 import { Sandbox } from '@daytona/sdk'
 import { useForm } from '@tanstack/react-form'
 import { isAxiosError } from 'axios'
@@ -48,6 +49,13 @@ import { ScrollArea } from '../ui/scroll-area'
 const NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/
 
 const NONE_VALUE = '__none__'
+
+const SELECTABLE_GPU_TYPES = (Object.values(GpuType) as GpuType[]).filter((t) => t !== GpuType.UNKNOWN_DEFAULT_OPEN_API)
+
+const resolveAllowedGpuTypes = (regionAllowed: GpuType[] | null | undefined): GpuType[] => {
+  const filteredRegion = (regionAllowed ?? []).filter((t) => t !== GpuType.UNKNOWN_DEFAULT_OPEN_API)
+  return filteredRegion.length > 0 ? filteredRegion : SELECTABLE_GPU_TYPES
+}
 
 enum Source {
   SNAPSHOT = 'snapshot',
@@ -97,6 +105,7 @@ const buildBaseFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: numb
     ephemeral: z.boolean().optional(),
     setAsDefaultRegion: z.boolean().optional(),
     gpu: z.boolean().optional(),
+    gpuType: z.nativeEnum(GpuType).optional(),
   })
 
 const buildFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: number) => {
@@ -140,6 +149,7 @@ const defaultValues: FormValues = {
   ephemeral: false,
   setAsDefaultRegion: false,
   gpu: false,
+  gpuType: undefined,
 }
 
 const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) => {
@@ -274,6 +284,7 @@ export const CreateSandboxSheet = ({
                     memory: value.memory,
                     disk: value.disk,
                     gpu: value.gpu ? 1 : undefined,
+                    gpuType: value.gpu && value.gpuType ? value.gpuType : undefined,
                   }
                 : undefined,
           })
@@ -307,6 +318,7 @@ export const CreateSandboxSheet = ({
         form.setFieldValue('memory', undefined)
         form.setFieldValue('disk', undefined)
         form.setFieldValue('gpu', false)
+        form.setFieldValue('gpuType', undefined)
       } else {
         form.setFieldValue('snapshot', undefined)
       }
@@ -607,34 +619,70 @@ export const CreateSandboxSheet = ({
                           {(regionId) => {
                             const region = usageOverview?.regionUsage.find((r) => r.regionId === regionId)
                             if ((region?.totalGpuQuota ?? 0) <= 0) return null
+                            const allowedGpuTypes = resolveAllowedGpuTypes(region?.allowedGpuTypes)
                             return (
-                              <form.Field name="gpu">
-                                {(field) => (
-                                  <div className="flex items-start gap-2 pt-1">
-                                    <Checkbox
-                                      id={field.name}
-                                      className="mt-0.5"
-                                      checked={field.state.value ?? false}
-                                      onCheckedChange={(checked) => {
-                                        const isChecked = checked === true
-                                        field.handleChange(isChecked)
-                                        if (isChecked) {
-                                          form.setFieldValue('ephemeral', true)
-                                          form.setFieldValue('autoDeleteInterval', 0)
-                                        }
-                                      }}
-                                    />
-                                    <div className="flex flex-col gap-1">
-                                      <Label htmlFor={field.name} className="text-sm font-normal">
-                                        Allocate GPU
-                                      </Label>
-                                      <FieldDescription>
-                                        GPU sandboxes are always ephemeral and auto-deleted when stopped.
-                                      </FieldDescription>
+                              <div className="flex flex-col gap-3">
+                                <form.Field name="gpu">
+                                  {(field) => (
+                                    <div className="flex items-start gap-2 pt-1">
+                                      <Checkbox
+                                        id={field.name}
+                                        className="mt-0.5"
+                                        checked={field.state.value ?? false}
+                                        onCheckedChange={(checked) => {
+                                          const isChecked = checked === true
+                                          field.handleChange(isChecked)
+                                          if (isChecked) {
+                                            form.setFieldValue('ephemeral', true)
+                                            form.setFieldValue('autoDeleteInterval', 0)
+                                            if (!form.getFieldValue('gpuType') && allowedGpuTypes.length > 0) {
+                                              form.setFieldValue('gpuType', allowedGpuTypes[0])
+                                            }
+                                          } else {
+                                            form.setFieldValue('gpuType', undefined)
+                                          }
+                                        }}
+                                      />
+                                      <div className="flex flex-col gap-1">
+                                        <Label htmlFor={field.name} className="text-sm font-normal">
+                                          Allocate GPU
+                                        </Label>
+                                        <FieldDescription>
+                                          GPU sandboxes are always ephemeral and auto-deleted when stopped.
+                                        </FieldDescription>
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
-                              </form.Field>
+                                  )}
+                                </form.Field>
+                                <form.Subscribe selector={(state) => state.values.gpu}>
+                                  {(gpuEnabled) =>
+                                    gpuEnabled && allowedGpuTypes.length > 0 ? (
+                                      <form.Field name="gpuType">
+                                        {(field) => (
+                                          <Field className="pl-6">
+                                            <FieldLabel htmlFor={field.name}>GPU type</FieldLabel>
+                                            <Select
+                                              value={field.state.value ?? allowedGpuTypes[0]}
+                                              onValueChange={(val) => field.handleChange(val as GpuType)}
+                                            >
+                                              <SelectTrigger className="h-8" id={field.name}>
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {allowedGpuTypes.map((gpuType) => (
+                                                  <SelectItem key={gpuType} value={gpuType}>
+                                                    {GPU_TYPE_LABELS[gpuType] || gpuType}
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </Field>
+                                        )}
+                                      </form.Field>
+                                    ) : null
+                                  }
+                                </form.Subscribe>
+                              </div>
                             )
                           }}
                         </form.Subscribe>

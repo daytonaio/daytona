@@ -18,6 +18,9 @@
 import type { CreateBuildInfo } from './create-build-info';
 // May contain unused imports in some cases
 // @ts-ignore
+import type { GpuType } from './gpu-type';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxVolume } from './sandbox-volume';
 
 export interface CreateSandbox {
@@ -65,6 +68,10 @@ export interface CreateSandbox {
      * GPU units allocated to the sandbox
      */
     'gpu'?: number;
+    /**
+     * Preferred GPU type for the sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the sandbox to the first that has capacity.
+     */
+    'gpuType'?: Array<GpuType>;
     /**
      * Memory allocated to the sandbox in GB
      */

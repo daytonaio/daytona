@@ -6,6 +6,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 import { SandboxUsagePeriod } from './sandbox-usage-period.entity'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
+import { GpuType } from '../../sandbox/enums/gpu-type.enum'
 
 // Duplicate of SandboxUsagePeriod
 // Used to archive usage periods and keep the original table lightweight
@@ -34,6 +35,13 @@ export class SandboxUsagePeriodArchive {
   @Column({ type: 'float' })
   gpu: number
 
+  @Column({
+    type: 'character varying',
+    nullable: true,
+    name: 'gpu_type',
+  })
+  gpuType: GpuType | null
+
   @Column({ type: 'float' })
   mem: number
 
@@ -57,6 +65,7 @@ export class SandboxUsagePeriodArchive {
     usagePeriodEntity.endAt = usagePeriod.endAt
     usagePeriodEntity.cpu = usagePeriod.cpu
     usagePeriodEntity.gpu = usagePeriod.gpu
+    usagePeriodEntity.gpuType = usagePeriod.gpuType
     usagePeriodEntity.mem = usagePeriod.mem
     usagePeriodEntity.disk = usagePeriod.disk
     usagePeriodEntity.region = usagePeriod.region

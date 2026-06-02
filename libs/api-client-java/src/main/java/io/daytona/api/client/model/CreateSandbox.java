@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.CreateBuildInfo;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SandboxVolume;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -110,6 +111,11 @@ public class CreateSandbox {
   @SerializedName(SERIALIZED_NAME_GPU)
   @javax.annotation.Nullable
   private Integer gpu;
+
+  public static final String SERIALIZED_NAME_GPU_TYPE = "gpuType";
+  @SerializedName(SERIALIZED_NAME_GPU_TYPE)
+  @javax.annotation.Nullable
+  private List<GpuType> gpuType = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_MEMORY = "memory";
   @SerializedName(SERIALIZED_NAME_MEMORY)
@@ -379,6 +385,33 @@ public class CreateSandbox {
   }
 
 
+  public CreateSandbox gpuType(@javax.annotation.Nullable List<GpuType> gpuType) {
+    this.gpuType = gpuType;
+    return this;
+  }
+
+  public CreateSandbox addGpuTypeItem(GpuType gpuTypeItem) {
+    if (this.gpuType == null) {
+      this.gpuType = new ArrayList<>();
+    }
+    this.gpuType.add(gpuTypeItem);
+    return this;
+  }
+
+  /**
+   * Preferred GPU type for the sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the sandbox to the first that has capacity.
+   * @return gpuType
+   */
+  @javax.annotation.Nullable
+  public List<GpuType> getGpuType() {
+    return gpuType;
+  }
+
+  public void setGpuType(@javax.annotation.Nullable List<GpuType> gpuType) {
+    this.gpuType = gpuType;
+  }
+
+
   public CreateSandbox memory(@javax.annotation.Nullable Integer memory) {
     this.memory = memory;
     return this;
@@ -604,6 +637,7 @@ public class CreateSandbox {
         Objects.equals(this.target, createSandbox.target) &&
         Objects.equals(this.cpu, createSandbox.cpu) &&
         Objects.equals(this.gpu, createSandbox.gpu) &&
+        Objects.equals(this.gpuType, createSandbox.gpuType) &&
         Objects.equals(this.memory, createSandbox.memory) &&
         Objects.equals(this.disk, createSandbox.disk) &&
         Objects.equals(this.autoStopInterval, createSandbox.autoStopInterval) &&
@@ -617,7 +651,7 @@ public class CreateSandbox {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, memory, disk, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, linkedSandbox, additionalProperties);
+    return Objects.hash(name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, gpuType, memory, disk, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, linkedSandbox, additionalProperties);
   }
 
   @Override
@@ -635,6 +669,7 @@ public class CreateSandbox {
     sb.append("    target: ").append(toIndentedString(target)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
+    sb.append("    gpuType: ").append(toIndentedString(gpuType)).append("\n");
     sb.append("    memory: ").append(toIndentedString(memory)).append("\n");
     sb.append("    disk: ").append(toIndentedString(disk)).append("\n");
     sb.append("    autoStopInterval: ").append(toIndentedString(autoStopInterval)).append("\n");
@@ -662,7 +697,7 @@ public class CreateSandbox {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "gpuType", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -695,6 +730,10 @@ public class CreateSandbox {
       }
       if ((jsonObj.get("target") != null && !jsonObj.get("target").isJsonNull()) && !jsonObj.get("target").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `target` to be a primitive type in the JSON string but got `%s`", jsonObj.get("target").toString()));
+      }
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("gpuType") != null && !jsonObj.get("gpuType").isJsonNull() && !jsonObj.get("gpuType").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `gpuType` to be an array in the JSON string but got `%s`", jsonObj.get("gpuType").toString()));
       }
       if (jsonObj.get("volumes") != null && !jsonObj.get("volumes").isJsonNull()) {
         JsonArray jsonArrayvolumes = jsonObj.getAsJsonArray("volumes");

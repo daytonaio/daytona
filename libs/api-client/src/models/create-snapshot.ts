@@ -18,6 +18,9 @@
 import type { CreateBuildInfo } from './create-build-info';
 // May contain unused imports in some cases
 // @ts-ignore
+import type { GpuType } from './gpu-type';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxClass } from './sandbox-class';
 
 export interface CreateSnapshot {
@@ -41,6 +44,10 @@ export interface CreateSnapshot {
      * GPU units allocated to the resulting sandbox
      */
     'gpu'?: number;
+    /**
+     * Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.
+     */
+    'gpuType'?: Array<GpuType>;
     /**
      * Memory allocated to the resulting sandbox in GB
      */
