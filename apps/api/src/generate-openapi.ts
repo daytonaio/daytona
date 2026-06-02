@@ -4,6 +4,7 @@ import * as path from 'path'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
+import type { OpenAPIObject } from '@nestjs/swagger'
 import { getOpenApiConfig } from './openapi.config'
 import { addWebhookDocumentation } from './openapi-webhooks'
 import {
@@ -27,6 +28,7 @@ async function generateOpenAPI() {
     const document = {
       ...SwaggerModule.createDocument(app, config),
     }
+    addEnumVarnames(document)
     const openapiPath = './dist/apps/api/openapi.json'
     fs.mkdirSync(path.dirname(openapiPath), { recursive: true })
     fs.writeFileSync(openapiPath, JSON.stringify(document, null, 2))
@@ -47,6 +49,7 @@ async function generateOpenAPI() {
       }),
       openapi: '3.1.0',
     }
+    addEnumVarnames(document_3_1_0)
     const documentWithWebhooks = addWebhookDocumentation(document_3_1_0)
     const openapi310Path = './dist/apps/api/openapi.3.1.0.json'
     fs.mkdirSync(path.dirname(openapi310Path), { recursive: true })
@@ -73,5 +76,45 @@ const timeout = setTimeout(() => {
 process.on('exit', () => {
   clearTimeout(timeout)
 })
+
+// https://openapi-generator.tech/docs/templating/#enum
+// Adds x-enum-varnames to string enums whose values contain characters that
+// OpenAPI Generator would otherwise mangle (e.g. "linux-vm" -> LINUX_MINUS_VM in Python).
+function addEnumVarnames(document: OpenAPIObject): void {
+  const visited = new WeakSet<object>()
+
+  const toVarname = (value: string, index: number): string => {
+    const cleaned = value
+      .replace(/[^A-Za-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .toUpperCase()
+    if (!cleaned) return `VALUE_${index}`
+    return /^\d/.test(cleaned) ? `_${cleaned}` : cleaned
+  }
+
+  const visit = (node: unknown): void => {
+    if (!node || typeof node !== 'object' || visited.has(node)) return
+    visited.add(node)
+
+    const schema = node as Record<string, unknown>
+    const values = schema.enum
+    if (
+      schema.type === 'string' &&
+      Array.isArray(values) &&
+      !schema['x-enum-varnames'] &&
+      values.every((v): v is string => typeof v === 'string') &&
+      values.some((v) => /[^A-Za-z0-9_]/.test(v))
+    ) {
+      const varnames = values.map(toVarname)
+      if (new Set(varnames).size === varnames.length) {
+        schema['x-enum-varnames'] = varnames
+      }
+    }
+
+    for (const value of Object.values(schema)) visit(value)
+  }
+
+  visit(document)
+}
 
 generateOpenAPI()

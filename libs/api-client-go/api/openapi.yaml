@@ -9281,6 +9281,22 @@ components:
             - delete:runners
             - read:audit_logs
             type: string
+            x-enum-varnames:
+            - WRITE_REGISTRIES
+            - DELETE_REGISTRIES
+            - WRITE_SNAPSHOTS
+            - DELETE_SNAPSHOTS
+            - WRITE_SANDBOXES
+            - DELETE_SANDBOXES
+            - READ_VOLUMES
+            - WRITE_VOLUMES
+            - DELETE_VOLUMES
+            - WRITE_REGIONS
+            - DELETE_REGIONS
+            - READ_RUNNERS
+            - WRITE_RUNNERS
+            - DELETE_RUNNERS
+            - READ_AUDIT_LOGS
           type: array
         expiresAt:
           description: When the API key expires
@@ -9336,6 +9352,22 @@ components:
             - delete:runners
             - read:audit_logs
             type: string
+            x-enum-varnames:
+            - WRITE_REGISTRIES
+            - DELETE_REGISTRIES
+            - WRITE_SNAPSHOTS
+            - DELETE_SNAPSHOTS
+            - WRITE_SANDBOXES
+            - DELETE_SANDBOXES
+            - READ_VOLUMES
+            - WRITE_VOLUMES
+            - DELETE_VOLUMES
+            - WRITE_REGIONS
+            - DELETE_REGIONS
+            - READ_RUNNERS
+            - WRITE_RUNNERS
+            - DELETE_RUNNERS
+            - READ_AUDIT_LOGS
           type: array
         expiresAt:
           description: When the API key expires
@@ -9396,6 +9428,22 @@ components:
             - delete:runners
             - read:audit_logs
             type: string
+            x-enum-varnames:
+            - WRITE_REGISTRIES
+            - DELETE_REGISTRIES
+            - WRITE_SNAPSHOTS
+            - DELETE_SNAPSHOTS
+            - WRITE_SANDBOXES
+            - DELETE_SANDBOXES
+            - READ_VOLUMES
+            - WRITE_VOLUMES
+            - DELETE_VOLUMES
+            - WRITE_REGIONS
+            - DELETE_REGIONS
+            - READ_RUNNERS
+            - WRITE_RUNNERS
+            - DELETE_RUNNERS
+            - READ_AUDIT_LOGS
           type: array
         lastUsedAt:
           description: When the API key was last used
@@ -9463,6 +9511,22 @@ components:
             - delete:runners
             - read:audit_logs
             type: string
+            x-enum-varnames:
+            - WRITE_REGISTRIES
+            - DELETE_REGISTRIES
+            - WRITE_SNAPSHOTS
+            - DELETE_SNAPSHOTS
+            - WRITE_SANDBOXES
+            - DELETE_SANDBOXES
+            - READ_VOLUMES
+            - WRITE_VOLUMES
+            - DELETE_VOLUMES
+            - WRITE_REGIONS
+            - DELETE_REGIONS
+            - READ_RUNNERS
+            - WRITE_RUNNERS
+            - DELETE_RUNNERS
+            - READ_AUDIT_LOGS
           type: array
         isGlobal:
           description: Global role flag
@@ -9772,6 +9836,11 @@ components:
       - android
       - windows
       type: string
+      x-enum-varnames:
+      - LINUX_VM
+      - CONTAINER
+      - ANDROID
+      - WINDOWS
     RegionUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
@@ -10109,6 +10178,22 @@ components:
             - delete:runners
             - read:audit_logs
             type: string
+            x-enum-varnames:
+            - WRITE_REGISTRIES
+            - DELETE_REGISTRIES
+            - WRITE_SNAPSHOTS
+            - DELETE_SNAPSHOTS
+            - WRITE_SANDBOXES
+            - DELETE_SANDBOXES
+            - READ_VOLUMES
+            - WRITE_VOLUMES
+            - DELETE_VOLUMES
+            - WRITE_REGIONS
+            - DELETE_REGIONS
+            - READ_RUNNERS
+            - WRITE_RUNNERS
+            - DELETE_RUNNERS
+            - READ_AUDIT_LOGS
           type: array
       required:
       - description
@@ -10151,6 +10236,22 @@ components:
             - delete:runners
             - read:audit_logs
             type: string
+            x-enum-varnames:
+            - WRITE_REGISTRIES
+            - DELETE_REGISTRIES
+            - WRITE_SNAPSHOTS
+            - DELETE_SNAPSHOTS
+            - WRITE_SANDBOXES
+            - DELETE_SANDBOXES
+            - READ_VOLUMES
+            - WRITE_VOLUMES
+            - DELETE_VOLUMES
+            - WRITE_REGIONS
+            - DELETE_REGIONS
+            - READ_RUNNERS
+            - WRITE_RUNNERS
+            - DELETE_RUNNERS
+            - READ_AUDIT_LOGS
           type: array
       required:
       - description
@@ -10682,6 +10783,11 @@ components:
           - windows
           example: linux-vm
           type: string
+          x-enum-varnames:
+          - LINUX_VM
+          - CONTAINER
+          - ANDROID
+          - WINDOWS
         state:
           allOf:
           - $ref: "#/components/schemas/SandboxState"
@@ -11113,6 +11219,11 @@ components:
           - windows
           example: linux-vm
           type: string
+          x-enum-varnames:
+          - LINUX_VM
+          - CONTAINER
+          - ANDROID
+          - WINDOWS
         daemonVersion:
           description: The version of the daemon running in the sandbox
           example: 1.0.0
@@ -13920,6 +14031,11 @@ components:
           - windows
           example: linux-vm
           type: string
+          x-enum-varnames:
+          - LINUX_VM
+          - CONTAINER
+          - ANDROID
+          - WINDOWS
       required:
       - cpu
       - createdAt
@@ -14585,6 +14701,14 @@ components:
       - volume.created
       - volume.state.updated
       type: string
+      x-enum-varnames:
+      - SANDBOX_CREATED
+      - SANDBOX_STATE_UPDATED
+      - SNAPSHOT_CREATED
+      - SNAPSHOT_STATE_UPDATED
+      - SNAPSHOT_REMOVED
+      - VOLUME_CREATED
+      - VOLUME_STATE_UPDATED
     SendWebhookDto:
       example:
         eventId: evt_1234567890abcdef
