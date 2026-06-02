@@ -75,6 +75,15 @@ export class RegionDto {
   })
   snapshotManagerUrl?: string | null
 
+  @ApiProperty({
+    description:
+      'Provider-prefixed storage region slug (e.g. "aws-us-east-1") used to pin layered volumes to a specific AWS S3 region. NULL means no layered storage is configured for this region. Operator-set.',
+    example: 'aws-us-east-1',
+    nullable: true,
+    required: false,
+  })
+  storageRegion?: string | null
+
   static fromRegion(region: Region): RegionDto {
     return {
       id: region.id,
@@ -86,6 +95,7 @@ export class RegionDto {
       proxyUrl: region.proxyUrl,
       sshGatewayUrl: region.sshGatewayUrl,
       snapshotManagerUrl: region.snapshotManagerUrl,
+      storageRegion: region.storageRegion,
     }
   }
 }

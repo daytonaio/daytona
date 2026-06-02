@@ -24,12 +24,16 @@ module DaytonaApiClient
     # Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
     attr_accessor :subpath
 
+    # Mount the volume read-only inside this sandbox. The volume itself is unchanged; this is a per-mount attribute, so the same volume can be mounted read-write in one sandbox and read-only in another. Defaults to false.
+    attr_accessor :read_only
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'volume_id' => :'volumeId',
         :'mount_path' => :'mountPath',
-        :'subpath' => :'subpath'
+        :'subpath' => :'subpath',
+        :'read_only' => :'readOnly'
       }
     end
 
@@ -48,7 +52,8 @@ module DaytonaApiClient
       {
         :'volume_id' => :'String',
         :'mount_path' => :'String',
-        :'subpath' => :'String'
+        :'subpath' => :'String',
+        :'read_only' => :'Boolean'
       }
     end
 
@@ -88,6 +93,12 @@ module DaytonaApiClient
 
       if attributes.key?(:'subpath')
         self.subpath = attributes[:'subpath']
+      end
+
+      if attributes.key?(:'read_only')
+        self.read_only = attributes[:'read_only']
+      else
+        self.read_only = false
       end
     end
 
@@ -143,7 +154,8 @@ module DaytonaApiClient
       self.class == o.class &&
           volume_id == o.volume_id &&
           mount_path == o.mount_path &&
-          subpath == o.subpath
+          subpath == o.subpath &&
+          read_only == o.read_only
     end
 
     # @see the `==` method
@@ -155,7 +167,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [volume_id, mount_path, subpath].hash
+      [volume_id, mount_path, subpath, read_only].hash
     end
 
     # Builds the object from hash

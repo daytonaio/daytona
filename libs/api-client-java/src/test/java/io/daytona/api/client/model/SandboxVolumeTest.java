@@ -61,4 +61,12 @@ public class SandboxVolumeTest {
         // TODO: test subpath
     }
 
+    /**
+     * Test the property 'readOnly'
+     */
+    @Test
+    public void readOnlyTest() {
+        // TODO: test readOnly
+    }
+
 }

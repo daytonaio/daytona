@@ -187,7 +187,9 @@ models/trace-span.ts
 models/trace-summary.ts
 models/update-docker-registry.ts
 models/update-job-status.ts
+models/update-organization-custom-bucket.ts
 models/update-organization-default-region.ts
+models/update-organization-default-volume-backend.ts
 models/update-organization-invitation.ts
 models/update-organization-member-access.ts
 models/update-organization-quota.ts

@@ -6,4 +6,5 @@
 export const FeatureFlags = {
   ORGANIZATION_INFRASTRUCTURE: 'organization_infrastructure',
   SANDBOX_RESIZE: 'sandbox_resize',
+  VOLUME_BACKEND_PICKER: 'volume_backend_picker',
 } as const

@@ -31,7 +31,9 @@ import io.daytona.api.client.model.OtelConfig;
 import io.daytona.api.client.model.RegenerateApiKeyResponse;
 import io.daytona.api.client.model.Region;
 import io.daytona.api.client.model.SnapshotManagerCredentials;
+import io.daytona.api.client.model.UpdateOrganizationCustomBucket;
 import io.daytona.api.client.model.UpdateOrganizationDefaultRegion;
+import io.daytona.api.client.model.UpdateOrganizationDefaultVolumeBackend;
 import io.daytona.api.client.model.UpdateOrganizationInvitation;
 import io.daytona.api.client.model.UpdateOrganizationMemberAccess;
 import io.daytona.api.client.model.UpdateOrganizationQuota;
@@ -139,6 +141,18 @@ public class OrganizationsApiTest {
     public void declineOrganizationInvitationTest() throws ApiException {
         String invitationId = null;
         api.declineOrganizationInvitation(invitationId);
+        // TODO: test validations
+    }
+
+    /**
+     * Remove custom bucket configuration (revert to platform-managed bucket)
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void deleteCustomBucketConfigTest() throws ApiException {
+        String organizationId = null;
+        api.deleteCustomBucketConfig(organizationId);
         // TODO: test validations
     }
 
@@ -395,6 +409,32 @@ public class OrganizationsApiTest {
         String id = null;
         String xDaytonaOrganizationID = null;
         RegenerateApiKeyResponse response = api.regenerateSshGatewayApiKey(id, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Set custom bucket configuration for layered volumes
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void setCustomBucketConfigTest() throws ApiException {
+        String organizationId = null;
+        UpdateOrganizationCustomBucket updateOrganizationCustomBucket = null;
+        api.setCustomBucketConfig(organizationId, updateOrganizationCustomBucket);
+        // TODO: test validations
+    }
+
+    /**
+     * Set default volume backend
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void setDefaultVolumeBackendTest() throws ApiException {
+        String organizationId = null;
+        UpdateOrganizationDefaultVolumeBackend updateOrganizationDefaultVolumeBackend = null;
+        api.setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend);
         // TODO: test validations
     }
 

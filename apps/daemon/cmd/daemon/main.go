@@ -6,6 +6,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -25,6 +26,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
+	"github.com/daytonaio/daemon/pkg/volumemount"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -122,6 +124,20 @@ func run() int {
 			logger = slog.New(handler)
 			slog.SetDefault(logger)
 		}
+	}
+
+	// Mount in-container volumes before the user entrypoint or any daemon
+	// service starts. No-op when no in-container volume spec was injected.
+	// On failure, log to stderr and exit non-zero: the runner detects the
+	// premature exit and surfaces it as a sandbox-level error, which beats
+	// coming up with a silently-empty mount path.
+	mountCtx, mountCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	mountErr := volumemount.MountAll(mountCtx, logger)
+	mountCancel()
+	if mountErr != nil {
+		fmt.Fprintf(os.Stderr, "daytona-daemon: volume mount failed: %v\n", mountErr)
+		logger.Error("volume mount failed; exiting", "error", mountErr)
+		return 2
 	}
 
 	sessionService := session.NewSessionService(logger, configDir, c.TerminationGracePeriod, c.TerminationCheckInterval)

@@ -42,6 +42,9 @@ module DaytonaApiClient
     # Snapshot Manager URL for the region
     attr_accessor :snapshot_manager_url
 
+    # Provider-prefixed storage region slug (e.g. \"aws-us-east-1\") used to pin layered volumes to a specific AWS S3 region. NULL means no layered storage is configured for this region. Operator-set.
+    attr_accessor :storage_region
+
     class EnumAttributeValidator
       attr_reader :datatype
       attr_reader :allowable_values
@@ -75,7 +78,8 @@ module DaytonaApiClient
         :'updated_at' => :'updatedAt',
         :'proxy_url' => :'proxyUrl',
         :'ssh_gateway_url' => :'sshGatewayUrl',
-        :'snapshot_manager_url' => :'snapshotManagerUrl'
+        :'snapshot_manager_url' => :'snapshotManagerUrl',
+        :'storage_region' => :'storageRegion'
       }
     end
 
@@ -100,7 +104,8 @@ module DaytonaApiClient
         :'updated_at' => :'String',
         :'proxy_url' => :'String',
         :'ssh_gateway_url' => :'String',
-        :'snapshot_manager_url' => :'String'
+        :'snapshot_manager_url' => :'String',
+        :'storage_region' => :'String'
       }
     end
 
@@ -110,7 +115,8 @@ module DaytonaApiClient
         :'organization_id',
         :'proxy_url',
         :'ssh_gateway_url',
-        :'snapshot_manager_url'
+        :'snapshot_manager_url',
+        :'storage_region'
       ])
     end
 
@@ -174,6 +180,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'snapshot_manager_url')
         self.snapshot_manager_url = attributes[:'snapshot_manager_url']
+      end
+
+      if attributes.key?(:'storage_region')
+        self.storage_region = attributes[:'storage_region']
       end
     end
 
@@ -280,7 +290,8 @@ module DaytonaApiClient
           updated_at == o.updated_at &&
           proxy_url == o.proxy_url &&
           ssh_gateway_url == o.ssh_gateway_url &&
-          snapshot_manager_url == o.snapshot_manager_url
+          snapshot_manager_url == o.snapshot_manager_url &&
+          storage_region == o.storage_region
     end
 
     # @see the `==` method
@@ -292,7 +303,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, organization_id, region_type, created_at, updated_at, proxy_url, ssh_gateway_url, snapshot_manager_url].hash
+      [id, name, organization_id, region_type, created_at, updated_at, proxy_url, ssh_gateway_url, snapshot_manager_url, storage_region].hash
     end
 
     # Builds the object from hash

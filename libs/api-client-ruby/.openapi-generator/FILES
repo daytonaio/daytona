@@ -189,7 +189,9 @@ lib/daytona_api_client/models/trace_span.rb
 lib/daytona_api_client/models/trace_summary.rb
 lib/daytona_api_client/models/update_docker_registry.rb
 lib/daytona_api_client/models/update_job_status.rb
+lib/daytona_api_client/models/update_organization_custom_bucket.rb
 lib/daytona_api_client/models/update_organization_default_region.rb
+lib/daytona_api_client/models/update_organization_default_volume_backend.rb
 lib/daytona_api_client/models/update_organization_invitation.rb
 lib/daytona_api_client/models/update_organization_member_access.rb
 lib/daytona_api_client/models/update_organization_quota.rb

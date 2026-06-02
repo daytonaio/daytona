@@ -6,4 +6,6 @@
 export enum FeatureFlags {
   ORGANIZATION_INFRASTRUCTURE = 'organization_infrastructure',
   ORGANIZATION_EXPERIMENTS = 'organization_experiments',
+  BILLING_PROVIDER_V2 = 'billing_provider_v2',
+  VOLUME_BACKEND_PICKER = 'volume_backend_picker',
 }

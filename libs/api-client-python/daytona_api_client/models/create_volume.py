@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -31,8 +31,10 @@ class CreateVolume(BaseModel):
     CreateVolume
     """ # noqa: E501
     name: StrictStr
+    backend: Optional[StrictStr] = Field(default=None, description="Storage backend for this volume. 's3fuse' (default) mounts a dedicated S3 bucket on the runner host. 'layered' mounts inside the sandbox via the layered control plane and requires the volume_backend_picker feature flag. When omitted, the organization's default backend is used.")
+    region_id: Optional[StrictStr] = Field(default=None, description="Daytona Region ID the volume should live in. Only honored for the layered backend; rejected for s3fuse. When omitted, defaults to the organization's default region.", serialization_alias="regionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["name", "backend", "regionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +93,9 @@ class CreateVolume(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "backend": obj.get("backend"),
+            "region_id": obj.get("regionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

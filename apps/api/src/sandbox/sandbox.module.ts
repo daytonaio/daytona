@@ -33,6 +33,12 @@ import { VolumeController } from './controllers/volume.controller'
 import { VolumeService } from './services/volume.service'
 import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
+import { SandboxVolumeMount } from './entities/sandbox-volume.entity'
+import { LayeredVolumeClient } from './services/layered/layered-volume.client'
+import { LAYERED_VOLUME_PROVIDER } from './services/layered/layered-volume.provider'
+import { SandboxVolumeMountService } from './services/sandbox-volume-mount.service'
+import { Organization } from '../organization/entities/organization.entity'
+import { EncryptionModule } from '../encryption/encryption.module'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
@@ -69,6 +75,7 @@ import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provide
     DockerRegistryModule,
     OrganizationModule,
     RegionModule,
+    EncryptionModule,
     TypeOrmModule.forFeature([
       Sandbox,
       Runner,
@@ -79,6 +86,8 @@ import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provide
       DockerRegistry,
       WarmPool,
       Volume,
+      SandboxVolumeMount,
+      Organization,
       SshAccess,
       Region,
       Job,
@@ -113,6 +122,8 @@ import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provide
     SandboxLookupCacheInvalidationService,
     SnapshotManager,
     RedisLockProvider,
+    { provide: LAYERED_VOLUME_PROVIDER, useClass: LayeredVolumeClient },
+    SandboxVolumeMountService,
     VolumeService,
     VolumeManager,
     VolumeSubscriber,

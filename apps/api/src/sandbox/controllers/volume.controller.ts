@@ -3,7 +3,21 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Post, Delete, Body, Param, Logger, UseGuards, HttpCode, Query } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Logger,
+  UseGuards,
+  HttpCode,
+  Query,
+  ForbiddenException,
+} from '@nestjs/common'
+import { OpenFeature } from '@openfeature/nestjs-sdk'
+import { FeatureFlags } from '../../common/constants/feature-flags'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -95,6 +109,18 @@ export class VolumeController {
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createVolumeDto: CreateVolumeDto,
   ): Promise<VolumeDto> {
+    // Gate explicit 'layered' behind the feature flag; s3fuse and the
+    // org-default fallback are always allowed.
+    if (createVolumeDto.backend === 'layered') {
+      const flagEnabled = await OpenFeature.getClient().getBooleanValue(FeatureFlags.VOLUME_BACKEND_PICKER, false, {
+        targetingKey: authContext.userId,
+        organizationId: authContext.organization.id,
+      })
+      if (!flagEnabled) {
+        throw new ForbiddenException('The layered volume backend is not enabled for this organization')
+      }
+    }
+
     const volume = await this.volumeService.create(authContext.organization, createVolumeDto)
     return VolumeDto.fromVolume(volume)
   }

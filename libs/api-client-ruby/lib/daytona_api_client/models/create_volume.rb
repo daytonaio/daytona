@@ -17,10 +17,40 @@ module DaytonaApiClient
   class CreateVolume < ApiModelBase
     attr_accessor :name
 
+    # Storage backend for this volume. 's3fuse' (default) mounts a dedicated S3 bucket on the runner host. 'layered' mounts inside the sandbox via the layered control plane and requires the volume_backend_picker feature flag. When omitted, the organization's default backend is used.
+    attr_accessor :backend
+
+    # Daytona Region ID the volume should live in. Only honored for the layered backend; rejected for s3fuse. When omitted, defaults to the organization's default region.
+    attr_accessor :region_id
+
+    class EnumAttributeValidator
+      attr_reader :datatype
+      attr_reader :allowable_values
+
+      def initialize(datatype, allowable_values)
+        @allowable_values = allowable_values.map do |value|
+          case datatype.to_s
+          when /Integer/i
+            value.to_i
+          when /Float/i
+            value.to_f
+          else
+            value
+          end
+        end
+      end
+
+      def valid?(value)
+        !value || allowable_values.include?(value)
+      end
+    end
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'name' => :'name'
+        :'name' => :'name',
+        :'backend' => :'backend',
+        :'region_id' => :'regionId'
       }
     end
 
@@ -37,7 +67,9 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'name' => :'String'
+        :'name' => :'String',
+        :'backend' => :'String',
+        :'region_id' => :'String'
       }
     end
 
@@ -68,6 +100,14 @@ module DaytonaApiClient
       else
         self.name = nil
       end
+
+      if attributes.key?(:'backend')
+        self.backend = attributes[:'backend']
+      end
+
+      if attributes.key?(:'region_id')
+        self.region_id = attributes[:'region_id']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -87,6 +127,8 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @name.nil?
+      backend_validator = EnumAttributeValidator.new('String', ["s3fuse", "layered", "unknown_default_open_api"])
+      return false unless backend_validator.valid?(@backend)
       true
     end
 
@@ -100,12 +142,24 @@ module DaytonaApiClient
       @name = name
     end
 
+    # Custom attribute writer method checking allowed values (enum).
+    # @param [Object] backend Object to be assigned
+    def backend=(backend)
+      validator = EnumAttributeValidator.new('String', ["s3fuse", "layered", "unknown_default_open_api"])
+      unless validator.valid?(backend)
+        fail ArgumentError, "invalid value for \"backend\", must be one of #{validator.allowable_values}."
+      end
+      @backend = backend
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          name == o.name
+          name == o.name &&
+          backend == o.backend &&
+          region_id == o.region_id
     end
 
     # @see the `==` method
@@ -117,7 +171,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name].hash
+      [name, backend, region_id].hash
     end
 
     # Builds the object from hash

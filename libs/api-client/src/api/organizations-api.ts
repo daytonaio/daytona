@@ -54,7 +54,11 @@ import type { Region } from '../models';
 // @ts-ignore
 import type { SnapshotManagerCredentials } from '../models';
 // @ts-ignore
+import type { UpdateOrganizationCustomBucket } from '../models';
+// @ts-ignore
 import type { UpdateOrganizationDefaultRegion } from '../models';
+// @ts-ignore
+import type { UpdateOrganizationDefaultVolumeBackend } from '../models';
 // @ts-ignore
 import type { UpdateOrganizationInvitation } from '../models';
 // @ts-ignore
@@ -351,6 +355,45 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             }
 
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Remove custom bucket configuration (revert to platform-managed bucket)
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteCustomBucketConfig: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('deleteCustomBucketConfig', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/custom-bucket`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -1222,6 +1265,94 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
         },
         /**
          * 
+         * @summary Set custom bucket configuration for layered volumes
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationCustomBucket} updateOrganizationCustomBucket 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setCustomBucketConfig: async (organizationId: string, updateOrganizationCustomBucket: UpdateOrganizationCustomBucket, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('setCustomBucketConfig', 'organizationId', organizationId)
+            // verify required parameter 'updateOrganizationCustomBucket' is not null or undefined
+            assertParamExists('setCustomBucketConfig', 'updateOrganizationCustomBucket', updateOrganizationCustomBucket)
+            const localVarPath = `/organizations/{organizationId}/custom-bucket`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationCustomBucket, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Set default volume backend
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setDefaultVolumeBackend: async (organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('setDefaultVolumeBackend', 'organizationId', organizationId)
+            // verify required parameter 'updateOrganizationDefaultVolumeBackend' is not null or undefined
+            assertParamExists('setDefaultVolumeBackend', 'updateOrganizationDefaultVolumeBackend', updateOrganizationDefaultVolumeBackend)
+            const localVarPath = `/organizations/{organizationId}/default-volume-backend`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationDefaultVolumeBackend, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Set default region for organization
          * @param {string} organizationId Organization ID
          * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -1868,6 +1999,19 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Remove custom bucket configuration (revert to platform-managed bucket)
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteCustomBucketConfig(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteCustomBucketConfig(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.deleteCustomBucketConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Delete organization
          * @param {string} organizationId Organization ID
          * @param {*} [options] Override http request option.
@@ -2145,6 +2289,34 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Set custom bucket configuration for layered volumes
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationCustomBucket} updateOrganizationCustomBucket 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async setCustomBucketConfig(organizationId: string, updateOrganizationCustomBucket: UpdateOrganizationCustomBucket, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.setCustomBucketConfig(organizationId, updateOrganizationCustomBucket, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.setCustomBucketConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Set default volume backend
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async setDefaultVolumeBackend(organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.setDefaultVolumeBackend']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Set default region for organization
          * @param {string} organizationId Organization ID
          * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
@@ -2400,6 +2572,16 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
         },
         /**
          * 
+         * @summary Remove custom bucket configuration (revert to platform-managed bucket)
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteCustomBucketConfig(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteCustomBucketConfig(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Delete organization
          * @param {string} organizationId Organization ID
          * @param {*} [options] Override http request option.
@@ -2611,6 +2793,28 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
          */
         regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<RegenerateApiKeyResponse> {
             return localVarFp.regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Set custom bucket configuration for layered volumes
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationCustomBucket} updateOrganizationCustomBucket 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setCustomBucketConfig(organizationId: string, updateOrganizationCustomBucket: UpdateOrganizationCustomBucket, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.setCustomBucketConfig(organizationId, updateOrganizationCustomBucket, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Set default volume backend
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setDefaultVolumeBackend(organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2834,6 +3038,17 @@ export class OrganizationsApi extends BaseAPI {
      */
     public declineOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).declineOrganizationInvitation(invitationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Remove custom bucket configuration (revert to platform-managed bucket)
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public deleteCustomBucketConfig(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).deleteCustomBucketConfig(organizationId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3069,6 +3284,30 @@ export class OrganizationsApi extends BaseAPI {
      */
     public regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Set custom bucket configuration for layered volumes
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationCustomBucket} updateOrganizationCustomBucket 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public setCustomBucketConfig(organizationId: string, updateOrganizationCustomBucket: UpdateOrganizationCustomBucket, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).setCustomBucketConfig(organizationId, updateOrganizationCustomBucket, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Set default volume backend
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationDefaultVolumeBackend} updateOrganizationDefaultVolumeBackend 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public setDefaultVolumeBackend(organizationId: string, updateOrganizationDefaultVolumeBackend: UpdateOrganizationDefaultVolumeBackend, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).setDefaultVolumeBackend(organizationId, updateOrganizationDefaultVolumeBackend, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
