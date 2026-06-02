@@ -297,6 +297,7 @@ const configuration = {
     snapshotQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA || '30', 10),
     maxSnapshotSize: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE || '20', 10),
     volumeQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_VOLUME_QUOTA || '100', 10),
+    otelEndpoint: process.env.DEFAULT_ORG_QUOTA_OTEL_ENDPOINT,
   },
   defaultRegion: {
     id: process.env.DEFAULT_REGION_ID || 'us',
