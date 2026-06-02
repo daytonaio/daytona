@@ -266,7 +266,7 @@ return await session.skill('bug-fix', {
 
 A few details worth highlighting:
 
-- **Two agents, one sandbox.** The setup agent installs `gh`, configures auth, clones the repo, and installs dependencies. A second agent (given a different `id` and `cwd`) operates inside the cloned repo and discovers our `bug-fix` skill from `.agents/skills/bug-fix/SKILL.md`, which the orchestrator uploads into the cloned worktree just before init. Both agents share the same Daytona sandbox. The distinct `id` matters: a fresh `id` opens a fresh Flue session — see [What `<id>` actually means: sessions](#what-id-actually-means-sessions) for the full lifecycle.
+- **Two agents, one sandbox.** The setup agent installs `gh`, configures auth, clones the repo, and installs dependencies. A second agent (given a different `id` and `cwd`) operates inside the cloned repo and discovers our `bug-fix` skill from `.agents/skills/bug-fix/SKILL.md`, which the orchestrator uploads into the cloned worktree just before init. Both agents share the same Daytona sandbox. The distinct `id` matters: a fresh `id` opens a fresh Flue session — see [What `id` actually means: sessions](#what-id-actually-means-sessions) for the full lifecycle.
 - **No `AGENTS.md` upload.** Flue would happily read an `AGENTS.md` from the session cwd and prepend it to every system prompt, but that file lives at the cloned repo's root and uploading our own would overwrite the target's `AGENTS.md` if it has one. Every guardrail we'd put there (TDD discipline, minimal change, match host code style) is already covered by the `test-driven-developer` role and the `bug-fix` skill body, so the harness ships nothing at the worktree root.
 - **`.git/info/exclude` keeps the worktree clean.** After uploading `SKILL.md` to `.agents/skills/bug-fix/`, the orchestrator appends `.agents/` to the cloned repo's `.git/info/exclude` (git's local-only ignore — does NOT modify the target's `.gitignore`). The harness scaffolding stays invisible to `git status` and never accidentally lands in a commit.
 - **Two repos, one workflow.** `repo` is the user's fork (where branches and the PR land); `issueRepo` is where the issue lives (the upstream parent, auto-detected via `gh repo view --json parent` because GitHub disables issues on forks).
@@ -357,7 +357,7 @@ npm run run
 
 `flue run` builds, spawns the server, POSTs with `Accept: text/event-stream`, streams events to stderr, prints the final result to stdout, and shuts the server down. Perfect for CI.
 
-#### What `<id>` actually means: sessions
+#### What `id` actually means: sessions
 
 The `<id>` segment in `POST /agents/bug-fix/<id>` is not just a label. It identifies a Flue **session**: the persistent message history and conversation metadata that `agent.session()` opens inside your handler.
 

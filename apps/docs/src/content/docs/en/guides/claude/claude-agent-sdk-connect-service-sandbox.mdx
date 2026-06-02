@@ -15,7 +15,7 @@ A key advantage of this approach is its **extensibility**: you can easily replac
 
 When the main module is launched, a Daytona sandbox is created for the Developer Agent, and a Project Manager Agent is initialized locally. Interaction with the system occurs via a command line chat interface. The Project Manager Agent receives prompts, plans the workflow, and delegates coding tasks to the Developer Agent. The Developer Agent executes tasks in the sandbox and streams results back to the Project Manager, who reviews and coordinates further actions. All logs and outputs from both agents are streamed in real time to the terminal, providing full visibility into the process as it is managed by the Project Manager Agent.
 
-The Developer Agent can also host web apps and provide preview links using [Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/). The Project Manager Agent will present these links and summarize the results for you.
+The Developer Agent can also host web apps and provide preview links using [Daytona Preview Links](https://www.daytona.io/docs/en/preview/). The Project Manager Agent will present these links and summarize the results for you.
 
 You can continue interacting with the system until you are finished. When you exit the program, the sandbox is deleted automatically.
 
@@ -164,11 +164,11 @@ This system is composed of two collaborating agents, each with a distinct role a
 1. **Provisioning:**
   - The Developer Agent is provisioned inside a Daytona sandbox and is responsible for executing coding tasks.
 2. **SDK Installation:**
-  - The system installs the Claude Agent SDK in the sandbox by running `pip install` (see [process execution](/docs/en/process-code-execution#process-execution)).
+  - The system installs the Claude Agent SDK in the sandbox by running `pip install` (see [process execution](/docs/en/process-code-execution#command-execution)).
 3. **Interpreter Context:**
-  - A new [code interpreter context](/docs/en/process-code-execution#stateful-code-interpreter) is created for isolated execution.
+  - A new [code interpreter context](/docs/en/process-code-execution#run-code-stateful) is created for isolated execution.
 4. **Script Upload:**
-  - The coding agent script is uploaded to the sandbox using [file uploading](/docs/file-system-operations#uploading-a-single-file).
+  - The coding agent script is uploaded to the sandbox using [file uploading](/docs/en/file-system-operations#upload-a-single-file).
 5. **SDK Initialization:**
   - The Claude Agent SDK is initialized in the interpreter context (e.g., `import coding_agent`).
 6. **Task Execution:**
