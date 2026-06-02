@@ -45,7 +45,16 @@ ENV CI=true
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
-RUN npm install -g corepack && corepack enable
+# Pin corepack's home to a shared, world-readable path and pre-fetch the pinned
+# yarn release at build time. Without this, a pod running as a non-root user
+# (e.g. a hardened k8s securityContext) gets a different $HOME, misses the
+# root-owned corepack cache, and corepack tries to download yarn from
+# repo.yarnpkg.com at startup — which fails on air-gapped/egress-restricted
+# clusters running the migration jobs.
+ENV COREPACK_HOME=/opt/corepack
+RUN npm install -g corepack && corepack enable && \
+    corepack prepare yarn@4.13.0 --activate && \
+    chmod -R a+rX /opt/corepack
 
 WORKDIR /daytona
 
@@ -68,10 +77,12 @@ COPY --from=builder /daytona/dist ./dist
 # The migration:run:* scripts execute the typeorm CLI through ts-node against
 # the TypeScript data-sources (apps/api/src/migrations/**), which load entities
 # via a `*.entity.ts` glob. Ship that source + the tsconfigs they extend so the
-# deploy migration jobs resolve identically to a full checkout.
-COPY --from=builder /daytona/apps/api/src ./apps/api/src
-COPY --from=builder /daytona/apps/api/tsconfig.json /daytona/apps/api/tsconfig.app.json /daytona/apps/api/tsconfig.spec.json ./apps/api/
-COPY --from=builder /daytona/tsconfig.base.json ./
+# deploy migration jobs resolve identically to a full checkout. --chmod makes
+# them world-readable: the sources carry restrictive repo perms that would
+# otherwise be unreadable to a non-root migration pod.
+COPY --from=builder --chmod=0755 /daytona/apps/api/src ./apps/api/src
+COPY --from=builder --chmod=0644 /daytona/apps/api/tsconfig.json /daytona/apps/api/tsconfig.app.json /daytona/apps/api/tsconfig.spec.json ./apps/api/
+COPY --from=builder --chmod=0644 /daytona/tsconfig.base.json ./
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
