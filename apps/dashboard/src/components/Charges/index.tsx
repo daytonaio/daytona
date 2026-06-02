@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
 import { getColumnSizeStyles } from '@/lib/utils/table'
 import { flexRender } from '@tanstack/react-table'
@@ -27,6 +26,7 @@ import { useChargesTable } from './useChargesTable'
 export function ChargesTable({ data, loading, onRowClick }: ChargesTableProps) {
   const { table } = useChargesTable({ data })
   const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasSearch = String(table.getState().globalFilter ?? '').trim().length > 0
 
   return (
     <div className="flex flex-col gap-3">
@@ -41,9 +41,15 @@ export function ChargesTable({ data, loading, onRowClick }: ChargesTableProps) {
             <TableEmptyState
               overlay
               colSpan={table.getAllColumns().length}
-              message="No charges yet."
+              message={hasSearch ? 'No matching charges found.' : 'No charges yet.'}
               icon={<Receipt />}
-              description={<p>Charges will appear here as payments are attempted on your organization.</p>}
+              description={
+                hasSearch ? (
+                  <p>Try adjusting your search query.</p>
+                ) : (
+                  <p>Charges will appear here as payments are attempted on your organization.</p>
+                )
+              }
             />
           ) : null
         }
@@ -67,7 +73,7 @@ export function ChargesTable({ data, loading, onRowClick }: ChargesTableProps) {
           <TableBody>
             {loading ? (
               <>
-                {Array.from({ length: DEFAULT_PAGE_SIZE }).map((_, rowIndex) => (
+                {Array.from({ length: table.getState().pagination.pageSize }).map((_, rowIndex) => (
                   <TableRow key={rowIndex}>
                     {table.getVisibleLeafColumns().map((column) => (
                       <TableCell
