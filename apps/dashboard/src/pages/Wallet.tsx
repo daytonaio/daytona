@@ -22,19 +22,11 @@ import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateI
 import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
 import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
 import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
-import { useVoidInvoiceMutation } from '@/hooks/mutations/useVoidInvoiceMutation'
-import {
-  useFetchOwnerCheckoutUrlQuery,
-  useIsOwnerCheckoutUrlFetching,
-  useOwnerBillingPortalUrlQuery,
-  useOwnerInvoicesQuery,
-  useOwnerWalletQuery,
-} from '@/hooks/queries/billingQueries'
+import { useOwnerInvoicesQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useChargesQuery } from '@/hooks/queries/useChargesQuery'
-import { useBillingV2Enabled } from '@/hooks/useBillingV2Enabled'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { ArrowUpRight, CheckCircleIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
+import { InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -45,7 +37,6 @@ const DEFAULT_PAGE_SIZE = 10
 const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { user } = useAuth()
-  const isBillingV2 = useBillingV2Enabled()
   const [automaticTopUp, setAutomaticTopUp] = useState<AutomaticTopUp | undefined>(undefined)
   const [couponCode, setCouponCode] = useState<string>('')
   const [redeemCouponError, setRedeemCouponError] = useState<string | null>(null)
@@ -57,43 +48,23 @@ const Wallet = () => {
     pageSize: DEFAULT_PAGE_SIZE,
   })
   const walletQuery = useOwnerWalletQuery({ refetchOnMount: 'always' })
-  const billingPortalUrlQuery = useOwnerBillingPortalUrlQuery()
   const invoicesQuery = useOwnerInvoicesQuery(invoicesPagination.pageIndex + 1, invoicesPagination.pageSize)
   const chargesQuery = useChargesQuery({
     organizationId: selectedOrganization?.id ?? '',
-    enabled: Boolean(selectedOrganization && isBillingV2),
+    enabled: Boolean(selectedOrganization),
   })
 
-  const isCheckoutUrlLoading = useIsOwnerCheckoutUrlFetching()
-  const fetchCheckoutUrl = useFetchOwnerCheckoutUrlQuery()
   const wallet = walletQuery.data
-  const billingPortalUrl = billingPortalUrlQuery.data
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
   const redeemCouponMutation = useRedeemCouponMutation()
   const topUpWalletMutation = useTopUpWalletMutation()
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
-  const voidInvoiceMutation = useVoidInvoiceMutation()
 
   useEffect(() => {
     if (wallet?.automaticTopUp) {
       setAutomaticTopUp(wallet.automaticTopUp)
     }
   }, [wallet])
-
-  const handleUpdatePaymentMethod = useCallback(async () => {
-    const newWindow = window.open('', '_blank')
-    try {
-      const data = await fetchCheckoutUrl()
-      if (newWindow) {
-        newWindow.location.href = data
-      }
-    } catch (error) {
-      newWindow?.close()
-      toast.error('Failed to fetch checkout url', {
-        description: String(error),
-      })
-    }
-  }, [fetchCheckoutUrl])
 
   const handleSetAutomaticTopUp = useCallback(async () => {
     if (!selectedOrganization) {
@@ -231,27 +202,7 @@ const Wallet = () => {
     [selectedOrganization],
   )
 
-  const handleVoidInvoice = useCallback(
-    async (invoice: Invoice) => {
-      if (!selectedOrganization) {
-        return
-      }
-      try {
-        await voidInvoiceMutation.mutateAsync({
-          organizationId: selectedOrganization.id,
-          invoiceId: invoice.id ?? '',
-        })
-        toast.success('Invoice voided successfully')
-      } catch (error) {
-        toast.error('Failed to void invoice', {
-          description: String(error),
-        })
-      }
-    },
-    [selectedOrganization, voidInvoiceMutation],
-  )
-
-  const isBillingLoading = walletQuery.isLoading && billingPortalUrlQuery.isLoading
+  const isBillingLoading = walletQuery.isLoading
   const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
   const topUpEnabled =
     wallet?.creditCardConnected && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount)
@@ -362,47 +313,8 @@ const Wallet = () => {
                       </div>
                     </div>
                   </div>
-                  {isBillingV2 ? null : billingPortalUrlQuery.isLoading ? (
-                    <Skeleton className="h-8 w-[160px]" />
-                  ) : billingPortalUrl ? (
-                    <Button variant="link" asChild className="flex items-center gap-2 !px-0">
-                      <a
-                        href={`${billingPortalUrl}/customer-edit-information`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Update Billing Info
-                        <ArrowUpRight />
-                      </a>
-                    </Button>
-                  ) : null}
                 </div>
               </CardContent>
-              {!isBillingV2 && (
-                <CardContent className="border-t border-border">
-                  <div className="flex gap-4 items-center justify-between">
-                    <div className="flex flex-col gap-1 items-start">
-                      <div className="text-sm font-medium">Payment method</div>
-                      {!wallet.creditCardConnected ? (
-                        <div className="text-sm text-muted-foreground">Payment method not connected</div>
-                      ) : (
-                        <div className="text-sm text-muted-foreground flex items-center gap-2">
-                          <CheckCircleIcon className="w-4 h-4 shrink-0" /> Credit card connected
-                        </div>
-                      )}
-                    </div>
-                    {!wallet.creditCardConnected ? (
-                      <Button variant="default" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
-                        {isCheckoutUrlLoading && <Spinner />} Connect
-                      </Button>
-                    ) : (
-                      <Button variant="secondary" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
-                        {isCheckoutUrlLoading && <Spinner />} Update
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              )}
 
               {user?.profile.email_verified && (
                 <CardContent className="border-t border-border">
@@ -437,7 +349,7 @@ const Wallet = () => {
               )}
             </Card>
 
-            {isBillingV2 && selectedOrganization && (
+            {selectedOrganization && (
               <>
                 <BillingInfoCard organizationId={selectedOrganization.id} />
                 <PaymentMethodsCard organizationId={selectedOrganization.id} />
@@ -641,13 +553,12 @@ const Wallet = () => {
                   onPaginationChange={setInvoicesPagination}
                   loading={invoicesQuery.isLoading}
                   onViewInvoice={handleViewInvoice}
-                  onVoidInvoice={isBillingV2 ? undefined : handleVoidInvoice}
                   onPayInvoice={handlePayInvoice}
                 />
               </CardContent>
             </Card>
 
-            {isBillingV2 && selectedOrganization && (
+            {selectedOrganization && (
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle>Charges</CardTitle>

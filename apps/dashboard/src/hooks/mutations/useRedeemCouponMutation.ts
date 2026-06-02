@@ -6,7 +6,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../queries/queryKeys'
 import { useApi } from '../useApi'
-import { useBillingV2Enabled } from '../useBillingV2Enabled'
 
 interface RedeemCouponVariables {
   organizationId: string
@@ -16,12 +15,11 @@ interface RedeemCouponVariables {
 export const useRedeemCouponMutation = () => {
   const { billingApi } = useApi()
   const queryClient = useQueryClient()
-  const v2 = useBillingV2Enabled()
 
   return useMutation<string, unknown, RedeemCouponVariables>({
-    mutationFn: ({ organizationId, couponCode }) => billingApi.redeemCoupon(organizationId, couponCode, { v2 }),
+    mutationFn: ({ organizationId, couponCode }) => billingApi.redeemCoupon(organizationId, couponCode),
     onSuccess: (_data, { organizationId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.organization.wallet(organizationId, v2) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.organization.wallet(organizationId) })
 
       // a coupon can upgrade the tier
       queryClient.invalidateQueries({ queryKey: queryKeys.organization.tier(organizationId) })

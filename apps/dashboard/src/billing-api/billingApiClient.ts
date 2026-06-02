@@ -8,7 +8,6 @@ import {
   BillingInfo,
   BillingInfoApi,
   ChargeList,
-  CheckoutUrlApi,
   Configuration,
   InvoicesApi,
   OrganizationApi,
@@ -27,20 +26,12 @@ import {
 } from '@daytona/billing-api-client'
 import { AxiosInstance } from 'axios'
 
-// Passed per-call by hooks that read the BILLING_PROVIDER_V2 feature flag.
-// Each method picks the v1 or v2 backend based on this flag. Methods without
-// a v2 counterpart (tiers, emails) ignore it.
-export interface BillingVersionOptions {
-  v2?: boolean
-}
-
 export class BillingApiClient {
   private walletApi: WalletApi
   private usageApi: UsageApi
   private tierApi: TierApi
   private invoicesApi: InvoicesApi
   private organizationApi: OrganizationApi
-  private checkoutUrlApi: CheckoutUrlApi
   private portalUrlApi: PortalUrlApi
   private billingInfoApi: BillingInfoApi
 
@@ -50,129 +41,51 @@ export class BillingApiClient {
     this.tierApi = new TierApi(configuration, undefined, axiosInstance)
     this.invoicesApi = new InvoicesApi(configuration, undefined, axiosInstance)
     this.organizationApi = new OrganizationApi(configuration, undefined, axiosInstance)
-    this.checkoutUrlApi = new CheckoutUrlApi(configuration, undefined, axiosInstance)
     this.portalUrlApi = new PortalUrlApi(configuration, undefined, axiosInstance)
     this.billingInfoApi = new BillingInfoApi(configuration, undefined, axiosInstance)
   }
 
-  public async getOrganizationUsage(
-    organizationId: string,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<OrganizationUsage> {
-    const response = v2
-      ? await this.usageApi.getV2CurrentUsage(organizationId)
-      : await this.usageApi.getCurrentUsage(organizationId)
+  public async getOrganizationUsage(organizationId: string): Promise<OrganizationUsage> {
+    const response = await this.usageApi.getV2CurrentUsage(organizationId)
     return response.data
   }
 
-  public async getPastOrganizationUsage(
-    organizationId: string,
-    periods?: number,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<OrganizationUsage[]> {
-    const response = v2
-      ? await this.usageApi.getV2PastUsage(organizationId, periods ?? 12)
-      : await this.usageApi.getPastUsage(organizationId, periods ?? 12)
-    // v1 returns a single OrganizationUsage; v2 returns an array. Normalize to array.
-    const data = response.data as unknown as OrganizationUsage | OrganizationUsage[]
-    return Array.isArray(data) ? data : [data]
-  }
-
-  public async getOrganizationWallet(
-    organizationId: string,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<OrganizationWallet> {
-    const response = v2
-      ? await this.walletApi.getV2Wallet(organizationId)
-      : await this.walletApi.getWallet(organizationId)
+  public async getPastOrganizationUsage(organizationId: string, periods?: number): Promise<OrganizationUsage[]> {
+    const response = await this.usageApi.getV2PastUsage(organizationId, periods ?? 12)
     return response.data
   }
 
-  public async setAutomaticTopUp(
-    organizationId: string,
-    automaticTopUp?: AutomaticTopUp,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<void> {
-    if (v2) {
-      await this.walletApi.setV2AutomaticTopUp(organizationId, automaticTopUp)
-    } else {
-      await this.walletApi.setAutomaticTopUp(organizationId, automaticTopUp)
-    }
-  }
-
-  public async getOrganizationBillingPortalUrl(
-    organizationId: string,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<string> {
-    const response = v2
-      ? await this.portalUrlApi.getV2PortalURL(organizationId)
-      : await this.portalUrlApi.getPortalUrl(organizationId)
+  public async getOrganizationWallet(organizationId: string): Promise<OrganizationWallet> {
+    const response = await this.walletApi.getV2Wallet(organizationId)
     return response.data
   }
 
-  public async getOrganizationCheckoutUrl(organizationId: string, { v2 }: BillingVersionOptions = {}): Promise<string> {
-    const response = v2
-      ? await this.checkoutUrlApi.getV2CheckoutURL(organizationId)
-      : await this.checkoutUrlApi.getCheckoutUrl(organizationId)
+  public async setAutomaticTopUp(organizationId: string, automaticTopUp?: AutomaticTopUp): Promise<void> {
+    await this.walletApi.setV2AutomaticTopUp(organizationId, automaticTopUp)
+  }
+
+  public async getOrganizationBillingPortalUrl(organizationId: string): Promise<string> {
+    const response = await this.portalUrlApi.getV2PortalURL(organizationId)
     return response.data
   }
 
-  public async redeemCoupon(
-    organizationId: string,
-    couponCode: string,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<string> {
-    if (v2) {
-      await this.organizationApi.redeemV2Coupon(couponCode, organizationId)
-    } else {
-      await this.organizationApi.redeemCoupon(couponCode, organizationId)
-    }
+  public async redeemCoupon(organizationId: string, couponCode: string): Promise<string> {
+    await this.organizationApi.redeemV2Coupon(couponCode, organizationId)
     return 'Coupon redeemed successfully'
   }
 
-  public async listInvoices(
-    organizationId: string,
-    page?: number,
-    perPage?: number,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<PaginatedTInvoice> {
-    const response = v2
-      ? await this.invoicesApi.listV2Invoices(organizationId, page, perPage)
-      : await this.invoicesApi.listInvoices(organizationId, page, perPage)
+  public async listInvoices(organizationId: string, page?: number, perPage?: number): Promise<PaginatedTInvoice> {
+    const response = await this.invoicesApi.listV2Invoices(organizationId, page, perPage)
     return response.data
   }
 
-  public async createInvoicePaymentUrl(
-    organizationId: string,
-    invoiceId: string,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<PaymentUrl> {
-    const response = v2
-      ? await this.invoicesApi.createV2PaymentURL(organizationId, invoiceId)
-      : await this.invoicesApi.createPaymentUrl(organizationId, invoiceId)
+  public async createInvoicePaymentUrl(organizationId: string, invoiceId: string): Promise<PaymentUrl> {
+    const response = await this.invoicesApi.createV2PaymentURL(organizationId, invoiceId)
     return response.data
   }
 
-  public async voidInvoice(
-    organizationId: string,
-    invoiceId: string,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<void> {
-    if (v2) {
-      throw new Error('Voiding invoices is not supported in billing provider v2')
-    } else {
-      await this.invoicesApi.voidInvoice(organizationId, invoiceId)
-    }
-  }
-
-  public async topUpWallet(
-    organizationId: string,
-    amountCents: number,
-    { v2 }: BillingVersionOptions = {},
-  ): Promise<PaymentUrl> {
-    const response = v2
-      ? await this.walletApi.topUpV2Wallet(organizationId, { amountCents })
-      : await this.walletApi.topUpWallet(organizationId, { amountCents })
+  public async topUpWallet(organizationId: string, amountCents: number): Promise<PaymentUrl> {
+    const response = await this.walletApi.topUpV2Wallet(organizationId, { amountCents })
     return response.data
   }
 
@@ -216,9 +129,6 @@ export class BillingApiClient {
   public async resendOrganizationEmailVerification(organizationId: string, email: string): Promise<void> {
     await this.organizationApi.resendVerificationEmail(organizationId, { email })
   }
-
-  // v2-only: billing info, payment methods, charges. These have no v1 counterpart
-  // and are only invoked when the BILLING_PROVIDER_V2 flag is on.
 
   public async getBillingInfo(organizationId: string): Promise<BillingInfo> {
     const response = await this.billingInfoApi.getV2BillingInfo(organizationId)

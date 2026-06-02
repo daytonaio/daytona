@@ -7,21 +7,19 @@ import type { Charge } from '@daytona/billing-api-client'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
 import { useApi } from '../useApi'
-import { useBillingV2Enabled } from '../useBillingV2Enabled'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
 export const useChargesQuery = ({ organizationId, enabled = true }: { organizationId: string; enabled?: boolean }) => {
   const { billingApi } = useApi()
   const config = useConfig()
-  const v2 = useBillingV2Enabled()
 
   const query = useInfiniteQuery({
     queryKey: queryKeys.billing.charges(organizationId),
     queryFn: ({ pageParam }) => billingApi.listCharges(organizationId, { startingAfter: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor : undefined),
-    enabled: Boolean(enabled && v2 && config.billingApiUrl && organizationId),
+    enabled: Boolean(enabled && config.billingApiUrl && organizationId),
   })
 
   useEffect(() => {

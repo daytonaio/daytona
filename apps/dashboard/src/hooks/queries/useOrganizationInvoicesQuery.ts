@@ -6,7 +6,6 @@
 import type { PaginatedTInvoice } from '@daytona/billing-api-client'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
-import { useBillingV2Enabled } from '../useBillingV2Enabled'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
@@ -23,11 +22,10 @@ export const useOrganizationInvoicesQuery = ({
 }) => {
   const { billingApi } = useApi()
   const config = useConfig()
-  const v2 = useBillingV2Enabled()
 
   return useQuery<PaginatedTInvoice>({
-    queryKey: queryKeys.billing.invoices(organizationId, v2, page, perPage),
-    queryFn: () => billingApi.listInvoices(organizationId, page, perPage, { v2 }),
+    queryKey: queryKeys.billing.invoices(organizationId, page, perPage),
+    queryFn: () => billingApi.listInvoices(organizationId, page, perPage),
     enabled: Boolean(enabled && config.billingApiUrl && organizationId),
   })
 }

@@ -6,8 +6,8 @@
 import { formatAmount } from '@/lib/utils'
 import { Charge } from '@daytona/billing-api-client'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp } from 'lucide-react'
 import React from 'react'
+import { SortOrderIcon } from '../SortIcon'
 import { Badge } from '../ui/badge'
 import { ChargesTableActions } from './ChargesTableActions'
 
@@ -18,22 +18,18 @@ interface SortableHeaderProps {
 }
 
 const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label, dataState }) => {
+  const sortDirection = column.getIsSorted()
+
   return (
-    <div
-      role="button"
-      onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-      className="flex items-center"
+    <button
+      type="button"
+      onClick={() => column.toggleSorting(sortDirection === 'asc')}
+      className="group/sort-header flex h-full w-full items-center gap-2"
       {...(dataState && { 'data-state': dataState })}
     >
       {label}
-      {column.getIsSorted() === 'asc' ? (
-        <ArrowUp className="ml-2 h-4 w-4" />
-      ) : column.getIsSorted() === 'desc' ? (
-        <ArrowDown className="ml-2 h-4 w-4" />
-      ) : (
-        <div className="ml-2 w-4 h-4" />
-      )}
-    </div>
+      <SortOrderIcon sort={sortDirection || null} />
+    </button>
   )
 }
 
@@ -69,6 +65,8 @@ export function getColumns(): ColumnDef<Charge>[] {
     },
     {
       id: 'description',
+      size: 320,
+      minSize: 220,
       header: ({ column }) => <SortableHeader column={column} label="Description" />,
       accessorKey: 'description',
       cell: ({ row }) => {
@@ -121,10 +119,13 @@ export function getColumns(): ColumnDef<Charge>[] {
     },
     {
       id: 'actions',
-      size: 100,
+      header: () => null,
+      size: 48,
+      minSize: 48,
+      maxSize: 48,
       enableHiding: false,
       cell: ({ row }) => (
-        <div>
+        <div className="flex justify-center">
           <ChargesTableActions charge={row.original} />
         </div>
       ),

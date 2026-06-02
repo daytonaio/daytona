@@ -6,7 +6,6 @@
 import type { PaymentMethod } from '@daytona/billing-api-client'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
-import { useBillingV2Enabled } from '../useBillingV2Enabled'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
@@ -19,11 +18,10 @@ export const usePaymentMethodsQuery = ({
 }) => {
   const { billingApi } = useApi()
   const config = useConfig()
-  const v2 = useBillingV2Enabled()
 
   return useQuery<PaymentMethod[]>({
     queryKey: queryKeys.billing.paymentMethods(organizationId),
     queryFn: () => billingApi.listPaymentMethods(organizationId),
-    enabled: Boolean(enabled && v2 && config.billingApiUrl && organizationId),
+    enabled: Boolean(enabled && config.billingApiUrl && organizationId),
   })
 }

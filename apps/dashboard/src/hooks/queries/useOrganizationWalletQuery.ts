@@ -6,7 +6,6 @@
 import type { OrganizationWallet } from '@daytona/billing-api-client'
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { useApi } from '../useApi'
-import { useBillingV2Enabled } from '../useBillingV2Enabled'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
@@ -20,11 +19,10 @@ export const useOrganizationWalletQuery = ({
 } & Omit<UseQueryOptions<OrganizationWallet>, 'queryKey' | 'queryFn'>) => {
   const { billingApi } = useApi()
   const config = useConfig()
-  const v2 = useBillingV2Enabled()
 
   return useQuery<OrganizationWallet>({
-    queryKey: queryKeys.organization.wallet(organizationId, v2),
-    queryFn: () => billingApi.getOrganizationWallet(organizationId, { v2 }),
+    queryKey: queryKeys.organization.wallet(organizationId),
+    queryFn: () => billingApi.getOrganizationWallet(organizationId),
     enabled: Boolean(enabled && config.billingApiUrl && organizationId),
     refetchOnWindowFocus: true,
     ...queryOptions,
