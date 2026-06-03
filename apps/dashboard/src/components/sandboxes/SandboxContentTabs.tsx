@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRegions } from '@/hooks/useRegions'
-import { SandboxListItem } from '@daytona/api-client'
+import type { SandboxListItem } from '@daytona/api-client'
 import { SandboxFileSystemTab } from './SandboxFileSystemTab'
 import { SandboxInfoPanel } from './SandboxInfoPanel'
 import { SandboxLogsTab } from './SandboxLogsTab'
@@ -25,6 +25,78 @@ interface SandboxContentTabsProps {
   spendingTabAvailable: boolean
   tab: TabValue
   onTabChange: (tab: TabValue) => void
+}
+
+export function SandboxContentTabTriggers({
+  spendingTabAvailable,
+  triggerClassName,
+}: {
+  spendingTabAvailable: boolean
+  triggerClassName?: string
+}) {
+  return (
+    <>
+      <TabsTrigger value="logs" className={triggerClassName}>
+        Logs
+      </TabsTrigger>
+      <TabsTrigger value="traces" className={triggerClassName}>
+        Traces
+      </TabsTrigger>
+      <TabsTrigger value="metrics" className={triggerClassName}>
+        Metrics
+      </TabsTrigger>
+      {spendingTabAvailable && (
+        <TabsTrigger value="spending" className={triggerClassName}>
+          Spending
+        </TabsTrigger>
+      )}
+      <TabsTrigger value="terminal" className={triggerClassName}>
+        Terminal
+      </TabsTrigger>
+      <TabsTrigger value="filesystem" className={triggerClassName}>
+        Filesystem
+      </TabsTrigger>
+      <TabsTrigger value="vnc" className={triggerClassName}>
+        VNC
+      </TabsTrigger>
+    </>
+  )
+}
+
+export function SandboxContentTabPanels({
+  sandbox,
+  spendingTabAvailable,
+}: {
+  sandbox: SandboxListItem
+  spendingTabAvailable: boolean
+}) {
+  return (
+    <>
+      <TabsContent value="logs" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxLogsTab sandboxId={sandbox.id} />
+      </TabsContent>
+      <TabsContent value="traces" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxTracesTab sandboxId={sandbox.id} />
+      </TabsContent>
+      <TabsContent value="metrics" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxMetricsTab sandboxId={sandbox.id} />
+      </TabsContent>
+      {spendingTabAvailable && (
+        <TabsContent value="spending" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+          <SandboxSpendingTab sandboxId={sandbox.id} />
+        </TabsContent>
+      )}
+      <TabsContent value="terminal" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxTerminalTab sandbox={sandbox} />
+      </TabsContent>
+      <TabsContent value="filesystem" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxFileSystemTab sandbox={sandbox} />
+      </TabsContent>
+      <TabsContent value="vnc" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
+        <SandboxVncTab sandbox={sandbox} />
+      </TabsContent>
+    </>
+  )
 }
 
 export function SandboxContentTabs({
@@ -69,42 +141,14 @@ export function SandboxContentTabs({
           <TabsTrigger value="overview" className="lg:hidden">
             Overview
           </TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
-          <TabsTrigger value="traces">Traces</TabsTrigger>
-          <TabsTrigger value="metrics">Metrics</TabsTrigger>
-          {spendingTabAvailable && <TabsTrigger value="spending">Spending</TabsTrigger>}
-          <TabsTrigger value="terminal">Terminal</TabsTrigger>
-          <TabsTrigger value="filesystem">Filesystem</TabsTrigger>
-          <TabsTrigger value="vnc">VNC</TabsTrigger>
+          <SandboxContentTabTriggers spendingTabAvailable={spendingTabAvailable} />
         </TabsList>
       </ScrollArea>
 
       <TabsContent value="overview" className="flex-1 min-h-0 m-0 overflow-y-auto scrollbar-sm lg:hidden">
         <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
       </TabsContent>
-      <TabsContent value="logs" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxLogsTab sandboxId={sandbox.id} />
-      </TabsContent>
-      <TabsContent value="traces" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxTracesTab sandboxId={sandbox.id} />
-      </TabsContent>
-      <TabsContent value="metrics" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxMetricsTab sandboxId={sandbox.id} />
-      </TabsContent>
-      {spendingTabAvailable && (
-        <TabsContent value="spending" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-          <SandboxSpendingTab sandboxId={sandbox.id} />
-        </TabsContent>
-      )}
-      <TabsContent value="terminal" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxTerminalTab sandbox={sandbox} />
-      </TabsContent>
-      <TabsContent value="filesystem" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxFileSystemTab sandbox={sandbox} />
-      </TabsContent>
-      <TabsContent value="vnc" className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxVncTab sandbox={sandbox} />
-      </TabsContent>
+      <SandboxContentTabPanels sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
     </Tabs>
   )
 }

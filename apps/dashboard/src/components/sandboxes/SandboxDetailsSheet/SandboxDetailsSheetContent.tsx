@@ -11,14 +11,8 @@ import type { Sandbox } from '@daytona/api-client'
 import { ChevronsRight } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { SandboxActionsSegmented } from '../SandboxActionsSegmented'
-import { SandboxFileSystemTab } from '../SandboxFileSystemTab'
+import { SandboxContentTabPanels, SandboxContentTabTriggers } from '../SandboxContentTabs'
 import { SandboxInfoPanel } from '../SandboxInfoPanel'
-import { SandboxLogsTab } from '../SandboxLogsTab'
-import { SandboxMetricsTab } from '../SandboxMetricsTab'
-import { SandboxSpendingTab } from '../SandboxSpendingTab'
-import { SandboxTerminalTab } from '../SandboxTerminalTab'
-import { SandboxTracesTab } from '../SandboxTracesTab'
-import { SandboxVncTab } from '../SandboxVncTab'
 import { FadeTabList } from './FadeTabList'
 import { SandboxDetailsHeader } from './SandboxDetailsHeader'
 import type { SandboxDetailsSheetTabValue } from './SandboxDetailsSheet'
@@ -60,66 +54,11 @@ function SandboxDetailsTabsList({
           Overview
         </TabsTrigger>
       )}
-      <TabsTrigger value="logs" className="h-[41px] border-b py-0">
-        Logs
-      </TabsTrigger>
-      <TabsTrigger value="traces" className="h-[41px] border-b py-0">
-        Traces
-      </TabsTrigger>
-      <TabsTrigger value="metrics" className="h-[41px] border-b py-0">
-        Metrics
-      </TabsTrigger>
-      {spendingTabAvailable && (
-        <TabsTrigger value="spending" className="h-[41px] border-b py-0">
-          Spending
-        </TabsTrigger>
-      )}
-      <TabsTrigger value="terminal" className="h-[41px] border-b py-0">
-        Terminal
-      </TabsTrigger>
-      <TabsTrigger value="filesystem" className="h-[41px] border-b py-0">
-        Filesystem
-      </TabsTrigger>
-      <TabsTrigger value="vnc" className="h-[41px] border-b py-0">
-        VNC
-      </TabsTrigger>
+      <SandboxContentTabTriggers
+        spendingTabAvailable={!!spendingTabAvailable}
+        triggerClassName="h-[41px] border-b py-0"
+      />
     </FadeTabList>
-  )
-}
-
-function SandboxDetailsTabContent({
-  sandbox,
-  spendingTabAvailable,
-}: {
-  sandbox: Sandbox
-  spendingTabAvailable: boolean | undefined
-}) {
-  return (
-    <>
-      <TabsContent value="logs" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxLogsTab sandboxId={sandbox.id} />
-      </TabsContent>
-      <TabsContent value="traces" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxTracesTab sandboxId={sandbox.id} />
-      </TabsContent>
-      <TabsContent value="metrics" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxMetricsTab sandboxId={sandbox.id} />
-      </TabsContent>
-      {spendingTabAvailable && (
-        <TabsContent value="spending" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-          <SandboxSpendingTab sandboxId={sandbox.id} />
-        </TabsContent>
-      )}
-      <TabsContent value="terminal" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxTerminalTab sandbox={sandbox} />
-      </TabsContent>
-      <TabsContent value="filesystem" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxFileSystemTab sandbox={sandbox} />
-      </TabsContent>
-      <TabsContent value="vnc" className="m-0 min-h-0 flex-1 data-[state=active]:flex flex-col overflow-hidden">
-        <SandboxVncTab sandbox={sandbox} />
-      </TabsContent>
-    </>
   )
 }
 
@@ -226,7 +165,7 @@ function SandboxDetailsSheetContent({
               </div>
               <div className="flex min-w-0 min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="flex min-h-0 flex-1 flex-col animate-in fade-in slide-in-from-right-20 duration-300 ease-out">
-                  <SandboxDetailsTabContent sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
+                  <SandboxContentTabPanels sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
                 </div>
               </div>
             </div>
@@ -243,7 +182,7 @@ function SandboxDetailsSheetContent({
             {sandboxInfoPanel}
           </TabsContent>
 
-          <SandboxDetailsTabContent sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
+          <SandboxContentTabPanels sandbox={sandbox} spendingTabAvailable={spendingTabAvailable} />
         </>
       )}
     </Tabs>

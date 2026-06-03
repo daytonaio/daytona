@@ -23,16 +23,9 @@ import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { ChevronDown, ChevronUp, Container, X } from 'lucide-react'
 import React, { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { InfoPanelSkeleton } from '../SandboxInfoPanel'
+import type { TabValue } from '../SearchParams'
 
-export type SandboxDetailsSheetTabValue =
-  | 'overview'
-  | 'logs'
-  | 'traces'
-  | 'metrics'
-  | 'spending'
-  | 'terminal'
-  | 'filesystem'
-  | 'vnc'
+export type SandboxDetailsSheetTabValue = TabValue
 
 export interface SandboxSheetRef {
   open: () => void
@@ -168,7 +161,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   const spendingTabAvailable = !!config.analyticsApiUrl
   const isDesktop = viewportWidth >= MOBILE_BREAKPOINT
 
-  const { data: sandbox, error, isError, isLoading } = useSandboxQuery(sandboxId || '')
+  const { data: sandbox, error, isError, isLoading, isPending } = useSandboxQuery(sandboxId || '')
   useSandboxDetailsWsSync(sandboxId || '')
 
   const handleOpenChange = (isOpen: boolean) => {
@@ -373,7 +366,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 onResetToOverview={resetToOverview}
               />
             </React.Suspense>
-          ) : isLoading ? (
+          ) : isLoading || isPending ? (
             <SandboxDetailsSheetSkeleton />
           ) : (
             <SandboxDetailsSheetEmptyState

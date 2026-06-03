@@ -508,7 +508,6 @@ const Sandboxes: React.FC = () => {
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
   const [sshSandboxId, setSshSandboxId] = useState('')
-  const sandboxDetailsOpen = Boolean(sandboxIdParam)
   const initializedSandboxIdParamRef = useRef<string | null>(null)
 
   const updateSandboxInCache = useCallback(
@@ -1256,7 +1255,7 @@ const Sandboxes: React.FC = () => {
         <SandboxTable
           ref={sandboxTableRef}
           sandboxIsLoading={sandboxIsLoading}
-          activeSandboxId={sandboxDetailsOpen ? sandboxIdParam : undefined}
+          activeSandboxId={sandboxIdParam ?? undefined}
           handleStart={handleStart}
           handleStop={handleStop}
           handleDelete={openDeleteDialog}
