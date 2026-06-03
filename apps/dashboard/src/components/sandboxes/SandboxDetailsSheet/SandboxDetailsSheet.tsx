@@ -166,8 +166,8 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   }
 
   useImperativeHandle(ref, () => ({
-    open: () => setOpen(true),
-    close: () => setOpen(false),
+    open: () => handleOpenChange(true),
+    close: () => handleOpenChange(false),
   }))
 
   useEffect(() => {
