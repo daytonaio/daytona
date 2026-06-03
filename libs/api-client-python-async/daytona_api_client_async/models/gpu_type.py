@@ -28,7 +28,7 @@ class GpuType(str, Enum):
     allowed enum values
     """
     H100 = 'H100'
-    RTX_MINUS_PRO_MINUS_6000 = 'RTX-PRO-6000'
+    RTX_PRO_6000 = 'RTX-PRO-6000'
     UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod

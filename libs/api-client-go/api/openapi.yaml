@@ -9846,6 +9846,9 @@ components:
       - H100
       - RTX-PRO-6000
       type: string
+      x-enum-varnames:
+      - H100
+      - RTX_PRO_6000
     RegionUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
