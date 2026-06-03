@@ -51,9 +51,7 @@ export interface SandboxDetailsSheetProps {
   onNavigate: (direction: 'prev' | 'next') => void
   hasPrev: boolean
   hasNext: boolean
-  initialTab?: SandboxDetailsSheetTabValue
-  activeTab?: SandboxDetailsSheetTabValue
-  onTabChange?: (tab: SandboxDetailsSheetTabValue) => void
+  defaultTab?: SandboxDetailsSheetTabValue
 }
 
 const OVERVIEW_WIDTH = 450
@@ -144,9 +142,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   onNavigate,
   hasPrev,
   hasNext,
-  initialTab = 'overview',
-  activeTab: activeTabProp,
-  onTabChange,
+  defaultTab = 'overview',
   ref,
 }) => {
   const [open, setOpen] = useState(false)
@@ -155,7 +151,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   const isHeaderNavigationRef = useRef(false)
   const initializedOpenSandboxIdRef = useRef<string | null>(null)
   const [internalActiveTab, setInternalActiveTab] = useState<SandboxDetailsSheetTabValue>('overview')
-  const activeTab = activeTabProp ?? internalActiveTab
+  const activeTab = internalActiveTab
   const [viewportWidth, setViewportWidth] = useState(() => getViewportWidth())
   const config = useConfig()
   const spendingTabAvailable = !!config.analyticsApiUrl
@@ -199,40 +195,29 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     [isDesktop, sidebarWidth, viewportWidth],
   )
 
-  const setActiveTabValue = useCallback(
-    (tab: SandboxDetailsSheetTabValue) => {
-      if (activeTabProp === undefined) {
-        setInternalActiveTab(tab)
-      }
-
-      onTabChange?.(tab)
-    },
-    [activeTabProp, onTabChange],
-  )
-
   const resetToOverview = useCallback(
     (immediate = false) => {
-      setActiveTabValue('overview')
+      setInternalActiveTab('overview')
       requestAnimationFrame(() => resizeSheetToTab('overview', immediate))
     },
-    [resizeSheetToTab, setActiveTabValue],
+    [resizeSheetToTab],
   )
 
   const resetToTab = useCallback(
     (tab: SandboxDetailsSheetTabValue, immediate = false) => {
-      setActiveTabValue(tab)
+      setInternalActiveTab(tab)
       requestAnimationFrame(() => resizeSheetToTab(tab, immediate))
     },
-    [resizeSheetToTab, setActiveTabValue],
+    [resizeSheetToTab],
   )
 
   const handleTabChange = useCallback(
     (value: string) => {
       const nextTab = value as SandboxDetailsSheetTabValue
-      setActiveTabValue(nextTab)
+      setInternalActiveTab(nextTab)
       resizeSheetToTab(nextTab)
     },
-    [resizeSheetToTab, setActiveTabValue],
+    [resizeSheetToTab],
   )
 
   useEffect(() => {
@@ -251,16 +236,8 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
       return
     }
 
-    resetToTab(initialTab, true)
-  }, [initialTab, open, resetToTab, sandboxId])
-
-  useEffect(() => {
-    if (!open || activeTabProp === undefined) {
-      return
-    }
-
-    requestAnimationFrame(() => resizeSheetToTab(activeTabProp))
-  }, [activeTabProp, open, resizeSheetToTab])
+    resetToTab(defaultTab, true)
+  }, [defaultTab, open, resetToTab, sandboxId])
 
   useEffect(() => {
     if (!open || isDesktop) {

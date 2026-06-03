@@ -502,13 +502,25 @@ const Sandboxes: React.FC = () => {
   const [snapshotName, setSnapshotName] = useState('')
   const [selectedSandbox, setSelectedSandbox] = useState<SandboxListItem | null>(null)
   const [orderedSandboxItems, setOrderedSandboxItems] = useState<SandboxListItem[] | null>(null)
-  const [sandboxDetailsInitialTab, setSandboxDetailsInitialTab] = useState<SandboxDetailsSheetTabValue>(
-    sandboxTabParam ?? 'overview',
-  )
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
   const [sshSandboxId, setSshSandboxId] = useState('')
-  const initializedSandboxIdParamRef = useRef<string | null>(null)
+
+  const seedSandboxDetailsCache = useCallback(
+    (sandbox: SandboxListItem | Sandbox) => {
+      if (!selectedOrganization?.id) {
+        return
+      }
+
+      const queryKey = queryKeys.sandboxes.detail(selectedOrganization.id, sandbox.id)
+      if (queryClient.getQueryData<Sandbox>(queryKey)) {
+        return
+      }
+
+      queryClient.setQueryData<Sandbox>(queryKey, sandbox as Sandbox, { updatedAt: 0 })
+    },
+    [queryClient, selectedOrganization?.id],
+  )
 
   const updateSandboxInCache = useCallback(
     (sandboxId: string, updates: Partial<Sandbox>) => {
@@ -772,22 +784,18 @@ const Sandboxes: React.FC = () => {
 
   useEffect(() => {
     if (!sandboxIdParam) {
-      initializedSandboxIdParamRef.current = null
       setSelectedSandbox(null)
       setOrderedSandboxItems(null)
       sandboxSheetRef.current?.close()
       return
     }
 
-    const isNewSandbox = initializedSandboxIdParamRef.current !== sandboxIdParam
-    initializedSandboxIdParamRef.current = sandboxIdParam
-
-    setSelectedSandbox(sandboxFromLoadedResults ?? null)
-    if (isNewSandbox) {
-      setSandboxDetailsInitialTab(sandboxTabParam ?? 'overview')
+    if (sandboxFromLoadedResults) {
+      seedSandboxDetailsCache(sandboxFromLoadedResults)
     }
+    setSelectedSandbox(sandboxFromLoadedResults ?? null)
     sandboxSheetRef.current?.open()
-  }, [sandboxFromLoadedResults, sandboxIdParam, sandboxTabParam])
+  }, [sandboxFromLoadedResults, sandboxIdParam, seedSandboxDetailsCache])
 
   const handleCreateSnapshot = (id: string) => {
     setSandboxToSnapshot(id)
@@ -1113,6 +1121,7 @@ const Sandboxes: React.FC = () => {
     const nextSandbox = sandboxItems[nextIndex]
 
     if (nextSandbox) {
+      seedSandboxDetailsCache(nextSandbox)
       setSelectedSandbox(nextSandbox)
       setSandboxIdParam(nextSandbox.id)
     }
@@ -1125,14 +1134,14 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const openSandboxDetails = (sandbox: SandboxListItem, initialTab: SandboxDetailsSheetTabValue = 'overview') => {
+  const openSandboxDetails = (sandbox: SandboxListItem, defaultTab: SandboxDetailsSheetTabValue = 'overview') => {
     const orderedSandboxes =
       sandboxTableRef.current?.table.getPrePaginationRowModel().rows.map((row) => row.original) ?? []
+    seedSandboxDetailsCache(sandbox)
     setOrderedSandboxItems(orderedSandboxes.some((item) => item.id === sandbox.id) ? orderedSandboxes : null)
     setSelectedSandbox(sandbox)
-    setSandboxDetailsInitialTab(initialTab)
+    setSandboxTabParam(defaultTab)
     setSandboxIdParam(sandbox.id)
-    setSandboxTabParam(initialTab)
   }
 
   const handleSandboxRowClick = (sandbox: SandboxListItem) => {
@@ -1146,10 +1155,6 @@ const Sandboxes: React.FC = () => {
   const handleSandboxCreated = (sandbox: CreatedSandbox) => {
     const createdSandbox = sandbox as unknown as Sandbox
 
-    queryClient.setQueryData<Sandbox>(
-      queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', createdSandbox.id),
-      createdSandbox,
-    )
     markAllSandboxQueriesAsStale(true)
     openSandboxDetails(createdSandbox)
   }
@@ -1407,11 +1412,7 @@ const Sandboxes: React.FC = () => {
           onNavigate={handleSandboxSheetNavigate}
           hasPrev={selectedSandboxIndex > 0}
           hasNext={selectedSandboxIndex >= 0 && selectedSandboxIndex < sandboxItems.length - 1}
-          initialTab={sandboxDetailsInitialTab}
-          activeTab={sandboxTabParam ?? undefined}
-          onTabChange={(tab) => {
-            setSandboxTabParam(tab)
-          }}
+          defaultTab={sandboxTabParam ?? 'overview'}
         />
 
         {forkTreeSandboxId && (
