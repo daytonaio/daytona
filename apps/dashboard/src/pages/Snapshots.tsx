@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants/Pagination'
 import { useActivateSnapshotMutation } from '@/hooks/mutations/useActivateSnapshotMutation'
 import { useDeactivateSnapshotMutation } from '@/hooks/mutations/useDeactivateSnapshotMutation'
 import { useDeleteSnapshotMutation } from '@/hooks/mutations/useDeleteSnapshotMutation'
@@ -35,11 +35,61 @@ import { useSnapshotWsSync } from '@/hooks/useSnapshotWsSync'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { pluralize } from '@/lib/utils'
-import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytona/api-client'
+import {
+  GetAllSnapshotsOrderEnum,
+  GetAllSnapshotsSortEnum,
+  OrganizationRolePermissionsEnum,
+  PaginatedSnapshots,
+  SnapshotDto,
+  SnapshotState,
+} from '@daytona/api-client'
 import { useQueryClient } from '@tanstack/react-query'
-import { parseAsString, useQueryState } from 'nuqs'
+import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryState, useQueryStates } from 'nuqs'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
+
+const SNAPSHOT_SORT_FIELDS = Object.values(GetAllSnapshotsSortEnum)
+const SNAPSHOT_SORT_DIRECTIONS = Object.values(GetAllSnapshotsOrderEnum)
+const SNAPSHOT_STATES = Object.values(SnapshotState)
+
+const snapshotViewSearchParams = {
+  page: parseAsInteger.withDefault(1),
+  limit: parseAsInteger.withDefault(DEFAULT_PAGE_SIZE),
+  search: parseAsString.withDefault(''),
+  states: parseAsArrayOf(parseAsString).withDefault([]),
+  sort: parseAsString.withDefault(DEFAULT_SNAPSHOT_SORTING.field),
+  order: parseAsString.withDefault(DEFAULT_SNAPSHOT_SORTING.direction),
+}
+
+function normalizePage(page: number) {
+  return Math.max(1, page)
+}
+
+function normalizePageSize(pageSize: number) {
+  return PAGE_SIZE_OPTIONS.includes(pageSize as (typeof PAGE_SIZE_OPTIONS)[number]) ? pageSize : DEFAULT_PAGE_SIZE
+}
+
+function normalizeSorting(field: string, direction: string): SnapshotSorting {
+  const sortField = SNAPSHOT_SORT_FIELDS.includes(field as GetAllSnapshotsSortEnum)
+    ? (field as GetAllSnapshotsSortEnum)
+    : DEFAULT_SNAPSHOT_SORTING.field
+  const sortDirection = SNAPSHOT_SORT_DIRECTIONS.includes(direction as GetAllSnapshotsOrderEnum)
+    ? (direction as GetAllSnapshotsOrderEnum)
+    : DEFAULT_SNAPSHOT_SORTING.direction
+
+  return {
+    field: sortField,
+    direction: sortDirection,
+  }
+}
+
+function getValidatedStates(states: string[]) {
+  return states.filter((state): state is SnapshotState => SNAPSHOT_STATES.includes(state as SnapshotState))
+}
+
+function isDefaultSorting(sorting: SnapshotSorting) {
+  return sorting.field === DEFAULT_SNAPSHOT_SORTING.field && sorting.direction === DEFAULT_SNAPSHOT_SORTING.direction
+}
 
 const Snapshots: React.FC = () => {
   const queryClient = useQueryClient()
@@ -50,6 +100,7 @@ const Snapshots: React.FC = () => {
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [orderedSnapshotItems, setOrderedSnapshotItems] = useState<SnapshotDto[] | null>(null)
+  const [viewParams, setViewParams] = useQueryStates(snapshotViewSearchParams)
   const [snapshotIdParam, setSnapshotIdParam] = useQueryState('snapshotId', parseAsString)
   const snapshotSheetRef = useRef<SnapshotSheetRef>(null)
 
@@ -58,23 +109,23 @@ const Snapshots: React.FC = () => {
   const activateSnapshotMutation = useActivateSnapshotMutation({ invalidateOnSuccess: false })
   const deactivateSnapshotMutation = useDeactivateSnapshotMutation({ invalidateOnSuccess: false })
 
-  const [paginationParams, setPaginationParams] = useState({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  })
-
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sorting, setSorting] = useState<SnapshotSorting>(DEFAULT_SNAPSHOT_SORTING)
-  const [stateFilter, setStateFilter] = useState<Set<string>>(new Set())
+  const page = normalizePage(viewParams.page)
+  const pageSize = normalizePageSize(viewParams.limit)
+  const searchQuery = viewParams.search
+  const sorting = useMemo<SnapshotSorting>(
+    () => normalizeSorting(viewParams.sort, viewParams.order),
+    [viewParams.order, viewParams.sort],
+  )
+  const stateFilter = useMemo<Set<string>>(() => new Set(getValidatedStates(viewParams.states)), [viewParams.states])
 
   const queryParams = useMemo<SnapshotQueryParams>(
     () => ({
-      page: paginationParams.pageIndex + 1,
-      pageSize: paginationParams.pageSize,
+      page,
+      pageSize,
       sorting,
       filters: searchQuery.trim() ? { name: searchQuery.trim() } : undefined,
     }),
-    [paginationParams.pageIndex, paginationParams.pageSize, sorting, searchQuery],
+    [page, pageSize, sorting, searchQuery],
   )
 
   const snapshotListQueryKey = useMemo(
@@ -170,28 +221,59 @@ const Snapshots: React.FC = () => {
     [queryClient, snapshotListQueryKey],
   )
 
-  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
-    setPaginationParams({ pageIndex, pageSize })
-  }, [])
+  const handlePaginationChange = useCallback(
+    ({ pageIndex, pageSize: nextPageSizeValue }: { pageIndex: number; pageSize: number }) => {
+      const nextPage = normalizePage(pageIndex + 1)
+      const nextPageSize = normalizePageSize(nextPageSizeValue)
+      const pageSizeChanged = nextPageSize !== pageSize
 
-  const handleSortingChange = useCallback((newSorting: SnapshotSorting) => {
-    setSorting(newSorting)
-    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [])
+      setViewParams({
+        page: pageSizeChanged || nextPage === 1 ? null : nextPage,
+        limit: nextPageSize === DEFAULT_PAGE_SIZE ? null : nextPageSize,
+      })
+    },
+    [pageSize, setViewParams],
+  )
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value)
-    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  const handleSortingChange = useCallback(
+    (newSorting: SnapshotSorting) => {
+      setViewParams({
+        page: null,
+        sort: isDefaultSorting(newSorting) ? null : newSorting.field,
+        order: isDefaultSorting(newSorting) ? null : newSorting.direction,
+      })
+    },
+    [setViewParams],
+  )
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setViewParams({
+        page: null,
+        search: value.trim() || null,
+      })
+    },
+    [setViewParams],
+  )
+
+  const handleStateFilterChange = useCallback(
+    (values: Set<string>) => {
+      const states = getValidatedStates([...values])
+
+      setViewParams({
+        page: null,
+        states: states.length > 0 ? states : null,
+      })
+    },
+    [setViewParams],
+  )
 
   useEffect(() => {
-    if (snapshotsData?.items.length === 0 && paginationParams.pageIndex > 0) {
-      setPaginationParams((prev) => ({
-        ...prev,
-        pageIndex: prev.pageIndex - 1,
-      }))
+    if (snapshotsData?.items.length === 0 && page > 1) {
+      const previousPage = page - 1
+      setViewParams({ page: previousPage === 1 ? null : previousPage })
     }
-  }, [snapshotsData?.items.length, paginationParams.pageIndex])
+  }, [snapshotsData?.items.length, page, setViewParams])
 
   const handleDelete = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
@@ -469,18 +551,15 @@ const Snapshots: React.FC = () => {
           totalItems={snapshotsData?.total ?? 0}
           onPaginationChange={handlePaginationChange}
           pagination={{
-            pageIndex: paginationParams.pageIndex,
-            pageSize: paginationParams.pageSize,
+            pageIndex: page - 1,
+            pageSize,
           }}
           searchValue={searchQuery}
           onSearchChange={handleSearchChange}
           sorting={sorting}
           onSortingChange={handleSortingChange}
           stateFilter={stateFilter}
-          onStateFilterChange={(values) => {
-            setStateFilter(values)
-            setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-          }}
+          onStateFilterChange={handleStateFilterChange}
         />
 
         <SnapshotSheet
