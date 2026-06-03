@@ -4,7 +4,6 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Outlet } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { CommandPalette, useRegisterCommands, type CommandConfig } from '@/components/CommandPalette'
@@ -12,6 +11,7 @@ import {
   SetDefaultRegionDialog,
   type SetDefaultRegionDialogRef,
 } from '@/components/Organizations/SetDefaultRegionDialog'
+import { PrivacyBanner } from '@/components/PrivacyBanner'
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
@@ -26,7 +26,6 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
 import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
-import { PrivacyBanner } from '@/components/PrivacyBanner'
 
 function useDashboardCommands() {
   const { theme, setTheme } = useTheme()
@@ -70,11 +69,16 @@ function useDashboardCommands() {
   useRegisterCommands(globalCommands, { groupId: 'global', groupLabel: 'Global', groupOrder: 5 })
 }
 
-const Dashboard: React.FC = () => {
+type DashboardProps = {
+  children: React.ReactNode
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ children }) => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const setDefaultRegionDialogRef = useRef<SetDefaultRegionDialogRef>(null)
   const config = useConfig()
+
   useOwnerWalletQuery() // prefetch wallet
 
   useDashboardCommands()
@@ -136,7 +140,7 @@ const Dashboard: React.FC = () => {
         <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
         <SidebarInset className="overflow-y-auto">
           <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
-            <Outlet />
+            {children}
             <CommandPalette />
           </div>
         </SidebarInset>

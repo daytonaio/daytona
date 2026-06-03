@@ -22,6 +22,7 @@ import { RoutePath } from '@/enums/RoutePath'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn, getMetaKey } from '@/lib/utils'
+import { lazyRoutes } from '@/routes'
 import { usePylonCommands } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import {
@@ -66,9 +67,16 @@ interface SidebarItem {
   label: string
   path: RoutePath | string
   onClick?: () => void
+  preload?: () => Promise<unknown>
 }
 
-const useNavCommands = (items: { label: string; path: RoutePath | string; onClick?: () => void }[]) => {
+function preloadSidebarItem(item: Pick<SidebarItem, 'preload'>) {
+  item.preload?.().catch(() => {
+    // React Router will surface import failures when the route renders.
+  })
+}
+
+const useNavCommands = (items: SidebarItem[]) => {
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
@@ -80,7 +88,10 @@ const useNavCommands = (items: { label: string; path: RoutePath | string; onClic
           id: `nav-${item.path}`,
           label: `Go to ${item.label}`,
           icon: <ArrowRightIcon className="w-4 h-4" />,
-          onSelect: () => navigate(item.path),
+          onSelect: () => {
+            preloadSidebarItem(item)
+            navigate(item.path)
+          },
         })),
     [pathname, navigate, items],
   )
@@ -101,16 +112,19 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <Container size={16} strokeWidth={1.5} />,
         label: 'Sandboxes',
         path: RoutePath.SANDBOXES,
+        preload: lazyRoutes.Sandboxes,
       },
       {
         icon: <Box size={16} strokeWidth={1.5} />,
         label: 'Snapshots',
         path: RoutePath.SNAPSHOTS,
+        preload: lazyRoutes.Snapshots,
       },
       {
         icon: <PackageOpen size={16} strokeWidth={1.5} />,
         label: 'Registries',
         path: RoutePath.REGISTRIES,
+        preload: lazyRoutes.Registries,
       },
     ]
     if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_VOLUMES)) {
@@ -118,6 +132,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <HardDrive size={16} strokeWidth={1.5} />,
         label: 'Volumes',
         path: RoutePath.VOLUMES,
+        preload: lazyRoutes.Volumes,
       })
     }
 
@@ -126,6 +141,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <TextSearch size={16} strokeWidth={1.5} />,
         label: 'Audit Logs',
         path: RoutePath.AUDIT_LOGS,
+        preload: lazyRoutes.AuditLogs,
       })
     }
 
@@ -134,13 +150,19 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
 
   const settingsItems = useMemo(() => {
     const arr: SidebarItem[] = [
-      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
+      {
+        icon: <KeyRound size={16} strokeWidth={1.5} />,
+        label: 'API Keys',
+        path: RoutePath.KEYS,
+        preload: lazyRoutes.Keys,
+      },
     ]
 
     arr.push({
       icon: <Mail size={16} strokeWidth={1.5} />,
       label: 'Webhooks',
       path: RoutePath.WEBHOOKS,
+      preload: lazyRoutes.Webhooks,
     })
 
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
@@ -148,6 +170,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <LockKeyhole size={16} strokeWidth={1.5} />,
         label: 'Limits',
         path: RoutePath.LIMITS,
+        preload: lazyRoutes.Limits,
       })
     }
 
@@ -155,6 +178,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       icon: <Users size={16} strokeWidth={1.5} />,
       label: 'Members',
       path: RoutePath.MEMBERS,
+      preload: lazyRoutes.OrganizationMembers,
     })
     // TODO: uncomment when we allow creating custom roles
     // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
@@ -165,6 +189,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       icon: <Settings size={16} strokeWidth={1.5} />,
       label: 'Settings',
       path: RoutePath.SETTINGS,
+      preload: lazyRoutes.OrganizationSettings,
     })
 
     return arr
@@ -180,11 +205,13 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <ChartColumn size={16} strokeWidth={1.5} />,
         label: 'Spending',
         path: RoutePath.BILLING_SPENDING,
+        preload: lazyRoutes.Spending,
       },
       {
         icon: <CreditCard size={16} strokeWidth={1.5} />,
         label: 'Wallet',
         path: RoutePath.BILLING_WALLET,
+        preload: lazyRoutes.Wallet,
       },
     ]
   }, [billingEnabled, authenticatedUserOrganizationMember?.role])
@@ -199,6 +226,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <MapPinned size={16} strokeWidth={1.5} />,
         label: 'Regions',
         path: RoutePath.REGIONS,
+        preload: lazyRoutes.Regions,
       },
     ]
 
@@ -207,6 +235,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <Server size={16} strokeWidth={1.5} />,
         label: 'Runners',
         path: RoutePath.RUNNERS,
+        preload: lazyRoutes.Runners,
       })
     }
 
@@ -219,6 +248,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         icon: <Joystick size={16} strokeWidth={1.5} />,
         label: 'Playground',
         path: RoutePath.PLAYGROUND,
+        preload: lazyRoutes.Playground,
       },
     ]
   }, [])
@@ -244,16 +274,19 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           path: RoutePath.ACCOUNT_SETTINGS,
           label: 'Account Settings',
           icon: <Settings size={16} strokeWidth={1.5} />,
+          preload: lazyRoutes.AccountSettings,
         },
         {
           path: RoutePath.USER_INVITATIONS,
           label: 'Invitations',
           icon: <Mail size={16} strokeWidth={1.5} />,
+          preload: lazyRoutes.UserOrganizationInvitations,
         },
         {
           path: RoutePath.ONBOARDING,
           label: 'Onboarding',
           icon: <ListChecks size={16} strokeWidth={1.5} />,
+          preload: lazyRoutes.Onboarding,
         },
       )
   }, [sidebarGroups])
@@ -335,7 +368,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                               <span>{item.label}</span>
                             </button>
                           ) : (
-                            <Link to={item.path}>
+                            <Link
+                              to={item.path}
+                              onPointerEnter={() => preloadSidebarItem(item)}
+                              onFocus={() => preloadSidebarItem(item)}
+                            >
                               {item.icon}
                               <span>{item.label}</span>
                             </Link>

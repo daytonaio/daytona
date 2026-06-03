@@ -4,10 +4,6 @@
  */
 
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import Onboarding from '@/pages/Onboarding'
-import OrganizationMembers from '@/pages/OrganizationMembers'
-import OrganizationSettings from '@/pages/OrganizationSettings'
-import UserOrganizationInvitations from '@/pages/UserOrganizationInvitations'
 import { NotificationSocketProvider } from '@/providers/NotificationSocketProvider'
 import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
 import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
@@ -15,13 +11,23 @@ import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizatio
 import { initPylon } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
 import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
-import React, { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, type ReactNode } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  redirect,
+  RouterProvider,
+  useLocation,
+  useNavigation,
+  useRouteError,
+} from 'react-router-dom'
 import { BannerProvider } from './components/Banner'
 import { CommandPaletteProvider } from './components/CommandPalette'
+import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
 import LoadingFallback from './components/LoadingFallback'
-import { SandboxDetails } from './components/sandboxes'
+import { LoadingFallbackContent } from './components/LoadingFallbackContent'
 import { Button } from './components/ui/button'
 import {
   Dialog,
@@ -33,50 +39,39 @@ import {
 } from './components/ui/dialog'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import { FeatureFlags } from './enums/FeatureFlags'
-import { RoutePath, getRouteSubPath } from './enums/RoutePath'
+import { getRouteSubPath, RoutePath, trimLeadingSlash } from './enums/RoutePath'
 import { useConfig } from './hooks/useConfig'
-import AccountSettings from './pages/AccountSettings'
-import AuditLogs from './pages/AuditLogs'
 import Dashboard from './pages/Dashboard'
-import EmailVerify from './pages/EmailVerify'
-import Keys from './pages/Keys'
 import LandingPage from './pages/LandingPage'
-import Limits from './pages/Limits'
 import Logout from './pages/Logout'
 import NotFound from './pages/NotFound'
-import Playground from './pages/Playground'
-import Regions from './pages/Regions'
-import Registries from './pages/Registries'
-import Runners from './pages/Runners'
-import Sandboxes from './pages/Sandboxes'
-import Snapshots from './pages/Snapshots'
-import Spending from './pages/Spending'
-import Volumes from './pages/Volumes'
-import Wallet from './pages/Wallet'
-import WebhookEndpointDetails from './pages/WebhookEndpointDetails'
-import Webhooks from './pages/Webhooks'
+
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 import { SvixProvider } from './providers/SvixProvider'
+import { lazyRoutes } from './routes'
 
-// Simple redirection components for external URLs
-const DocsRedirect = () => {
-  React.useEffect(() => {
-    window.open(DAYTONA_DOCS_URL, '_blank')
-    window.location.href = RoutePath.DASHBOARD
-  }, [])
-  return null
+function normalizeRouteError(error: unknown) {
+  if (error instanceof Error) {
+    return error
+  }
+
+  if (typeof error === 'string') {
+    return new Error(error)
+  }
+
+  return new Error('Unknown route error')
 }
 
-const SlackRedirect = () => {
-  React.useEffect(() => {
-    window.open(DAYTONA_SLACK_URL, '_blank')
-    window.location.href = RoutePath.DASHBOARD
-  }, [])
-  return null
+function RouteErrorFallback() {
+  const error = useRouteError()
+
+  return (
+    <ErrorBoundaryFallback error={normalizeRouteError(error)} resetErrorBoundary={() => window.location.reload()} />
+  )
 }
 
-function App() {
+function AppRoot() {
   const config = useConfig()
   const location = useLocation()
   const posthog = usePostHog()
@@ -128,166 +123,52 @@ function App() {
     )
   }
 
+  return <Outlet />
+}
+
+function DashboardOutlet() {
+  const location = useLocation()
+  const navigation = useNavigation()
+  const isRouteLoading = navigation.state === 'loading' && navigation.location?.pathname !== location.pathname
+
   return (
-    <Routes>
-      <Route path={RoutePath.LANDING} element={<LandingPage />} />
-      <Route path={RoutePath.LOGOUT} element={<Logout />} />
-      <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
-      <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
-      <Route
-        path={RoutePath.DASHBOARD}
-        element={
-          <Suspense fallback={<LoadingFallback />}>
-            <ApiProvider>
-              <OrganizationsProvider>
-                <SelectedOrganizationProvider>
-                  <RegionsProvider>
-                    <UserOrganizationInvitationsProvider>
-                      <NotificationSocketProvider>
-                        <CommandPaletteProvider>
-                          <BannerProvider>
-                            <Dashboard />
-                          </BannerProvider>
-                        </CommandPaletteProvider>
-                      </NotificationSocketProvider>
-                    </UserOrganizationInvitationsProvider>
-                  </RegionsProvider>
-                </SelectedOrganizationProvider>
-              </OrganizationsProvider>
-            </ApiProvider>
-          </Suspense>
-        }
-      >
-        <Route index element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />} />
-        <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
-        <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
-        <Route path={getRouteSubPath(RoutePath.SANDBOX_DETAILS)} element={<SandboxDetails />} />
-        <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
-        <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
-        <Route
-          path={getRouteSubPath(RoutePath.VOLUMES)}
-          element={
-            <RequiredPermissionsOrganizationPageWrapper
-              requiredPermissions={[OrganizationRolePermissionsEnum.READ_VOLUMES]}
-            >
-              <Volumes />
-            </RequiredPermissionsOrganizationPageWrapper>
-          }
-        />
-        <Route
-          path={getRouteSubPath(RoutePath.LIMITS)}
-          element={
-            <OwnerAccessOrganizationPageWrapper>
-              <Limits />
-            </OwnerAccessOrganizationPageWrapper>
-          }
-        />
-        {config.billingApiUrl && (
-          <>
-            <Route
-              path={getRouteSubPath(RoutePath.BILLING_SPENDING)}
-              element={
-                <OwnerAccessOrganizationPageWrapper>
-                  <Spending />
-                </OwnerAccessOrganizationPageWrapper>
-              }
-            />
-            <Route
-              path={getRouteSubPath(RoutePath.BILLING_WALLET)}
-              element={
-                <OwnerAccessOrganizationPageWrapper>
-                  <Wallet />
-                </OwnerAccessOrganizationPageWrapper>
-              }
-            />
-            <Route path={getRouteSubPath(RoutePath.EMAIL_VERIFY)} element={<EmailVerify />} />
-          </>
-        )}
-        <Route path={getRouteSubPath(RoutePath.MEMBERS)} element={<OrganizationMembers />} />
-        {
-          // TODO: uncomment when we allow creating custom roles
-          /* <Route
-          path={getRouteSubPath(RoutePath.ROLES)}
-          element={
-            <NonPersonalOrganizationPageWrapper>
-              <OwnerAccessOrganizationPageWrapper>
-                <OrganizationRoles />
-              </OwnerAccessOrganizationPageWrapper>
-            </NonPersonalOrganizationPageWrapper>
-          }
-        /> */
-        }
-        <Route
-          path={getRouteSubPath(RoutePath.AUDIT_LOGS)}
-          element={
-            <RequiredPermissionsOrganizationPageWrapper
-              requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
-            >
-              <AuditLogs />
-            </RequiredPermissionsOrganizationPageWrapper>
-          }
-        />
-        <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
-        <Route
-          path={getRouteSubPath(RoutePath.REGIONS)}
-          element={
-            <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
-              <Regions />
-            </RequiredFeatureFlagWrapper>
-          }
-        />
-        <Route
-          path={getRouteSubPath(RoutePath.RUNNERS)}
-          element={
-            <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
-              <RequiredPermissionsOrganizationPageWrapper
-                requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
-              >
-                <Runners />
-              </RequiredPermissionsOrganizationPageWrapper>
-            </RequiredFeatureFlagWrapper>
-          }
-        />
-        <Route
-          path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
-          element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}
-        />
-        <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
-        <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
-        <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
-        <Route
-          path={getRouteSubPath(RoutePath.WEBHOOKS)}
-          element={
-            <SvixProvider>
-              <Webhooks />
-            </SvixProvider>
-          }
-        />
-        <Route
-          path={getRouteSubPath(RoutePath.WEBHOOK_ENDPOINT_DETAILS)}
-          element={
-            <SvixProvider>
-              <WebhookEndpointDetails />
-            </SvixProvider>
-          }
-        />
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <Suspense fallback={<LoadingFallback />}>
+      <ApiProvider>
+        <OrganizationsProvider>
+          <SelectedOrganizationProvider>
+            <RegionsProvider>
+              <UserOrganizationInvitationsProvider>
+                <NotificationSocketProvider>
+                  <CommandPaletteProvider>
+                    <BannerProvider>
+                      <Dashboard>
+                        {isRouteLoading ? (
+                          <div className="flex min-h-screen w-full items-center justify-center bg-background p-6">
+                            <LoadingFallbackContent />
+                          </div>
+                        ) : (
+                          <Outlet />
+                        )}
+                      </Dashboard>
+                    </BannerProvider>
+                  </CommandPaletteProvider>
+                </NotificationSocketProvider>
+              </UserOrganizationInvitationsProvider>
+            </RegionsProvider>
+          </SelectedOrganizationProvider>
+        </OrganizationsProvider>
+      </ApiProvider>
+    </Suspense>
   )
 }
 
-function NonPersonalOrganizationPageWrapper({ children }: { children: React.ReactNode }) {
-  const { selectedOrganization } = useSelectedOrganization()
+function DashboardIndexRedirect() {
+  const location = useLocation()
 
-  if (selectedOrganization?.personal) {
-    return <Navigate to={RoutePath.DASHBOARD} replace />
-  }
-
-  return children
+  return <Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />
 }
 
-function OwnerAccessOrganizationPageWrapper({ children }: { children: React.ReactNode }) {
+function OwnerAccessOrganizationPageWrapper({ children }: { children: ReactNode }) {
   const { authenticatedUserOrganizationMember } = useSelectedOrganization()
 
   if (authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
@@ -301,7 +182,7 @@ function RequiredPermissionsOrganizationPageWrapper({
   children,
   requiredPermissions,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   requiredPermissions: OrganizationRolePermissionsEnum[]
 }) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -313,7 +194,7 @@ function RequiredPermissionsOrganizationPageWrapper({
   return children
 }
 
-function RequiredFeatureFlagWrapper({ children, flagKey }: { children: React.ReactNode; flagKey: FeatureFlags }) {
+function RequiredFeatureFlagWrapper({ children, flagKey }: { children: ReactNode; flagKey: FeatureFlags }) {
   const flagEnabled = useFeatureFlagEnabled(flagKey)
 
   if (!flagEnabled) {
@@ -321,6 +202,169 @@ function RequiredFeatureFlagWrapper({ children, flagKey }: { children: React.Rea
   }
 
   return children
+}
+
+function OwnerAccessOrganizationOutlet() {
+  return (
+    <OwnerAccessOrganizationPageWrapper>
+      <Outlet />
+    </OwnerAccessOrganizationPageWrapper>
+  )
+}
+
+function RequiredPermissionsOrganizationOutlet({
+  requiredPermissions,
+}: {
+  requiredPermissions: OrganizationRolePermissionsEnum[]
+}) {
+  return (
+    <RequiredPermissionsOrganizationPageWrapper requiredPermissions={requiredPermissions}>
+      <Outlet />
+    </RequiredPermissionsOrganizationPageWrapper>
+  )
+}
+
+function RequiredFeatureFlagOutlet({ flagKey }: { flagKey: FeatureFlags }) {
+  return (
+    <RequiredFeatureFlagWrapper flagKey={flagKey}>
+      <Outlet />
+    </RequiredFeatureFlagWrapper>
+  )
+}
+
+function BillingEnabledOutlet() {
+  const config = useConfig()
+
+  if (!config.billingApiUrl) {
+    return <Navigate to={RoutePath.DASHBOARD} replace />
+  }
+
+  return <Outlet />
+}
+
+function BillingOwnerAccessOutlet() {
+  const config = useConfig()
+
+  if (!config.billingApiUrl) {
+    return <Navigate to={RoutePath.DASHBOARD} replace />
+  }
+
+  return (
+    <OwnerAccessOrganizationPageWrapper>
+      <Outlet />
+    </OwnerAccessOrganizationPageWrapper>
+  )
+}
+
+function RunnersAccessOutlet() {
+  return (
+    <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
+      <RequiredPermissionsOrganizationPageWrapper requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}>
+        <Outlet />
+      </RequiredPermissionsOrganizationPageWrapper>
+    </RequiredFeatureFlagWrapper>
+  )
+}
+
+function WebhooksOutlet() {
+  return (
+    <SvixProvider>
+      <Outlet />
+    </SvixProvider>
+  )
+}
+
+const router = createBrowserRouter([
+  {
+    path: RoutePath.LANDING,
+    element: <AppRoot />,
+    errorElement: <RouteErrorFallback />,
+    children: [
+      { index: true, element: <LandingPage /> },
+      { path: trimLeadingSlash(RoutePath.LOGOUT), element: <Logout /> },
+      { path: trimLeadingSlash(RoutePath.DOCS), loader: () => redirect(DAYTONA_DOCS_URL) },
+      { path: trimLeadingSlash(RoutePath.SLACK), loader: () => redirect(DAYTONA_SLACK_URL) },
+      {
+        path: trimLeadingSlash(RoutePath.DASHBOARD),
+        element: <DashboardOutlet />,
+        children: [
+          { index: true, element: <DashboardIndexRedirect /> },
+          { path: getRouteSubPath(RoutePath.KEYS), lazy: lazyRoutes.Keys },
+          { path: getRouteSubPath(RoutePath.SANDBOXES), lazy: lazyRoutes.Sandboxes },
+          { path: getRouteSubPath(RoutePath.SANDBOX_DETAILS), lazy: lazyRoutes.SandboxDetails },
+          { path: getRouteSubPath(RoutePath.SNAPSHOTS), lazy: lazyRoutes.Snapshots },
+          { path: getRouteSubPath(RoutePath.REGISTRIES), lazy: lazyRoutes.Registries },
+          {
+            path: getRouteSubPath(RoutePath.VOLUMES),
+            element: (
+              <RequiredPermissionsOrganizationOutlet
+                requiredPermissions={[OrganizationRolePermissionsEnum.READ_VOLUMES]}
+              />
+            ),
+            children: [{ index: true, lazy: lazyRoutes.Volumes }],
+          },
+          {
+            path: getRouteSubPath(RoutePath.LIMITS),
+            element: <OwnerAccessOrganizationOutlet />,
+            children: [{ index: true, lazy: lazyRoutes.Limits }],
+          },
+          {
+            path: getRouteSubPath(RoutePath.BILLING_SPENDING),
+            element: <BillingOwnerAccessOutlet />,
+            children: [{ index: true, lazy: lazyRoutes.Spending }],
+          },
+          {
+            path: getRouteSubPath(RoutePath.BILLING_WALLET),
+            element: <BillingOwnerAccessOutlet />,
+            children: [{ index: true, lazy: lazyRoutes.Wallet }],
+          },
+          {
+            path: getRouteSubPath(RoutePath.EMAIL_VERIFY),
+            element: <BillingEnabledOutlet />,
+            children: [{ index: true, lazy: lazyRoutes.EmailVerify }],
+          },
+          { path: getRouteSubPath(RoutePath.MEMBERS), lazy: lazyRoutes.OrganizationMembers },
+          {
+            path: getRouteSubPath(RoutePath.AUDIT_LOGS),
+            element: (
+              <RequiredPermissionsOrganizationOutlet
+                requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
+              />
+            ),
+            children: [{ index: true, lazy: lazyRoutes.AuditLogs }],
+          },
+          { path: getRouteSubPath(RoutePath.SETTINGS), lazy: lazyRoutes.OrganizationSettings },
+          {
+            path: getRouteSubPath(RoutePath.REGIONS),
+            element: <RequiredFeatureFlagOutlet flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE} />,
+            children: [{ index: true, lazy: lazyRoutes.Regions }],
+          },
+          {
+            path: getRouteSubPath(RoutePath.RUNNERS),
+            element: <RunnersAccessOutlet />,
+            children: [{ index: true, lazy: lazyRoutes.Runners }],
+          },
+          { path: getRouteSubPath(RoutePath.ACCOUNT_SETTINGS), lazy: lazyRoutes.AccountSettings },
+          { path: getRouteSubPath(RoutePath.USER_INVITATIONS), lazy: lazyRoutes.UserOrganizationInvitations },
+          { path: getRouteSubPath(RoutePath.ONBOARDING), lazy: lazyRoutes.Onboarding },
+          { path: getRouteSubPath(RoutePath.PLAYGROUND), lazy: lazyRoutes.Playground },
+          {
+            path: getRouteSubPath(RoutePath.WEBHOOKS),
+            element: <WebhooksOutlet />,
+            children: [
+              { index: true, lazy: lazyRoutes.Webhooks },
+              { path: ':endpointId', lazy: lazyRoutes.WebhookEndpointDetails },
+            ],
+          },
+        ],
+      },
+      { path: '*', element: <NotFound /> },
+    ],
+  },
+])
+
+function App() {
+  return <RouterProvider router={router} fallbackElement={<LoadingFallback />} />
 }
 
 export default App

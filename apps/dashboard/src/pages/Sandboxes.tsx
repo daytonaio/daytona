@@ -12,7 +12,7 @@ import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import { CreateSshAccessSheet } from '@/components/sandboxes/CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from '@/components/sandboxes/RevokeSshAccessDialog'
-import SandboxDetailsSheet, { SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet'
+import type { SandboxDetailsSheetTabValue } from '@/components/sandboxes/SandboxDetailsSheet/SandboxDetailsSheet'
 import { tabParser } from '@/components/sandboxes/SearchParams'
 import { SandboxTable } from '@/components/SandboxTable'
 import type { SandboxTableRef } from '@/components/SandboxTable/types'
@@ -56,6 +56,7 @@ import { useSandboxWsSync, type SandboxWsSyncEvent } from '@/hooks/useSandboxWsS
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
+import { lazyWithPreload } from '@/lib/lazy'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { formatDuration, pluralize } from '@/lib/utils'
 import {
@@ -104,6 +105,10 @@ const SANDBOX_STATES = Object.values(SandboxState)
 const SANDBOX_CLASSES = Object.values(SandboxClass)
 const DEFAULT_SANDBOXES: SandboxListItem[] = []
 const SANDBOX_LIST_REVALIDATION_DEBOUNCE_MS = 2000
+const SandboxDetailsSheet = lazyWithPreload(
+  () => import('@/components/sandboxes/SandboxDetailsSheet/SandboxDetailsSheet'),
+  { preload: true },
+)
 
 const labelsParser = parseAsJson<Record<string, string>>((value) => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -1390,33 +1395,35 @@ const Sandboxes: React.FC = () => {
           }}
         />
 
-        <SandboxDetailsSheet
-          sandbox={selectedSandbox}
-          open={sandboxDetailsOpen}
-          onOpenChange={handleSandboxDetailsOpenChange}
-          sandboxIsLoading={sandboxIsLoading}
-          handleStart={handleStart}
-          handleStop={handleStop}
-          handleDelete={async (id) => {
-            await openDeleteDialog(id)
-          }}
-          handleArchive={handleArchive}
-          writePermitted={writePermitted}
-          deletePermitted={deletePermitted}
-          handleRecover={handleRecover}
-          getRegionName={getRegionName}
-          onCreateSshAccess={openCreateSshDialog}
-          onRevokeSshAccess={openRevokeSshDialog}
-          onScreenRecordings={handleScreenRecordings}
-          onNavigate={handleSandboxSheetNavigate}
-          hasPrev={selectedSandboxIndex > 0}
-          hasNext={selectedSandboxIndex >= 0 && selectedSandboxIndex < sandboxItems.length - 1}
-          initialTab={sandboxDetailsInitialTab}
-          activeTab={sandboxTabParam as SandboxDetailsSheetTabValue}
-          onTabChange={(tab) => {
-            setSandboxTabParam(tab)
-          }}
-        />
+        <React.Suspense fallback={null}>
+          <SandboxDetailsSheet
+            sandbox={selectedSandbox}
+            open={sandboxDetailsOpen}
+            onOpenChange={handleSandboxDetailsOpenChange}
+            sandboxIsLoading={sandboxIsLoading}
+            handleStart={handleStart}
+            handleStop={handleStop}
+            handleDelete={async (id) => {
+              await openDeleteDialog(id)
+            }}
+            handleArchive={handleArchive}
+            writePermitted={writePermitted}
+            deletePermitted={deletePermitted}
+            handleRecover={handleRecover}
+            getRegionName={getRegionName}
+            onCreateSshAccess={openCreateSshDialog}
+            onRevokeSshAccess={openRevokeSshDialog}
+            onScreenRecordings={handleScreenRecordings}
+            onNavigate={handleSandboxSheetNavigate}
+            hasPrev={selectedSandboxIndex > 0}
+            hasNext={selectedSandboxIndex >= 0 && selectedSandboxIndex < sandboxItems.length - 1}
+            initialTab={sandboxDetailsInitialTab}
+            activeTab={sandboxTabParam as SandboxDetailsSheetTabValue}
+            onTabChange={(tab) => {
+              setSandboxTabParam(tab)
+            }}
+          />
+        </React.Suspense>
 
         {forkTreeSandboxId && (
           <ForkTreeDialog
