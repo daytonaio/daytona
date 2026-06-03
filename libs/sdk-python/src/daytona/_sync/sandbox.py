@@ -644,7 +644,7 @@ class Sandbox(SandboxDto):
             sandbox.resize(Resources(cpu=2, memory=4, disk=30))
             ```
         """
-        if resources.gpu or resources.gpu_type:
+        if resources.gpu is not None or resources.gpu_type is not None:
             raise DaytonaValidationError(
                 "Resize does not support changes to gpu or gpu_type — to change GPU, create a new Sandbox"
             )
