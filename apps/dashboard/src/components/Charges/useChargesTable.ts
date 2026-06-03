@@ -49,6 +49,9 @@ export function useChargesTable({ data }: UseChargesTableProps) {
     state: {
       sorting,
       columnFilters,
+      columnPinning: {
+        right: ['actions'],
+      },
       pagination,
     },
     defaultColumn: {

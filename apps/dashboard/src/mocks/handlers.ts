@@ -4,11 +4,15 @@
  */
 
 import {
+  BillingInfo,
+  ChargeList,
   Invoice,
   OrganizationEmail,
   OrganizationTier,
+  OrganizationUsage,
   OrganizationWallet,
   PaginatedTInvoice,
+  PaymentMethod,
   PaymentUrl,
   Tier,
 } from '@daytona/billing-api-client'
@@ -27,7 +31,7 @@ export const handlers = [
       billingApiUrl: BILLING_API_URL,
     })
   }),
-  http.get(`${BILLING_API_URL}/organization/:organizationId/portal-url`, async () => {
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/portal-url`, async () => {
     return HttpResponse.json<string>(`${BILLING_API_URL}/portal`)
   }),
   http.get(`${BILLING_API_URL}/tier`, async () => {
@@ -74,7 +78,27 @@ export const handlers = [
       },
     ])
   }),
-  http.get(`${BILLING_API_URL}/organization/:organizationId/wallet`, async () => {
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/usage`, async () => {
+    return HttpResponse.json<OrganizationUsage>({
+      amountCents: 5000,
+      from: new Date('2026-06-01').toISOString(),
+      to: new Date('2026-06-30').toISOString(),
+      totalAmountCents: 5000,
+      usageCharges: [],
+    })
+  }),
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/usage/past`, async () => {
+    return HttpResponse.json<OrganizationUsage[]>([
+      {
+        amountCents: 5000,
+        from: new Date('2026-06-01').toISOString(),
+        to: new Date('2026-06-30').toISOString(),
+        totalAmountCents: 5000,
+        usageCharges: [],
+      },
+    ])
+  }),
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/wallet`, async () => {
     return HttpResponse.json<OrganizationWallet>({
       balanceCents: 1000,
       ongoingBalanceCents: 1000,
@@ -82,6 +106,40 @@ export const handlers = [
       creditCardConnected: false,
       automaticTopUp: undefined,
       hasFailedOrPendingInvoice: true,
+    })
+  }),
+  http.put(`${BILLING_API_URL}/v2/organization/:organizationId/wallet/automatic-top-up`, async () => {
+    return HttpResponse.json({})
+  }),
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/billing-info`, async () => {
+    return HttpResponse.json<BillingInfo>({
+      name: 'Daytona Demo',
+      email: 'billing@example.com',
+      address: {
+        line1: '123 Main St',
+        city: 'New York',
+        state: 'NY',
+        postalCode: '10001',
+        country: 'US',
+      },
+    })
+  }),
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/payment-methods`, async () => {
+    return HttpResponse.json<PaymentMethod[]>([])
+  }),
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/charges`, async () => {
+    return HttpResponse.json<ChargeList>({
+      data: [
+        {
+          id: 'ch_mock_001',
+          amountCents: 5000,
+          createdAt: new Date().toISOString(),
+          currency: 'usd',
+          description: 'Sandbox usage',
+          status: 'succeeded',
+        },
+      ],
+      hasMore: false,
     })
   }),
   http.get(`${BILLING_API_URL}/organization/:organizationId/tier`, async () => {
@@ -104,7 +162,7 @@ export const handlers = [
       },
     ])
   }),
-  http.get(`${BILLING_API_URL}/organization/:organizationId/invoices`, async ({ request, params }) => {
+  http.get(`${BILLING_API_URL}/v2/organization/:organizationId/invoices`, async ({ request }) => {
     const url = new URL(request.url)
     const page = parseInt(url.searchParams.get('page') || '1', 10)
     const perPage = parseInt(url.searchParams.get('perPage') || '50', 10)
@@ -184,17 +242,17 @@ export const handlers = [
       totalPages,
     })
   }),
-  http.post(`${BILLING_API_URL}/organization/:organizationId/invoices/:invoiceId/payment-url`, async () => {
+  http.post(`${BILLING_API_URL}/v2/organization/:organizationId/invoices/:invoiceId/payment-url`, async () => {
     return HttpResponse.json<PaymentUrl>({
       url: 'https://checkout.stripe.com/pay/cs_test_1234567890',
     })
   }),
-  http.post(`${BILLING_API_URL}/organization/:organizationId/invoices/:invoiceId/void`, async () => {
-    return HttpResponse.json({})
-  }),
-  http.post(`${BILLING_API_URL}/organization/:organizationId/wallet/top-up`, async () => {
+  http.post(`${BILLING_API_URL}/v2/organization/:organizationId/wallet/top-up`, async () => {
     return HttpResponse.json<PaymentUrl>({
       url: `https://checkout.stripe.com/pay/cs_test_${Date.now()}`,
     })
+  }),
+  http.post(`${BILLING_API_URL}/v2/organization/:organizationId/redeem-coupon/:couponCode`, async () => {
+    return HttpResponse.json({})
   }),
 ]

@@ -14,11 +14,11 @@ export function ChargesTableActions({ charge }: ChargesTableActionsProps) {
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center justify-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <MoreHorizontalIcon className="h-4 w-4" aria-label="Open menu" />
+          <Button variant="ghost" size="icon-sm" aria-label="Open menu">
+            <MoreHorizontalIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

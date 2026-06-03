@@ -7,7 +7,6 @@ import { PaymentUrl } from '@daytona/billing-api-client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../queries/queryKeys'
 import { useApi } from '../useApi'
-import { useBillingV2Enabled } from '../useBillingV2Enabled'
 
 interface TopUpWalletVariables {
   organizationId: string
@@ -17,12 +16,11 @@ interface TopUpWalletVariables {
 export const useTopUpWalletMutation = () => {
   const { billingApi } = useApi()
   const queryClient = useQueryClient()
-  const v2 = useBillingV2Enabled()
 
   return useMutation<PaymentUrl, unknown, TopUpWalletVariables>({
-    mutationFn: ({ organizationId, amountCents }) => billingApi.topUpWallet(organizationId, amountCents, { v2 }),
+    mutationFn: ({ organizationId, amountCents }) => billingApi.topUpWallet(organizationId, amountCents),
     onSuccess: (_data, { organizationId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.organization.wallet(organizationId, v2) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.organization.wallet(organizationId) })
     },
   })
 }

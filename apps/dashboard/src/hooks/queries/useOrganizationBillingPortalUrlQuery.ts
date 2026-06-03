@@ -5,7 +5,6 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
-import { useBillingV2Enabled } from '../useBillingV2Enabled'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
@@ -18,11 +17,10 @@ export const useOrganizationBillingPortalUrlQuery = ({
 }) => {
   const { billingApi } = useApi()
   const config = useConfig()
-  const v2 = useBillingV2Enabled()
 
   return useQuery<string | null>({
-    queryKey: queryKeys.billing.portalUrl(organizationId, v2),
-    queryFn: () => billingApi.getOrganizationBillingPortalUrl(organizationId, { v2 }),
+    queryKey: queryKeys.billing.portalUrl(organizationId),
+    queryFn: () => billingApi.getOrganizationBillingPortalUrl(organizationId),
     enabled: Boolean(enabled && organizationId && config.billingApiUrl),
   })
 }
