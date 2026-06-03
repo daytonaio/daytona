@@ -27,13 +27,13 @@ class WebhookEvent(str, Enum):
     """
     allowed enum values
     """
-    SANDBOX_DOT_CREATED = 'sandbox.created'
-    SANDBOX_DOT_STATE_DOT_UPDATED = 'sandbox.state.updated'
-    SNAPSHOT_DOT_CREATED = 'snapshot.created'
-    SNAPSHOT_DOT_STATE_DOT_UPDATED = 'snapshot.state.updated'
-    SNAPSHOT_DOT_REMOVED = 'snapshot.removed'
-    VOLUME_DOT_CREATED = 'volume.created'
-    VOLUME_DOT_STATE_DOT_UPDATED = 'volume.state.updated'
+    SANDBOX_CREATED = 'sandbox.created'
+    SANDBOX_STATE_UPDATED = 'sandbox.state.updated'
+    SNAPSHOT_CREATED = 'snapshot.created'
+    SNAPSHOT_STATE_UPDATED = 'snapshot.state.updated'
+    SNAPSHOT_REMOVED = 'snapshot.removed'
+    VOLUME_CREATED = 'volume.created'
+    VOLUME_STATE_UPDATED = 'volume.state.updated'
     UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod

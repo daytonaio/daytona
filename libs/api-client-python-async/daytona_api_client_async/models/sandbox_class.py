@@ -27,7 +27,7 @@ class SandboxClass(str, Enum):
     """
     allowed enum values
     """
-    LINUX_MINUS_VM = 'linux-vm'
+    LINUX_VM = 'linux-vm'
     CONTAINER = 'container'
     ANDROID = 'android'
     WINDOWS = 'windows'
