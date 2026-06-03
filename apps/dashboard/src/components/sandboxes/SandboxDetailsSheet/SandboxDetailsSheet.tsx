@@ -111,7 +111,7 @@ function SandboxDetailsSheetSkeleton() {
 function SandboxDetailsSheetEmptyState({ title, description }: { title: string; description: string }) {
   return (
     <div className="flex min-h-0 flex-1 items-center justify-center p-6">
-      <Empty>
+      <Empty className="bg-transparent">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <Container className="size-4" />
