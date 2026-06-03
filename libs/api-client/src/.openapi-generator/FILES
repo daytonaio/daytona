@@ -77,6 +77,7 @@ models/git-commit-response.ts
 models/git-delete-branch-request.ts
 models/git-repo-request.ts
 models/git-status.ts
+models/gpu-type.ts
 models/health-controller-check200-response-info-value.ts
 models/health-controller-check200-response.ts
 models/health-controller-check503-response.ts

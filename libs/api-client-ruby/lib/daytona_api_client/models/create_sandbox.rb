@@ -48,6 +48,9 @@ module DaytonaApiClient
     # GPU units allocated to the sandbox
     attr_accessor :gpu
 
+    # Preferred GPU type for the sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the sandbox to the first that has capacity.
+    attr_accessor :gpu_type
+
     # Memory allocated to the sandbox in GB
     attr_accessor :memory
 
@@ -86,6 +89,7 @@ module DaytonaApiClient
         :'target' => :'target',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
+        :'gpu_type' => :'gpuType',
         :'memory' => :'memory',
         :'disk' => :'disk',
         :'auto_stop_interval' => :'autoStopInterval',
@@ -121,6 +125,7 @@ module DaytonaApiClient
         :'target' => :'String',
         :'cpu' => :'Integer',
         :'gpu' => :'Integer',
+        :'gpu_type' => :'Array<GpuType>',
         :'memory' => :'Integer',
         :'disk' => :'Integer',
         :'auto_stop_interval' => :'Integer',
@@ -202,6 +207,12 @@ module DaytonaApiClient
         self.gpu = attributes[:'gpu']
       end
 
+      if attributes.key?(:'gpu_type')
+        if (value = attributes[:'gpu_type']).is_a?(Array)
+          self.gpu_type = value
+        end
+      end
+
       if attributes.key?(:'memory')
         self.memory = attributes[:'memory']
       end
@@ -268,6 +279,7 @@ module DaytonaApiClient
           target == o.target &&
           cpu == o.cpu &&
           gpu == o.gpu &&
+          gpu_type == o.gpu_type &&
           memory == o.memory &&
           disk == o.disk &&
           auto_stop_interval == o.auto_stop_interval &&
@@ -287,7 +299,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, linked_sandbox].hash
+      [name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, gpu_type, memory, disk, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, linked_sandbox].hash
     end
 
     # Builds the object from hash

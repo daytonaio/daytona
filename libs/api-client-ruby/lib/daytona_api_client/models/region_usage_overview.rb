@@ -35,6 +35,8 @@ module DaytonaApiClient
 
     attr_accessor :current_gpu_usage
 
+    attr_accessor :allowed_gpu_types
+
     attr_accessor :max_cpu_per_sandbox
 
     attr_accessor :max_memory_per_sandbox
@@ -84,6 +86,7 @@ module DaytonaApiClient
         :'current_disk_usage' => :'currentDiskUsage',
         :'total_gpu_quota' => :'totalGpuQuota',
         :'current_gpu_usage' => :'currentGpuUsage',
+        :'allowed_gpu_types' => :'allowedGpuTypes',
         :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
         :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
         :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
@@ -117,6 +120,7 @@ module DaytonaApiClient
         :'current_disk_usage' => :'Float',
         :'total_gpu_quota' => :'Float',
         :'current_gpu_usage' => :'Float',
+        :'allowed_gpu_types' => :'Array<GpuType>',
         :'max_cpu_per_sandbox' => :'Float',
         :'max_memory_per_sandbox' => :'Float',
         :'max_disk_per_sandbox' => :'Float',
@@ -214,6 +218,12 @@ module DaytonaApiClient
         self.current_gpu_usage = attributes[:'current_gpu_usage']
       else
         self.current_gpu_usage = nil
+      end
+
+      if attributes.key?(:'allowed_gpu_types')
+        if (value = attributes[:'allowed_gpu_types']).is_a?(Array)
+          self.allowed_gpu_types = value
+        end
       end
 
       if attributes.key?(:'max_cpu_per_sandbox')
@@ -439,6 +449,7 @@ module DaytonaApiClient
           current_disk_usage == o.current_disk_usage &&
           total_gpu_quota == o.total_gpu_quota &&
           current_gpu_usage == o.current_gpu_usage &&
+          allowed_gpu_types == o.allowed_gpu_types &&
           max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
           max_memory_per_sandbox == o.max_memory_per_sandbox &&
           max_disk_per_sandbox == o.max_disk_per_sandbox &&
@@ -457,7 +468,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [region_id, sandbox_class, total_cpu_quota, current_cpu_usage, total_memory_quota, current_memory_usage, total_disk_quota, current_disk_usage, total_gpu_quota, current_gpu_usage, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox, max_cpu_per_gpu_sandbox, max_memory_per_gpu_sandbox, max_disk_per_gpu_sandbox].hash
+      [region_id, sandbox_class, total_cpu_quota, current_cpu_usage, total_memory_quota, current_memory_usage, total_disk_quota, current_disk_usage, total_gpu_quota, current_gpu_usage, allowed_gpu_types, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, max_disk_per_non_ephemeral_sandbox, max_cpu_per_gpu_sandbox, max_memory_per_gpu_sandbox, max_disk_per_gpu_sandbox].hash
     end
 
     # Builds the object from hash

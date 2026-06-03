@@ -52,6 +52,7 @@ export * from './git-commit-response';
 export * from './git-delete-branch-request';
 export * from './git-repo-request';
 export * from './git-status';
+export * from './gpu-type';
 export * from './health-controller-check200-response';
 export * from './health-controller-check200-response-info-value';
 export * from './health-controller-check503-response';

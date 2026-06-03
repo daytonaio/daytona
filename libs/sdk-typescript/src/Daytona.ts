@@ -12,7 +12,7 @@ import {
   VolumesApi,
   ConfigApi,
 } from '@daytona/api-client'
-import type { SandboxVolume } from '@daytona/api-client'
+import type { GpuType, SandboxVolume } from '@daytona/api-client'
 import axios, { AxiosError } from 'axios'
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import {
@@ -128,6 +128,8 @@ export interface Resources {
   cpu?: number
   /** GPU allocation for the Sandbox */
   gpu?: number
+  /** Preferred GPU type for the Sandbox */
+  gpuType?: GpuType | GpuType[]
   /** Memory allocation for the Sandbox in GiB */
   memory?: number
   /** Disk space allocation for the Sandbox in GiB */
@@ -552,6 +554,12 @@ export class Daytona implements AsyncDisposable {
           target: this.target,
           cpu: resources?.cpu,
           gpu: resources?.gpu,
+          gpuType:
+            resources?.gpuType === undefined
+              ? undefined
+              : Array.isArray(resources.gpuType)
+                ? resources.gpuType
+                : [resources.gpuType],
           memory: resources?.memory,
           disk: resources?.disk,
           autoStopInterval: params.autoStopInterval,

@@ -18,6 +18,7 @@ import {
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { v4 as uuidv4 } from 'uuid'
 import { SandboxVolume } from '../dto/sandbox.dto'
@@ -169,6 +170,13 @@ export class Sandbox {
 
   @Column({ type: 'int', default: 0 })
   gpu = 0
+
+  @Column({
+    type: 'character varying',
+    nullable: true,
+    name: 'gpu_type',
+  })
+  gpuType?: GpuType | null
 
   @Column({ type: 'int', default: 4 })
   mem = 4

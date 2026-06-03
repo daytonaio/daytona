@@ -9,6 +9,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { BuildInfoDto } from './build-info.dto'
 import { IsEnum, IsOptional } from 'class-validator'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 
 export class SnapshotDto {
   @ApiProperty()
@@ -43,6 +44,16 @@ export class SnapshotDto {
 
   @ApiProperty()
   gpu: number
+
+  @ApiPropertyOptional({
+    description: 'The GPU type assigned to the snapshot',
+    enum: GpuType,
+    enumName: 'GpuType',
+    example: GpuType.H100,
+  })
+  @IsEnum(GpuType)
+  @IsOptional()
+  gpuType?: GpuType
 
   @ApiProperty()
   mem: number
@@ -112,6 +123,7 @@ export class SnapshotDto {
       entrypoint: snapshot.entrypoint ?? null,
       cpu: snapshot.cpu,
       gpu: snapshot.gpu,
+      gpuType: snapshot.gpuType ?? undefined,
       mem: snapshot.mem,
       disk: snapshot.disk,
       errorReason: snapshot.errorReason ?? null,

@@ -18,6 +18,7 @@ import {
 import { SnapshotRunner } from './snapshot-runner.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 import { BuildInfo } from './build-info.entity'
 import { SnapshotRegion } from './snapshot-region.entity'
 
@@ -69,6 +70,13 @@ export class Snapshot {
 
   @Column({ type: 'int', default: 0 })
   gpu = 0
+
+  @Column({
+    type: 'character varying',
+    nullable: true,
+    name: 'gpu_type',
+  })
+  gpuType?: GpuType | null
 
   @Column({ type: 'int', default: 1 })
   mem = 1

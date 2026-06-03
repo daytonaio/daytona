@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client_async.models.gpu_type import GpuType
 from daytona_api_client_async.models.sandbox_class import SandboxClass
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -41,6 +42,7 @@ class RegionUsageOverview(BaseModel):
     current_disk_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentDiskUsage")
     total_gpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalGpuQuota")
     current_gpu_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentGpuUsage")
+    allowed_gpu_types: Optional[List[GpuType]] = Field(default=None, serialization_alias="allowedGpuTypes")
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
@@ -49,7 +51,7 @@ class RegionUsageOverview(BaseModel):
     max_memory_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerGpuSandbox")
     max_disk_per_gpu_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerGpuSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"]
+    __properties: ClassVar[List[str]] = ["regionId", "sandboxClass", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage", "totalGpuQuota", "currentGpuUsage", "allowedGpuTypes", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -153,6 +155,7 @@ class RegionUsageOverview(BaseModel):
             "current_disk_usage": obj.get("currentDiskUsage"),
             "total_gpu_quota": obj.get("totalGpuQuota"),
             "current_gpu_usage": obj.get("currentGpuUsage"),
+            "allowed_gpu_types": obj.get("allowedGpuTypes"),
             "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
             "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
             "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),

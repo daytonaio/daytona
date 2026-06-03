@@ -1146,16 +1146,16 @@ func (s *Sandbox) waitForSnapshotComplete(ctx context.Context) error {
 
 // Resize resizes the sandbox resources with a default timeout of 60 seconds.
 //
-// Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started
-// sandbox allows increasing CPU and memory. To resize disk or decrease resources,
-// the sandbox must be stopped first.
+// Changes the CPU, memory, or disk allocation. Resizing a started sandbox accepts
+// only CPU and memory increases. Disk resize requires a stopped sandbox; disk can
+// only grow. GPU is not resizable — to change GPU, create a new sandbox.
+//
+// Returns an error if resources.GPU or resources.GpuType is set.
 //
 // Example:
 //
-//	// Resize a started sandbox (CPU and memory can be increased)
 //	err := sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8})
 //
-//	// Resize a stopped sandbox (CPU, memory, and disk can be changed)
 //	sandbox.Stop(ctx)
 //	err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4, Disk: 30})
 func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error {
@@ -1166,9 +1166,12 @@ func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error 
 
 // ResizeWithTimeout resizes the sandbox resources with a custom timeout.
 //
-// Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started
-// sandbox allows increasing CPU and memory. To resize disk or decrease resources,
-// the sandbox must be stopped first. 0 means no timeout.
+// Changes the CPU, memory, or disk allocation. Resizing a started sandbox accepts
+// only CPU and memory increases. Disk resize requires a stopped sandbox; disk can
+// only grow. GPU is not resizable — to change GPU, create a new sandbox. A timeout
+// of 0 means no timeout.
+//
+// Returns an error if resources.GPU or resources.GpuType is set.
 //
 // Example:
 //
@@ -1182,6 +1185,11 @@ func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resour
 func (s *Sandbox) doResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error {
 	if resources == nil {
 		return errors.NewDaytonaError("Resources must not be nil", 0, nil)
+	}
+
+	if resources.GPU > 0 || len(resources.GpuType) > 0 {
+		return errors.NewDaytonaError(
+			"Resize does not support changes to gpu or gpuType — to change GPU, create a new sandbox", 0, nil)
 	}
 
 	if timeout < 0 {

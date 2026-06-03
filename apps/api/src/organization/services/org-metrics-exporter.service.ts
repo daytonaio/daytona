@@ -98,6 +98,7 @@ export class OrgMetricsExporterService {
         totalMemoryQuota: -1,
         totalDiskQuota: -1,
         totalGpuQuota: -1,
+        allowedGpuTypes: null,
         maxCpuPerSandbox: null,
         maxMemoryPerSandbox: null,
         maxDiskPerSandbox: null,

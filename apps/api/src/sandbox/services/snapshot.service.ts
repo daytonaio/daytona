@@ -19,6 +19,7 @@ import { v4 as uuidv4, validate as isUUID } from 'uuid'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
@@ -61,6 +62,8 @@ import {
   persistSnapshotFromSandbox,
   PersistSnapshotFromSandboxParams,
 } from '../utils/persist-snapshot-from-sandbox.util'
+import { getRunnerSandboxClass } from '../utils/sandbox-class.util'
+import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 
@@ -186,6 +189,15 @@ export class SnapshotService {
 
       const newSnapshotCount = 1
 
+      const regionQuota = region.enforceQuotas
+        ? await this.organizationService.getRegionQuota(organization.id, region.id, sandboxClass)
+        : null
+      const gpuTypePreferences = resolveGpuTypePreferences(
+        createSnapshotDto.gpu ?? 0,
+        createSnapshotDto.gpuType,
+        regionQuota?.allowedGpuTypes,
+      )
+
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
         region,
@@ -201,6 +213,13 @@ export class SnapshotService {
         pendingSnapshotCountIncrement = newSnapshotCount
       }
 
+      const resolvedGpuType = await this.resolveSnapshotGpuType(
+        region,
+        sandboxClass,
+        createSnapshotDto.gpu,
+        gpuTypePreferences,
+      )
+
       try {
         const snapshotId = uuidv4()
 
@@ -208,6 +227,7 @@ export class SnapshotService {
           id: snapshotId,
           organizationId: organization.id,
           ...createSnapshotDto,
+          gpuType: resolvedGpuType,
           entrypoint: this.processEntrypoint(entrypoint),
           mem: createSnapshotDto.memory, // Map memory to mem
           sandboxClass,
@@ -265,6 +285,15 @@ export class SnapshotService {
 
       const newSnapshotCount = 1
 
+      const regionQuota = region.enforceQuotas
+        ? await this.organizationService.getRegionQuota(organization.id, region.id, sandboxClass)
+        : null
+      const gpuTypePreferences = resolveGpuTypePreferences(
+        createSnapshotDto.gpu ?? 0,
+        createSnapshotDto.gpuType,
+        regionQuota?.allowedGpuTypes,
+      )
+
       const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
         organization,
         region,
@@ -280,6 +309,13 @@ export class SnapshotService {
         pendingSnapshotCountIncrement = newSnapshotCount
       }
 
+      const resolvedGpuType = await this.resolveSnapshotGpuType(
+        region,
+        sandboxClass,
+        createSnapshotDto.gpu,
+        gpuTypePreferences,
+      )
+
       entrypoint = this.getEntrypointFromDockerfile(createSnapshotDto.buildInfo.dockerfileContent)
 
       const snapshotId = uuidv4()
@@ -288,6 +324,7 @@ export class SnapshotService {
         id: snapshotId,
         organizationId: organization.id,
         ...createSnapshotDto,
+        gpuType: resolvedGpuType,
         entrypoint: this.processEntrypoint(entrypoint),
         mem: createSnapshotDto.memory, // Map memory to mem
         sandboxClass,
@@ -617,6 +654,31 @@ export class SnapshotService {
     return {
       pendingSnapshotCountIncremented: true,
     }
+  }
+
+  /**
+   * Probes the scheduler to pin `snapshot.gpuType` to a concrete value
+   * whenever `gpu > 0`, so every active GPU snapshot has a stable type
+   * for sandboxes to inherit and capacity issues surface at create time
+   * rather than leaving the snapshot stuck in PENDING.
+   *
+   * @throws {BadRequestError} If no runner satisfies the preference filter.
+   */
+  private async resolveSnapshotGpuType(
+    region: Region,
+    sandboxClass: SandboxClass,
+    gpu: number | undefined,
+    gpuTypePreferences: GpuType[] | undefined,
+  ): Promise<GpuType | null> {
+    if (!gpu || gpu === 0) return null
+
+    const runner = await this.runnerService.getRandomAvailableRunner({
+      regions: [region.id],
+      sandboxClass: getRunnerSandboxClass(sandboxClass),
+      gpu,
+      gpuType: gpuTypePreferences ?? null,
+    })
+    return runner.gpuType
   }
 
   async rollbackPendingUsage(organizationId: string, pendingSnapshotCountIncrement?: number): Promise<void> {

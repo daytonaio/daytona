@@ -19,10 +19,13 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SandboxClass;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.google.gson.Gson;
@@ -77,6 +80,11 @@ public class CreateOrganizationRegionQuota {
   @SerializedName(SERIALIZED_NAME_TOTAL_GPU_QUOTA)
   @javax.annotation.Nonnull
   private BigDecimal totalGpuQuota;
+
+  public static final String SERIALIZED_NAME_ALLOWED_GPU_TYPES = "allowedGpuTypes";
+  @SerializedName(SERIALIZED_NAME_ALLOWED_GPU_TYPES)
+  @javax.annotation.Nullable
+  private List<GpuType> allowedGpuTypes;
 
   public static final String SERIALIZED_NAME_MAX_CPU_PER_SANDBOX = "maxCpuPerSandbox";
   @SerializedName(SERIALIZED_NAME_MAX_CPU_PER_SANDBOX)
@@ -208,6 +216,33 @@ public class CreateOrganizationRegionQuota {
 
   public void setTotalGpuQuota(@javax.annotation.Nonnull BigDecimal totalGpuQuota) {
     this.totalGpuQuota = totalGpuQuota;
+  }
+
+
+  public CreateOrganizationRegionQuota allowedGpuTypes(@javax.annotation.Nullable List<GpuType> allowedGpuTypes) {
+    this.allowedGpuTypes = allowedGpuTypes;
+    return this;
+  }
+
+  public CreateOrganizationRegionQuota addAllowedGpuTypesItem(GpuType allowedGpuTypesItem) {
+    if (this.allowedGpuTypes == null) {
+      this.allowedGpuTypes = new ArrayList<>();
+    }
+    this.allowedGpuTypes.add(allowedGpuTypesItem);
+    return this;
+  }
+
+  /**
+   * Get allowedGpuTypes
+   * @return allowedGpuTypes
+   */
+  @javax.annotation.Nullable
+  public List<GpuType> getAllowedGpuTypes() {
+    return allowedGpuTypes;
+  }
+
+  public void setAllowedGpuTypes(@javax.annotation.Nullable List<GpuType> allowedGpuTypes) {
+    this.allowedGpuTypes = allowedGpuTypes;
   }
 
 
@@ -403,6 +438,7 @@ public class CreateOrganizationRegionQuota {
         Objects.equals(this.totalMemoryQuota, createOrganizationRegionQuota.totalMemoryQuota) &&
         Objects.equals(this.totalDiskQuota, createOrganizationRegionQuota.totalDiskQuota) &&
         Objects.equals(this.totalGpuQuota, createOrganizationRegionQuota.totalGpuQuota) &&
+        Objects.equals(this.allowedGpuTypes, createOrganizationRegionQuota.allowedGpuTypes) &&
         Objects.equals(this.maxCpuPerSandbox, createOrganizationRegionQuota.maxCpuPerSandbox) &&
         Objects.equals(this.maxMemoryPerSandbox, createOrganizationRegionQuota.maxMemoryPerSandbox) &&
         Objects.equals(this.maxDiskPerSandbox, createOrganizationRegionQuota.maxDiskPerSandbox) &&
@@ -419,7 +455,7 @@ public class CreateOrganizationRegionQuota {
 
   @Override
   public int hashCode() {
-    return Objects.hash(sandboxClass, totalCpuQuota, totalMemoryQuota, totalDiskQuota, totalGpuQuota, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, additionalProperties);
+    return Objects.hash(sandboxClass, totalCpuQuota, totalMemoryQuota, totalDiskQuota, totalGpuQuota, allowedGpuTypes, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, maxDiskPerNonEphemeralSandbox, maxCpuPerGpuSandbox, maxMemoryPerGpuSandbox, maxDiskPerGpuSandbox, additionalProperties);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -438,6 +474,7 @@ public class CreateOrganizationRegionQuota {
     sb.append("    totalMemoryQuota: ").append(toIndentedString(totalMemoryQuota)).append("\n");
     sb.append("    totalDiskQuota: ").append(toIndentedString(totalDiskQuota)).append("\n");
     sb.append("    totalGpuQuota: ").append(toIndentedString(totalGpuQuota)).append("\n");
+    sb.append("    allowedGpuTypes: ").append(toIndentedString(allowedGpuTypes)).append("\n");
     sb.append("    maxCpuPerSandbox: ").append(toIndentedString(maxCpuPerSandbox)).append("\n");
     sb.append("    maxMemoryPerSandbox: ").append(toIndentedString(maxMemoryPerSandbox)).append("\n");
     sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
@@ -464,7 +501,7 @@ public class CreateOrganizationRegionQuota {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
+    openapiFields = new HashSet<String>(Arrays.asList("sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota", "allowedGpuTypes", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "maxDiskPerNonEphemeralSandbox", "maxCpuPerGpuSandbox", "maxMemoryPerGpuSandbox", "maxDiskPerGpuSandbox"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("sandboxClass", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalGpuQuota"));
@@ -492,6 +529,10 @@ public class CreateOrganizationRegionQuota {
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       // validate the required field `sandboxClass`
       SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
+      // ensure the optional json data is an array if present
+      if (jsonObj.get("allowedGpuTypes") != null && !jsonObj.get("allowedGpuTypes").isJsonNull() && !jsonObj.get("allowedGpuTypes").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `allowedGpuTypes` to be an array in the JSON string but got `%s`", jsonObj.get("allowedGpuTypes").toString()));
+      }
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

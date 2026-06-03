@@ -18,6 +18,9 @@
 import type { BuildInfo } from './build-info';
 // May contain unused imports in some cases
 // @ts-ignore
+import type { GpuType } from './gpu-type';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxDesiredState } from './sandbox-desired-state';
 // May contain unused imports in some cases
 // @ts-ignore
@@ -79,6 +82,10 @@ export interface Sandbox {
      * The GPU quota for the sandbox
      */
     'gpu': number;
+    /**
+     * The GPU type assigned to the sandbox
+     */
+    'gpuType'?: GpuType;
     /**
      * The memory quota for the sandbox
      */

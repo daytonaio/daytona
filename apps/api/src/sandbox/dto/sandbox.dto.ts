@@ -11,6 +11,7 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BuildInfoDto } from './build-info.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 
 @ApiSchema({ name: 'SandboxVolume' })
 export class SandboxVolume {
@@ -117,6 +118,16 @@ export class SandboxDto {
     example: 0,
   })
   gpu: number
+
+  @ApiPropertyOptional({
+    description: 'The GPU type assigned to the sandbox',
+    enum: GpuType,
+    enumName: 'GpuType',
+    example: GpuType.H100,
+  })
+  @IsEnum(GpuType)
+  @IsOptional()
+  gpuType?: GpuType
 
   @ApiProperty({
     description: 'The memory quota for the sandbox',
@@ -303,6 +314,7 @@ export class SandboxDto {
       env: sandbox.env,
       cpu: sandbox.cpu,
       gpu: sandbox.gpu,
+      gpuType: sandbox.gpuType ?? undefined,
       memory: sandbox.mem,
       disk: sandbox.disk,
       public: sandbox.public,

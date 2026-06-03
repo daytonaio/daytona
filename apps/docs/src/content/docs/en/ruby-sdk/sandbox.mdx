@@ -806,13 +806,13 @@ def resize(resources, timeout)
 
 Resizes the Sandbox resources.
 
-Changes the CPU, memory, or disk allocation for the Sandbox. Resizing a started
-sandbox allows increasing CPU and memory. To resize disk or decrease resources,
-the sandbox must be stopped first.
+Changes the CPU, memory, or disk allocation. Resizing a started sandbox accepts
+only CPU and memory increases. Disk resize requires a stopped sandbox; disk can
+only grow. GPU is not resizable — to change GPU, create a new sandbox.
 
 **Parameters**:
 
-- `resources` _Daytona:Resources_ - New resource configuration
+- `resources` _Daytona:Resources_ - New resource configuration (cpu, memory, disk only)
 - `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s)
 
 **Returns**:
@@ -821,7 +821,7 @@ the sandbox must be stopped first.
 
 **Raises**:
 
-- `Sdk:Error` -
+- `Sdk:Error` - If resources.gpu or resources.gpu_type is set
 
 **Examples:**
 

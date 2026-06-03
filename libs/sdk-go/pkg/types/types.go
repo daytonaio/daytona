@@ -6,6 +6,7 @@ package types
 import (
 	"time"
 
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	toolbox "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
@@ -18,6 +19,17 @@ const (
 	CodeLanguagePython     CodeLanguage = "python"
 	CodeLanguageJavaScript CodeLanguage = "javascript"
 	CodeLanguageTypeScript CodeLanguage = "typescript"
+)
+
+// GpuType identifies a specific NVIDIA GPU model. Used in [Resources.GpuType]
+// as an ordered preference list — the scheduler tries each in order and pins
+// the sandbox/snapshot to the first that has capacity. It is an alias for the
+// API client's GpuType type.
+type GpuType = apiclient.GpuType
+
+const (
+	GpuTypeH100       GpuType = apiclient.GPUTYPE_H100
+	GpuTypeRtxPro6000 GpuType = apiclient.GPUTYPE_RTX_PRO_6000
 )
 
 // ExperimentalConfig holds experimental feature flags for the Daytona client.
@@ -40,10 +52,11 @@ type DaytonaConfig struct {
 
 // Resources represents resource allocation for a sandbox.
 type Resources struct {
-	CPU    int
-	GPU    int
-	Memory int
-	Disk   int
+	CPU     int
+	GPU     int
+	GpuType []GpuType
+	Memory  int
+	Disk    int
 }
 
 // VolumeMount represents a volume mount configuration

@@ -79,6 +79,7 @@ public class SnapshotService {
         if (resources != null) {
             if (resources.getCpu() != null) req.setCpu(resources.getCpu());
             if (resources.getGpu() != null) req.setGpu(resources.getGpu());
+            if (resources.getGpuType() != null) req.setGpuType(resources.getGpuType());
             if (resources.getMemory() != null) req.setMemory(resources.getMemory());
             if (resources.getDisk() != null) req.setDisk(resources.getDisk());
         }

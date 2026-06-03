@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from daytona_api_client import SandboxListSortDirection, SandboxListSortField, SandboxState
+    from daytona_api_client_async import GpuType
     from daytona_toolbox_api_client import SessionExecuteResponse
 
     from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
@@ -75,6 +76,7 @@ __all__ = [
     "CodeRunParams",
     "Sandbox",
     "Resources",
+    "GpuType",
     "SandboxState",
     "SandboxListSortField",
     "SandboxListSortDirection",
@@ -127,6 +129,7 @@ __all__ = [
 
 # Mapping of symbol name -> (absolute module path, attribute name) for external packages
 _EXTERNAL_IMPORTS: dict[str, tuple[str, str]] = {
+    "GpuType": ("daytona_api_client_async.models.gpu_type", "GpuType"),
     "SandboxState": ("daytona_api_client.models.sandbox_state", "SandboxState"),
     "SandboxListSortField": ("daytona_api_client.models.sandbox_list_sort_field", "SandboxListSortField"),
     "SandboxListSortDirection": (

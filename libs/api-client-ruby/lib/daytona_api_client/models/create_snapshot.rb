@@ -30,6 +30,9 @@ module DaytonaApiClient
     # GPU units allocated to the resulting sandbox
     attr_accessor :gpu
 
+    # Preferred GPU type for the resulting sandbox.
+    attr_accessor :gpu_type
+
     # Memory allocated to the resulting sandbox in GB
     attr_accessor :memory
 
@@ -75,6 +78,7 @@ module DaytonaApiClient
         :'entrypoint' => :'entrypoint',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
+        :'gpu_type' => :'gpuType',
         :'memory' => :'memory',
         :'disk' => :'disk',
         :'build_info' => :'buildInfo',
@@ -101,6 +105,7 @@ module DaytonaApiClient
         :'entrypoint' => :'Array<String>',
         :'cpu' => :'Integer',
         :'gpu' => :'Integer',
+        :'gpu_type' => :'Array<GpuType>',
         :'memory' => :'Integer',
         :'disk' => :'Integer',
         :'build_info' => :'CreateBuildInfo',
@@ -153,6 +158,12 @@ module DaytonaApiClient
 
       if attributes.key?(:'gpu')
         self.gpu = attributes[:'gpu']
+      end
+
+      if attributes.key?(:'gpu_type')
+        if (value = attributes[:'gpu_type']).is_a?(Array)
+          self.gpu_type = value
+        end
       end
 
       if attributes.key?(:'memory')
@@ -216,6 +227,7 @@ module DaytonaApiClient
           entrypoint == o.entrypoint &&
           cpu == o.cpu &&
           gpu == o.gpu &&
+          gpu_type == o.gpu_type &&
           memory == o.memory &&
           disk == o.disk &&
           build_info == o.build_info &&
@@ -232,7 +244,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, image_name, entrypoint, cpu, gpu, memory, disk, build_info, region_id, sandbox_class].hash
+      [name, image_name, entrypoint, cpu, gpu, gpu_type, memory, disk, build_info, region_id, sandbox_class].hash
     end
 
     # Builds the object from hash

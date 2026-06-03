@@ -3,11 +3,24 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray, Max, Min } from 'class-validator'
+import {
+  ArrayMinSize,
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  Max,
+  Min,
+} from 'class-validator'
+import { Transform } from 'class-transformer'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 import { IsSafeDisplayString } from '../../common/validators'
+import { GpuType } from '../enums/gpu-type.enum'
 
 @ApiSchema({ name: 'CreateSandbox' })
 export class CreateSandboxDto {
@@ -108,6 +121,29 @@ export class CreateSandboxDto {
   @Min(0)
   @Max(1)
   gpu?: number
+
+  @ApiPropertyOptional({
+    description:
+      'Preferred GPU type for the sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the sandbox to the first that has capacity.',
+    enum: GpuType,
+    enumName: 'GpuType',
+    isArray: true,
+    example: [GpuType.H100],
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.length === 0
+        ? undefined
+        : value
+      : value === undefined || value === null
+        ? value
+        : [value],
+  )
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsEnum(GpuType, { each: true })
+  gpuType?: GpuType[]
 
   @ApiPropertyOptional({
     description: 'Memory allocated to the sandbox in GB',

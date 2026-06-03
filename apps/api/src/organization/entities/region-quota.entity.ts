@@ -6,6 +6,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm'
 import { Organization } from './organization.entity'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
+import { GpuType } from '../../sandbox/enums/gpu-type.enum'
 
 const DEFAULT_MAX_CPU_PER_GPU_SANDBOX = 16
 const DEFAULT_MAX_MEMORY_PER_GPU_SANDBOX = 192
@@ -55,6 +56,18 @@ export class RegionQuota {
     name: 'total_gpu_quota',
   })
   totalGpuQuota: number
+
+  /**
+   * List of GPU types permitted in this region.
+   * `null` = no restriction.
+   */
+  @Column({
+    type: 'text',
+    array: true,
+    nullable: true,
+    name: 'allowed_gpu_types',
+  })
+  allowedGpuTypes: GpuType[] | null
 
   @Column({
     type: 'int',
@@ -143,6 +156,7 @@ export class RegionQuota {
     totalMemoryQuota: number
     totalDiskQuota: number
     totalGpuQuota?: number
+    allowedGpuTypes?: GpuType[] | null
     maxCpuPerSandbox?: number | null
     maxMemoryPerSandbox?: number | null
     maxDiskPerSandbox?: number | null
@@ -159,6 +173,7 @@ export class RegionQuota {
     this.totalMemoryQuota = params.totalMemoryQuota
     this.totalDiskQuota = params.totalDiskQuota
     this.totalGpuQuota = params.totalGpuQuota ?? 0
+    this.allowedGpuTypes = params.allowedGpuTypes ?? null
     this.maxCpuPerSandbox = params.maxCpuPerSandbox ?? null
     this.maxMemoryPerSandbox = params.maxMemoryPerSandbox ?? null
     this.maxDiskPerSandbox = params.maxDiskPerSandbox ?? null

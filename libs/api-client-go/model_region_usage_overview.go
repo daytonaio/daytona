@@ -31,6 +31,7 @@ type RegionUsageOverview struct {
 	CurrentDiskUsage float32 `json:"currentDiskUsage"`
 	TotalGpuQuota float32 `json:"totalGpuQuota"`
 	CurrentGpuUsage float32 `json:"currentGpuUsage"`
+	AllowedGpuTypes []GpuType `json:"allowedGpuTypes,omitempty"`
 	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox"`
 	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox"`
 	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox"`
@@ -317,6 +318,38 @@ func (o *RegionUsageOverview) SetCurrentGpuUsage(v float32) {
 	o.CurrentGpuUsage = v
 }
 
+// GetAllowedGpuTypes returns the AllowedGpuTypes field value if set, zero value otherwise.
+func (o *RegionUsageOverview) GetAllowedGpuTypes() []GpuType {
+	if o == nil || IsNil(o.AllowedGpuTypes) {
+		var ret []GpuType
+		return ret
+	}
+	return o.AllowedGpuTypes
+}
+
+// GetAllowedGpuTypesOk returns a tuple with the AllowedGpuTypes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RegionUsageOverview) GetAllowedGpuTypesOk() ([]GpuType, bool) {
+	if o == nil || IsNil(o.AllowedGpuTypes) {
+		return nil, false
+	}
+	return o.AllowedGpuTypes, true
+}
+
+// HasAllowedGpuTypes returns a boolean if a field has been set.
+func (o *RegionUsageOverview) HasAllowedGpuTypes() bool {
+	if o != nil && !IsNil(o.AllowedGpuTypes) {
+		return true
+	}
+
+	return false
+}
+
+// SetAllowedGpuTypes gets a reference to the given []GpuType and assigns it to the AllowedGpuTypes field.
+func (o *RegionUsageOverview) SetAllowedGpuTypes(v []GpuType) {
+	o.AllowedGpuTypes = v
+}
+
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value
 // If the value is explicit nil, the zero value for float32 will be returned
 func (o *RegionUsageOverview) GetMaxCpuPerSandbox() float32 {
@@ -519,6 +552,9 @@ func (o RegionUsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize["currentDiskUsage"] = o.CurrentDiskUsage
 	toSerialize["totalGpuQuota"] = o.TotalGpuQuota
 	toSerialize["currentGpuUsage"] = o.CurrentGpuUsage
+	if !IsNil(o.AllowedGpuTypes) {
+		toSerialize["allowedGpuTypes"] = o.AllowedGpuTypes
+	}
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox.Get()
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox.Get()
@@ -595,6 +631,7 @@ func (o *RegionUsageOverview) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "currentDiskUsage")
 		delete(additionalProperties, "totalGpuQuota")
 		delete(additionalProperties, "currentGpuUsage")
+		delete(additionalProperties, "allowedGpuTypes")
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")

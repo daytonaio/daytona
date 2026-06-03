@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getSnapshotQueryErrorStatus, useSnapshotQuery } from '@/hooks/queries/useSnapshotsQuery'
+import { getGpuTypeLabel } from '@/lib/gpu-types'
 import { cn, getRelativeTimeString, truncateUUID } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { MagnifyingGlassIcon } from '@phosphor-icons/react'
@@ -398,7 +399,17 @@ export function SnapshotSheet({
                   <ResourceChip resource="cpu" value={activeSnapshot.cpu} />
                   <ResourceChip resource="memory" value={activeSnapshot.mem} />
                   <ResourceChip resource="disk" value={activeSnapshot.disk} />
-                  {activeSnapshot.gpu > 0 && <ResourceChip resource="gpu" value={activeSnapshot.gpu} />}
+                  {activeSnapshot.gpu > 0 &&
+                    (() => {
+                      const gpuTypeLabel = getGpuTypeLabel(activeSnapshot.gpuType)
+                      return (
+                        <ResourceChip
+                          resource="gpu"
+                          value={activeSnapshot.gpu}
+                          unit={gpuTypeLabel ? `GPU · ${gpuTypeLabel}` : undefined}
+                        />
+                      )
+                    })()}
                 </div>
               </InfoSection>
 

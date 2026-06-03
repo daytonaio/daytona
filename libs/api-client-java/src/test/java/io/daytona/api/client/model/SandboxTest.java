@@ -19,6 +19,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.BuildInfo;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SandboxDesiredState;
 import io.daytona.api.client.model.SandboxState;
 import io.daytona.api.client.model.SandboxVolume;
@@ -148,6 +149,14 @@ public class SandboxTest {
     @Test
     public void gpuTest() {
         // TODO: test gpu
+    }
+
+    /**
+     * Test the property 'gpuType'
+     */
+    @Test
+    public void gpuTypeTest() {
+        // TODO: test gpuType
     }
 
     /**

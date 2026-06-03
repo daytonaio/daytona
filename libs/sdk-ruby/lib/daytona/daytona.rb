@@ -236,6 +236,10 @@ module Daytona
         create_sandbox.memory = params.resources&.memory
         create_sandbox.disk = params.resources&.disk
         create_sandbox.gpu = params.resources&.gpu
+        if params.resources&.gpu_type
+          create_sandbox.gpu_type =
+            params.resources.gpu_type.is_a?(Array) ? params.resources.gpu_type : [params.resources.gpu_type]
+        end
       end
 
       response = sandbox_api.create_sandbox(create_sandbox)

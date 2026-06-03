@@ -19,6 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import io.daytona.api.client.model.GpuType;
 import io.daytona.api.client.model.SandboxDesiredState;
 import io.daytona.api.client.model.SandboxState;
 import java.io.IOException;
@@ -188,6 +189,11 @@ public class SandboxListItem {
   @SerializedName(SERIALIZED_NAME_GPU)
   @javax.annotation.Nonnull
   private BigDecimal gpu;
+
+  public static final String SERIALIZED_NAME_GPU_TYPE = "gpuType";
+  @SerializedName(SERIALIZED_NAME_GPU_TYPE)
+  @javax.annotation.Nullable
+  private GpuType gpuType;
 
   public static final String SERIALIZED_NAME_MEMORY = "memory";
   @SerializedName(SERIALIZED_NAME_MEMORY)
@@ -601,6 +607,25 @@ public class SandboxListItem {
   }
 
 
+  public SandboxListItem gpuType(@javax.annotation.Nullable GpuType gpuType) {
+    this.gpuType = gpuType;
+    return this;
+  }
+
+  /**
+   * The GPU type assigned to the sandbox
+   * @return gpuType
+   */
+  @javax.annotation.Nullable
+  public GpuType getGpuType() {
+    return gpuType;
+  }
+
+  public void setGpuType(@javax.annotation.Nullable GpuType gpuType) {
+    this.gpuType = gpuType;
+  }
+
+
   public SandboxListItem memory(@javax.annotation.Nonnull BigDecimal memory) {
     this.memory = memory;
     return this;
@@ -906,6 +931,7 @@ public class SandboxListItem {
         Objects.equals(this._public, sandboxListItem._public) &&
         Objects.equals(this.cpu, sandboxListItem.cpu) &&
         Objects.equals(this.gpu, sandboxListItem.gpu) &&
+        Objects.equals(this.gpuType, sandboxListItem.gpuType) &&
         Objects.equals(this.memory, sandboxListItem.memory) &&
         Objects.equals(this.disk, sandboxListItem.disk) &&
         Objects.equals(this.labels, sandboxListItem.labels) &&
@@ -923,7 +949,7 @@ public class SandboxListItem {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, target, runnerId, sandboxClass, state, desiredState, snapshot, user, errorReason, recoverable, _public, cpu, gpu, memory, disk, labels, backupState, autoStopInterval, autoArchiveInterval, autoDeleteInterval, createdAt, updatedAt, lastActivityAt, daemonVersion, toolboxProxyUrl, additionalProperties);
+    return Objects.hash(id, organizationId, name, target, runnerId, sandboxClass, state, desiredState, snapshot, user, errorReason, recoverable, _public, cpu, gpu, gpuType, memory, disk, labels, backupState, autoStopInterval, autoArchiveInterval, autoDeleteInterval, createdAt, updatedAt, lastActivityAt, daemonVersion, toolboxProxyUrl, additionalProperties);
   }
 
   @Override
@@ -945,6 +971,7 @@ public class SandboxListItem {
     sb.append("    _public: ").append(toIndentedString(_public)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
+    sb.append("    gpuType: ").append(toIndentedString(gpuType)).append("\n");
     sb.append("    memory: ").append(toIndentedString(memory)).append("\n");
     sb.append("    disk: ").append(toIndentedString(disk)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
@@ -976,7 +1003,7 @@ public class SandboxListItem {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "target", "runnerId", "sandboxClass", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "target", "runnerId", "sandboxClass", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "gpuType", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "target", "user", "public", "cpu", "gpu", "memory", "disk", "labels", "toolboxProxyUrl"));
@@ -1040,6 +1067,10 @@ public class SandboxListItem {
       }
       if ((jsonObj.get("errorReason") != null && !jsonObj.get("errorReason").isJsonNull()) && !jsonObj.get("errorReason").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `errorReason` to be a primitive type in the JSON string but got `%s`", jsonObj.get("errorReason").toString()));
+      }
+      // validate the optional field `gpuType`
+      if (jsonObj.get("gpuType") != null && !jsonObj.get("gpuType").isJsonNull()) {
+        GpuType.validateJsonElement(jsonObj.get("gpuType"));
       }
       if ((jsonObj.get("backupState") != null && !jsonObj.get("backupState").isJsonNull()) && !jsonObj.get("backupState").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `backupState` to be a primitive type in the JSON string but got `%s`", jsonObj.get("backupState").toString()));

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
+import { getGpuTypeLabel } from '@/lib/gpu-types'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
 import { SandboxListItem } from '@daytona/api-client'
 import { AlertCircle, ArrowUpRight, KeyRound, Tag, UserRoundX } from 'lucide-react'
@@ -126,7 +127,17 @@ export function SandboxInfoPanel({
           <ResourceChip resource="cpu" value={sandbox.cpu} />
           <ResourceChip resource="memory" value={sandbox.memory} />
           <ResourceChip resource="disk" value={sandbox.disk} />
-          {sandbox.gpu > 0 && <ResourceChip resource="gpu" value={sandbox.gpu} />}
+          {sandbox.gpu > 0 &&
+            (() => {
+              const gpuTypeLabel = getGpuTypeLabel(sandbox.gpuType)
+              return (
+                <ResourceChip
+                  resource="gpu"
+                  value={sandbox.gpu}
+                  unit={gpuTypeLabel ? `GPU · ${gpuTypeLabel}` : undefined}
+                />
+              )
+            })()}
         </div>
       </InfoSection>
 

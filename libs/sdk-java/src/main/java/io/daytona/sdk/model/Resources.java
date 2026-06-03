@@ -5,6 +5,9 @@ package io.daytona.sdk.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.daytona.api.client.model.GpuType;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 /**
@@ -15,6 +18,8 @@ public class Resources {
     private Integer cpu;
     @JsonProperty("gpu")
     private Integer gpu;
+    @JsonProperty("gpuType")
+    private List<GpuType> gpuType;
     @JsonProperty("memory")
     private Integer memory;
     @JsonProperty("disk")
@@ -47,6 +52,20 @@ public class Resources {
      * @param gpu GPU units
      */
     public void setGpu(Integer gpu) { this.gpu = gpu; }
+
+    /**
+     * Returns the preferred GPU type for the Sandbox.
+     *
+     * @return preferred GPU type, or {@code null} for any available type
+     */
+    public List<GpuType> getGpuType() { return gpuType; }
+
+    /**
+     * Sets the preferred GPU type for the Sandbox.
+     *
+     * @param gpuType preferred GPU type
+     */
+    public void setGpuType(List<GpuType> gpuType) { this.gpuType = gpuType; }
 
     /**
      * Returns memory allocation in GiB.

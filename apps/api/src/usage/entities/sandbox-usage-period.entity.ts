@@ -5,6 +5,7 @@
 
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
+import { GpuType } from '../../sandbox/enums/gpu-type.enum'
 
 @Entity('sandbox_usage_periods')
 @Index('idx_sandbox_usage_periods_sandbox_end', ['sandboxId', 'endAt'])
@@ -35,6 +36,13 @@ export class SandboxUsagePeriod {
   @Column({ type: 'float' })
   gpu: number
 
+  @Column({
+    type: 'character varying',
+    nullable: true,
+    name: 'gpu_type',
+  })
+  gpuType: GpuType | null
+
   @Column({ type: 'float' })
   mem: number
 
@@ -58,6 +66,7 @@ export class SandboxUsagePeriod {
     usagePeriodEntity.endAt = usagePeriod.endAt
     usagePeriodEntity.cpu = usagePeriod.cpu
     usagePeriodEntity.gpu = usagePeriod.gpu
+    usagePeriodEntity.gpuType = usagePeriod.gpuType
     usagePeriodEntity.mem = usagePeriod.mem
     usagePeriodEntity.disk = usagePeriod.disk
     usagePeriodEntity.region = usagePeriod.region

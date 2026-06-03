@@ -21,6 +21,7 @@ import {
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { EventEmitter2 } from '@nestjs/event-emitter'
@@ -305,6 +306,9 @@ export class RunnerService {
 
     if (params.gpu > 0) {
       runnerFilter.gpu = MoreThanOrEqual(params.gpu)
+      if (typeof params.gpuType === 'string') {
+        runnerFilter.gpuType = params.gpuType
+      }
     } else {
       // GPU runners are exclusively reserved for GPU sandboxes.
       runnerFilter.gpu = Or(IsNull(), Equal(0))
@@ -771,16 +775,23 @@ export class RunnerService {
   }
 
   async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
-    const availableRunners = await this.findAvailableRunners(params)
+    const pickRandom = (runners: Runner[]) => runners[Math.floor(Math.random() * runners.length)]
 
+    if (params.gpu > 0 && Array.isArray(params.gpuType) && params.gpuType.length > 0) {
+      for (const gpuType of params.gpuType) {
+        const candidates = await this.findAvailableRunners({ ...params, gpuType })
+        if (candidates.length > 0) {
+          return pickRandom(candidates)
+        }
+      }
+      throw new BadRequestError(`No available runners with GPU type: ${params.gpuType.join(', ')}.`)
+    }
+
+    const availableRunners = await this.findAvailableRunners(params)
     if (availableRunners.length === 0) {
       throw new BadRequestError('No available runners')
     }
-
-    // Get random runner from the best available runners
-    const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
-
-    return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
+    return pickRandom(availableRunners)
   }
 
   /**
@@ -1201,6 +1212,14 @@ export class GetRunnerParams {
   // and have not yet reached their GPU sandbox capacity (a runner with
   // runner.gpu = N can host up to N concurrent GPU sandboxes).
   gpu: number
+  /**
+   * GPU type filter. Three forms accepted:
+   *  - `null` → no GPU type filter
+   *  - single `GpuType` → exact match (honored by `findAvailableRunners`)
+   *  - `GpuType[]` ordered preference list → only honored by `getRandomAvailableRunner`,
+   *    which iterates and returns a runner matching the first type with capacity.
+   */
+  gpuType: GpuType | GpuType[] | null
 }
 
 interface AvailabilityScoreParams {

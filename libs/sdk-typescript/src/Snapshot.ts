@@ -175,6 +175,11 @@ export class SnapshotService {
     if (params.resources) {
       createSnapshotReq.cpu = params.resources.cpu
       createSnapshotReq.gpu = params.resources.gpu
+      if (params.resources.gpuType !== undefined) {
+        createSnapshotReq.gpuType = Array.isArray(params.resources.gpuType)
+          ? params.resources.gpuType
+          : [params.resources.gpuType]
+      }
       createSnapshotReq.memory = params.resources.memory
       createSnapshotReq.disk = params.resources.disk
     }

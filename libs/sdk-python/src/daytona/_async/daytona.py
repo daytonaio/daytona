@@ -529,6 +529,12 @@ class AsyncDaytona:
                 sandbox_data.memory = params.resources.memory
                 sandbox_data.disk = params.resources.disk
                 sandbox_data.gpu = params.resources.gpu
+                if params.resources.gpu_type is not None:
+                    sandbox_data.gpu_type = (
+                        params.resources.gpu_type
+                        if isinstance(params.resources.gpu_type, list)
+                        else [params.resources.gpu_type]
+                    )
 
         response = await self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=http_timeout(timeout))
 

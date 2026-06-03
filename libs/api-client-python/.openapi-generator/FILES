@@ -78,6 +78,7 @@ daytona_api_client/models/git_commit_response.py
 daytona_api_client/models/git_delete_branch_request.py
 daytona_api_client/models/git_repo_request.py
 daytona_api_client/models/git_status.py
+daytona_api_client/models/gpu_type.py
 daytona_api_client/models/health_controller_check200_response.py
 daytona_api_client/models/health_controller_check200_response_info_value.py
 daytona_api_client/models/health_controller_check503_response.py

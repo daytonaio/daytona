@@ -107,6 +107,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.git_delete_branch_request import GitDeleteBranchRequest
     from daytona_api_client_async.models.git_repo_request import GitRepoRequest
     from daytona_api_client_async.models.git_status import GitStatus
+    from daytona_api_client_async.models.gpu_type import GpuType
     from daytona_api_client_async.models.health_controller_check200_response import HealthControllerCheck200Response
     from daytona_api_client_async.models.health_controller_check200_response_info_value import HealthControllerCheck200ResponseInfoValue
     from daytona_api_client_async.models.health_controller_check503_response import HealthControllerCheck503Response
@@ -321,6 +322,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "GitDeleteBranchRequest": "daytona_api_client_async.models.git_delete_branch_request",
     "GitRepoRequest": "daytona_api_client_async.models.git_repo_request",
     "GitStatus": "daytona_api_client_async.models.git_status",
+    "GpuType": "daytona_api_client_async.models.gpu_type",
     "HealthControllerCheck200Response": "daytona_api_client_async.models.health_controller_check200_response",
     "HealthControllerCheck200ResponseInfoValue": "daytona_api_client_async.models.health_controller_check200_response_info_value",
     "HealthControllerCheck503Response": "daytona_api_client_async.models.health_controller_check503_response",
@@ -549,6 +551,7 @@ __all__ = [
     "GitDeleteBranchRequest",
     "GitRepoRequest",
     "GitStatus",
+    "GpuType",
     "HealthControllerCheck200Response",
     "HealthControllerCheck200ResponseInfoValue",
     "HealthControllerCheck503Response",

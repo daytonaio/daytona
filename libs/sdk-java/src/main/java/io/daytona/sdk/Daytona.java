@@ -171,6 +171,7 @@ public class Daytona implements AutoCloseable {
             if (params.getResources() != null) {
                 if (params.getResources().getCpu() != null) body.setCpu(params.getResources().getCpu());
                 if (params.getResources().getGpu() != null) body.setGpu(params.getResources().getGpu());
+                if (params.getResources().getGpuType() != null) body.setGpuType(params.getResources().getGpuType());
                 if (params.getResources().getMemory() != null) body.setMemory(params.getResources().getMemory());
                 if (params.getResources().getDisk() != null) body.setDisk(params.getResources().getDisk());
             }

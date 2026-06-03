@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client.models.gpu_type import GpuType
 from daytona_api_client.models.sandbox_desired_state import SandboxDesiredState
 from daytona_api_client.models.sandbox_state import SandboxState
 from pydantic import TypeAdapter
@@ -47,6 +48,7 @@ class SandboxListItem(BaseModel):
     public: StrictBool = Field(description="Whether the sandbox http preview is public")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU quota for the sandbox")
     gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU quota for the sandbox")
+    gpu_type: Optional[GpuType] = Field(default=None, description="The GPU type assigned to the sandbox", serialization_alias="gpuType")
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory quota for the sandbox")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk quota for the sandbox")
     labels: Dict[str, StrictStr] = Field(description="Labels for the sandbox")
@@ -60,7 +62,7 @@ class SandboxListItem(BaseModel):
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", serialization_alias="daemonVersion")
     toolbox_proxy_url: StrictStr = Field(description="The toolbox proxy URL for the sandbox", serialization_alias="toolboxProxyUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "target", "runnerId", "sandboxClass", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "target", "runnerId", "sandboxClass", "state", "desiredState", "snapshot", "user", "errorReason", "recoverable", "public", "cpu", "gpu", "gpuType", "memory", "disk", "labels", "backupState", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "createdAt", "updatedAt", "lastActivityAt", "daemonVersion", "toolboxProxyUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -134,6 +136,7 @@ class SandboxListItem(BaseModel):
             "public": obj.get("public"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),
+            "gpu_type": obj.get("gpuType"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "labels": obj.get("labels"),

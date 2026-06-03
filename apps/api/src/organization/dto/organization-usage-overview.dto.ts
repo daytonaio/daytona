@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
+import { GpuType } from '../../sandbox/enums/gpu-type.enum'
 
 @ApiSchema({ name: 'RegionUsageOverview' })
 export class RegionUsageOverviewDto {
@@ -33,6 +34,9 @@ export class RegionUsageOverviewDto {
   totalGpuQuota: number
   @ApiProperty()
   currentGpuUsage: number
+
+  @ApiPropertyOptional({ enum: GpuType, enumName: 'GpuType', isArray: true })
+  allowedGpuTypes?: GpuType[]
 
   @ApiProperty({ nullable: true })
   maxCpuPerSandbox: number | null

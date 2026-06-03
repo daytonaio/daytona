@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client.models.create_build_info import CreateBuildInfo
+from daytona_api_client.models.gpu_type import GpuType
 from daytona_api_client.models.sandbox_volume import SandboxVolume
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -43,6 +44,7 @@ class CreateSandbox(BaseModel):
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the sandbox will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the sandbox")
+    gpu_type: Optional[List[GpuType]] = Field(default=None, description="Preferred GPU type for the sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the sandbox to the first that has capacity.", serialization_alias="gpuType")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", serialization_alias="autoStopInterval")
@@ -52,7 +54,7 @@ class CreateSandbox(BaseModel):
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the sandbox", serialization_alias="buildInfo")
     linked_sandbox: Optional[StrictStr] = Field(default=None, description="ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.", serialization_alias="linkedSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"]
+    __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "gpuType", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -132,6 +134,7 @@ class CreateSandbox(BaseModel):
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),
+            "gpu_type": obj.get("gpuType"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "auto_stop_interval": obj.get("autoStopInterval"),
