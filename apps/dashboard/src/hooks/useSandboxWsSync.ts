@@ -128,9 +128,28 @@ export function useSandboxDetailsWsSync(sandboxId?: string) {
     enabled: Boolean(selectedOrganization?.id && sandboxId),
     sandboxId,
     queryKey: queryKeys.sandboxes.detail(selectedOrganization?.id ?? '', sandboxId ?? ''),
-    sync: (oldData, sandbox) => {
+    sync: (oldData, sandbox, event) => {
       if (!oldData) {
         return sandbox
+      }
+
+      if (event.type === 'desired-state.updated') {
+        if (
+          event.newDesiredState === SandboxDesiredState.DESTROYED &&
+          (sandbox.state === SandboxState.ERROR || sandbox.state === SandboxState.BUILD_FAILED)
+        ) {
+          return {
+            ...oldData,
+            ...sandbox,
+            state: SandboxState.DESTROYED,
+          }
+        }
+
+        const { state: _ignoredState, ...sandboxWithoutState } = sandbox
+        return {
+          ...oldData,
+          ...sandboxWithoutState,
+        }
       }
 
       return {
