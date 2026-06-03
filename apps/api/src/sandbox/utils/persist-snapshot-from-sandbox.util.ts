@@ -15,6 +15,7 @@ import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { GpuType } from '../enums/gpu-type.enum'
 
 export interface PersistSnapshotFromSandboxDeps {
   snapshotRepository: SnapshotRepository
@@ -31,6 +32,7 @@ export interface PersistSnapshotFromSandboxParams {
   sandboxClass: SandboxClass
   cpu: number
   gpu: number
+  gpuType?: GpuType | null
   mem: number
   disk: number
   sizeGB?: number
@@ -65,6 +67,7 @@ export async function persistSnapshotFromSandbox(
     sandboxClass: params.sandboxClass,
     cpu: params.cpu,
     gpu: params.gpu,
+    gpuType: params.gpuType ?? null,
     mem: params.mem,
     disk: params.disk,
     size,

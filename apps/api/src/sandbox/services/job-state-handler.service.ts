@@ -842,6 +842,7 @@ export class JobStateHandlerService {
                 sandboxClass: sandbox.sandboxClass,
                 cpu: sandbox.cpu,
                 gpu: sandbox.gpu,
+                gpuType: sandbox.gpuType ?? null,
                 mem: sandbox.mem,
                 disk: sandbox.disk,
                 sizeGB: snapshotSizeGB,
