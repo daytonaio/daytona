@@ -10,9 +10,16 @@ import type { ComponentProps, ReactNode } from 'react'
 
 type CreateResourceButtonProps = Omit<ComponentProps<typeof Button>, 'asChild'> & {
   resource: ReactNode
+  label?: ReactNode
 }
 
-export function CreateResourceButton({ resource, children, className, ...props }: CreateResourceButtonProps) {
+export function CreateResourceButton({
+  resource,
+  children,
+  className,
+  label = 'Create',
+  ...props
+}: CreateResourceButtonProps) {
   return (
     <Button
       variant="default"
@@ -21,7 +28,7 @@ export function CreateResourceButton({ resource, children, className, ...props }
       {...props}
     >
       <Plus className="size-4" />
-      <span className="sr-only xs:not-sr-only">Create</span>
+      <span className="sr-only xs:not-sr-only">{label}</span>
       <span className="hidden sm:inline">{children ?? resource}</span>
     </Button>
   )
