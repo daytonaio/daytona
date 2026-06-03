@@ -437,12 +437,8 @@ Resources represents resource allocation for a sandbox.
 
 ```go
 type Resources struct {
-    CPU int
-    GPU int
-    // GpuType is an ordered preference list of GPU types. The scheduler tries
-    // each in order and pins the sandbox/snapshot to the first that has
-    // capacity. Only valid when creating a sandbox from a build image; rejected
-    // when creating a sandbox from a snapshot (the snapshot pins the GPU type).
+    CPU     int
+    GPU     int
     GpuType []GpuType
     Memory  int
     Disk    int

@@ -21,10 +21,7 @@ class Resources:
         memory (int | None): Amount of memory in GiB to allocate.
         disk (int | None): Amount of disk space in GiB to allocate.
         gpu (int | None): Number of GPUs to allocate.
-        gpu_type (GpuType | list[GpuType] | None): Preferred GPU type. Accepts a single
-            value or an ordered preference list — the scheduler tries each in order and pins
-            the sandbox/snapshot to the first that has capacity. Only valid when creating
-            from a build image; rejected when creating a sandbox from a snapshot.
+        gpu_type (GpuType | list[GpuType] | None): Preferred GPU type for the Sandbox.
 
     Example:
         ```python

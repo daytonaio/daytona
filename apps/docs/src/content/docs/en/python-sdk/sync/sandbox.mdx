@@ -710,10 +710,7 @@ Resources configuration for Sandbox.
 - `memory` _int | None_ - Amount of memory in GiB to allocate.
 - `disk` _int | None_ - Amount of disk space in GiB to allocate.
 - `gpu` _int | None_ - Number of GPUs to allocate.
-- `gpu_type` _GpuType | list[GpuType] | None_ - Preferred GPU type. Accepts a single
-  value or an ordered preference list — the scheduler tries each in order and pins
-  the sandbox/snapshot to the first that has capacity. Only valid when creating
-  from a build image; rejected when creating a sandbox from a snapshot.
+- `gpu_type` _GpuType | list[GpuType] | None_ - Preferred GPU type for the Sandbox.
   
 
 **Example**:

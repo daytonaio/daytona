@@ -54,19 +54,16 @@ public class Resources {
     public void setGpu(Integer gpu) { this.gpu = gpu; }
 
     /**
-     * Returns the GPU type preference list.
+     * Returns the preferred GPU type for the Sandbox.
      *
-     * <p>The scheduler tries each value in order and pins the sandbox to the first that
-     * has capacity. Rejected when creating a sandbox from a snapshot.
-     *
-     * @return ordered preference list of GPU types, or {@code null} for any available type
+     * @return preferred GPU type, or {@code null} for any available type
      */
     public List<GpuType> getGpuType() { return gpuType; }
 
     /**
-     * Sets the GPU type preference list.
+     * Sets the preferred GPU type for the Sandbox.
      *
-     * @param gpuType ordered preference list of GPU types
+     * @param gpuType preferred GPU type
      */
     public void setGpuType(List<GpuType> gpuType) { this.gpuType = gpuType; }
 
