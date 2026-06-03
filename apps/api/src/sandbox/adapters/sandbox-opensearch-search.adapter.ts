@@ -373,7 +373,7 @@ export class SandboxOpenSearchSearchAdapter implements SandboxSearchAdapter, OnM
       public: source.public,
       cpu: source.cpu,
       gpu: source.gpu,
-      gpuType: source.gpuType ?? undefined,
+      gpuType: source.gpu_type ?? undefined,
       memory: source.mem,
       disk: source.disk,
       labels,
