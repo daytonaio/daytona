@@ -478,10 +478,7 @@ Resource allocation for a Sandbox.
 - `cpu?` _number_ - CPU allocation for the Sandbox in cores
 - `disk?` _number_ - Disk space allocation for the Sandbox in GiB
 - `gpu?` _number_ - GPU allocation for the Sandbox in units
-- `gpuType?` _GpuType \| GpuType\[\]_ - Preferred GPU type for the Sandbox. Accepts a single value or an ordered
-    preference list — the scheduler tries each in order and pins the Sandbox to
-    the first that has capacity. Only valid when creating a Sandbox from a
-    build image; rejected when creating a Sandbox from a snapshot.
+- `gpuType?` _GpuType \| GpuType\[\]_ - Preferred GPU type for the Sandbox
 - `memory?` _number_ - Memory allocation for the Sandbox in GiB
     
 

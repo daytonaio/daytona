@@ -45,7 +45,7 @@ export interface CreateSnapshot {
      */
     'gpu'?: number;
     /**
-     * Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.
+     * Preferred GPU type for the resulting sandbox.
      */
     'gpuType'?: Array<GpuType>;
     /**

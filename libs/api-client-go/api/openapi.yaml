@@ -13965,9 +13965,7 @@ components:
           example: 0
           type: integer
         gpuType:
-          description: Preferred GPU type for the resulting sandbox. Accepts a single
-            value or an ordered preference list — the scheduler tries each in order
-            and pins the snapshot to the first that has capacity.
+          description: Preferred GPU type for the resulting sandbox.
           example:
           - H100
           items:

@@ -38,7 +38,7 @@ class CreateSnapshot(BaseModel):
     entrypoint: Optional[List[StrictStr]] = Field(default=None, description="The entrypoint command for the snapshot")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the resulting sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the resulting sandbox")
-    gpu_type: Optional[List[GpuType]] = Field(default=None, description="Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.", serialization_alias="gpuType")
+    gpu_type: Optional[List[GpuType]] = Field(default=None, description="Preferred GPU type for the resulting sandbox.", serialization_alias="gpuType")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", serialization_alias="buildInfo")

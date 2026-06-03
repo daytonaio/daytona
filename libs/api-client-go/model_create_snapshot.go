@@ -31,7 +31,7 @@ type CreateSnapshot struct {
 	Cpu *int32 `json:"cpu,omitempty"`
 	// GPU units allocated to the resulting sandbox
 	Gpu *int32 `json:"gpu,omitempty"`
-	// Preferred GPU type for the resulting sandbox. Accepts a single value or an ordered preference list — the scheduler tries each in order and pins the snapshot to the first that has capacity.
+	// Preferred GPU type for the resulting sandbox.
 	GpuType []GpuType `json:"gpuType,omitempty"`
 	// Memory allocated to the resulting sandbox in GB
 	Memory *int32 `json:"memory,omitempty"`

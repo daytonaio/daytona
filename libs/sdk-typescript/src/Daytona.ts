@@ -128,12 +128,7 @@ export interface Resources {
   cpu?: number
   /** GPU allocation for the Sandbox */
   gpu?: number
-  /**
-   * Preferred GPU type for the Sandbox. Accepts a single value or an ordered
-   * preference list — the scheduler tries each in order and pins the Sandbox to
-   * the first that has capacity. Only valid when creating a Sandbox from a
-   * build image; rejected when creating a Sandbox from a snapshot.
-   */
+  /** Preferred GPU type for the Sandbox */
   gpuType?: GpuType | GpuType[]
   /** Memory allocation for the Sandbox in GiB */
   memory?: number
