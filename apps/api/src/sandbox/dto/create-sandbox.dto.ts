@@ -131,7 +131,15 @@ export class CreateSandboxDto {
     example: [GpuType.H100],
   })
   @IsOptional()
-  @Transform(({ value }) => (Array.isArray(value) ? value : value === undefined || value === null ? value : [value]))
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.length === 0
+        ? undefined
+        : value
+      : value === undefined || value === null
+        ? value
+        : [value],
+  )
   @IsArray()
   @ArrayMinSize(1)
   @IsEnum(GpuType, { each: true })
