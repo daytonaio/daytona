@@ -18,11 +18,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getSandboxQueryErrorStatus, useSandboxQuery } from '@/hooks/queries/useSandboxQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSandboxDetailsWsSync } from '@/hooks/useSandboxWsSync'
+import { lazyWithPreload } from '@/lib/lazy'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { ChevronDown, ChevronUp, Container, X } from 'lucide-react'
 import React, { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { InfoPanelSkeleton } from '../SandboxInfoPanel'
-import { SandboxDetailsSheetContent } from './SandboxDetailsSheetContent'
 
 export type SandboxDetailsSheetTabValue =
   | 'overview'
@@ -68,6 +68,7 @@ const EXPANDED_WIDTH = 1600
 const MOBILE_BREAKPOINT = 1024
 const SIDE_BY_SIDE_MIN_WIDTH = 1000
 const TAB_RESIZE_DURATION = 0.5
+const SandboxDetailsSheetContent = lazyWithPreload(() => import('./SandboxDetailsSheetContent'), { preload: true })
 
 function getViewportWidth() {
   return typeof window === 'undefined' ? EXPANDED_WIDTH : window.innerWidth
@@ -350,26 +351,28 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               description="This sandbox may not exist, or you may not have access to it in this organization."
             />
           ) : sandbox ? (
-            <SandboxDetailsSheetContent
-              sandbox={sandbox}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-              isDesktop={isDesktop}
-              spendingTabAvailable={spendingTabAvailable}
-              actionDisabled={actionDisabled}
-              writePermitted={writePermitted}
-              deletePermitted={deletePermitted}
-              handleStart={handleStart}
-              handleStop={handleStop}
-              handleDelete={handleDelete}
-              handleArchive={handleArchive}
-              handleRecover={handleRecover}
-              getRegionName={getRegionName}
-              onCreateSshAccess={onCreateSshAccess}
-              onRevokeSshAccess={onRevokeSshAccess}
-              onScreenRecordings={onScreenRecordings}
-              onResetToOverview={resetToOverview}
-            />
+            <React.Suspense fallback={<SandboxDetailsSheetSkeleton />}>
+              <SandboxDetailsSheetContent
+                sandbox={sandbox}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                isDesktop={isDesktop}
+                spendingTabAvailable={spendingTabAvailable}
+                actionDisabled={actionDisabled}
+                writePermitted={writePermitted}
+                deletePermitted={deletePermitted}
+                handleStart={handleStart}
+                handleStop={handleStop}
+                handleDelete={handleDelete}
+                handleArchive={handleArchive}
+                handleRecover={handleRecover}
+                getRegionName={getRegionName}
+                onCreateSshAccess={onCreateSshAccess}
+                onRevokeSshAccess={onRevokeSshAccess}
+                onScreenRecordings={onScreenRecordings}
+                onResetToOverview={resetToOverview}
+              />
+            </React.Suspense>
           ) : isLoading ? (
             <SandboxDetailsSheetSkeleton />
           ) : (

@@ -131,7 +131,7 @@ function SandboxOverviewTabTrigger() {
   )
 }
 
-export function SandboxDetailsSheetContent({
+function SandboxDetailsSheetContent({
   sandbox,
   activeTab,
   onTabChange,
@@ -249,3 +249,5 @@ export function SandboxDetailsSheetContent({
     </Tabs>
   )
 }
+
+export default SandboxDetailsSheetContent
