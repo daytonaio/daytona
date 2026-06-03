@@ -858,6 +858,124 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Kill a process by PID
+    # Kill a tracked running process by its OS process ID
+    # @param pid [Integer] OS Process ID
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def kill_process(pid, opts = {})
+      kill_process_with_http_info(pid, opts)
+      nil
+    end
+
+    # Kill a process by PID
+    # Kill a tracked running process by its OS process ID
+    # @param pid [Integer] OS Process ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def kill_process_with_http_info(pid, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ProcessApi.kill_process ...'
+      end
+      # verify the required parameter 'pid' is set
+      if @api_client.config.client_side_validation && pid.nil?
+        fail ArgumentError, "Missing the required parameter 'pid' when calling ProcessApi.kill_process"
+      end
+      # resource path
+      local_var_path = '/process/{pid}'.sub('{' + 'pid' + '}', CGI.escape(pid.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ProcessApi.kill_process",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ProcessApi#kill_process\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # List all running processes
+    # List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+    # @param [Hash] opts the optional parameters
+    # @return [ListProcessesResponse]
+    def list_processes(opts = {})
+      data, _status_code, _headers = list_processes_with_http_info(opts)
+      data
+    end
+
+    # List all running processes
+    # List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(ListProcessesResponse, Integer, Hash)>] ListProcessesResponse data, response status code and response headers
+    def list_processes_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ProcessApi.list_processes ...'
+      end
+      # resource path
+      local_var_path = '/process/list'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'ListProcessesResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ProcessApi.list_processes",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ProcessApi#list_processes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # List all PTY sessions
     # Get a list of all active pseudo-terminal sessions
     # @param [Hash] opts the optional parameters

@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/gorilla/websocket"
 )
 
@@ -95,14 +96,16 @@ type ContextInfo struct {
 type Context struct {
 	info ContextInfo
 
-	logger *slog.Logger
+	logger  *slog.Logger
+	tracker *process.ProcessTracker
 
-	cmd        *exec.Cmd
-	stdin      io.WriteCloser
-	stdout     io.ReadCloser
-	ctx        context.Context
-	cancel     context.CancelFunc
-	workerPath string
+	cmd          *exec.Cmd
+	stdin        io.WriteCloser
+	stdout       io.ReadCloser
+	ctx          context.Context
+	cancel       context.CancelFunc
+	workerPath   string
+	trackerToken uint64
 
 	// Single websocket client (protected by mu)
 	client *wsClient
@@ -112,7 +115,8 @@ type Context struct {
 	commandMu     sync.Mutex
 
 	// Execution FIFO queue
-	queue chan execJob
+	queue        chan execJob
+	shuttingDown bool
 
 	// Process exit notification
 	done chan struct{}

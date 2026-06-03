@@ -34,7 +34,7 @@ import (
 //	@Router			/process/execute [post]
 //
 //	@id				ExecuteCommand
-func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
+func ExecuteCommand(logger *slog.Logger, tracker *ProcessTracker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request ExecuteRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
@@ -74,6 +74,19 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 				Result:   err.Error(),
 			})
 			return
+		}
+
+		if tracker != nil {
+			token := tracker.Register(ProcessEntry{
+				PID:       cmd.Process.Pid,
+				Type:      ProcessTypeExec,
+				ID:        fmt.Sprintf("exec-%d", cmd.Process.Pid),
+				Command:   request.Command,
+				Cwd:       cmd.Dir,
+				Envs:      request.Envs,
+				CreatedAt: time.Now(),
+			})
+			defer tracker.Deregister(cmd.Process.Pid, token)
 		}
 
 		// set maximum execution time

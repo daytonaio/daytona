@@ -11,13 +11,16 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
 // NewPTYController creates a new PTY controller
-func NewPTYController(logger *slog.Logger, workDir string) *PTYController {
+
+func NewPTYController(logger *slog.Logger, workDir string, tracker *process.ProcessTracker) *PTYController {
+	ptyManager = NewPTYManager(tracker)
 	return &PTYController{logger: logger.With(slog.String("component", "PTY_controller")), workDir: workDir}
 }
 

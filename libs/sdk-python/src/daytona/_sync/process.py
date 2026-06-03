@@ -31,6 +31,7 @@ from ..common.process import (
     ExecuteResponse,
     ExecutionArtifacts,
     OutputHandler,
+    ProcessInfo,
     SessionCommandLogsResponse,
     SessionExecuteRequest,
     SessionExecuteResponse,
@@ -556,6 +557,58 @@ class Process:
             ```
         """
         self._api_client.delete_session(session_id=session_id)
+
+    @intercept_errors(message_prefix="Failed to list processes: ")
+    @with_instrumentation("list")
+    def list(self) -> list[ProcessInfo]:
+        """List all running processes in the sandbox.
+
+        Returns a list of currently running processes including sessions,
+        PTY sessions, interpreter contexts, and in-flight exec/code_run commands.
+
+        Returns:
+            list[ProcessInfo]: List of running process information.
+
+        Example:
+            ```python
+            processes = sandbox.process.list()
+            for proc in processes:
+                print(f"PID {proc.pid}: {proc.type} - {proc.command}")
+            ```
+        """
+        response = self._api_client.list_processes()
+        return [
+            ProcessInfo(
+                pid=p.pid,
+                type=str(p.type) if p.type else "",
+                id=p.id or "",
+                command=p.command,
+                cwd=p.cwd,
+                envs=dict(p.envs) if p.envs else None,
+                created_at=p.created_at,
+            )
+            for p in (response.processes or [])
+        ]
+
+    @intercept_errors(message_prefix="Failed to kill process: ")
+    @with_instrumentation("kill")
+    def kill(self, pid: int) -> None:
+        """Kill a running process by its OS process ID.
+
+        Args:
+            pid: The OS process ID to kill. Can be obtained from `list()`.
+
+        Raises:
+            DaytonaError: If the process is not found or cannot be killed.
+
+        Example:
+            ```python
+            processes = sandbox.process.list()
+            if processes:
+                sandbox.process.kill(processes[0].pid)
+            ```
+        """
+        self._api_client.kill_process(pid=pid)
 
     @intercept_errors(message_prefix="Failed to create PTY session: ")
     @with_instrumentation()

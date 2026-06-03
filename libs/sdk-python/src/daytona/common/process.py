@@ -128,6 +128,29 @@ class SessionCommandLogsResponse:
     stderr: str | None = None
 
 
+@dataclass
+class ProcessInfo:
+    """Information about a running process in the sandbox.
+
+    Attributes:
+        pid: OS process ID
+        type: Process type ("session", "pty", "interpreter", "exec", "code_run")
+        id: Subsystem-level identifier (session ID, PTY ID, etc.)
+        command: What was executed (shell path, language, etc.)
+        cwd: Working directory
+        envs: Environment variables
+        created_at: ISO timestamp of when the process started
+    """
+
+    pid: int
+    type: str
+    id: str
+    command: str | None = None
+    cwd: str | None = None
+    envs: dict[str, str] | None = None
+    created_at: str | None = None
+
+
 # Type aliases for callbacks
 T = TypeVar("T")
 OutputHandler = Union[

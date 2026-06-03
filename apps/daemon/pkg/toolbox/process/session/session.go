@@ -4,13 +4,16 @@
 package session
 
 import (
+	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 )
 
 // CreateSession godoc
@@ -53,6 +56,27 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 		return
 	}
 
+	if s.tracker != nil {
+		pid, pidErr := s.sessionService.GetSessionPID(request.SessionId)
+		if pidErr != nil {
+			s.logger.Warn("Failed to get session PID for tracker registration", "sessionId", request.SessionId, "error", pidErr)
+		} else {
+			var token uint64
+			token = s.tracker.Register(process.WithProcessCancel(process.ProcessEntry{
+				PID:       pid,
+				Type:      process.ProcessTypeSession,
+				ID:        request.SessionId,
+				Internal:  false,
+				CreatedAt: time.Now(),
+			}, func() {
+				_ = s.sessionService.Delete(context.Background(), request.SessionId)
+				s.deleteTrackerRegistration(request.SessionId)
+				s.tracker.Deregister(pid, token)
+			}))
+			s.storeTrackerRegistration(request.SessionId, pid, token)
+		}
+	}
+
 	c.Status(http.StatusCreated)
 }
 
@@ -78,6 +102,12 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 	if err != nil {
 		c.Error(err)
 		return
+	}
+
+	if s.tracker != nil {
+		if registration, ok := s.popTrackerRegistration(sessionId); ok {
+			s.tracker.Deregister(registration.pid, registration.token)
+		}
 	}
 
 	c.Status(http.StatusNoContent)

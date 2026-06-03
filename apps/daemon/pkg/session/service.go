@@ -4,9 +4,11 @@
 package session
 
 import (
+	"errors"
 	"log/slog"
 	"time"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
@@ -26,4 +28,17 @@ func NewSessionService(logger *slog.Logger, configDir string, terminationGracePe
 		terminationGracePeriod:   terminationGracePeriod,
 		terminationCheckInterval: terminationCheckInterval,
 	}
+}
+
+func (s *SessionService) GetSessionPID(sessionId string) (int, error) {
+	session, ok := s.sessions.Get(sessionId)
+	if !ok {
+		return 0, common_errors.NewNotFoundError(errors.New("session not found"))
+	}
+
+	if session.cmd == nil || session.cmd.Process == nil {
+		return 0, errors.New("session process not available")
+	}
+
+	return session.cmd.Process.Pid, nil
 }

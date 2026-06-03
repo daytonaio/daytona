@@ -57,6 +57,7 @@ type ServerConfig struct {
 	WorkDir               string
 	ConfigDir             string
 	ComputerUse           computeruse.IComputerUse
+	ProcessTracker        *process.ProcessTracker
 	SandboxId             string
 	OtelEndpoint          *string
 	SessionService        *session_svc.SessionService
@@ -68,12 +69,18 @@ type ServerConfig struct {
 }
 
 func NewServer(config ServerConfig) *server {
+	tracker := config.ProcessTracker
+	if tracker == nil {
+		tracker = process.NewProcessTracker()
+	}
+
 	return &server{
 		logger:                config.Logger.With(slog.String("component", "toolbox_server")),
 		WorkDir:               config.WorkDir,
 		SandboxId:             config.SandboxId,
 		otelEndpoint:          config.OtelEndpoint,
 		telemetry:             Telemetry{},
+		processTracker:        tracker,
 		sessionService:        config.SessionService,
 		configDir:             config.ConfigDir,
 		recordingService:      config.RecordingService,
@@ -92,6 +99,7 @@ type server struct {
 	otelEndpoint          *string
 	authToken             string
 	telemetry             Telemetry
+	processTracker        *process.ProcessTracker
 	sessionService        *session_svc.SessionService
 	configDir             string
 	recordingService      *recording.RecordingService
@@ -192,10 +200,12 @@ func (s *server) Start() error {
 	processLogger := s.logger.With(slog.String("component", "process_controller"))
 	processController := r.Group("/process")
 	{
-		processController.POST("/execute", process.ExecuteCommand(processLogger))
-		processController.POST("/code-run", coderun.CodeRun(processLogger))
+		processController.POST("/execute", process.ExecuteCommand(processLogger, s.processTracker))
+		processController.POST("/code-run", coderun.CodeRun(processLogger, s.processTracker))
+		processController.GET("/list", process.ListProcesses(s.processTracker))
+		processController.DELETE("/:pid", process.KillProcess(s.processTracker))
 
-		sessionController := session.NewSessionController(s.logger, s.configDir, s.sessionService)
+		sessionController := session.NewSessionController(s.logger, s.configDir, s.sessionService, s.processTracker)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
@@ -211,7 +221,7 @@ func (s *server) Start() error {
 		}
 
 		// PTY endpoints
-		ptyController := pty.NewPTYController(s.logger, s.WorkDir)
+		ptyController := pty.NewPTYController(s.logger, s.WorkDir, s.processTracker)
 		ptyGroup := processController.Group("/pty")
 		{
 			ptyGroup.GET("", ptyController.ListPTYSessions)
@@ -223,7 +233,7 @@ func (s *server) Start() error {
 		}
 
 		// Interpreter endpoints
-		interpreterController := interpreter.NewInterpreterController(s.logger, s.WorkDir)
+		interpreterController := interpreter.NewInterpreterController(s.logger, s.WorkDir, s.processTracker)
 		interpreterGroup := processController.Group("/interpreter")
 		{
 			interpreterGroup.POST("/context", interpreterController.CreateContext)

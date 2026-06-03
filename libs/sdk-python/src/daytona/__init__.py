@@ -56,7 +56,14 @@ if TYPE_CHECKING:
     )
     from .common.image import Image
     from .common.lsp_server import LspCompletionPosition, LspLanguageId
-    from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
+    from .common.process import (
+        CodeRunParams,
+        ExecuteResponse,
+        ExecutionArtifacts,
+        OutputHandler,
+        ProcessInfo,
+        SessionExecuteRequest,
+    )
     from .common.pty import PtySize
     from .common.sandbox import ListSandboxesQuery, Resources
     from .common.snapshot import CreateSnapshotParams
@@ -117,6 +124,7 @@ __all__ = [
     "ExecutionError",
     "OutputMessage",
     "OutputHandler",
+    "ProcessInfo",
     "DaytonaTimeoutError",
     "DaytonaAuthenticationError",
     "DaytonaAuthorizationError",
@@ -199,6 +207,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ExecuteResponse": "common.process",
     "ExecutionArtifacts": "common.process",
     "OutputHandler": "common.process",
+    "ProcessInfo": "common.process",
     "SessionExecuteRequest": "common.process",
     # common.pty
     "PtySize": "common.pty",

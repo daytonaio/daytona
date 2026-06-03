@@ -593,6 +593,13 @@ definitions:
     required:
       - contexts
     type: object
+  ListProcessesResponse:
+    properties:
+      processes:
+        items:
+          $ref: '#/definitions/process.ProcessEntry'
+        type: array
+    type: object
   ListRecordingsResponse:
     properties:
       recordings:
@@ -1128,6 +1135,43 @@ definitions:
   gin.H:
     additionalProperties: {}
     type: object
+  process.ProcessEntry:
+    properties:
+      command:
+        type: string
+      createdAt:
+        type: string
+      cwd:
+        type: string
+      envs:
+        additionalProperties:
+          type: string
+        type: object
+      id:
+        type: string
+      internal:
+        type: boolean
+      pid:
+        type: integer
+      token:
+        type: integer
+      type:
+        $ref: '#/definitions/process.ProcessType'
+    type: object
+  process.ProcessType:
+    enum:
+      - session
+      - pty
+      - interpreter
+      - exec
+      - code_run
+    type: string
+    x-enum-varnames:
+      - ProcessTypeSession
+      - ProcessTypePTY
+      - ProcessTypeInterpreter
+      - ProcessTypeExec
+      - ProcessTypeCodeRun
 info:
   contact: {}
   description: Daytona Toolbox API
@@ -2794,6 +2838,22 @@ paths:
       summary: Check if port is in use
       tags:
         - port
+  /process/{pid}:
+    delete:
+      description: Kill a tracked running process by its OS process ID
+      operationId: KillProcess
+      parameters:
+        - description: OS Process ID
+          in: path
+          name: pid
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+      summary: Kill a process by PID
+      tags:
+        - process
   /process/code-run:
     post:
       consumes:
@@ -2949,6 +3009,21 @@ paths:
       summary: Execute code in an interpreter context
       tags:
         - interpreter
+  /process/list:
+    get:
+      description: List all tracked running processes across all subsystems (sessions,
+        PTY, interpreter, exec, code_run)
+      operationId: ListProcesses
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ListProcessesResponse'
+      summary: List all running processes
+      tags:
+        - process
   /process/pty:
     get:
       description: Get a list of all active pseudo-terminal sessions

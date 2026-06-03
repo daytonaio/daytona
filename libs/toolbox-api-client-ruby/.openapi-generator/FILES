@@ -64,6 +64,7 @@ lib/daytona_toolbox_api_client/models/keyboard_press_request.rb
 lib/daytona_toolbox_api_client/models/keyboard_type_request.rb
 lib/daytona_toolbox_api_client/models/list_branch_response.rb
 lib/daytona_toolbox_api_client/models/list_contexts_response.rb
+lib/daytona_toolbox_api_client/models/list_processes_response.rb
 lib/daytona_toolbox_api_client/models/list_recordings_response.rb
 lib/daytona_toolbox_api_client/models/lsp_completion_params.rb
 lib/daytona_toolbox_api_client/models/lsp_document_request.rb
@@ -84,6 +85,8 @@ lib/daytona_toolbox_api_client/models/port_list.rb
 lib/daytona_toolbox_api_client/models/position.rb
 lib/daytona_toolbox_api_client/models/process_errors_response.rb
 lib/daytona_toolbox_api_client/models/process_logs_response.rb
+lib/daytona_toolbox_api_client/models/process_process_entry.rb
+lib/daytona_toolbox_api_client/models/process_process_type.rb
 lib/daytona_toolbox_api_client/models/process_restart_response.rb
 lib/daytona_toolbox_api_client/models/process_status.rb
 lib/daytona_toolbox_api_client/models/process_status_response.rb

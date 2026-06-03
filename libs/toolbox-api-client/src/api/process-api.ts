@@ -34,6 +34,8 @@ import type { ExecuteRequest } from '../models';
 // @ts-ignore
 import type { ExecuteResponse } from '../models';
 // @ts-ignore
+import type { ListProcessesResponse } from '../models';
+// @ts-ignore
 import type { PtyCreateRequest } from '../models';
 // @ts-ignore
 import type { PtyCreateResponse } from '../models';
@@ -512,6 +514,69 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Kill a tracked running process by its OS process ID
+         * @summary Kill a process by PID
+         * @param {number} pid OS Process ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        killProcess: async (pid: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pid' is not null or undefined
+            assertParamExists('killProcess', 'pid', pid)
+            const localVarPath = `/process/{pid}`
+                .replace(`{${"pid"}}`, encodeURIComponent(String(pid)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+         * @summary List all running processes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listProcesses: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/process/list`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get a list of all active pseudo-terminal sessions
          * @summary List all PTY sessions
          * @param {*} [options] Override http request option.
@@ -872,6 +937,31 @@ export const ProcessApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Kill a tracked running process by its OS process ID
+         * @summary Kill a process by PID
+         * @param {number} pid OS Process ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async killProcess(pid: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.killProcess(pid, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ProcessApi.killProcess']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+         * @summary List all running processes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listProcesses(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListProcessesResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listProcesses(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ProcessApi.listProcesses']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get a list of all active pseudo-terminal sessions
          * @summary List all PTY sessions
          * @param {*} [options] Override http request option.
@@ -1080,6 +1170,25 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getSessionCommandLogs(sessionId, commandId, follow, options).then((request) => request(axios, basePath));
         },
         /**
+         * Kill a tracked running process by its OS process ID
+         * @summary Kill a process by PID
+         * @param {number} pid OS Process ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        killProcess(pid: number, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.killProcess(pid, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+         * @summary List all running processes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listProcesses(options?: RawAxiosRequestConfig): AxiosPromise<ListProcessesResponse> {
+            return localVarFp.listProcesses(options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get a list of all active pseudo-terminal sessions
          * @summary List all PTY sessions
          * @param {*} [options] Override http request option.
@@ -1281,6 +1390,27 @@ export class ProcessApi extends BaseAPI {
      */
     public getSessionCommandLogs(sessionId: string, commandId: string, follow?: boolean, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).getSessionCommandLogs(sessionId, commandId, follow, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Kill a tracked running process by its OS process ID
+     * @summary Kill a process by PID
+     * @param {number} pid OS Process ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public killProcess(pid: number, options?: RawAxiosRequestConfig) {
+        return ProcessApiFp(this.configuration).killProcess(pid, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+     * @summary List all running processes
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public listProcesses(options?: RawAxiosRequestConfig) {
+        return ProcessApiFp(this.configuration).listProcesses(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

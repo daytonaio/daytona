@@ -6,6 +6,7 @@ package coderun
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os/exec"
@@ -17,6 +18,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +34,7 @@ import (
 //	@Router			/process/code-run [post]
 //
 //	@id				CodeRun
-func CodeRun(logger *slog.Logger) gin.HandlerFunc {
+func CodeRun(logger *slog.Logger, tracker *process.ProcessTracker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request CodeRunRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
@@ -67,6 +69,18 @@ func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 				Result:   err.Error(),
 			})
 			return
+		}
+
+		if tracker != nil {
+			token := tracker.Register(process.ProcessEntry{
+				PID:       cmd.Process.Pid,
+				Type:      process.ProcessTypeCodeRun,
+				ID:        fmt.Sprintf("coderun-%d", cmd.Process.Pid),
+				Command:   runCommand,
+				Envs:      request.Envs,
+				CreatedAt: time.Now(),
+			})
+			defer tracker.Deregister(cmd.Process.Pid, token)
 		}
 
 		var timeoutReached atomic.Bool

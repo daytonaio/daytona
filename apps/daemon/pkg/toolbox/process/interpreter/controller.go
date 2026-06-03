@@ -13,12 +13,13 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
-func NewInterpreterController(logger *slog.Logger, workDir string) *Controller {
-	InitManager(workDir)
+func NewInterpreterController(logger *slog.Logger, workDir string, tracker *process.ProcessTracker) *Controller {
+	InitManager(workDir, tracker)
 	// Pre-warm the default interpreter context to reduce latency on first request
 	go func() {
 		_, err := GetOrCreateDefaultContext(logger)
@@ -160,7 +161,11 @@ func (c *Controller) Execute(ctx *gin.Context) {
 		envs = *req.Envs
 	}
 
-	go iCtx.enqueueAndExecute(req.Code, envs, timeout, ws)
+	go func() {
+		if err := iCtx.enqueueAndExecute(req.Code, envs, timeout, ws); err != nil {
+			writeWSError(ws, err.Error(), websocket.CloseGoingAway)
+		}
+	}()
 }
 
 // writeWSError sends an error message to the WebSocket and closes the connection

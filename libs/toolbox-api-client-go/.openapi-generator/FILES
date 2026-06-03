@@ -60,6 +60,7 @@ model_keyboard_press_request.go
 model_keyboard_type_request.go
 model_list_branch_response.go
 model_list_contexts_response.go
+model_list_processes_response.go
 model_list_recordings_response.go
 model_lsp_completion_params.go
 model_lsp_document_request.go
@@ -80,6 +81,8 @@ model_port_list.go
 model_position.go
 model_process_errors_response.go
 model_process_logs_response.go
+model_process_process_entry.go
+model_process_process_type.go
 model_process_restart_response.go
 model_process_status.go
 model_process_status_response.go

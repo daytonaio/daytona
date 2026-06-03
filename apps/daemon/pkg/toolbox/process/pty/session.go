@@ -10,10 +10,12 @@ import (
 	"os"
 	"os/exec"
 	"syscall"
+	"time"
 
 	"github.com/creack/pty"
 	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
+	trackerprocess "github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/shirou/gopsutil/v4/process"
 )
 
@@ -54,6 +56,7 @@ func (s *PTYSession) start() error {
 
 	cmd := exec.CommandContext(ctx, shell, "-i", "-l")
 	cmd.Dir = s.info.Cwd
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	// Env
 	cmd.Env = os.Environ()
@@ -70,6 +73,21 @@ func (s *PTYSession) start() error {
 	s.cmd = cmd
 	s.ptmx = ptmx
 	s.info.Active = true
+	s.trackerToken = 0
+	pid := s.cmd.Process.Pid
+	trackerToken := uint64(0)
+	if ptyManager.processTracker != nil {
+		trackerToken = ptyManager.processTracker.Register(trackerprocess.WithProcessCancel(trackerprocess.ProcessEntry{
+			PID:       pid,
+			Type:      trackerprocess.ProcessTypePTY,
+			ID:        s.info.ID,
+			Command:   shell,
+			Cwd:       s.info.Cwd,
+			Envs:      s.info.Envs,
+			CreatedAt: time.Now(),
+		}, s.kill))
+		s.trackerToken = trackerToken
+	}
 
 	s.logger.Debug("Started PTY session", "sessionId", s.info.ID, "pid", s.cmd.Process.Pid)
 
@@ -83,6 +101,9 @@ func (s *PTYSession) start() error {
 	// Uses Reap (not Wait) because pty.StartWithSize wires std{in,out,err}
 	// to *os.File slaves — no Go-level I/O goroutines to drain.
 	go func() {
+		if tracker := ptyManager.processTracker; tracker != nil {
+			defer tracker.Deregister(pid, trackerToken)
+		}
 		exitCode, err := childreap.Reap(s.cmd)
 		var exitReason string
 

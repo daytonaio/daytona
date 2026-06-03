@@ -1916,6 +1916,21 @@ paths:
       summary: Execute code in an interpreter context
       tags:
       - interpreter
+  /process/list:
+    get:
+      description: "List all tracked running processes across all subsystems (sessions,\
+        \ PTY, interpreter, exec, code_run)"
+      operationId: ListProcesses
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListProcessesResponse"
+          description: OK
+      summary: List all running processes
+      tags:
+      - process
   /process/pty:
     get:
       description: Get a list of all active pseudo-terminal sessions
@@ -2283,6 +2298,24 @@ paths:
       tags:
       - process
       x-codegen-request-body-name: request
+  /process/{pid}:
+    delete:
+      description: Kill a tracked running process by its OS process ID
+      operationId: KillProcess
+      parameters:
+      - description: OS Process ID
+        in: path
+        name: pid
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Kill a process by PID
+      tags:
+      - process
   /user-home-dir:
     get:
       description: Get the current user home directory path.
@@ -3572,6 +3605,35 @@ components:
       required:
       - contexts
       type: object
+    ListProcessesResponse:
+      example:
+        processes:
+        - createdAt: createdAt
+          cwd: cwd
+          internal: true
+          envs:
+            key: envs
+          pid: 0
+          id: id
+          type: session
+          command: command
+          token: 6
+        - createdAt: createdAt
+          cwd: cwd
+          internal: true
+          envs:
+            key: envs
+          pid: 0
+          id: id
+          type: session
+          command: command
+          token: 6
+      properties:
+        processes:
+          items:
+            $ref: "#/components/schemas/process.ProcessEntry"
+          type: array
+      type: object
     ListRecordingsResponse:
       example:
         recordings:
@@ -4380,6 +4442,54 @@ components:
       additionalProperties:
         type: object
       type: object
+    process.ProcessEntry:
+      example:
+        createdAt: createdAt
+        cwd: cwd
+        internal: true
+        envs:
+          key: envs
+        pid: 0
+        id: id
+        type: session
+        command: command
+        token: 6
+      properties:
+        command:
+          type: string
+        createdAt:
+          type: string
+        cwd:
+          type: string
+        envs:
+          additionalProperties:
+            type: string
+          type: object
+        id:
+          type: string
+        internal:
+          type: boolean
+        pid:
+          type: integer
+        token:
+          type: integer
+        type:
+          $ref: "#/components/schemas/process.ProcessType"
+      type: object
+    process.ProcessType:
+      enum:
+      - session
+      - pty
+      - interpreter
+      - exec
+      - code_run
+      type: string
+      x-enum-varnames:
+      - ProcessTypeSession
+      - ProcessTypePTY
+      - ProcessTypeInterpreter
+      - ProcessTypeExec
+      - ProcessTypeCodeRun
     UploadFile_request:
       properties:
         file:

@@ -78,6 +78,7 @@ src/main/java/io/daytona/toolbox/client/model/KeyboardPressRequest.java
 src/main/java/io/daytona/toolbox/client/model/KeyboardTypeRequest.java
 src/main/java/io/daytona/toolbox/client/model/ListBranchResponse.java
 src/main/java/io/daytona/toolbox/client/model/ListContextsResponse.java
+src/main/java/io/daytona/toolbox/client/model/ListProcessesResponse.java
 src/main/java/io/daytona/toolbox/client/model/ListRecordingsResponse.java
 src/main/java/io/daytona/toolbox/client/model/LspCompletionParams.java
 src/main/java/io/daytona/toolbox/client/model/LspDocumentRequest.java
@@ -98,6 +99,8 @@ src/main/java/io/daytona/toolbox/client/model/PortList.java
 src/main/java/io/daytona/toolbox/client/model/Position.java
 src/main/java/io/daytona/toolbox/client/model/ProcessErrorsResponse.java
 src/main/java/io/daytona/toolbox/client/model/ProcessLogsResponse.java
+src/main/java/io/daytona/toolbox/client/model/ProcessProcessEntry.java
+src/main/java/io/daytona/toolbox/client/model/ProcessProcessType.java
 src/main/java/io/daytona/toolbox/client/model/ProcessRestartResponse.java
 src/main/java/io/daytona/toolbox/client/model/ProcessStatus.java
 src/main/java/io/daytona/toolbox/client/model/ProcessStatusResponse.java
@@ -180,6 +183,7 @@ src/test/java/io/daytona/toolbox/client/model/KeyboardPressRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/KeyboardTypeRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/ListBranchResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ListContextsResponseTest.java
+src/test/java/io/daytona/toolbox/client/model/ListProcessesResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ListRecordingsResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/LspCompletionParamsTest.java
 src/test/java/io/daytona/toolbox/client/model/LspDocumentRequestTest.java
@@ -200,6 +204,8 @@ src/test/java/io/daytona/toolbox/client/model/PortListTest.java
 src/test/java/io/daytona/toolbox/client/model/PositionTest.java
 src/test/java/io/daytona/toolbox/client/model/ProcessErrorsResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ProcessLogsResponseTest.java
+src/test/java/io/daytona/toolbox/client/model/ProcessProcessEntryTest.java
+src/test/java/io/daytona/toolbox/client/model/ProcessProcessTypeTest.java
 src/test/java/io/daytona/toolbox/client/model/ProcessRestartResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ProcessStatusResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ProcessStatusTest.java

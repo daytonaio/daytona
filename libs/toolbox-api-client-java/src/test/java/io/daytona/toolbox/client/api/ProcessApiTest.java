@@ -20,6 +20,7 @@ import io.daytona.toolbox.client.model.Command;
 import io.daytona.toolbox.client.model.CreateSessionRequest;
 import io.daytona.toolbox.client.model.ExecuteRequest;
 import io.daytona.toolbox.client.model.ExecuteResponse;
+import io.daytona.toolbox.client.model.ListProcessesResponse;
 import io.daytona.toolbox.client.model.PtyCreateRequest;
 import io.daytona.toolbox.client.model.PtyCreateResponse;
 import io.daytona.toolbox.client.model.PtyListResponse;
@@ -227,6 +228,33 @@ public class ProcessApiTest {
         String commandId = null;
         Boolean follow = null;
         SessionCommandLogsResponse response = api.getSessionCommandLogs(sessionId, commandId, follow);
+        // TODO: test validations
+    }
+
+    /**
+     * Kill a process by PID
+     *
+     * Kill a tracked running process by its OS process ID
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void killProcessTest() throws ApiException {
+        Integer pid = null;
+        api.killProcess(pid);
+        // TODO: test validations
+    }
+
+    /**
+     * List all running processes
+     *
+     * List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void listProcessesTest() throws ApiException {
+        ListProcessesResponse response = api.listProcesses();
         // TODO: test validations
     }
 

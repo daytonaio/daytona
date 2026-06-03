@@ -18,6 +18,7 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/pkg/childreap"
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -33,16 +34,27 @@ func (c *Context) Info() ContextInfo {
 }
 
 // enqueueAndExecute enqueues a job and processes jobs FIFO ensuring single execution at a time
-func (c *Context) enqueueAndExecute(code string, envs map[string]string, timeout time.Duration, ws *websocket.Conn) {
+func (c *Context) enqueueAndExecute(code string, envs map[string]string, timeout time.Duration, ws *websocket.Conn) (err error) {
 	c.mu.Lock()
+	if c.shuttingDown {
+		c.mu.Unlock()
+		return fmt.Errorf("context is shutting down")
+	}
 	if c.queue == nil {
 		c.queue = make(chan execJob, 128)
 		go c.processQueue()
 	}
+	queue := c.queue
 	c.mu.Unlock()
 
 	job := execJob{code: code, envs: envs, timeout: timeout, ws: ws}
-	c.queue <- job
+	defer func() {
+		if recover() != nil {
+			err = fmt.Errorf("context is shutting down")
+		}
+	}()
+	queue <- job
+	return nil
 }
 
 func (c *Context) processQueue() {
@@ -202,6 +214,7 @@ func (c *Context) start() error {
 	cmd := exec.CommandContext(ctx, pyCmd, workerPath)
 	cmd.Dir = c.info.Cwd
 	cmd.Env = os.Environ()
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	// Get stdin/stdout pipes
 	stdin, err := cmd.StdinPipe()
@@ -232,7 +245,20 @@ func (c *Context) start() error {
 	c.stdin = stdin
 	c.stdout = stdout
 	c.info.Active = true
+	c.shuttingDown = false
 	c.done = make(chan struct{})
+	c.trackerToken = 0
+	if c.tracker != nil {
+		c.trackerToken = c.tracker.Register(process.WithProcessCancel(process.ProcessEntry{
+			PID:       c.cmd.Process.Pid,
+			Type:      process.ProcessTypeInterpreter,
+			ID:        c.info.ID,
+			Command:   fmt.Sprintf("%s %s", pyCmd, workerPath),
+			Cwd:       c.info.Cwd,
+			Internal:  c.info.ID == "default",
+			CreatedAt: time.Now(),
+		}, c.shutdown))
+	}
 
 	c.logger.Debug("Started interpreter context", "contextId", c.info.ID, "pid", c.cmd.Process.Pid)
 
@@ -369,6 +395,15 @@ func getStringFromChunk(chunk map[string]any, key string) string {
 func (c *Context) monitorProcess() {
 	// Reap (not Wait): stdin/stdout are *os.File pipes (StdinPipe /
 	// StdoutPipe) and stderr is os.Stderr; no Go I/O goroutines to drain.
+	pid := 0
+	token := uint64(0)
+	if c.cmd != nil && c.cmd.Process != nil {
+		pid = c.cmd.Process.Pid
+		token = c.trackerToken
+	}
+	if c.tracker != nil {
+		defer c.tracker.Deregister(pid, token)
+	}
 	_, err := childreap.Reap(c.cmd)
 
 	c.mu.Lock()
@@ -407,10 +442,13 @@ func (c *Context) monitorProcess() {
 func (c *Context) shutdown() {
 	c.mu.Lock()
 
-	if !c.info.Active {
+	if c.shuttingDown || !c.info.Active {
 		c.mu.Unlock()
 		return
 	}
+
+	c.shuttingDown = true
+	c.info.Active = false
 
 	// Get references while we have the lock
 	contextID := c.info.ID
@@ -418,16 +456,17 @@ func (c *Context) shutdown() {
 	cmd := c.cmd
 	done := c.done
 	queue := c.queue
+	c.queue = nil
 	c.mu.Unlock()
 
 	// Close the queue to exit processQueue goroutine and prevent new jobs
 	if queue != nil {
 		close(queue)
-		c.queue = nil
 	}
 
 	// Send SIGTERM to trigger immediate graceful shutdown (not queued)
 	if cmd != nil && cmd.Process != nil {
+		_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM)
 		_ = cmd.Process.Signal(syscall.SIGTERM)
 	}
 
@@ -444,6 +483,7 @@ func (c *Context) shutdown() {
 				cancel()
 			}
 			if cmd != nil && cmd.Process != nil {
+				_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 				_ = cmd.Process.Kill()
 			}
 			// Wait a bit more for kill to take effect

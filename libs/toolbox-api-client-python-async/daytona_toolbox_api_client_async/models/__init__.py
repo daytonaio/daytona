@@ -66,6 +66,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.keyboard_type_request import KeyboardTypeRequest
     from daytona_toolbox_api_client_async.models.list_branch_response import ListBranchResponse
     from daytona_toolbox_api_client_async.models.list_contexts_response import ListContextsResponse
+    from daytona_toolbox_api_client_async.models.list_processes_response import ListProcessesResponse
     from daytona_toolbox_api_client_async.models.list_recordings_response import ListRecordingsResponse
     from daytona_toolbox_api_client_async.models.lsp_completion_params import LspCompletionParams
     from daytona_toolbox_api_client_async.models.lsp_document_request import LspDocumentRequest
@@ -86,6 +87,8 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.position import Position
     from daytona_toolbox_api_client_async.models.process_errors_response import ProcessErrorsResponse
     from daytona_toolbox_api_client_async.models.process_logs_response import ProcessLogsResponse
+    from daytona_toolbox_api_client_async.models.process_process_entry import ProcessProcessEntry
+    from daytona_toolbox_api_client_async.models.process_process_type import ProcessProcessType
     from daytona_toolbox_api_client_async.models.process_restart_response import ProcessRestartResponse
     from daytona_toolbox_api_client_async.models.process_status import ProcessStatus
     from daytona_toolbox_api_client_async.models.process_status_response import ProcessStatusResponse
@@ -161,6 +164,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "KeyboardTypeRequest": "daytona_toolbox_api_client_async.models.keyboard_type_request",
     "ListBranchResponse": "daytona_toolbox_api_client_async.models.list_branch_response",
     "ListContextsResponse": "daytona_toolbox_api_client_async.models.list_contexts_response",
+    "ListProcessesResponse": "daytona_toolbox_api_client_async.models.list_processes_response",
     "ListRecordingsResponse": "daytona_toolbox_api_client_async.models.list_recordings_response",
     "LspCompletionParams": "daytona_toolbox_api_client_async.models.lsp_completion_params",
     "LspDocumentRequest": "daytona_toolbox_api_client_async.models.lsp_document_request",
@@ -181,6 +185,8 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "Position": "daytona_toolbox_api_client_async.models.position",
     "ProcessErrorsResponse": "daytona_toolbox_api_client_async.models.process_errors_response",
     "ProcessLogsResponse": "daytona_toolbox_api_client_async.models.process_logs_response",
+    "ProcessProcessEntry": "daytona_toolbox_api_client_async.models.process_process_entry",
+    "ProcessProcessType": "daytona_toolbox_api_client_async.models.process_process_type",
     "ProcessRestartResponse": "daytona_toolbox_api_client_async.models.process_restart_response",
     "ProcessStatus": "daytona_toolbox_api_client_async.models.process_status",
     "ProcessStatusResponse": "daytona_toolbox_api_client_async.models.process_status_response",

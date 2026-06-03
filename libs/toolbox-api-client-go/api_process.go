@@ -211,6 +211,34 @@ type ProcessAPI interface {
 	GetSessionCommandLogsExecute(r ProcessAPIGetSessionCommandLogsRequest) (*SessionCommandLogsResponse, *http.Response, error)
 
 	/*
+	KillProcess Kill a process by PID
+
+	Kill a tracked running process by its OS process ID
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param pid OS Process ID
+	@return ProcessAPIKillProcessRequest
+	*/
+	KillProcess(ctx context.Context, pid int32) ProcessAPIKillProcessRequest
+
+	// KillProcessExecute executes the request
+	KillProcessExecute(r ProcessAPIKillProcessRequest) (*http.Response, error)
+
+	/*
+	ListProcesses List all running processes
+
+	List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPIListProcessesRequest
+	*/
+	ListProcesses(ctx context.Context) ProcessAPIListProcessesRequest
+
+	// ListProcessesExecute executes the request
+	//  @return ListProcessesResponse
+	ListProcessesExecute(r ProcessAPIListProcessesRequest) (*ListProcessesResponse, *http.Response, error)
+
+	/*
 	ListPtySessions List all PTY sessions
 
 	Get a list of all active pseudo-terminal sessions
@@ -1602,6 +1630,197 @@ func (a *ProcessAPIService) GetSessionCommandLogsExecute(r ProcessAPIGetSessionC
 
 	// to determine the Accept header
 	localVarHTTPHeaderAccepts := []string{"application/json", "text/plain"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ProcessAPIKillProcessRequest struct {
+	ctx context.Context
+	ApiService ProcessAPI
+	pid int32
+}
+
+func (r ProcessAPIKillProcessRequest) Execute() (*http.Response, error) {
+	return r.ApiService.KillProcessExecute(r)
+}
+
+/*
+KillProcess Kill a process by PID
+
+Kill a tracked running process by its OS process ID
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param pid OS Process ID
+ @return ProcessAPIKillProcessRequest
+*/
+func (a *ProcessAPIService) KillProcess(ctx context.Context, pid int32) ProcessAPIKillProcessRequest {
+	return ProcessAPIKillProcessRequest{
+		ApiService: a,
+		ctx: ctx,
+		pid: pid,
+	}
+}
+
+// Execute executes the request
+func (a *ProcessAPIService) KillProcessExecute(r ProcessAPIKillProcessRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.KillProcess")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process/{pid}"
+	localVarPath = strings.Replace(localVarPath, "{"+"pid"+"}", url.PathEscape(parameterValueToString(r.pid, "pid")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ProcessAPIListProcessesRequest struct {
+	ctx context.Context
+	ApiService ProcessAPI
+}
+
+func (r ProcessAPIListProcessesRequest) Execute() (*ListProcessesResponse, *http.Response, error) {
+	return r.ApiService.ListProcessesExecute(r)
+}
+
+/*
+ListProcesses List all running processes
+
+List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPIListProcessesRequest
+*/
+func (a *ProcessAPIService) ListProcesses(ctx context.Context) ProcessAPIListProcessesRequest {
+	return ProcessAPIListProcessesRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return ListProcessesResponse
+func (a *ProcessAPIService) ListProcessesExecute(r ProcessAPIListProcessesRequest) (*ListProcessesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ListProcessesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.ListProcesses")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process/list"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)

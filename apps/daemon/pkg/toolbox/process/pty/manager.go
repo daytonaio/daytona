@@ -6,6 +6,7 @@ package pty
 import (
 	"fmt"
 
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
@@ -15,9 +16,10 @@ var ptyManager = &PTYManager{
 }
 
 // NewPTYManager creates a new PTY manager instance
-func NewPTYManager() *PTYManager {
+func NewPTYManager(tracker *process.ProcessTracker) *PTYManager {
 	return &PTYManager{
-		sessions: cmap.New[*PTYSession](),
+		sessions:       cmap.New[*PTYSession](),
+		processTracker: tracker,
 	}
 }
 
@@ -52,7 +54,7 @@ func (m *PTYManager) List() []PTYSessionInfo {
 
 func (m *PTYManager) VerifyPTYSessionReady(id string) (*PTYSession, error) {
 	// Validate session existence and send control message
-	session, ok := ptyManager.Get(id)
+	session, ok := m.Get(id)
 	if !ok {
 		return nil, fmt.Errorf("PTY session %s not found", id)
 	}
@@ -76,7 +78,7 @@ func (m *PTYManager) VerifyPTYSessionReady(id string) (*PTYSession, error) {
 }
 
 func (m *PTYManager) VerifyPTYSessionForResize(id string) (*PTYSession, error) {
-	session, ok := ptyManager.Get(id)
+	session, ok := m.Get(id)
 	if !ok {
 		return nil, fmt.Errorf("PTY session %s not found", id)
 	}

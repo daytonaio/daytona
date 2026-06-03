@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/gorilla/websocket"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
@@ -29,7 +30,8 @@ type PTYController struct {
 
 // PTYManager manages multiple PTY sessions
 type PTYManager struct {
-	sessions cmap.ConcurrentMap[string, *PTYSession]
+	sessions       cmap.ConcurrentMap[string, *PTYSession]
+	processTracker *process.ProcessTracker
 }
 
 // wsClient represents a WebSocket client connection
@@ -48,10 +50,11 @@ type PTYSession struct {
 
 	info PTYSessionInfo
 
-	cmd    *exec.Cmd
-	ptmx   *os.File
-	ctx    context.Context
-	cancel context.CancelFunc
+	cmd          *exec.Cmd
+	ptmx         *os.File
+	ctx          context.Context
+	cancel       context.CancelFunc
+	trackerToken uint64
 
 	// multi-attach
 	clients   cmap.ConcurrentMap[string, *wsClient]

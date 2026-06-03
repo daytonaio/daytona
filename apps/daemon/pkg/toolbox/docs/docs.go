@@ -2730,6 +2730,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/process/list": {
+            "get": {
+                "description": "List all tracked running processes across all subsystems (sessions, PTY, interpreter, exec, code_run)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "process"
+                ],
+                "summary": "List all running processes",
+                "operationId": "ListProcesses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ListProcessesResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/process/pty": {
             "get": {
                 "description": "Get a list of all active pseudo-terminal sessions",
@@ -3233,6 +3254,30 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/SessionExecuteResponse"
                         }
+                    }
+                }
+            }
+        },
+        "/process/{pid}": {
+            "delete": {
+                "description": "Kill a tracked running process by its OS process ID",
+                "tags": [
+                    "process"
+                ],
+                "summary": "Kill a process by PID",
+                "operationId": "KillProcess",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "OS Process ID",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -4195,6 +4240,17 @@ const docTemplate = `{
                 }
             }
         },
+        "ListProcessesResponse": {
+            "type": "object",
+            "properties": {
+                "processes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/process.ProcessEntry"
+                    }
+                }
+            }
+        },
         "ListRecordingsResponse": {
             "type": "object",
             "required": [
@@ -4992,6 +5048,58 @@ const docTemplate = `{
         "gin.H": {
             "type": "object",
             "additionalProperties": {}
+        },
+        "process.ProcessEntry": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "cwd": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "internal": {
+                    "type": "boolean"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/process.ProcessType"
+                }
+            }
+        },
+        "process.ProcessType": {
+            "type": "string",
+            "enum": [
+                "session",
+                "pty",
+                "interpreter",
+                "exec",
+                "code_run"
+            ],
+            "x-enum-varnames": [
+                "ProcessTypeSession",
+                "ProcessTypePTY",
+                "ProcessTypeInterpreter",
+                "ProcessTypeExec",
+                "ProcessTypeCodeRun"
+            ]
         }
     }
 }`

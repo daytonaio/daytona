@@ -10,23 +10,26 @@ import (
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/google/uuid"
 )
 
 // Manager manages multiple interpreter contexts
 type Manager struct {
-	contexts   map[string]*Context
-	mu         sync.RWMutex
-	defaultCwd string
+	contexts       map[string]*Context
+	mu             sync.RWMutex
+	defaultCwd     string
+	processTracker *process.ProcessTracker
 }
 
 var globalManager *Manager
 
 // InitManager initializes the global context manager
-func InitManager(defaultCwd string) {
+func InitManager(defaultCwd string, tracker *process.ProcessTracker) {
 	globalManager = &Manager{
-		contexts:   make(map[string]*Context),
-		defaultCwd: defaultCwd,
+		contexts:       make(map[string]*Context),
+		defaultCwd:     defaultCwd,
+		processTracker: tracker,
 	}
 }
 
@@ -58,7 +61,8 @@ func (m *Manager) CreateContext(logger *slog.Logger, id, cwd, language string) (
 			Active:    false,
 			Language:  language,
 		},
-		logger: logger.With(slog.String("context_id", id)),
+		logger:  logger.With(slog.String("context_id", id)),
+		tracker: m.processTracker,
 	}
 
 	err := iCtx.start()
