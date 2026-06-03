@@ -24,7 +24,7 @@ jobs:
     name: Go work
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -42,7 +42,7 @@ jobs:
     name: CLI docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -72,7 +72,7 @@ jobs:
       matrix:
         working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, libs/sdk-go, apps/otel-collector/exporter]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -81,7 +81,7 @@ jobs:
           cache: true
           cache-dependency-path: '**/go.sum'
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
           version: v2.6.2
           working-directory: ${{ matrix.working-directory }}
@@ -97,7 +97,7 @@ jobs:
     name: Go lint (Computer Use)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -112,7 +112,7 @@ jobs:
           go fmt ./...
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
           version: v2.6.2
           working-directory: libs/computer-use
@@ -123,7 +123,7 @@ jobs:
     name: Python lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -154,7 +154,7 @@ jobs:
     name: Format, lint and generate API clients
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-toolchain
@@ -181,7 +181,7 @@ jobs:
     name: TypeScript SDK type check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -207,7 +207,7 @@ jobs:
     if: github.repository == 'daytonaio/daytona'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-toolchain
@@ -226,7 +226,7 @@ jobs:
     if: github.repository == 'daytonaio/daytona'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-toolchain
@@ -239,19 +239,19 @@ jobs:
     if: github.repository == 'daytonaio/daytona'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
       - name: Check AGPL License Headers
-        uses: apache/skywalking-eyes/header@e910f72bae86171d727742c25f8a4555b7b83893 # main
+        uses: apache/skywalking-eyes/header@ab3d1fe50d23f9c82eff489297167e2dde8ba6cb # main
         with:
           token: ${{ github.token }}
           config: .licenserc.yaml
           mode: 'check'
 
       - name: Check Apache License Headers
-        uses: apache/skywalking-eyes/header@e910f72bae86171d727742c25f8a4555b7b83893 # main
+        uses: apache/skywalking-eyes/header@ab3d1fe50d23f9c82eff489297167e2dde8ba6cb # main
         with:
           token: ${{ github.token }}
           config: .licenserc-clients.yaml
@@ -262,7 +262,7 @@ jobs:
     name: Yarnrc integrity check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
       - name: Ensure PyYAML available
