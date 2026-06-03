@@ -38,7 +38,7 @@ permissions: {}
 jobs:
   publish:
     if: github.repository == 'daytonaio/daytona'
-    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    runs-on: blacksmith-16vcpu-ubuntu-2404
     permissions:
       contents: read
     env:
@@ -102,7 +102,7 @@ jobs:
   update-homebrew-tap:
     if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish
-    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions: {}
     name: Update Homebrew CLI tap
     steps:

@@ -7,7 +7,7 @@ permissions: {}
 
 jobs:
   translate:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     if: ${{ github.repository == 'daytonaio/daytona' && github.event.head_commit.author.name != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'gt-translate/') }}
     permissions:
       contents: write
