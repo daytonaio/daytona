@@ -994,7 +994,7 @@ export class SandboxService {
       } catch (error) {
         if (
           error instanceof BadRequestError == false ||
-          error.message !== 'No available runners' ||
+          !error.message.startsWith('No available runners') ||
           !createSandboxDto.buildInfo
         ) {
           throw error
