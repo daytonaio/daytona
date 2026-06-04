@@ -4616,3 +4616,27 @@ sudo mount --move <your-mount-path> /tmp/.fuse-defunct-$$
 After this, your original mount path is free for remounting. The FUSE daemon stays alive serving the mount at the new path; both the relocated mount and the daemon are cleaned up automatically when the sandbox is deleted.
 
 This works for any FUSE-based mount — verified against `mount-s3`, `gcsfuse`, and `blobfuse2`.
+
+## Filesystem semantics and limitations
+
+Mounted object storage providers such as Amazon S3, Cloudflare R2, and Tigris appear as regular directories inside the sandbox. However, object storage does not provide full POSIX filesystem semantics.
+
+Avoid using mounted object storage for:
+
+- SQLite databases
+- Git repositories and worktrees
+- Append-heavy log files
+- Package manager caches
+- File locking workloads
+- Concurrent modification of the same file
+- Applications that require random writes or in-place file updates
+
+Recommended use cases include:
+
+- Datasets
+- Static assets
+- Model weights
+- Shared read-mostly content
+- Generated artifacts and output files
+
+For workloads requiring append operations, databases, file locking, or other mutable filesystem behavior, use the local sandbox filesystem instead.
