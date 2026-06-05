@@ -224,10 +224,15 @@ export class SnapshotService {
         const snapshotId = uuidv4()
 
         const snapshot = this.snapshotRepository.create({
-          // Request input first; server-authoritative fields below cannot be overridden by it.
-          ...createSnapshotDto,
           id: snapshotId,
           organizationId: organization.id,
+          // Map only client-settable fields explicitly; the raw DTO is never spread, so
+          // request input cannot assign server-owned columns (e.g. organizationId, initialRunnerId).
+          name: createSnapshotDto.name,
+          imageName: createSnapshotDto.imageName,
+          cpu: createSnapshotDto.cpu,
+          gpu: createSnapshotDto.gpu,
+          disk: createSnapshotDto.disk,
           gpuType: resolvedGpuType,
           entrypoint: this.processEntrypoint(entrypoint),
           mem: createSnapshotDto.memory, // Map memory to mem
@@ -235,8 +240,6 @@ export class SnapshotService {
           state,
           ref,
           general,
-          hideFromUsers: false,
-          initialRunnerId: undefined,
           snapshotRegions: [{ snapshotId, regionId: region.id }],
         })
 
@@ -324,18 +327,21 @@ export class SnapshotService {
       const snapshotId = uuidv4()
 
       const snapshot = this.snapshotRepository.create({
-        // Request input first; server-authoritative fields below cannot be overridden by it.
-        ...createSnapshotDto,
         id: snapshotId,
         organizationId: organization.id,
+        // Map only client-settable fields explicitly; the raw DTO is never spread, so
+        // request input cannot assign server-owned columns (e.g. organizationId, initialRunnerId).
+        // imageName is intentionally omitted: it is rejected for the build-info path.
+        name: createSnapshotDto.name,
+        cpu: createSnapshotDto.cpu,
+        gpu: createSnapshotDto.gpu,
+        disk: createSnapshotDto.disk,
         gpuType: resolvedGpuType,
         entrypoint: this.processEntrypoint(entrypoint),
         mem: createSnapshotDto.memory, // Map memory to mem
         sandboxClass,
         state: SnapshotState.PENDING,
         general,
-        hideFromUsers: false,
-        initialRunnerId: undefined,
         snapshotRegions: [{ snapshotId, regionId: region.id }],
       })
 
