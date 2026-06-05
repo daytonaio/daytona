@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsString, IsBoolean, IsOptional, IsArray } from 'class-validator'
+import { IsString, IsBoolean, IsNumber, IsOptional, IsArray } from 'class-validator'
 
 @ApiSchema({ name: 'FileInfo' })
 export class FileInfoDto {
@@ -236,16 +236,21 @@ export class GitCommitInfoDto {
 @ApiSchema({ name: 'ExecuteRequest' })
 export class ExecuteRequestDto {
   @ApiProperty()
+  @IsString()
   command: string
 
   @ApiPropertyOptional({
     description: 'Current working directory',
   })
+  @IsString()
+  @IsOptional()
   cwd?: string
 
   @ApiPropertyOptional({
     description: 'Timeout in seconds, defaults to 10 seconds',
   })
+  @IsNumber()
+  @IsOptional()
   timeout?: number
 }
 
