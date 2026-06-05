@@ -224,9 +224,10 @@ export class SnapshotService {
         const snapshotId = uuidv4()
 
         const snapshot = this.snapshotRepository.create({
+          // Request input first; server-authoritative fields below cannot be overridden by it.
+          ...createSnapshotDto,
           id: snapshotId,
           organizationId: organization.id,
-          ...createSnapshotDto,
           gpuType: resolvedGpuType,
           entrypoint: this.processEntrypoint(entrypoint),
           mem: createSnapshotDto.memory, // Map memory to mem
@@ -234,6 +235,8 @@ export class SnapshotService {
           state,
           ref,
           general,
+          hideFromUsers: false,
+          initialRunnerId: undefined,
           snapshotRegions: [{ snapshotId, regionId: region.id }],
         })
 
@@ -321,15 +324,18 @@ export class SnapshotService {
       const snapshotId = uuidv4()
 
       const snapshot = this.snapshotRepository.create({
+        // Request input first; server-authoritative fields below cannot be overridden by it.
+        ...createSnapshotDto,
         id: snapshotId,
         organizationId: organization.id,
-        ...createSnapshotDto,
         gpuType: resolvedGpuType,
         entrypoint: this.processEntrypoint(entrypoint),
         mem: createSnapshotDto.memory, // Map memory to mem
         sandboxClass,
         state: SnapshotState.PENDING,
         general,
+        hideFromUsers: false,
+        initialRunnerId: undefined,
         snapshotRegions: [{ snapshotId, regionId: region.id }],
       })
 
