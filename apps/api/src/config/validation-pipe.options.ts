@@ -13,9 +13,10 @@ import { ValidationPipeOptions } from '@nestjs/common'
  * server-authoritative fields (e.g. organizationId).
  *
  * `forbidNonWhitelisted` is intentionally NOT enabled: some first-party clients
- * still send undeclared/legacy fields (e.g. the CLI sends `envVars` on sandbox
- * creation), and silently stripping them is backward-compatible whereas
- * rejecting them with a 400 is not.
+ * still send undeclared fields the API never reads (e.g. a stray `envVars` on
+ * sandbox creation — the service only consumes `env`). Stripping such fields is
+ * behaviorally identical to the previous pipe, whereas rejecting them with a 400
+ * would be a new, breaking regression.
  *
  * Kept in a shared constant so the regression spec validates the exact
  * production configuration.
