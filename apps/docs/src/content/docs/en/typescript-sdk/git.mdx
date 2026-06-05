@@ -121,7 +121,8 @@ clone(
    branch?: string, 
    commitId?: string, 
    username?: string, 
-password?: string): Promise<void>
+   password?: string, 
+insecureSkipTls?: boolean): Promise<void>
 ```
 
 Clones a Git repository into the specified path. It supports
@@ -136,6 +137,7 @@ repository if credentials are provided.
 - `commitId?` _string_ - Specific commit to clone. If specified, the repository will be left in a detached HEAD state at this commit
 - `username?` _string_ - Git username for authentication
 - `password?` _string_ - Git password or token for authentication
+- `insecureSkipTls?` _boolean_ - Skip TLS certificate verification (insecure). Use only for trusted internal Git servers with self-signed or private-CA certs.
 
 
 **Returns**:

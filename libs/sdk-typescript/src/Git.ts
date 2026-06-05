@@ -133,6 +133,7 @@ export class Git {
    * @param {string} [commitId] - Specific commit to clone. If specified, the repository will be left in a detached HEAD state at this commit
    * @param {string} [username] - Git username for authentication
    * @param {string} [password] - Git password or token for authentication
+   * @param {boolean} [insecureSkipTls] - Skip TLS certificate verification (insecure). Use only for trusted internal Git servers with self-signed or private-CA certs.
    * @returns {Promise<void>}
    *
    * @example
@@ -168,6 +169,7 @@ export class Git {
     commitId?: string,
     username?: string,
     password?: string,
+    insecureSkipTls?: boolean,
   ): Promise<void> {
     await this.apiClient.cloneRepository({
       url: url,
@@ -176,6 +178,7 @@ export class Git {
       username,
       password,
       commit_id: commitId,
+      insecure_skip_tls: insecureSkipTls,
     })
   }
 

@@ -47,7 +47,7 @@ func TestCloneRejectsUntrustedTLSBeforeSendingCredentials_GoGit(t *testing.T) {
 	server, receivedAuth := newChallengingTLSServer(t)
 
 	svc := &Service{WorkDir: t.TempDir()}
-	err := svc.CloneRepository(&gitprovider.GitRepository{Url: server.URL}, testCreds)
+	err := svc.CloneRepository(&gitprovider.GitRepository{Url: server.URL}, testCreds, false)
 	require.Error(t, err, "expected clone to fail TLS verification")
 	require.Empty(t, receivedAuth.Load().(string),
 		"GHSA-375h-72g4-hc9c regression: credentials leaked to untrusted TLS endpoint")
@@ -90,8 +90,52 @@ func TestCloneRejectsUntrustedTLSBeforeSendingCredentials_CLI(t *testing.T) {
 	server, receivedAuth := newChallengingTLSServer(t)
 
 	svc := &Service{WorkDir: t.TempDir()}
-	err := svc.CloneRepository(&gitprovider.GitRepository{Url: server.URL}, testCreds)
+	err := svc.CloneRepository(&gitprovider.GitRepository{Url: server.URL}, testCreds, false)
 	require.Error(t, err, "expected clone to fail TLS verification")
 	require.Empty(t, receivedAuth.Load().(string),
 		"GHSA-375h-72g4-hc9c regression: credentials leaked to untrusted TLS endpoint")
+}
+
+// Positive plumbing test for the insecure_skip_tls=true opt-in (go-git path):
+// when the caller explicitly opts into skipping TLS verification, the clone
+// completes the TLS handshake against the untrusted server, native git sends
+// credentials in response to the 401 challenge, and the server records the
+// Authorization header. This locks in that the flag actually wires through.
+func TestCloneSkipsTLSWhenInsecureSkipTLSTrue_GoGit(t *testing.T) {
+	t.Setenv(experimentalUseGitCLIEnv, "false")
+	t.Setenv(experimentalUseGitCloneCLIEnv, "false")
+
+	server, receivedAuth := newChallengingTLSServer(t)
+
+	svc := &Service{WorkDir: t.TempDir()}
+	err := svc.CloneRepository(&gitprovider.GitRepository{Url: server.URL}, testCreds, true)
+	// Clone still returns an error because the server replies 401 — but the
+	// TLS handshake completed and credentials were transmitted, which is the
+	// behavior we're locking in.
+	require.Error(t, err, "expected 401 from challenging server")
+	require.NotEmpty(t, receivedAuth.Load().(string),
+		"insecure_skip_tls=true must let the request complete TLS handshake and reach the server")
+}
+
+// Positive plumbing test for the insecure_skip_tls=true opt-in (CLI path).
+// Same contract as the go-git variant: with the flag on, the bypass kicks in
+// and credentials are transmitted to the fake server.
+func TestCloneSkipsTLSWhenInsecureSkipTLSTrue_CLI(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git binary not found in PATH")
+	}
+
+	t.Setenv(experimentalUseGitCLIEnv, "true")
+	unsetEnvForTest(t, "GIT_SSL_NO_VERIFY")
+	t.Setenv("GIT_CONFIG_GLOBAL", os.DevNull)
+	t.Setenv("GIT_CONFIG_SYSTEM", os.DevNull)
+	t.Setenv("HOME", t.TempDir())
+
+	server, receivedAuth := newChallengingTLSServer(t)
+
+	svc := &Service{WorkDir: t.TempDir()}
+	err := svc.CloneRepository(&gitprovider.GitRepository{Url: server.URL}, testCreds, true)
+	require.Error(t, err, "expected 401 from challenging server")
+	require.NotEmpty(t, receivedAuth.Load().(string),
+		"insecure_skip_tls=true must let the request complete TLS handshake and reach the server")
 }

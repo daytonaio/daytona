@@ -54,6 +54,14 @@ public class GitCloneRequestTest {
     }
 
     /**
+     * Test the property 'insecureSkipTls'
+     */
+    @Test
+    public void insecureSkipTlsTest() {
+        // TODO: test insecureSkipTls
+    }
+
+    /**
      * Test the property 'password'
      */
     @Test

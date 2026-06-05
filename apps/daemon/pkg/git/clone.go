@@ -7,6 +7,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log/slog"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -19,15 +21,22 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
+func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error {
 	if isGitCLIModeEnabled() || os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
-		return s.CloneRepositoryCLI(repo, auth)
+		return s.CloneRepositoryCLI(repo, auth, insecureSkipTLS)
+	}
+
+	if insecureSkipTLS {
+		slog.Warn("git clone TLS verification disabled",
+			"url", sanitizeURLForLog(repo.Url),
+			"reason", "insecure_skip_tls=true")
 	}
 
 	cloneOptions := &git.CloneOptions{
-		URL:          repo.Url,
-		SingleBranch: true,
-		Auth:         auth,
+		URL:             repo.Url,
+		SingleBranch:    true,
+		InsecureSkipTLS: insecureSkipTLS,
+		Auth:            auth,
 	}
 
 	if s.LogWriter != nil {
@@ -84,8 +93,13 @@ esac
 
 // CloneRepositoryCLI clones via the `git` CLI. Bounded memory (mmap pack handling).
 // Creds flow through GIT_ASKPASS + env — never via URL or argv.
-func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
-	if err := s.gitCLIRun("git clone", buildCloneArgs(repo, s.WorkDir), auth, 64*1024); err != nil {
+func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error {
+	if insecureSkipTLS {
+		slog.Warn("git clone TLS verification disabled",
+			"url", sanitizeURLForLog(repo.Url),
+			"reason", "insecure_skip_tls=true")
+	}
+	if err := s.gitCLIRun("git clone", buildCloneArgs(repo, s.WorkDir, insecureSkipTLS), auth, 64*1024); err != nil {
 		return err
 	}
 
@@ -122,7 +136,11 @@ func (s *Service) attachCmdOutput(cmd *exec.Cmd, tailSize int) *tailBuffer {
 }
 
 // Credentials must NEVER be embedded in the URL — they flow via GIT_ASKPASS (see buildCloneEnv).
-func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
+// When skipVerify is true, the caller has explicitly opted into insecure TLS via the
+// request's insecure_skip_tls flag; we forward that to git via -c http.sslVerify=false.
+// When skipVerify is false (default), we do NOT pin sslVerify=true so a sandbox-shell
+// user with their own ~/.gitconfig override is still honored on the CLI escape path.
+func buildCloneArgs(repo *gitprovider.GitRepository, workDir string, skipVerify bool) []string {
 	cloneURL := repo.Url
 	if !strings.Contains(cloneURL, "://") {
 		cloneURL = "https://" + cloneURL
@@ -131,15 +149,40 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
 	args := []string{
 		"-c", "credential.helper=", // prevent any inherited helper from persisting the token
 		"-c", "core.hooksPath=/dev/null", // disable post-checkout (and any inherited core.hooksPath) — defense-in-depth so hooks can't read GIT_USERNAME / GIT_PASSWORD
+	}
+	if skipVerify {
+		args = append(args, "-c", "http.sslVerify=false")
+	}
+	args = append(args,
 		"clone",
 		"--single-branch",
 		"--progress",
-	}
+	)
 	if repo.Branch != "" {
 		args = append(args, "--branch", repo.Branch)
 	}
 	args = append(args, "--", cloneURL, workDir)
 	return args
+}
+
+// sanitizeURLForLog returns a string form of u with any embedded userinfo
+// removed. Prepends https:// when no scheme is present so net/url.Parse
+// treats the userinfo correctly (otherwise "user:pass@host/repo" parses as a
+// path, leaving creds in the result). Logs go to slog when the operator opts
+// into TLS bypass; this helper guarantees we don't echo creds back even
+// though TestBuildCloneArgs_NeverEmbedsCredsInURL already proves the daemon
+// refuses to embed them in clone args.
+func sanitizeURLForLog(u string) string {
+	parsed := u
+	if !strings.Contains(parsed, "://") {
+		parsed = "https://" + parsed
+	}
+	parsedURL, err := url.Parse(parsed)
+	if err != nil {
+		return "<unparseable url>"
+	}
+	parsedURL.User = nil
+	return parsedURL.String()
 }
 
 func buildCloneEnv(baseEnv []string, askPath string, auth *http.BasicAuth) []string {

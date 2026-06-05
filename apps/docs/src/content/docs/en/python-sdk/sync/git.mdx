@@ -116,7 +116,8 @@ def clone(url: str,
           branch: str | None = None,
           commit_id: str | None = None,
           username: str | None = None,
-          password: str | None = None) -> None
+          password: str | None = None,
+          insecure_skip_tls: bool | None = None) -> None
 ```
 
 Clones a Git repository into the specified path. It supports
@@ -134,6 +135,9 @@ repository if credentials are provided.
   the repository will be left in a detached HEAD state at this commit.
 - `username` _str | None_ - Git username for authentication.
 - `password` _str | None_ - Git password or token for authentication.
+- `insecure_skip_tls` _bool | None_ - Skip TLS certificate verification (insecure).
+  Use only for trusted internal Git servers with self-signed or private-CA certs;
+  credentials, if supplied, are transmitted over an unverified TLS connection.
   
 
 **Example**:

@@ -60,6 +60,11 @@ public class GitCloneRequest {
   @javax.annotation.Nullable
   private String commitId;
 
+  public static final String SERIALIZED_NAME_INSECURE_SKIP_TLS = "insecure_skip_tls";
+  @SerializedName(SERIALIZED_NAME_INSECURE_SKIP_TLS)
+  @javax.annotation.Nullable
+  private Boolean insecureSkipTls;
+
   public static final String SERIALIZED_NAME_PASSWORD = "password";
   @SerializedName(SERIALIZED_NAME_PASSWORD)
   @javax.annotation.Nullable
@@ -118,6 +123,25 @@ public class GitCloneRequest {
 
   public void setCommitId(@javax.annotation.Nullable String commitId) {
     this.commitId = commitId;
+  }
+
+
+  public GitCloneRequest insecureSkipTls(@javax.annotation.Nullable Boolean insecureSkipTls) {
+    this.insecureSkipTls = insecureSkipTls;
+    return this;
+  }
+
+  /**
+   * Skip TLS certificate verification for this clone. Defaults to false (verify). Set to true ONLY for trusted internal Git servers with self-signed or private-CA certs; credentials, if supplied, will be transmitted over an unverified TLS connection and are exposed to any MITM on the route.
+   * @return insecureSkipTls
+   */
+  @javax.annotation.Nullable
+  public Boolean getInsecureSkipTls() {
+    return insecureSkipTls;
+  }
+
+  public void setInsecureSkipTls(@javax.annotation.Nullable Boolean insecureSkipTls) {
+    this.insecureSkipTls = insecureSkipTls;
   }
 
 
@@ -253,6 +277,7 @@ public class GitCloneRequest {
     GitCloneRequest gitCloneRequest = (GitCloneRequest) o;
     return Objects.equals(this.branch, gitCloneRequest.branch) &&
         Objects.equals(this.commitId, gitCloneRequest.commitId) &&
+        Objects.equals(this.insecureSkipTls, gitCloneRequest.insecureSkipTls) &&
         Objects.equals(this.password, gitCloneRequest.password) &&
         Objects.equals(this.path, gitCloneRequest.path) &&
         Objects.equals(this.url, gitCloneRequest.url) &&
@@ -262,7 +287,7 @@ public class GitCloneRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(branch, commitId, password, path, url, username, additionalProperties);
+    return Objects.hash(branch, commitId, insecureSkipTls, password, path, url, username, additionalProperties);
   }
 
   @Override
@@ -271,6 +296,7 @@ public class GitCloneRequest {
     sb.append("class GitCloneRequest {\n");
     sb.append("    branch: ").append(toIndentedString(branch)).append("\n");
     sb.append("    commitId: ").append(toIndentedString(commitId)).append("\n");
+    sb.append("    insecureSkipTls: ").append(toIndentedString(insecureSkipTls)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
@@ -294,7 +320,7 @@ public class GitCloneRequest {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("branch", "commit_id", "password", "path", "url", "username"));
+    openapiFields = new HashSet<String>(Arrays.asList("branch", "commit_id", "insecure_skip_tls", "password", "path", "url", "username"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("path", "url"));

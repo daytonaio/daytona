@@ -396,7 +396,7 @@ public class GitApi {
 
     /**
      * Clone a Git repository
-     * Clone a Git repository to the specified path
+     * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls&#x3D;true to skip verification for self-signed or private-CA Git servers.
      * @param request Clone repository request (required)
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -412,7 +412,7 @@ public class GitApi {
 
     /**
      * Clone a Git repository
-     * Clone a Git repository to the specified path
+     * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls&#x3D;true to skip verification for self-signed or private-CA Git servers.
      * @param request Clone repository request (required)
      * @return ApiResponse&lt;Void&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -430,7 +430,7 @@ public class GitApi {
 
     /**
      * Clone a Git repository (asynchronously)
-     * Clone a Git repository to the specified path
+     * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls&#x3D;true to skip verification for self-signed or private-CA Git servers.
      * @param request Clone repository request (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call

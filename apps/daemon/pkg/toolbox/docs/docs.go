@@ -1170,6 +1170,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -1302,6 +1303,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -1968,7 +1970,7 @@ const docTemplate = `{
         },
         "/git/clone": {
             "post": {
-                "description": "Clone a Git repository to the specified path",
+                "description": "Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.",
                 "consumes": [
                     "application/json"
                 ],
@@ -3480,7 +3482,8 @@ const docTemplate = `{
                     "items": {
                         "type": "array",
                         "items": {
-                            "type": "number"
+                            "type": "number",
+                            "format": "float64"
                         }
                     }
                 },
@@ -3942,6 +3945,10 @@ const docTemplate = `{
                 },
                 "commit_id": {
                     "type": "string"
+                },
+                "insecure_skip_tls": {
+                    "description": "Skip TLS certificate verification for this clone. Defaults to false (verify).\nSet to true ONLY for trusted internal Git servers with self-signed or\nprivate-CA certs; credentials, if supplied, will be transmitted over an\nunverified TLS connection and are exposed to any MITM on the route.",
+                    "type": "boolean"
                 },
                 "password": {
                     "type": "string"

@@ -113,6 +113,7 @@ definitions:
       points:
         items:
           items:
+            format: float64
             type: number
           type: array
         type: array
@@ -419,6 +420,13 @@ definitions:
         type: string
       commit_id:
         type: string
+      insecure_skip_tls:
+        description: |-
+          Skip TLS certificate verification for this clone. Defaults to false (verify).
+          Set to true ONLY for trusted internal Git servers with self-signed or
+          private-CA certs; credentials, if supplied, will be transmitted over an
+          unverified TLS connection and are exposed to any MITM on the route.
+        type: boolean
       password:
         type: string
       path:
@@ -1894,6 +1902,7 @@ paths:
           name: quality
           type: integer
         - description: Scale factor (0.1-1.0)
+          format: float64
           in: query
           name: scale
           type: number
@@ -1984,6 +1993,7 @@ paths:
           name: quality
           type: integer
         - description: Scale factor (0.1-1.0)
+          format: float64
           in: query
           name: scale
           type: number
@@ -2436,7 +2446,9 @@ paths:
     post:
       consumes:
         - application/json
-      description: Clone a Git repository to the specified path
+      description: Clone a Git repository to the specified path. Defaults to strict
+        TLS verification; set insecure_skip_tls=true to skip verification for self-signed
+        or private-CA Git servers.
       operationId: CloneRepository
       parameters:
         - description: Clone repository request

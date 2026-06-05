@@ -22,10 +22,11 @@ var testCreds = &http.BasicAuth{
 
 func TestBuildCloneArgs(t *testing.T) {
 	tests := []struct {
-		name     string
-		repo     *gitprovider.GitRepository
-		workDir  string
-		expected []string
+		name       string
+		repo       *gitprovider.GitRepository
+		workDir    string
+		skipVerify bool
+		expected   []string
 	}{
 		{
 			name: "https URL with branch",
@@ -85,16 +86,35 @@ func TestBuildCloneArgs(t *testing.T) {
 				"--", "https://github.com/daytonaio/daytona", "/work-dir",
 			},
 		},
+		{
+			name: "skipVerify=true adds http.sslVerify=false",
+			repo: &gitprovider.GitRepository{
+				Url:    "https://internal-git.example.com/org/repo",
+				Branch: "main",
+			},
+			workDir:    "/work-dir",
+			skipVerify: true,
+			expected: []string{
+				"-c", "credential.helper=",
+				"-c", "core.hooksPath=/dev/null",
+				"-c", "http.sslVerify=false",
+				"clone", "--single-branch", "--progress",
+				"--branch", "main",
+				"--", "https://internal-git.example.com/org/repo", "/work-dir",
+			},
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := buildCloneArgs(tc.repo, tc.workDir)
+			got := buildCloneArgs(tc.repo, tc.workDir, tc.skipVerify)
 			require.Equal(t, tc.expected, got)
 
-			for _, arg := range got {
-				require.NotEqual(t, "http.sslVerify=false", arg,
-					"regression: GHSA-375h-72g4-hc9c — daemon git clone must not disable TLS verification")
+			if !tc.skipVerify {
+				for _, arg := range got {
+					require.NotEqual(t, "http.sslVerify=false", arg,
+						"regression: GHSA-375h-72g4-hc9c — daemon git clone must not disable TLS verification by default")
+				}
 			}
 		})
 	}
@@ -108,7 +128,7 @@ func TestBuildCloneArgs_NeverEmbedsCredsInURL(t *testing.T) {
 		Url:    "https://github.com/daytonaio/daytona",
 		Branch: "main",
 	}
-	args := buildCloneArgs(repo, "/work-dir")
+	args := buildCloneArgs(repo, "/work-dir", false)
 
 	for _, arg := range args {
 		require.NotContains(t, arg, testCreds.Username, "username leaked into clone args: %q", arg)

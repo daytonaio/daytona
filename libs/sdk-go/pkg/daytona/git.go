@@ -95,6 +95,9 @@ func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*
 		if cloneOpts.Password != nil {
 			req.SetPassword(*cloneOpts.Password)
 		}
+		if cloneOpts.InsecureSkipTLS != nil {
+			req.SetInsecureSkipTls(*cloneOpts.InsecureSkipTLS)
+		}
 
 		httpResp, err := g.toolboxClient.GitAPI.CloneRepository(ctx).Request(*req).Execute()
 		if err != nil {

@@ -48,6 +48,27 @@ Clones a repository with optional branch, commit, and credentials.
 
 - `io.daytona.sdk.exception.DaytonaException` - if cloning fails
 
+#### clone()
+```java
+public void clone(String url, String path, String branch, String commitId, String username, String password, Boolean insecureSkipTls)
+```
+
+Clones a repository with optional branch, commit, credentials, and TLS verification override.
+
+**Parameters**:
+
+- `url` _String_ - repository URL
+- `path` _String_ - destination path in the Sandbox
+- `branch` _String_ - branch to clone; `null` uses default branch
+- `commitId` _String_ - commit SHA to checkout after clone; `null` skips detached checkout
+- `username` _String_ - username for authenticated remotes
+- `password` _String_ - password or token for authenticated remotes
+- `insecureSkipTls` _Boolean_ - when `true`, skip TLS certificate verification (insecure). Use only for trusted internal Git servers with self-signed or private-CA certs; credentials, if supplied, are transmitted over an unverified TLS connection. `null` or `false` keeps strict TLS verification.
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if cloning fails
+
 #### branches()
 ```java
 public Map<String, Object> branches(String path)
