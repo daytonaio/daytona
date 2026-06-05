@@ -4,7 +4,7 @@
  */
 
 import 'reflect-metadata'
-import { ArgumentMetadata, BadRequestException, ValidationPipe } from '@nestjs/common'
+import { ArgumentMetadata, ValidationPipe } from '@nestjs/common'
 import { validationPipeOptions } from './validation-pipe.options'
 import { CreateSnapshotDto } from '../sandbox/dto/create-snapshot.dto'
 import { SandboxLabelsDto } from '../sandbox/dto/sandbox.dto'
@@ -17,16 +17,15 @@ const pipe = new ValidationPipe(validationPipeOptions)
 const body = (metatype: ArgumentMetadata['metatype']): ArgumentMetadata => ({ type: 'body', metatype, data: '' })
 
 describe('global ValidationPipe — mass-assignment prevention', () => {
-  describe('rejects undeclared (server-authoritative) properties', () => {
+  describe('strips undeclared (server-authoritative) properties', () => {
     it.each([
       ['organizationId', { organizationId: 'b2cadaa7-78a5-48a0-8eb0-f4f0e2a1bfd7' }],
       ['id', { id: 'attacker-chosen-uuid' }],
       ['initialRunnerId', { initialRunnerId: 'arbitrary-runner' }],
       ['hideFromUsers', { hideFromUsers: true }],
-    ])('rejects an injected %s on CreateSnapshotDto', async (_field, injected) => {
-      await expect(
-        pipe.transform({ name: 'x', imageName: 'ubuntu:22.04', ...injected }, body(CreateSnapshotDto)),
-      ).rejects.toBeInstanceOf(BadRequestException)
+    ])('strips an injected %s from CreateSnapshotDto', async (field, injected) => {
+      const out = await pipe.transform({ name: 'x', imageName: 'ubuntu:22.04', ...injected }, body(CreateSnapshotDto))
+      expect(out).not.toHaveProperty(field)
     })
 
     it('accepts a clean CreateSnapshotDto and preserves declared fields', async () => {
