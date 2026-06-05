@@ -3,6 +3,7 @@
 
 package io.daytona.sdk;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.daytona.sdk.model.*;
 import io.daytona.sdk.exception.DaytonaException;
 import io.daytona.toolbox.client.api.ProcessApi;
@@ -22,12 +23,15 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -43,6 +47,9 @@ public class Process {
     private static final byte STDOUT_PREFIX_BYTE = 0x01;
     private static final byte STDERR_PREFIX_BYTE = 0x02;
     private static final int PREFIX_REPEAT_COUNT = 3;
+    private static final long PTY_CONNECTION_TIMEOUT_SECONDS = 10;
+    private static final String PTY_ENVS_SUBPROTOCOL_PREFIX = "X-Daytona-Pty-Envs~";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final ProcessApi processApi;
     private final Sandbox sandbox;
@@ -290,17 +297,48 @@ public class Process {
      */
     public PtyHandle createPty(PtyCreateOptions options) {
         PtyCreateOptions createOptions = options == null ? new PtyCreateOptions() : options;
-        PtyCreateRequest request = new PtyCreateRequest()
-                .id(createOptions.getId())
-                .cols(createOptions.getCols())
-                .rows(createOptions.getRows());
-
-        PtyCreateResponse response = ExceptionMapper.callToolbox(() -> processApi.createPtySession(request));
-        if (response == null || response.getSessionId() == null || response.getSessionId().isEmpty()) {
-            throw new DaytonaException("Failed to create PTY session");
+        String id = createOptions.getId();
+        if (id == null || id.isEmpty()) {
+            // Generate a client-side id when none is provided (preserves the
+            // legacy server-generated/default id flow).
+            id = "pty-" + UUID.randomUUID();
         }
 
-        return connectPty(response.getSessionId(), createOptions);
+        String wsUrl = buildPtyCreateConnectUrl(
+                sandbox.getToolboxApiClient().getBasePath(),
+                id,
+                createOptions.getCols(),
+                createOptions.getRows(),
+                createOptions.getCwd()
+        );
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(wsUrl)
+                .addHeader("Authorization", "Bearer " + sandbox.getApiKey());
+
+        // Envs are passed as a WebSocket subprotocol token (kept uniform across
+        // SDKs and the daemon, out of the URL/logs). okhttp has no dedicated
+        // client-side subprotocol API, so set it via the Sec-WebSocket-Protocol
+        // request header. Omitted when there are no envs.
+        Map<String, String> envs = createOptions.getEnvs();
+        if (envs != null && !envs.isEmpty()) {
+            String token = PTY_ENVS_SUBPROTOCOL_PREFIX + encodePtyEnvs(envs);
+            requestBuilder.addHeader("Sec-WebSocket-Protocol", token);
+        }
+        Request wsRequest = requestBuilder.build();
+
+        PtyHandle handle = new PtyHandle(
+                sandbox.getToolboxApiClient().getHttpClient(),
+                wsRequest,
+                id,
+                this::resizePtySession,
+                this::killPtySession,
+                createOptions.getOnData()
+        );
+        // The WebSocket connects asynchronously and the daemon registers the
+        // session on connect, so wait for the connection before returning (other
+        // SDKs do the same) — otherwise an immediate listPtySessions() races it.
+        handle.waitForConnection(PTY_CONNECTION_TIMEOUT_SECONDS);
+        return handle;
     }
 
     /**
@@ -330,7 +368,7 @@ public class Process {
                 .addHeader("Authorization", "Bearer " + sandbox.getApiKey())
                 .build();
 
-        return new PtyHandle(
+        PtyHandle handle = new PtyHandle(
                 sandbox.getToolboxApiClient().getHttpClient(),
                 wsRequest,
                 sessionId,
@@ -338,6 +376,8 @@ public class Process {
                 this::killPtySession,
                 connectOptions.getOnData()
         );
+        handle.waitForConnection(PTY_CONNECTION_TIMEOUT_SECONDS);
+        return handle;
     }
 
     /**
@@ -397,6 +437,35 @@ public class Process {
                 .replaceFirst("^https://", "wss://")
                 .replaceFirst("^http://", "ws://");
         return wsBase + "/process/pty/" + sessionId + "/connect";
+    }
+
+    private String buildPtyCreateConnectUrl(String toolboxBaseUrl, String id, int cols, int rows, String cwd) {
+        if (toolboxBaseUrl == null || toolboxBaseUrl.isEmpty()) {
+            throw new DaytonaException("Toolbox base URL is not available");
+        }
+        String wsBase = toolboxBaseUrl
+                .replaceFirst("^https://", "wss://")
+                .replaceFirst("^http://", "ws://");
+        // URL-encode user-provided values so reserved characters don't corrupt the
+        // request; cols/rows are ints and safe to inline.
+        StringBuilder url = new StringBuilder(wsBase)
+                .append("/process/pty/create-connect?id=")
+                .append(URLEncoder.encode(id, StandardCharsets.UTF_8))
+                .append("&cols=").append(cols)
+                .append("&rows=").append(rows);
+        if (cwd != null && !cwd.isEmpty()) {
+            url.append("&cwd=").append(URLEncoder.encode(cwd, StandardCharsets.UTF_8));
+        }
+        return url.toString();
+    }
+
+    private String encodePtyEnvs(Map<String, String> envs) {
+        try {
+            byte[] json = OBJECT_MAPPER.writeValueAsBytes(envs);
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(json);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new DaytonaException("Failed to serialize PTY environment variables", e);
+        }
     }
 
     private void streamDemuxedLogsViaWebSocket(String wsUrl, Consumer<String> onStdout, Consumer<String> onStderr) {

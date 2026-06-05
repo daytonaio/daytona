@@ -114,10 +114,10 @@ func TestPtyHandleReadEOFAndWriteWithoutConnection(t *testing.T) {
 func TestPtyHandleControlAndCloseParsing(t *testing.T) {
 	t.Run("control message updates connection state", func(t *testing.T) {
 		handle := &PtyHandle{}
-		handle.handleControlMessage(&controlMessage{Status: "connected"})
+		handle.handleControlMessage(&controlMessage{Status: "connected"}, nil)
 		assert.True(t, handle.connectionEstablished)
 		assert.True(t, handle.connected)
-		handle.handleControlMessage(&controlMessage{Status: "error", Error: "bad"})
+		handle.handleControlMessage(&controlMessage{Status: "error", Error: "bad"}, nil)
 		require.NotNil(t, handle.Error())
 		assert.Equal(t, "bad", *handle.Error())
 	})

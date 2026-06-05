@@ -6,7 +6,11 @@ package daytona
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"net/url"
+	"strconv"
 
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/common"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
@@ -1036,22 +1040,56 @@ func (p *ProcessService) CreatePty(ctx context.Context, id string, opts ...func(
 	return withInstrumentation(ctx, p.otel, "Process", "CreatePty", func(ctx context.Context) (*PtyHandle, error) {
 		createOpts := options.Apply(opts...)
 
-		// Convert to CreatePtySession options
-		sessionOpts := []func(*options.PtySession){}
+		// Build query params for single-roundtrip create-connect endpoint
+		cols := 80
+		rows := 24
 		if createOpts.PtySize != nil {
-			sessionOpts = append(sessionOpts, options.WithPtySize(*createOpts.PtySize))
-		}
-		if createOpts.Env != nil {
-			sessionOpts = append(sessionOpts, options.WithPtyEnv(createOpts.Env))
+			cols = createOpts.PtySize.Cols
+			rows = createOpts.PtySize.Rows
 		}
 
-		// Create the PTY session
-		_, err := p.CreatePtySession(ctx, id, sessionOpts...)
+		httpURL := p.toolboxClient.GetConfig().Servers[0].URL
+		wsURL := common.ConvertToWebSocketURL(httpURL)
+
+		values := url.Values{}
+		values.Set("id", id)
+		values.Set("cols", strconv.Itoa(cols))
+		values.Set("rows", strconv.Itoa(rows))
+
+		headers := make(map[string][]string)
+		cfg := p.toolboxClient.GetConfig()
+		for key, value := range cfg.DefaultHeader {
+			headers[key] = []string{value}
+		}
+
+		// Pass envs via a WebSocket subprotocol token (base64url-no-padding JSON) instead of a header.
+		var token string
+		if len(createOpts.Env) > 0 {
+			envJSON, err := json.Marshal(createOpts.Env)
+			if err != nil {
+				return nil, errors.NewDaytonaError(fmt.Sprintf("Failed to encode PTY envs: %v", err), 0, nil)
+			}
+			token = "X-Daytona-Pty-Envs~" + base64.RawURLEncoding.EncodeToString(envJSON)
+		}
+
+		// gorilla/websocket's DefaultDialer is a shared global; copy it before mutating.
+		dialer := *websocket.DefaultDialer
+		if token != "" {
+			dialer.Subprotocols = []string{token}
+		}
+
+		conn, _, err := dialer.DialContext(ctx, fmt.Sprintf("%s/process/pty/create-connect?%s", wsURL, values.Encode()), headers)
 		if err != nil {
-			return nil, err
+			return nil, errors.NewDaytonaError(fmt.Sprintf("Failed to create and connect PTY: %v", err), 0, nil)
 		}
 
-		// Connect to the session
-		return p.ConnectPty(ctx, id)
+		resizeHandler := func(ctx context.Context, c, r int) (*types.PtySessionInfo, error) {
+			return p.ResizePtySession(ctx, id, types.PtySize{Cols: c, Rows: r})
+		}
+		killHandler := func(ctx context.Context) error {
+			return p.KillPtySession(ctx, id)
+		}
+
+		return newPtyHandle(conn, id, resizeHandler, killHandler), nil
 	})
 }

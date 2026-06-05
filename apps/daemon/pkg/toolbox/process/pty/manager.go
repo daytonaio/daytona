@@ -26,6 +26,12 @@ func (m *PTYManager) Add(s *PTYSession) {
 	m.sessions.Set(s.info.ID, s)
 }
 
+// AddIfAbsent adds a PTY session only if no session with the same ID exists.
+// It returns true if the session was added, false if one already existed.
+func (m *PTYManager) AddIfAbsent(s *PTYSession) bool {
+	return m.sessions.SetIfAbsent(s.info.ID, s)
+}
+
 // Get retrieves a PTY session by ID
 func (m *PTYManager) Get(id string) (*PTYSession, bool) {
 	s, ok := m.sessions.Get(id)

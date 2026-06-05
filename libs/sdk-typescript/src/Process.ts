@@ -10,7 +10,6 @@ import type {
   SessionExecuteRequest,
   SessionExecuteResponse as ApiSessionExecuteResponse,
   CodeRunRequest,
-  PtyCreateRequest,
   PtySessionInfo,
 } from '@daytona/toolbox-api-client'
 import type { ExecuteResponse } from './types/ExecuteResponse'
@@ -19,6 +18,7 @@ import { stdDemuxStream } from './utils/Stream'
 import { PtyHandle } from './PtyHandle'
 import type { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
 import { createSandboxWebSocket } from './utils/WebSocket'
+import { toBuffer } from './utils/Binary'
 import { WithInstrumentation } from './utils/otel.decorator'
 
 // 3-byte multiplexing markers inserted by the shell labelers
@@ -531,18 +531,46 @@ export class Process {
    */
   @WithInstrumentation()
   public async createPty(options?: PtyCreateOptions & PtyConnectOptions): Promise<PtyHandle> {
-    const request: PtyCreateRequest = {
-      id: options.id,
-      cwd: options.cwd,
-      envs: options.envs,
-      cols: options.cols,
-      rows: options.rows,
-      lazyStart: true,
+    const id = options.id
+    const cols = options.cols ?? 80
+    const rows = options.rows ?? 24
+
+    // Build query params for the combined create-connect endpoint (single round-trip)
+    const params = new URLSearchParams({
+      id,
+      cols: String(cols),
+      rows: String(rows),
+    })
+    if (options.cwd) params.set('cwd', options.cwd)
+
+    const wsUrl = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/pty/create-connect?${params.toString()}`
+
+    // Envs are passed via a WebSocket subprotocol token (base64url, no padding, of the JSON object)
+    // rather than the query string or a header, so they forward uniformly across browser/Deno/serverless
+    // runtimes and match the daemon's create-connect protocol.
+    const headers: Record<string, any> = { ...(this.clientConfig.baseOptions?.headers || {}) }
+    const subprotocols: string[] = []
+    if (options.envs && Object.keys(options.envs).length) {
+      const b64url = toBuffer(new TextEncoder().encode(JSON.stringify(options.envs)))
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '')
+      subprotocols.push(`X-Daytona-Pty-Envs~${b64url}`)
     }
 
-    const response = await this.apiClient.createPtySession(request)
+    const ws = await createSandboxWebSocket(wsUrl, headers, this.getPreviewToken, subprotocols)
 
-    return await this.connectPty(response.data.sessionId, options)
+    const handle = new PtyHandle(
+      ws,
+      (handleCols: number, handleRows: number) => this.resizePtySession(id, handleCols, handleRows),
+      () => this.killPtySession(id),
+      options.onData,
+      id,
+    )
+    await handle.waitForConnection()
+
+    return handle
   }
 
   /**

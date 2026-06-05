@@ -417,7 +417,7 @@ func (h *PtyHandle) handleMessages() {
 			// Try to parse as control message
 			var ctrl controlMessage
 			if err := json.Unmarshal(data, &ctrl); err == nil && ctrl.Type == "control" {
-				h.handleControlMessage(&ctrl)
+				h.handleControlMessage(&ctrl, data)
 			} else {
 				// Regular text output - send to channel
 				// Make a copy of data since WebSocket reuses the buffer
@@ -444,8 +444,9 @@ func (h *PtyHandle) handleMessages() {
 	}
 }
 
-// handleControlMessage processes control messages from the server
-func (h *PtyHandle) handleControlMessage(msg *controlMessage) {
+// handleControlMessage processes control messages from the server.
+// rawData is the original JSON bytes for parsing extra fields (e.g. exitCode).
+func (h *PtyHandle) handleControlMessage(msg *controlMessage, rawData []byte) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -453,6 +454,25 @@ func (h *PtyHandle) handleControlMessage(msg *controlMessage) {
 	case "connected":
 		h.connected = true
 		h.connectionEstablished = true
+	case "exited":
+		// An instantly-exiting PTY may never emit "connected"; unblock WaitForConnection.
+		h.connectionEstablished = true
+		// Parse exit code and reason from the raw JSON (fields not in controlMessage struct)
+		var raw map[string]json.RawMessage
+		if err := json.Unmarshal(rawData, &raw); err == nil {
+			if codeRaw, ok := raw["exitCode"]; ok {
+				var code int
+				if err := json.Unmarshal(codeRaw, &code); err == nil {
+					h.exitCode = &code
+				}
+			}
+			if reasonRaw, ok := raw["exitReason"]; ok {
+				var reason string
+				if err := json.Unmarshal(reasonRaw, &reason); err == nil {
+					h.err = &reason
+				}
+			}
+		}
 	case "error":
 		errMsg := msg.Error
 		if errMsg == "" {

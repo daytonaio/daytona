@@ -3069,6 +3069,43 @@ paths:
       summary: Resize a PTY session
       tags:
         - process
+  /process/pty/create-connect:
+    get:
+      description: |-
+        Creates a new PTY session and immediately establishes a WebSocket connection.
+        PTY configuration is passed as query parameters. The shell starts on WS open.
+        This is faster than calling create + connect separately (1 round-trip vs 2).
+      operationId: CreateAndConnectPtySession
+      parameters:
+        - description: PTY session ID
+          in: query
+          name: id
+          required: true
+          type: string
+        - description: Working directory
+          in: query
+          name: cwd
+          type: string
+        - description: 'Terminal columns (default: 80)'
+          in: query
+          name: cols
+          type: integer
+        - description: 'Terminal rows (default: 24)'
+          in: query
+          name: rows
+          type: integer
+        - description:
+            WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~<base64url-no-padding
+            JSON object>
+          in: header
+          name: Sec-WebSocket-Protocol
+          type: string
+      responses:
+        '101':
+          description: Switching Protocols - WebSocket connection established
+      summary: Create and connect to a PTY session in a single WebSocket upgrade
+      tags:
+        - process
   /process/session:
     get:
       description: Get a list of all active shell sessions
