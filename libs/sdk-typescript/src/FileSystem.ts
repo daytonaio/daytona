@@ -340,6 +340,16 @@ export class FileSystem {
       return Boolean(axios.isCancel?.(err) || error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED')
     }
 
+    let returnedStreamForAbort: Readable | null = null
+    const forwardAbortToReturnedStream = () => {
+      const stream = returnedStreamForAbort
+      if (stream && !stream.destroyed && !stream.readableEnded) {
+        stream.destroy(toDownloadCancelledError())
+      }
+    }
+    const removeAbortForwarder = () => options.signal?.removeEventListener('abort', forwardAbortToReturnedStream)
+    options.signal?.addEventListener('abort', forwardAbortToReturnedStream, { once: true })
+
     let response
     try {
       response = await this.apiClient.downloadFiles(
@@ -351,6 +361,7 @@ export class FileSystem {
         },
       )
     } catch (err) {
+      removeAbortForwarder()
       if (options.signal?.aborted || isCanceledError(err)) {
         throw toDownloadCancelledError()
       }
@@ -389,15 +400,30 @@ export class FileSystem {
               if (fileStreamEnded) return
               if (!progress.destroyed) progress.destroy(err)
             })
+            // pipe() does not forward 'close'. If the upstream connection
+            // drops, busboy may close the fileStream without 'end', leaving
+            // the progress Transform dangling. Propagate close → end so the
+            // caller's stream always terminates.
+            fileStream.once('close', () => {
+              if (!progress.writableFinished && !progress.destroyed) {
+                progress.end()
+              }
+            })
             resolvedStream = progress
           } else {
             resolvedStream = fileStream as Readable
           }
+          returnedStreamForAbort = resolvedStream
+          resolvedStream.once('end', removeAbortForwarder)
+          resolvedStream.once('error', removeAbortForwarder)
+          resolvedStream.once('close', removeAbortForwarder)
+          if (options.signal?.aborted) queueMicrotask(forwardAbortToReturnedStream)
           resolve(resolvedStream)
         },
       )
         .then(() => {
           if (!resolvedStream) {
+            removeAbortForwarder()
             const metadata = metadataMap.get(remotePath)
             if (metadata?.error) {
               reject(createFileDownloadError(metadata.error, metadata.errorDetails))
@@ -409,6 +435,7 @@ export class FileSystem {
         .catch((err) => {
           const normalizedError = options.signal?.aborted || isCanceledError(err) ? toDownloadCancelledError() : err
           if (!resolvedStream) {
+            removeAbortForwarder()
             reject(normalizedError)
             return
           }

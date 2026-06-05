@@ -70,7 +70,8 @@ func DownloadFiles(c *gin.Context) {
 		})
 		return
 	}
-	defer mw.Close() // ensure final boundary is written
+	// Do not `defer mw.Close()`: deferring the closing boundary races with
+	// net/http's response finalization and can silently truncate the response.
 
 	for _, path := range req.Paths {
 		f, info, downloadErr := openDownloadFile(c, path)
@@ -82,12 +83,23 @@ func DownloadFiles(c *gin.Context) {
 		if err := writeFilePart(c.Request.Context(), mw, path, f, info.Size()); err != nil {
 			f.Close()
 
-			// If streaming fails after the multipart file part has started, emitting a
-			// second error part for the same path breaks the response contract.
-			c.Error(err)
+			// Mid-part failure: end the response now so the client's truncation
+			// guard surfaces this loudly instead of as a successful short file.
+			_ = c.Error(err)
 			return
 		}
 		f.Close()
+	}
+
+	if err := mw.Close(); err != nil {
+		_ = c.Error(fmt.Errorf("close multipart writer: %w", err))
+	}
+	flushResponse(c)
+}
+
+func flushResponse(c *gin.Context) {
+	if flusher, ok := c.Writer.(http.Flusher); ok {
+		flusher.Flush()
 	}
 }
 

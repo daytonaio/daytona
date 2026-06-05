@@ -213,7 +213,7 @@ module Daytona
     #   # Upload binary data
     #   data = { key: "value" }.to_json
     #   sandbox.fs.upload_file(data, "tmp/config.json")
-    def upload_file(source, remote_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    def upload_file(source, remote_path)
       if source.is_a?(String) && File.exist?(source)
         # Source is a file path
         File.open(source, 'rb') { |file| toolbox_api.upload_file(remote_path, file) }
@@ -221,12 +221,17 @@ module Daytona
         # Source is an IO object
         toolbox_api.upload_file(remote_path, source)
       else
-        # Source is string content - create a temporary file
-        Tempfile.create('daytona_upload') do |file|
-          file.binmode
-          file.write(source)
-          file.rewind
-          toolbox_api.upload_file(remote_path, file)
+        # Tempfile.create yields a ::File (works with Typhoeus) but deletes
+        # on block exit — too early if curl reads asynchronously. Write via
+        # Tempfile, close it, then reopen as ::File for the upload.
+        tmp = Tempfile.new('daytona_upload')
+        begin
+          tmp.binmode
+          tmp.write(source.to_s.b)
+          tmp.close
+          File.open(tmp.path, 'rb') { |file| toolbox_api.upload_file(remote_path, file) }
+        ensure
+          tmp.unlink
         end
       end
     rescue StandardError => e

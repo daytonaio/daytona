@@ -108,40 +108,40 @@ module Daytona
 
       puts "[DEBUG] Connecting to WebSocket: #{ws_url}" if ENV['DEBUG']
 
-      ws = WebSocket::Client::Simple.connect(ws_url, headers:)
-
-      ws.on :open do
-        puts '[DEBUG] WebSocket opened, sending request' if ENV['DEBUG']
-        ws.send(JSON.dump(request))
-      end
-
-      ws.on :message do |msg|
-        puts "[DEBUG] Received message (length=#{msg.data.length}): #{msg.data.inspect[0..200]}" if ENV['DEBUG']
-
-        interpreter.send(:handle_message, msg.data, result, on_stdout, on_stderr, on_error, completion_queue)
-      end
-
-      ws.on :error do |e|
-        puts "[DEBUG] WebSocket error: #{e.message}" if ENV['DEBUG']
-        completion_queue.push({ type: :error, error: e })
-      end
-
-      ws.on :close do |e|
-        if ENV['DEBUG']
-          code = e&.code || 'nil'
-          reason = e&.reason || 'nil'
-          puts "[DEBUG] WebSocket closed: code=#{code}, reason=#{reason}"
+      ws = WebSocket::Client::Simple.connect(ws_url, headers:) do |client|
+        client.on :open do
+          puts '[DEBUG] WebSocket opened, sending request' if ENV['DEBUG']
+          client.send(JSON.dump(request))
         end
-        error_info = interpreter.send(:handle_close, e)
-        if error_info
-          completion_queue.push({ type: :error_from_close, error: error_info })
-        else
-          completion_queue.push({ type: :close })
+
+        client.on :message do |msg|
+          puts "[DEBUG] Received message (length=#{msg.data.length}): #{msg.data.inspect[0..200]}" if ENV['DEBUG']
+
+          interpreter.send(:handle_message, msg.data, result, on_stdout, on_stderr, on_error, completion_queue)
+        end
+
+        client.on :error do |e|
+          puts "[DEBUG] WebSocket error: #{e.message}" if ENV['DEBUG']
+          completion_queue.push({ type: :error, error: e })
+        end
+
+        client.on :close do |e|
+          if ENV['DEBUG']
+            code = e&.code || 'nil'
+            reason = e&.reason || 'nil'
+            puts "[DEBUG] WebSocket closed: code=#{code}, reason=#{reason}"
+          end
+          error_info = interpreter.send(:handle_close, e)
+          if error_info
+            completion_queue.push({ type: :error_from_close, error: error_info })
+          else
+            completion_queue.push({ type: :close })
+          end
         end
       end
 
       no_timeout = timeout.is_a?(Numeric) && timeout <= 0
-      max_wait = no_timeout ? nil : (timeout || 600) + 3
+      max_wait = no_timeout ? nil : (timeout || 600) + 30
       start_time = Time.now
       completion_reason = nil
 

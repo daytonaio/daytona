@@ -73,7 +73,7 @@ RSpec.describe Daytona::CodeInterpreter do
       stdout = []
       stderr = []
       errors = []
-      allow(WebSocket::Client::Simple).to receive(:connect).and_return(socket)
+      allow(WebSocket::Client::Simple).to receive(:connect).and_yield(socket).and_return(socket)
 
       result = interpreter.run_code(
         'print("hello")',
@@ -103,7 +103,7 @@ RSpec.describe Daytona::CodeInterpreter do
     it 'raises TimeoutError when the websocket closes with the timeout code' do
       socket = InterpreterWebSocket.new([[:close,
                                           double(code: described_class::WEBSOCKET_TIMEOUT_CODE, reason: 'timeout')]])
-      allow(WebSocket::Client::Simple).to receive(:connect).and_return(socket)
+      allow(WebSocket::Client::Simple).to receive(:connect).and_yield(socket).and_return(socket)
 
       expect { interpreter.run_code('sleep(10)', timeout: 1) }
         .to raise_error(Daytona::Sdk::TimeoutError, /Execution timed out/)
@@ -111,7 +111,7 @@ RSpec.describe Daytona::CodeInterpreter do
 
     it 'wraps websocket errors as SDK errors' do
       socket = InterpreterWebSocket.new([[:error, StandardError.new('socket boom')]])
-      allow(WebSocket::Client::Simple).to receive(:connect).and_return(socket)
+      allow(WebSocket::Client::Simple).to receive(:connect).and_yield(socket).and_return(socket)
       allow(interpreter).to receive(:sleep)
       allow(Time).to receive(:now).and_return(Time.now, Time.now + 10)
 

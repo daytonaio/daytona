@@ -31,7 +31,12 @@ from daytona_toolbox_api_client_async import (
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from ..common.errors import DaytonaError
-from ..common.file_transfer import create_multipart_parser, parse_content_type_boundary, serialize_download_request
+from ..common.file_transfer import (
+    create_multipart_parser,
+    parse_content_type_boundary,
+    raise_if_multipart_truncated,
+    serialize_download_request,
+)
 from ..common.filesystem import (
     CancelEvent,
     DownloadProgress,
@@ -352,6 +357,7 @@ class AsyncFileSystem:
                 parser.finalize()
                 async for piece in drain():
                     yield piece
+                raise_if_multipart_truncated(parser, remote_path)
 
             raise_if_stream_error(remote_path, error_text, error_details, received_file_data)
 
@@ -560,6 +566,7 @@ class AsyncFileSystem:
                 events.clear()
                 parser.finalize()
                 await _process_events()
+                raise_if_multipart_truncated(parser, "bulk-download")
         finally:
             for writer in file_writers:
                 await writer.close()

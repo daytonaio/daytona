@@ -30,8 +30,11 @@ type fileResult struct {
 //
 //	@id				UploadFiles
 func UploadFiles(c *gin.Context) {
+	enableFullDuplex(c)
+
 	reader, err := c.Request.MultipartReader()
 	if err != nil {
+		drainBody(c)
 		c.JSON(http.StatusBadRequest, gin.H{"errors": []string{"invalid multipart form"}})
 		return
 	}
@@ -46,9 +49,6 @@ func UploadFiles(c *gin.Context) {
 			break
 		}
 		if err != nil {
-			// The multipart reader is unrecoverable after a non-EOF error
-			// (subsequent calls return the same error forever), so we must
-			// stop iterating to avoid an infinite loop / OOM.
 			errs = append(errs, fmt.Sprintf("reading part: %v", err))
 			break
 		}
@@ -112,12 +112,30 @@ func UploadFiles(c *gin.Context) {
 		}
 	}
 
+	drainBody(c)
+
 	if len(errs) > 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"errors": errs, "files": files})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"files": files})
+}
+
+// drainBody consumes remaining request body bytes before a response is sent.
+// Go's net/http server only auto-drains up to 256KB; anything beyond that
+// causes it to close the connection before the reverse proxy finishes reading
+// the response, producing 'unexpected EOF' on the proxy side.
+func drainBody(c *gin.Context) {
+	_, _ = io.Copy(io.Discard, c.Request.Body)
+}
+
+// enableFullDuplex allows the handler to write a response while the client is
+// still sending the request body. Without this, Go's HTTP/1.1 server may RST
+// the connection before the reverse proxy finishes reading the response.
+func enableFullDuplex(c *gin.Context) {
+	rc := http.NewResponseController(c.Writer)
+	_ = rc.EnableFullDuplex()
 }
 
 func extractIndex(fieldName string) string {
