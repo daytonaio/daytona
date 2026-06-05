@@ -110,7 +110,9 @@ export function SandboxTableActions({
           onClick: () => onCreateSnapshot?.(),
           disabled: isLoading,
         })
+      }
 
+      if (isVmSandbox && sandbox.state === SandboxState.STARTED) {
         items.push({
           key: 'fork',
           label: 'Fork',
