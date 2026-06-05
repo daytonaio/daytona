@@ -165,13 +165,14 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string, skipVerify 
 	return args
 }
 
-// sanitizeURLForLog returns a string form of u with any embedded userinfo
-// removed. Prepends https:// when no scheme is present so net/url.Parse
-// treats the userinfo correctly (otherwise "user:pass@host/repo" parses as a
-// path, leaving creds in the result). Logs go to slog when the operator opts
-// into TLS bypass; this helper guarantees we don't echo creds back even
-// though TestBuildCloneArgs_NeverEmbedsCredsInURL already proves the daemon
-// refuses to embed them in clone args.
+// sanitizeURLForLog returns a string form of u with any embedded userinfo,
+// query string, and fragment removed. Prepends https:// when no scheme is
+// present so net/url.Parse treats the userinfo correctly (otherwise
+// "user:pass@host/repo" parses as a path, leaving creds in the result).
+// Query and fragment are stripped as defense-in-depth: git URLs do not
+// normally carry credentials in those positions, but unusual proxy or
+// webhook-style URLs can (e.g. ?access_token=…), and the audit log line
+// should be safe to share regardless.
 func sanitizeURLForLog(u string) string {
 	parsed := u
 	if !strings.Contains(parsed, "://") {
@@ -182,6 +183,8 @@ func sanitizeURLForLog(u string) string {
 		return "<unparseable url>"
 	}
 	parsedURL.User = nil
+	parsedURL.RawQuery = ""
+	parsedURL.Fragment = ""
 	return parsedURL.String()
 }
 
