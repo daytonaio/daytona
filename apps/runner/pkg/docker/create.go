@@ -188,9 +188,11 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", "", err
 	}
 
+	platform := getSandboxPlatform()
+
 	c, err := d.apiClient.ContainerCreate(ctx, containerConfig, hostConfig, networkingConfig, &v1.Platform{
-		Architecture: "amd64",
-		OS:           "linux",
+		Architecture: platform.architecture,
+		OS:           platform.os,
 	}, sandboxDto.Id)
 	if err != nil {
 		// Container already exists and is being created by another process
@@ -275,7 +277,7 @@ func (p *DockerClient) validateImageArchitecture(image *image.InspectResponse) e
 	}
 
 	arch := strings.ToLower(image.Architecture)
-	validArchs := []string{"amd64", "x86_64"}
+	validArchs := getSandboxContainerArchs()
 
 	for _, validArch := range validArchs {
 		if arch == validArch {
@@ -283,5 +285,5 @@ func (p *DockerClient) validateImageArchitecture(image *image.InspectResponse) e
 		}
 	}
 
-	return common_errors.NewConflictError(fmt.Errorf("image %s architecture (%s) is not x64 compatible", image.ID, image.Architecture))
+	return common_errors.NewConflictError(fmt.Errorf("image %s architecture (%s) is not supported for sandbox platform %s", image.ID, image.Architecture, sandboxImagePlatform()))
 }

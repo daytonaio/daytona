@@ -133,14 +133,16 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		utils.DEFAULT_BASE_DELAY,
 		utils.DEFAULT_MAX_DELAY,
 		func() error {
+			platform := getSandboxPlatform()
+
 			_, createErr := d.apiClient.ContainerCreate(
 				ctx,
 				originalContainer.Config,
 				newHostConfig,
 				nil,
 				&v1.Platform{
-					Architecture: "amd64",
-					OS:           "linux",
+					Architecture: platform.architecture,
+					OS:           platform.os,
 				},
 				sandboxId,
 			)
