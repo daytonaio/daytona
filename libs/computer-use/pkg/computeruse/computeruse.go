@@ -21,20 +21,22 @@ import (
 )
 
 type Process struct {
-	Name        string
-	Command     string
-	Args        []string
-	User        string
-	Priority    int
-	Env         map[string]string
-	LogFile     string
-	ErrFile     string
-	AutoRestart bool
-	cmd         *exec.Cmd
-	cancel      context.CancelFunc
-	done        chan struct{}
-	mu          sync.Mutex
-	running     bool
+	Name             string
+	Command          string
+	Args             []string
+	User             string
+	Priority         int
+	Env              map[string]string
+	LogFile          string
+	ErrFile          string
+	AutoRestart      bool
+	readinessProbe   func(context.Context) error
+	readinessTimeout time.Duration
+	cmd              *exec.Cmd
+	cancel           context.CancelFunc
+	done             chan struct{}
+	mu               sync.Mutex
+	running          bool
 }
 
 type ComputerUse struct {
@@ -64,7 +66,12 @@ var _ computeruse.IComputerUse = &ComputerUse{}
 
 // Keep the existing restart delay as a named default so tests can use a short
 // per-instance delay without changing production behavior.
-const defaultProcessRestartDelay = 5 * time.Second
+const (
+	defaultProcessRestartDelay = 5 * time.Second
+	defaultReadinessTimeout    = 10 * time.Second
+	xfce4ReadinessTimeout      = 20 * time.Second
+	readinessPollInterval      = 100 * time.Millisecond
+)
 
 func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 	c.processes = make(map[string]*Process)
@@ -111,14 +118,18 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	}
 	os.Setenv("DISPLAY", display)
 	log.Infof("Set DISPLAY environment variable to: %s", display)
+	defer c.invalidateA11yStatus()
 
-	// Start all processes in order of priority
-	c.startAllProcesses()
-	c.invalidateA11yStatus()
+	// Start all processes in order of priority, waiting for the required
+	// desktop services to become usable before starting their dependents.
+	if err := c.startAllProcesses(); err != nil {
+		return nil, err
+	}
 
 	// Check process status after starting
 	status, err := c.GetProcessStatus()
 	if err != nil {
+		c.stopProcessesReverse(c.getProcessesByPriority(), "after status check failure")
 		return nil, fmt.Errorf("failed to get process status after start: %v", err)
 	}
 
@@ -134,6 +145,7 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	}
 
 	if len(failed) > 0 {
+		c.stopProcessesReverse(c.getProcessesByPriority(), "after required process check failure")
 		return nil, fmt.Errorf("failed to start: %v", failed)
 	}
 
@@ -185,8 +197,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
-		LogFile: filepath.Join(c.configDir, "xvfb.log"),
-		ErrFile: filepath.Join(c.configDir, "xvfb.err"),
+		LogFile:          filepath.Join(c.configDir, "xvfb.log"),
+		ErrFile:          filepath.Join(c.configDir, "xvfb.err"),
+		readinessProbe:   xDisplayReadinessProbe(display),
+		readinessTimeout: defaultReadinessTimeout,
 	}
 
 	// Process 2: xfce4 (Desktop Environment)
@@ -203,8 +217,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 			"USER":                     user,
 			"DBUS_SESSION_BUS_ADDRESS": dbusAddress,
 		},
-		LogFile: filepath.Join(c.configDir, "xfce4.log"),
-		ErrFile: filepath.Join(c.configDir, "xfce4.err"),
+		LogFile:          filepath.Join(c.configDir, "xfce4.log"),
+		ErrFile:          filepath.Join(c.configDir, "xfce4.err"),
+		readinessProbe:   xfce4ReadinessProbe(display),
+		readinessTimeout: xfce4ReadinessTimeout,
 	}
 
 	// Process 2.5: at-spi-bus-launcher (AT-SPI daemon for the accessibility API)
@@ -264,8 +280,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
-		LogFile: filepath.Join(c.configDir, "x11vnc.log"),
-		ErrFile: filepath.Join(c.configDir, "x11vnc.err"),
+		LogFile:          filepath.Join(c.configDir, "x11vnc.log"),
+		ErrFile:          filepath.Join(c.configDir, "x11vnc.err"),
+		readinessProbe:   tcpReadinessProbe("127.0.0.1", vncPort),
+		readinessTimeout: defaultReadinessTimeout,
 	}
 	// Determine the best available NoVNC command with fallback options
 	var novncCommand string
@@ -298,8 +316,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
-		LogFile: filepath.Join(c.configDir, "novnc.log"),
-		ErrFile: filepath.Join(c.configDir, "novnc.err"),
+		LogFile:          filepath.Join(c.configDir, "novnc.log"),
+		ErrFile:          filepath.Join(c.configDir, "novnc.err"),
+		readinessProbe:   tcpReadinessProbe("127.0.0.1", noVncPort),
+		readinessTimeout: defaultReadinessTimeout,
 	}
 }
 
@@ -325,15 +345,29 @@ func waitForSessionBus(address string, timeout time.Duration) error {
 	}
 }
 
-func (c *ComputerUse) startAllProcesses() {
-	// Sort processes by priority and start them
+func (c *ComputerUse) startAllProcesses() error {
 	processes := c.getProcessesByPriority()
+	started := make([]*Process, 0, len(processes))
 
 	for _, process := range processes {
 		go c.startProcess(process)
-		// Wait a bit between starting processes to ensure proper initialization
-		time.Sleep(2 * time.Second)
+		started = append(started, process)
+
+		if process.readinessProbe == nil {
+			continue
+		}
+
+		err := c.waitForProcessReadiness(process)
+		if err == nil {
+			log.Infof("Process %s is ready", process.Name)
+			continue
+		}
+
+		c.stopProcessesReverse(started, "after startup failure")
+		return err
 	}
+
+	return nil
 }
 
 func (c *ComputerUse) getProcessesByPriority() []*Process {
@@ -428,13 +462,7 @@ func (c *ComputerUse) runProcessOnce(ctx context.Context, process *Process) erro
 	log.Infof("Starting process: %s", process.Name)
 
 	cmd := exec.CommandContext(ctx, process.Command, process.Args...)
-
-	if len(process.Env) > 0 {
-		cmd.Env = os.Environ()
-		for key, value := range process.Env {
-			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
-		}
-	}
+	cmd.Env = mergedEnv(process.Env)
 
 	if process.LogFile != "" {
 		logFile, err := c.openProcessOutputFile(process.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -494,20 +522,7 @@ func closeProcessFile(processName, fileKind string, file io.Closer) {
 func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 	log.Info("Stopping all computer use processes...")
 
-	c.mu.RLock()
-	processes := make([]*Process, 0, len(c.processes))
-	for _, p := range c.processes {
-		processes = append(processes, p)
-	}
-	c.mu.RUnlock()
-
-	// Stop processes in reverse priority order
-	for i := len(processes) - 1; i >= 0; i-- {
-		process := processes[i]
-		if err := c.stopProcess(process); err != nil {
-			log.Errorf("Failed to stop process %s: %v", process.Name, err)
-		}
-	}
+	c.stopProcessesReverse(c.getProcessesByPriority(), "during stop")
 
 	// Release the cached AT-SPI bus connection so a later Start() dials a
 	// fresh one — the bus address can change across launcher restarts.
@@ -520,6 +535,15 @@ func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 	c.setA11yStatus(false)
 
 	return new(computeruse.Empty), nil
+}
+
+func (c *ComputerUse) stopProcessesReverse(processes []*Process, reason string) {
+	for i := len(processes) - 1; i >= 0; i-- {
+		process := processes[i]
+		if err := c.stopProcess(process); err != nil {
+			log.Errorf("Failed to stop process %s %s: %v", process.Name, reason, err)
+		}
+	}
 }
 
 func (c *ComputerUse) stopProcess(process *Process) error {
@@ -622,6 +646,14 @@ func (c *ComputerUse) RestartProcess(req *computeruse.ProcessRequest) (*computer
 	}
 
 	go c.startProcess(process)
+	if process.readinessProbe != nil {
+		if err := c.waitForProcessReadiness(process); err != nil {
+			if stopErr := c.stopProcess(process); stopErr != nil {
+				log.Errorf("Failed to stop process %s after restart readiness failure: %v", process.Name, stopErr)
+			}
+			return nil, err
+		}
+	}
 
 	return new(computeruse.Empty), nil
 }
