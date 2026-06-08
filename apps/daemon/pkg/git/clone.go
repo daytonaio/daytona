@@ -7,8 +7,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log/slog"
-	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -24,12 +22,6 @@ import (
 func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error {
 	if isGitCLIModeEnabled() || os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
 		return s.CloneRepositoryCLI(repo, auth, insecureSkipTLS)
-	}
-
-	if insecureSkipTLS {
-		slog.Warn("git clone TLS verification disabled",
-			"url", sanitizeURLForLog(repo.Url),
-			"reason", "insecure_skip_tls=true")
 	}
 
 	cloneOptions := &git.CloneOptions{
@@ -94,11 +86,6 @@ esac
 // CloneRepositoryCLI clones via the `git` CLI. Bounded memory (mmap pack handling).
 // Creds flow through GIT_ASKPASS + env — never via URL or argv.
 func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error {
-	if insecureSkipTLS {
-		slog.Warn("git clone TLS verification disabled",
-			"url", sanitizeURLForLog(repo.Url),
-			"reason", "insecure_skip_tls=true")
-	}
 	if err := s.gitCLIRun("git clone", buildCloneArgs(repo, s.WorkDir, insecureSkipTLS), auth, 64*1024); err != nil {
 		return err
 	}
@@ -163,29 +150,6 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string, skipVerify 
 	}
 	args = append(args, "--", cloneURL, workDir)
 	return args
-}
-
-// sanitizeURLForLog returns a string form of u with any embedded userinfo,
-// query string, and fragment removed. Prepends https:// when no scheme is
-// present so net/url.Parse treats the userinfo correctly (otherwise
-// "user:pass@host/repo" parses as a path, leaving creds in the result).
-// Query and fragment are stripped as defense-in-depth: git URLs do not
-// normally carry credentials in those positions, but unusual proxy or
-// webhook-style URLs can (e.g. ?access_token=…), and the audit log line
-// should be safe to share regardless.
-func sanitizeURLForLog(u string) string {
-	parsed := u
-	if !strings.Contains(parsed, "://") {
-		parsed = "https://" + parsed
-	}
-	parsedURL, err := url.Parse(parsed)
-	if err != nil {
-		return "<unparseable url>"
-	}
-	parsedURL.User = nil
-	parsedURL.RawQuery = ""
-	parsedURL.Fragment = ""
-	return parsedURL.String()
 }
 
 func buildCloneEnv(baseEnv []string, askPath string, auth *http.BasicAuth) []string {
