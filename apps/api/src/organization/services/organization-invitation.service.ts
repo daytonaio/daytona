@@ -84,7 +84,10 @@ export class OrganizationInvitationService {
     invitation.role = createOrganizationInvitationDto.role
     invitation.invitedBy = invitedBy
 
-    const assignedRoles = await this.organizationRoleService.findByIds(createOrganizationInvitationDto.assignedRoleIds)
+    const assignedRoles = await this.organizationRoleService.findByIds(
+      organizationId,
+      createOrganizationInvitationDto.assignedRoleIds,
+    )
     if (assignedRoles.length !== createOrganizationInvitationDto.assignedRoleIds.length) {
       throw new BadRequestException('One or more role IDs are invalid')
     }
@@ -136,7 +139,10 @@ export class OrganizationInvitationService {
     }
     invitation.role = updateOrganizationInvitationDto.role
 
-    const assignedRoles = await this.organizationRoleService.findByIds(updateOrganizationInvitationDto.assignedRoleIds)
+    const assignedRoles = await this.organizationRoleService.findByIds(
+      organizationId,
+      updateOrganizationInvitationDto.assignedRoleIds,
+    )
     if (assignedRoles.length !== updateOrganizationInvitationDto.assignedRoleIds.length) {
       throw new BadRequestException('One or more role IDs are invalid')
     }

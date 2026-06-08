@@ -38,21 +38,26 @@ export class OrganizationRoleService {
     })
   }
 
-  async findByIds(roleIds: string[]): Promise<OrganizationRole[]> {
+  async findByIds(organizationId: string, roleIds: string[]): Promise<OrganizationRole[]> {
     if (roleIds.length === 0) {
       return []
     }
 
     return this.organizationRoleRepository.find({
-      where: {
-        id: In(roleIds),
-      },
+      where: [
+        { id: In(roleIds), organizationId },
+        { id: In(roleIds), isGlobal: true },
+      ],
     })
   }
 
-  async update(roleId: string, updateOrganizationRoleDto: UpdateOrganizationRoleDto): Promise<OrganizationRole> {
+  async update(
+    organizationId: string,
+    roleId: string,
+    updateOrganizationRoleDto: UpdateOrganizationRoleDto,
+  ): Promise<OrganizationRole> {
     const role = await this.organizationRoleRepository.findOne({
-      where: { id: roleId },
+      where: { id: roleId, organizationId },
     })
 
     if (!role) {
@@ -70,9 +75,9 @@ export class OrganizationRoleService {
     return this.organizationRoleRepository.save(role)
   }
 
-  async delete(roleId: string): Promise<void> {
+  async delete(organizationId: string, roleId: string): Promise<void> {
     const role = await this.organizationRoleRepository.findOne({
-      where: { id: roleId },
+      where: { id: roleId, organizationId },
     })
 
     if (!role) {
