@@ -9,6 +9,16 @@ import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { queryKeys } from './queryKeys'
 
+export function getSandboxQueryErrorStatus(error: unknown) {
+  const cause = error instanceof Error ? error.cause : undefined
+
+  if (!isAxiosError(cause)) {
+    return undefined
+  }
+
+  return cause.response?.status ?? cause.status
+}
+
 export const useSandboxQuery = (sandboxId: string, { enabled = true }: { enabled?: boolean } = {}) => {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
@@ -22,7 +32,7 @@ export const useSandboxQuery = (sandboxId: string, { enabled = true }: { enabled
     enabled: enabled && !!sandboxId && !!selectedOrganization?.id,
     staleTime: 1000 * 10,
     retry: (failureCount, error) => {
-      if (isAxiosError(error.cause) && error.cause?.status === 404) return false
+      if (getSandboxQueryErrorStatus(error) === 404) return false
       return failureCount < 3
     },
   })

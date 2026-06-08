@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { queryKeys } from '@/hooks/queries/queryKeys'
+import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { Sandbox, SandboxDesiredState, SandboxState } from '@daytona/api-client'
 import type { QueryKey } from '@tanstack/react-query'
@@ -57,7 +57,6 @@ export function useSandboxWsSync<TData = Sandbox>({
 
   useEffect(() => {
     if (!enabled || !notificationSocket || !selectedOrganization?.id) return
-    if (!queryKeyRef.current && !onSyncRef.current) return
 
     const cancelSandboxQuery = async () => {
       if (!queryKeyRef.current) return
