@@ -10,11 +10,13 @@ import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
 import { RoutePath } from '@/enums/RoutePath'
-import { useOwnerTierQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
+import { useOwnerTierQuery } from '@/hooks/queries/billingQueries'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
+import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
@@ -23,7 +25,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import type { Organization, RegionUsageOverview, SandboxClass } from '@daytona/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
-import { RefreshCcw } from 'lucide-react'
+import { AlertCircle, RefreshCcw } from 'lucide-react'
 import { ReactNode, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
@@ -32,16 +34,19 @@ export default function Limits() {
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
   const organizationTierQuery = useOwnerTierQuery()
-  const walletQuery = useOwnerWalletQuery()
   const tiersQuery = useTiersQuery()
 
   const organizationTier = organizationTierQuery.data
   const tiers = tiersQuery.data?.slice().sort((a, b) => (a.tier ?? 0) - (b.tier ?? 0))
-  const wallet = walletQuery.data
 
   const { getRegionName } = useRegions()
   const config = useConfig()
   const navigate = useNavigate()
+  const paymentMethodsQuery = usePaymentMethodsQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: Boolean(config.billingApiUrl && selectedOrganization),
+  })
+  const hasPaymentMethod = (paymentMethodsQuery.data?.length ?? 0) > 0
 
   useEffect(() => {
     if (selectedOrganization && !selectedOrganization.defaultRegionId) {
@@ -72,15 +77,15 @@ export default function Limits() {
     currentEntry: currentRegionUsageOverview,
   } = useRegionClassSelection(usageOverview?.regionUsage, selectedOrganization?.defaultRegionId)
 
-  const isLoading = organizationTierQuery.isLoading || tiersQuery.isLoading || walletQuery.isLoading
+  const isLoading = organizationTierQuery.isLoading || tiersQuery.isLoading || paymentMethodsQuery.isLoading
   const isError =
-    organizationTierQuery.isError || tiersQuery.isError || usageOverviewQuery.isError || walletQuery.isError
+    organizationTierQuery.isError || tiersQuery.isError || usageOverviewQuery.isError || paymentMethodsQuery.isError
 
   const handleRetry = () => {
     organizationTierQuery.refetch()
     tiersQuery.refetch()
     usageOverviewQuery.refetch()
-    walletQuery.refetch()
+    paymentMethodsQuery.refetch()
   }
 
   return (
@@ -90,18 +95,21 @@ export default function Limits() {
       <PageContent>
         <PageIntro title="Limits" />
         {isError ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center">Oops, something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-between items-center flex-col gap-3">
-              <div>There was an error loading your limits.</div>
-              <Button variant="outline" onClick={handleRetry}>
-                <RefreshCcw className="mr-2 h-4 w-4" />
+          <Empty className="py-12 max-h-64 border" variant="destructive">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <AlertCircle />
+              </EmptyMedia>
+              <EmptyTitle>Failed to load limits</EmptyTitle>
+              <EmptyDescription>Something went wrong while fetching your limits. Please try again.</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button variant="secondary" size="sm" onClick={handleRetry}>
+                <RefreshCcw />
                 Retry
               </Button>
-            </CardContent>
-          </Card>
+            </EmptyContent>
+          </Empty>
         ) : (
           <>
             <Card>
@@ -222,15 +230,17 @@ export default function Limits() {
 
             {config.billingApiUrl && selectedOrganization && (
               <>
-                <TierUpgradeCard
-                  organizationTier={organizationTier}
-                  tiers={tiers || []}
-                  organization={selectedOrganization}
-                  requirementsState={{
-                    emailVerified: !!user?.profile?.email_verified,
-                    creditCardLinked: !!wallet?.creditCardConnected,
-                  }}
-                />
+                {!isLoading && (
+                  <TierUpgradeCard
+                    organizationTier={organizationTier}
+                    tiers={tiers || []}
+                    organization={selectedOrganization}
+                    requirementsState={{
+                      emailVerified: !!user?.profile?.email_verified,
+                      creditCardLinked: hasPaymentMethod,
+                    }}
+                  />
+                )}
 
                 <Card className="mb-10">
                   <CardHeader>

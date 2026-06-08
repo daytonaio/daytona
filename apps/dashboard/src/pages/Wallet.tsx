@@ -24,9 +24,10 @@ import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticT
 import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
 import { useOwnerInvoicesQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useChargesQuery } from '@/hooks/queries/useChargesQuery'
+import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
+import { CreditCardIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -53,8 +54,14 @@ const Wallet = () => {
     organizationId: selectedOrganization?.id ?? '',
     enabled: Boolean(selectedOrganization),
   })
+  const paymentMethodsQuery = usePaymentMethodsQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: Boolean(selectedOrganization),
+  })
 
   const wallet = walletQuery.data
+  const hasPaymentMethod = (paymentMethodsQuery.data?.length ?? 0) > 0
+  const paymentMethodsLoading = paymentMethodsQuery.isLoading
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
   const redeemCouponMutation = useRedeemCouponMutation()
   const topUpWalletMutation = useTopUpWalletMutation()
@@ -204,8 +211,10 @@ const Wallet = () => {
 
   const isBillingLoading = walletQuery.isLoading
   const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
-  const topUpEnabled =
-    wallet?.creditCardConnected && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount)
+  const topUpDisabledBecauseMissingPaymentMethod = Boolean(wallet && !paymentMethodsLoading && !hasPaymentMethod)
+  const topUpEnabled = Boolean(
+    hasPaymentMethod && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount),
+  )
 
   return (
     <PageLayout>
@@ -261,12 +270,17 @@ const Wallet = () => {
                     </AlertDescription>
                   </Alert>
                 )}
-                {!wallet.creditCardConnected && user.profile.email_verified && selectedOrganization?.personal && (
-                  <Alert variant="neutral">
-                    <SparklesIcon />
-                    <AlertDescription>Connect a credit card to receive an additional $100 of credits.</AlertDescription>
-                  </Alert>
-                )}
+                {!paymentMethodsLoading &&
+                  !hasPaymentMethod &&
+                  user.profile.email_verified &&
+                  selectedOrganization?.personal && (
+                    <Alert variant="neutral">
+                      <SparklesIcon />
+                      <AlertDescription>
+                        Connect a credit card to receive an additional $100 of credits.
+                      </AlertDescription>
+                    </Alert>
+                  )}
               </>
             )}
             {wallet.hasFailedOrPendingInvoice && (
@@ -356,7 +370,7 @@ const Wallet = () => {
               </>
             )}
 
-            {wallet.creditCardConnected && !isPostPaid && (
+            {hasPaymentMethod && !isPostPaid && (
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle>Automatic top-up</CardTitle>
@@ -470,16 +484,16 @@ const Wallet = () => {
                 <div className="grid grid-cols-1 gap-10 items-center lg:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <Label className="text-sm font-medium">Select amount</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 xxs:grid-cols-4 overflow-hidden rounded-md border border-input">
                       {[25, 500, 1000, 2000].map((amount) => (
                         <Button
                           key={amount}
                           type="button"
-                          variant={selectedPreset === amount ? 'default' : 'outline'}
+                          variant={selectedPreset === amount ? 'default' : 'ghost'}
                           size="default"
-                          className="flex h-9"
+                          className="flex h-9 min-w-0 rounded-none border-t border-border px-2 text-[13px] first:border-t-0 xxs:border-l xxs:border-t-0 xxs:first:border-l-0"
                           onClick={() => {
-                            setSelectedPreset(amount)
+                            setSelectedPreset((currentPreset) => (currentPreset === amount ? null : amount))
                             setOneTimeTopUpAmount(undefined)
                           }}
                         >
@@ -526,9 +540,18 @@ const Wallet = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between gap-2">
-                <div className="text-sm text-muted-foreground">
-                  You will be redirected to Stripe to complete the payment.
-                </div>
+                {paymentMethodsLoading ? (
+                  <Skeleton className="h-4 w-64 max-w-full" />
+                ) : topUpDisabledBecauseMissingPaymentMethod ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CreditCardIcon className="w-4 h-4 shrink-0" />
+                    <span>Add a payment method to top up.</span>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    You will be redirected to Stripe to complete the payment.
+                  </div>
+                )}
                 <Button onClick={handleTopUpWallet} disabled={!topUpEnabled} size="sm">
                   {topUpWalletMutation.isPending && <Spinner />}
                   Top up
