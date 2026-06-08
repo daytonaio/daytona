@@ -5,7 +5,8 @@
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Or } from 'typeorm'
+import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -36,6 +37,12 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { SandboxService } from '../services/sandbox.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { Job } from '../entities/job.entity'
+import { JobStatus } from '../enums/job-status.enum'
+import { JobType } from '../enums/job-type.enum'
+import { ResourceType } from '../enums/resource-type.enum'
+import { JobStateHandlerService } from '../services/job-state-handler.service'
+import { SandboxConflictError } from '../errors/sandbox-conflict.error'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -52,6 +59,9 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     @InjectRedis() private readonly redis: Redis,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
+    @InjectRepository(Job)
+    private readonly jobRepository: Repository<Job>,
+    private readonly jobStateHandlerService: JobStateHandlerService,
   ) {}
 
   //  on init
@@ -623,9 +633,51 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.PENDING, backupSnapshot, registry.id)
   }
 
+  /**
+   * Reconcile an in-progress backup on a v2 runner from its CREATE_BACKUP job.
+   *
+   * On v2 runners backup completion is driven by the job-state handler, which is invoked
+   * once (fire-and-forget) when the runner reports the job terminal. If that invocation is
+   * lost (e.g. a transient error, or it raced with the PENDING->IN_PROGRESS write), the
+   * sandbox is stranded in InProgress while its job is already Completed/Failed - the
+   * stale-job sweep ignores terminal jobs and the runner has nothing left to report.
+   *
+   * Re-running the authoritative completion handler here is idempotent and resolves the
+   * sandbox to Completed/Error. The v2 RunnerAdapter's `sandboxInfo` only echoes the DB
+   * backupState, so the runner-polling path below would otherwise be a no-op for v2.
+   */
+  private async reconcileV2BackupFromJob(sandbox: Sandbox): Promise<void> {
+    const job = await this.jobRepository.findOne({
+      where: {
+        resourceType: ResourceType.SANDBOX,
+        resourceId: sandbox.id,
+        type: JobType.CREATE_BACKUP,
+      },
+      order: { createdAt: 'DESC' },
+    })
+
+    if (!job) {
+      return
+    }
+
+    if (job.status === JobStatus.COMPLETED || job.status === JobStatus.FAILED) {
+      // handleJobCompletion -> handleCreateBackupJobCompletion swallows its own errors,
+      // so this won't throw and won't trip the caller's error-retry/ERROR path.
+      await this.jobStateHandlerService.handleJobCompletion(job)
+    }
+  }
+
   private async checkBackupProgress(sandbox: Sandbox): Promise<void> {
     try {
       const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+
+      // v2+ runners don't expose live backup state via the runner API - completion is
+      // tracked through the CREATE_BACKUP job. Reconcile from the job instead of polling.
+      if (runner.apiVersion !== '0') {
+        await this.reconcileV2BackupFromJob(sandbox)
+        return
+      }
+
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       // Get sandbox info from runner
@@ -722,6 +774,34 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
+  /**
+   * Transition a backup from PENDING to IN_PROGRESS without clobbering a terminal state
+   * that a concurrent completion may have already written.
+   *
+   * On v2 runners a CREATE_BACKUP job can be claimed and completed (or fail fast, e.g.
+   * "No such container") within milliseconds of being created. The fire-and-forget job
+   * completion handler then writes Completed/Error. An unconditional write here would
+   * overwrite that terminal state back to InProgress and strand the sandbox forever
+   * (the job is already terminal, so neither the stale-job sweep nor the in-progress
+   * poller would ever resolve it). The guarded update is a no-op once the sandbox has
+   * left PENDING.
+   */
+  private async markBackupInProgressIfPending(sandboxId: string): Promise<void> {
+    try {
+      await this.sandboxRepository.updateWhere(sandboxId, {
+        updateData: { backupState: BackupState.IN_PROGRESS },
+        whereCondition: { backupState: BackupState.PENDING },
+      })
+    } catch (error) {
+      if (error instanceof SandboxConflictError) {
+        // Backup already left PENDING (e.g. completion handler set Completed/Error). Don't clobber it.
+        this.logger.debug(`Skipping InProgress transition for sandbox ${sandboxId}: backup no longer PENDING`)
+        return
+      }
+      throw error
+    }
+  }
+
   private async handlePendingBackup(sandbox: Sandbox): Promise<void> {
     const lockKey = `runner-${sandbox.runnerId}-backup-lock`
     try {
@@ -748,17 +828,17 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       //  check if backup is already in progress on the runner
       const runnerSandbox = await runnerAdapter.sandboxInfo(sandbox.id)
       if (runnerSandbox.backupState === BackupState.IN_PROGRESS) {
-        await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
+        await this.markBackupInProgressIfPending(sandbox.id)
         return
       }
 
       // Initiate backup on runner
       await runnerAdapter.createBackup(sandbox, sandbox.backupSnapshot, registry)
 
-      await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
+      await this.markBackupInProgressIfPending(sandbox.id)
     } catch (error) {
       if (error.response?.status === 400 && error.response?.data?.message.includes('A backup is already in progress')) {
-        await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
+        await this.markBackupInProgressIfPending(sandbox.id)
         return
       }
       const { recoverable, errorReason } = sanitizeSandboxError(error)
