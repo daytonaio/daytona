@@ -102,7 +102,7 @@ export class PreviewController {
   @AuthStrategy(AuthStrategyType.API_KEY)
   @UseGuards(ProxyAuthContextGuard)
   async isPreviewWarningEnabled(@Param('sandboxId') sandboxId: string, @Query('port') port?: number): Promise<boolean> {
-    const cacheKey = `preview:warning:${sandboxId}`
+    const cacheKey = `preview:warning:${sandboxId}:${port ?? ''}`
     const cached = await this.redis.get(cacheKey)
     if (cached !== null) {
       return cached === '1'

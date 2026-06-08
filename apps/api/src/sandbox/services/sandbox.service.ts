@@ -3160,8 +3160,12 @@ export class SandboxService {
       try {
         const sandboxId = await this.getSandboxIdFromSignedPreviewUrlToken(sandboxIdOrToken, port)
         organization = await this.organizationService.findBySandboxId(sandboxId)
-      } catch {
-        // fall through to the NotFoundException below
+      } catch (error) {
+        // An invalid or expired token falls through to the NotFoundException below;
+        // surface any other backend (Redis/DB) error instead of masking it as a 404.
+        if (!(error instanceof ForbiddenException)) {
+          throw error
+        }
       }
     }
 

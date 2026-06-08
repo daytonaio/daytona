@@ -207,14 +207,17 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 // unresolved token) it returns true so the warning is shown, preserving the
 // default behavior.
 func (p *Proxy) getSandboxPreviewWarningEnabled(ctx context.Context, sandboxIdOrToken string, port string) (bool, error) {
-	enabledCache, err := p.sandboxPreviewWarningCache.Get(ctx, sandboxIdOrToken)
+	// Key on the port too: a signed token is scoped to the port it was issued for,
+	// so the same identifier can resolve to different sandboxes per port.
+	cacheKey := fmt.Sprintf("%s:%s", sandboxIdOrToken, port)
+	enabledCache, err := p.sandboxPreviewWarningCache.Get(ctx, cacheKey)
 	if err == nil {
 		return *enabledCache, nil
 	}
 
 	enabled := true
 	err = utils.RetryWithExponentialBackoff(ctx, "getSandboxPreviewWarningEnabled", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
-		req := p.apiclient.PreviewAPI.IsPreviewWarningEnabled(context.Background(), sandboxIdOrToken)
+		req := p.apiclient.PreviewAPI.IsPreviewWarningEnabled(ctx, sandboxIdOrToken)
 		if portFloat, parseErr := strconv.ParseFloat(port, 32); parseErr == nil {
 			req = req.Port(float32(portFloat))
 		}
@@ -245,7 +248,7 @@ func (p *Proxy) getSandboxPreviewWarningEnabled(ctx context.Context, sandboxIdOr
 		return true, err
 	}
 
-	if cacheErr := p.sandboxPreviewWarningCache.Set(ctx, sandboxIdOrToken, enabled, 1*time.Minute); cacheErr != nil {
+	if cacheErr := p.sandboxPreviewWarningCache.Set(ctx, cacheKey, enabled, 1*time.Minute); cacheErr != nil {
 		log.Errorf("Failed to set sandbox preview warning in cache: %v", cacheErr)
 	}
 
