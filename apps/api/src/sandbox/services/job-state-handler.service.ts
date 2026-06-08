@@ -487,6 +487,12 @@ export class JobStateHandlerService {
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
+        if (sandbox.backupState === BackupState.COMPLETED) {
+          this.logger.debug(
+            `CREATE_BACKUP job ${job.id} already applied for sandbox ${sandboxId}; skipping duplicate completion`,
+          )
+          return
+        }
         this.logger.debug(
           `CREATE_BACKUP job ${job.id} completed successfully, marking sandbox ${sandboxId} as BACKUP_COMPLETED`,
         )

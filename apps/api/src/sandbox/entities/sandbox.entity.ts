@@ -268,11 +268,16 @@ export class Sandbox {
       case BackupState.COMPLETED: {
         const now = new Date()
         update.lastBackupAt = now
-        if (sandbox.backupSnapshot) {
+        // The snapshot that just completed is normally the one already tracked on the sandbox.
+        // If it was cleared while the job ran, fall back to the recovered reference passed in so
+        // the backup is still recorded in history - restore scans existingBackupSnapshots, so a
+        // missing entry would strand the sandbox with no discoverable backup.
+        const completedSnapshot = sandbox.backupSnapshot ?? backupSnapshot
+        if (completedSnapshot) {
           update.existingBackupSnapshots = [
             ...sandbox.existingBackupSnapshots,
             {
-              snapshotName: sandbox.backupSnapshot,
+              snapshotName: completedSnapshot,
               createdAt: now,
             },
           ]
