@@ -10804,20 +10804,10 @@ components:
           example: runner123
           type: string
         sandboxClass:
-          deprecated: true
+          allOf:
+          - $ref: "#/components/schemas/SandboxClass"
           description: The class of the sandbox
-          enum:
-          - linux-vm
-          - container
-          - android
-          - windows
           example: linux-vm
-          type: string
-          x-enum-varnames:
-          - LINUX_VM
-          - CONTAINER
-          - ANDROID
-          - WINDOWS
         state:
           allOf:
           - $ref: "#/components/schemas/SandboxState"

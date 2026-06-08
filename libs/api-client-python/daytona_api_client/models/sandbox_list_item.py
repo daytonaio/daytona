@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client.models.gpu_type import GpuType
+from daytona_api_client.models.sandbox_class import SandboxClass
 from daytona_api_client.models.sandbox_desired_state import SandboxDesiredState
 from daytona_api_client.models.sandbox_state import SandboxState
 from pydantic import TypeAdapter
@@ -38,7 +39,7 @@ class SandboxListItem(BaseModel):
     name: StrictStr = Field(description="The name of the sandbox")
     target: StrictStr = Field(description="The target environment for the sandbox")
     runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", serialization_alias="runnerId")
-    sandbox_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", serialization_alias="sandboxClass")
+    sandbox_class: Optional[SandboxClass] = Field(default=None, description="The class of the sandbox", serialization_alias="sandboxClass")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
     desired_state: Optional[SandboxDesiredState] = Field(default=None, description="The desired state of the sandbox", serialization_alias="desiredState")
     snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the sandbox")
