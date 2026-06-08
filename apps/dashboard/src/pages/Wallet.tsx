@@ -61,8 +61,8 @@ const Wallet = () => {
 
   const wallet = walletQuery.data
   const paymentMethods = paymentMethodsQuery.data
-  const hasNoPaymentMethod = paymentMethods?.length === 0
   const paymentMethodsLoading = paymentMethodsQuery.isLoading
+  const hasNoPaymentMethod = (paymentMethods?.length ?? 0) === 0
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
   const redeemCouponMutation = useRedeemCouponMutation()
   const topUpWalletMutation = useTopUpWalletMutation()
