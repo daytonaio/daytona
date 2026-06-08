@@ -532,7 +532,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'check-stale-in-progress-backups' })
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'check-stale-in-progress-backups' })
   @TrackJobExecution()
   @LogExecution('check-stale-in-progress-backups')
   @WithInstrumentation()
