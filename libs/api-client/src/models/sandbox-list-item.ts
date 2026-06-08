@@ -18,6 +18,9 @@
 import type { GpuType } from './gpu-type';
 // May contain unused imports in some cases
 // @ts-ignore
+import type { SandboxClass } from './sandbox-class';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxDesiredState } from './sandbox-desired-state';
 // May contain unused imports in some cases
 // @ts-ignore
@@ -46,9 +49,8 @@ export interface SandboxListItem {
     'runnerId'?: string;
     /**
      * The class of the sandbox
-     * @deprecated
      */
-    'sandboxClass'?: SandboxListItemSandboxClassEnum;
+    'sandboxClass'?: SandboxClass;
     /**
      * The state of the sandbox
      */
@@ -139,15 +141,6 @@ export interface SandboxListItem {
     'toolboxProxyUrl': string;
 }
 
-export const SandboxListItemSandboxClassEnum = {
-    LINUX_VM: 'linux-vm',
-    CONTAINER: 'container',
-    ANDROID: 'android',
-    WINDOWS: 'windows',
-    UNKNOWN_DEFAULT_OPEN_API: '11184809',
-} as const;
-
-export type SandboxListItemSandboxClassEnum = typeof SandboxListItemSandboxClassEnum[keyof typeof SandboxListItemSandboxClassEnum];
 export const SandboxListItemBackupStateEnum = {
     NONE: 'None',
     PENDING: 'Pending',

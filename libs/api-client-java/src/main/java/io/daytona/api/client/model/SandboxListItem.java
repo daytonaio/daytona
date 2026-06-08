@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.daytona.api.client.model.GpuType;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.api.client.model.SandboxDesiredState;
 import io.daytona.api.client.model.SandboxState;
 import java.io.IOException;
@@ -81,69 +82,10 @@ public class SandboxListItem {
   @javax.annotation.Nullable
   private String runnerId;
 
-  /**
-   * The class of the sandbox
-   */
-  @JsonAdapter(SandboxClassEnum.Adapter.class)
-  public enum SandboxClassEnum {
-    LINUX_VM("linux-vm"),
-    
-    CONTAINER("container"),
-    
-    ANDROID("android"),
-    
-    WINDOWS("windows"),
-    
-    UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
-
-    private String value;
-
-    SandboxClassEnum(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    public static SandboxClassEnum fromValue(String value) {
-      for (SandboxClassEnum b : SandboxClassEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      return UNKNOWN_DEFAULT_OPEN_API;
-    }
-
-    public static class Adapter extends TypeAdapter<SandboxClassEnum> {
-      @Override
-      public void write(final JsonWriter jsonWriter, final SandboxClassEnum enumeration) throws IOException {
-        jsonWriter.value(enumeration.getValue());
-      }
-
-      @Override
-      public SandboxClassEnum read(final JsonReader jsonReader) throws IOException {
-        String value =  jsonReader.nextString();
-        return SandboxClassEnum.fromValue(value);
-      }
-    }
-
-    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
-      String value = jsonElement.getAsString();
-      SandboxClassEnum.fromValue(value);
-    }
-  }
-
   public static final String SERIALIZED_NAME_SANDBOX_CLASS = "sandboxClass";
-  @Deprecated
   @SerializedName(SERIALIZED_NAME_SANDBOX_CLASS)
   @javax.annotation.Nullable
-  private SandboxClassEnum sandboxClass;
+  private SandboxClass sandboxClass;
 
   public static final String SERIALIZED_NAME_STATE = "state";
   @SerializedName(SERIALIZED_NAME_STATE)
@@ -413,8 +355,7 @@ public class SandboxListItem {
   }
 
 
-  @Deprecated
-  public SandboxListItem sandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+  public SandboxListItem sandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
     this.sandboxClass = sandboxClass;
     return this;
   }
@@ -422,16 +363,13 @@ public class SandboxListItem {
   /**
    * The class of the sandbox
    * @return sandboxClass
-   * @deprecated
    */
-  @Deprecated
   @javax.annotation.Nullable
-  public SandboxClassEnum getSandboxClass() {
+  public SandboxClass getSandboxClass() {
     return sandboxClass;
   }
 
-  @Deprecated
-  public void setSandboxClass(@javax.annotation.Nullable SandboxClassEnum sandboxClass) {
+  public void setSandboxClass(@javax.annotation.Nullable SandboxClass sandboxClass) {
     this.sandboxClass = sandboxClass;
   }
 
@@ -1044,12 +982,9 @@ public class SandboxListItem {
       if ((jsonObj.get("runnerId") != null && !jsonObj.get("runnerId").isJsonNull()) && !jsonObj.get("runnerId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `runnerId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("runnerId").toString()));
       }
-      if ((jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) && !jsonObj.get("sandboxClass").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sandboxClass` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sandboxClass").toString()));
-      }
       // validate the optional field `sandboxClass`
       if (jsonObj.get("sandboxClass") != null && !jsonObj.get("sandboxClass").isJsonNull()) {
-        SandboxClassEnum.validateJsonElement(jsonObj.get("sandboxClass"));
+        SandboxClass.validateJsonElement(jsonObj.get("sandboxClass"));
       }
       // validate the optional field `state`
       if (jsonObj.get("state") != null && !jsonObj.get("state").isJsonNull()) {

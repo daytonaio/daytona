@@ -32,8 +32,7 @@ type SandboxListItem struct {
 	// The runner ID of the sandbox
 	RunnerId *string `json:"runnerId,omitempty"`
 	// The class of the sandbox
-	// Deprecated
-	SandboxClass *string `json:"sandboxClass,omitempty"`
+	SandboxClass *SandboxClass `json:"sandboxClass,omitempty"`
 	// The state of the sandbox
 	State *SandboxState `json:"state,omitempty"`
 	// The desired state of the sandbox
@@ -241,10 +240,9 @@ func (o *SandboxListItem) SetRunnerId(v string) {
 }
 
 // GetSandboxClass returns the SandboxClass field value if set, zero value otherwise.
-// Deprecated
-func (o *SandboxListItem) GetSandboxClass() string {
+func (o *SandboxListItem) GetSandboxClass() SandboxClass {
 	if o == nil || IsNil(o.SandboxClass) {
-		var ret string
+		var ret SandboxClass
 		return ret
 	}
 	return *o.SandboxClass
@@ -252,8 +250,7 @@ func (o *SandboxListItem) GetSandboxClass() string {
 
 // GetSandboxClassOk returns a tuple with the SandboxClass field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// Deprecated
-func (o *SandboxListItem) GetSandboxClassOk() (*string, bool) {
+func (o *SandboxListItem) GetSandboxClassOk() (*SandboxClass, bool) {
 	if o == nil || IsNil(o.SandboxClass) {
 		return nil, false
 	}
@@ -269,9 +266,8 @@ func (o *SandboxListItem) HasSandboxClass() bool {
 	return false
 }
 
-// SetSandboxClass gets a reference to the given string and assigns it to the SandboxClass field.
-// Deprecated
-func (o *SandboxListItem) SetSandboxClass(v string) {
+// SetSandboxClass gets a reference to the given SandboxClass and assigns it to the SandboxClass field.
+func (o *SandboxListItem) SetSandboxClass(v SandboxClass) {
 	o.SandboxClass = &v
 }
 

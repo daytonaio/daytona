@@ -78,9 +78,9 @@ export class SandboxListItemDto {
   @ApiPropertyOptional({
     description: 'The class of the sandbox',
     enum: SandboxClass,
+    enumName: 'SandboxClass',
     example: Object.values(SandboxClass)[0],
     required: false,
-    deprecated: true,
   })
   @IsEnum(SandboxClass)
   @IsOptional()
