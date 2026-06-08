@@ -6,6 +6,7 @@ package computeruse
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,20 +21,22 @@ import (
 )
 
 type Process struct {
-	Name        string
-	Command     string
-	Args        []string
-	User        string
-	Priority    int
-	Env         map[string]string
-	LogFile     string
-	ErrFile     string
-	AutoRestart bool
-	cmd         *exec.Cmd
-	ctx         context.Context
-	cancel      context.CancelFunc
-	mu          sync.Mutex
-	running     bool
+	Name             string
+	Command          string
+	Args             []string
+	User             string
+	Priority         int
+	Env              map[string]string
+	LogFile          string
+	ErrFile          string
+	AutoRestart      bool
+	readinessProbe   func(context.Context) error
+	readinessTimeout time.Duration
+	cmd              *exec.Cmd
+	cancel           context.CancelFunc
+	done             chan struct{}
+	mu               sync.Mutex
+	running          bool
 }
 
 type ComputerUse struct {
@@ -49,12 +52,26 @@ type ComputerUse struct {
 	a11yHealth func() bool
 	waitDBus   func(string, time.Duration) error
 
+	// Test-only hooks. Production leaves these unset so child stdout/stderr use
+	// real *os.File handles from os.OpenFile.
+	openProcessFile     func(string, int, os.FileMode) (io.WriteCloser, error)
+	processRestartDelay time.Duration
+
 	a11yStatusMu        sync.Mutex
 	a11yStatusRunning   bool
 	a11yStatusCheckedAt time.Time
 }
 
 var _ computeruse.IComputerUse = &ComputerUse{}
+
+// Keep the existing restart delay as a named default so tests can use a short
+// per-instance delay without changing production behavior.
+const (
+	defaultProcessRestartDelay = 5 * time.Second
+	defaultReadinessTimeout    = 10 * time.Second
+	xfce4ReadinessTimeout      = 20 * time.Second
+	readinessPollInterval      = 100 * time.Millisecond
+)
 
 func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 	c.processes = make(map[string]*Process)
@@ -101,14 +118,18 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	}
 	os.Setenv("DISPLAY", display)
 	log.Infof("Set DISPLAY environment variable to: %s", display)
+	defer c.invalidateA11yStatus()
 
-	// Start all processes in order of priority
-	c.startAllProcesses()
-	c.invalidateA11yStatus()
+	// Start all processes in order of priority, waiting for the required
+	// desktop services to become usable before starting their dependents.
+	if err := c.startAllProcesses(); err != nil {
+		return nil, err
+	}
 
 	// Check process status after starting
 	status, err := c.GetProcessStatus()
 	if err != nil {
+		c.stopProcessesReverse(c.getProcessesByPriority(), "after status check failure")
 		return nil, fmt.Errorf("failed to get process status after start: %v", err)
 	}
 
@@ -124,6 +145,7 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	}
 
 	if len(failed) > 0 {
+		c.stopProcessesReverse(c.getProcessesByPriority(), "after required process check failure")
 		return nil, fmt.Errorf("failed to start: %v", failed)
 	}
 
@@ -175,8 +197,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
-		LogFile: filepath.Join(c.configDir, "xvfb.log"),
-		ErrFile: filepath.Join(c.configDir, "xvfb.err"),
+		LogFile:          filepath.Join(c.configDir, "xvfb.log"),
+		ErrFile:          filepath.Join(c.configDir, "xvfb.err"),
+		readinessProbe:   xDisplayReadinessProbe(display),
+		readinessTimeout: defaultReadinessTimeout,
 	}
 
 	// Process 2: xfce4 (Desktop Environment)
@@ -193,8 +217,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 			"USER":                     user,
 			"DBUS_SESSION_BUS_ADDRESS": dbusAddress,
 		},
-		LogFile: filepath.Join(c.configDir, "xfce4.log"),
-		ErrFile: filepath.Join(c.configDir, "xfce4.err"),
+		LogFile:          filepath.Join(c.configDir, "xfce4.log"),
+		ErrFile:          filepath.Join(c.configDir, "xfce4.err"),
+		readinessProbe:   xfce4ReadinessProbe(display),
+		readinessTimeout: xfce4ReadinessTimeout,
 	}
 
 	// Process 2.5: at-spi-bus-launcher (AT-SPI daemon for the accessibility API)
@@ -254,8 +280,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
-		LogFile: filepath.Join(c.configDir, "x11vnc.log"),
-		ErrFile: filepath.Join(c.configDir, "x11vnc.err"),
+		LogFile:          filepath.Join(c.configDir, "x11vnc.log"),
+		ErrFile:          filepath.Join(c.configDir, "x11vnc.err"),
+		readinessProbe:   tcpReadinessProbe("127.0.0.1", vncPort),
+		readinessTimeout: defaultReadinessTimeout,
 	}
 	// Determine the best available NoVNC command with fallback options
 	var novncCommand string
@@ -288,8 +316,10 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
-		LogFile: filepath.Join(c.configDir, "novnc.log"),
-		ErrFile: filepath.Join(c.configDir, "novnc.err"),
+		LogFile:          filepath.Join(c.configDir, "novnc.log"),
+		ErrFile:          filepath.Join(c.configDir, "novnc.err"),
+		readinessProbe:   tcpReadinessProbe("127.0.0.1", noVncPort),
+		readinessTimeout: defaultReadinessTimeout,
 	}
 }
 
@@ -315,15 +345,29 @@ func waitForSessionBus(address string, timeout time.Duration) error {
 	}
 }
 
-func (c *ComputerUse) startAllProcesses() {
-	// Sort processes by priority and start them
+func (c *ComputerUse) startAllProcesses() error {
 	processes := c.getProcessesByPriority()
+	started := make([]*Process, 0, len(processes))
 
 	for _, process := range processes {
 		go c.startProcess(process)
-		// Wait a bit between starting processes to ensure proper initialization
-		time.Sleep(2 * time.Second)
+		started = append(started, process)
+
+		if process.readinessProbe == nil {
+			continue
+		}
+
+		err := c.waitForProcessReadiness(process)
+		if err == nil {
+			log.Infof("Process %s is ready", process.Name)
+			continue
+		}
+
+		c.stopProcessesReverse(started, "after startup failure")
+		return err
 	}
+
+	return nil
 }
 
 func (c *ComputerUse) getProcessesByPriority() []*Process {
@@ -353,97 +397,132 @@ func (c *ComputerUse) startProcess(process *Process) {
 		process.mu.Unlock()
 		return
 	}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	process.cancel = cancel
+	process.done = done
 	process.running = true
 	process.mu.Unlock()
 
+	defer func() {
+		process.mu.Lock()
+		process.cancel = nil
+		process.done = nil
+		process.cmd = nil
+		process.running = false
+		process.mu.Unlock()
+		close(done)
+	}()
+
 	for {
-		log.Infof("Starting process: %s", process.Name)
-
-		// Create context for the process
-		process.ctx, process.cancel = context.WithCancel(context.Background())
-
-		// Create command
-		process.cmd = exec.CommandContext(process.ctx, process.Command, process.Args...)
-
-		// Set environment variables
-		if len(process.Env) > 0 {
-			process.cmd.Env = os.Environ()
-			for key, value := range process.Env {
-				process.cmd.Env = append(process.cmd.Env, fmt.Sprintf("%s=%s", key, value))
-			}
+		if ctx.Err() != nil {
+			return
 		}
 
-		// Set up logging
-		if process.LogFile != "" {
-			logFile, err := os.OpenFile(process.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-			if err != nil {
-				log.Errorf("Failed to open log file for %s: %v", process.Name, err)
-			} else {
-				process.cmd.Stdout = logFile
-				defer logFile.Close()
-			}
-		}
-
-		if process.ErrFile != "" {
-			errFile, err := os.OpenFile(process.ErrFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-			if err != nil {
-				log.Errorf("Failed to open error file for %s: %v", process.Name, err)
-			} else {
-				process.cmd.Stderr = errFile
-				defer errFile.Close()
-			}
-		}
-
-		// Start the process
-		err := process.cmd.Start()
-		if err != nil {
-			log.Errorf("Failed to start process %s: %v", process.Name, err)
-			if !process.AutoRestart {
-				break
-			}
-			time.Sleep(5 * time.Second)
-			continue
-		}
-
-		log.Infof("Process %s started with PID: %d", process.Name, process.cmd.Process.Pid)
-
-		// Wait for the process to finish
-		err = process.cmd.Wait()
+		err := c.runProcessOnce(ctx, process)
 		if err != nil {
 			log.Errorf("Process %s exited with error: %v", process.Name, err)
 		} else {
 			log.Infof("Process %s exited normally", process.Name)
 		}
 
-		// Check if we should restart
 		if !process.AutoRestart {
-			break
+			return
 		}
 
-		log.Infof("Restarting process %s in 5 seconds...", process.Name)
-		time.Sleep(5 * time.Second)
+		restartDelay := c.getProcessRestartDelay()
+		log.Infof("Restarting process %s in %s...", process.Name, restartDelay)
+		timer := time.NewTimer(restartDelay)
+		select {
+		case <-ctx.Done():
+			if !timer.Stop() {
+				<-timer.C
+			}
+			return
+		case <-timer.C:
+		}
+	}
+}
+
+func (c *ComputerUse) getProcessRestartDelay() time.Duration {
+	if c.processRestartDelay > 0 {
+		return c.processRestartDelay
+	}
+	return defaultProcessRestartDelay
+}
+
+func (c *ComputerUse) openProcessOutputFile(name string, flag int, perm os.FileMode) (io.WriteCloser, error) {
+	if c.openProcessFile != nil {
+		return c.openProcessFile(name, flag, perm)
+	}
+	return os.OpenFile(name, flag, perm)
+}
+
+func (c *ComputerUse) runProcessOnce(ctx context.Context, process *Process) error {
+	log.Infof("Starting process: %s", process.Name)
+
+	cmd := exec.CommandContext(ctx, process.Command, process.Args...)
+	cmd.Env = mergedEnv(process.Env)
+
+	if process.LogFile != "" {
+		logFile, err := c.openProcessOutputFile(process.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			log.Errorf("Failed to open log file for %s: %v", process.Name, err)
+		} else {
+			cmd.Stdout = logFile
+			defer closeProcessFile(process.Name, "log", logFile)
+		}
+	}
+
+	if process.ErrFile != "" {
+		errFile, err := c.openProcessOutputFile(process.ErrFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			log.Errorf("Failed to open error file for %s: %v", process.Name, err)
+		} else {
+			cmd.Stderr = errFile
+			defer closeProcessFile(process.Name, "error", errFile)
+		}
 	}
 
 	process.mu.Lock()
-	process.running = false
+	if ctx.Err() != nil {
+		process.mu.Unlock()
+		return ctx.Err()
+	}
+	process.cmd = cmd
 	process.mu.Unlock()
+
+	err := cmd.Start()
+	if err != nil {
+		process.mu.Lock()
+		if process.cmd == cmd {
+			process.cmd = nil
+		}
+		process.mu.Unlock()
+		return fmt.Errorf("failed to start process %s: %w", process.Name, err)
+	}
+
+	log.Infof("Process %s started with PID: %d", process.Name, cmd.Process.Pid)
+
+	err = cmd.Wait()
+	process.mu.Lock()
+	if process.cmd == cmd {
+		process.cmd = nil
+	}
+	process.mu.Unlock()
+	return err
+}
+
+func closeProcessFile(processName, fileKind string, file io.Closer) {
+	if err := file.Close(); err != nil {
+		log.Errorf("Failed to close %s file for %s: %v", fileKind, processName, err)
+	}
 }
 
 func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 	log.Info("Stopping all computer use processes...")
 
-	c.mu.RLock()
-	processes := make([]*Process, 0, len(c.processes))
-	for _, p := range c.processes {
-		processes = append(processes, p)
-	}
-	c.mu.RUnlock()
-
-	// Stop processes in reverse priority order
-	for i := len(processes) - 1; i >= 0; i-- {
-		process := processes[i]
-		c.stopProcess(process)
-	}
+	c.stopProcessesReverse(c.getProcessesByPriority(), "during stop")
 
 	// Release the cached AT-SPI bus connection so a later Start() dials a
 	// fresh one — the bus address can change across launcher restarts.
@@ -458,30 +537,39 @@ func (c *ComputerUse) Stop() (*computeruse.Empty, error) {
 	return new(computeruse.Empty), nil
 }
 
-func (c *ComputerUse) stopProcess(process *Process) {
+func (c *ComputerUse) stopProcessesReverse(processes []*Process, reason string) {
+	for i := len(processes) - 1; i >= 0; i-- {
+		process := processes[i]
+		if err := c.stopProcess(process); err != nil {
+			log.Errorf("Failed to stop process %s %s: %v", process.Name, reason, err)
+		}
+	}
+}
+
+func (c *ComputerUse) stopProcess(process *Process) error {
 	process.mu.Lock()
-	defer process.mu.Unlock()
 
 	if !process.running {
-		return
+		process.mu.Unlock()
+		return nil
 	}
 
 	log.Infof("Stopping process: %s", process.Name)
-
-	// Cancel the context to stop the process
-	if process.cancel != nil {
-		process.cancel()
+	cancel := process.cancel
+	done := process.done
+	if cancel != nil {
+		cancel()
 	}
+	process.mu.Unlock()
 
-	// Kill the process if it's still running
-	if process.cmd != nil && process.cmd.Process != nil {
-		err := process.cmd.Process.Kill()
-		if err != nil {
-			log.Errorf("Failed to kill process %s: %v", process.Name, err)
+	if done != nil {
+		select {
+		case <-done:
+		case <-time.After(5 * time.Second):
+			return fmt.Errorf("timed out waiting for process %s supervisor to stop", process.Name)
 		}
 	}
-
-	process.running = false
+	return nil
 }
 
 func (c *ComputerUse) GetProcessStatus() (map[string]computeruse.ProcessStatus, error) {
@@ -553,14 +641,19 @@ func (c *ComputerUse) RestartProcess(req *computeruse.ProcessRequest) (*computer
 		return nil, fmt.Errorf("process %s not found", req.ProcessName)
 	}
 
-	// Stop the process first
-	c.stopProcess(process)
+	if err := c.stopProcess(process); err != nil {
+		return nil, err
+	}
 
-	// Wait a moment for cleanup
-	time.Sleep(1 * time.Second)
-
-	// Start the process again
 	go c.startProcess(process)
+	if process.readinessProbe != nil {
+		if err := c.waitForProcessReadiness(process); err != nil {
+			if stopErr := c.stopProcess(process); stopErr != nil {
+				log.Errorf("Failed to stop process %s after restart readiness failure: %v", process.Name, stopErr)
+			}
+			return nil, err
+		}
+	}
 
 	return new(computeruse.Empty), nil
 }
