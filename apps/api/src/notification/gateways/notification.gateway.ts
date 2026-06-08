@@ -26,6 +26,7 @@ import { RunnerDto } from '../../sandbox/dto/runner.dto'
 import { RunnerState } from '../../sandbox/enums/runner-state.enum'
 import { RunnerEvents } from '../../sandbox/constants/runner-events'
 import { NotificationEmitter } from './notification-emitter.abstract'
+import { OrganizationUserService } from '../../organization/services/organization-user.service'
 
 @WebSocketGateway({
   path: '/api/socket.io/',
@@ -40,6 +41,7 @@ export class NotificationGateway extends NotificationEmitter implements OnGatewa
   constructor(
     private readonly jwtStrategy: JwtStrategy,
     private readonly apiKeyStrategy: ApiKeyStrategy,
+    private readonly organizationUserService: OrganizationUserService,
     @InjectRedis() private readonly redis: Redis,
   ) {
     super()
@@ -71,6 +73,9 @@ export class NotificationGateway extends NotificationEmitter implements OnGatewa
         // Join the organization room for organization scoped notifications
         const organizationId = socket.handshake.query.organizationId as string | undefined
         if (organizationId) {
+          if (!(await this.organizationUserService.exists(organizationId, payload.sub))) {
+            return next(new UnauthorizedException())
+          }
           await socket.join(organizationId)
         }
 
