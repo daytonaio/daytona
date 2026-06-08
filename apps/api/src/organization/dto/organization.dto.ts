@@ -90,6 +90,11 @@ export class OrganizationDto {
   })
   sandboxLimitedNetworkEgress: boolean
 
+  @ApiProperty({
+    description: 'Whether the proxy shows the preview URL warning page for this organization',
+  })
+  previewWarningEnabled: boolean
+
   @ApiPropertyOptional({
     description: 'Default region ID',
     required: false,
@@ -189,6 +194,7 @@ export class OrganizationDto {
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       snapshotDeactivationTimeoutMinutes: organization.snapshotDeactivationTimeoutMinutes,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
+      previewWarningEnabled: organization.previewWarningEnabled,
       defaultRegionId: organization.defaultRegionId,
       authenticatedRateLimit: organization.authenticatedRateLimit,
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,

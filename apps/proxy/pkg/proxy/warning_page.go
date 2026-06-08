@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -43,13 +44,33 @@ func handleAcceptProxyWarning(ctx *gin.Context, secure bool) {
 		true,
 	)
 
-	// Redirect to the original URL or root
+	// Navigate to the original URL or root
 	redirectURL := ctx.Query("redirect")
 	if redirectURL == "" {
 		redirectURL = "/"
 	}
 
-	ctx.Redirect(http.StatusFound, redirectURL)
+	// Complete the consent POST on this origin and let the browser start a fresh
+	// navigation via meta refresh, instead of issuing an HTTP redirect. The warning
+	// page pins the consent form to `form-action 'self'`, and that CSP follows the
+	// entire redirect chain of a form submission. For private sandboxes the chain
+	// continues into the (cross-origin) auth provider, which form-action would block.
+	// A meta-refresh navigation is not a form submission, so the auth redirect runs
+	// free of the form-action constraint.
+	ctx.Header("Content-Security-Policy", "default-src 'none'")
+	ctx.Header("X-Content-Type-Options", "nosniff")
+	ctx.Header("Content-Type", "text/html; charset=utf-8")
+	// redirectURL is escaped for the double-quoted HTML attribute context; this
+	// matches the open-redirect posture of the previous Location-header behavior.
+	ctx.String(http.StatusOK, fmt.Sprintf(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=%s" />
+    <title>Redirecting…</title>
+  </head>
+  <body>Redirecting…</body>
+</html>`, html.EscapeString(redirectURL)))
 }
 
 // browserWarningMiddleware is the middleware that checks for browsers and shows warning
@@ -81,7 +102,7 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 		}
 
 		// Skip warning for the acceptance endpoint itself or auth callbacks
-		targetPort, _, _, err := p.parseHost(ctx.Request.Host)
+		targetPort, sandboxIdOrSignedToken, _, err := p.parseHost(ctx.Request.Host)
 		if err != nil {
 			switch ctx.Request.Method {
 			case "GET":
@@ -96,6 +117,18 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 		if ctx.Request.URL.Path == ACCEPT_PREVIEW_PAGE_WARNING_PATH || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT || targetPort == RECORDING_DASHBOARD_PORT {
 			ctx.Next()
 			return
+		}
+
+		// Skip the warning if the sandbox's organization has disabled it.
+		// On any lookup error we fail open and still show the warning.
+		if sandboxIdOrSignedToken != "" {
+			enabled, err := p.getSandboxPreviewWarningEnabled(ctx.Request.Context(), sandboxIdOrSignedToken, targetPort)
+			if err != nil {
+				log.Errorf("Failed to get sandbox preview warning status: %v", err)
+			} else if !enabled {
+				ctx.Next()
+				return
+			}
 		}
 
 		// Serve the warning page
@@ -301,6 +334,9 @@ func serveWarningPage(c *gin.Context, https bool) {
 	// Defense-in-depth: this page has no inline scripts and loads no external
 	// resources, so deny everything by default. style-src 'unsafe-inline' keeps
 	// the embedded <style> block working; form-action 'self' pins the consent POST.
+	// The consent POST completes on this origin (the accept handler responds 200 and
+	// the browser then navigates on via meta refresh), so the cross-origin auth
+	// redirect happens outside the form submission and isn't subject to form-action.
 	// Any future contributor adding scripts/images/fonts/external CSS to this page
 	// must extend this policy.
 	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'")

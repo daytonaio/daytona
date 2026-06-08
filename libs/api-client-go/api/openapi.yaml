@@ -7189,6 +7189,44 @@ paths:
       summary: Check if sandbox is public
       tags:
       - preview
+  /preview/{sandboxId}/preview-warning:
+    get:
+      operationId: isPreviewWarningEnabled
+      parameters:
+      - description: "ID of the sandbox, or a signed preview URL token (requires the\
+          \ port query param)"
+        explode: false
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Port the signed preview URL token was issued for. Required when
+          sandboxId is a signed token.
+        explode: true
+        in: query
+        name: port
+        required: false
+        schema:
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewWarning"
+          description: Whether the preview warning page is enabled for the sandbox
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Check if the preview warning page is enabled for the sandbox
+      tags:
+      - preview
   /preview/{sandboxId}/validate/{authToken}:
     get:
       operationId: isValidAuthToken
@@ -8505,6 +8543,36 @@ paths:
       summary: Get organization region quota
       tags:
       - admin
+  /admin/organizations/{organizationId}/preview-warning:
+    post:
+      operationId: adminUpdateOrganizationPreviewWarning
+      parameters:
+      - description: Organization ID
+        explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationPreviewWarning"
+        required: true
+      responses:
+        "204":
+          description: Preview warning updated successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Update organization preview warning
+      tags:
+      - admin
   /webhooks/organizations/{organizationId}/app-portal-access:
     post:
       operationId: WebhookController_getAppPortalAccess
@@ -9683,6 +9751,7 @@ components:
         createdAt: 2000-01-23T04:56:07.000+00:00
         sandboxLimitedNetworkEgress: true
         suspendedUntil: 2000-01-23T04:56:07.000+00:00
+        previewWarningEnabled: true
         snapshotDeactivationTimeoutMinutes: 5.637376656633329
         otelConfig: ""
         authenticatedRateLimitTtlSeconds: 3.616076749251911
@@ -9757,6 +9826,10 @@ components:
         sandboxLimitedNetworkEgress:
           description: Sandbox default network block all
           type: boolean
+        previewWarningEnabled:
+          description: Whether the proxy shows the preview URL warning page for this
+            organization
+          type: boolean
         defaultRegionId:
           description: Default region ID
           type: string
@@ -9805,6 +9878,7 @@ components:
       - name
       - otelConfig
       - personal
+      - previewWarningEnabled
       - sandboxCreateRateLimit
       - sandboxCreateRateLimitTtlSeconds
       - sandboxLifecycleRateLimit
@@ -14195,6 +14269,16 @@ components:
       - total
       - totalPages
       type: object
+    PreviewWarning:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          description: Whether the preview warning page is enabled for the sandbox
+          type: boolean
+      required:
+      - enabled
+      type: object
     VolumeState:
       description: Volume state
       enum:
@@ -15000,6 +15084,17 @@ components:
       - totalDiskQuota
       - totalGpuQuota
       - totalMemoryQuota
+      type: object
+    OrganizationPreviewWarning:
+      example:
+        previewWarningEnabled: true
+      properties:
+        previewWarningEnabled:
+          description: Whether the proxy shows the preview URL warning page for this
+            organization
+          type: boolean
+      required:
+      - previewWarningEnabled
       type: object
     WebhookAppPortalAccess:
       example:

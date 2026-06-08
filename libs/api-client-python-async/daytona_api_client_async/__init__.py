@@ -141,6 +141,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.oidc_config import OidcConfig
     from daytona_api_client_async.models.organization import Organization
     from daytona_api_client_async.models.organization_invitation import OrganizationInvitation
+    from daytona_api_client_async.models.organization_preview_warning import OrganizationPreviewWarning
     from daytona_api_client_async.models.organization_role import OrganizationRole
     from daytona_api_client_async.models.organization_sandbox_default_limited_network_egress import OrganizationSandboxDefaultLimitedNetworkEgress
     from daytona_api_client_async.models.organization_suspension import OrganizationSuspension
@@ -157,6 +158,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
     from daytona_api_client_async.models.position import Position
     from daytona_api_client_async.models.posthog_config import PosthogConfig
+    from daytona_api_client_async.models.preview_warning import PreviewWarning
     from daytona_api_client_async.models.process_errors_response import ProcessErrorsResponse
     from daytona_api_client_async.models.process_logs_response import ProcessLogsResponse
     from daytona_api_client_async.models.process_restart_response import ProcessRestartResponse
@@ -356,6 +358,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "OidcConfig": "daytona_api_client_async.models.oidc_config",
     "Organization": "daytona_api_client_async.models.organization",
     "OrganizationInvitation": "daytona_api_client_async.models.organization_invitation",
+    "OrganizationPreviewWarning": "daytona_api_client_async.models.organization_preview_warning",
     "OrganizationRole": "daytona_api_client_async.models.organization_role",
     "OrganizationSandboxDefaultLimitedNetworkEgress": "daytona_api_client_async.models.organization_sandbox_default_limited_network_egress",
     "OrganizationSuspension": "daytona_api_client_async.models.organization_suspension",
@@ -372,6 +375,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "PortPreviewUrl": "daytona_api_client_async.models.port_preview_url",
     "Position": "daytona_api_client_async.models.position",
     "PosthogConfig": "daytona_api_client_async.models.posthog_config",
+    "PreviewWarning": "daytona_api_client_async.models.preview_warning",
     "ProcessErrorsResponse": "daytona_api_client_async.models.process_errors_response",
     "ProcessLogsResponse": "daytona_api_client_async.models.process_logs_response",
     "ProcessRestartResponse": "daytona_api_client_async.models.process_restart_response",
@@ -585,6 +589,7 @@ __all__ = [
     "OidcConfig",
     "Organization",
     "OrganizationInvitation",
+    "OrganizationPreviewWarning",
     "OrganizationRole",
     "OrganizationSandboxDefaultLimitedNetworkEgress",
     "OrganizationSuspension",
@@ -601,6 +606,7 @@ __all__ = [
     "PortPreviewUrl",
     "Position",
     "PosthogConfig",
+    "PreviewWarning",
     "ProcessErrorsResponse",
     "ProcessLogsResponse",
     "ProcessRestartResponse",

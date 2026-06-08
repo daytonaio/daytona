@@ -112,6 +112,7 @@ daytona_api_client/models/mouse_scroll_response.py
 daytona_api_client/models/oidc_config.py
 daytona_api_client/models/organization.py
 daytona_api_client/models/organization_invitation.py
+daytona_api_client/models/organization_preview_warning.py
 daytona_api_client/models/organization_role.py
 daytona_api_client/models/organization_sandbox_default_limited_network_egress.py
 daytona_api_client/models/organization_suspension.py
@@ -128,6 +129,7 @@ daytona_api_client/models/poll_jobs_response.py
 daytona_api_client/models/port_preview_url.py
 daytona_api_client/models/position.py
 daytona_api_client/models/posthog_config.py
+daytona_api_client/models/preview_warning.py
 daytona_api_client/models/process_errors_response.py
 daytona_api_client/models/process_logs_response.py
 daytona_api_client/models/process_restart_response.py

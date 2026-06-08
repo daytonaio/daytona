@@ -45,6 +45,7 @@ export enum AuditAction {
   SEND_WEBHOOK_MESSAGE = 'send_webhook_message',
   INITIALIZE_WEBHOOKS = 'initialize_webhooks',
   UPDATE_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS = 'update_sandbox_default_limited_network_egress',
+  UPDATE_PREVIEW_WARNING = 'update_preview_warning',
   UPDATE_OTEL_CONFIG = 'update_otel_config',
   DELETE_OTEL_CONFIG = 'delete_otel_config',
   CREATE_SSH_ACCESS = 'create_ssh_access',

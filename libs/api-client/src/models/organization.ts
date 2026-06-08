@@ -83,6 +83,10 @@ export interface Organization {
      */
     'sandboxLimitedNetworkEgress': boolean;
     /**
+     * Whether the proxy shows the preview URL warning page for this organization
+     */
+    'previewWarningEnabled': boolean;
+    /**
      * Default region ID
      */
     'defaultRegionId'?: string;

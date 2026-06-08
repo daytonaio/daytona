@@ -65,6 +65,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   private readonly logger = new Logger(OrganizationService.name)
   private defaultOrganizationQuota: CreateOrganizationQuotaDto
   private defaultSandboxLimitedNetworkEgress: boolean
+  private defaultPreviewWarningEnabled: boolean
 
   constructor(
     @InjectRepository(Organization)
@@ -86,6 +87,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
       'organizationSandboxDefaultLimitedNetworkEgress',
     )
+    this.defaultPreviewWarningEnabled = this.configService.getOrThrow('organizationDefaultPreviewWarningEnabled')
   }
 
   async onApplicationShutdown() {
@@ -444,6 +446,16 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.organizationRepository.save(organization)
   }
 
+  async updatePreviewWarning(organizationId: string, previewWarningEnabled: boolean): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+    organization.previewWarningEnabled = previewWarningEnabled
+
+    await this.organizationRepository.save(organization)
+  }
+
   /**
    * @param organizationId - The ID of the organization.
    * @param defaultRegionId - The ID of the region to set as the default region.
@@ -646,6 +658,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
 
     organization.sandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
+    organization.previewWarningEnabled = this.defaultPreviewWarningEnabled
 
     const owner = new OrganizationUser()
     owner.userId = createdBy

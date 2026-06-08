@@ -181,6 +181,12 @@ export class Organization {
   })
   sandboxLimitedNetworkEgress: boolean
 
+  @Column({
+    default: false,
+    name: 'preview_warning_enabled',
+  })
+  previewWarningEnabled: boolean
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
