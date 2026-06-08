@@ -410,7 +410,7 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 ### Windows Sandboxes
 
-Daytona provides methods to create Windows sandboxes. 
+Daytona provides methods to create Windows sandboxes.
 
 Windows sandboxes are Windows OS runtime environments used to run Windows applications. They provide a consistent Windows baseline, so you can run Windows-specific tools and workflows in an isolated sandbox.
 
@@ -542,7 +542,7 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 ### Ephemeral Sandboxes
 
-Daytona provides methods to create ephemeral sandboxes. 
+Daytona provides methods to create ephemeral sandboxes.
 
 Ephemeral sandboxes are automatically deleted once they are stopped. They are useful for short-lived tasks or testing purposes.
 
@@ -1088,7 +1088,9 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 Daytona provides methods to stop sandboxes.
 
-Stopped sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed. 
+Stopped sandboxes maintain filesystem persistence while their memory state is cleared. They incur
+only disk usage costs and can be started again when needed. Sandboxes in a stopping or stopped state
+will no longer accept requests.
 
 The stopped state should be used when a sandbox is expected to be started again. Otherwise, it is recommended to stop and then archive the sandbox to eliminate disk usage costs.
 
@@ -1158,7 +1160,7 @@ Common use cases for force stop include:
 
 ## Pause Sandboxes
 
-Daytona provides methods to pause sandboxes. 
+Daytona provides methods to pause sandboxes.
 
 Pausing a sandbox keeps both filesystem state and memory persistence, so sandboxes can resume from in-memory runtime state. Compared to regular stop behavior, pause is useful for workloads with active in-memory context and state continuity.
 
@@ -1168,7 +1170,7 @@ Daytona supports pause functionality through VM-based runners. Pause is handled 
 
 Daytona provides methods to archive sandboxes.
 
-A sandbox must be stopped before it can be archived. When a sandbox is archived, the entire filesystem state is moved to a cost-effective object storage, making it available for an extended period. 
+A sandbox must be stopped before it can be archived. When a sandbox is archived, the entire filesystem state is moved to a cost-effective object storage, making it available for an extended period.
 
 Starting an archived sandbox takes more time than starting a stopped sandbox, depending on its size. It can be started again in the same way as a stopped sandbox.
 
@@ -1389,7 +1391,7 @@ df -h /                         # disk
 
 ## Fork Sandboxes
 
-Daytona provides methods to fork sandboxes. 
+Daytona provides methods to fork sandboxes.
 
 Forking creates a duplicate of your sandbox's filesystem and memory, and copies it into a new sandbox. The new sandbox is fully independent: it can be started, stopped, and deleted without affecting the original. The sandbox must be in started state before forking.
 
@@ -1473,7 +1475,7 @@ The fork tree displays each sandbox in the hierarchy along with its current stat
 
 ## Label Sandboxes
 
-Daytona provides methods to set sandbox labels. 
+Daytona provides methods to set sandbox labels.
 
 Setting labels replaces the full label set for the sandbox. Include all labels you want to keep in the request. If you omit an existing label, it will be removed.
 
@@ -1548,7 +1550,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/labels' \
 
 ## Create Snapshot from Sandbox
 
-Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxes. 
+Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxes.
 
 A snapshot captures an immutable, point-in-time copy of a sandbox's filesystem and memory that you can use as a base to create new sandboxes, effectively templating a known-good environment for reuse. You can think of it as a checkpoint you can restore from whenever you need a clean, identical starting point.
 
@@ -1626,7 +1628,7 @@ Daytona provides methods to delete sandboxes.
 sandbox.delete()
 ```
 
-</TabItem> 
+</TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
@@ -1717,7 +1719,7 @@ Daytona sandboxes can be automatically stopped, archived, and deleted based on u
 
 Daytona provides methods to update a sandbox's last activity timestamp.
 
-This updates the sandbox's recorded activity time without changing its runtime state. It is useful when your workflow is driven by external systems or background orchestration that may not reset inactivity tracking. 
+This updates the sandbox's recorded activity time without changing its runtime state. It is useful when your workflow is driven by external systems or background orchestration that may not reset inactivity tracking.
 
 For example, if you run long-lived automation around a sandbox and want to avoid unintended auto-stop behavior, call this operation periodically to indicate that the sandbox is still actively used.
 
@@ -1756,9 +1758,9 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxId}/last-activity' \
 
 ### Auto-stop interval
 
-Daytona provides methods to set the auto-stop interval. 
+Daytona provides methods to set the auto-stop interval.
 
-The auto-stop interval sets the amount of time after which a running sandbox will be automatically stopped. The auto-stop triggers even if there are internal processes running in the sandbox. 
+The auto-stop interval sets the amount of time after which a running sandbox will be automatically stopped. The auto-stop triggers even if there are internal processes running in the sandbox.
 
 The system differentiates between "internal processes" and "active user interaction". Merely having a script or background task running is not sufficient to keep the sandbox alive.
 
