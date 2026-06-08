@@ -103,7 +103,7 @@ export class OrganizationUserService {
     }
 
     // validate assignments
-    const assignedRoles = await this.organizationRoleService.findByIds(assignedRoleIds)
+    const assignedRoles = await this.organizationRoleService.findByIds(organizationId, assignedRoleIds)
     if (assignedRoles.length !== assignedRoleIds.length) {
       throw new BadRequestException('One or more role IDs are invalid')
     }
