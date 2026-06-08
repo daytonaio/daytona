@@ -270,10 +270,10 @@ const Snapshots: React.FC = () => {
 
   useEffect(() => {
     if (snapshotsData?.items.length === 0 && page > 1) {
-      const previousPage = page - 1
-      setViewParams({ page: previousPage === 1 ? null : previousPage })
+      const targetPage = snapshotsData.totalPages ? Math.min(page - 1, snapshotsData.totalPages) : 1
+      setViewParams({ page: targetPage === 1 ? null : targetPage })
     }
-  }, [snapshotsData?.items.length, page, setViewParams])
+  }, [snapshotsData?.items.length, snapshotsData?.totalPages, page, setViewParams])
 
   const handleDelete = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
