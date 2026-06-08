@@ -60,7 +60,8 @@ const Wallet = () => {
   })
 
   const wallet = walletQuery.data
-  const hasPaymentMethod = (paymentMethodsQuery.data?.length ?? 0) > 0
+  const paymentMethods = paymentMethodsQuery.data
+  const hasNoPaymentMethod = paymentMethods?.length === 0
   const paymentMethodsLoading = paymentMethodsQuery.isLoading
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
   const redeemCouponMutation = useRedeemCouponMutation()
@@ -115,37 +116,33 @@ const Wallet = () => {
     }
   }, [selectedOrganization, couponCode, redeemCouponMutation])
 
-  const saveAutomaticTopUpDisabled = useMemo(() => {
-    if (setAutomaticTopUpMutation.isPending) {
-      return true
-    }
-
+  const automaticTopUpHasChanges = useMemo(() => {
     if (wallet?.automaticTopUp?.disabled && (automaticTopUp?.thresholdAmount || 0) > 0) {
-      return false
+      return true
     }
 
     if (automaticTopUp?.thresholdAmount !== wallet?.automaticTopUp?.thresholdAmount) {
       if (!wallet?.automaticTopUp) {
         if ((automaticTopUp?.thresholdAmount || 0) !== 0) {
-          return false
+          return true
         }
       } else {
-        return false
+        return true
       }
     }
 
     if (automaticTopUp?.targetAmount !== wallet?.automaticTopUp?.targetAmount) {
       if (!wallet?.automaticTopUp) {
         if ((automaticTopUp?.targetAmount || 0) !== 0) {
-          return false
+          return true
         }
       } else {
-        return false
+        return true
       }
     }
 
-    return true
-  }, [setAutomaticTopUpMutation.isPending, wallet, automaticTopUp])
+    return false
+  }, [wallet, automaticTopUp])
 
   const handleTopUpWallet = useCallback(async () => {
     if (!selectedOrganization) {
@@ -211,9 +208,22 @@ const Wallet = () => {
 
   const isBillingLoading = walletQuery.isLoading
   const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
-  const topUpDisabledBecauseMissingPaymentMethod = Boolean(wallet && !paymentMethodsLoading && !hasPaymentMethod)
+  const showCreditCardBonusPrompt = Boolean(
+    hasNoPaymentMethod && user?.profile.email_verified && selectedOrganization?.personal,
+  )
+  const showMissingPaymentMethodTopUpMessage = Boolean(wallet && hasNoPaymentMethod)
+  const automaticTopUpSaveDisabled =
+    !automaticTopUpHasChanges ||
+    setAutomaticTopUpMutation.isPending ||
+    walletQuery.isLoading ||
+    !wallet ||
+    paymentMethodsLoading ||
+    hasNoPaymentMethod
   const topUpEnabled = Boolean(
-    hasPaymentMethod && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount),
+    !paymentMethodsLoading &&
+      !hasNoPaymentMethod &&
+      !topUpWalletMutation.isPending &&
+      (selectedPreset || oneTimeTopUpAmount),
   )
 
   return (
@@ -270,17 +280,12 @@ const Wallet = () => {
                     </AlertDescription>
                   </Alert>
                 )}
-                {!paymentMethodsLoading &&
-                  !hasPaymentMethod &&
-                  user.profile.email_verified &&
-                  selectedOrganization?.personal && (
-                    <Alert variant="neutral">
-                      <SparklesIcon />
-                      <AlertDescription>
-                        Connect a credit card to receive an additional $100 of credits.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                {showCreditCardBonusPrompt && (
+                  <Alert variant="neutral">
+                    <SparklesIcon />
+                    <AlertDescription>Connect a credit card to receive an additional $100 of credits.</AlertDescription>
+                  </Alert>
+                )}
               </>
             )}
             {wallet.hasFailedOrPendingInvoice && (
@@ -370,7 +375,7 @@ const Wallet = () => {
               </>
             )}
 
-            {hasPaymentMethod && !isPostPaid && (
+            {!isPostPaid && (
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle>Automatic top-up</CardTitle>
@@ -462,10 +467,7 @@ const Wallet = () => {
                     <span className="text-sm ">Setting both values to 0 will disable automatic top-ups.</span>
                   </div>
                   <div className="flex gap-2 items-center ml-auto">
-                    <Button
-                      onClick={handleSetAutomaticTopUp}
-                      disabled={saveAutomaticTopUpDisabled || walletQuery.isLoading || !wallet}
-                    >
+                    <Button onClick={handleSetAutomaticTopUp} disabled={automaticTopUpSaveDisabled}>
                       {setAutomaticTopUpMutation.isPending && <Spinner />} Save
                     </Button>
                   </div>
@@ -542,7 +544,7 @@ const Wallet = () => {
               <CardFooter className="flex justify-between gap-2">
                 {paymentMethodsLoading ? (
                   <Skeleton className="h-4 w-64 max-w-full" />
-                ) : topUpDisabledBecauseMissingPaymentMethod ? (
+                ) : showMissingPaymentMethodTopUpMessage ? (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <CreditCardIcon className="w-4 h-4 shrink-0" />
                     <span>Add a payment method to top up.</span>

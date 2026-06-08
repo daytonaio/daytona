@@ -42,7 +42,9 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
     organizationId: suspension?.id ?? '',
     enabled: suspension?.suspensionReason === PAYMENT_METHOD_REQUIRED_REASON,
   })
-  const hasPaymentMethod = (paymentMethodsQuery.data?.length ?? 0) > 0
+  const paymentMethods = paymentMethodsQuery.data
+  const paymentMethodsUnavailable = paymentMethodsQuery.isError && paymentMethods === undefined
+  const hasPaymentMethod = (paymentMethods?.length ?? 0) > 0
 
   useEffect(() => {
     const wasSuspended = previousSuspendedRef.current
@@ -64,7 +66,7 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
 
     if (isSetupRequiredSuspension(reason)) {
       if (reason === PAYMENT_METHOD_REQUIRED_REASON) {
-        if (paymentMethodsQuery.isLoading) {
+        if (paymentMethodsQuery.isLoading || paymentMethodsUnavailable) {
           removeBanner(SUSPENSION_BANNER_ID)
           return
         }
@@ -166,5 +168,14 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
       description: reason ? `${reason}. ${cleanupText}` : cleanupText,
       isDismissible: false,
     })
-  }, [suspension, addBanner, removeBanner, navigate, path, hasPaymentMethod, paymentMethodsQuery.isLoading])
+  }, [
+    suspension,
+    addBanner,
+    removeBanner,
+    navigate,
+    path,
+    hasPaymentMethod,
+    paymentMethodsQuery.isLoading,
+    paymentMethodsUnavailable,
+  ])
 }
