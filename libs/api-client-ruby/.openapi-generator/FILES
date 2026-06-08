@@ -114,6 +114,7 @@ lib/daytona_api_client/models/mouse_scroll_response.rb
 lib/daytona_api_client/models/oidc_config.rb
 lib/daytona_api_client/models/organization.rb
 lib/daytona_api_client/models/organization_invitation.rb
+lib/daytona_api_client/models/organization_preview_warning.rb
 lib/daytona_api_client/models/organization_role.rb
 lib/daytona_api_client/models/organization_sandbox_default_limited_network_egress.rb
 lib/daytona_api_client/models/organization_suspension.rb

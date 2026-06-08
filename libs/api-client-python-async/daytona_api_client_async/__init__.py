@@ -141,6 +141,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.oidc_config import OidcConfig
     from daytona_api_client_async.models.organization import Organization
     from daytona_api_client_async.models.organization_invitation import OrganizationInvitation
+    from daytona_api_client_async.models.organization_preview_warning import OrganizationPreviewWarning
     from daytona_api_client_async.models.organization_role import OrganizationRole
     from daytona_api_client_async.models.organization_sandbox_default_limited_network_egress import OrganizationSandboxDefaultLimitedNetworkEgress
     from daytona_api_client_async.models.organization_suspension import OrganizationSuspension
@@ -356,6 +357,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "OidcConfig": "daytona_api_client_async.models.oidc_config",
     "Organization": "daytona_api_client_async.models.organization",
     "OrganizationInvitation": "daytona_api_client_async.models.organization_invitation",
+    "OrganizationPreviewWarning": "daytona_api_client_async.models.organization_preview_warning",
     "OrganizationRole": "daytona_api_client_async.models.organization_role",
     "OrganizationSandboxDefaultLimitedNetworkEgress": "daytona_api_client_async.models.organization_sandbox_default_limited_network_egress",
     "OrganizationSuspension": "daytona_api_client_async.models.organization_suspension",
@@ -585,6 +587,7 @@ __all__ = [
     "OidcConfig",
     "Organization",
     "OrganizationInvitation",
+    "OrganizationPreviewWarning",
     "OrganizationRole",
     "OrganizationSandboxDefaultLimitedNetworkEgress",
     "OrganizationSuspension",

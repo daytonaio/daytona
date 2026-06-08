@@ -1311,6 +1311,76 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Update organization preview warning
+    # @param organization_id [String] Organization ID
+    # @param organization_preview_warning [OrganizationPreviewWarning] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def admin_update_organization_preview_warning(organization_id, organization_preview_warning, opts = {})
+      admin_update_organization_preview_warning_with_http_info(organization_id, organization_preview_warning, opts)
+      nil
+    end
+
+    # Update organization preview warning
+    # @param organization_id [String] Organization ID
+    # @param organization_preview_warning [OrganizationPreviewWarning] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def admin_update_organization_preview_warning_with_http_info(organization_id, organization_preview_warning, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_update_organization_preview_warning ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling AdminApi.admin_update_organization_preview_warning"
+      end
+      # verify the required parameter 'organization_preview_warning' is set
+      if @api_client.config.client_side_validation && organization_preview_warning.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_preview_warning' when calling AdminApi.admin_update_organization_preview_warning"
+      end
+      # resource path
+      local_var_path = '/admin/organizations/{organizationId}/preview-warning'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(organization_preview_warning)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_update_organization_preview_warning",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_update_organization_preview_warning\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Update organization region quota
     # @param organization_id [String] Organization ID
     # @param region_id [String] Region ID

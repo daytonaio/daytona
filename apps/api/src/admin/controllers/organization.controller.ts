@@ -30,6 +30,7 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { CreateOrganizationRegionQuotaDto } from '../../organization/dto/create-organization-region-quota.dto'
 import { UpdateOrganizationRegionQuotaDto } from '../../organization/dto/update-organization-region-quota.dto'
 import { RegionQuotaDto } from '../../organization/dto/region-quota.dto'
+import { OrganizationPreviewWarningDto } from '../../organization/dto/organization-preview-warning.dto'
 
 @Controller('admin/organizations')
 @ApiTags('admin')
@@ -231,5 +232,37 @@ export class AdminOrganizationController {
     @Param('sandboxClass', new ParseEnumPipe(SandboxClass)) sandboxClass: SandboxClass,
   ): Promise<void> {
     await this.organizationService.deleteRegionQuota(organizationId, regionId, sandboxClass)
+  }
+
+  @Post(':organizationId/preview-warning')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Update organization preview warning',
+    operationId: 'adminUpdateOrganizationPreviewWarning',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Preview warning updated successfully',
+  })
+  @Audit({
+    action: AuditAction.UPDATE_PREVIEW_WARNING,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<OrganizationPreviewWarningDto>) => ({
+        previewWarningEnabled: req.body?.previewWarningEnabled,
+      }),
+    },
+  })
+  async updatePreviewWarning(
+    @Param('organizationId') organizationId: string,
+    @Body() body: OrganizationPreviewWarningDto,
+  ): Promise<void> {
+    await this.organizationService.updatePreviewWarning(organizationId, body.previewWarningEnabled)
   }
 }

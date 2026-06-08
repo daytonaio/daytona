@@ -3151,6 +3151,27 @@ export class SandboxService {
     return sandbox.public
   }
 
+  async isPreviewWarningEnabled(sandboxIdOrToken: string, port?: number): Promise<boolean> {
+    let organization = await this.organizationService.findBySandboxId(sandboxIdOrToken)
+
+    // The identifier may be a signed preview URL token rather than a sandbox ID.
+    // A token can only be resolved with the port it was issued for.
+    if (!organization && port !== undefined) {
+      try {
+        const sandboxId = await this.getSandboxIdFromSignedPreviewUrlToken(sandboxIdOrToken, port)
+        organization = await this.organizationService.findBySandboxId(sandboxId)
+      } catch {
+        // fall through to the NotFoundException below
+      }
+    }
+
+    if (!organization) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxIdOrToken} not found`)
+    }
+
+    return organization.previewWarningEnabled
+  }
+
   @OnEvent(OrganizationEvents.SUSPENDED_SANDBOX_STOPPED)
   async handleSuspendedSandboxStopped(event: OrganizationSuspendedSandboxStoppedEvent) {
     await this.stop(event.sandboxId).catch((error) => {

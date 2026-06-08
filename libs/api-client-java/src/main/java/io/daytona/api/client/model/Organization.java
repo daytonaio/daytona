@@ -133,6 +133,11 @@ public class Organization {
   @javax.annotation.Nonnull
   private Boolean sandboxLimitedNetworkEgress;
 
+  public static final String SERIALIZED_NAME_PREVIEW_WARNING_ENABLED = "previewWarningEnabled";
+  @SerializedName(SERIALIZED_NAME_PREVIEW_WARNING_ENABLED)
+  @javax.annotation.Nonnull
+  private Boolean previewWarningEnabled;
+
   public static final String SERIALIZED_NAME_DEFAULT_REGION_ID = "defaultRegionId";
   @SerializedName(SERIALIZED_NAME_DEFAULT_REGION_ID)
   @javax.annotation.Nullable
@@ -485,6 +490,25 @@ public class Organization {
   }
 
 
+  public Organization previewWarningEnabled(@javax.annotation.Nonnull Boolean previewWarningEnabled) {
+    this.previewWarningEnabled = previewWarningEnabled;
+    return this;
+  }
+
+  /**
+   * Whether the proxy shows the preview URL warning page for this organization
+   * @return previewWarningEnabled
+   */
+  @javax.annotation.Nonnull
+  public Boolean getPreviewWarningEnabled() {
+    return previewWarningEnabled;
+  }
+
+  public void setPreviewWarningEnabled(@javax.annotation.Nonnull Boolean previewWarningEnabled) {
+    this.previewWarningEnabled = previewWarningEnabled;
+  }
+
+
   public Organization defaultRegionId(@javax.annotation.Nullable String defaultRegionId) {
     this.defaultRegionId = defaultRegionId;
     return this;
@@ -726,6 +750,7 @@ public class Organization {
         Objects.equals(this.maxDiskPerSandbox, organization.maxDiskPerSandbox) &&
         Objects.equals(this.snapshotDeactivationTimeoutMinutes, organization.snapshotDeactivationTimeoutMinutes) &&
         Objects.equals(this.sandboxLimitedNetworkEgress, organization.sandboxLimitedNetworkEgress) &&
+        Objects.equals(this.previewWarningEnabled, organization.previewWarningEnabled) &&
         Objects.equals(this.defaultRegionId, organization.defaultRegionId) &&
         Objects.equals(this.authenticatedRateLimit, organization.authenticatedRateLimit) &&
         Objects.equals(this.sandboxCreateRateLimit, organization.sandboxCreateRateLimit) &&
@@ -740,7 +765,7 @@ public class Organization {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, createdBy, personal, createdAt, updatedAt, suspended, suspendedAt, suspensionReason, suspendedUntil, suspensionCleanupGracePeriodHours, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, snapshotDeactivationTimeoutMinutes, sandboxLimitedNetworkEgress, defaultRegionId, authenticatedRateLimit, sandboxCreateRateLimit, sandboxLifecycleRateLimit, experimentalConfig, otelConfig, authenticatedRateLimitTtlSeconds, sandboxCreateRateLimitTtlSeconds, sandboxLifecycleRateLimitTtlSeconds, additionalProperties);
+    return Objects.hash(id, name, createdBy, personal, createdAt, updatedAt, suspended, suspendedAt, suspensionReason, suspendedUntil, suspensionCleanupGracePeriodHours, maxCpuPerSandbox, maxMemoryPerSandbox, maxDiskPerSandbox, snapshotDeactivationTimeoutMinutes, sandboxLimitedNetworkEgress, previewWarningEnabled, defaultRegionId, authenticatedRateLimit, sandboxCreateRateLimit, sandboxLifecycleRateLimit, experimentalConfig, otelConfig, authenticatedRateLimitTtlSeconds, sandboxCreateRateLimitTtlSeconds, sandboxLifecycleRateLimitTtlSeconds, additionalProperties);
   }
 
   @Override
@@ -763,6 +788,7 @@ public class Organization {
     sb.append("    maxDiskPerSandbox: ").append(toIndentedString(maxDiskPerSandbox)).append("\n");
     sb.append("    snapshotDeactivationTimeoutMinutes: ").append(toIndentedString(snapshotDeactivationTimeoutMinutes)).append("\n");
     sb.append("    sandboxLimitedNetworkEgress: ").append(toIndentedString(sandboxLimitedNetworkEgress)).append("\n");
+    sb.append("    previewWarningEnabled: ").append(toIndentedString(previewWarningEnabled)).append("\n");
     sb.append("    defaultRegionId: ").append(toIndentedString(defaultRegionId)).append("\n");
     sb.append("    authenticatedRateLimit: ").append(toIndentedString(authenticatedRateLimit)).append("\n");
     sb.append("    sandboxCreateRateLimit: ").append(toIndentedString(sandboxCreateRateLimit)).append("\n");
@@ -791,10 +817,10 @@ public class Organization {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "previewWarningEnabled", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotDeactivationTimeoutMinutes", "sandboxLimitedNetworkEgress", "previewWarningEnabled", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "otelConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"));
   }
 
   /**

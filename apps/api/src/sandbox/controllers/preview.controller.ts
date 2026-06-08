@@ -4,9 +4,9 @@
  */
 
 import Redis from 'ioredis'
-import { Controller, Get, Param, Logger, NotFoundException, Req, UseGuards } from '@nestjs/common'
+import { Controller, Get, Param, Query, Logger, NotFoundException, Req, UseGuards } from '@nestjs/common'
 import { SandboxService } from '../services/sandbox.service'
-import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
+import { ApiResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { OrganizationUserService } from '../../organization/services/organization-user.service'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
@@ -76,6 +76,42 @@ export class PreviewController {
       }
       throw ex
     }
+  }
+
+  @Get(':sandboxId/preview-warning')
+  @ApiOperation({
+    summary: 'Check if the preview warning page is enabled for the sandbox',
+    operationId: 'isPreviewWarningEnabled',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox, or a signed preview URL token (requires the port query param)',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'port',
+    description: 'Port the signed preview URL token was issued for. Required when sandboxId is a signed token.',
+    type: 'number',
+    required: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Whether the preview warning page is enabled for the sandbox',
+    type: Boolean,
+  })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(ProxyAuthContextGuard)
+  async isPreviewWarningEnabled(@Param('sandboxId') sandboxId: string, @Query('port') port?: number): Promise<boolean> {
+    const cacheKey = `preview:warning:${sandboxId}`
+    const cached = await this.redis.get(cacheKey)
+    if (cached !== null) {
+      return cached === '1'
+    }
+
+    const enabled = await this.sandboxService.isPreviewWarningEnabled(sandboxId, port)
+    //  cache the result for 60 seconds to avoid unnecessary requests to the database
+    await this.redis.setex(cacheKey, 60, enabled ? '1' : '0')
+    return enabled
   }
 
   @Get(':sandboxId/validate/:authToken')

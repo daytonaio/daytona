@@ -24,6 +24,13 @@ describe('[AUTH] PreviewController', () => {
     expectArrayMatch(getAuthContextGuards(PreviewController, methodName), [ProxyAuthContextGuard])
   })
 
+  it('isPreviewWarningEnabled', () => {
+    const methodName = trackMethod('isPreviewWarningEnabled')
+    expect(isPublicEndpoint(PreviewController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(PreviewController, methodName), [AuthStrategyType.API_KEY])
+    expectArrayMatch(getAuthContextGuards(PreviewController, methodName), [ProxyAuthContextGuard])
+  })
+
   it('isValidAuthToken', () => {
     const methodName = trackMethod('isValidAuthToken')
     expect(isPublicEndpoint(PreviewController, methodName)).toBe(false)

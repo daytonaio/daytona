@@ -51,6 +51,19 @@ type PreviewAPI interface {
 	HasSandboxAccessExecute(r PreviewAPIHasSandboxAccessRequest) (bool, *http.Response, error)
 
 	/*
+	IsPreviewWarningEnabled Check if the preview warning page is enabled for the sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param)
+	@return PreviewAPIIsPreviewWarningEnabledRequest
+	*/
+	IsPreviewWarningEnabled(ctx context.Context, sandboxId string) PreviewAPIIsPreviewWarningEnabledRequest
+
+	// IsPreviewWarningEnabledExecute executes the request
+	//  @return bool
+	IsPreviewWarningEnabledExecute(r PreviewAPIIsPreviewWarningEnabledRequest) (bool, *http.Response, error)
+
+	/*
 	IsSandboxPublic Check if sandbox is public
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -233,6 +246,117 @@ func (a *PreviewAPIService) HasSandboxAccessExecute(r PreviewAPIHasSandboxAccess
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type PreviewAPIIsPreviewWarningEnabledRequest struct {
+	ctx context.Context
+	ApiService PreviewAPI
+	sandboxId string
+	port *float32
+}
+
+// Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
+func (r PreviewAPIIsPreviewWarningEnabledRequest) Port(port float32) PreviewAPIIsPreviewWarningEnabledRequest {
+	r.port = &port
+	return r
+}
+
+func (r PreviewAPIIsPreviewWarningEnabledRequest) Execute() (bool, *http.Response, error) {
+	return r.ApiService.IsPreviewWarningEnabledExecute(r)
+}
+
+/*
+IsPreviewWarningEnabled Check if the preview warning page is enabled for the sandbox
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param)
+ @return PreviewAPIIsPreviewWarningEnabledRequest
+*/
+func (a *PreviewAPIService) IsPreviewWarningEnabled(ctx context.Context, sandboxId string) PreviewAPIIsPreviewWarningEnabledRequest {
+	return PreviewAPIIsPreviewWarningEnabledRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxId: sandboxId,
+	}
+}
+
+// Execute executes the request
+//  @return bool
+func (a *PreviewAPIService) IsPreviewWarningEnabledExecute(r PreviewAPIIsPreviewWarningEnabledRequest) (bool, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  bool
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsPreviewWarningEnabled")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/preview/{sandboxId}/preview-warning"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.port != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "port", r.port, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

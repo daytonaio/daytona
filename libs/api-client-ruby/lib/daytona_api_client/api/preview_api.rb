@@ -147,6 +147,70 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Check if the preview warning page is enabled for the sandbox
+    # @param sandbox_id [String] ID of the sandbox, or a signed preview URL token (requires the port query param)
+    # @param [Hash] opts the optional parameters
+    # @option opts [Float] :port Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
+    # @return [Boolean]
+    def is_preview_warning_enabled(sandbox_id, opts = {})
+      data, _status_code, _headers = is_preview_warning_enabled_with_http_info(sandbox_id, opts)
+      data
+    end
+
+    # Check if the preview warning page is enabled for the sandbox
+    # @param sandbox_id [String] ID of the sandbox, or a signed preview URL token (requires the port query param)
+    # @param [Hash] opts the optional parameters
+    # @option opts [Float] :port Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
+    # @return [Array<(Boolean, Integer, Hash)>] Boolean data, response status code and response headers
+    def is_preview_warning_enabled_with_http_info(sandbox_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: PreviewApi.is_preview_warning_enabled ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling PreviewApi.is_preview_warning_enabled"
+      end
+      # resource path
+      local_var_path = '/preview/{sandboxId}/preview-warning'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'port'] = opts[:'port'] if !opts[:'port'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Boolean'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"PreviewApi.is_preview_warning_enabled",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: PreviewApi#is_preview_warning_enabled\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Check if sandbox is public
     # @param sandbox_id [String] ID of the sandbox
     # @param [Hash] opts the optional parameters

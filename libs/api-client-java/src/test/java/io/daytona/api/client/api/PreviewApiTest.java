@@ -57,6 +57,19 @@ public class PreviewApiTest {
     }
 
     /**
+     * Check if the preview warning page is enabled for the sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void isPreviewWarningEnabledTest() throws ApiException {
+        String sandboxId = null;
+        BigDecimal port = null;
+        Boolean response = api.isPreviewWarningEnabled(sandboxId, port);
+        // TODO: test validations
+    }
+
+    /**
      * Check if sandbox is public
      *
      * @throws ApiException if the Api call fails

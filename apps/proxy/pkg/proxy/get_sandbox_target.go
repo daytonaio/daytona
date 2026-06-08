@@ -200,6 +200,58 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 	return &isPublic, nil
 }
 
+// getSandboxPreviewWarningEnabled reports whether the preview URL warning page
+// should be shown for the sandbox's organization. The identifier may be a sandbox
+// ID or a signed preview URL token; for a token the port it was issued for must be
+// supplied so the API can resolve it. It fails open: on any error (including an
+// unresolved token) it returns true so the warning is shown, preserving the
+// default behavior.
+func (p *Proxy) getSandboxPreviewWarningEnabled(ctx context.Context, sandboxIdOrToken string, port string) (bool, error) {
+	enabledCache, err := p.sandboxPreviewWarningCache.Get(ctx, sandboxIdOrToken)
+	if err == nil {
+		return *enabledCache, nil
+	}
+
+	enabled := true
+	err = utils.RetryWithExponentialBackoff(ctx, "getSandboxPreviewWarningEnabled", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		req := p.apiclient.PreviewAPI.IsPreviewWarningEnabled(context.Background(), sandboxIdOrToken)
+		if portFloat, parseErr := strconv.ParseFloat(port, 32); parseErr == nil {
+			req = req.Port(float32(portFloat))
+		}
+		result, res, err := req.Execute()
+		if err == nil {
+			enabled = result
+			return nil
+		}
+		openapiErr := common_errors.ConvertOpenAPIError(err)
+
+		if openapiErr != nil {
+			// On a 4xx (e.g. the sandbox can't be resolved from a signed token),
+			// fail open and show the warning.
+			if res != nil && res.StatusCode >= 400 && res.StatusCode < 500 &&
+				res.StatusCode != http.StatusRequestTimeout && res.StatusCode != http.StatusTooManyRequests {
+				enabled = true
+				return nil
+			}
+			if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+				return &utils.NonRetryableError{Err: openapiErr}
+			}
+			return openapiErr
+		}
+		enabled = true
+		return nil
+	})
+	if err != nil {
+		return true, err
+	}
+
+	if cacheErr := p.sandboxPreviewWarningCache.Set(ctx, sandboxIdOrToken, enabled, 1*time.Minute); cacheErr != nil {
+		log.Errorf("Failed to set sandbox preview warning in cache: %v", cacheErr)
+	}
+
+	return enabled, nil
+}
+
 func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, authKey string) (*bool, error) {
 	apiValidation := func() (bool, error) {
 		_, resp, err := p.apiclient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()

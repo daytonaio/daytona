@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -81,7 +82,7 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 		}
 
 		// Skip warning for the acceptance endpoint itself or auth callbacks
-		targetPort, _, _, err := p.parseHost(ctx.Request.Host)
+		targetPort, sandboxIdOrSignedToken, _, err := p.parseHost(ctx.Request.Host)
 		if err != nil {
 			switch ctx.Request.Method {
 			case "GET":
@@ -96,6 +97,18 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 		if ctx.Request.URL.Path == ACCEPT_PREVIEW_PAGE_WARNING_PATH || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT || targetPort == RECORDING_DASHBOARD_PORT {
 			ctx.Next()
 			return
+		}
+
+		// Skip the warning if the sandbox's organization has disabled it.
+		// On any lookup error we fail open and still show the warning.
+		if sandboxIdOrSignedToken != "" {
+			enabled, err := p.getSandboxPreviewWarningEnabled(ctx.Request.Context(), sandboxIdOrSignedToken, targetPort)
+			if err != nil {
+				log.Errorf("Failed to get sandbox preview warning status: %v", err)
+			} else if !enabled {
+				ctx.Next()
+				return
+			}
 		}
 
 		// Serve the warning page
