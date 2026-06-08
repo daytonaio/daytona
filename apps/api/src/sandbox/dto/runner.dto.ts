@@ -8,7 +8,7 @@ import { IsEnum, IsOptional } from 'class-validator'
 import { Runner } from '../entities/runner.entity'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
-import { RunnerClass } from '../enums/runner-class.enum'
+import { RunnerClass } from '../enums/runner-class.deprecated.enum'
 
 @ApiSchema({ name: 'Runner' })
 export class RunnerDto {
@@ -207,10 +207,12 @@ export class RunnerDto {
   apiVersion: string
 
   @ApiProperty({
-    description: 'The class of the runner',
+    description:
+      'The class of the runner. Deprecated and always returns "container" for backward compatibility - use sandboxClass instead.',
     enum: RunnerClass,
     enumName: 'RunnerClass',
     example: RunnerClass.CONTAINER,
+    deprecated: true,
   })
   @IsEnum(RunnerClass)
   runnerClass: RunnerClass
@@ -235,7 +237,7 @@ export class RunnerDto {
       gpu: runner.gpu,
       gpuType: runner.gpuType,
       sandboxClass: runner.sandboxClass,
-      runnerClass: runner.runnerClass,
+      runnerClass: RunnerClass.CONTAINER,
       currentCpuUsagePercentage: runner.currentCpuUsagePercentage,
       currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,
       currentDiskUsagePercentage: runner.currentDiskUsagePercentage,

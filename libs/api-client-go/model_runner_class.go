@@ -15,20 +15,18 @@ import (
 	"encoding/json"
 )
 
-// RunnerClass The class of the runner
+// RunnerClass The class of the runner. Deprecated and always returns \"container\" for backward compatibility - use sandboxClass instead.
 type RunnerClass string
 
 // List of RunnerClass
 const (
 	RUNNERCLASS_CONTAINER RunnerClass = "container"
-	RUNNERCLASS_VM RunnerClass = "vm"
 	RUNNERCLASS_UNKNOWN_DEFAULT_OPEN_API RunnerClass = "11184809"
 )
 
 // All allowed values of RunnerClass enum
 var AllowedRunnerClassEnumValues = []RunnerClass{
 	"container",
-	"vm",
 	"11184809",
 }
 

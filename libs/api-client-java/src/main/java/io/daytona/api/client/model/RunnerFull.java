@@ -205,6 +205,7 @@ public class RunnerFull {
   private String apiVersion;
 
   public static final String SERIALIZED_NAME_RUNNER_CLASS = "runnerClass";
+  @Deprecated
   @SerializedName(SERIALIZED_NAME_RUNNER_CLASS)
   @javax.annotation.Nonnull
   private RunnerClass runnerClass;
@@ -795,20 +796,24 @@ public class RunnerFull {
   }
 
 
+  @Deprecated
   public RunnerFull runnerClass(@javax.annotation.Nonnull RunnerClass runnerClass) {
     this.runnerClass = runnerClass;
     return this;
   }
 
   /**
-   * The class of the runner
+   * The class of the runner. Deprecated and always returns \&quot;container\&quot; for backward compatibility - use sandboxClass instead.
    * @return runnerClass
+   * @deprecated
    */
+  @Deprecated
   @javax.annotation.Nonnull
   public RunnerClass getRunnerClass() {
     return runnerClass;
   }
 
+  @Deprecated
   public void setRunnerClass(@javax.annotation.Nonnull RunnerClass runnerClass) {
     this.runnerClass = runnerClass;
   }

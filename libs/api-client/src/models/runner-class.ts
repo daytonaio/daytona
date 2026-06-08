@@ -15,12 +15,11 @@
 
 
 /**
- * The class of the runner
+ * The class of the runner. Deprecated and always returns \"container\" for backward compatibility - use sandboxClass instead.
  */
 
 export const RunnerClass = {
     CONTAINER: 'container',
-    VM: 'vm',
     UNKNOWN_DEFAULT_OPEN_API: '11184809',
 } as const;
 

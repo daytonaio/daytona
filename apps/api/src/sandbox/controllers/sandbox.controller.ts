@@ -710,7 +710,6 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/snapshot')
   @HttpCode(200)
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
   @ApiOperation({
     summary: 'Create a snapshot from a sandbox',
     operationId: 'createSandboxSnapshot',
@@ -746,7 +745,6 @@ export class SandboxController {
   @HttpCode(200)
   @SkipThrottle({ authenticated: true })
   @ThrottlerScope('sandbox-create')
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
   @ApiOperation({
     summary: 'Fork a sandbox',
     operationId: 'forkSandbox',
@@ -779,7 +777,6 @@ export class SandboxController {
   }
 
   @Get(':sandboxIdOrName/forks')
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
   @ApiOperation({
     summary: 'Get sandbox fork children',
     operationId: 'getSandboxForks',
@@ -802,7 +799,6 @@ export class SandboxController {
   }
 
   @Get(':sandboxIdOrName/parent')
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
   @ApiOperation({
     summary: 'Get sandbox fork parent',
     operationId: 'getSandboxParent',
@@ -822,7 +818,6 @@ export class SandboxController {
   }
 
   @Get(':sandboxIdOrName/ancestors')
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_LINUX_VM, defaultValue: false }] })
   @ApiOperation({
     summary: 'Get sandbox fork ancestor chain',
     operationId: 'getSandboxAncestors',

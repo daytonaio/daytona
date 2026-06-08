@@ -21,14 +21,13 @@ from typing_extensions import Self
 
 class RunnerClass(str, Enum):
     """
-    The class of the runner
+    The class of the runner. Deprecated and always returns \"container\" for backward compatibility - use sandboxClass instead.
     """
 
     """
     allowed enum values
     """
     CONTAINER = 'container'
-    VM = 'vm'
     UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod

@@ -25,7 +25,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
-import { RunnerClass } from '../enums/runner-class.enum'
 import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { StateChangeInProgressError } from '../../exceptions/state-change-in-progress.exception'
@@ -984,13 +983,6 @@ export class SandboxService {
           }),
         })
 
-        if (runner.runnerClass !== RunnerClass.CONTAINER) {
-          throw new HttpException(
-            'Declarative build is not supported for the selected runner class',
-            HttpStatus.UNPROCESSABLE_ENTITY,
-          )
-        }
-
         sandbox.runnerId = runner.id
         sandbox.gpuType = sandbox.gpu > 0 ? runner.gpuType : null
       } catch (error) {
@@ -1088,6 +1080,10 @@ export class SandboxService {
 
     const sourceSandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
+    if (![SandboxClass.LINUX_VM, SandboxClass.WINDOWS].includes(sourceSandbox.sandboxClass)) {
+      throw new HttpException('Forking is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
+    }
+
     const region = await this.regionService.findOne(sourceSandbox.region)
     if (!region) {
       throw new NotFoundException(`Region with ID ${sourceSandbox.region} not found`)
@@ -1106,15 +1102,11 @@ export class SandboxService {
         throw new NotFoundException(`Sandbox with ID ${sourceSandbox.id} does not have a runner`)
       }
 
-      const runner = await this.runnerService.findOneOrFail(sourceSandbox.runnerId)
-
-      if (runner.runnerClass !== RunnerClass.VM) {
-        throw new HttpException('Forking is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
-      }
-
       if (sourceSandbox.gpu > 0) {
         throw new HttpException('Forking is not supported for GPU sandboxes', HttpStatus.UNPROCESSABLE_ENTITY)
       }
+
+      const runner = await this.runnerService.findOneOrFail(sourceSandbox.runnerId)
 
       // Copy all properties from source sandbox to forked sandbox
       const forkedSandbox = new Sandbox({ region: sourceSandbox.region, name: dto.name })
@@ -1301,6 +1293,10 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
+    if (![SandboxClass.LINUX_VM, SandboxClass.WINDOWS].includes(sandbox.sandboxClass)) {
+      throw new HttpException('Snapshotting is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
+    }
+
     try {
       if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
         throw new BadRequestError('Sandbox must be in started or stopped state to create a snapshot')
@@ -1316,10 +1312,6 @@ export class SandboxService {
 
       const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
-      if (![RunnerClass.VM, RunnerClass.CONTAINER].includes(runner.runnerClass)) {
-        throw new HttpException('Snapshotting is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
-      }
-
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const region = await this.regionService.findOne(sandbox.region)
@@ -1328,12 +1320,6 @@ export class SandboxService {
       }
 
       const registry = (await this.dockerRegistryService.getAvailableInternalRegistry(sandbox.region)) ?? undefined
-
-      if (runner.runnerClass === RunnerClass.CONTAINER && !registry) {
-        throw new BadRequestError(
-          'No internal registry is available for this sandbox region; cannot snapshot a Docker sandbox',
-        )
-      }
 
       const { pendingSnapshotCountIncremented } = await this.snapshotService.validateOrganizationQuotas(
         organization,

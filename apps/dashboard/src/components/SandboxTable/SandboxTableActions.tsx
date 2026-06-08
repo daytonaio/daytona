@@ -3,11 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { FeatureFlags } from '@/enums/FeatureFlags'
-import { useRegions } from '@/hooks/useRegions'
-import { SandboxState } from '@daytona/api-client'
+import { SandboxClass, SandboxState } from '@daytona/api-client'
 import { Loader2, MoreHorizontal, Play, Square, Terminal, Wrench } from 'lucide-react'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useMemo } from 'react'
 import TooltipButton from '../TooltipButton'
 import { Button } from '../ui/button'
@@ -25,7 +22,6 @@ export function SandboxTableActions({
   writePermitted,
   deletePermitted,
   isLoading,
-  runnerClass,
   onStart,
   onStop,
   onDelete,
@@ -40,9 +36,7 @@ export function SandboxTableActions({
   onViewForks,
   onOpenTerminal,
 }: SandboxTableActionsProps) {
-  const linuxVmEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_LINUX_VM)
-  const { getRegionName } = useRegions()
-  const isExperimentalRegion = (getRegionName(sandbox.target) ?? '').toLowerCase() === 'experimental'
+  const isVmSandbox = sandbox.sandboxClass === SandboxClass.LINUX_VM || sandbox.sandboxClass === SandboxClass.WINDOWS
   const primaryActionTooltip =
     sandbox.state === SandboxState.STARTING
       ? 'Starting sandbox'
@@ -109,11 +103,7 @@ export function SandboxTableActions({
         })
       }
 
-      if (
-        linuxVmEnabled &&
-        isExperimentalRegion &&
-        (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)
-      ) {
+      if (isVmSandbox && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
         items.push({
           key: 'create-snapshot',
           label: 'Create Snapshot',
@@ -129,7 +119,7 @@ export function SandboxTableActions({
         })
       }
 
-      if (linuxVmEnabled && isExperimentalRegion) {
+      if (isVmSandbox) {
         items.push({
           key: 'view-forks',
           label: 'View Fork Tree',
@@ -174,7 +164,6 @@ export function SandboxTableActions({
     sandbox.state,
     sandbox.id,
     isLoading,
-    runnerClass,
     sandbox.recoverable,
     onStart,
     onStop,
@@ -188,9 +177,7 @@ export function SandboxTableActions({
     onScreenRecordings,
     onFork,
     onViewForks,
-    linuxVmEnabled,
-    isExperimentalRegion,
-    sandbox.target,
+    isVmSandbox,
   ])
 
   if (!writePermitted && !deletePermitted) {

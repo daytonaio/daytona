@@ -66,7 +66,6 @@ export interface SandboxTableActionsProps {
   writePermitted: boolean
   deletePermitted: boolean
   isLoading: boolean
-  runnerClass?: string
   onStart: (id: string) => void
   onStop: (id: string) => void
   onDelete: (id: string) => void

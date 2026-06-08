@@ -11937,10 +11937,10 @@ components:
       - unresponsive
       type: string
     RunnerClass:
-      description: The class of the runner
+      description: The class of the runner. Deprecated and always returns "container"
+        for backward compatibility - use sandboxClass instead.
       enum:
       - container
-      - vm
       type: string
     RunnerFull:
       example:
@@ -12106,7 +12106,9 @@ components:
         runnerClass:
           allOf:
           - $ref: "#/components/schemas/RunnerClass"
-          description: The class of the runner
+          deprecated: true
+          description: The class of the runner. Deprecated and always returns "container"
+            for backward compatibility - use sandboxClass instead.
           example: container
         appVersion:
           deprecated: true
@@ -12323,7 +12325,9 @@ components:
         runnerClass:
           allOf:
           - $ref: "#/components/schemas/RunnerClass"
-          description: The class of the runner
+          deprecated: true
+          description: The class of the runner. Deprecated and always returns "container"
+            for backward compatibility - use sandboxClass instead.
           example: container
         appVersion:
           deprecated: true

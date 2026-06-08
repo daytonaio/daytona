@@ -102,7 +102,7 @@ module DaytonaApiClient
     # The api version of the runner
     attr_accessor :api_version
 
-    # The class of the runner
+    # The class of the runner. Deprecated and always returns \"container\" for backward compatibility - use sandboxClass instead.
     attr_accessor :runner_class
 
     # The app version of the runner
