@@ -473,9 +473,11 @@ export class JobStateHandlerService {
       // perform stale-snapshot checks when the field is present.
       const jobSnapshot = job.getPayload<{ snapshot?: string }>()?.snapshot
 
-      // Ignore stale backup results if the job's snapshot doesn't match the current DB snapshot.
-      // Old v2 runners may not include snapshot in the payload — skip this check for them.
-      if (jobSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
+      // Ignore stale backup results if the sandbox is tracking a *different* snapshot
+      // (i.e. a newer backup superseded this one). A null/empty DB snapshot means there's
+      // no newer backup to protect, so we must NOT drop the result - doing so would strand
+      // the sandbox in InProgress. Old v2 runners that omit the snapshot also skip this check.
+      if (jobSnapshot && sandbox.backupSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
         this.logger.warn(
           `Ignoring stale backup ${job.status} for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
         )
@@ -488,7 +490,10 @@ export class JobStateHandlerService {
         this.logger.debug(
           `CREATE_BACKUP job ${job.id} completed successfully, marking sandbox ${sandboxId} as BACKUP_COMPLETED`,
         )
-        Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.COMPLETED))
+        // If the DB snapshot was cleared while the job ran, recover the reference from the job
+        // so the completed backup remains usable for restore.
+        const completionSnapshot = sandbox.backupSnapshot ? undefined : (jobSnapshot ?? undefined)
+        Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.COMPLETED, completionSnapshot))
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_BACKUP job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
