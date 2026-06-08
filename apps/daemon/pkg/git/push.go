@@ -83,10 +83,6 @@ func resolveSymbolicHEAD(gitBin, workDir string) (string, error) {
 }
 
 func buildPushArgs(workDir, branchRef string) []string {
-	// Note: no -c http.sslVerify=false here. go-git's default PushOptions
-	// does NOT skip TLS verification (unlike CloneOptions, where we set
-	// InsecureSkipTLS:true). Skipping verify on push would be a behavior
-	// change and a MITM risk for the basic-auth token.
 	return []string{
 		"-C", workDir,
 		"-c", "credential.helper=",

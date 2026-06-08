@@ -152,7 +152,7 @@ module DaytonaToolboxApiClient
     end
 
     # Clone a Git repository
-    # Clone a Git repository to the specified path
+    # Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
     # @param request [GitCloneRequest] Clone repository request
     # @param [Hash] opts the optional parameters
     # @return [nil]
@@ -162,7 +162,7 @@ module DaytonaToolboxApiClient
     end
 
     # Clone a Git repository
-    # Clone a Git repository to the specified path
+    # Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls&#x3D;true to skip verification for self-signed or private-CA Git servers.
     # @param request [GitCloneRequest] Clone repository request
     # @param [Hash] opts the optional parameters
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers

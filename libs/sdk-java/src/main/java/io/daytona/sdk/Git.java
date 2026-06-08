@@ -38,7 +38,7 @@ public class Git {
      * @throws io.daytona.sdk.exception.DaytonaException if cloning fails
      */
     public void clone(String url, String path) {
-        clone(url, path, null, null, null, null);
+        clone(url, path, null, null, null, null, null);
     }
 
     /**
@@ -53,11 +53,31 @@ public class Git {
      * @throws io.daytona.sdk.exception.DaytonaException if cloning fails
      */
     public void clone(String url, String path, String branch, String commitId, String username, String password) {
+        clone(url, path, branch, commitId, username, password, null);
+    }
+
+    /**
+     * Clones a repository with optional branch, commit, credentials, and TLS verification override.
+     *
+     * @param url repository URL
+     * @param path destination path in the Sandbox
+     * @param branch branch to clone; {@code null} uses default branch
+     * @param commitId commit SHA to checkout after clone; {@code null} skips detached checkout
+     * @param username username for authenticated remotes
+     * @param password password or token for authenticated remotes
+     * @param insecureSkipTls when {@code true}, skip TLS certificate verification (insecure).
+     *   Use only for trusted internal Git servers with self-signed or private-CA certs;
+     *   credentials, if supplied, are transmitted over an unverified TLS connection.
+     *   {@code null} or {@code false} keeps strict TLS verification.
+     * @throws io.daytona.sdk.exception.DaytonaException if cloning fails
+     */
+    public void clone(String url, String path, String branch, String commitId, String username, String password, Boolean insecureSkipTls) {
         GitCloneRequest request = new GitCloneRequest().url(url).path(path);
         if (branch != null) request.branch(branch);
         if (commitId != null) request.commitId(commitId);
         if (username != null) request.username(username);
         if (password != null) request.password(password);
+        if (insecureSkipTls != null) request.insecureSkipTls(insecureSkipTls);
         ExceptionMapper.runToolbox(() -> gitApi.cloneRepository(request));
     }
 

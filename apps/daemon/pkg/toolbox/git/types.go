@@ -16,6 +16,11 @@ type GitCloneRequest struct {
 	Password *string `json:"password,omitempty" validate:"optional"`
 	Branch   *string `json:"branch,omitempty" validate:"optional"`
 	CommitID *string `json:"commit_id,omitempty" validate:"optional"`
+	// Skip TLS certificate verification for this clone. Defaults to false (verify).
+	// Set to true ONLY for trusted internal Git servers with self-signed or
+	// private-CA certs; credentials, if supplied, will be transmitted over an
+	// unverified TLS connection and are exposed to any MITM on the route.
+	InsecureSkipTLS *bool `json:"insecure_skip_tls,omitempty" validate:"optional"`
 } //	@name	GitCloneRequest
 
 type GitCommitRequest struct {

@@ -17,7 +17,7 @@ import (
 // CloneRepository godoc
 //
 //	@Summary		Clone a Git repository
-//	@Description	Clone a Git repository to the specified path
+//	@Description	Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
 //	@Tags			git
 //	@Accept			json
 //	@Produce		json
@@ -62,7 +62,9 @@ func CloneRepository(c *gin.Context) {
 		}
 	}
 
-	err := gitService.CloneRepository(&repo, auth)
+	insecureSkipTLS := req.InsecureSkipTLS != nil && *req.InsecureSkipTLS
+
+	err := gitService.CloneRepository(&repo, auth, insecureSkipTLS)
 	if err != nil {
 		abortWithGitError(c, err)
 		return

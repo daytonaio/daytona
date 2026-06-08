@@ -82,6 +82,9 @@ module Daytona
     #   the repository will be left in a detached HEAD state at this commit.
     # @param username [String, nil] Git username for authentication.
     # @param password [String, nil] Git password or token for authentication.
+    # @param insecure_skip_tls [Boolean, nil] Skip TLS certificate verification (insecure).
+    #   Use only for trusted internal Git servers with self-signed or private-CA certs;
+    #   credentials, if supplied, are transmitted over an unverified TLS connection.
     # @return [void]
     # @raise [Daytona::Sdk::Error] if cloning repository fails
     #
@@ -107,7 +110,7 @@ module Daytona
     #     path: "workspace/repo-old",
     #     commit_id: "abc123"
     #   )
-    def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil) # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
+    def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil, insecure_skip_tls: nil) # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
       toolbox_api.clone_repository(
         DaytonaToolboxApiClient::GitCloneRequest.new(
           url: url,
@@ -115,7 +118,8 @@ module Daytona
           path: path,
           username: username,
           password: password,
-          commit_id: commit_id
+          commit_id: commit_id,
+          insecure_skip_tls: insecure_skip_tls
         )
       )
     rescue DaytonaToolboxApiClient::ApiError => e

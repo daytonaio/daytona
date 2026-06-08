@@ -23,6 +23,8 @@ var _ MappedNullable = &GitCloneRequest{}
 type GitCloneRequest struct {
 	Branch *string `json:"branch,omitempty"`
 	CommitId *string `json:"commit_id,omitempty"`
+	// Skip TLS certificate verification for this clone. Defaults to false (verify). Set to true ONLY for trusted internal Git servers with self-signed or private-CA certs; credentials, if supplied, will be transmitted over an unverified TLS connection and are exposed to any MITM on the route.
+	InsecureSkipTls *bool `json:"insecure_skip_tls,omitempty"`
 	Password *string `json:"password,omitempty"`
 	Path string `json:"path"`
 	Url string `json:"url"`
@@ -112,6 +114,38 @@ func (o *GitCloneRequest) HasCommitId() bool {
 // SetCommitId gets a reference to the given string and assigns it to the CommitId field.
 func (o *GitCloneRequest) SetCommitId(v string) {
 	o.CommitId = &v
+}
+
+// GetInsecureSkipTls returns the InsecureSkipTls field value if set, zero value otherwise.
+func (o *GitCloneRequest) GetInsecureSkipTls() bool {
+	if o == nil || IsNil(o.InsecureSkipTls) {
+		var ret bool
+		return ret
+	}
+	return *o.InsecureSkipTls
+}
+
+// GetInsecureSkipTlsOk returns a tuple with the InsecureSkipTls field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCloneRequest) GetInsecureSkipTlsOk() (*bool, bool) {
+	if o == nil || IsNil(o.InsecureSkipTls) {
+		return nil, false
+	}
+	return o.InsecureSkipTls, true
+}
+
+// HasInsecureSkipTls returns a boolean if a field has been set.
+func (o *GitCloneRequest) HasInsecureSkipTls() bool {
+	if o != nil && !IsNil(o.InsecureSkipTls) {
+		return true
+	}
+
+	return false
+}
+
+// SetInsecureSkipTls gets a reference to the given bool and assigns it to the InsecureSkipTls field.
+func (o *GitCloneRequest) SetInsecureSkipTls(v bool) {
+	o.InsecureSkipTls = &v
 }
 
 // GetPassword returns the Password field value if set, zero value otherwise.
@@ -241,6 +275,9 @@ func (o GitCloneRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.CommitId) {
 		toSerialize["commit_id"] = o.CommitId
+	}
+	if !IsNil(o.InsecureSkipTls) {
+		toSerialize["insecure_skip_tls"] = o.InsecureSkipTls
 	}
 	if !IsNil(o.Password) {
 		toSerialize["password"] = o.Password

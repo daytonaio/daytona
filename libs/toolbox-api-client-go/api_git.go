@@ -50,7 +50,7 @@ type GitAPI interface {
 	/*
 	CloneRepository Clone a Git repository
 
-	Clone a Git repository to the specified path
+	Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return GitAPICloneRepositoryRequest
@@ -391,7 +391,7 @@ func (r GitAPICloneRepositoryRequest) Execute() (*http.Response, error) {
 /*
 CloneRepository Clone a Git repository
 
-Clone a Git repository to the specified path
+Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return GitAPICloneRepositoryRequest

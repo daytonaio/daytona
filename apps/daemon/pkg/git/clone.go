@@ -19,15 +19,15 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
+func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error {
 	if isGitCLIModeEnabled() || os.Getenv(experimentalUseGitCloneCLIEnv) == "true" {
-		return s.CloneRepositoryCLI(repo, auth)
+		return s.CloneRepositoryCLI(repo, auth, insecureSkipTLS)
 	}
 
 	cloneOptions := &git.CloneOptions{
 		URL:             repo.Url,
 		SingleBranch:    true,
-		InsecureSkipTLS: true,
+		InsecureSkipTLS: insecureSkipTLS,
 		Auth:            auth,
 	}
 
@@ -85,8 +85,8 @@ esac
 
 // CloneRepositoryCLI clones via the `git` CLI. Bounded memory (mmap pack handling).
 // Creds flow through GIT_ASKPASS + env — never via URL or argv.
-func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth) error {
-	if err := s.gitCLIRun("git clone", buildCloneArgs(repo, s.WorkDir), auth, 64*1024); err != nil {
+func (s *Service) CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error {
+	if err := s.gitCLIRun("git clone", buildCloneArgs(repo, s.WorkDir, insecureSkipTLS), auth, 64*1024); err != nil {
 		return err
 	}
 
@@ -123,7 +123,11 @@ func (s *Service) attachCmdOutput(cmd *exec.Cmd, tailSize int) *tailBuffer {
 }
 
 // Credentials must NEVER be embedded in the URL — they flow via GIT_ASKPASS (see buildCloneEnv).
-func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
+// When skipVerify is true, the caller has explicitly opted into insecure TLS via the
+// request's insecure_skip_tls flag; we forward that to git via -c http.sslVerify=false.
+// When skipVerify is false (default), we do NOT pin sslVerify=true so a sandbox-shell
+// user with their own ~/.gitconfig override is still honored on the CLI escape path.
+func buildCloneArgs(repo *gitprovider.GitRepository, workDir string, skipVerify bool) []string {
 	cloneURL := repo.Url
 	if !strings.Contains(cloneURL, "://") {
 		cloneURL = "https://" + cloneURL
@@ -131,12 +135,16 @@ func buildCloneArgs(repo *gitprovider.GitRepository, workDir string) []string {
 
 	args := []string{
 		"-c", "credential.helper=", // prevent any inherited helper from persisting the token
-		"-c", "http.sslVerify=false", // parity with go-git InsecureSkipTLS
 		"-c", "core.hooksPath=/dev/null", // disable post-checkout (and any inherited core.hooksPath) — defense-in-depth so hooks can't read GIT_USERNAME / GIT_PASSWORD
+	}
+	if skipVerify {
+		args = append(args, "-c", "http.sslVerify=false")
+	}
+	args = append(args,
 		"clone",
 		"--single-branch",
 		"--progress",
-	}
+	)
 	if repo.Branch != "" {
 		args = append(args, "--branch", repo.Branch)
 	}

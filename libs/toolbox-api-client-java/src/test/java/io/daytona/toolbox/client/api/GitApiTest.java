@@ -72,7 +72,7 @@ public class GitApiTest {
     /**
      * Clone a Git repository
      *
-     * Clone a Git repository to the specified path
+     * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls&#x3D;true to skip verification for self-signed or private-CA Git servers.
      *
      * @throws ApiException if the Api call fails
      */

@@ -599,7 +599,7 @@ class GitApi:
     ) -> None:
         """Clone a Git repository
 
-        Clone a Git repository to the specified path
+        Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
 
         :param request: Clone repository request (required)
         :type request: GitCloneRequest
@@ -666,7 +666,7 @@ class GitApi:
     ) -> ApiResponse[None]:
         """Clone a Git repository
 
-        Clone a Git repository to the specified path
+        Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
 
         :param request: Clone repository request (required)
         :type request: GitCloneRequest
@@ -733,7 +733,7 @@ class GitApi:
     ) -> RESTResponseType:
         """Clone a Git repository
 
-        Clone a Git repository to the specified path
+        Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
 
         :param request: Clone repository request (required)
         :type request: GitCloneRequest

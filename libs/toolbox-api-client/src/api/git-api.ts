@@ -117,7 +117,7 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             };
         },
         /**
-         * Clone a Git repository to the specified path
+         * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
          * @summary Clone a Git repository
          * @param {GitCloneRequest} request Clone repository request
          * @param {*} [options] Override http request option.
@@ -468,7 +468,7 @@ export const GitApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Clone a Git repository to the specified path
+         * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
          * @summary Clone a Git repository
          * @param {GitCloneRequest} request Clone repository request
          * @param {*} [options] Override http request option.
@@ -614,7 +614,7 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
             return localVarFp.checkoutBranch(request, options).then((request) => request(axios, basePath));
         },
         /**
-         * Clone a Git repository to the specified path
+         * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
          * @summary Clone a Git repository
          * @param {GitCloneRequest} request Clone repository request
          * @param {*} [options] Override http request option.
@@ -733,7 +733,7 @@ export class GitApi extends BaseAPI {
     }
 
     /**
-     * Clone a Git repository to the specified path
+     * Clone a Git repository to the specified path. Defaults to strict TLS verification; set insecure_skip_tls=true to skip verification for self-signed or private-CA Git servers.
      * @summary Clone a Git repository
      * @param {GitCloneRequest} request Clone repository request
      * @param {*} [options] Override http request option.

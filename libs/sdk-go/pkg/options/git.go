@@ -54,10 +54,11 @@ func Apply[T any](opts ...func(*T)) *T {
 // Fields are pointers to distinguish between unset values and zero values.
 // Use the corresponding With* functions to set these options.
 type GitClone struct {
-	Branch   *string // Branch to clone (defaults to repository's default branch)
-	CommitId *string // Specific commit SHA to checkout after cloning
-	Username *string // Username for HTTPS authentication
-	Password *string // Password or token for HTTPS authentication
+	Branch          *string // Branch to clone (defaults to repository's default branch)
+	CommitId        *string // Specific commit SHA to checkout after cloning
+	Username        *string // Username for HTTPS authentication
+	Password        *string // Password or token for HTTPS authentication
+	InsecureSkipTLS *bool   // Skip TLS certificate verification (insecure). Use only for trusted internal Git servers with self-signed or private-CA certs.
 }
 
 // WithBranch sets the branch to clone instead of the repository's default branch.
@@ -116,6 +117,23 @@ func WithUsername(username string) func(*GitClone) {
 func WithPassword(password string) func(*GitClone) {
 	return func(opts *GitClone) {
 		opts.Password = &password
+	}
+}
+
+// WithInsecureSkipTLS opts into skipping TLS certificate verification for the
+// clone. Use ONLY when cloning from a trusted internal Git server with a
+// self-signed or private-CA certificate. Credentials, if supplied, will be
+// transmitted over an unverified TLS connection and are exposed to any MITM
+// on the route.
+//
+// Example:
+//
+//	err := sandbox.Git.Clone(ctx, url, path,
+//	    options.WithInsecureSkipTLS(true),
+//	)
+func WithInsecureSkipTLS(insecureSkipTLS bool) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.InsecureSkipTLS = &insecureSkipTLS
 	}
 }
 

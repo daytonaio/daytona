@@ -118,6 +118,7 @@ class AsyncGit:
         commit_id: str | None = None,
         username: str | None = None,
         password: str | None = None,
+        insecure_skip_tls: bool | None = None,
     ) -> None:
         """Clones a Git repository into the specified path. It supports
         cloning specific branches or commits, and can authenticate with the remote
@@ -133,6 +134,9 @@ class AsyncGit:
                 the repository will be left in a detached HEAD state at this commit.
             username (str | None): Git username for authentication.
             password (str | None): Git password or token for authentication.
+            insecure_skip_tls (bool | None): Skip TLS certificate verification (insecure).
+                Use only for trusted internal Git servers with self-signed or private-CA certs;
+                credentials, if supplied, are transmitted over an unverified TLS connection.
 
         Example:
             ```python
@@ -167,6 +171,7 @@ class AsyncGit:
                 username=username,
                 password=password,
                 commit_id=commit_id,
+                insecure_skip_tls=insecure_skip_tls,
             ),
         )
 
