@@ -187,8 +187,22 @@ export class SandboxService {
     pendingDiskIncremented: boolean
     pendingGpuIncremented: boolean
   }> {
-    if (!regionQuota && region.enforceQuotas) {
-      regionQuota = await this.organizationService.getRegionQuota(organization.id, region.id, sandboxClass)
+    if (region.enforceQuotas) {
+      if (!regionQuota) {
+        regionQuota = await this.organizationService.getRegionQuota(organization.id, region.id, sandboxClass)
+      }
+
+      if (!regionQuota) {
+        if (region.regionType === RegionType.SHARED) {
+          // region is public, but the organization does not have a quota for it
+          throw new ForbiddenException(
+            `Region ${region.id} is not available to the organization for class ${sandboxClass}`,
+          )
+        } else {
+          // region is not public, respond as if the region was not found
+          throw new NotFoundException('Region not found')
+        }
+      }
     }
 
     // validate per-sandbox quotas
@@ -229,18 +243,6 @@ export class SandboxService {
         pendingMemoryIncremented: false,
         pendingDiskIncremented: false,
         pendingGpuIncremented: false,
-      }
-    }
-
-    if (!regionQuota) {
-      if (region.regionType === RegionType.SHARED) {
-        // region is public, but the organization does not have a quota for it
-        throw new ForbiddenException(
-          `Region ${region.id} is not available to the organization for class ${sandboxClass}`,
-        )
-      } else {
-        // region is not public, respond as if the region was not found
-        throw new NotFoundException('Region not found')
       }
     }
 
