@@ -22,6 +22,27 @@ const (
 	ACCEPT_PREVIEW_PAGE_WARNING_PATH = "/accept-daytona-preview-warning"
 )
 
+// isSafeRedirect permits only same-host absolute URLs (http/https) and
+// single-leading-slash relative paths, so the accept handler cannot be turned
+// into an open redirect. Validation runs on a backslash-normalized copy because
+// browsers fold "\" to "/" in the authority; the redirect still issues the
+// original value (any value that passes is an absolute same-host URL or a safe
+// relative path, and url.Parse fails closed on control characters).
+func isSafeRedirect(redirectURL, requestHost string) bool {
+	normalized := strings.ReplaceAll(redirectURL, "\\", "/")
+	u, err := url.Parse(normalized)
+	if err != nil {
+		return false
+	}
+	if u.Host != "" {
+		if u.Scheme != "" && u.Scheme != "http" && u.Scheme != "https" {
+			return false
+		}
+		return strings.EqualFold(u.Host, requestHost)
+	}
+	return strings.HasPrefix(normalized, "/") && !strings.HasPrefix(normalized, "//")
+}
+
 func handleAcceptProxyWarning(ctx *gin.Context, secure bool) {
 	// Set SameSite attribute based on security context
 	if secure {
@@ -43,9 +64,10 @@ func handleAcceptProxyWarning(ctx *gin.Context, secure bool) {
 		true,
 	)
 
-	// Redirect to the original URL or root
+	// Redirect to the original URL or root. Reject any target that is not
+	// same-host (or a safe relative path) to prevent an open redirect.
 	redirectURL := ctx.Query("redirect")
-	if redirectURL == "" {
+	if redirectURL == "" || !isSafeRedirect(redirectURL, ctx.Request.Host) {
 		redirectURL = "/"
 	}
 
