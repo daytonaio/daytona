@@ -10,6 +10,7 @@ import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationPr
 import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
 import { initPylon } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytona/api-client'
+import { ShieldAlert } from 'lucide-react'
 import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import { Suspense, useEffect, type ReactNode } from 'react'
 import { useAuth } from 'react-oidc-context'
@@ -28,6 +29,8 @@ import { CommandPaletteProvider } from './components/CommandPalette'
 import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
 import LoadingFallback from './components/LoadingFallback'
 import { LoadingFallbackContent } from './components/LoadingFallbackContent'
+import { PageContent, PageHeader, PageIntro, PageLayout } from './components/PageLayout'
+import { Badge } from './components/ui/badge'
 import { Button } from './components/ui/button'
 import {
   Dialog,
@@ -37,6 +40,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from './components/ui/dialog'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from './components/ui/empty'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import { FeatureFlags } from './enums/FeatureFlags'
 import { getRouteSubPath, RoutePath, trimLeadingSlash } from './enums/RoutePath'
@@ -168,11 +172,45 @@ function DashboardIndexRedirect() {
   return <Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />
 }
 
-function OwnerAccessOrganizationPageWrapper({ children }: { children: ReactNode }) {
+function getAccessLabel(access: string) {
+  return access.replace(/[:_-]+/g, ' ').toLowerCase()
+}
+
+function AccessRequiredPage({ pageTitle, requiredAccess }: { pageTitle: ReactNode; requiredAccess: string[] }) {
+  return (
+    <PageLayout>
+      <PageHeader />
+      <PageContent>
+        <PageIntro title={pageTitle} />
+        <Empty className="flex-none rounded-md border py-12" variant="warning">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ShieldAlert />
+            </EmptyMedia>
+            <EmptyTitle>You don&apos;t have access to this page</EmptyTitle>
+            <EmptyDescription>Ask your organization administrator to grant you the required access.</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <div className="text-xs font-medium text-muted-foreground">Required access</div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {requiredAccess.map((access) => (
+                <Badge key={access} className="capitalize" title={access}>
+                  {getAccessLabel(access)}
+                </Badge>
+              ))}
+            </div>
+          </EmptyContent>
+        </Empty>
+      </PageContent>
+    </PageLayout>
+  )
+}
+
+function OwnerAccessOrganizationPageWrapper({ children, pageTitle }: { children: ReactNode; pageTitle: ReactNode }) {
   const { authenticatedUserOrganizationMember } = useSelectedOrganization()
 
   if (authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
-    return <Navigate to={RoutePath.DASHBOARD} replace />
+    return <AccessRequiredPage pageTitle={pageTitle} requiredAccess={['owner role']} />
   }
 
   return children
@@ -180,15 +218,20 @@ function OwnerAccessOrganizationPageWrapper({ children }: { children: ReactNode 
 
 function RequiredPermissionsOrganizationPageWrapper({
   children,
+  pageTitle,
   requiredPermissions,
 }: {
   children: ReactNode
+  pageTitle: ReactNode
   requiredPermissions: OrganizationRolePermissionsEnum[]
 }) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
+  const missingPermissions = requiredPermissions.filter((permission) => {
+    return !authenticatedUserHasPermission(permission)
+  })
 
-  if (!requiredPermissions.every((permission) => authenticatedUserHasPermission(permission))) {
-    return <Navigate to={RoutePath.DASHBOARD} replace />
+  if (missingPermissions.length > 0) {
+    return <AccessRequiredPage pageTitle={pageTitle} requiredAccess={missingPermissions} />
   }
 
   return children
@@ -204,21 +247,23 @@ function RequiredFeatureFlagWrapper({ children, flagKey }: { children: ReactNode
   return children
 }
 
-function OwnerAccessOrganizationOutlet() {
+function OwnerAccessOrganizationOutlet({ pageTitle }: { pageTitle: ReactNode }) {
   return (
-    <OwnerAccessOrganizationPageWrapper>
+    <OwnerAccessOrganizationPageWrapper pageTitle={pageTitle}>
       <Outlet />
     </OwnerAccessOrganizationPageWrapper>
   )
 }
 
 function RequiredPermissionsOrganizationOutlet({
+  pageTitle,
   requiredPermissions,
 }: {
+  pageTitle: ReactNode
   requiredPermissions: OrganizationRolePermissionsEnum[]
 }) {
   return (
-    <RequiredPermissionsOrganizationPageWrapper requiredPermissions={requiredPermissions}>
+    <RequiredPermissionsOrganizationPageWrapper pageTitle={pageTitle} requiredPermissions={requiredPermissions}>
       <Outlet />
     </RequiredPermissionsOrganizationPageWrapper>
   )
@@ -242,7 +287,7 @@ function BillingEnabledOutlet() {
   return <Outlet />
 }
 
-function BillingOwnerAccessOutlet() {
+function BillingOwnerAccessOutlet({ pageTitle }: { pageTitle: ReactNode }) {
   const config = useConfig()
 
   if (!config.billingApiUrl) {
@@ -250,7 +295,7 @@ function BillingOwnerAccessOutlet() {
   }
 
   return (
-    <OwnerAccessOrganizationPageWrapper>
+    <OwnerAccessOrganizationPageWrapper pageTitle={pageTitle}>
       <Outlet />
     </OwnerAccessOrganizationPageWrapper>
   )
@@ -259,7 +304,10 @@ function BillingOwnerAccessOutlet() {
 function RunnersAccessOutlet() {
   return (
     <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
-      <RequiredPermissionsOrganizationPageWrapper requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}>
+      <RequiredPermissionsOrganizationPageWrapper
+        pageTitle="Runners"
+        requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
+      >
         <Outlet />
       </RequiredPermissionsOrganizationPageWrapper>
     </RequiredFeatureFlagWrapper>
@@ -298,6 +346,7 @@ const router = createBrowserRouter([
             path: getRouteSubPath(RoutePath.VOLUMES),
             element: (
               <RequiredPermissionsOrganizationOutlet
+                pageTitle="Volumes"
                 requiredPermissions={[OrganizationRolePermissionsEnum.READ_VOLUMES]}
               />
             ),
@@ -305,17 +354,17 @@ const router = createBrowserRouter([
           },
           {
             path: getRouteSubPath(RoutePath.LIMITS),
-            element: <OwnerAccessOrganizationOutlet />,
+            element: <OwnerAccessOrganizationOutlet pageTitle="Limits" />,
             children: [{ index: true, lazy: lazyRoutes.Limits }],
           },
           {
             path: getRouteSubPath(RoutePath.BILLING_SPENDING),
-            element: <BillingOwnerAccessOutlet />,
+            element: <BillingOwnerAccessOutlet pageTitle="Spending" />,
             children: [{ index: true, lazy: lazyRoutes.Spending }],
           },
           {
             path: getRouteSubPath(RoutePath.BILLING_WALLET),
-            element: <BillingOwnerAccessOutlet />,
+            element: <BillingOwnerAccessOutlet pageTitle="Wallet" />,
             children: [{ index: true, lazy: lazyRoutes.Wallet }],
           },
           {
@@ -328,6 +377,7 @@ const router = createBrowserRouter([
             path: getRouteSubPath(RoutePath.AUDIT_LOGS),
             element: (
               <RequiredPermissionsOrganizationOutlet
+                pageTitle="Audit Logs"
                 requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
               />
             ),
