@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils'
 import { SandboxState as SandboxStateType } from '@daytona/api-client'
 import { Loader2 } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import type React from 'react'
 import { getStateLabel } from '../SandboxTable/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
@@ -165,7 +164,7 @@ function AnimatedStateLabel({ label, animate }: { label: string; animate: boolea
   return (
     <span className="min-w-0 overflow-hidden">
       <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span key={label} className="block truncate origin-left" {...motionProps}>
+        <motion.span key={label} className="block origin-left" {...motionProps}>
           {label}
         </motion.span>
       </AnimatePresence>

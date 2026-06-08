@@ -4,4 +4,4 @@
  */
 
 export { default } from './SandboxDetailsSheet'
-export type { SandboxDetailsSheetProps, SandboxDetailsSheetTabValue } from './SandboxDetailsSheet'
+export type { SandboxDetailsSheetProps, SandboxDetailsSheetTabValue, SandboxSheetRef } from './SandboxDetailsSheet'
