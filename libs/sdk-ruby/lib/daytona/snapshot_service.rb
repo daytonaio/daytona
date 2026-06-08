@@ -111,6 +111,7 @@ module Daytona
       end
 
       create_snapshot_req.region_id = params.region_id || @default_region_id
+      create_snapshot_req.sandbox_class = params.sandbox_class
 
       snapshot = snapshots_api.create_snapshot(create_snapshot_req)
 

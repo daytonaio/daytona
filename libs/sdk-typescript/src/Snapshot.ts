@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ObjectStorageApi, SnapshotsApi, SnapshotState, Configuration } from '@daytona/api-client'
+import { ObjectStorageApi, SnapshotsApi, SnapshotState, SandboxClass, Configuration } from '@daytona/api-client'
 import type { SnapshotDto, CreateSnapshot, PaginatedSnapshots as PaginatedSnapshotsDto } from '@daytona/api-client'
 import { DaytonaError } from './errors/DaytonaError'
 import { Image } from './Image'
@@ -55,6 +55,7 @@ export interface PaginatedSnapshots extends Omit<PaginatedSnapshotsDto, 'items'>
  * @property {Resources} resources - Resources of the snapshot.
  * @property {string[]} entrypoint - Entrypoint of the snapshot.
  * @property {string} regionId - ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
+ * @property {SandboxClass} sandboxClass - Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
  */
 export type CreateSnapshotParams = {
   name: string
@@ -62,6 +63,7 @@ export type CreateSnapshotParams = {
   resources?: Resources
   entrypoint?: string[]
   regionId?: string
+  sandboxClass?: SandboxClass
 }
 
 /**
@@ -185,6 +187,7 @@ export class SnapshotService {
     }
 
     createSnapshotReq.regionId = params.regionId || this.defaultRegionId
+    createSnapshotReq.sandboxClass = params.sandboxClass
 
     let createdSnapshot = (
       await this.snapshotsApi.createSnapshot(createSnapshotReq, undefined, {

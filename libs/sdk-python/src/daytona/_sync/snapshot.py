@@ -10,7 +10,9 @@ from typing import Callable, cast
 
 from daytona_api_client import CreateBuildInfo, CreateSnapshot
 from daytona_api_client import GpuType as SyncGpuType
-from daytona_api_client import ObjectStorageApi, SnapshotDto, SnapshotsApi, SnapshotState
+from daytona_api_client import ObjectStorageApi
+from daytona_api_client import SandboxClass as SyncSandboxClass
+from daytona_api_client import SnapshotDto, SnapshotsApi, SnapshotState
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
@@ -160,6 +162,9 @@ class SnapshotService:
             create_snapshot_req.disk = params.resources.disk
 
         create_snapshot_req.region_id = params.region_id or self.__default_region_id
+        create_snapshot_req.sandbox_class = (
+            SyncSandboxClass(params.sandbox_class.value) if params.sandbox_class is not None else None
+        )
 
         created_snapshot: SnapshotDto = self.__snapshots_api.create_snapshot(create_snapshot_req)
 

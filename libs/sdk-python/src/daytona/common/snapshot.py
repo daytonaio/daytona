@@ -9,6 +9,7 @@ from daytona_api_client import BuildInfo
 from daytona_api_client import PaginatedSnapshots as PaginatedSnapshotsDto
 from daytona_api_client import SnapshotDto as SyncSnapshotDto
 from daytona_api_client_async import BuildInfo as AsyncBuildInfo
+from daytona_api_client_async import SandboxClass
 from daytona_api_client_async import SnapshotDto as AsyncSnapshotDto
 
 from .image import Image
@@ -71,6 +72,8 @@ class CreateSnapshotParams(BaseModel):
         entrypoint (list[str] | None): Entrypoint of the snapshot.
         region_id (str | None): ID of the region where the snapshot will be available.
             Defaults to organization default region if not specified.
+        sandbox_class (SandboxClass | None): Target sandbox class. Determines which runners
+            can host sandboxes created from this snapshot.
     """
 
     name: str
@@ -78,3 +81,4 @@ class CreateSnapshotParams(BaseModel):
     resources: Resources | None = None
     entrypoint: list[str] | None = None
     region_id: str | None = None
+    sandbox_class: SandboxClass | None = None

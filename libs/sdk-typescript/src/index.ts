@@ -66,7 +66,13 @@ export type {
 export { ChartType } from './types/Charts'
 export type { ExecutionError, ExecutionResult, OutputMessage, RunCodeOptions } from './types/CodeInterpreter'
 
-export { GpuType, SandboxState, SandboxListSortField, SandboxListSortDirection } from '@daytona/api-client'
+export {
+  GpuType,
+  SandboxState,
+  SandboxListSortField,
+  SandboxListSortDirection,
+  SandboxClass,
+} from '@daytona/api-client'
 export type {
   FileInfo,
   GitStatus,

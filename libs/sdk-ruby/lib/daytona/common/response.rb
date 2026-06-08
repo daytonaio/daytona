@@ -6,6 +6,7 @@
 module Daytona
   # Re-export of api-client enum constants under the Daytona namespace so
   # SDK consumers never need to import from DaytonaApiClient directly.
+  SandboxClass = DaytonaApiClient::SandboxClass
   SandboxState = DaytonaApiClient::SandboxState
   SandboxListSortField = DaytonaApiClient::SandboxListSortField
   SandboxListSortDirection = DaytonaApiClient::SandboxListSortDirection

@@ -167,6 +167,7 @@ class AsyncSnapshotService:
             create_snapshot_req.disk = params.resources.disk
 
         create_snapshot_req.region_id = params.region_id or self.__default_region_id
+        create_snapshot_req.sandbox_class = params.sandbox_class
 
         created_snapshot: SnapshotDto = await self.__snapshots_api.create_snapshot(create_snapshot_req)
 

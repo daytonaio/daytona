@@ -32,6 +32,16 @@ const (
 	GpuTypeRtxPro6000 GpuType = apiclient.GPUTYPE_RTX_PRO_6000
 )
 
+// SandboxClass determines which runners can host sandboxes created from a snapshot.
+// It is an alias for the API client's SandboxClass type.
+type SandboxClass = apiclient.SandboxClass
+
+const (
+	SandboxClassLinuxVM   SandboxClass = apiclient.SANDBOXCLASS_LINUX_VM
+	SandboxClassContainer SandboxClass = apiclient.SANDBOXCLASS_CONTAINER
+	SandboxClassAndroid   SandboxClass = apiclient.SANDBOXCLASS_ANDROID
+)
+
 // ExperimentalConfig holds experimental feature flags for the Daytona client.
 type ExperimentalConfig struct {
 	// Deprecated: use DaytonaConfig.OtelEnabled. Kept for backwards compatibility.
@@ -109,6 +119,7 @@ type CreateSnapshotParams struct {
 	Resources      *Resources
 	Entrypoint     []string
 	SkipValidation *bool
+	SandboxClass   *SandboxClass
 }
 
 // PaginatedSnapshots represents a paginated list of snapshots
