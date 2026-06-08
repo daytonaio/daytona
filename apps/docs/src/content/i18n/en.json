@@ -146,6 +146,7 @@
   "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.mastra": "Mastra",
   "sidebarconfig.opencode": "OpenCode",
+  "sidebarconfig.pi": "Pi",
   "sidebarconfig.claude": "Claude",
   "sidebarconfig.openclaw": "OpenClaw",
   "sidebarconfig.vercelAiSdk": "Vercel AI SDK",
