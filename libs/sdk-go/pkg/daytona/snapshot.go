@@ -268,6 +268,10 @@ func (s *SnapshotService) doCreate(ctx context.Context, params *types.CreateSnap
 		createReq.Entrypoint = params.Entrypoint
 	}
 
+	if params.SandboxClass != nil {
+		createReq.SandboxClass = params.SandboxClass
+	}
+
 	result, httpResp, err := req.CreateSnapshot(createReq).Execute()
 	if err != nil {
 		return nil, nil, s.client.handleAPIError(err, httpResp)

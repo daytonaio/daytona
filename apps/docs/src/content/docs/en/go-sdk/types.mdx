@@ -42,6 +42,7 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 - [type PtySize](<#PtySize>)
 - [type Resources](<#Resources>)
 - [type SandboxBaseParams](<#SandboxBaseParams>)
+- [type SandboxClass](<#SandboxClass>)
 - [type ScreenshotOptions](<#ScreenshotOptions>)
 - [type ScreenshotRegion](<#ScreenshotRegion>)
 - [type ScreenshotResponse](<#ScreenshotResponse>)
@@ -112,6 +113,7 @@ type CreateSnapshotParams struct {
     Resources      *Resources
     Entrypoint     []string
     SkipValidation *bool
+    SandboxClass   *SandboxClass
 }
 ```
 
@@ -472,6 +474,25 @@ type SandboxBaseParams struct {
     // linked to another sandbox.
     LinkedSandbox string
 }
+```
+
+<a name="SandboxClass"></a>
+## type SandboxClass
+
+SandboxClass determines which runners can host sandboxes created from a snapshot. It is an alias for the API client's SandboxClass type.
+
+```go
+type SandboxClass = apiclient.SandboxClass
+```
+
+<a name="SandboxClassLinuxVM"></a>
+
+```go
+const (
+    SandboxClassLinuxVM   SandboxClass = apiclient.SANDBOXCLASS_LINUX_VM
+    SandboxClassContainer SandboxClass = apiclient.SANDBOXCLASS_CONTAINER
+    SandboxClassAndroid   SandboxClass = apiclient.SANDBOXCLASS_ANDROID
+)
 ```
 
 <a name="ScreenshotOptions"></a>

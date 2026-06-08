@@ -6,6 +6,7 @@ package io.daytona.sdk;
 import io.daytona.api.client.api.SnapshotsApi;
 import io.daytona.api.client.model.CreateBuildInfo;
 import io.daytona.api.client.model.CreateSnapshot;
+import io.daytona.api.client.model.SandboxClass;
 import io.daytona.sdk.exception.DaytonaException;
 import io.daytona.sdk.model.PaginatedSnapshots;
 import io.daytona.sdk.model.Snapshot;
@@ -42,8 +43,25 @@ public class SnapshotService {
      * @throws io.daytona.sdk.exception.DaytonaException if the API request fails
      */
     public Snapshot create(String name, String imageName) {
+        return create(name, imageName, null);
+    }
+
+    /**
+     * Creates a snapshot from an existing image reference with a target sandbox class.
+     *
+     * @param name snapshot name
+     * @param imageName source image name or tag
+     * @param sandboxClass target sandbox class; {@code null} for default
+     * @return created {@link Snapshot}
+     * @throws io.daytona.sdk.exception.DaytonaException if the API request fails
+     */
+    public Snapshot create(String name, String imageName, SandboxClass sandboxClass) {
+        CreateSnapshot req = new CreateSnapshot().name(name).imageName(imageName);
+        if (sandboxClass != null) {
+            req.setSandboxClass(sandboxClass);
+        }
         io.daytona.api.client.model.SnapshotDto snapshotDto = ExceptionMapper.callMain(
-                () -> snapshotsApi.createSnapshot(new CreateSnapshot().name(name).imageName(imageName), null)
+                () -> snapshotsApi.createSnapshot(req, null)
         );
         return toSnapshot(snapshotDto);
     }
@@ -58,7 +76,7 @@ public class SnapshotService {
      * @throws DaytonaException if the API request fails or the build fails
      */
     public Snapshot create(String name, Image image, Consumer<String> onLogs) {
-        return create(name, image, null, onLogs);
+        return create(name, image, null, null, onLogs);
     }
 
     /**
@@ -72,6 +90,21 @@ public class SnapshotService {
      * @throws DaytonaException if the API request fails or the build fails
      */
     public Snapshot create(String name, Image image, io.daytona.sdk.model.Resources resources, Consumer<String> onLogs) {
+        return create(name, image, resources, null, onLogs);
+    }
+
+    /**
+     * Creates a snapshot from a declarative {@link Image} with resources, sandbox class, and optional build log streaming.
+     *
+     * @param name snapshot name
+     * @param image declarative image definition
+     * @param resources CPU/GPU/memory/disk resources; {@code null} for defaults
+     * @param sandboxClass target sandbox class; {@code null} for default
+     * @param onLogs callback for build log lines; {@code null} to skip streaming
+     * @return created {@link Snapshot} in active or error state
+     * @throws DaytonaException if the API request fails or the build fails
+     */
+    public Snapshot create(String name, Image image, io.daytona.sdk.model.Resources resources, SandboxClass sandboxClass, Consumer<String> onLogs) {
         CreateSnapshot req = new CreateSnapshot().name(name)
                 .buildInfo(new CreateBuildInfo().dockerfileContent(image.getDockerfile()))
                 .entrypoint(null);
@@ -82,6 +115,10 @@ public class SnapshotService {
             if (resources.getGpuType() != null) req.setGpuType(resources.getGpuType());
             if (resources.getMemory() != null) req.setMemory(resources.getMemory());
             if (resources.getDisk() != null) req.setDisk(resources.getDisk());
+        }
+
+        if (sandboxClass != null) {
+            req.setSandboxClass(sandboxClass);
         }
 
         final io.daytona.api.client.model.SnapshotDto[] ref = { ExceptionMapper.callMain(

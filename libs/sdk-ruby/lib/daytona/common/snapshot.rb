@@ -23,17 +23,22 @@ module Daytona
     #   Defaults to organization default region if not specified.
     attr_reader :region_id
 
+    # @return [DaytonaApiClient::SandboxClass, nil] Target sandbox class.
+    attr_reader :sandbox_class
+
     # @param name [String] Name of the snapshot
     # @param image [String, Daytona::Image] Image of the snapshot
     # @param resources [Daytona::Resources, nil] Resources of the snapshot
     # @param entrypoint [Array<String>, nil] Entrypoint of the snapshot
     # @param region_id [String, nil] ID of the region where the snapshot will be available
-    def initialize(name:, image:, resources: nil, entrypoint: nil, region_id: nil)
+    # @param sandbox_class [DaytonaApiClient::SandboxClass, nil] Target sandbox class
+    def initialize(name:, image:, resources: nil, entrypoint: nil, region_id: nil, sandbox_class: nil)
       @name = name
       @image = image
       @resources = resources
       @entrypoint = entrypoint
       @region_id = region_id
+      @sandbox_class = sandbox_class
     end
   end
 
