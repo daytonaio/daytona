@@ -561,13 +561,17 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
       for (const sandbox of staleSandboxes) {
         try {
-          await this.sandboxService.updateSandboxBackupState(
-            sandbox.id,
-            BackupState.ERROR,
-            undefined,
-            undefined,
-            'Backup timed out after 2 hours',
-          )
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData: {
+              backupState: BackupState.ERROR,
+              backupErrorReason: 'Backup timed out after 2 hours',
+            },
+            whereCondition: {
+              backupState: BackupState.IN_PROGRESS,
+              desiredState: Not(SandboxDesiredState.DESTROYED),
+              updatedAt: LessThan(twoHoursAgo),
+            },
+          })
           this.logger.warn(`Backup for sandbox ${sandbox.id} timed out after 2 hours`)
         } catch (error) {
           this.logger.error(`Failed to mark stale backup as errored for sandbox ${sandbox.id}:`, error)
