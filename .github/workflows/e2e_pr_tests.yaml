@@ -173,6 +173,12 @@ jobs:
           echo "Last snapshot response:"
           echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
           echo ""
+          echo "=== Runner DB entry (state inspection) ==="
+          docker compose -f apps/daytona-e2e/docker-compose.e2e.yaml exec -T db \
+            psql -U user -d application_ctx -x -c \
+            'SELECT id, domain, "apiUrl", "proxyUrl", region, name, state, "appVersion", "apiVersion", "lastChecked", unschedulable, draining, "availabilityScore", "currentSnapshotCount", "serviceHealth", "createdAt", "updatedAt" FROM runner;' \
+            2>/dev/null || echo "Failed to query runner table"
+          echo ""
           echo "=== Runner logs (full) ==="
           cat /tmp/runner.log 2>/dev/null || echo "No runner logs found"
           echo ""
