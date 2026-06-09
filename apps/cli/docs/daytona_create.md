@@ -27,7 +27,7 @@ daytona create [flags]
       --snapshot string             Snapshot to use for the sandbox
       --target string               Target region (eu, us)
       --user string                 User associated with the sandbox
-  -v, --volume stringArray          Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)
+  -v, --volume stringArray          Volumes to mount (format: VOLUME_ID:MOUNT_PATH)
 ```
 
 ### Options inherited from parent commands

@@ -5,7 +5,7 @@
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { IsEnum, IsOptional } from 'class-validator'
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator'
 import { BackupState } from '../enums/backup-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -19,12 +19,17 @@ export class SandboxVolume {
     description: 'The ID of the volume',
     example: 'volume123',
   })
+  // Must be the volume UUID, never a name. This value is forwarded to the runner
+  // and used to build the host bind-mount source (/mnt/daytona-volume-<volumeId>);
+  // a non-UUID (e.g. a name containing "../") would escape that base path.
+  @IsUUID()
   volumeId: string
 
   @ApiProperty({
     description: 'The mount path for the volume',
     example: '/data',
   })
+  @IsString()
   mountPath: string
 
   @ApiPropertyOptional({
@@ -32,6 +37,8 @@ export class SandboxVolume {
       'Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.',
     example: 'users/alice',
   })
+  @IsOptional()
+  @IsString()
   subpath?: string
 }
 

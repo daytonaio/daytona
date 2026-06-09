@@ -34,10 +34,19 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 	// mount to become ready; doing them sequentially made create-time scale
 	// linearly with the number of mounted volumes.
 	uniqueMounts := make(map[string]string, len(volumes)) // volumeIdPrefixed -> baseMountPath
+	mountBase := filepath.Clean(getVolumeMountBasePath())
 	for _, vol := range volumes {
 		volumeIdPrefixed := fmt.Sprintf("%s%s", volumeMountPrefix, vol.VolumeId)
 		if _, ok := uniqueMounts[volumeIdPrefixed]; !ok {
-			uniqueMounts[volumeIdPrefixed] = filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
+			baseMountPath := filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
+			// Defense in depth: the volumeId is server-controlled (a UUID), but if a
+			// traversal string ever reached here it would escape the mount base
+			// (e.g. "../../.." -> "/"). Confine baseMountPath to mountBase, same as
+			// the subpath check below.
+			if baseMountPath != mountBase && !strings.HasPrefix(baseMountPath, mountBase+string(os.PathSeparator)) {
+				return nil, fmt.Errorf("invalid volumeId %q: resolves outside volume mount base", vol.VolumeId)
+			}
+			uniqueMounts[volumeIdPrefixed] = baseMountPath
 		}
 	}
 
