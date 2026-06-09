@@ -205,7 +205,7 @@
     "satori": "^0.26.0",
     "semver": "^7.7.2",
     "sharp": "^0.34.2",
-    "shell-quote": "^1.8.2",
+    "shell-quote": "^1.8.4",
     "socket.io-client": "^4.8.1",
     "sonner": "^1.7.4",
     "starlight-openapi": "^0.19.1",
