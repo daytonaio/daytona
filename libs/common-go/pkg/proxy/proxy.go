@@ -13,6 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// proxyTransport wraps *http.Transport with retryTransport for stale-connection
+// handling. If direct *http.Transport access is needed, split into two variables.
 var proxyTransport http.RoundTripper = &retryTransport{
 	base: &http.Transport{
 		MaxIdleConns:        100,
