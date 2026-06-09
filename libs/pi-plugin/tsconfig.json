@@ -1,4 +1,7 @@
 {
+  // Standalone on purpose (does not extend tsconfig.base.json): this is a jiti-loaded
+  // ESM extension using .ts-extension imports + noEmit, which conflicts with the base's
+  // commonjs/node-resolution/importHelpers build model.
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",

@@ -227,6 +227,12 @@ export default function (pi: ExtensionAPI) {
     setStatus(ctx, '☁ daytona · spinning up sandbox…')
     const startedAt = Date.now()
 
+    // Tracked outside the try so the catch can clean up a sandbox that was
+    // created but whose later setup (clone, git init, …) failed — otherwise the
+    // sandbox would leak (no session entry points at it, so reapOrphans can't
+    // attribute it either).
+    let created: Sandbox | undefined
+
     try {
       // Reattach to this session's existing sandbox on resume/reload. A fork
       // always gets a fresh sandbox (branched off the parent below).
@@ -265,6 +271,7 @@ export default function (pi: ExtensionAPI) {
         autoDeleteInterval: -1, // never auto-delete
         labels: { 'created-by': 'pi-daytona', 'session-id': sessionId },
       })
+      created = sandbox
 
       const home = (await sandbox.getUserHomeDir()) ?? '/home/daytona'
       // Temporary git identity so the agent's commits (and our init commit) just work.
@@ -347,6 +354,8 @@ export default function (pi: ExtensionAPI) {
       setRunningStatus(ctx, sandbox.id, cwd)
     } catch (err) {
       active = null
+      // Delete the half-created sandbox so it doesn't leak (best-effort).
+      if (created) await created.delete().catch(() => {})
       setStatus(ctx, undefined)
       ctx.ui.notify(`Daytona: failed to start sandbox — ${errorMessage(err)}`, 'error')
     }
@@ -397,8 +406,6 @@ export default function (pi: ExtensionAPI) {
     const current = active
     active = null
     setStatus(ctx, undefined)
-    // No push here: agent_end already pushes after each turn, and the sandbox
-    // persists (paused), so any unpushed commits go up on the next turn.
 
     const persisted = ctx.sessionManager.getSessionFile() !== undefined
     if (persisted) {

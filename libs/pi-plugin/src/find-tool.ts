@@ -38,7 +38,10 @@ export interface RemoteSearchResult {
 
 export async function runRemoteFind(sandbox: Sandbox, cwd: string, params: FindParams): Promise<RemoteSearchResult> {
   const { pattern, path: searchDir = '.', limit } = params
-  const max = Math.max(1, limit ?? DEFAULT_LIMIT)
+  // Guard against malformed input (NaN/Infinity/non-integer) before it reaches
+  // `head -n`, which would otherwise become e.g. `head -n NaN`.
+  const requested = limit ?? DEFAULT_LIMIT
+  const max = Number.isFinite(requested) ? Math.max(1, Math.floor(requested)) : DEFAULT_LIMIT
   const searchPath = searchDir.startsWith('/') ? searchDir : joinPath(cwd, searchDir)
 
   // Mirror Pi: a path glob (contains "/") should match at any depth.

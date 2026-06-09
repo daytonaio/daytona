@@ -16,11 +16,11 @@ import path from "node:path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 
-// Use the same jiti loader Pi bundles.
-const piRequire = createRequire(
-	path.join(root, "node_modules/@earendil-works/pi-coding-agent/package.json"),
-);
-const { createJiti } = piRequire("jiti");
+// Use the same jiti loader Pi bundles. Resolve the host package's exported entry
+// via Node (walks up node_modules, so it works whether the dep is local or
+// hoisted to the workspace root) and borrow its jiti from there.
+const hostEntry = createRequire(import.meta.url).resolve("@earendil-works/pi-coding-agent");
+const { createJiti } = createRequire(hostEntry)("jiti");
 const jiti = createJiti(import.meta.url);
 
 const flags = [];
@@ -43,7 +43,9 @@ if (typeof factory !== "function") {
 	throw new Error("Extension default export is not a function");
 }
 
-factory(stubPi);
+// Await like Pi does: the factory is synchronous today, but Pi awaits the
+// result, so this stays faithful (and robust if it ever becomes async).
+await factory(stubPi);
 
 const expectedFlags = ["daytona", "repo", "branch", "snapshot", "public"];
 const expectedTools = ["bash", "read", "write", "edit", "ls", "find", "grep", "preview_url"];

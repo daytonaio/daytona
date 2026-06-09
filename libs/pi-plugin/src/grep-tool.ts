@@ -39,8 +39,13 @@ export interface RemoteGrepResult {
 
 export async function runRemoteGrep(sandbox: Sandbox, cwd: string, params: GrepParams): Promise<RemoteGrepResult> {
   const { pattern, path: searchDir = '.', glob, ignoreCase, literal, context, limit } = params
-  const max = Math.max(1, limit ?? DEFAULT_LIMIT)
-  const ctxLines = context && context > 0 ? context : 0
+  // Guard against malformed input (NaN/Infinity/non-integer) before it reaches
+  // `head -n`, which would otherwise become e.g. `head -n NaN`.
+  const requested = limit ?? DEFAULT_LIMIT
+  const max = Number.isFinite(requested) ? Math.max(1, Math.floor(requested)) : DEFAULT_LIMIT
+  // Same guard as `max`: context is interpolated into `--context`/`-C`, so reject
+  // Infinity/non-integer before it becomes e.g. `--context Infinity`.
+  const ctxLines = Number.isFinite(context) && context > 0 ? Math.floor(context) : 0
 
   const rg = ['rg', '--line-number', '--no-heading', '--color=never', '--hidden']
   if (ignoreCase) rg.push('--ignore-case')

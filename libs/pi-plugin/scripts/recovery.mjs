@@ -17,12 +17,14 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const piRequire = createRequire(path.join(root, "node_modules/@earendil-works/pi-coding-agent/package.json"));
-const { createJiti } = piRequire("jiti");
-const HOST = path.join(root, "node_modules/@earendil-works/pi-coding-agent");
+// Resolve the host package's exported entry via Node (walks up node_modules, so
+// it works whether the dep is local or hoisted to the workspace root), and
+// borrow its bundled jiti.
+const hostEntry = createRequire(import.meta.url).resolve("@earendil-works/pi-coding-agent");
+const { createJiti } = createRequire(hostEntry)("jiti");
 const jiti = createJiti(import.meta.url, {
 	moduleCache: false,
-	alias: { "@earendil-works/pi-coding-agent": HOST + "/dist/index.js" },
+	alias: { "@earendil-works/pi-coding-agent": hostEntry },
 });
 const { Daytona } = await import("@daytona/sdk");
 
@@ -79,9 +81,6 @@ try {
 	check(err && /restart pi/i.test(err.message), "error tells the user how to recover");
 } finally {
 	await sandbox.delete().catch(() => {});
-	for await (const s of daytona.list({ labels: { "created-by": "pi-daytona-test" } })) {
-		await s.delete().catch(() => {});
-	}
 	console.log("  (cleaned up)");
 }
 

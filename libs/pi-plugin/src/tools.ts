@@ -94,7 +94,13 @@ export function registerTools(pi: ExtensionAPI, getActive: () => ToolSandbox | n
     ...localFind,
     async execute(id, params, signal, onUpdate) {
       const active = requireSandbox()
-      if (active) return runRemoteFind(active.sandbox, active.cwd, params as FindParams)
+      if (active) {
+        // We can only honor a pre-aborted signal here: Daytona's exec is a
+        // single blocking, non-streaming call, so there's no mid-flight cancel
+        // and no incremental output for onUpdate to stream.
+        if (signal?.aborted) throw new Error('aborted')
+        return runRemoteFind(active.sandbox, active.cwd, params as FindParams)
+      }
       return localFind.execute(id, params, signal, onUpdate)
     },
   })
@@ -103,7 +109,12 @@ export function registerTools(pi: ExtensionAPI, getActive: () => ToolSandbox | n
     ...localGrep,
     async execute(id, params, signal, onUpdate) {
       const active = requireSandbox()
-      if (active) return runRemoteGrep(active.sandbox, active.cwd, params as GrepParams)
+      if (active) {
+        // See find above: only a pre-aborted signal is honorable; Daytona's
+        // exec is blocking and non-streaming, so no mid-flight cancel / onUpdate.
+        if (signal?.aborted) throw new Error('aborted')
+        return runRemoteGrep(active.sandbox, active.cwd, params as GrepParams)
+      }
       return localGrep.execute(id, params, signal, onUpdate)
     },
   })
