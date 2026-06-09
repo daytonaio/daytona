@@ -46,8 +46,8 @@ module Daytona
     def create_folder(path, mode)
       Sdk.logger.debug("Creating folder #{path} with mode #{mode}")
       toolbox_api.create_folder(path, mode)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to create folder: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to create folder')
     end
 
     # Deletes a file from the Sandbox.
@@ -65,8 +65,8 @@ module Daytona
     #   sandbox.fs.delete_file("workspace/old_dir", recursive: true)
     def delete_file(path, recursive: false)
       toolbox_api.delete_file(path, { recursive: })
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to delete file: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to delete file')
     end
 
     # Gets detailed information about a file or directory, including its
@@ -89,8 +89,8 @@ module Daytona
     #   puts "Path is a directory" if info.is_dir
     def get_file_info(path)
       toolbox_api.get_file_info(path)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to get file info: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get file info')
     end
 
     # Lists files and directories in a given path and returns their information, similar to the ls -l command.
@@ -114,8 +114,8 @@ module Daytona
     #   puts "Subdirectories: #{dirs.map(&:name).join(', ')}"
     def list_files(path)
       toolbox_api.list_files({ path: })
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to list files: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to list files')
     end
 
     # Downloads a file from the Sandbox. Returns the file contents as a string.
@@ -150,8 +150,8 @@ module Daytona
       else
         file
       end
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to download file: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to download file')
     end
 
     # Downloads a single file from the Sandbox as a stream without buffering the entire
@@ -189,8 +189,8 @@ module Daytona
                                    timeout: timeout, on_progress: on_progress,
                                    cancel_event: cancel_event, &)
       nil
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to download file: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES, Sdk::Error => e
+      raise Sdk.wrap_error(e, 'Failed to download file')
     end
 
     # Uploads a file to the specified path in the Sandbox. If a file already exists at
@@ -229,8 +229,8 @@ module Daytona
           toolbox_api.upload_file(remote_path, file)
         end
       end
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to upload file: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to upload file')
     end
 
     # Streams +source+ to the Sandbox without buffering its contents in memory, with
@@ -259,8 +259,8 @@ module Daytona
       FileTransfer.stream_upload(api_client: toolbox_api.api_client, remote_path: remote_path,
                                  source: source, timeout: timeout, on_progress: on_progress,
                                  cancel_event: cancel_event)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to upload file: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES, Sdk::Error => e
+      raise Sdk.wrap_error(e, 'Failed to upload file')
     end
 
     # Uploads multiple files to the Sandbox. If files already exist at the destination paths,
@@ -280,8 +280,8 @@ module Daytona
     #   sandbox.fs.upload_files(files)
     def upload_files(files)
       files.each { |file_upload| upload_file(file_upload.source, file_upload.destination) }
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to upload files: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to upload files')
     end
 
     # Searches for files containing a pattern, similar to the grep command.
@@ -301,8 +301,8 @@ module Daytona
     #   end
     def find_files(path, pattern)
       toolbox_api.find_in_files(path, pattern)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to find files: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to find files')
     end
 
     # Searches for files and directories whose names match the specified pattern.
@@ -325,8 +325,8 @@ module Daytona
     #   puts "Found #{result.files.length} test files"
     def search_files(path, pattern)
       toolbox_api.search_files(path, pattern)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to search files: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to search files')
     end
 
     # Moves or renames a file or directory. The parent directory of the destination must exist.
@@ -358,8 +358,8 @@ module Daytona
     #   )
     def move_files(source, destination)
       toolbox_api.move_file(source, destination)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to move files: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to move files')
     end
 
     # Performs search and replace operations across multiple files.
@@ -394,8 +394,8 @@ module Daytona
         new_value: new_value
       )
       toolbox_api.replace_in_files(replace_request)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to replace in files: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to replace in files')
     end
 
     # Sets permissions and ownership for a file or directory. Any of the parameters can be nil
@@ -429,8 +429,8 @@ module Daytona
       opts[:group] = group if group
 
       toolbox_api.set_file_permissions(path, opts)
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to set file permissions: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to set file permissions')
     end
 
     instrument :create_folder, :delete_file, :get_file_info, :list_files, :download_file,

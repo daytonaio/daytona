@@ -591,15 +591,14 @@ func (c *Client) Get(ctx context.Context, sandboxIDOrName string) (*Sandbox, err
 
 Get retrieves an existing sandbox by its ID or name.
 
-The sandboxIDOrName parameter accepts either the sandbox's unique ID or its human\-readable name. If a sandbox with the given identifier is not found, a [errors.DaytonaNotFoundError](<https://pkg.go.dev/errors/#DaytonaNotFoundError>) is returned.
+The sandboxIDOrName parameter accepts either the sandbox's unique ID or its human\-readable name. If a sandbox with the given identifier is not found, a [\\\*errors.DaytonaError](<https://pkg.go.dev/errors/#DaytonaError>) matching [errors.ErrNotFound](<https://pkg.go.dev/errors/#ErrNotFound>) is returned.
 
 Example:
 
 ```
 sandbox, err := client.Get(ctx, "my-sandbox")
 if err != nil {
-    var notFound *errors.DaytonaNotFoundError
-    if errors.As(err, &notFound) {
+    if stderrors.Is(err, errors.ErrNotFound) {
         log.Println("Sandbox not found")
     }
     return err

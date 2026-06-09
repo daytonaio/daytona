@@ -52,8 +52,10 @@ src/main/java/io/daytona/toolbox/client/model/ComputerUseStatusResponse.java
 src/main/java/io/daytona/toolbox/client/model/ComputerUseStopResponse.java
 src/main/java/io/daytona/toolbox/client/model/CreateContextRequest.java
 src/main/java/io/daytona/toolbox/client/model/CreateSessionRequest.java
+src/main/java/io/daytona/toolbox/client/model/DaemonErrorCode.java
 src/main/java/io/daytona/toolbox/client/model/DisplayInfo.java
 src/main/java/io/daytona/toolbox/client/model/DisplayInfoResponse.java
+src/main/java/io/daytona/toolbox/client/model/ErrorResponse.java
 src/main/java/io/daytona/toolbox/client/model/ExecuteRequest.java
 src/main/java/io/daytona/toolbox/client/model/ExecuteResponse.java
 src/main/java/io/daytona/toolbox/client/model/FileInfo.java
@@ -154,8 +156,10 @@ src/test/java/io/daytona/toolbox/client/model/ComputerUseStatusResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ComputerUseStopResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/CreateContextRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/CreateSessionRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/DaemonErrorCodeTest.java
 src/test/java/io/daytona/toolbox/client/model/DisplayInfoResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/DisplayInfoTest.java
+src/test/java/io/daytona/toolbox/client/model/ErrorResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/ExecuteRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/ExecuteResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/FileInfoTest.java

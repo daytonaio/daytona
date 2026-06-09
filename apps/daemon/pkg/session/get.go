@@ -4,15 +4,13 @@
 package session
 
 import (
-	"errors"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/common"
 )
 
 func (s *SessionService) Get(sessionId string) (*Session, error) {
 	_, ok := s.sessions.Get(sessionId)
 	if !ok {
-		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
+		return nil, common.NewProcessNotFoundError("session not found")
 	}
 
 	commands, err := s.getSessionCommands(sessionId)

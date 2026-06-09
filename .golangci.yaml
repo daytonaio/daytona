@@ -3,15 +3,24 @@ run:
   build-tags:
     - testing
 linters:
+  enable:
+    - forbidigo
   settings:
     errcheck:
       exclude-functions:
-        - (*github.com/gin-gonic/gin.Context).AbortWithError
         - (*github.com/gin-gonic/gin.Context).Error
         - io.Copy
         - syscall.Syscall
         - (github.com/gliderlabs/ssh.Session).Exit
         - (io.Writer).Write
+    forbidigo:
+      # Force every gin handler to surface errors via c.Error(<HTTPError>) so the
+      # shared error middleware writes the envelope. Direct gin helpers bypass it.
+      forbid:
+        - pattern: '\.AbortWithError\('
+          msg: 'use c.Error(<HTTPError>) instead; bypasses the error middleware'
+        - pattern: '\.AbortWithStatusJSON\('
+          msg: 'use c.Error(<HTTPError>) instead; bypasses the error middleware'
   exclusions:
     generated: lax
     presets:

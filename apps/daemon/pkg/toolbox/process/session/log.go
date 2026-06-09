@@ -22,6 +22,10 @@ import (
 //	@Param			commandId	path		string						true	"Command ID"
 //	@Param			follow		query		boolean						false	"Follow logs in real-time (WebSocket only)"
 //	@Success		200			{object}	SessionCommandLogsResponse	"Log content (JSON for new SDKs, plain text for old SDKs)"
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		403			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
 //	@Router			/process/session/{sessionId}/command/{commandId}/logs [get]
 //
 //	@id				GetSessionCommandLogs
@@ -74,6 +78,8 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 //	@Produce		text/plain
 //	@Param			follow	query		boolean						false	"Follow logs in real-time (WebSocket only)"
 //	@Success		200		{object}	SessionCommandLogsResponse	"Entrypoint log content"
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //	@Router			/process/session/entrypoint/logs [get]
 //
 //	@id				GetEntrypointLogs

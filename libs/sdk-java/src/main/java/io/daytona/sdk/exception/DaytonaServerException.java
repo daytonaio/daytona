@@ -35,4 +35,12 @@ public class DaytonaServerException extends DaytonaException {
     public DaytonaServerException(int statusCode, String message, Throwable cause) {
         super(statusCode, message, cause);
     }
+
+    public DaytonaServerException(int statusCode, String message, String code, String source) {
+        super(statusCode, message, code, source);
+    }
+
+    public DaytonaServerException(int statusCode, String message, Throwable cause, String code, String source) {
+        super(statusCode, message, cause, code, source);
+    }
 }

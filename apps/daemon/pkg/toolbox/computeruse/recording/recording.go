@@ -7,6 +7,8 @@ import (
 	"errors"
 	"net/http"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 
 	recordingservice "github.com/daytonaio/daemon/pkg/recording"
@@ -19,14 +21,14 @@ import (
 //	@Tags			computer-use
 //	@Produce		json
 //	@Success		200	{object}	ListRecordingsResponse
-//	@Failure		500	{object}	map[string]string
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/computeruse/recordings [get]
 //
 //	@id				ListRecordings
 func (r *RecordingController) ListRecordings(ctx *gin.Context) {
 	recordings, err := r.recordingService.ListRecordings()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -50,25 +52,26 @@ func (r *RecordingController) ListRecordings(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			id	path		string	true	"Recording ID"
 //	@Success		200	{object}	RecordingDTO
-//	@Failure		404	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/computeruse/recordings/{id} [get]
 //
 //	@id				GetRecording
 func (r *RecordingController) GetRecording(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+		ctx.Error(common_errors.NewBadRequestError(errors.New("id is required")))
 		return
 	}
 
 	recording, err := r.recordingService.GetRecording(id)
 	if err != nil {
 		if errors.Is(err, recordingservice.ErrRecordingNotFound) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "recording not found"})
+			ctx.Error(common_errors.NewNotFoundError(errors.New("recording not found")))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -82,30 +85,31 @@ func (r *RecordingController) GetRecording(ctx *gin.Context) {
 //	@Tags			computer-use
 //	@Param			id	path	string	true	"Recording ID"
 //	@Success		204
-//	@Failure		400	{object}	map[string]string
-//	@Failure		404	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		409	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/computeruse/recordings/{id} [delete]
 //
 //	@id				DeleteRecording
 func (r *RecordingController) DeleteRecording(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "id is required"})
+		ctx.Error(common_errors.NewBadRequestError(errors.New("id is required")))
 		return
 	}
 
 	err := r.recordingService.DeleteRecording(id)
 	if err != nil {
 		if errors.Is(err, recordingservice.ErrRecordingNotFound) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "recording not found"})
+			ctx.Error(common_errors.NewNotFoundError(errors.New("recording not found")))
 			return
 		}
 		if errors.Is(err, recordingservice.ErrRecordingStillActive) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "cannot delete an active recording, stop it first"})
+			ctx.Error(common.NewRecordingStillActiveError("cannot delete an active recording, stop it first"))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 

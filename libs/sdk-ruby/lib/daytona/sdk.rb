@@ -3,6 +3,7 @@
 
 # frozen_string_literal: true
 
+require 'json'
 require 'logger'
 
 require 'daytona_api_client'
@@ -11,6 +12,8 @@ require 'toml'
 require 'websocket-client-simple'
 
 require_relative 'sdk/version'
+require_relative 'sdk/errors'
+require_relative 'sdk/file_download_patch'
 require_relative 'config'
 require_relative 'otel'
 require_relative 'common/charts'
@@ -41,15 +44,9 @@ require_relative 'process'
 
 module Daytona
   module Sdk
-    class Error < StandardError; end
-    class TimeoutError < Error; end
-    class AuthenticationError < Error; end
-    class ForbiddenError < Error; end
-    class NotFoundError < Error; end
-    class ConflictError < Error; end
-    class ValidationError < Error; end
-    class RateLimitError < Error; end
-    class ServerError < Error; end
+    # The error hierarchy and translation helpers live in `sdk/errors.rb`.
+    # This file just provides cross-cutting bits that need to be loaded
+    # alongside them.
 
     def self.logger = @logger ||= Logger.new($stdout, level: Logger::INFO)
   end

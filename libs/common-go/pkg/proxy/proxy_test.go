@@ -148,7 +148,7 @@ func TestNewProxyRequestHandler_PreservesPathEncoding(t *testing.T) {
 			}
 
 			router := gin.New()
-			router.GET("/*path", proxy.NewProxyRequestHandler(getTarget, nil))
+			router.GET("/*path", proxy.NewProxyRequestHandler(getTarget, nil, nil))
 
 			// Use a real HTTP server for the proxy side: httptest.ResponseRecorder
 			// does not implement http.CloseNotifier, which httputil.ReverseProxy

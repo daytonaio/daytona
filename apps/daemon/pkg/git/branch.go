@@ -19,9 +19,14 @@ func (s *Service) CreateBranch(name string) error {
 		return err
 	}
 
+	ref := plumbing.NewBranchReferenceName(name)
+	if _, err := repo.Storer.Reference(ref); err == nil {
+		return git.ErrBranchExists
+	}
+
 	return w.Checkout(&git.CheckoutOptions{
 		Create: true,
-		Branch: plumbing.NewBranchReferenceName(name),
+		Branch: ref,
 	})
 }
 

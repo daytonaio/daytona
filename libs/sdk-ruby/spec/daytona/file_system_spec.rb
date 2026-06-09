@@ -103,7 +103,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors in Sdk::Error' do
-      allow(toolbox_api).to receive(:create_folder).and_raise(StandardError, 'fail')
+      allow(toolbox_api).to receive(:create_folder).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'fail'))
 
       expect { fs.create_folder('/x', '755') }.to raise_error(Daytona::Sdk::Error, /Failed to create folder: fail/)
     end
@@ -127,7 +128,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:delete_file).and_raise(StandardError, 'nope')
+      allow(toolbox_api).to receive(:delete_file).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                  message: 'nope'))
 
       expect { fs.delete_file('/x') }.to raise_error(Daytona::Sdk::Error, /Failed to delete file: nope/)
     end
@@ -142,7 +144,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:get_file_info).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_file_info).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'err'))
 
       expect { fs.get_file_info('/x') }.to raise_error(Daytona::Sdk::Error, /Failed to get file info: err/)
     end
@@ -157,7 +160,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:list_files).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:list_files).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                 message: 'err'))
 
       expect { fs.list_files('/x') }.to raise_error(Daytona::Sdk::Error, /Failed to list files: err/)
     end
@@ -186,7 +190,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:download_file).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:download_file).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'err'))
 
       expect { fs.download_file('/x') }.to raise_error(Daytona::Sdk::Error, /Failed to download file: err/)
     end
@@ -251,7 +256,7 @@ RSpec.describe Daytona::FileSystem do
       stub_streaming_request(chunks: [body.byteslice(0, 82), body.byteslice(82, body.bytesize - 82)])
 
       expect { fs.download_file_stream('/missing.txt') { |_chunk| nil } }
-        .to raise_error(Daytona::Sdk::Error, /Failed to download file: file not found/)
+        .to raise_error(Daytona::Sdk::Error, /file not found/)
     end
 
     it 'aborts when cancel_event is set before the first chunk' do
@@ -260,7 +265,7 @@ RSpec.describe Daytona::FileSystem do
       cancel = double('CancelEvent', set?: true)
 
       expect { fs.download_file_stream('/remote.txt', cancel_event: cancel) { |_chunk| nil } }
-        .to raise_error(Daytona::Sdk::Error, /Failed to download file: Download cancelled/)
+        .to raise_error(Daytona::Sdk::Error, /Download cancelled/)
     end
   end
 
@@ -296,7 +301,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:upload_file).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:upload_file).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                  message: 'err'))
 
       expect { fs.upload_file('data', '/x') }.to raise_error(Daytona::Sdk::Error, /Failed to upload file: err/)
     end
@@ -308,7 +314,7 @@ RSpec.describe Daytona::FileSystem do
       io = StringIO.new('streamed-bytes')
 
       expect { fs.upload_file_stream(io, '/remote.bin', cancel_event: cancel) }
-        .to raise_error(Daytona::Sdk::Error, /Failed to upload file: Upload cancelled/)
+        .to raise_error(Daytona::Sdk::Error, /Upload cancelled/)
     end
 
     it 'cancels mid-upload from the libcurl progress callback' do
@@ -329,7 +335,7 @@ RSpec.describe Daytona::FileSystem do
           cancel_event: cancel,
           on_progress: ->(p) { progress_calls << p }
         )
-      end.to raise_error(Daytona::Sdk::Error, /Failed to upload file: Upload cancelled/)
+      end.to raise_error(Daytona::Sdk::Error, /Upload cancelled/)
 
       expect(progress_calls.map(&:bytes_sent)).to eq([32])
     end
@@ -367,7 +373,7 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors from individual uploads' do
-      allow(fs).to receive(:upload_file).and_raise(StandardError, 'boom')
+      allow(fs).to receive(:upload_file).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500, message: 'boom'))
 
       expect { fs.upload_files([Daytona::FileUpload.new('content', '/dest')]) }
         .to raise_error(Daytona::Sdk::Error, /Failed to upload files: boom/)
@@ -383,7 +389,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:find_in_files).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:find_in_files).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'err'))
 
       expect { fs.find_files('/x', 'pat') }.to raise_error(Daytona::Sdk::Error, /Failed to find files: err/)
     end
@@ -398,7 +405,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:search_files).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:search_files).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                   message: 'err'))
 
       expect do
         fs.search_files('/workspace', '*.rb')
@@ -416,7 +424,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:move_file).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:move_file).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                message: 'err'))
 
       expect { fs.move_files('/a', '/b') }.to raise_error(Daytona::Sdk::Error, /Failed to move files: err/)
     end
@@ -438,7 +447,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:replace_in_files).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:replace_in_files).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                       message: 'err'))
 
       expect { fs.replace_in_files(files: [], pattern: 'a', new_value: 'b') }
         .to raise_error(Daytona::Sdk::Error, /Failed to replace in files: err/)
@@ -473,7 +483,8 @@ RSpec.describe Daytona::FileSystem do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:set_file_permissions).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:set_file_permissions).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                           message: 'err'))
 
       expect do
         fs.set_file_permissions(path: '/x')

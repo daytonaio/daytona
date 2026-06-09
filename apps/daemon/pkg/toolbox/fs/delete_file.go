@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,13 +21,16 @@ import (
 //	@Param			path		query	string	true	"File or directory path to delete"
 //	@Param			recursive	query	boolean	false	"Enable recursive deletion for directories"
 //	@Success		204
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		403	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
 //	@Router			/files [delete]
 //
 //	@id				DeleteFile
 func DeleteFile(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {
-		c.AbortWithError(http.StatusBadRequest, errors.New("path is required"))
+		c.Error(common_errors.NewBadRequestError(errors.New("path is required")))
 		return
 	}
 
@@ -36,20 +41,20 @@ func DeleteFile(c *gin.Context) {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.AbortWithError(http.StatusNotFound, err)
+			c.Error(common.NewFileNotFoundError(err.Error()))
 			return
 		}
 		if os.IsPermission(err) {
-			c.AbortWithError(http.StatusForbidden, err)
+			c.Error(common.NewFileAccessDeniedError(err.Error()))
 			return
 		}
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.Error(common_errors.NewBadRequestError(err))
 		return
 	}
 
 	// If it's a directory and recursive flag is not set, return error
 	if info.IsDir() && !recursive {
-		c.AbortWithError(http.StatusBadRequest, errors.New("cannot delete directory without recursive flag"))
+		c.Error(common_errors.NewBadRequestError(errors.New("cannot delete directory without recursive flag")))
 		return
 	}
 
@@ -61,7 +66,7 @@ func DeleteFile(c *gin.Context) {
 	}
 
 	if deleteErr != nil {
-		c.AbortWithError(http.StatusBadRequest, deleteErr)
+		c.Error(common_errors.NewBadRequestError(deleteErr))
 		return
 	}
 

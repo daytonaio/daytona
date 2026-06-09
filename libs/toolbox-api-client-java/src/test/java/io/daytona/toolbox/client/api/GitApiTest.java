@@ -14,6 +14,7 @@
 package io.daytona.toolbox.client.api;
 
 import io.daytona.toolbox.client.ApiException;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.GitAddRequest;
 import io.daytona.toolbox.client.model.GitBranchRequest;
 import io.daytona.toolbox.client.model.GitCheckoutRequest;

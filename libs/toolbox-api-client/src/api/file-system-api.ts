@@ -22,6 +22,8 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { ErrorResponse } from '../models';
+// @ts-ignore
 import type { FileInfo } from '../models';
 // @ts-ignore
 import type { FilesDownloadRequest } from '../models';
@@ -71,6 +73,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['mode'] = mode;
             }
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -112,6 +115,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['recursive'] = recursive;
             }
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -343,6 +347,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['destination'] = destination;
             }
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -473,6 +478,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarQueryParameter['mode'] = mode;
             }
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -549,6 +555,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarHeaderParameter['Accept'] = '*/*';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};

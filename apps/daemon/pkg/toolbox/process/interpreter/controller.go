@@ -13,6 +13,7 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
@@ -38,8 +39,8 @@ func NewInterpreterController(logger *slog.Logger, workDir string) *Controller {
 //	@Produce		json
 //	@Param			request	body		CreateContextRequest	true	"Context configuration"
 //	@Success		200		{object}	InterpreterContext
-//	@Failure		400		{object}	map[string]string
-//	@Failure		500		{object}	map[string]string
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
 //	@Router			/process/interpreter/context [post]
 //
 //	@id				CreateInterpreterContext
@@ -47,7 +48,7 @@ func (c *Controller) CreateContext(ctx *gin.Context) {
 	var req CreateContextRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request payload: %w", err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request payload: %w", err)))
 		return
 	}
 
@@ -56,7 +57,7 @@ func (c *Controller) CreateContext(ctx *gin.Context) {
 		language = *req.Language
 	}
 	if language != LanguagePython {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("unsupported language: %s (only '%s' is supported currently)", language, LanguagePython))
+		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("unsupported language: %s (only '%s' is supported currently)", language, LanguagePython)))
 		return
 	}
 
@@ -67,7 +68,7 @@ func (c *Controller) CreateContext(ctx *gin.Context) {
 
 	iCtx, err := CreateContext(c.logger, cwd, language)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -178,30 +179,31 @@ func writeWSError(ws *websocket.Conn, value string, closeCode int) {
 //	@Produce		json
 //	@Param			id	path		string	true	"Context ID"
 //	@Success		200	{object}	map[string]string
-//	@Failure		400	{object}	map[string]string
-//	@Failure		404	{object}	map[string]string
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/process/interpreter/context/{id} [delete]
 //
 //	@id				DeleteInterpreterContext
 func (c *Controller) DeleteContext(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if id == "" {
-		ctx.AbortWithError(http.StatusBadRequest, errors.New("context ID is required"))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("context ID is required")))
 		return
 	}
 
 	if id == "default" {
-		ctx.AbortWithError(http.StatusBadRequest, errors.New("cannot delete default context"))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("cannot delete default context")))
 		return
 	}
 
 	err := DeleteContext(id)
 	if err != nil {
 		if common_errors.IsNotFoundError(err) {
-			ctx.AbortWithError(http.StatusNotFound, err)
+			ctx.Error(common.NewProcessNotFoundError(err.Error()))
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 
@@ -215,6 +217,7 @@ func (c *Controller) DeleteContext(ctx *gin.Context) {
 //	@Tags			interpreter
 //	@Produce		json
 //	@Success		200	{object}	ListContextsResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/process/interpreter/context [get]
 //
 //	@id				ListInterpreterContexts

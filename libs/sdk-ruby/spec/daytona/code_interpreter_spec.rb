@@ -131,7 +131,9 @@ RSpec.describe Daytona::CodeInterpreter do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:create_interpreter_context).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:create_interpreter_context).and_raise(DaytonaToolboxApiClient::ApiError.new(
+                                                                             code: 500, message: 'err'
+                                                                           ))
 
       expect do
         interpreter.create_context
@@ -154,7 +156,9 @@ RSpec.describe Daytona::CodeInterpreter do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:list_interpreter_contexts).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:list_interpreter_contexts).and_raise(DaytonaToolboxApiClient::ApiError.new(
+                                                                            code: 500, message: 'err'
+                                                                          ))
 
       expect do
         interpreter.list_contexts
@@ -172,7 +176,9 @@ RSpec.describe Daytona::CodeInterpreter do
 
     it 'wraps errors' do
       ctx = double('InterpreterContext', id: 'ctx-1')
-      allow(toolbox_api).to receive(:delete_interpreter_context).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:delete_interpreter_context).and_raise(DaytonaToolboxApiClient::ApiError.new(
+                                                                             code: 500, message: 'err'
+                                                                           ))
 
       expect do
         interpreter.delete_context(ctx)

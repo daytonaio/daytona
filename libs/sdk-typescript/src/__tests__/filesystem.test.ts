@@ -16,7 +16,7 @@ describe('FileSystem.downloadFile', () => {
       {
         error: 'download failed',
         errorDetails: {
-          errorCode: 'FILE_NOT_FOUND',
+          code: 'FILE_NOT_FOUND',
           message: 'missing file',
           statusCode: 404,
         },
@@ -35,7 +35,7 @@ describe('FileSystem.downloadFile', () => {
     )
 
     await expect(FileSystem.prototype.downloadFile.call(fileSystem, '/workspace/missing.txt')).rejects.toMatchObject({
-      errorCode: 'FILE_NOT_FOUND',
+      code: 'FILE_NOT_FOUND',
       statusCode: 404,
     })
   })
@@ -50,7 +50,7 @@ describe('FileSystem.downloadFile', () => {
     await expect(
       FileSystem.prototype.downloadFile.call(fileSystem, '/workspace/missing.txt', '/tmp/out.txt'),
     ).rejects.toMatchObject({
-      errorCode: 'FILE_NOT_FOUND',
+      code: 'FILE_NOT_FOUND',
       statusCode: 404,
     })
   })

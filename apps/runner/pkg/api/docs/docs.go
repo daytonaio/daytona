@@ -1688,6 +1688,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "/api/resource"
                 },
+                "source": {
+                    "type": "string",
+                    "example": "DAYTONA_DAEMON"
+                },
                 "statusCode": {
                     "type": "integer",
                     "example": 400

@@ -18,6 +18,7 @@ import io.daytona.toolbox.client.model.CodeRunRequest;
 import io.daytona.toolbox.client.model.CodeRunResponse;
 import io.daytona.toolbox.client.model.Command;
 import io.daytona.toolbox.client.model.CreateSessionRequest;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.ExecuteRequest;
 import io.daytona.toolbox.client.model.ExecuteResponse;
 import io.daytona.toolbox.client.model.PtyCreateRequest;

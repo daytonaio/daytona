@@ -28,6 +28,7 @@ import java.io.IOException;
 
 
 import io.daytona.toolbox.client.model.CreateContextRequest;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.InterpreterContext;
 import io.daytona.toolbox.client.model.ListContextsResponse;
 
@@ -222,6 +223,7 @@ public class InterpreterApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deleteInterpreterContextCall(@javax.annotation.Nonnull String id, final ApiCallback _callback) throws ApiException {
@@ -293,6 +295,7 @@ public class InterpreterApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Map<String, String> deleteInterpreterContext(@javax.annotation.Nonnull String id) throws ApiException {
@@ -313,6 +316,7 @@ public class InterpreterApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Map<String, String>> deleteInterpreterContextWithHttpInfo(@javax.annotation.Nonnull String id) throws ApiException {
@@ -335,6 +339,7 @@ public class InterpreterApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deleteInterpreterContextAsync(@javax.annotation.Nonnull String id, final ApiCallback<Map<String, String>> _callback) throws ApiException {
@@ -467,6 +472,7 @@ public class InterpreterApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listInterpreterContextsCall(final ApiCallback _callback) throws ApiException {
@@ -529,6 +535,7 @@ public class InterpreterApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ListContextsResponse listInterpreterContexts() throws ApiException {
@@ -546,6 +553,7 @@ public class InterpreterApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListContextsResponse> listInterpreterContextsWithHttpInfo() throws ApiException {
@@ -565,6 +573,7 @@ public class InterpreterApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listInterpreterContextsAsync(final ApiCallback<ListContextsResponse> _callback) throws ApiException {

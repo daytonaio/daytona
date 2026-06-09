@@ -28,6 +28,7 @@ import java.io.IOException;
 
 
 import io.daytona.toolbox.client.model.CompletionList;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.LspCompletionParams;
 import io.daytona.toolbox.client.model.LspDocumentRequest;
 import io.daytona.toolbox.client.model.LspServerRequest;
@@ -87,6 +88,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call completionsCall(@javax.annotation.Nonnull LspCompletionParams request, final ApiCallback _callback) throws ApiException {
@@ -156,6 +158,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public CompletionList completions(@javax.annotation.Nonnull LspCompletionParams request) throws ApiException {
@@ -174,6 +177,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<CompletionList> completionsWithHttpInfo(@javax.annotation.Nonnull LspCompletionParams request) throws ApiException {
@@ -194,6 +198,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call completionsAsync(@javax.annotation.Nonnull LspCompletionParams request, final ApiCallback<CompletionList> _callback) throws ApiException {
@@ -214,6 +219,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call didCloseCall(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
@@ -242,6 +248,7 @@ public class LspApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -281,6 +288,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public void didClose(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
@@ -298,6 +306,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> didCloseWithHttpInfo(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
@@ -317,6 +326,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call didCloseAsync(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback<Void> _callback) throws ApiException {
@@ -336,6 +346,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call didOpenCall(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback _callback) throws ApiException {
@@ -364,6 +375,7 @@ public class LspApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -403,6 +415,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public void didOpen(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
@@ -420,6 +433,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> didOpenWithHttpInfo(@javax.annotation.Nonnull LspDocumentRequest request) throws ApiException {
@@ -439,6 +453,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call didOpenAsync(@javax.annotation.Nonnull LspDocumentRequest request, final ApiCallback<Void> _callback) throws ApiException {
@@ -460,6 +475,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call documentSymbolsCall(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, final ApiCallback _callback) throws ApiException {
@@ -552,6 +568,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public List<LspSymbol> documentSymbols(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri) throws ApiException {
@@ -572,6 +589,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<List<LspSymbol>> documentSymbolsWithHttpInfo(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri) throws ApiException {
@@ -594,6 +612,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call documentSymbolsAsync(@javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, @javax.annotation.Nonnull String uri, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {
@@ -614,6 +633,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call startCall(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback _callback) throws ApiException {
@@ -642,6 +663,7 @@ public class LspApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -681,6 +703,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public void start(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
@@ -698,6 +722,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> startWithHttpInfo(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
@@ -717,6 +743,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call startAsync(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback<Void> _callback) throws ApiException {
@@ -736,6 +764,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call stopCall(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback _callback) throws ApiException {
@@ -764,6 +794,7 @@ public class LspApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -803,6 +834,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public void stop(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
@@ -820,6 +853,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> stopWithHttpInfo(@javax.annotation.Nonnull LspServerRequest request) throws ApiException {
@@ -839,6 +874,8 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call stopAsync(@javax.annotation.Nonnull LspServerRequest request, final ApiCallback<Void> _callback) throws ApiException {
@@ -860,6 +897,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call workspaceSymbolsCall(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, final ApiCallback _callback) throws ApiException {
@@ -952,6 +990,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public List<LspSymbol> workspaceSymbols(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject) throws ApiException {
@@ -972,6 +1011,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<List<LspSymbol>> workspaceSymbolsWithHttpInfo(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject) throws ApiException {
@@ -994,6 +1034,7 @@ public class LspApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call workspaceSymbolsAsync(@javax.annotation.Nonnull String query, @javax.annotation.Nonnull String languageId, @javax.annotation.Nonnull String pathToProject, final ApiCallback<List<LspSymbol>> _callback) throws ApiException {

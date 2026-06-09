@@ -256,6 +256,44 @@ definitions:
     required:
       - sessionId
     type: object
+  DaemonErrorCode:
+    enum:
+      - GIT_AUTH_FAILED
+      - GIT_REPO_NOT_FOUND
+      - GIT_BRANCH_NOT_FOUND
+      - GIT_BRANCH_EXISTS
+      - GIT_PUSH_REJECTED
+      - GIT_DIRTY_WORKTREE
+      - GIT_MERGE_CONFLICT
+      - FILE_NOT_FOUND
+      - FILE_ACCESS_DENIED
+      - LSP_SERVER_NOT_INITIALIZED
+      - PROCESS_EXECUTION_TIMEOUT
+      - PROCESS_NOT_FOUND
+      - SESSION_ENDED
+      - COMMAND_ALREADY_COMPLETED
+      - A11Y_UNAVAILABLE
+      - RECORDING_STILL_ACTIVE
+      - RECORDING_FFMPEG_NOT_FOUND
+    type: string
+    x-enum-varnames:
+      - CodeGitAuthFailed
+      - CodeGitRepoNotFound
+      - CodeGitBranchNotFound
+      - CodeGitBranchExists
+      - CodeGitPushRejected
+      - CodeGitDirtyWorktree
+      - CodeGitMergeConflict
+      - CodeFileNotFound
+      - CodeFileAccessDenied
+      - CodeLspServerNotInitialized
+      - CodeProcessExecutionTimeout
+      - CodeProcessNotFound
+      - CodeSessionEnded
+      - CodeCommandAlreadyCompleted
+      - CodeA11yUnavailable
+      - CodeRecordingStillActive
+      - CodeRecordingFfmpegNotFound
   DisplayInfo:
     properties:
       height:
@@ -279,6 +317,37 @@ definitions:
         type: array
     type: object
   Empty:
+    type: object
+  ErrorResponse:
+    description: Error response
+    properties:
+      code:
+        allOf:
+          - $ref: '#/definitions/DaemonErrorCode'
+        example: GIT_REPO_NOT_FOUND
+      message:
+        example: Bad request
+        type: string
+      method:
+        example: GET
+        type: string
+      path:
+        example: /api/resource
+        type: string
+      source:
+        example: DAYTONA_DAEMON
+        type: string
+      statusCode:
+        example: 400
+        type: integer
+      timestamp:
+        example: '2023-01-01T12:00:00Z'
+        type: string
+    required:
+      - message
+      - path
+      - statusCode
+      - timestamp
     type: object
   ExecuteRequest:
     properties:
@@ -1168,27 +1237,19 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '503':
           description: Service Unavailable
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Find accessibility nodes
       tags:
         - computer-use
@@ -1215,27 +1276,19 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '503':
           description: Service Unavailable
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Focus an accessibility node
       tags:
         - computer-use
@@ -1263,27 +1316,19 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '503':
           description: Service Unavailable
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Invoke an action on an accessibility node
       tags:
         - computer-use
@@ -1311,27 +1356,19 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '503':
           description: Service Unavailable
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Set the value of an accessibility node
       tags:
         - computer-use
@@ -1363,27 +1400,19 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '503':
           description: Service Unavailable
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Get accessibility tree
       tags:
         - computer-use
@@ -1398,6 +1427,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/DisplayInfoResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get display information
       tags:
         - computer-use
@@ -1412,6 +1445,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/WindowsResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get windows information
       tags:
         - computer-use
@@ -1435,6 +1472,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Empty'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Press hotkey
       tags:
         - computer-use
@@ -1458,6 +1503,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Empty'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Press key
       tags:
         - computer-use
@@ -1481,6 +1534,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Empty'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Type text
       tags:
         - computer-use
@@ -1504,6 +1565,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/MouseClickResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Click mouse button
       tags:
         - computer-use
@@ -1527,6 +1596,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/MouseDragResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Drag mouse
       tags:
         - computer-use
@@ -1550,6 +1627,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/MousePositionResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Move mouse cursor
       tags:
         - computer-use
@@ -1564,6 +1649,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/MousePositionResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get mouse position
       tags:
         - computer-use
@@ -1587,6 +1676,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ScrollResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Scroll mouse wheel
       tags:
         - computer-use
@@ -1698,9 +1795,7 @@ paths:
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: List all recordings
       tags:
         - computer-use
@@ -1720,21 +1815,19 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Delete a recording
       tags:
         - computer-use
@@ -1754,18 +1847,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Recording'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Get recording details
       tags:
         - computer-use
@@ -1786,18 +1879,18 @@ paths:
           description: OK
           schema:
             type: file
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Download a recording
       tags:
         - computer-use
@@ -1823,15 +1916,15 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
+        '503':
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Start a new recording
       tags:
         - computer-use
@@ -1858,15 +1951,15 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Stop a recording
       tags:
         - computer-use
@@ -1886,6 +1979,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ScreenshotResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Take a screenshot
       tags:
         - computer-use
@@ -1917,6 +2018,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ScreenshotResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Take a compressed screenshot
       tags:
         - computer-use
@@ -1956,6 +2065,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ScreenshotResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Take a region screenshot
       tags:
         - computer-use
@@ -2007,6 +2124,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ScreenshotResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Take a compressed region screenshot
       tags:
         - computer-use
@@ -2035,6 +2160,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ComputerUseStatusResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get computer use status
       tags:
         - computer-use
@@ -2069,6 +2198,18 @@ paths:
       responses:
         '204':
           description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Delete a file or directory
       tags:
         - file-system
@@ -2089,6 +2230,18 @@ paths:
             items:
               $ref: '#/definitions/FileInfo'
             type: array
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: List files and directories
       tags:
         - file-system
@@ -2114,6 +2267,22 @@ paths:
           description: Multipart response with file parts and JSON error parts
           schema:
             $ref: '#/definitions/gin.H'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Download multiple files
       tags:
         - file-system
@@ -2126,6 +2295,10 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Upload multiple files
       tags:
         - file-system
@@ -2146,6 +2319,18 @@ paths:
           description: OK
           schema:
             type: file
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Download a file
       tags:
         - file-system
@@ -2173,6 +2358,10 @@ paths:
             items:
               $ref: '#/definitions/Match'
             type: array
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Find text in files
       tags:
         - file-system
@@ -2196,6 +2385,10 @@ paths:
       responses:
         '201':
           description: Created
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Create a folder
       tags:
         - file-system
@@ -2216,6 +2409,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/FileInfo'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get file information
       tags:
         - file-system
@@ -2237,6 +2442,22 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Move or rename file/directory
       tags:
         - file-system
@@ -2265,6 +2486,18 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Set file permissions
       tags:
         - file-system
@@ -2290,6 +2523,10 @@ paths:
             items:
               $ref: '#/definitions/ReplaceResult'
             type: array
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Replace text in files
       tags:
         - file-system
@@ -2315,6 +2552,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/SearchFilesResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Search files by pattern
       tags:
         - file-system
@@ -2340,6 +2581,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/gin.H'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Upload a file
       tags:
         - file-system
@@ -2361,6 +2606,18 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Add files to Git staging
       tags:
         - git
@@ -2382,6 +2639,18 @@ paths:
       responses:
         '204':
           description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Delete a branch
       tags:
         - git
@@ -2401,6 +2670,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ListBranchResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: List branches
       tags:
         - git
@@ -2421,6 +2698,18 @@ paths:
       responses:
         '201':
           description: Created
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Create a new branch
       tags:
         - git
@@ -2442,6 +2731,22 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Checkout branch or commit
       tags:
         - git
@@ -2465,6 +2770,26 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Clone a Git repository
       tags:
         - git
@@ -2488,6 +2813,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/GitCommitResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Commit changes
       tags:
         - git
@@ -2510,6 +2847,14 @@ paths:
             items:
               $ref: '#/definitions/GitCommitInfo'
             type: array
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get commit history
       tags:
         - git
@@ -2531,6 +2876,30 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Pull changes from remote
       tags:
         - git
@@ -2552,6 +2921,26 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Push changes to remote
       tags:
         - git
@@ -2572,6 +2961,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/GitStatus'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get Git status
       tags:
         - git
@@ -2618,6 +3019,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/CompletionList'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get code completions
       tags:
         - lsp
@@ -2639,6 +3044,10 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Notify document closed
       tags:
         - lsp
@@ -2660,6 +3069,10 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Notify document opened
       tags:
         - lsp
@@ -2692,6 +3105,10 @@ paths:
             items:
               $ref: '#/definitions/LspSymbol'
             type: array
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get document symbols
       tags:
         - lsp
@@ -2713,6 +3130,14 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Start LSP server
       tags:
         - lsp
@@ -2734,6 +3159,14 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Stop LSP server
       tags:
         - lsp
@@ -2766,6 +3199,10 @@ paths:
             items:
               $ref: '#/definitions/LspSymbol'
             type: array
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get workspace symbols
       tags:
         - lsp
@@ -2800,6 +3237,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/IsPortInUseResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Check if port is in use
       tags:
         - port
@@ -2824,6 +3265,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/CodeRunResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '408':
+          description: Request Timeout
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Execute code
       tags:
         - process
@@ -2847,6 +3300,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ExecuteResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '408':
+          description: Request Timeout
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Execute a command
       tags:
         - process
@@ -2862,6 +3323,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ListContextsResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: List all user-created interpreter contexts
       tags:
         - interpreter
@@ -2888,15 +3353,11 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '500':
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
       summary: Create a new interpreter context
       tags:
         - interpreter
@@ -2922,15 +3383,15 @@ paths:
         '400':
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Delete an interpreter context
       tags:
         - interpreter
@@ -2969,6 +3430,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/PtyListResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: List all PTY sessions
       tags:
         - process
@@ -2991,6 +3456,18 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/PtyCreateResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Create a new PTY session
       tags:
         - process
@@ -3011,6 +3488,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/gin.H'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Delete a PTY session
       tags:
         - process
@@ -3030,6 +3515,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/PtySessionInfo'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get PTY session information
       tags:
         - process
@@ -3047,6 +3540,10 @@ paths:
       responses:
         '101':
           description: Switching Protocols - WebSocket connection established
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Connect to PTY session via WebSocket
       tags:
         - process
@@ -3075,6 +3572,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/PtySessionInfo'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '410':
+          description: Gone
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Resize a PTY session
       tags:
         - process
@@ -3091,6 +3600,10 @@ paths:
             items:
               $ref: '#/definitions/Session'
             type: array
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: List all sessions
       tags:
         - process
@@ -3111,6 +3624,18 @@ paths:
       responses:
         '201':
           description: Created
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Create a new session
       tags:
         - process
@@ -3127,6 +3652,18 @@ paths:
       responses:
         '204':
           description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Delete a session
       tags:
         - process
@@ -3146,6 +3683,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Session'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get session details
       tags:
         - process
@@ -3171,6 +3716,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Command'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get session command details
       tags:
         - process
@@ -3201,6 +3754,22 @@ paths:
       responses:
         '204':
           description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '410':
+          description: Gone
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Send input to command
       tags:
         - process
@@ -3233,6 +3802,22 @@ paths:
           description: Log content (JSON for new SDKs, plain text for old SDKs)
           schema:
             $ref: '#/definitions/SessionCommandLogsResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get session command logs
       tags:
         - process
@@ -3265,6 +3850,22 @@ paths:
           description: Accepted
           schema:
             $ref: '#/definitions/SessionExecuteResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Execute command in session
       tags:
         - process
@@ -3279,6 +3880,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Session'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get entrypoint session details
       tags:
         - process
@@ -3301,6 +3910,14 @@ paths:
           description: Entrypoint log content
           schema:
             $ref: '#/definitions/SessionCommandLogsResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
       summary: Get entrypoint logs
       tags:
         - process

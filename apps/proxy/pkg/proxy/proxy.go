@@ -138,7 +138,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		common_errors.Recovery()(ctx)
 	})
 
-	router.Use(common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
+	router.Use(common_errors.NewErrorMiddleware("", func(ctx *gin.Context, err error) common_errors.ErrorResponse {
 		return common_errors.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
 			Message:    err.Error(),
@@ -188,12 +188,12 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 					}
 
 					if regexp.MustCompile(`^/snapshots/[\w-]+/build-logs$`).MatchString(ctx.Request.URL.Path) {
-						common_proxy.NewProxyRequestHandler(proxy.getSnapshotTarget, nil)(ctx)
+						common_proxy.NewProxyRequestHandler(proxy.getSnapshotTarget, nil, nil)(ctx)
 						return
 					}
 
 					if regexp.MustCompile(`^/sandboxes/[\w-]+/build-logs$`).MatchString(ctx.Request.URL.Path) {
-						common_proxy.NewProxyRequestHandler(proxy.getSandboxBuildTarget, nil)(ctx)
+						common_proxy.NewProxyRequestHandler(proxy.getSandboxBuildTarget, nil, nil)(ctx)
 						return
 					}
 				}
@@ -218,7 +218,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 					return nil
 				}
 
-				common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse)(ctx)
+				common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse, nil)(ctx)
 				return
 			}
 
@@ -232,7 +232,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 			return
 		}
 
-		common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil)(ctx)
+		common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil, nil)(ctx)
 	})
 
 	httpServer := &http.Server{

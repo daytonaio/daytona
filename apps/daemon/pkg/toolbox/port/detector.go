@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/cakturk/go-netstat/netstat"
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
@@ -92,6 +93,7 @@ func (d *portsDetector) GetPorts(c *gin.Context) {
 //	@Produce		json
 //	@Param			port	path		int	true	"Port number (3000-9999)"
 //	@Success		200		{object}	IsPortInUseResponse
+//	@Failure		400		{object}	common.ErrorResponse
 //	@Router			/port/{port}/in-use [get]
 //
 //	@id				IsPortInUse
@@ -100,12 +102,12 @@ func (d *portsDetector) IsPortInUse(c *gin.Context) {
 
 	port, err := strconv.Atoi(portParam)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("invalid port: must be a number between 3000 and 9999"))
+		c.Error(common_errors.NewBadRequestError(errors.New("invalid port: must be a number between 3000 and 9999")))
 		return
 	}
 
 	if port < 3000 || port > 9999 {
-		c.AbortWithError(http.StatusBadRequest, errors.New("port out of range: must be between 3000 and 9999"))
+		c.Error(common_errors.NewBadRequestError(errors.New("port out of range: must be between 3000 and 9999")))
 		return
 	}
 

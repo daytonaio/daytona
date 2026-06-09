@@ -31,6 +31,8 @@ import (
 //	@Produce		json
 //	@Param			request	body		ExecuteRequest	true	"Command execution request"
 //	@Success		200		{object}	ExecuteResponse
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		408		{object}	common.ErrorResponse
 //	@Router			/process/execute [post]
 //
 //	@id				ExecuteCommand
@@ -38,7 +40,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request ExecuteRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
-			c.Error(common_errors.NewBadRequestError(fmt.Errorf("invalid request body: %w", err)))
+			c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 			return
 		}
 
@@ -95,7 +97,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		exitCode, waitErr := childreap.Wait(cmd)
 		output := outBuf.Bytes()
 		if timeoutReached.Load() {
-			c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
+			c.Error(common.NewProcessExecutionTimeoutError("command execution timeout"))
 			return
 		}
 		if waitErr != nil {

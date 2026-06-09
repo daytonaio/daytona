@@ -40,8 +40,10 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.computer_use_stop_response import ComputerUseStopResponse
     from daytona_toolbox_api_client_async.models.create_context_request import CreateContextRequest
     from daytona_toolbox_api_client_async.models.create_session_request import CreateSessionRequest
+    from daytona_toolbox_api_client_async.models.daemon_error_code import DaemonErrorCode
     from daytona_toolbox_api_client_async.models.display_info import DisplayInfo
     from daytona_toolbox_api_client_async.models.display_info_response import DisplayInfoResponse
+    from daytona_toolbox_api_client_async.models.error_response import ErrorResponse
     from daytona_toolbox_api_client_async.models.execute_request import ExecuteRequest
     from daytona_toolbox_api_client_async.models.execute_response import ExecuteResponse
     from daytona_toolbox_api_client_async.models.file_info import FileInfo
@@ -135,8 +137,10 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ComputerUseStopResponse": "daytona_toolbox_api_client_async.models.computer_use_stop_response",
     "CreateContextRequest": "daytona_toolbox_api_client_async.models.create_context_request",
     "CreateSessionRequest": "daytona_toolbox_api_client_async.models.create_session_request",
+    "DaemonErrorCode": "daytona_toolbox_api_client_async.models.daemon_error_code",
     "DisplayInfo": "daytona_toolbox_api_client_async.models.display_info",
     "DisplayInfoResponse": "daytona_toolbox_api_client_async.models.display_info_response",
+    "ErrorResponse": "daytona_toolbox_api_client_async.models.error_response",
     "ExecuteRequest": "daytona_toolbox_api_client_async.models.execute_request",
     "ExecuteResponse": "daytona_toolbox_api_client_async.models.execute_response",
     "FileInfo": "daytona_toolbox_api_client_async.models.file_info",

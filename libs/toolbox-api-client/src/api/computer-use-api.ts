@@ -40,6 +40,8 @@ import type { ComputerUseStopResponse } from '../models';
 // @ts-ignore
 import type { DisplayInfoResponse } from '../models';
 // @ts-ignore
+import type { ErrorResponse } from '../models';
+// @ts-ignore
 import type { FindAccessibilityNodesRequest } from '../models';
 // @ts-ignore
 import type { KeyboardHotkeyRequest } from '../models';

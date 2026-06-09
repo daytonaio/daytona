@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,13 +22,14 @@ import (
 //	@Param			path	query	string	true	"Folder path to create"
 //	@Param			mode	query	string	true	"Octal permission mode (default: 0755)"
 //	@Success		201
+//	@Failure		400	{object}	common.ErrorResponse
 //	@Router			/files/folder [post]
 //
 //	@id				CreateFolder
 func CreateFolder(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {
-		c.AbortWithError(http.StatusBadRequest, errors.New("path is required"))
+		c.Error(common_errors.NewBadRequestError(errors.New("path is required")))
 		return
 	}
 
@@ -37,14 +39,14 @@ func CreateFolder(c *gin.Context) {
 	if mode != "" {
 		modeNum, err := strconv.ParseUint(mode, 8, 32)
 		if err != nil {
-			c.AbortWithError(http.StatusBadRequest, errors.New("invalid mode format"))
+			c.Error(common_errors.NewBadRequestError(errors.New("invalid mode format")))
 			return
 		}
 		perm = os.FileMode(modeNum)
 	}
 
 	if err := os.MkdirAll(path, perm); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.Error(common_errors.NewBadRequestError(err))
 		return
 	}
 

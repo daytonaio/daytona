@@ -47,8 +47,8 @@ module Daytona
       toolbox_api.add_files(DaytonaToolboxApiClient::GitAddRequest.new(path:, files:))
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to add files')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to add files: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to add files')
     end
 
     # Lists branches in the repository.
@@ -65,8 +65,8 @@ module Daytona
       toolbox_api.list_branches(path)
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to list branches')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to list branches: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to list branches')
     end
 
     # Clones a Git repository into the specified path. It supports
@@ -124,8 +124,8 @@ module Daytona
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to clone repository')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to clone repository: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to clone repository')
     end
 
     # Creates a new commit with the staged changes. Make sure to stage
@@ -158,8 +158,8 @@ module Daytona
       GitCommitResponse.new(sha: response._hash)
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to commit changes')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to commit changes: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to commit changes')
     end
 
     # Pushes all local commits on the current branch to the remote
@@ -189,8 +189,8 @@ module Daytona
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to push changes')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to push changes: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to push changes')
     end
 
     # Pulls changes from the remote repository. If the remote repository requires authentication,
@@ -220,8 +220,8 @@ module Daytona
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to pull changes')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to pull changes: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to pull changes')
     end
 
     # Gets the current Git repository status.
@@ -240,8 +240,8 @@ module Daytona
       toolbox_api.get_status(path)
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to get status')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to get status: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to get status')
     end
 
     # Checkout branch in the repository.
@@ -261,8 +261,8 @@ module Daytona
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to checkout branch')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to checkout branch: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to checkout branch')
     end
 
     # Create branch in the repository.
@@ -283,8 +283,8 @@ module Daytona
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to create branch')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to create branch: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to create branch')
     end
 
     # Delete branch in the repository.
@@ -304,8 +304,8 @@ module Daytona
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to delete branch')
-    rescue StandardError => e
-      raise Sdk::Error, "Failed to delete branch: #{e.message}"
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to delete branch')
     end
 
     instrument :add, :branches, :clone, :commit, :push, :pull, :status,
@@ -318,17 +318,7 @@ module Daytona
     attr_reader :otel_state
 
     def map_api_error(api_error, prefix)
-      msg = "#{prefix}: #{api_error.message}"
-      case api_error.code
-      when 400 then Sdk::ValidationError.new(msg)
-      when 401 then Sdk::AuthenticationError.new(msg)
-      when 403 then Sdk::ForbiddenError.new(msg)
-      when 404 then Sdk::NotFoundError.new(msg)
-      when 409 then Sdk::ConflictError.new(msg)
-      when 429 then Sdk::RateLimitError.new(msg)
-      when 500..599 then Sdk::ServerError.new(msg)
-      else Sdk::Error.new(msg)
-      end
+      Sdk.wrap_error(api_error, prefix)
     end
   end
 end

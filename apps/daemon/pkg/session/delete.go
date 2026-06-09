@@ -5,20 +5,20 @@ package session
 
 import (
 	"context"
-	"errors"
 	"os"
 	"syscall"
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/pkg/childreap"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/shirou/gopsutil/v4/process"
 )
 
 func (s *SessionService) Delete(ctx context.Context, sessionId string) error {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
-		return common_errors.NewNotFoundError(errors.New("session not found"))
+		return common.NewProcessNotFoundError("session not found")
 	}
 
 	// Terminate process group first with signals (SIGTERM -> SIGKILL)

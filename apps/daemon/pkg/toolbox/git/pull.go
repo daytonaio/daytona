@@ -23,13 +23,19 @@ import (
 //	@Produce		json
 //	@Param			request	body	GitRepoRequest	true	"Pull request"
 //	@Success		200
+//	@Failure		400	{object}	common.ErrorResponse
+//	@Failure		401	{object}	common.ErrorResponse
+//	@Failure		403	{object}	common.ErrorResponse
+//	@Failure		404	{object}	common.ErrorResponse
+//	@Failure		409	{object}	common.ErrorResponse
+//	@Failure		500	{object}	common.ErrorResponse
 //	@Router			/git/pull [post]
 //
 //	@id				PullChanges
 func PullChanges(c *gin.Context) {
 	var req GitRepoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
+		c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
 	}
 

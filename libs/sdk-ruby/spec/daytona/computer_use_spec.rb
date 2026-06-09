@@ -27,7 +27,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:start_computer_use).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:start_computer_use).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                         message: 'err'))
 
       expect { computer_use.start }.to raise_error(Daytona::Sdk::Error, /Failed to start computer use: err/)
     end
@@ -42,7 +43,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:stop_computer_use).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:stop_computer_use).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                        message: 'err'))
 
       expect { computer_use.stop }.to raise_error(Daytona::Sdk::Error, /Failed to stop computer use: err/)
     end
@@ -57,7 +59,9 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:get_computer_use_status).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_computer_use_status).and_raise(DaytonaToolboxApiClient::ApiError.new(
+                                                                          code: 500, message: 'err'
+                                                                        ))
 
       expect { computer_use.status }.to raise_error(Daytona::Sdk::Error, /Failed to get computer use status: err/)
     end
@@ -72,7 +76,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:get_process_status).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_process_status).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                         message: 'err'))
 
       expect { computer_use.get_process_status(process_name: 'xvfb') }
         .to raise_error(Daytona::Sdk::Error, /Failed to get process status: err/)
@@ -88,7 +93,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:restart_process).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:restart_process).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                      message: 'err'))
 
       expect { computer_use.restart_process(process_name: 'xfce4') }
         .to raise_error(Daytona::Sdk::Error, /Failed to restart process: err/)
@@ -104,7 +110,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:get_process_logs).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_process_logs).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                       message: 'err'))
 
       expect { computer_use.get_process_logs(process_name: 'novnc') }
         .to raise_error(Daytona::Sdk::Error, /Failed to get process logs: err/)
@@ -120,7 +127,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:get_process_errors).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_process_errors).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                         message: 'err'))
 
       expect { computer_use.get_process_errors(process_name: 'x11vnc') }
         .to raise_error(Daytona::Sdk::Error, /Failed to get process errors: err/)
@@ -138,7 +146,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps position errors' do
-      allow(toolbox_api).to receive(:get_mouse_position).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_mouse_position).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                         message: 'err'))
 
       expect { mouse.position }.to raise_error(Daytona::Sdk::Error, /Failed to get mouse position: err/)
     end
@@ -155,7 +164,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps move errors' do
-      allow(toolbox_api).to receive(:move_mouse).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:move_mouse).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                 message: 'err'))
 
       expect { mouse.move(x: 1, y: 2) }.to raise_error(Daytona::Sdk::Error, /Failed to move mouse: err/)
     end
@@ -174,7 +184,7 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps click errors' do
-      allow(toolbox_api).to receive(:click).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:click).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500, message: 'err'))
 
       expect { mouse.click(x: 1, y: 2) }.to raise_error(Daytona::Sdk::Error, /Failed to click mouse: err/)
     end
@@ -191,7 +201,7 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps drag errors' do
-      allow(toolbox_api).to receive(:drag).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:drag).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500, message: 'err'))
 
       expect { mouse.drag(start_x: 1, start_y: 2, end_x: 3, end_y: 4) }
         .to raise_error(Daytona::Sdk::Error, /Failed to drag mouse: err/)
@@ -208,7 +218,7 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps scroll errors' do
-      allow(toolbox_api).to receive(:scroll).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:scroll).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500, message: 'err'))
 
       expect { mouse.scroll(x: 1, y: 2, direction: 'down') }
         .to raise_error(Daytona::Sdk::Error, /Failed to scroll mouse: err/)
@@ -230,7 +240,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps type errors' do
-      allow(toolbox_api).to receive(:type_text).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:type_text).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                message: 'err'))
 
       expect { keyboard.type(text: 'Hello') }.to raise_error(Daytona::Sdk::Error, /Failed to type text: err/)
     end
@@ -247,7 +258,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps press errors' do
-      allow(toolbox_api).to receive(:press_key).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:press_key).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                message: 'err'))
 
       expect { keyboard.press(key: 'c', modifiers: ['ctrl']) }
         .to raise_error(Daytona::Sdk::Error, /Failed to press key: err/)
@@ -264,7 +276,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps hotkey errors' do
-      allow(toolbox_api).to receive(:press_hotkey).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:press_hotkey).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                   message: 'err'))
 
       expect { keyboard.hotkey(keys: 'ctrl+c') }.to raise_error(Daytona::Sdk::Error, /Failed to press hotkey: err/)
     end
@@ -282,7 +295,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps full screen screenshot errors' do
-      allow(toolbox_api).to receive(:take_screenshot).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:take_screenshot).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                      message: 'err'))
 
       expect { screenshot.take_full_screen }.to raise_error(Daytona::Sdk::Error, /Failed to take screenshot: err/)
     end
@@ -297,7 +311,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps region screenshot errors' do
-      allow(toolbox_api).to receive(:take_region_screenshot).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:take_region_screenshot).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                             message: 'err'))
 
       expect { screenshot.take_region(region: region) }
         .to raise_error(Daytona::Sdk::Error, /Failed to take region screenshot: err/)
@@ -323,7 +338,9 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps compressed screenshot errors' do
-      allow(toolbox_api).to receive(:take_compressed_screenshot).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:take_compressed_screenshot).and_raise(DaytonaToolboxApiClient::ApiError.new(
+                                                                             code: 500, message: 'err'
+                                                                           ))
 
       expect do
         screenshot.take_compressed
@@ -331,7 +348,9 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps compressed region screenshot errors' do
-      allow(toolbox_api).to receive(:take_compressed_region_screenshot).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:take_compressed_region_screenshot).and_raise(DaytonaToolboxApiClient::ApiError.new(
+                                                                                    code: 500, message: 'err'
+                                                                                  ))
 
       expect { screenshot.take_compressed_region(region: region) }
         .to raise_error(Daytona::Sdk::Error, /Failed to take compressed region screenshot: err/)
@@ -349,7 +368,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps info errors' do
-      allow(toolbox_api).to receive(:get_display_info).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_display_info).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                       message: 'err'))
 
       expect { display.info }.to raise_error(Daytona::Sdk::Error, /Failed to get display info: err/)
     end
@@ -362,7 +382,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps window errors' do
-      allow(toolbox_api).to receive(:get_windows).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_windows).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                  message: 'err'))
 
       expect { display.windows }.to raise_error(Daytona::Sdk::Error, /Failed to get windows: err/)
     end
@@ -426,7 +447,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps accessibility errors' do
-      allow(toolbox_api).to receive(:get_accessibility_tree).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_accessibility_tree).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                             message: 'err'))
 
       expect { accessibility.get_tree }
         .to raise_error(Daytona::Sdk::Error, /Failed to get accessibility tree: err/)
@@ -455,7 +477,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps start errors' do
-      allow(toolbox_api).to receive(:start_recording).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:start_recording).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                      message: 'err'))
 
       expect { recording.start }.to raise_error(Daytona::Sdk::Error, /Failed to start recording: err/)
     end
@@ -471,7 +494,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps stop errors' do
-      allow(toolbox_api).to receive(:stop_recording).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:stop_recording).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                     message: 'err'))
 
       expect { recording.stop(id: 'rec-1') }.to raise_error(Daytona::Sdk::Error, /Failed to stop recording: err/)
     end
@@ -484,7 +508,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps list errors' do
-      allow(toolbox_api).to receive(:list_recordings).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:list_recordings).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                      message: 'err'))
 
       expect { recording.list }.to raise_error(Daytona::Sdk::Error, /Failed to list recordings: err/)
     end
@@ -497,7 +522,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps get errors' do
-      allow(toolbox_api).to receive(:get_recording).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_recording).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'err'))
 
       expect { recording.get(id: 'rec-1') }.to raise_error(Daytona::Sdk::Error, /Failed to get recording: err/)
     end
@@ -511,7 +537,8 @@ RSpec.describe Daytona::ComputerUse do
     end
 
     it 'wraps delete errors' do
-      allow(toolbox_api).to receive(:delete_recording).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:delete_recording).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                       message: 'err'))
 
       expect { recording.delete(id: 'rec-1') }.to raise_error(Daytona::Sdk::Error, /Failed to delete recording: err/)
     end

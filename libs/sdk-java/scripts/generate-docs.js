@@ -75,21 +75,26 @@ const DOC_TARGETS = [
     outputFile: 'errors.mdx',
     logName: 'Exception Classes',
     title: 'Errors',
-    classes: [
-      { file: 'exception/DaytonaException.java', className: 'DaytonaException' },
-      { file: 'exception/DaytonaAuthenticationException.java', className: 'DaytonaAuthenticationException' },
-      { file: 'exception/DaytonaBadRequestException.java', className: 'DaytonaBadRequestException' },
-      { file: 'exception/DaytonaConflictException.java', className: 'DaytonaConflictException' },
-      { file: 'exception/DaytonaConnectionException.java', className: 'DaytonaConnectionException' },
-      { file: 'exception/DaytonaForbiddenException.java', className: 'DaytonaForbiddenException' },
-      { file: 'exception/DaytonaNotFoundException.java', className: 'DaytonaNotFoundException' },
-      { file: 'exception/DaytonaRateLimitException.java', className: 'DaytonaRateLimitException' },
-      { file: 'exception/DaytonaServerException.java', className: 'DaytonaServerException' },
-      { file: 'exception/DaytonaTimeoutException.java', className: 'DaytonaTimeoutException' },
-      { file: 'exception/DaytonaValidationException.java', className: 'DaytonaValidationException' },
-    ],
+    classes: discoverExceptionClasses,
   },
 ]
+
+// Auto-discover every Daytona*Exception.java in the exception/ directory so
+// new typed exceptions are picked up without editing this script. Base
+// classes are listed first; the rest follow alphabetically.
+function discoverExceptionClasses() {
+  const dir = path.join(SDK_SOURCE_DIR, 'exception')
+  const files = fs.readdirSync(dir).filter((name) => name.startsWith('Daytona') && name.endsWith('Exception.java'))
+  const order = (name) => {
+    if (name === 'DaytonaException.java') return 0
+    return 1
+  }
+  files.sort((a, b) => order(a) - order(b) || a.localeCompare(b))
+  return files.map((file) => ({
+    file: `exception/${file}`,
+    className: file.replace(/\.java$/, ''),
+  }))
+}
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true })
@@ -583,8 +588,9 @@ function parseInnerClass(parentSource, parentClassName, innerClassName) {
 function generateTarget(target) {
   console.log(`📝 Generating docs for ${target.logName}...`)
 
+  const classes = typeof target.classes === 'function' ? target.classes() : target.classes
   const classDocs = []
-  for (const classTarget of target.classes) {
+  for (const classTarget of classes) {
     const parsed = parseTopClass(classTarget.file, classTarget.className)
     classDocs.push(parsed)
 

@@ -90,9 +90,12 @@ module Daytona
     #
     # @param id [String]
     # @return [Daytona::Sandbox]
+    # @raise [Daytona::Sdk::Error]
     def get(id)
       sandbox_dto = sandbox_api.get_sandbox(id)
       to_sandbox(sandbox_dto:)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, "Failed to get sandbox #{id}")
     end
 
     # Iterates over Sandboxes matching the given query.
@@ -178,6 +181,8 @@ module Daytona
       }.compact
 
       sandbox_api.list_sandboxes(opts)
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to list sandboxes')
     end
 
     instrument :fetch_sandbox_page, component: 'Daytona.list'
@@ -267,6 +272,8 @@ module Daytona
       end
 
       sandbox
+    rescue *Sdk::API_ERROR_CLASSES => e
+      raise Sdk.wrap_error(e, 'Failed to create sandbox')
     end
 
     # @return [void]

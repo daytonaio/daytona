@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +27,7 @@ func (s *server) Initialize(otelServiceName string, entrypointLogFilePath string
 	return func(ctx *gin.Context) {
 		var req InitializeRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, err)
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 
@@ -34,7 +35,7 @@ func (s *server) Initialize(otelServiceName string, entrypointLogFilePath string
 
 		err := s.initTelemetry(ctx.Request.Context(), otelServiceName, entrypointLogFilePath, organizationId, regionId, snapshot)
 		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, err)
+			ctx.Error(common_errors.NewBadRequestError(err))
 			return
 		}
 
@@ -75,7 +76,7 @@ func (s *server) GetWorkDir(ctx *gin.Context) {
 func (s *server) GetUserHomeDir(ctx *gin.Context) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.Error(common_errors.NewInternalServerError(err))
 		return
 	}
 	userHomeDirResponse := UserHomeDirResponse{

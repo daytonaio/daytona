@@ -20,7 +20,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:add_files).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:add_files).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                message: 'err'))
 
       expect { git.add('/repo', ['f']) }.to raise_error(Daytona::Sdk::Error, /Failed to add files: err/)
     end
@@ -35,7 +36,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:list_branches).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:list_branches).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'err'))
 
       expect { git.branches('/repo') }.to raise_error(Daytona::Sdk::Error, /Failed to list branches: err/)
     end
@@ -76,7 +78,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:clone_repository).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:clone_repository).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                       message: 'err'))
 
       expect { git.clone(url: 'x', path: 'y') }.to raise_error(Daytona::Sdk::Error, /Failed to clone repository: err/)
     end
@@ -109,7 +112,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:commit_changes).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:commit_changes).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                     message: 'err'))
 
       expect { git.commit(path: '/r', message: 'm', author: 'a', email: 'e') }
         .to raise_error(Daytona::Sdk::Error, /Failed to commit changes: err/)
@@ -130,7 +134,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:push_changes).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:push_changes).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                   message: 'err'))
 
       expect { git.push(path: '/r') }.to raise_error(Daytona::Sdk::Error, /Failed to push changes: err/)
     end
@@ -150,7 +155,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:pull_changes).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:pull_changes).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                   message: 'err'))
 
       expect { git.pull(path: '/r') }.to raise_error(Daytona::Sdk::Error, /Failed to pull changes: err/)
     end
@@ -165,7 +171,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:get_status).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:get_status).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                 message: 'err'))
 
       expect { git.status('/r') }.to raise_error(Daytona::Sdk::Error, /Failed to get status: err/)
     end
@@ -184,7 +191,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:checkout_branch).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:checkout_branch).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                      message: 'err'))
 
       expect { git.checkout_branch('/r', 'b') }.to raise_error(Daytona::Sdk::Error, /Failed to checkout branch: err/)
     end
@@ -203,7 +211,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors' do
-      allow(toolbox_api).to receive(:create_branch).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:create_branch).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'err'))
 
       expect { git.create_branch('/r', 'b') }.to raise_error(Daytona::Sdk::Error, /Failed to create branch: err/)
     end
@@ -222,7 +231,8 @@ RSpec.describe Daytona::Git do
     end
 
     it 'wraps errors from the API call' do
-      allow(toolbox_api).to receive(:delete_branch).and_raise(StandardError, 'err')
+      allow(toolbox_api).to receive(:delete_branch).and_raise(DaytonaToolboxApiClient::ApiError.new(code: 500,
+                                                                                                    message: 'err'))
 
       expect { git.delete_branch('/r', 'b') }.to raise_error(Daytona::Sdk::Error, /Failed to delete branch: err/)
     end

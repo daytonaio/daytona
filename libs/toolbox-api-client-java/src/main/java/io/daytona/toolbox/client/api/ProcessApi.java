@@ -31,6 +31,7 @@ import io.daytona.toolbox.client.model.CodeRunRequest;
 import io.daytona.toolbox.client.model.CodeRunResponse;
 import io.daytona.toolbox.client.model.Command;
 import io.daytona.toolbox.client.model.CreateSessionRequest;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import io.daytona.toolbox.client.model.ExecuteRequest;
 import io.daytona.toolbox.client.model.ExecuteResponse;
 import io.daytona.toolbox.client.model.PtyCreateRequest;
@@ -98,6 +99,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call codeRunCall(@javax.annotation.Nonnull CodeRunRequest request, final ApiCallback _callback) throws ApiException {
@@ -167,6 +171,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public CodeRunResponse codeRun(@javax.annotation.Nonnull CodeRunRequest request) throws ApiException {
@@ -185,6 +192,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<CodeRunResponse> codeRunWithHttpInfo(@javax.annotation.Nonnull CodeRunRequest request) throws ApiException {
@@ -205,6 +215,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call codeRunAsync(@javax.annotation.Nonnull CodeRunRequest request, final ApiCallback<CodeRunResponse> _callback) throws ApiException {
@@ -225,6 +238,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call connectPtySessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
@@ -254,6 +268,7 @@ public class ProcessApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "*/*"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -292,6 +307,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public void connectPtySession(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -309,6 +325,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> connectPtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -328,6 +345,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call connectPtySessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Void> _callback) throws ApiException {
@@ -347,6 +365,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call createPtySessionCall(@javax.annotation.Nonnull PtyCreateRequest request, final ApiCallback _callback) throws ApiException {
@@ -416,6 +437,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public PtyCreateResponse createPtySession(@javax.annotation.Nonnull PtyCreateRequest request) throws ApiException {
@@ -434,6 +458,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<PtyCreateResponse> createPtySessionWithHttpInfo(@javax.annotation.Nonnull PtyCreateRequest request) throws ApiException {
@@ -454,6 +481,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call createPtySessionAsync(@javax.annotation.Nonnull PtyCreateRequest request, final ApiCallback<PtyCreateResponse> _callback) throws ApiException {
@@ -474,6 +504,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call createSessionCall(@javax.annotation.Nonnull CreateSessionRequest request, final ApiCallback _callback) throws ApiException {
@@ -502,6 +535,7 @@ public class ProcessApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -541,6 +575,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public void createSession(@javax.annotation.Nonnull CreateSessionRequest request) throws ApiException {
@@ -558,6 +595,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> createSessionWithHttpInfo(@javax.annotation.Nonnull CreateSessionRequest request) throws ApiException {
@@ -577,6 +617,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call createSessionAsync(@javax.annotation.Nonnull CreateSessionRequest request, final ApiCallback<Void> _callback) throws ApiException {
@@ -596,6 +639,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deletePtySessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
@@ -665,6 +710,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public Map<String, Object> deletePtySession(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -683,6 +730,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Map<String, Object>> deletePtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -703,6 +752,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deletePtySessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
@@ -723,6 +774,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deleteSessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
@@ -752,6 +806,7 @@ public class ProcessApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "*/*"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -790,6 +845,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public void deleteSession(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -807,6 +865,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> deleteSessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -826,6 +887,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deleteSessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Void> _callback) throws ApiException {
@@ -845,6 +909,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call executeCommandCall(@javax.annotation.Nonnull ExecuteRequest request, final ApiCallback _callback) throws ApiException {
@@ -914,6 +980,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
      </table>
      */
     public ExecuteResponse executeCommand(@javax.annotation.Nonnull ExecuteRequest request) throws ApiException {
@@ -932,6 +1000,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ExecuteResponse> executeCommandWithHttpInfo(@javax.annotation.Nonnull ExecuteRequest request) throws ApiException {
@@ -952,6 +1022,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 408 </td><td> Request Timeout </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call executeCommandAsync(@javax.annotation.Nonnull ExecuteRequest request, final ApiCallback<ExecuteResponse> _callback) throws ApiException {
@@ -972,6 +1044,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getEntrypointLogsCall(@javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
@@ -1040,6 +1114,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public SessionCommandLogsResponse getEntrypointLogs(@javax.annotation.Nullable Boolean follow) throws ApiException {
@@ -1058,6 +1134,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<SessionCommandLogsResponse> getEntrypointLogsWithHttpInfo(@javax.annotation.Nullable Boolean follow) throws ApiException {
@@ -1078,6 +1156,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Entrypoint log content </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getEntrypointLogsAsync(@javax.annotation.Nullable Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
@@ -1097,6 +1177,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getEntrypointSessionCall(final ApiCallback _callback) throws ApiException {
@@ -1159,6 +1241,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Session getEntrypointSession() throws ApiException {
@@ -1176,6 +1260,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Session> getEntrypointSessionWithHttpInfo() throws ApiException {
@@ -1195,6 +1281,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getEntrypointSessionAsync(final ApiCallback<Session> _callback) throws ApiException {
@@ -1215,6 +1303,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getPtySessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
@@ -1284,6 +1374,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public PtySessionInfo getPtySession(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -1302,6 +1394,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<PtySessionInfo> getPtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -1322,6 +1416,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getPtySessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
@@ -1342,6 +1438,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSessionCall(@javax.annotation.Nonnull String sessionId, final ApiCallback _callback) throws ApiException {
@@ -1411,6 +1509,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Session getSession(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -1429,6 +1529,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Session> getSessionWithHttpInfo(@javax.annotation.Nonnull String sessionId) throws ApiException {
@@ -1449,6 +1551,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSessionAsync(@javax.annotation.Nonnull String sessionId, final ApiCallback<Session> _callback) throws ApiException {
@@ -1470,6 +1574,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSessionCommandCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, final ApiCallback _callback) throws ApiException {
@@ -1546,6 +1652,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public Command getSessionCommand(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId) throws ApiException {
@@ -1565,6 +1673,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Command> getSessionCommandWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId) throws ApiException {
@@ -1586,6 +1696,8 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSessionCommandAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, final ApiCallback<Command> _callback) throws ApiException {
@@ -1608,6 +1720,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Forbidden </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSessionCommandLogsCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow, final ApiCallback _callback) throws ApiException {
@@ -1690,6 +1806,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Forbidden </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public SessionCommandLogsResponse getSessionCommandLogs(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow) throws ApiException {
@@ -1710,6 +1830,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Forbidden </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<SessionCommandLogsResponse> getSessionCommandLogsWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow) throws ApiException {
@@ -1732,6 +1856,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Log content (JSON for new SDKs, plain text for old SDKs) </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> Forbidden </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getSessionCommandLogsAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nullable Boolean follow, final ApiCallback<SessionCommandLogsResponse> _callback) throws ApiException {
@@ -1751,6 +1879,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listPtySessionsCall(final ApiCallback _callback) throws ApiException {
@@ -1813,6 +1942,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public PtyListResponse listPtySessions() throws ApiException {
@@ -1830,6 +1960,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<PtyListResponse> listPtySessionsWithHttpInfo() throws ApiException {
@@ -1849,6 +1980,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listPtySessionsAsync(final ApiCallback<PtyListResponse> _callback) throws ApiException {
@@ -1868,6 +2000,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSessionsCall(final ApiCallback _callback) throws ApiException {
@@ -1930,6 +2063,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public List<Session> listSessions() throws ApiException {
@@ -1947,6 +2081,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<List<Session>> listSessionsWithHttpInfo() throws ApiException {
@@ -1966,6 +2101,7 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSessionsAsync(final ApiCallback<List<Session>> _callback) throws ApiException {
@@ -1987,6 +2123,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call resizePtySessionCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request, final ApiCallback _callback) throws ApiException {
@@ -2063,6 +2202,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public PtySessionInfo resizePtySession(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request) throws ApiException {
@@ -2082,6 +2224,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<PtySessionInfo> resizePtySessionWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request) throws ApiException {
@@ -2103,6 +2248,9 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call resizePtySessionAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull PtyResizeRequest request, final ApiCallback<PtySessionInfo> _callback) throws ApiException {
@@ -2125,6 +2273,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call sendInputCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request, final ApiCallback _callback) throws ApiException {
@@ -2155,6 +2307,7 @@ public class ProcessApi {
         Map<String, Object> localVarFormParams = new HashMap<String, Object>();
 
         final String[] localVarAccepts = {
+            "*/*"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -2206,6 +2359,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public void sendInput(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request) throws ApiException {
@@ -2225,6 +2382,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> sendInputWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request) throws ApiException {
@@ -2246,6 +2407,10 @@ public class ProcessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 204 </td><td> No Content </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 410 </td><td> Gone </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call sendInputAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull String commandId, @javax.annotation.Nonnull SessionSendInputRequest request, final ApiCallback<Void> _callback) throws ApiException {
@@ -2267,6 +2432,10 @@ public class ProcessApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call sessionExecuteCommandCall(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request, final ApiCallback _callback) throws ApiException {
@@ -2344,6 +2513,10 @@ public class ProcessApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public SessionExecuteResponse sessionExecuteCommand(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request) throws ApiException {
@@ -2364,6 +2537,10 @@ public class ProcessApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<SessionExecuteResponse> sessionExecuteCommandWithHttpInfo(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request) throws ApiException {
@@ -2386,6 +2563,10 @@ public class ProcessApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 202 </td><td> Accepted </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> Bad Request </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> Not Found </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Conflict </td><td>  -  </td></tr>
+        <tr><td> 500 </td><td> Internal Server Error </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call sessionExecuteCommandAsync(@javax.annotation.Nonnull String sessionId, @javax.annotation.Nonnull SessionExecuteRequest request, final ApiCallback<SessionExecuteResponse> _callback) throws ApiException {

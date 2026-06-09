@@ -24,6 +24,7 @@ import io.daytona.toolbox.client.model.ComputerUseStartResponse;
 import io.daytona.toolbox.client.model.ComputerUseStatusResponse;
 import io.daytona.toolbox.client.model.ComputerUseStopResponse;
 import io.daytona.toolbox.client.model.DisplayInfoResponse;
+import io.daytona.toolbox.client.model.ErrorResponse;
 import java.io.File;
 import io.daytona.toolbox.client.model.FindAccessibilityNodesRequest;
 import io.daytona.toolbox.client.model.KeyboardHotkeyRequest;
