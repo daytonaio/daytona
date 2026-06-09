@@ -107,6 +107,7 @@ export class DockerRegistryController {
 
   @Get('registry-push-access')
   @HttpCode(200)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @ApiOperation({
     summary: 'Get temporary registry access for pushing snapshots',
     operationId: 'getTransientPushAccess',

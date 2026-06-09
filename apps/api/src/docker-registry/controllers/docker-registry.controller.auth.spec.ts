@@ -57,7 +57,9 @@ describe('[AUTH] DockerRegistryController', () => {
     ])
     expectArrayMatch(getAuthContextGuards(DockerRegistryController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(DockerRegistryController, methodName)).toBeUndefined()
-    expect(getRequiredOrganizationResourcePermissions(DockerRegistryController, methodName)).toBeUndefined()
+    expectArrayMatch(getRequiredOrganizationResourcePermissions(DockerRegistryController, methodName), [
+      OrganizationResourcePermission.WRITE_SNAPSHOTS,
+    ])
   })
 
   it('findOne', () => {

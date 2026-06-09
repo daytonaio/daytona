@@ -14,6 +14,8 @@ import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
+import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
+import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 
 @Controller('object-storage')
 @ApiTags('object-storage')
@@ -28,6 +30,7 @@ export class ObjectStorageController {
 
   @Get('push-access')
   @HttpCode(200)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @ApiOperation({
     summary: 'Get temporary storage access for pushing objects',
     operationId: 'getPushAccess',
