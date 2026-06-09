@@ -69,13 +69,13 @@ Or run outside a git repo to get a blank workspace.
 
 #### Flags
 
-| Flag                | Description                                            |
-| ------------------- | ----------------------------------------------------- |
-| `--daytona`         | Run tools inside a Daytona sandbox                     |
+| Flag                | Description                                                         |
+| ------------------- | ------------------------------------------------------------------- |
+| `--daytona`         | Run tools inside a Daytona sandbox                                  |
 | `--repo <url>`      | Git repo to clone into the sandbox (defaults to the repo you're in) |
-| `--branch <name>`   | Branch to clone (defaults to your current branch)    |
-| `--snapshot <name>` | Choose a Daytona snapshot / base image                |
-| `--public`          | Create a public sandbox so preview URLs need no token |
+| `--branch <name>`   | Branch to clone (defaults to your current branch)                   |
+| `--snapshot <name>` | Choose a Daytona snapshot / base image                              |
+| `--public`          | Create a public sandbox so preview URLs need no token               |
 
 #### Slash commands
 
@@ -114,15 +114,15 @@ All network git operations (clone/push) run **inside the sandbox** through Dayto
 
 ### Tools
 
-| Tool                | What it does                                                                    |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `bash` (+ user `!`) | Run a command in the sandbox; backgrounded processes (`&`) don't hang the agent |
-| `read`              | Read a file from the sandbox                                                    |
-| `write`             | Write a file to the sandbox                                                     |
-| `edit`              | Edit a file (download → modify → upload; preserves Pi's exact-match semantics)  |
-| `ls`                | List a sandbox directory                                                        |
-| `find`              | Find files by glob inside the sandbox (gitignore-aware, supports path globs)    |
-| `grep`              | Search file contents inside the sandbox                                         |
+| Tool                | What it does                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `bash` (+ user `!`) | Run a command in the sandbox; backgrounded processes (`&`) don't hang the agent    |
+| `read`              | Read a file from the sandbox                                                       |
+| `write`             | Write a file to the sandbox                                                        |
+| `edit`              | Edit a file (download → modify → upload; preserves Pi's exact-match semantics)     |
+| `ls`                | List a sandbox directory                                                           |
+| `find`              | Find files by glob inside the sandbox (gitignore-aware, supports path globs)       |
+| `grep`              | Search file contents inside the sandbox                                            |
 | `preview_url(port)` | Get a public preview URL for a port — the agent calls this after starting a server |
 
 ## Development
