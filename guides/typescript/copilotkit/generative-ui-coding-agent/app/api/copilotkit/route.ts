@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { CopilotRuntime, copilotRuntimeNextJSAppRouterEndpoint } from '@copilotkit/runtime'
 import { BuiltInAgent, defineTool } from '@copilotkit/runtime/v2'
 import { Daytona } from '@daytona/sdk'
