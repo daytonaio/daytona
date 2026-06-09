@@ -188,7 +188,7 @@ function AccessRequiredPage({ pageTitle, requiredAccess }: { pageTitle: ReactNod
               <ShieldAlert />
             </EmptyMedia>
             <EmptyTitle>You don&apos;t have access to this page</EmptyTitle>
-            <EmptyDescription>Ask your organization administrator to grant you the required access.</EmptyDescription>
+            <EmptyDescription>Ask your organization owner to grant you the required access.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <div className="text-xs font-medium text-muted-foreground">Required access</div>
