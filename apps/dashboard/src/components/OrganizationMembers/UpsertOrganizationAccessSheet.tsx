@@ -18,8 +18,8 @@ import {
   SheetDescription,
   SheetFooter,
   SheetHeader,
-  SheetTrigger,
   SheetTitle,
+  SheetTrigger,
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useOrganizationRolesQuery } from '@/hooks/queries/useOrganizationRolesQuery'
@@ -28,13 +28,13 @@ import { useForm } from '@tanstack/react-form'
 import { AlertTriangle } from 'lucide-react'
 import React, {
   Ref,
-  type ReactNode,
   useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from 'react'
 import { z } from 'zod'
 
@@ -236,7 +236,7 @@ export const UpsertOrganizationAccessSheet: React.FC<UpsertOrganizationAccessShe
       {trigger === undefined ? (
         <SheetTrigger asChild>
           {isCreateMode ? (
-            <CreateResourceButton resource="Member" className={className} disabled={disabled}>
+            <CreateResourceButton resource="Member" className={className} disabled={disabled} label="Invite">
               Member
             </CreateResourceButton>
           ) : (
