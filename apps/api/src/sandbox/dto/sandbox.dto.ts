@@ -17,7 +17,8 @@ import { GpuType } from '../enums/gpu-type.enum'
 export class SandboxVolume {
   @ApiProperty({
     description: 'The ID of the volume',
-    example: 'volume123',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    format: 'uuid',
   })
   // Must be the volume UUID, never a name. This value is forwarded to the runner
   // and used to build the host bind-mount source (/mnt/daytona-volume-<volumeId>);

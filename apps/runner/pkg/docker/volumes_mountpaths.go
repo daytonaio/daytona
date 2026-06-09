@@ -40,10 +40,12 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		if _, ok := uniqueMounts[volumeIdPrefixed]; !ok {
 			baseMountPath := filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
 			// Defense in depth: the volumeId is server-controlled (a UUID), but if a
-			// traversal string ever reached here it would escape the mount base
-			// (e.g. "../../.." -> "/"). Confine baseMountPath to mountBase, same as
-			// the subpath check below.
-			if baseMountPath != mountBase && !strings.HasPrefix(baseMountPath, mountBase+string(os.PathSeparator)) {
+			// traversal string or separator ever reached here it could escape the
+			// mount base (e.g. "/.." -> "/mnt", "../../.." -> "/") or collide with
+			// another volume's path (e.g. "/../daytona-volume-other"). Require the
+			// resolved path to be a direct child of mountBase whose final segment is
+			// exactly the prefixed volumeId.
+			if filepath.Dir(baseMountPath) != mountBase || filepath.Base(baseMountPath) != volumeIdPrefixed {
 				return nil, fmt.Errorf("invalid volumeId %q: resolves outside volume mount base", vol.VolumeId)
 			}
 			uniqueMounts[volumeIdPrefixed] = baseMountPath
