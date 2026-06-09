@@ -9,60 +9,60 @@
  * without throwing. Does NOT require a Daytona API key or network.
  */
 
-import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, "..");
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const root = path.resolve(__dirname, '..')
 
 // Use the same jiti loader Pi bundles. Resolve the host package's exported entry
 // via Node (walks up node_modules, so it works whether the dep is local or
 // hoisted to the workspace root) and borrow its jiti from there.
-const hostEntry = createRequire(import.meta.url).resolve("@earendil-works/pi-coding-agent");
-const { createJiti } = createRequire(hostEntry)("jiti");
-const jiti = createJiti(import.meta.url);
+const hostEntry = createRequire(import.meta.url).resolve('@earendil-works/pi-coding-agent')
+const { createJiti } = createRequire(hostEntry)('jiti')
+const jiti = createJiti(import.meta.url)
 
-const flags = [];
-const tools = [];
-const events = [];
-const commands = [];
+const flags = []
+const tools = []
+const events = []
+const commands = []
 
 const stubPi = {
-	registerFlag: (name) => flags.push(name),
-	registerTool: (tool) => tools.push(tool?.name),
-	registerCommand: (name) => commands.push(name),
-	on: (event) => events.push(event),
-	getFlag: () => undefined,
-};
+  registerFlag: (name) => flags.push(name),
+  registerTool: (tool) => tools.push(tool?.name),
+  registerCommand: (name) => commands.push(name),
+  on: (event) => events.push(event),
+  getFlag: () => undefined,
+}
 
-const mod = await jiti.import(path.join(root, "index.ts"));
-const factory = mod.default ?? mod;
+const mod = await jiti.import(path.join(root, 'index.ts'))
+const factory = mod.default ?? mod
 
-if (typeof factory !== "function") {
-	throw new Error("Extension default export is not a function");
+if (typeof factory !== 'function') {
+  throw new Error('Extension default export is not a function')
 }
 
 // Await like Pi does: the factory is synchronous today, but Pi awaits the
 // result, so this stays faithful (and robust if it ever becomes async).
-await factory(stubPi);
+await factory(stubPi)
 
-const expectedFlags = ["daytona", "repo", "branch", "snapshot", "public"];
-const expectedTools = ["bash", "read", "write", "edit", "ls", "find", "grep", "preview_url"];
-const expectedEvents = ["user_bash", "session_start", "before_agent_start", "agent_end", "session_shutdown"];
-const expectedCommands = ["sandbox", "merge", "pr", "compare", "github"];
+const expectedFlags = ['daytona', 'repo', 'branch', 'snapshot', 'public']
+const expectedTools = ['bash', 'read', 'write', 'edit', 'ls', 'find', 'grep', 'preview_url']
+const expectedEvents = ['user_bash', 'session_start', 'before_agent_start', 'agent_end', 'session_shutdown']
+const expectedCommands = ['sandbox', 'merge', 'pr', 'compare', 'github']
 
 function assertContains(label, actual, expected) {
-	const missing = expected.filter((e) => !actual.includes(e));
-	if (missing.length) {
-		throw new Error(`${label}: missing ${JSON.stringify(missing)} (got ${JSON.stringify(actual)})`);
-	}
-	console.log(`✓ ${label}: ${expected.join(", ")}`);
+  const missing = expected.filter((e) => !actual.includes(e))
+  if (missing.length) {
+    throw new Error(`${label}: missing ${JSON.stringify(missing)} (got ${JSON.stringify(actual)})`)
+  }
+  console.log(`✓ ${label}: ${expected.join(', ')}`)
 }
 
-assertContains("flags", flags, expectedFlags);
-assertContains("tools", tools, expectedTools);
-assertContains("events", events, expectedEvents);
-assertContains("commands", commands, expectedCommands);
+assertContains('flags', flags, expectedFlags)
+assertContains('tools', tools, expectedTools)
+assertContains('events', events, expectedEvents)
+assertContains('commands', commands, expectedCommands)
 
-console.log("\nSmoke test passed: extension loads and registers cleanly.");
+console.log('\nSmoke test passed: extension loads and registers cleanly.')
