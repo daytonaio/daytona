@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Inspector } from './Inspector'
+import { Inspector, InspectorToggle } from './Inspector'
 
 type Props = {
   status: string
@@ -57,22 +57,9 @@ export function TerminalCard({
           {!pending && background && 'background'}
           {!pending && !background && (failed ? `exit ${exitCode}` : 'done')}
         </span>
-        <button
-          onClick={() => setOpen((o) => !o)}
-          aria-label={open ? 'hide details' : 'show details'}
-          style={{
-            marginLeft: 'auto',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: '#64748b',
-            fontSize: 11,
-            padding: '0 4px',
-            fontFamily: 'inherit',
-          }}
-        >
-          {open ? '▾' : '▸'}
-        </button>
+        <span style={{ marginLeft: 'auto' }}>
+          <InspectorToggle open={open} onClick={() => setOpen((o) => !o)} />
+        </span>
       </div>
       <div style={{ padding: '10px 12px' }}>
         <div style={{ color: '#60a5fa', wordBreak: 'break-all' }}>

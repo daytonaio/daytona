@@ -46,6 +46,8 @@ const createSandbox = defineTool({
     labels: z.record(z.string()).optional().describe('Optional labels for organization-level sandbox tracking.'),
     autoStopInterval: z
       .number()
+      .int()
+      .nonnegative()
       .optional()
       .describe('Minutes of inactivity before the sandbox auto-stops. 0 disables, default 15.'),
   }),

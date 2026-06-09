@@ -53,7 +53,7 @@ export function GrepCard({ status, path, pattern, matches }: Props) {
             maxWidth: 320,
           }}
         >
-          {pattern ? `${pattern} in ${path}` : (path ?? '…')}
+          {pattern && path ? `${pattern} in ${path}` : (path ?? '…')}
         </code>
         {!pending ? (
           <span style={{ marginLeft: 'auto', color: '#64748b', fontSize: 11 }}>
@@ -85,6 +85,10 @@ export function GrepCard({ status, path, pattern, matches }: Props) {
               </span>
             </div>
           ))}
+        </div>
+      ) : !pending ? (
+        <div style={{ padding: '8px 14px', color: '#94a3b8', fontSize: 12, fontStyle: 'italic' }}>
+          (no matches)
         </div>
       ) : null}
       {open ? (

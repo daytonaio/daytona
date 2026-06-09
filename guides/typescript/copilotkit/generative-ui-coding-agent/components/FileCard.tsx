@@ -62,7 +62,7 @@ export function FileCard({ status, verb, path, content, bytes }: Props) {
         >
           {path ?? '…'}
         </code>
-        {bytes ? (
+        {bytes !== undefined ? (
           <span style={{ marginLeft: 'auto', color: '#64748b', fontSize: 11 }}>
             {bytes} B {content ? (open ? '▾' : '▸') : ''}
           </span>

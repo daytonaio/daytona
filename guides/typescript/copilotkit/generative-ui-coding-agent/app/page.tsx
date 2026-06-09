@@ -133,7 +133,13 @@ export default function Page() {
         <SandboxCard
           status={status}
           sandboxId={r?.sandboxId}
-          envVars={parameters?.envVars}
+          envVars={
+            parameters?.envVars
+              ? Object.fromEntries(
+                  Object.keys(parameters.envVars).map((key) => [key, '[redacted]']),
+                )
+              : undefined
+          }
           labels={parameters?.labels}
           autoStopInterval={parameters?.autoStopInterval}
         />

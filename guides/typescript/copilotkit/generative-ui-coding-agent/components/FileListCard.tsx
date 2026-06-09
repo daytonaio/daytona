@@ -57,7 +57,7 @@ export function FileListCard({ status, verb, path, pattern, entries, files }: Pr
             maxWidth: 320,
           }}
         >
-          {pattern ? `${path} • ${pattern}` : (path ?? '…')}
+          {pattern && path ? `${path} • ${pattern}` : (path ?? '…')}
         </code>
         {!pending && list.length ? (
           <span style={{ marginLeft: 'auto', color: '#64748b', fontSize: 11 }}>
@@ -90,6 +90,10 @@ export function FileListCard({ status, verb, path, pattern, entries, files }: Pr
               ) : null}
             </div>
           ))}
+        </div>
+      ) : !pending ? (
+        <div style={{ padding: '8px 14px', color: '#94a3b8', fontSize: 12, fontStyle: 'italic' }}>
+          {verb === 'searched' ? '(no matches)' : '(empty)'}
         </div>
       ) : null}
       {open ? (

@@ -82,6 +82,7 @@ export function PreviewCard({ status, url, port }: Props) {
             key={reloadKey}
             src={url}
             title="Sandbox preview"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             style={{
               width: '100%',
               height: 520,
