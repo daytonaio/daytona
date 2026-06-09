@@ -23,7 +23,7 @@ jobs:
   e2e-pr-tests:
     if: github.repository == 'daytonaio/daytona'
     name: E2E sandbox lifecycle (from source)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 30
     env:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}

@@ -16,7 +16,7 @@ env:
 jobs:
   prepare:
     if: github.repository == 'daytonaio/daytona'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
       pull-requests: write

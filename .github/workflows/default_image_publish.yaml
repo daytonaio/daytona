@@ -27,9 +27,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
+          - runner: blacksmith-16vcpu-ubuntu-2404-arm
             platform: linux/arm64
-          - runner: [self-hosted, Linux, X64, github-actions-runner-amd64]
+          - runner: blacksmith-16vcpu-ubuntu-2404
             platform: linux/amd64
 
     runs-on: ${{ matrix.runner }}
@@ -55,8 +55,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@ab5c1da94f53f5cd75c1038092aa276dddfccbba # v1.9.0
 
       - name: Log in to Docker Hub
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
@@ -67,15 +67,13 @@ jobs:
 
       - name: Build and push sandbox by digest
         id: build-sandbox
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        uses: useblacksmith/build-push-action@fb9e3e6a9299c78462bfadd0d93352c316adc9b8 # v2.2.0
         with:
           context: ./images/sandbox
           file: ./images/sandbox/Dockerfile
           platforms: ${{ matrix.platform }}
           tags: ${{ env.REGISTRY_IMAGE }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=registry,ref=daytonaio/sandbox:buildcache-${{ env.PLATFORM_PAIR }}
-          cache-to: type=registry,ref=daytonaio/sandbox:buildcache-${{ env.PLATFORM_PAIR }},mode=max
 
       - name: Export sandbox digest
         run: |
@@ -85,15 +83,13 @@ jobs:
 
       - name: Build and push sandbox-slim by digest
         id: build-sandbox-slim
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        uses: useblacksmith/build-push-action@fb9e3e6a9299c78462bfadd0d93352c316adc9b8 # v2.2.0
         with:
           context: ./images/sandbox-slim
           file: ./images/sandbox-slim/Dockerfile
           platforms: ${{ matrix.platform }}
           tags: ${{ env.REGISTRY_IMAGE }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=registry,ref=daytonaio/sandbox:buildcache-slim-${{ env.PLATFORM_PAIR }}
-          cache-to: type=registry,ref=daytonaio/sandbox:buildcache-slim-${{ env.PLATFORM_PAIR }},mode=max
 
       - name: Export sandbox-slim digest
         run: |
@@ -120,7 +116,7 @@ jobs:
       - name: Build and push sandbox-gpu by digest
         if: matrix.platform == 'linux/amd64'
         id: build-sandbox-gpu
-        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        uses: useblacksmith/build-push-action@fb9e3e6a9299c78462bfadd0d93352c316adc9b8 # v2.2.0
         with:
           context: ./images/sandbox-gpu
           file: ./images/sandbox-gpu/Dockerfile
@@ -129,8 +125,6 @@ jobs:
           build-args: |
             SANDBOX_IMAGE=${{ env.REGISTRY_IMAGE }}@${{ steps.build-sandbox.outputs.digest }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=registry,ref=daytonaio/sandbox-gpu:buildcache-linux-amd64
-          cache-to: type=registry,ref=daytonaio/sandbox-gpu:buildcache-linux-amd64,mode=max
 
       - name: Export sandbox-gpu digest
         if: matrix.platform == 'linux/amd64'
@@ -156,7 +150,7 @@ jobs:
 
   docker_manifest:
     needs: docker_build
-    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions: {}
 
     steps:
@@ -181,8 +175,8 @@ jobs:
           pattern: digests-gpu-*
           merge-multiple: true
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@ab5c1da94f53f5cd75c1038092aa276dddfccbba # v1.9.0
 
       - name: Log in to Docker Hub
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
