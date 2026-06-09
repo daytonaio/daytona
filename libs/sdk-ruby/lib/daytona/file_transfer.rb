@@ -18,6 +18,7 @@ module Daytona
   class MultipartDownloadStreamParser
     attr_reader :error_message
     attr_reader :part_total_bytes
+    attr_reader :part_bytes_emitted
     attr_writer :boundary_token
 
     def initialize(&on_file_chunk)
@@ -27,6 +28,7 @@ module Daytona
       @state = :preamble
       @part_name = nil
       @part_total_bytes = nil
+      @part_bytes_emitted = 0
       @error_buffer = String.new.b
     end
 
@@ -35,15 +37,13 @@ module Daytona
       process!
     end
 
+    # Raises if the response ended before the closing multipart boundary, so
+    # truncations surface as typed errors instead of silently short downloads.
     def finish!
       process!
+      return if @state == :done
 
-      return if @state == :done || @buffer.empty?
-
-      emit(@buffer)
-      finalize_part!
-      @buffer = String.new.b
-      @state = :done
+      raise Sdk::Error, "Truncated multipart response: closing boundary not received (state=#{@state})"
     end
 
     private
@@ -110,6 +110,7 @@ module Daytona
 
       case @part_name
       when 'file'
+        @part_bytes_emitted += data.bytesize
         @on_file_chunk.call(data)
       when 'error'
         @error_buffer << data
@@ -201,7 +202,7 @@ module Daytona
 
       request.on_complete do |completed_response|
         response = completed_response
-        parser.finish!
+        parser.finish! unless cancel_event&.set?
       end
 
       request.run
@@ -209,6 +210,16 @@ module Daytona
       raise Sdk::Error, "Download cancelled: #{remote_path}" if cancel_event&.set?
       raise Sdk::Error, parser.error_message if parser.error_message
       raise Sdk::Error, "HTTP #{response.code}" if response && !response.success?
+
+      assert_download_length!(parser, remote_path)
+    end
+
+    def self.assert_download_length!(parser, remote_path)
+      return unless parser.part_total_bytes && parser.part_bytes_emitted != parser.part_total_bytes
+
+      raise Sdk::Error,
+            "Multipart response length mismatch for #{remote_path}: " \
+            "got #{parser.part_bytes_emitted} bytes, expected #{parser.part_total_bytes}"
     end
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
@@ -232,6 +243,7 @@ module Daytona
     def self.stream_upload(api_client:, remote_path:, source:, timeout:, on_progress: nil, cancel_event: nil)
       with_upload_file(source, cancel_event, remote_path) do |upload_path|
         config = api_client.config
+        expected_bytes = File.size(upload_path)
         progress_callback = upload_progress_callback(on_progress, cancel_event)
         response = with_open_upload_file(upload_path) do |file|
           upload_request(
@@ -244,6 +256,7 @@ module Daytona
           ).run
         end
         raise_upload_error(response, cancel_event, remote_path)
+        verify_upload_response(response, remote_path, expected_bytes)
       end
     end
     # rubocop:enable Metrics/MethodLength, Metrics/ParameterLists
@@ -336,6 +349,28 @@ module Daytona
       raise Sdk::Error, "Upload timed out: #{remote_path}" if response.timed_out?
       raise Sdk::Error, "Upload cancelled: #{remote_path}" if response.return_code == :aborted_by_callback
       raise Sdk::Error, "HTTP #{response.code}: #{response.body}" unless response.success?
+    end
+
+    # Compares the daemon's reported bytes-written against what the SDK sent.
+    # Catches server-side miscounts (or extra-byte injection) at the upload
+    # call site instead of surfacing later as a download mismatch.
+    def self.verify_upload_response(response, remote_path, expected_bytes)
+      recorded = recorded_upload_bytes(response.body, remote_path)
+      return if recorded.nil? || recorded == expected_bytes
+
+      raise Sdk::Error,
+            "Upload size mismatch for #{remote_path}: sent #{expected_bytes} bytes, " \
+            "daemon recorded #{recorded}"
+    end
+
+    def self.recorded_upload_bytes(body, remote_path)
+      parsed = JSON.parse(body) rescue nil # rubocop:disable Style/RescueModifier
+      return nil unless parsed.is_a?(Hash)
+
+      files = Array(parsed['files'])
+      match = files.find { |f| f.is_a?(Hash) && f['path'] == remote_path }
+      bytes = match&.dig('bytes')
+      bytes.is_a?(Integer) ? bytes : nil
     end
 
     def self.open_drain_source(source)

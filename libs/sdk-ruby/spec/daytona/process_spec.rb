@@ -293,7 +293,7 @@ RSpec.describe Daytona::Process do
   describe '#get_session_command_logs_async' do
     it 'streams stdout and stderr chunks until close' do
       socket = PassiveWebSocket.new
-      allow(WebSocket::Client::Simple).to receive(:connect).and_return(socket)
+      allow(WebSocket::Client::Simple).to receive(:connect).and_yield(socket).and_return(socket)
       stdout_chunks = []
       stderr_chunks = []
 
@@ -323,7 +323,7 @@ RSpec.describe Daytona::Process do
   describe '#get_entrypoint_logs_async' do
     it 'streams entrypoint logs until close' do
       socket = PassiveWebSocket.new
-      allow(WebSocket::Client::Simple).to receive(:connect).and_return(socket)
+      allow(WebSocket::Client::Simple).to receive(:connect).and_yield(socket).and_return(socket)
       stdout_chunks = []
 
       thread = Thread.new do
@@ -376,7 +376,7 @@ RSpec.describe Daytona::Process do
     it 'connects via websocket and waits for the PTY connection' do
       socket = double('PtySocket')
       handle = instance_double(Daytona::PtyHandle)
-      allow(WebSocket::Client::Simple).to receive(:connect).and_return(socket)
+      allow(WebSocket::Client::Simple).to receive(:connect).and_yield(socket).and_return(socket)
       allow(Daytona::PtyHandle).to receive(:new).and_return(handle)
       allow(handle).to receive(:wait_for_connection)
 

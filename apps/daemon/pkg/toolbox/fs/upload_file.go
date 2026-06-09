@@ -23,6 +23,9 @@ import (
 //
 //	@id				UploadFile
 func UploadFile(c *gin.Context) {
+	enableFullDuplex(c)
+	defer drainBody(c)
+
 	path := c.Query("path")
 	if path == "" {
 		c.AbortWithError(http.StatusBadRequest, errors.New("path is required"))

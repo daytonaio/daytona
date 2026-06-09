@@ -570,7 +570,7 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     end
   end
 
-  context 'Code Interpreter', order: :defined do
+  context 'Code Interpreter', order: :defined, timeout: 120 do
     it 'runs simple Python code' do
       result = @sandbox.code_interpreter.run_code('print("interpreter hello")')
       expect(result).to be_a(Daytona::ExecutionResult)

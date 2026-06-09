@@ -379,6 +379,28 @@ class TestSyncFileSystem:
         with pytest.raises(DaytonaError, match="cancelled"):
             next(stream)
 
+    def test_download_file_stream_raises_on_truncated_response(self):
+        """Response ends before the closing boundary; SDK must raise."""
+        from daytona._sync.filesystem import FileSystem
+
+        mock_api = MagicMock()
+        remote_path = "workspace/file.txt"
+        boundary = b"sync-boundary"
+        payload = b"hello world" * 32  # multi-chunk content
+        multipart_body = _build_multipart_body(
+            boundary, name="file", filename=remote_path, payload=payload, content_length=len(payload)
+        )
+        # Drop the final boundary bytes; parser would otherwise finalize silently.
+        truncated = multipart_body[:-10]
+        client = _SyncStreamClient(_SyncStreamResponse([truncated], boundary))
+        mock_api._download_files_serialize = MagicMock(
+            return_value=("POST", "https://download", {}, {"paths": [remote_path]})
+        )
+        fs = FileSystem(mock_api, http_client=client)
+
+        with pytest.raises(DaytonaError, match=r"[Tt]runcated"):
+            list(fs.download_file_stream(remote_path))
+
 
 class TestAsyncFileSystem:
     def _make_fs(self):
@@ -604,6 +626,31 @@ class TestAsyncFileSystem:
         cancel.set()
         with pytest.raises(DaytonaError, match="cancelled"):
             await stream.__anext__()
+
+    @pytest.mark.asyncio
+    async def test_download_file_stream_raises_on_truncated_response(self):
+        """Async equivalent of the sync truncation guard. See sync test for context."""
+        from daytona._async.filesystem import AsyncFileSystem
+
+        mock_api = AsyncMock()
+        remote_path = "workspace/file.txt"
+        boundary = b"async-boundary"
+        payload = b"hello world" * 32
+        multipart_body = _build_multipart_body(
+            boundary, name="file", filename=remote_path, payload=payload, content_length=len(payload)
+        )
+        truncated = multipart_body[:-10]
+        client = _AsyncStreamClient(_AsyncStreamResponse([truncated], boundary))
+        mock_api._download_files_serialize = MagicMock(
+            return_value=("POST", "https://download", {}, {"paths": [remote_path]})
+        )
+        mock_api.api_client.http_session = client
+        fs = AsyncFileSystem(mock_api)
+
+        stream = await fs.download_file_stream(remote_path)
+        with pytest.raises(DaytonaError, match=r"[Tt]runcated"):
+            async for _ in stream:
+                pass
 
     @pytest.mark.asyncio
     async def test_upload_file_stream_accepts_async_iterable(self):

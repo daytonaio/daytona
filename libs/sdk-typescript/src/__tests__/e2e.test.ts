@@ -267,20 +267,26 @@ describe('TypeScript SDK E2E (real Daytona API)', () => {
     })
 
     test('download abort surfaces DaytonaError', async () => {
-      // Large enough to require multiple network chunks so abort fires mid-stream.
-      const content = Buffer.from(('download-abort-' + randomUUID()).repeat(1024 * 16))
-      await sandbox.fs.uploadFile(content, 'fs-test/download-abort.bin')
+      const remotePath = `fs-test/download-abort-${randomUUID()}.bin`
+      await sandbox.fs.uploadFile(Buffer.from('download-abort-' + randomUUID()), remotePath)
 
       const controller = new AbortController()
-      const stream = await sandbox.fs.downloadFileStream('fs-test/download-abort.bin', { signal: controller.signal })
+      const stream = await sandbox.fs.downloadFileStream(remotePath, { signal: controller.signal })
 
-      const error = await new Promise<unknown>((resolve, reject) => {
-        stream.once('data', () => controller.abort())
+      // The SDK returns the file stream paused. Aborting BEFORE attaching
+      // listeners and resuming lets the SDK's abort forwarder destroy the
+      // returned stream with DaytonaError before any bytes flow, so this is
+      // independent of network/CI speed and never races on small payloads.
+      controller.abort()
+
+      const outcome = new Promise<unknown>((resolve, reject) => {
         stream.once('error', resolve)
-        stream.once('end', () => reject(new Error('Expected download to be aborted')))
+        stream.once('end', () => reject(new Error('Expected aborted download to error, got clean end')))
+        stream.once('close', () => reject(new Error('Expected aborted download to error, got close')))
         stream.resume()
       })
 
+      const error = await outcome
       expect(error).toBeInstanceOf(DaytonaError)
       expect((error as Error).message).toMatch(/cancel/i)
     })

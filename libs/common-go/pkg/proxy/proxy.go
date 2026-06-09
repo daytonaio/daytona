@@ -13,12 +13,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var proxyTransport = &http.Transport{
-	MaxIdleConns:        100,
-	MaxIdleConnsPerHost: 100,
-	DialContext: (&net.Dialer{
-		KeepAlive: 30 * time.Second,
-	}).DialContext,
+// proxyTransport wraps *http.Transport with retryTransport for stale-connection
+// handling. If direct *http.Transport access is needed, split into two variables.
+var proxyTransport http.RoundTripper = &retryTransport{
+	base: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 100,
+		IdleConnTimeout:     90 * time.Second,
+		DialContext: (&net.Dialer{
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+	},
 }
 
 // ProxyRequest handles proxying requests to a sandbox's container

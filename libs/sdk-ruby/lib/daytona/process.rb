@@ -235,34 +235,34 @@ module Daytona
 
       completion_queue = Queue.new
 
-      ws = WebSocket::Client::Simple.connect(
+      WebSocket::Client::Simple.connect(
         url.to_s,
         headers: toolbox_api.api_client.default_headers.dup.merge(
           'X-Daytona-Preview-Token' => preview_link.token,
           'Content-Type' => 'text/plain',
           'Accept' => 'text/plain'
         )
-      )
+      ) do |client|
+        client.on(:message) do |message|
+          if message.type == :close
+            client.close
+            completion_queue.push(:close)
+          else
+            stdout, stderr = Util.demux(message.data.to_s)
 
-      ws.on(:message) do |message|
-        if message.type == :close
-          ws.close
-          completion_queue.push(:close)
-        else
-          stdout, stderr = Util.demux(message.data.to_s)
-
-          on_stdout.call(stdout) unless stdout.empty?
-          on_stderr.call(stderr) unless stderr.empty?
+            on_stdout.call(stdout) unless stdout.empty?
+            on_stderr.call(stderr) unless stderr.empty?
+          end
         end
-      end
 
-      ws.on(:close) do
-        completion_queue.push(:close)
-      end
+        client.on(:close) do
+          completion_queue.push(:close)
+        end
 
-      ws.on(:error) do |e|
-        completion_queue.push(:error)
-        raise Sdk::Error, "WebSocket error: #{e.message}"
+        client.on(:error) do |e|
+          completion_queue.push(:error)
+          raise Sdk::Error, "WebSocket error: #{e.message}"
+        end
       end
 
       # Wait for completion
@@ -302,34 +302,34 @@ module Daytona
 
       completion_queue = Queue.new
 
-      ws = WebSocket::Client::Simple.connect(
+      WebSocket::Client::Simple.connect(
         url.to_s,
         headers: toolbox_api.api_client.default_headers.dup.merge(
           'X-Daytona-Preview-Token' => preview_link.token,
           'Content-Type' => 'text/plain',
           'Accept' => 'text/plain'
         )
-      )
+      ) do |client|
+        client.on(:message) do |message|
+          if message.type == :close
+            client.close
+            completion_queue.push(:close)
+          else
+            stdout, stderr = Util.demux(message.data.to_s)
 
-      ws.on(:message) do |message|
-        if message.type == :close
-          ws.close
-          completion_queue.push(:close)
-        else
-          stdout, stderr = Util.demux(message.data.to_s)
-
-          on_stdout.call(stdout) unless stdout.empty?
-          on_stderr.call(stderr) unless stderr.empty?
+            on_stdout.call(stdout) unless stdout.empty?
+            on_stderr.call(stderr) unless stderr.empty?
+          end
         end
-      end
 
-      ws.on(:close) do
-        completion_queue.push(:close)
-      end
+        client.on(:close) do
+          completion_queue.push(:close)
+        end
 
-      ws.on(:error) do |e|
-        completion_queue.push(:error)
-        raise Sdk::Error, "WebSocket error: #{e.message}"
+        client.on(:error) do |e|
+          completion_queue.push(:error)
+          raise Sdk::Error, "WebSocket error: #{e.message}"
+        end
       end
 
       # Wait for completion
@@ -448,18 +448,21 @@ module Daytona
       url.scheme = url.scheme == 'https' ? 'wss' : 'ws'
       url.path = "/process/pty/#{session_id}/connect"
 
-      PtyHandle.new(
-        WebSocket::Client::Simple.connect(
-          url.to_s,
-          headers: toolbox_api.api_client.default_headers.dup.merge(
-            'X-Daytona-Preview-Token' => preview_link.token
-          )
-        ),
-        session_id:,
-
-        handle_resize: ->(pty_size) { resize_pty_session(session_id, pty_size) },
-        handle_kill: -> { delete_pty_session(session_id) }
-      ).tap(&:wait_for_connection)
+      handle = nil
+      WebSocket::Client::Simple.connect(
+        url.to_s,
+        headers: toolbox_api.api_client.default_headers.dup.merge(
+          'X-Daytona-Preview-Token' => preview_link.token
+        )
+      ) do |client|
+        handle = PtyHandle.new(
+          client,
+          session_id:,
+          handle_resize: ->(pty_size) { resize_pty_session(session_id, pty_size) },
+          handle_kill: -> { delete_pty_session(session_id) }
+        )
+      end
+      handle.tap(&:wait_for_connection)
     end
 
     # Resizes a PTY session to the specified dimensions

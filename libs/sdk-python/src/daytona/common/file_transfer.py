@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from python_multipart.multipart import MultipartParser, parse_options_header
+from python_multipart.multipart import MultipartParser, MultipartState, parse_options_header
 
 from daytona_toolbox_api_client import FilesDownloadRequest
 
@@ -53,3 +53,17 @@ def create_multipart_parser(
             "on_part_end": on_part_end,
         },
     )
+
+
+def raise_if_multipart_truncated(parser: MultipartParser, remote_path: str) -> None:
+    """Raise if the multipart stream ended before the closing boundary.
+
+    python_multipart can silently drop boundary look-ahead bytes at finalize().
+    Call after parser.finalize() so short downloads become retryable errors.
+    """
+    if parser.state != MultipartState.END:
+        msg = (
+            f"Truncated multipart response for {remote_path!r}: "
+            f"closing boundary not received (parser state={parser.state.name})"
+        )
+        raise DaytonaError(msg)
