@@ -21,6 +21,8 @@ import { setTimeout as sleep } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
+import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-desired-state-updated.event'
+import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
 
 @Injectable()
 export class UsageService implements TrackableJobExecutions, OnApplicationShutdown {
@@ -39,6 +41,25 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     while (this.activeJobs.size > 0) {
       this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
       await sleep(1000)
+    }
+  }
+
+  @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
+  @TrackJobExecution()
+  async handleSandboxDesiredStateUpdate(event: SandboxDesiredStateUpdatedEvent) {
+    await this.waitForLock(event.sandbox.id)
+
+    try {
+      switch (event.newDesiredState) {
+        case SandboxDesiredState.DESTROYED: {
+          await this.closeUsagePeriod(event.sandbox.id)
+          break
+        }
+      }
+    } finally {
+      this.releaseLock(event.sandbox.id).catch((error) => {
+        this.logger.error(`Error releasing lock for sandbox ${event.sandbox.id}`, error)
+      })
     }
   }
 
