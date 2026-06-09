@@ -153,7 +153,8 @@ export default function Limits() {
                         </TabsList>
                       </div>
                       {regionsForSelectedClass.length > 0 && (
-                        <div className="shrink-0 pb-1">
+                        <div className="flex shrink-0 items-center gap-1 pb-1">
+                          <span className="text-xs text-muted-foreground">Region:</span>
                           <Select
                             value={selectedRegionId}
                             onValueChange={setSelectedRegionId}
@@ -163,7 +164,7 @@ export default function Limits() {
                               size="xs"
                               aria-label="Select region"
                               className={cn(
-                                'w-auto min-w-20 max-w-40 gap-x-2 lowercase',
+                                'w-auto max-w-40 gap-x-2 border-transparent bg-transparent px-2 lowercase hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent focus-visible:border-transparent',
                                 regionsForSelectedClass.length === 1 &&
                                   'pointer-events-none select-none disabled:opacity-100 [&>svg]:hidden',
                               )}
