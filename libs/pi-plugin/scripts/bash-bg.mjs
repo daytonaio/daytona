@@ -109,6 +109,10 @@ try {
   check(mix.ms < 8000 && /started/.test(mix.out), `mixed bg+fg returns fast with fg output`, JSON.stringify(mix))
   const curl2 = await waitForHttp('http://localhost:8081/')
   check(/200/.test(curl2.out), 'second server alive (HTTP 200)', JSON.stringify(curl2))
+} catch (e) {
+  // A thrown error (e.g. a runOps watchdog timeout) would otherwise abort with a
+  // raw rejection; record it as a failed check so the summary below still prints.
+  check(false, 'aborted early', e?.message)
 } finally {
   await sandbox.delete().catch(() => {})
   console.log('  (sandbox deleted)')
