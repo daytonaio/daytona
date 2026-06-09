@@ -5,7 +5,9 @@ package organization
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/charmbracelet/huh"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/views/common"
@@ -13,6 +15,8 @@ import (
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/spf13/cobra"
 )
+
+var regionFlag string
 
 var CreateCmd = &cobra.Command{
 	Use:   "create [ORGANIZATION_NAME]",
@@ -26,8 +30,54 @@ var CreateCmd = &cobra.Command{
 			return err
 		}
 
+		regions, res, err := apiClient.RegionsAPI.ListSharedRegions(ctx).Execute()
+		if err != nil {
+			return apiclient_cli.HandleErrorResponse(res, err)
+		}
+
+		var chosenRegion *apiclient.Region
+		switch {
+		case regionFlag != "":
+			chosenRegion, err = resolveRegion(regions, regionFlag)
+			if err != nil {
+				return err
+			}
+		case len(regions) == 0:
+			return fmt.Errorf("no shared regions available; contact your administrator")
+		case len(regions) == 1:
+			chosenRegion = &regions[0]
+		default:
+			var chosenRegionId string
+			var regionOptions []huh.Option[string]
+
+			for _, region := range regions {
+				regionOptions = append(regionOptions, huh.NewOption(region.Name, region.Id))
+			}
+
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewSelect[string]().
+						Title("Choose a Region").
+						Options(
+							regionOptions...,
+						).
+						Value(&chosenRegionId),
+				).WithTheme(common.GetCustomTheme()),
+			)
+
+			if err := form.Run(); err != nil {
+				return err
+			}
+
+			chosenRegion, err = resolveRegion(regions, chosenRegionId)
+			if err != nil {
+				return err
+			}
+		}
+
 		createOrganizationDto := apiclient.CreateOrganization{
-			Name: args[0],
+			Name:            args[0],
+			DefaultRegionId: chosenRegion.Id,
 		}
 
 		org, res, err := apiClient.OrganizationsAPI.CreateOrganization(ctx).CreateOrganization(createOrganizationDto).Execute()
@@ -56,4 +106,19 @@ var CreateCmd = &cobra.Command{
 		common.RenderInfoMessageBold("Your organization has been created and its approval is pending\nOur team has been notified and will set up your resource quotas shortly")
 		return nil
 	},
+}
+
+// resolveRegion picks a region from the list whose Id or Name matches identifier.
+// Pure function  no I/O.
+func resolveRegion(regions []apiclient.Region, identifier string) (*apiclient.Region, error) {
+	for _, region := range regions {
+		if region.Id == identifier || region.Name == identifier {
+			return &region, nil
+		}
+	}
+	return nil, fmt.Errorf("region %q not found", identifier)
+}
+
+func init() {
+	CreateCmd.Flags().StringVarP(&regionFlag, "region", "r", "", "Default region (id or name) for the organization")
 }
