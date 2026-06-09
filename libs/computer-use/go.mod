@@ -4,12 +4,14 @@ go 1.25.0
 
 require (
 	github.com/go-vgo/robotgo v0.110.8
+	github.com/go-ole/go-ole v1.3.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.3
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
+	github.com/uandersonricardo/uiautomation v0.0.0-20250610195738-b54cd4b8ddde
 )
 
 require (
@@ -18,7 +20,6 @@ require (
 	github.com/ebitengine/purego v0.9.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/gen2brain/shm v0.1.1 // indirect
-	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
