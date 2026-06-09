@@ -143,7 +143,8 @@ export interface Runner {
      */
     'apiVersion': string;
     /**
-     * The class of the runner
+     * The class of the runner. Deprecated and always returns \"container\" for backward compatibility - use sandboxClass instead.
+     * @deprecated
      */
     'runnerClass': RunnerClass;
     /**

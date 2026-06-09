@@ -16,11 +16,10 @@ require 'time'
 module DaytonaApiClient
   class RunnerClass
     CONTAINER = "container".freeze
-    VM = "vm".freeze
     UNKNOWN_DEFAULT_OPEN_API = "unknown_default_open_api".freeze
 
     def self.all_vars
-      @all_vars ||= [CONTAINER, VM, UNKNOWN_DEFAULT_OPEN_API].freeze
+      @all_vars ||= [CONTAINER, UNKNOWN_DEFAULT_OPEN_API].freeze
     end
 
     # Builds the enum from string

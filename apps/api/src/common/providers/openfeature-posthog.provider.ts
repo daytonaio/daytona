@@ -43,7 +43,7 @@ export class OpenFeaturePostHogProvider implements Provider {
    * Returns true if the given flag key is listed in the
    * `OPENFEATURE_FORCE_ENABLED_FLAGS` env var (comma-separated). Used by the
    * E2E setup to force-enable feature-flag-gated endpoints (e.g.
-   * `sandbox_linux_vm`) when no real flag provider (PostHog) is configured.
+   * `sandbox_resize`) when no real flag provider (PostHog) is configured.
    *
    * Production deployments configure PostHog and never hit the unconfigured
    * code path that consults this list, so this is a no-op in production.

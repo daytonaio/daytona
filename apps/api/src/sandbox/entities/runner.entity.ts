@@ -5,7 +5,6 @@
 
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerClass } from '../enums/runner-class.enum'
 import { GpuType } from '../enums/gpu-type.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { RunnerServiceInfo } from '../common/runner-service-info'
@@ -71,13 +70,6 @@ export class Runner {
     default: SandboxClass.CONTAINER,
   })
   sandboxClass: SandboxClass = SandboxClass.CONTAINER
-
-  @Column({
-    type: 'enum',
-    enum: RunnerClass,
-    default: RunnerClass.CONTAINER,
-  })
-  runnerClass = RunnerClass.CONTAINER
 
   @Column({
     type: 'float',

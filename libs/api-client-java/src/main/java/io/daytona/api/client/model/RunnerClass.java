@@ -24,14 +24,12 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * The class of the runner
+ * The class of the runner. Deprecated and always returns \&quot;container\&quot; for backward compatibility - use sandboxClass instead.
  */
 @JsonAdapter(RunnerClass.Adapter.class)
 public enum RunnerClass {
   
   CONTAINER("container"),
-  
-  VM("vm"),
   
   UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
