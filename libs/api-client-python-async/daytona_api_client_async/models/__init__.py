@@ -117,7 +117,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.paginated_audit_logs import PaginatedAuditLogs
     from daytona_api_client_async.models.paginated_jobs import PaginatedJobs
     from daytona_api_client_async.models.paginated_logs import PaginatedLogs
-    from daytona_api_client_async.models.paginated_sandboxes_deprecated import PaginatedSandboxesDeprecated
     from daytona_api_client_async.models.paginated_snapshots import PaginatedSnapshots
     from daytona_api_client_async.models.paginated_traces import PaginatedTraces
     from daytona_api_client_async.models.poll_jobs_response import PollJobsResponse
@@ -302,7 +301,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "PaginatedAuditLogs": "daytona_api_client_async.models.paginated_audit_logs",
     "PaginatedJobs": "daytona_api_client_async.models.paginated_jobs",
     "PaginatedLogs": "daytona_api_client_async.models.paginated_logs",
-    "PaginatedSandboxesDeprecated": "daytona_api_client_async.models.paginated_sandboxes_deprecated",
     "PaginatedSnapshots": "daytona_api_client_async.models.paginated_snapshots",
     "PaginatedTraces": "daytona_api_client_async.models.paginated_traces",
     "PollJobsResponse": "daytona_api_client_async.models.poll_jobs_response",

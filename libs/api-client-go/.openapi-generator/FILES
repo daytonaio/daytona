@@ -119,7 +119,6 @@ model_otel_config.go
 model_paginated_audit_logs.go
 model_paginated_jobs.go
 model_paginated_logs.go
-model_paginated_sandboxes_deprecated.go
 model_paginated_snapshots.go
 model_paginated_traces.go
 model_poll_jobs_response.go
