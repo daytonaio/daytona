@@ -4,49 +4,66 @@
  */
 
 import { cn } from '@/lib/utils'
-import { RegionUsageOverview } from '@daytona/api-client'
+import { SandboxClass, type RegionUsageOverview } from '@daytona/api-client'
+import type { ReactNode } from 'react'
 import QuotaLine from './QuotaLine'
 import { Skeleton } from './ui/skeleton'
 
 export function UsageOverview({
   usageOverview,
+  hasGpuQuotaInClass = false,
   className,
 }: {
   usageOverview: RegionUsageOverview
+  hasGpuQuotaInClass?: boolean
   className?: string
 }) {
+  const isWindows = usageOverview.sandboxClass === SandboxClass.WINDOWS
+  const showGpuContactSales = !isWindows && !hasGpuQuotaInClass
+  const gpuCurrent = isWindows ? 0 : usageOverview.currentGpuUsage
+  const gpuTotal = isWindows ? 0 : usageOverview.totalGpuQuota
+
   return (
     <div className={cn('flex gap-4 [&>*]:flex-1 flex-col lg:flex-row', className)}>
-      <div className="flex flex-col gap-1">
-        <div className="w-full flex justify-between gap-2">
-          <div className="text-muted-foreground text-xs">Compute</div>
-          <UsageLabel current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} unit="vCPU" />
-        </div>
+      <ResourceUsageItem
+        label="Compute"
+        value={getUsageValue(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota, 'vCPU')}
+      >
         <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
-      </div>
-      <div className="flex flex-col gap-1">
-        <div className="w-full flex justify-between gap-2">
-          <div className="text-muted-foreground text-xs">Memory</div>
-          <UsageLabel current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} unit="GiB" />
-        </div>
+      </ResourceUsageItem>
+      <ResourceUsageItem
+        label="Memory"
+        value={getUsageValue(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GiB')}
+      >
         <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
-      </div>
-      <div className="flex flex-col gap-1">
-        <div className="w-full flex justify-between gap-2">
-          <div className="text-muted-foreground text-xs">Storage</div>
-          <UsageLabel current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} unit="GiB" />
-        </div>
+      </ResourceUsageItem>
+      <ResourceUsageItem
+        label="Storage"
+        value={getUsageValue(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GiB')}
+      >
         <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
-      </div>
-      {usageOverview.totalGpuQuota > 0 && (
-        <div className="flex flex-col gap-1">
-          <div className="w-full flex justify-between gap-2">
-            <div className="text-muted-foreground text-xs">GPU</div>
-            <UsageLabel current={usageOverview.currentGpuUsage} total={usageOverview.totalGpuQuota} unit="GPU" />
-          </div>
-          <QuotaLine current={usageOverview.currentGpuUsage} total={usageOverview.totalGpuQuota} />
-        </div>
-      )}
+      </ResourceUsageItem>
+      <ResourceUsageItem
+        label="GPU"
+        className={isWindows ? 'opacity-50' : undefined}
+        value={getUsageValue(
+          gpuCurrent,
+          gpuTotal,
+          'GPU',
+          isWindows ? (
+            <span className="text-xs text-muted-foreground text-nowrap">Coming soon</span>
+          ) : showGpuContactSales ? (
+            <a
+              href="mailto:sales@daytona.io?subject=GPU%20quota%20request"
+              className="text-xs font-medium text-foreground underline underline-offset-2 hover:text-muted-foreground text-nowrap"
+            >
+              Contact Sales
+            </a>
+          ) : undefined,
+        )}
+      >
+        <QuotaLine current={gpuCurrent} total={gpuTotal} />
+      </ResourceUsageItem>
     </div>
   )
 }
@@ -61,9 +78,18 @@ function formatUsageValue(value: number) {
   return truncated.toFixed(1)
 }
 
+function getUsageValue(current: number, total: number, unit: string, zeroQuotaValue?: ReactNode) {
+  if (total > 0) {
+    return <UsageLabel current={current} total={total} unit={unit} />
+  }
+
+  return zeroQuotaValue ?? <span className="text-xs text-muted-foreground text-nowrap">0 / 0 {unit}</span>
+}
+
 export function UsageOverviewSkeleton() {
   return (
     <div className="flex flex-col gap-3 p-4 lg:flex-row">
+      <Skeleton className="h-8 w-full" />
       <Skeleton className="h-8 w-full" />
       <Skeleton className="h-8 w-full" />
       <Skeleton className="h-8 w-full" />
@@ -71,8 +97,30 @@ export function UsageOverviewSkeleton() {
   )
 }
 
+function ResourceUsageItem({
+  label,
+  value,
+  className,
+  children,
+}: {
+  label: string
+  value: ReactNode
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <div className={cn('flex flex-col gap-1', className)}>
+      <div className="w-full flex justify-between gap-2">
+        <div className="text-muted-foreground text-xs">{label}</div>
+        {value}
+      </div>
+      {children}
+    </div>
+  )
+}
+
 const UsageLabel = ({ current, total, unit }: { current: number; total: number; unit: string }) => {
-  const percentage = (current / total) * 100
+  const percentage = total > 0 ? (current / total) * 100 : 0
   const isHighUsage = percentage > 90
 
   return (

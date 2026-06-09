@@ -5,12 +5,14 @@
 
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
+import { getSandboxClassLabel } from '@/components/SandboxTable/constants'
 import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
 import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
 import { RoutePath } from '@/enums/RoutePath'
 import { useOwnerTierQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
@@ -18,8 +20,8 @@ import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizati
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
-import { useRegionClassSelection } from '@/hooks/useRegionClassSelection'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useUsageScopeSelection } from '@/hooks/useUsageScopeSelection'
 import { cn } from '@/lib/utils'
 import type { Organization, RegionUsageOverview, SandboxClass } from '@daytona/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
@@ -62,15 +64,15 @@ export default function Limits() {
   )
 
   const {
-    regionIds,
-    selectedRegionId,
-    setSelectedRegionId,
-    classesForSelectedRegion,
+    classes,
     selectedSandboxClass,
     setSelectedSandboxClass,
-    showClassSelector,
+    regionsForSelectedClass,
+    selectedRegionId,
+    setSelectedRegionId,
     currentEntry: currentRegionUsageOverview,
-  } = useRegionClassSelection(usageOverview?.regionUsage, selectedOrganization?.defaultRegionId)
+  } = useUsageScopeSelection(usageOverview?.regionUsage, selectedOrganization?.defaultRegionId)
+  const usageScopeAlerts = getUsageScopeAlerts(usageOverview?.regionUsage ?? [])
 
   const isLoading = organizationTierQuery.isLoading || tiersQuery.isLoading || walletQuery.isLoading
   const isError =
@@ -105,7 +107,7 @@ export default function Limits() {
         ) : (
           <>
             <Card>
-              <CardHeader className="p-4">
+              <CardHeader className="p-4 space-y-0">
                 <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                   <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap items-center">
                     <div className="flex items-center gap-2">
@@ -117,52 +119,70 @@ export default function Limits() {
                       )}
                     </div>
                   </CardTitle>
-                  {regionIds.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">Region:</span>
-                      <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
-                        <SelectTrigger
-                          size="xs"
-                          disabled={regionIds.length === 1}
-                          className={`uppercase w-auto min-w-12 max-w-48 gap-x-2 ${regionIds.length === 1 ? 'pointer-events-none select-none [&>svg]:hidden min-w-10 disabled:opacity-100' : ''}`}
-                        >
-                          <SelectValue placeholder="Select region" />
-                        </SelectTrigger>
-                        <SelectContent className="min-w-24 max-w-48" align="end">
-                          {regionIds.map((regionId) => (
-                            <SelectItem key={regionId} value={regionId} className="uppercase">
-                              {getRegionName(regionId) ?? regionId}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {showClassSelector && (
-                        <>
-                          <span className="text-sm text-muted-foreground">Class:</span>
-                          <Select
-                            value={selectedSandboxClass}
-                            onValueChange={(value) => setSelectedSandboxClass(value as SandboxClass)}
-                          >
-                            <SelectTrigger size="xs" className="uppercase w-auto min-w-12 max-w-48 gap-x-2">
-                              <SelectValue placeholder="Select class" />
-                            </SelectTrigger>
-                            <SelectContent className="min-w-24 max-w-48" align="end">
-                              {classesForSelectedRegion.map((usage) => (
-                                <SelectItem key={usage.sandboxClass} value={usage.sandboxClass} className="uppercase">
-                                  {usage.sandboxClass}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </>
-                      )}
-                    </div>
-                  )}
                 </div>
                 <CardDescription>
                   Limits help us mitigate misuse and manage infrastructure resources. <br /> Ensuring fair and stable
                   access to sandboxes and compute capacity across all users.
                 </CardDescription>
+                <UsageScopeAlertRow
+                  alerts={usageScopeAlerts}
+                  getRegionName={getRegionName}
+                  onSelect={(alert) => {
+                    setSelectedSandboxClass(alert.sandboxClass)
+                    setSelectedRegionId(alert.regionId)
+                  }}
+                />
+                {classes.length > 0 && (
+                  <Tabs
+                    value={selectedSandboxClass}
+                    onValueChange={(value) => setSelectedSandboxClass(value as SandboxClass)}
+                    className="-mx-4 gap-0 pt-5"
+                  >
+                    <div className="flex items-end justify-between gap-3 pr-4 shadow-[inset_0_-1px] shadow-border">
+                      <div className="min-w-0 overflow-x-auto">
+                        <TabsList variant="underline" className="min-w-max border-b-0">
+                          {classes.map((sandboxClass) => {
+                            const label = getSandboxClassLabel(sandboxClass)
+
+                            return (
+                              <TabsTrigger key={sandboxClass} value={sandboxClass} className="gap-2 px-4 py-2">
+                                <span>{label}</span>
+                              </TabsTrigger>
+                            )
+                          })}
+                        </TabsList>
+                      </div>
+                      {regionsForSelectedClass.length > 0 && (
+                        <div className="shrink-0 pb-1">
+                          <Select
+                            value={selectedRegionId}
+                            onValueChange={setSelectedRegionId}
+                            disabled={regionsForSelectedClass.length === 1}
+                          >
+                            <SelectTrigger
+                              size="xs"
+                              aria-label="Select region"
+                              className={cn(
+                                'w-auto min-w-20 max-w-40 gap-x-2 lowercase',
+                                regionsForSelectedClass.length === 1 &&
+                                  'pointer-events-none select-none disabled:opacity-100 [&>svg]:hidden',
+                              )}
+                            >
+                              <SelectValue placeholder="Region" />
+                            </SelectTrigger>
+                            <SelectContent className="min-w-24 max-w-48" align="end">
+                              {regionsForSelectedClass.map((usage) => (
+                                <SelectItem key={usage.regionId} value={usage.regionId} className="lowercase">
+                                  {getRegionName(usage.regionId) ?? usage.regionId}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  </Tabs>
+                )}
               </CardHeader>
               <CardContent className="p-0 flex flex-col">
                 {usageOverviewQuery.isLoading ? (
@@ -170,7 +190,11 @@ export default function Limits() {
                 ) : (
                   usageOverview &&
                   currentRegionUsageOverview && (
-                    <div className="p-4 border-t border-border flex flex-col gap-2">
+                    <div
+                      className={cn('p-4 flex flex-col gap-2', {
+                        'border-t border-border': classes.length === 0,
+                      })}
+                    >
                       <div className="flex items-center gap-4">
                         <div className="text-sm font-medium">Resources</div>
                         <LiveIndicator
@@ -179,7 +203,10 @@ export default function Limits() {
                           lastUpdatedAt={usageOverviewQuery.dataUpdatedAt || 0}
                         />
                       </div>
-                      <UsageOverview usageOverview={currentRegionUsageOverview} />
+                      <UsageOverview
+                        usageOverview={currentRegionUsageOverview}
+                        hasGpuQuotaInClass={regionsForSelectedClass.some((usage) => usage.totalGpuQuota > 0)}
+                      />
                     </div>
                   )
                 )}
@@ -257,7 +284,18 @@ export default function Limits() {
   )
 }
 
+type UsageScopeSeverity = 'warning' | 'destructive'
 type ResourceType = 'compute' | 'memory' | 'storage'
+type UsageResourceLabel = 'CPU' | 'Memory' | 'Storage' | 'GPU'
+
+interface UsageScopeAlert {
+  key: string
+  sandboxClass: SandboxClass
+  regionId: string
+  severity: UsageScopeSeverity
+  resourceLabel: UsageResourceLabel
+  percentage: number
+}
 
 interface LimitItem {
   value?: number | null
@@ -265,6 +303,103 @@ interface LimitItem {
   label: string
   ttlSeconds?: number | null
   resourceType?: ResourceType
+}
+
+function getUsageScopeAlerts(usages: RegionUsageOverview[]): UsageScopeAlert[] {
+  return usages
+    .map(getUsageScopeAlert)
+    .filter((alert): alert is UsageScopeAlert => alert != null)
+    .sort((a, b) => {
+      if (a.severity !== b.severity) {
+        return a.severity === 'destructive' ? -1 : 1
+      }
+
+      return b.percentage - a.percentage
+    })
+}
+
+function getUsageScopeAlert(usage: RegionUsageOverview): UsageScopeAlert | null {
+  const resources = [
+    {
+      label: 'CPU' as const,
+      percentage: getUsagePercentage(usage.currentCpuUsage, usage.totalCpuQuota),
+    },
+    {
+      label: 'Memory' as const,
+      percentage: getUsagePercentage(usage.currentMemoryUsage, usage.totalMemoryQuota),
+    },
+    {
+      label: 'Storage' as const,
+      percentage: getUsagePercentage(usage.currentDiskUsage, usage.totalDiskQuota),
+    },
+    {
+      label: 'GPU' as const,
+      percentage: getUsagePercentage(usage.currentGpuUsage, usage.totalGpuQuota),
+    },
+  ].filter((resource): resource is { label: UsageResourceLabel; percentage: number } => resource.percentage != null)
+
+  const highestUsageResource = resources.reduce<(typeof resources)[number] | null>((highest, resource) => {
+    if (!highest || resource.percentage > highest.percentage) {
+      return resource
+    }
+
+    return highest
+  }, null)
+
+  if (!highestUsageResource || highestUsageResource.percentage <= 60) {
+    return null
+  }
+
+  return {
+    key: `${usage.sandboxClass}-${usage.regionId}`,
+    sandboxClass: usage.sandboxClass,
+    regionId: usage.regionId,
+    severity: highestUsageResource.percentage > 90 ? 'destructive' : 'warning',
+    resourceLabel: highestUsageResource.label,
+    percentage: highestUsageResource.percentage,
+  }
+}
+
+function getUsagePercentage(current: number, total: number): number | null {
+  if (total <= 0) return null
+  return (current / total) * 100
+}
+
+function UsageScopeAlertRow({
+  alerts,
+  getRegionName,
+  onSelect,
+}: {
+  alerts: UsageScopeAlert[]
+  getRegionName: (regionId: string) => string | undefined
+  onSelect: (alert: UsageScopeAlert) => void
+}) {
+  if (alerts.length === 0) return null
+
+  return (
+    <div className="flex min-w-0 gap-1.5 overflow-x-auto pt-4 text-xs">
+      {alerts.map((alert) => (
+        <button
+          key={alert.key}
+          type="button"
+          className={cn(
+            'inline-flex h-6 shrink-0 items-center gap-1 rounded-full border px-2 text-xs transition-colors',
+            alert.severity === 'destructive'
+              ? 'border-destructive-separator bg-destructive-background text-destructive-foreground hover:bg-destructive-background/80'
+              : 'border-warning-separator bg-warning-background text-warning-foreground hover:bg-warning-background/80',
+          )}
+          onClick={() => onSelect(alert)}
+        >
+          <span className="font-medium">
+            {getSandboxClassLabel(alert.sandboxClass)} - {getRegionName(alert.regionId) ?? alert.regionId}
+          </span>
+          <span className="opacity-70">
+            {alert.resourceLabel} {Math.round(alert.percentage)}%
+          </span>
+        </button>
+      ))}
+    </div>
+  )
 }
 
 function buildSandboxLimitItems(region: RegionUsageOverview | null, org: Organization | null | undefined): LimitItem[] {

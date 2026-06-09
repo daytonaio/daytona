@@ -21,7 +21,7 @@ const transition = {
 } as const
 
 const QuotaLine: React.FC<QuotaLineProps> = ({ current, total, className }) => {
-  const percentage = Math.min(Math.max((current / total) * 100, 0), 100)
+  const percentage = total > 0 ? Math.min(Math.max((current / total) * 100, 0), 100) : 0
 
   const greenWidth = Math.min(percentage, 60)
   const yellowWidth = Math.min(Math.max(percentage - 60, 0), 30)
