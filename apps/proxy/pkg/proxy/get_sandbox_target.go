@@ -223,7 +223,9 @@ func (p *Proxy) getSandboxPreviewWarningEnabled(ctx context.Context, sandboxIdOr
 		}
 		result, res, err := req.Execute()
 		if err == nil {
-			enabled = result
+			if result != nil {
+				enabled = result.GetEnabled()
+			}
 			return nil
 		}
 		openapiErr := common_errors.ConvertOpenAPIError(err)

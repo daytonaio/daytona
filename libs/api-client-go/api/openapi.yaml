@@ -7216,7 +7216,7 @@ paths:
           content:
             application/json:
               schema:
-                type: boolean
+                $ref: "#/components/schemas/PreviewWarning"
           description: Whether the preview warning page is enabled for the sandbox
       security:
       - bearer: []
@@ -14268,6 +14268,16 @@ components:
       - page
       - total
       - totalPages
+      type: object
+    PreviewWarning:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          description: Whether the preview warning page is enabled for the sandbox
+          type: boolean
+      required:
+      - enabled
       type: object
     VolumeState:
       description: Volume state

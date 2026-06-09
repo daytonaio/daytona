@@ -129,6 +129,7 @@ models/poll-jobs-response.ts
 models/port-preview-url.ts
 models/position.ts
 models/posthog-config.ts
+models/preview-warning.ts
 models/process-errors-response.ts
 models/process-logs-response.ts
 models/process-restart-response.ts

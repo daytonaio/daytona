@@ -145,6 +145,7 @@ src/main/java/io/daytona/api/client/model/PollJobsResponse.java
 src/main/java/io/daytona/api/client/model/PortPreviewUrl.java
 src/main/java/io/daytona/api/client/model/Position.java
 src/main/java/io/daytona/api/client/model/PosthogConfig.java
+src/main/java/io/daytona/api/client/model/PreviewWarning.java
 src/main/java/io/daytona/api/client/model/ProcessErrorsResponse.java
 src/main/java/io/daytona/api/client/model/ProcessLogsResponse.java
 src/main/java/io/daytona/api/client/model/ProcessRestartResponse.java
@@ -347,6 +348,7 @@ src/test/java/io/daytona/api/client/model/PollJobsResponseTest.java
 src/test/java/io/daytona/api/client/model/PortPreviewUrlTest.java
 src/test/java/io/daytona/api/client/model/PositionTest.java
 src/test/java/io/daytona/api/client/model/PosthogConfigTest.java
+src/test/java/io/daytona/api/client/model/PreviewWarningTest.java
 src/test/java/io/daytona/api/client/model/ProcessErrorsResponseTest.java
 src/test/java/io/daytona/api/client/model/ProcessLogsResponseTest.java
 src/test/java/io/daytona/api/client/model/ProcessRestartResponseTest.java

@@ -60,8 +60,8 @@ type PreviewAPI interface {
 	IsPreviewWarningEnabled(ctx context.Context, sandboxId string) PreviewAPIIsPreviewWarningEnabledRequest
 
 	// IsPreviewWarningEnabledExecute executes the request
-	//  @return bool
-	IsPreviewWarningEnabledExecute(r PreviewAPIIsPreviewWarningEnabledRequest) (bool, *http.Response, error)
+	//  @return PreviewWarning
+	IsPreviewWarningEnabledExecute(r PreviewAPIIsPreviewWarningEnabledRequest) (*PreviewWarning, *http.Response, error)
 
 	/*
 	IsSandboxPublic Check if sandbox is public
@@ -313,7 +313,7 @@ func (r PreviewAPIIsPreviewWarningEnabledRequest) Port(port float32) PreviewAPII
 	return r
 }
 
-func (r PreviewAPIIsPreviewWarningEnabledRequest) Execute() (bool, *http.Response, error) {
+func (r PreviewAPIIsPreviewWarningEnabledRequest) Execute() (*PreviewWarning, *http.Response, error) {
 	return r.ApiService.IsPreviewWarningEnabledExecute(r)
 }
 
@@ -333,13 +333,13 @@ func (a *PreviewAPIService) IsPreviewWarningEnabled(ctx context.Context, sandbox
 }
 
 // Execute executes the request
-//  @return bool
-func (a *PreviewAPIService) IsPreviewWarningEnabledExecute(r PreviewAPIIsPreviewWarningEnabledRequest) (bool, *http.Response, error) {
+//  @return PreviewWarning
+func (a *PreviewAPIService) IsPreviewWarningEnabledExecute(r PreviewAPIIsPreviewWarningEnabledRequest) (*PreviewWarning, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  bool
+		localVarReturnValue  *PreviewWarning
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsPreviewWarningEnabled")

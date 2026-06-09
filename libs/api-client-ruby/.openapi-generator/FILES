@@ -131,6 +131,7 @@ lib/daytona_api_client/models/poll_jobs_response.rb
 lib/daytona_api_client/models/port_preview_url.rb
 lib/daytona_api_client/models/position.rb
 lib/daytona_api_client/models/posthog_config.rb
+lib/daytona_api_client/models/preview_warning.rb
 lib/daytona_api_client/models/process_errors_response.rb
 lib/daytona_api_client/models/process_logs_response.rb
 lib/daytona_api_client/models/process_restart_response.rb

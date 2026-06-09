@@ -129,6 +129,7 @@ daytona_api_client_async/models/poll_jobs_response.py
 daytona_api_client_async/models/port_preview_url.py
 daytona_api_client_async/models/position.py
 daytona_api_client_async/models/posthog_config.py
+daytona_api_client_async/models/preview_warning.py
 daytona_api_client_async/models/process_errors_response.py
 daytona_api_client_async/models/process_logs_response.py
 daytona_api_client_async/models/process_restart_response.py

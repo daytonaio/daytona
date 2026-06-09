@@ -28,6 +28,7 @@ import java.io.IOException;
 
 
 import java.math.BigDecimal;
+import io.daytona.api.client.model.PreviewWarning;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -415,7 +416,7 @@ public class PreviewApi {
      * 
      * @param sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param) (required)
      * @param port Port the signed preview URL token was issued for. Required when sandboxId is a signed token. (optional)
-     * @return Boolean
+     * @return PreviewWarning
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
@@ -424,8 +425,8 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Whether the preview warning page is enabled for the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public Boolean isPreviewWarningEnabled(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable BigDecimal port) throws ApiException {
-        ApiResponse<Boolean> localVarResp = isPreviewWarningEnabledWithHttpInfo(sandboxId, port);
+    public PreviewWarning isPreviewWarningEnabled(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable BigDecimal port) throws ApiException {
+        ApiResponse<PreviewWarning> localVarResp = isPreviewWarningEnabledWithHttpInfo(sandboxId, port);
         return localVarResp.getData();
     }
 
@@ -434,7 +435,7 @@ public class PreviewApi {
      * 
      * @param sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param) (required)
      * @param port Port the signed preview URL token was issued for. Required when sandboxId is a signed token. (optional)
-     * @return ApiResponse&lt;Boolean&gt;
+     * @return ApiResponse&lt;PreviewWarning&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
@@ -443,9 +444,9 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Whether the preview warning page is enabled for the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Boolean> isPreviewWarningEnabledWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable BigDecimal port) throws ApiException {
+    public ApiResponse<PreviewWarning> isPreviewWarningEnabledWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable BigDecimal port) throws ApiException {
         okhttp3.Call localVarCall = isPreviewWarningEnabledValidateBeforeCall(sandboxId, port, null);
-        Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
+        Type localVarReturnType = new TypeToken<PreviewWarning>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
@@ -464,10 +465,10 @@ public class PreviewApi {
         <tr><td> 200 </td><td> Whether the preview warning page is enabled for the sandbox </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call isPreviewWarningEnabledAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable BigDecimal port, final ApiCallback<Boolean> _callback) throws ApiException {
+    public okhttp3.Call isPreviewWarningEnabledAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nullable BigDecimal port, final ApiCallback<PreviewWarning> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = isPreviewWarningEnabledValidateBeforeCall(sandboxId, port, _callback);
-        Type localVarReturnType = new TypeToken<Boolean>(){}.getType();
+        Type localVarReturnType = new TypeToken<PreviewWarning>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

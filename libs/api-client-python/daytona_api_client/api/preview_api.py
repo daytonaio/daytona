@@ -19,6 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Optional, Union
 from typing_extensions import Annotated
+from daytona_api_client.models.preview_warning import PreviewWarning
 
 from daytona_api_client.api_client import ApiClient, RequestSerialized
 from daytona_api_client.api_response import ApiResponse
@@ -588,7 +589,7 @@ class PreviewApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> bool:
+    ) -> PreviewWarning:
         """Check if the preview warning page is enabled for the sandbox
 
 
@@ -628,7 +629,7 @@ class PreviewApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bool",
+            '200': "PreviewWarning",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -658,7 +659,7 @@ class PreviewApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[bool]:
+    ) -> ApiResponse[PreviewWarning]:
         """Check if the preview warning page is enabled for the sandbox
 
 
@@ -698,7 +699,7 @@ class PreviewApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bool",
+            '200': "PreviewWarning",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -768,7 +769,7 @@ class PreviewApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bool",
+            '200': "PreviewWarning",
         }
         response_data = self.api_client.call_api(
             *_param,

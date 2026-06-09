@@ -158,6 +158,7 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
     from daytona_api_client_async.models.position import Position
     from daytona_api_client_async.models.posthog_config import PosthogConfig
+    from daytona_api_client_async.models.preview_warning import PreviewWarning
     from daytona_api_client_async.models.process_errors_response import ProcessErrorsResponse
     from daytona_api_client_async.models.process_logs_response import ProcessLogsResponse
     from daytona_api_client_async.models.process_restart_response import ProcessRestartResponse
@@ -374,6 +375,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "PortPreviewUrl": "daytona_api_client_async.models.port_preview_url",
     "Position": "daytona_api_client_async.models.position",
     "PosthogConfig": "daytona_api_client_async.models.posthog_config",
+    "PreviewWarning": "daytona_api_client_async.models.preview_warning",
     "ProcessErrorsResponse": "daytona_api_client_async.models.process_errors_response",
     "ProcessLogsResponse": "daytona_api_client_async.models.process_logs_response",
     "ProcessRestartResponse": "daytona_api_client_async.models.process_restart_response",
@@ -604,6 +606,7 @@ __all__ = [
     "PortPreviewUrl",
     "Position",
     "PosthogConfig",
+    "PreviewWarning",
     "ProcessErrorsResponse",
     "ProcessLogsResponse",
     "ProcessRestartResponse",

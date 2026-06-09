@@ -151,7 +151,7 @@ module DaytonaApiClient
     # @param sandbox_id [String] ID of the sandbox, or a signed preview URL token (requires the port query param)
     # @param [Hash] opts the optional parameters
     # @option opts [Float] :port Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
-    # @return [Boolean]
+    # @return [PreviewWarning]
     def is_preview_warning_enabled(sandbox_id, opts = {})
       data, _status_code, _headers = is_preview_warning_enabled_with_http_info(sandbox_id, opts)
       data
@@ -161,7 +161,7 @@ module DaytonaApiClient
     # @param sandbox_id [String] ID of the sandbox, or a signed preview URL token (requires the port query param)
     # @param [Hash] opts the optional parameters
     # @option opts [Float] :port Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
-    # @return [Array<(Boolean, Integer, Hash)>] Boolean data, response status code and response headers
+    # @return [Array<(PreviewWarning, Integer, Hash)>] PreviewWarning data, response status code and response headers
     def is_preview_warning_enabled_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: PreviewApi.is_preview_warning_enabled ...'
@@ -189,7 +189,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type] || 'Boolean'
+      return_type = opts[:debug_return_type] || 'PreviewWarning'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']

@@ -21,6 +21,8 @@ import globalAxios from 'axios';
 import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
+// @ts-ignore
+import type { PreviewWarning } from '../models';
 /**
  * PreviewApi - axios parameter creator
  */
@@ -283,7 +285,7 @@ export const PreviewApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async isPreviewWarningEnabled(sandboxId: string, port?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+        async isPreviewWarningEnabled(sandboxId: string, port?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PreviewWarning>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.isPreviewWarningEnabled(sandboxId, port, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PreviewApi.isPreviewWarningEnabled']?.[localVarOperationServerIndex]?.url;
@@ -354,7 +356,7 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        isPreviewWarningEnabled(sandboxId: string, port?: number, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+        isPreviewWarningEnabled(sandboxId: string, port?: number, options?: RawAxiosRequestConfig): AxiosPromise<PreviewWarning> {
             return localVarFp.isPreviewWarningEnabled(sandboxId, port, options).then((request) => request(axios, basePath));
         },
         /**

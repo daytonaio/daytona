@@ -15,6 +15,7 @@ package io.daytona.api.client.api;
 
 import io.daytona.api.client.ApiException;
 import java.math.BigDecimal;
+import io.daytona.api.client.model.PreviewWarning;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +66,7 @@ public class PreviewApiTest {
     public void isPreviewWarningEnabledTest() throws ApiException {
         String sandboxId = null;
         BigDecimal port = null;
-        Boolean response = api.isPreviewWarningEnabled(sandboxId, port);
+        PreviewWarning response = api.isPreviewWarningEnabled(sandboxId, port);
         // TODO: test validations
     }
 

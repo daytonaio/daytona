@@ -13,6 +13,7 @@ import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { ProxyAuthContextGuard } from '../guards/proxy-auth-context.guard'
+import { PreviewWarningDto } from '../dto/preview-warning.dto'
 
 @Controller('preview')
 @ApiTags('preview')
@@ -97,21 +98,24 @@ export class PreviewController {
   @ApiResponse({
     status: 200,
     description: 'Whether the preview warning page is enabled for the sandbox',
-    type: Boolean,
+    type: PreviewWarningDto,
   })
   @AuthStrategy(AuthStrategyType.API_KEY)
   @UseGuards(ProxyAuthContextGuard)
-  async isPreviewWarningEnabled(@Param('sandboxId') sandboxId: string, @Query('port') port?: number): Promise<boolean> {
+  async isPreviewWarningEnabled(
+    @Param('sandboxId') sandboxId: string,
+    @Query('port') port?: number,
+  ): Promise<PreviewWarningDto> {
     const cacheKey = `preview:warning:${sandboxId}:${port ?? ''}`
     const cached = await this.redis.get(cacheKey)
     if (cached !== null) {
-      return cached === '1'
+      return { enabled: cached === '1' }
     }
 
     const enabled = await this.sandboxService.isPreviewWarningEnabled(sandboxId, port)
     //  cache the result for 60 seconds to avoid unnecessary requests to the database
     await this.redis.setex(cacheKey, 60, enabled ? '1' : '0')
-    return enabled
+    return { enabled }
   }
 
   @Get(':sandboxId/validate/:authToken')
