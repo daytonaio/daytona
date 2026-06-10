@@ -6,6 +6,14 @@ List sandboxes
 daytona list [flags]
 ```
 
+### Examples
+
+```
+  daytona list
+  daytona list --limit 50
+  daytona list --format json
+```
+
 ### Options
 
 ```
@@ -17,7 +25,8 @@ daytona list [flags]
 ### Options inherited from parent commands
 
 ```
-      --help   help for daytona
+      --help       help for daytona
+      --no-input   Never prompt for input; fail instead when input would be required
 ```
 
 ### SEE ALSO

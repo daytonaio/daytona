@@ -6,6 +6,13 @@ Get volume details
 daytona volume get [VOLUME_ID_OR_NAME] [flags]
 ```
 
+### Examples
+
+```
+  daytona volume get my-volume
+  daytona volume get my-volume --format json
+```
+
 ### Options
 
 ```
@@ -15,7 +22,8 @@ daytona volume get [VOLUME_ID_OR_NAME] [flags]
 ### Options inherited from parent commands
 
 ```
-      --help   help for daytona
+      --help       help for daytona
+      --no-input   Never prompt for input; fail instead when input would be required
 ```
 
 ### SEE ALSO

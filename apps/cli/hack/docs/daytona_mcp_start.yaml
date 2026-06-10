@@ -2,8 +2,15 @@ name: daytona mcp start
 synopsis: Start Daytona MCP Server
 usage: daytona mcp start [flags]
 inherited_options:
-  - name: help
-    default_value: 'false'
-    usage: help for daytona
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: no-input
+      default_value: "false"
+      usage: |
+        Never prompt for input; fail instead when input would be required
+example: |4-
+      # Typically launched by an MCP client (see 'daytona mcp init')
+      daytona mcp start
 see_also:
-  - daytona mcp - Manage Daytona MCP Server
+    - daytona mcp - Manage Daytona MCP Server

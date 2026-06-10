@@ -6,6 +6,14 @@ Create a snapshot
 daytona snapshot create [SNAPSHOT] [flags]
 ```
 
+### Examples
+
+```
+  daytona snapshot create my-snapshot:1.0 --image ubuntu:22.04 --entrypoint "sleep infinity"
+  daytona snapshot create my-snapshot:1.0 --dockerfile ./Dockerfile --context ./app
+  daytona snapshot create my-snapshot:1.0 --image ubuntu:22.04 --cpu 2 --memory 4 --disk 10
+```
+
 ### Options
 
 ```
@@ -22,7 +30,8 @@ daytona snapshot create [SNAPSHOT] [flags]
 ### Options inherited from parent commands
 
 ```
-      --help   help for daytona
+      --help       help for daytona
+      --no-input   Never prompt for input; fail instead when input would be required
 ```
 
 ### SEE ALSO

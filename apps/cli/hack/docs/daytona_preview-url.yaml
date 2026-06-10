@@ -2,16 +2,27 @@ name: daytona preview-url
 synopsis: Get signed preview URL for a sandbox port
 usage: daytona preview-url [SANDBOX_ID | SANDBOX_NAME] [flags]
 options:
-  - name: expires
-    default_value: '3600'
-    usage: URL expiration time in seconds
-  - name: port
-    shorthand: p
-    default_value: '0'
-    usage: Port number to get preview URL for (required)
+    - name: expires
+      default_value: "3600"
+      usage: URL expiration time in seconds
+    - name: format
+      shorthand: f
+      usage: Output format. Must be one of (yaml, json)
+    - name: port
+      shorthand: p
+      default_value: "0"
+      usage: Port number to get preview URL for (required)
 inherited_options:
-  - name: help
-    default_value: 'false'
-    usage: help for daytona
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: no-input
+      default_value: "false"
+      usage: |
+        Never prompt for input; fail instead when input would be required
+example: |4-
+      daytona preview-url my-sandbox --port 3000
+      daytona preview-url my-sandbox --port 3000 --expires 7200
+      daytona preview-url my-sandbox --port 3000 --format json
 see_also:
-  - daytona - Daytona CLI
+    - daytona - Daytona CLI

@@ -1,32 +1,42 @@
 name: daytona
 synopsis: Daytona CLI
-description: Command line interface for Daytona Sandboxes
+description: |-
+    Command line interface for Daytona Sandboxes
+
+    Exit codes: 0 success; 1 runtime failure; 2 invalid flags or arguments (where validated); 124 wait timeout. 'daytona exec' exits with the remote command's exit code; 255 indicates a CLI-side failure.
 usage: daytona [flags]
 options:
-  - name: help
-    default_value: 'false'
-    usage: help for daytona
-  - name: version
-    shorthand: v
-    default_value: 'false'
-    usage: Display the version of Daytona
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: no-input
+      default_value: "false"
+      usage: |
+        Never prompt for input; fail instead when input would be required
+    - name: version
+      shorthand: v
+      default_value: "false"
+      usage: Display the version of Daytona
 see_also:
-  - daytona archive - Archive a sandbox
-  - daytona autocomplete - Adds a completion script for your shell environment
-  - daytona create - Create a new sandbox
-  - daytona delete - Delete a sandbox
-  - daytona docs - Opens the Daytona documentation in your default browser.
-  - daytona exec - Execute a command in a sandbox
-  - daytona info - Get sandbox info
-  - daytona list - List sandboxes
-  - daytona login - Log in to Daytona
-  - daytona logout - Logout from Daytona
-  - daytona mcp - Manage Daytona MCP Server
-  - daytona organization - Manage Daytona organizations
-  - daytona preview-url - Get signed preview URL for a sandbox port
-  - daytona snapshot - Manage Daytona snapshots
-  - daytona ssh - SSH into a sandbox
-  - daytona start - Start a sandbox
-  - daytona stop - Stop a sandbox
-  - daytona version - Print the version number
-  - daytona volume - Manage Daytona volumes
+    - daytona api - Make an authenticated request to the Daytona API
+    - daytona archive - Archive a sandbox
+    - daytona autocomplete - Adds a completion script for your shell environment
+    - daytona cp - Copy files between the local machine and a sandbox
+    - daytona create - Create a new sandbox
+    - daytona delete - Delete a sandbox
+    - daytona docs - Opens the Daytona documentation in your default browser.
+    - daytona exec - Execute a command in a sandbox
+    - daytona info - Get sandbox info
+    - daytona list - List sandboxes
+    - daytona login - Log in to Daytona
+    - daytona logout - Logout from Daytona
+    - daytona logs - View the build logs of a sandbox
+    - daytona mcp - Manage Daytona MCP Server
+    - daytona organization - Manage Daytona organizations
+    - daytona preview-url - Get signed preview URL for a sandbox port
+    - daytona snapshot - Manage Daytona snapshots
+    - daytona ssh - SSH into a sandbox
+    - daytona start - Start a sandbox
+    - daytona stop - Stop a sandbox
+    - daytona version - Print the version number
+    - daytona volume - Manage Daytona volumes
