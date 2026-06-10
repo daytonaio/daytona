@@ -19,11 +19,11 @@ import {
   Navigate,
   Outlet,
   redirect,
-  RouterProvider,
   useLocation,
   useNavigation,
   useRouteError,
-} from 'react-router-dom'
+} from 'react-router'
+import { RouterProvider } from 'react-router/dom'
 import { BannerProvider } from './components/Banner'
 import { CommandPaletteProvider } from './components/CommandPalette'
 import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
@@ -326,6 +326,7 @@ const router = createBrowserRouter([
   {
     path: RoutePath.LANDING,
     element: <AppRoot />,
+    hydrateFallbackElement: <LoadingFallback source="app-root-hydrate" />,
     errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <LandingPage /> },
@@ -414,7 +415,7 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={router} fallbackElement={<LoadingFallback source="router-fallback" />} />
+  return <RouterProvider router={router} />
 }
 
 export default App

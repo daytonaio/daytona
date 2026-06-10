@@ -48,7 +48,7 @@ import {
 import { AnimatePresence } from 'motion/react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { useMemo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { AnimatedLogo } from './AnimatedLogo'
 import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
 import { OrganizationPicker } from './Organizations/OrganizationPicker'

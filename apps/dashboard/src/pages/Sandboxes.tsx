@@ -88,7 +88,7 @@ import {
 } from 'nuqs'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 type CreateSandboxSnapshotVariables = {

@@ -43,7 +43,7 @@ import {
 } from '@tanstack/react-table'
 import { Mail } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { EndpointOut } from 'svix'
 import { columns } from './columns'
 
