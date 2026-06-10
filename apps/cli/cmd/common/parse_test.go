@@ -8,6 +8,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/daytonaio/daytona/cli/internal/clierr"
@@ -79,6 +80,9 @@ func TestParseVolumeSpecs(t *testing.T) {
 				var cliErr *clierr.Error
 				if !errors.As(err, &cliErr) || cliErr.Category != clierr.CategoryUsage {
 					t.Errorf("ParseVolumeSpecs(%v) error = %v, want usage-category clierr", tt.entries, err)
+				}
+				if !strings.Contains(err.Error(), "expected VOLUME:MOUNT_PATH") {
+					t.Errorf("ParseVolumeSpecs(%v) error = %q, want it to mention expected VOLUME:MOUNT_PATH", tt.entries, err)
 				}
 				return
 			}

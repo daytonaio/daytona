@@ -75,6 +75,10 @@ func (f YAMLFormatter) Format(data interface{}) (string, error) {
 }
 
 func (f *outputFormatter) Print() {
+	// No --format means no formatter; printing structured output is a no-op.
+	if f.formatter == nil {
+		return
+	}
 
 	formattedOutput, err := f.formatter.Format(f.data)
 	if err != nil {
@@ -105,14 +109,30 @@ func UnblockStdOut() {
 
 func RegisterFormatFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&FormatFlag, formatFlagName, formatFlagShortHand, FormatFlag, formatFlagDescription)
-	cmd.PreRunE = formatFlagPreRunE
+	chainFormatPreRunE(cmd)
 }
 
 // RegisterFormatFlagNoShorthand registers --format without the -f shorthand,
 // for commands where -f is already taken (e.g. --force, --dockerfile).
 func RegisterFormatFlagNoShorthand(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&FormatFlag, formatFlagName, FormatFlag, formatFlagDescription)
-	cmd.PreRunE = formatFlagPreRunE
+	chainFormatPreRunE(cmd)
+}
+
+// chainFormatPreRunE installs the --format validation as the command's
+// PreRunE, calling any pre-existing PreRunE after validation succeeds instead
+// of clobbering it.
+func chainFormatPreRunE(cmd *cobra.Command) {
+	original := cmd.PreRunE
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		if err := formatFlagPreRunE(cmd, args); err != nil {
+			return err
+		}
+		if original != nil {
+			return original(cmd, args)
+		}
+		return nil
+	}
 }
 
 func formatFlagPreRunE(cmd *cobra.Command, args []string) error {

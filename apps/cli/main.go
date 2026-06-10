@@ -119,6 +119,29 @@ func main() {
 	}
 }
 
+// executeErrorBody is the single-line JSON object reported on stderr for a
+// failed command when a structured output format was requested.
+type executeErrorBody struct {
+	Error string `json:"error"`
+	Code  string `json:"code"`
+	Hint  string `json:"hint,omitempty"`
+}
+
+// executeErrorPayload shapes err into the structured error object: clierr
+// errors map to their message, category, and hint; anything else reports the
+// error text under the generic "error" code.
+func executeErrorPayload(err error) executeErrorBody {
+	payload := executeErrorBody{Error: err.Error(), Code: "error"}
+
+	var cliErr *clierr.Error
+	if errors.As(err, &cliErr) {
+		payload.Error = cliErr.Message
+		payload.Code = string(cliErr.Category)
+		payload.Hint = cliErr.Hint
+	}
+	return payload
+}
+
 // reportExecuteError prints the final error: a single-line JSON object on
 // stderr when a structured output format was requested, a human-readable log
 // line otherwise.
@@ -128,20 +151,7 @@ func reportExecuteError(err error) {
 		return
 	}
 
-	payload := struct {
-		Error string `json:"error"`
-		Code  string `json:"code"`
-		Hint  string `json:"hint,omitempty"`
-	}{Error: err.Error(), Code: "error"}
-
-	var cliErr *clierr.Error
-	if errors.As(err, &cliErr) {
-		payload.Error = cliErr.Message
-		payload.Code = string(cliErr.Category)
-		payload.Hint = cliErr.Hint
-	}
-
-	data, marshalErr := json.Marshal(payload)
+	data, marshalErr := json.Marshal(executeErrorPayload(err))
 	if marshalErr != nil {
 		log.Error(err)
 		return

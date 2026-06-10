@@ -13,7 +13,7 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:   "info [SANDBOX_ID] | [SANDBOX_NAME]",
+	Use:   "info [SANDBOX_ID | SANDBOX_NAME]",
 	Short: "Get sandbox info",
 	Example: `  daytona info my-sandbox
   daytona info my-sandbox --format json`,

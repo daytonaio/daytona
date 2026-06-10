@@ -91,3 +91,77 @@ func TestRegisterFormatFlagShorthands(t *testing.T) {
 		})
 	}
 }
+
+func TestRegisterFormatFlagChainsPreRunE(t *testing.T) {
+	tests := []struct {
+		name            string
+		value           string
+		wantErr         bool
+		wantOriginalRun bool
+	}{
+		{name: "valid format runs original PreRunE after validation", value: "json", wantOriginalRun: true},
+		{name: "empty format runs original PreRunE", value: "", wantOriginalRun: true},
+		{name: "invalid format short-circuits original PreRunE", value: "xml", wantErr: true, wantOriginalRun: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			prevFormat := common.FormatFlag
+			t.Cleanup(func() {
+				common.UnblockStdOut()
+				common.FormatFlag = prevFormat
+				internal.SuppressVersionMismatchWarning = false
+			})
+
+			originalRun := false
+			cmd := &cobra.Command{Use: "test"}
+			cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+				originalRun = true
+				return nil
+			}
+			common.RegisterFormatFlag(cmd)
+
+			common.FormatFlag = tt.value
+			err := cmd.PreRunE(cmd, nil)
+
+			if tt.wantErr && err == nil {
+				t.Error("PreRunE expected error, got nil")
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("PreRunE unexpected error: %v", err)
+			}
+			if originalRun != tt.wantOriginalRun {
+				t.Errorf("original PreRunE run = %v, want %v", originalRun, tt.wantOriginalRun)
+			}
+		})
+	}
+}
+
+func TestRegisterFormatFlagChainPropagatesOriginalError(t *testing.T) {
+	prevFormat := common.FormatFlag
+	t.Cleanup(func() {
+		common.UnblockStdOut()
+		common.FormatFlag = prevFormat
+		internal.SuppressVersionMismatchWarning = false
+	})
+
+	wantErr := errors.New("original failed")
+	cmd := &cobra.Command{Use: "test"}
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error { return wantErr }
+	common.RegisterFormatFlagNoShorthand(cmd)
+
+	common.FormatFlag = "json"
+	if err := cmd.PreRunE(cmd, nil); !errors.Is(err, wantErr) {
+		t.Errorf("PreRunE error = %v, want original error %v", err, wantErr)
+	}
+}
+
+func TestPrintWithoutFormatIsNoOp(t *testing.T) {
+	prevFormat := common.FormatFlag
+	t.Cleanup(func() { common.FormatFlag = prevFormat })
+
+	// With no --format value the formatter is nil; Print must return
+	// without panicking (and without touching stdout blocking state).
+	common.FormatFlag = ""
+	common.NewFormatter(struct{ Name string }{Name: "x"}).Print()
+}

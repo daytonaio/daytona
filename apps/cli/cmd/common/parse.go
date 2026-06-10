@@ -26,14 +26,14 @@ func ParseKeyValuePairs(entries []string, flag string) (map[string]string, error
 	return pairs, nil
 }
 
-// ParseVolumeSpecs parses VOLUME_ID:MOUNT_PATH entries. Both the volume ID
-// and the mount path must be non-empty.
+// ParseVolumeSpecs parses VOLUME:MOUNT_PATH entries, where VOLUME is a
+// volume ID or name. Both the volume and the mount path must be non-empty.
 func ParseVolumeSpecs(entries []string) ([]apiclient.SandboxVolume, error) {
 	volumes := make([]apiclient.SandboxVolume, 0, len(entries))
 	for _, entry := range entries {
 		volumeId, mountPath, found := strings.Cut(entry, ":")
 		if !found || volumeId == "" || mountPath == "" {
-			return nil, clierr.Newf(clierr.CategoryUsage, "invalid --volume value %q: expected VOLUME_ID:MOUNT_PATH", entry)
+			return nil, clierr.Newf(clierr.CategoryUsage, "invalid --volume value %q: expected VOLUME:MOUNT_PATH", entry)
 		}
 		volumes = append(volumes, apiclient.SandboxVolume{
 			VolumeId:  volumeId,

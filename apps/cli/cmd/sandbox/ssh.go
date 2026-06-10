@@ -13,7 +13,7 @@ import (
 )
 
 var SSHCmd = &cobra.Command{
-	Use:   "ssh [SANDBOX_ID] | [SANDBOX_NAME]",
+	Use:   "ssh [SANDBOX_ID | SANDBOX_NAME]",
 	Short: "SSH into a sandbox",
 	Long:  "Establish an SSH connection to a running sandbox",
 	Example: `  daytona ssh my-sandbox
