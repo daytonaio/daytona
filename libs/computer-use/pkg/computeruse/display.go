@@ -29,32 +29,25 @@ func validateScreenshotRegion(width, height int) error {
 
 // encodeImageWithCompression encodes an image with the specified compression parameters
 func encodeImageWithCompression(img *image.RGBA, params ImageCompressionParams) ([]byte, error) {
-	var buf bytes.Buffer
+	// Scale before picking the encoder so every format — including
+	// unrecognized ones that fall back to PNG — honors params.Scale.
+	// Callers report cursor coordinates multiplied by Scale, so an
+	// unscaled encode here would desync them from the image.
+	var scaledImg image.Image = img
+	if params.Scale != 1.0 {
+		scaledImg = scaleImage(img, params.Scale)
+	}
 
+	var buf bytes.Buffer
 	switch params.Format {
 	case "jpeg":
-		// Scale the image if needed
-		var scaledImg image.Image = img
-		if params.Scale != 1.0 {
-			scaledImg = scaleImage(img, params.Scale)
-		}
 		err := jpeg.Encode(&buf, scaledImg, &jpeg.Options{Quality: params.Quality})
 		if err != nil {
 			return nil, err
 		}
-	case "png":
-		// Scale the image if needed
-		var scaledImg image.Image = img
-		if params.Scale != 1.0 {
-			scaledImg = scaleImage(img, params.Scale)
-		}
-		err := png.Encode(&buf, scaledImg)
-		if err != nil {
-			return nil, err
-		}
 	default:
-		// Default to PNG
-		err := png.Encode(&buf, img)
+		// "png" and any unrecognized format encode as PNG.
+		err := png.Encode(&buf, scaledImg)
 		if err != nil {
 			return nil, err
 		}

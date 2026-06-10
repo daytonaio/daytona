@@ -11,12 +11,18 @@ import (
 
 // GetWindows returns information about all open windows
 func (c *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
-	windowsList := getWindowsList()
+	windowsList, err := getWindowsList()
+	if err != nil {
+		return nil, err
+	}
+	foreground := getForegroundWindow()
 
 	windows := make([]computeruse.WindowInfo, 0, len(windowsList))
-	for i, w := range windowsList {
+	for _, w := range windowsList {
 		windows = append(windows, computeruse.WindowInfo{
-			ID:    i,
+			// HWNDs are 32-bit significant per Win32 handle guarantees, so
+			// the int conversion is lossless even on 64-bit builds.
+			ID:    int(w.HWND),
 			Title: w.Title,
 			Position: computeruse.Position{
 				X: w.X,
@@ -26,7 +32,7 @@ func (c *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
 				Width:  w.Width,
 				Height: w.Height,
 			},
-			IsActive: w.Visible,
+			IsActive: w.HWND == foreground,
 		})
 	}
 
