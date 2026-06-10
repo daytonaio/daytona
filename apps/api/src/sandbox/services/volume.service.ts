@@ -224,7 +224,11 @@ export class VolumeService {
     // The id column is a Postgres uuid — filtering it by a non-UUID string makes the
     // query itself throw, so only UUID-shaped references go into the id filter. Names
     // may also be UUID-shaped, so every reference goes into the name filter.
-    const uuidRefs = volumeIdOrNames.filter((idOrName) => isValidUuid(idOrName))
+    // Postgres compares uuids case-insensitively but the in-memory maps below cannot,
+    // so UUID-shaped references are canonicalized to lowercase here and when matching.
+    const uuidRefs = volumeIdOrNames
+      .filter((idOrName) => isValidUuid(idOrName))
+      .map((idOrName) => idOrName.toLowerCase())
     const where: FindOptionsWhere<Volume>[] = [
       { name: In(volumeIdOrNames), organizationId, state: Not(VolumeState.DELETED) },
     ]
@@ -243,7 +247,10 @@ export class VolumeService {
 
     const volumes = new Map<string, Volume>()
     for (const idOrName of volumeIdOrNames) {
-      const matchedById = volumesById.get(idOrName)
+      let matchedById: Volume | undefined
+      if (isValidUuid(idOrName)) {
+        matchedById = volumesById.get(idOrName.toLowerCase())
+      }
       const matchedByName = volumesByName.get(idOrName)
       if (matchedById !== undefined && matchedByName !== undefined && matchedById.id !== matchedByName.id) {
         throw new BadRequestError(

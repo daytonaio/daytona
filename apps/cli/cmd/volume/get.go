@@ -5,21 +5,12 @@ package volume
 
 import (
 	"context"
-	"net/http"
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/views/volume"
-	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
-
-// isVolumeId reports whether the argument is a canonical UUID (the length check
-// excludes braced/URN/dashless variants).
-func isVolumeId(arg string) bool {
-	return len(arg) == 36 && uuid.Validate(arg) == nil
-}
 
 var GetCmd = &cobra.Command{
 	Use:     "get [VOLUME_ID_OR_NAME]",
@@ -34,20 +25,9 @@ var GetCmd = &cobra.Command{
 			return err
 		}
 
-		// UUID-shaped arguments are looked up as volume IDs first, but volume names
-		// may also be UUID-shaped, so fall back to a name lookup when no ID matches
-		var vol *apiclient.VolumeDto
-		var res *http.Response
-		if isVolumeId(args[0]) {
-			vol, res, err = apiClient.VolumesAPI.GetVolume(ctx, args[0]).Execute()
-			if err != nil && res != nil && res.StatusCode == http.StatusNotFound {
-				vol, res, err = apiClient.VolumesAPI.GetVolumeByName(ctx, args[0]).Execute()
-			}
-		} else {
-			vol, res, err = apiClient.VolumesAPI.GetVolumeByName(ctx, args[0]).Execute()
-		}
+		vol, err := resolveVolume(ctx, apiClient, args[0])
 		if err != nil {
-			return apiclient_cli.HandleErrorResponse(res, err)
+			return err
 		}
 
 		if common.FormatFlag != "" {
