@@ -1713,7 +1713,7 @@ If omitted, the Daytona SDK will default to `python`. To override this, explicit
 
 ## Automated lifecycle management
 
-Daytona sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals. You can also refresh the last activity timestamp to explicitly signal activity when lifecycle behavior depends on inactivity windows.
+Sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals. The intervals act as a TTL (time-to-live) mechanism for the sandbox. You can also refresh the last activity timestamp to explicitly signal activity when lifecycle behavior depends on inactivity intervals.
 
 ### Update sandbox last activity
 
