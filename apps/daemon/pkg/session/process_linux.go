@@ -17,3 +17,7 @@ func setNewProcessGroup(cmd *exec.Cmd) {
 func killProcessGroup(pid int, sig syscall.Signal) {
 	_ = syscall.Kill(-pid, sig)
 }
+
+// SupportedOnPlatform reports whether sessions work on this platform.
+// Linux session shells speak the POSIX wrapper used by Execute.
+const SupportedOnPlatform = true
