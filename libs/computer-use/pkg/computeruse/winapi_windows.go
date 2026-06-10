@@ -485,20 +485,14 @@ func typeString(text string, delay int) error {
 	if text == "" {
 		return nil
 	}
-	// utf16-encode so we send a surrogate pair where needed.
-	utf16Text := utf16.Encode([]rune(text))
-	for _, r := range utf16Text {
-		down := inputStruct{}
-		down.asKeyboard(keybdInput{
-			WScan:   r,
-			DwFlags: keyEventF_UNICODE,
-		})
-		up := inputStruct{}
-		up.asKeyboard(keybdInput{
-			WScan:   r,
-			DwFlags: keyEventF_UNICODE | keyEventF_KEYUP,
-		})
-		if err := sendInputs([]inputStruct{down, up}); err != nil {
+	// Each rune's UTF-16 code units go out in a single SendInput call:
+	// within one call the events cannot interleave with other synthesized
+	// input, so a non-BMP rune's surrogate halves always arrive paired and
+	// the delay applies once per character, not per code unit.
+	inputs := make([]inputStruct, 0, 4)
+	for _, r := range text {
+		inputs = appendRuneInputs(inputs[:0], r)
+		if err := sendInputs(inputs); err != nil {
 			return err
 		}
 		if delay > 0 {
@@ -506,6 +500,26 @@ func typeString(text string, delay int) error {
 		}
 	}
 	return nil
+}
+
+// appendRuneInputs appends the KEYEVENTF_UNICODE down/up events that type r:
+// one down/up pair per UTF-16 code unit, so a non-BMP rune contributes four
+// events (its high then low surrogate).
+func appendRuneInputs(inputs []inputStruct, r rune) []inputStruct {
+	var units [2]uint16
+	for _, cu := range utf16.AppendRune(units[:0], r) {
+		var down, up inputStruct
+		down.asKeyboard(keybdInput{
+			WScan:   cu,
+			DwFlags: keyEventF_UNICODE,
+		})
+		up.asKeyboard(keybdInput{
+			WScan:   cu,
+			DwFlags: keyEventF_UNICODE | keyEventF_KEYUP,
+		})
+		inputs = append(inputs, down, up)
+	}
+	return inputs
 }
 
 // ---------------------------------------------------------------------------

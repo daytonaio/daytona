@@ -7,6 +7,7 @@ package computeruse
 
 import (
 	"testing"
+	"unicode/utf16"
 	"unsafe"
 
 	"github.com/stretchr/testify/assert"
@@ -182,4 +183,34 @@ func TestResolveKeyRejectsNonBMPRunes(t *testing.T) {
 func TestMouseScrollRejectsExcessiveAmount(t *testing.T) {
 	assert.Error(t, mouseScroll(maxScrollAmount+1, scrollDirectionUp))
 	assert.Error(t, mouseScroll(maxScrollAmount+1, scrollDirectionDown))
+}
+
+// typeString batches each rune's events into one SendInput call so a non-BMP
+// rune's surrogate halves cannot be split by other synthesized input.
+// appendRuneInputs builds those batches: a BMP rune yields one down/up pair,
+// a non-BMP rune yields down/up pairs for its high then low surrogate.
+func TestAppendRuneInputs(t *testing.T) {
+	type event struct {
+		scan  uint16
+		flags uint32
+	}
+	keyEvent := func(in inputStruct) event {
+		require.Equal(t, uint32(inputKeyboard), in.Type)
+		ki := *(*keybdInput)(unsafe.Pointer(&in.U[0]))
+		return event{ki.WScan, ki.DwFlags}
+	}
+
+	inputs := appendRuneInputs(nil, 'a')
+	require.Len(t, inputs, 2, "BMP rune must produce one down/up pair")
+	assert.Equal(t, event{'a', keyEventF_UNICODE}, keyEvent(inputs[0]))
+	assert.Equal(t, event{'a', keyEventF_UNICODE | keyEventF_KEYUP}, keyEvent(inputs[1]))
+
+	const grin = '\U0001F600'
+	hi, lo := utf16.EncodeRune(grin)
+	inputs = appendRuneInputs(inputs[:0], grin)
+	require.Len(t, inputs, 4, "non-BMP rune must produce down/up pairs for both surrogate halves")
+	assert.Equal(t, event{uint16(hi), keyEventF_UNICODE}, keyEvent(inputs[0]))
+	assert.Equal(t, event{uint16(hi), keyEventF_UNICODE | keyEventF_KEYUP}, keyEvent(inputs[1]))
+	assert.Equal(t, event{uint16(lo), keyEventF_UNICODE}, keyEvent(inputs[2]))
+	assert.Equal(t, event{uint16(lo), keyEventF_UNICODE | keyEventF_KEYUP}, keyEvent(inputs[3]))
 }
