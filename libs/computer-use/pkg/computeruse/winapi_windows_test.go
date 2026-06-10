@@ -6,6 +6,7 @@
 package computeruse
 
 import (
+	"math"
 	"syscall"
 	"testing"
 	"unicode/utf16"
@@ -179,11 +180,46 @@ func TestResolveKeyRejectsNonBMPRunes(t *testing.T) {
 	}
 }
 
-// mouseScroll must reject amounts beyond maxScrollAmount: past ~17.9M notches
-// the int32 wheel-delta product wraps and a scroll-up silently scrolls down.
+// mouseScroll must reject out-of-range amounts: each notch becomes one
+// SendInput event, so an unbounded amount would synthesize an absurd input
+// batch from a single request, and a negative amount has no event count.
 func TestMouseScrollRejectsExcessiveAmount(t *testing.T) {
 	assert.Error(t, mouseScroll(maxScrollAmount+1, scrollDirectionUp))
 	assert.Error(t, mouseScroll(maxScrollAmount+1, scrollDirectionDown))
+	assert.Error(t, mouseScroll(-1, scrollDirectionUp))
+}
+
+// Windows consumers read a wheel event's delta as signed 16-bit
+// (WM_MOUSEWHEEL: (short)HIWORD(wParam); raw input: RAWMOUSE.usButtonData as
+// a short), so an event with |delta| > 32767 is truncated mod 2^16 and can
+// flip the scroll direction (120*274 = 32880 reads back as -32656). Every
+// event scrollInputs generates must stay within the int16 ceiling, carry the
+// direction's sign, and the batch must sum to the requested notches.
+func TestScrollInputsStayWithinInt16WheelDelta(t *testing.T) {
+	wheelEventDelta := func(in inputStruct) int32 {
+		require.Equal(t, uint32(inputMouse), in.Type)
+		mi := *(*mouseInput)(unsafe.Pointer(&in.U[0]))
+		require.Equal(t, uint32(mouseEventF_WHEEL), mi.DwFlags)
+		return int32(mi.MouseData)
+	}
+
+	for direction, sign := range map[string]int64{
+		scrollDirectionUp:   1,
+		scrollDirectionDown: -1,
+	} {
+		inputs, err := scrollInputs(maxScrollAmount, direction)
+		require.NoError(t, err, "direction %q", direction)
+
+		var total int64
+		for i, in := range inputs {
+			delta := wheelEventDelta(in)
+			require.LessOrEqualf(t, delta, int32(math.MaxInt16), "direction %q event %d exceeds the int16 wheel ceiling", direction, i)
+			require.GreaterOrEqualf(t, delta, int32(math.MinInt16), "direction %q event %d exceeds the int16 wheel ceiling", direction, i)
+			require.Truef(t, sign*int64(delta) > 0, "direction %q event %d: delta %d must carry the direction's sign", direction, i, delta)
+			total += int64(delta)
+		}
+		assert.Equal(t, sign*int64(wheelDelta)*int64(maxScrollAmount), total, "direction %q: batch must sum to the requested notches", direction)
+	}
 }
 
 // typeString batches each rune's events into one SendInput call so a non-BMP

@@ -348,32 +348,51 @@ func mouseUp(button string) error {
 	return sendInputs(inputs)
 }
 
-// maxScrollAmount bounds a single scroll request. Past ~17.9M notches the
-// wheel-delta product below overflows int32 and silently flips the scroll
-// direction; any amount remotely near that is garbage input. Keep in sync
-// with the identical bound in mouse.go (linux).
+// maxScrollAmount bounds a single scroll request. Each notch becomes one
+// SendInput event below, so the bound caps how large an input batch a single
+// request can synthesize; anything remotely near it is garbage input. Keep in
+// sync with the identical bound in mouse.go (linux).
 const maxScrollAmount = 10000
+
+// scrollInputs builds one MOUSEEVENTF_WHEEL event per notch, each carrying
+// exactly ±wheelDelta. Windows delivers a wheel event's delta to consumers as
+// a signed 16-bit value (WM_MOUSEWHEEL reads (short)HIWORD(wParam); raw input
+// reads RAWMOUSE.usButtonData as a short), so a single event whose delta
+// exceeds ±32767 is truncated mod 2^16 and can silently flip the scroll
+// direction: 120*274 = 32880 reads back as -32656, ~272 notches the wrong
+// way. Per-notch events stay far below that ceiling, match real-wheel
+// semantics, and mirror the linux path (one notch per ScrollSmooth
+// iteration).
+func scrollInputs(amount int, direction string) ([]inputStruct, error) {
+	if amount < 0 || amount > maxScrollAmount {
+		return nil, fmt.Errorf("scroll amount %d exceeds maximum of %d", amount, maxScrollAmount)
+	}
+	var delta int32
+	switch direction {
+	case scrollDirectionUp:
+		delta = wheelDelta // Positive delta scrolls up.
+	case scrollDirectionDown:
+		delta = -wheelDelta
+	default:
+		return nil, fmt.Errorf("unsupported scroll direction %q: expected up or down", direction)
+	}
+	inputs := make([]inputStruct, amount)
+	for i := range inputs {
+		inputs[i].asMouse(mouseInput{
+			MouseData: uint32(delta),
+			DwFlags:   mouseEventF_WHEEL,
+		})
+	}
+	return inputs, nil
+}
 
 // mouseScroll scrolls by `amount` wheel notches in canonical `direction`
 // ("up" or "down", as produced by normalizeScrollDirection).
 func mouseScroll(amount int, direction string) error {
-	if amount > maxScrollAmount {
-		return fmt.Errorf("scroll amount %d exceeds maximum of %d", amount, maxScrollAmount)
+	inputs, err := scrollInputs(amount, direction)
+	if err != nil {
+		return err
 	}
-	delta := int32(wheelDelta * amount)
-	switch direction {
-	case scrollDirectionUp:
-		// Positive delta scrolls up.
-	case scrollDirectionDown:
-		delta = -delta
-	default:
-		return fmt.Errorf("unsupported scroll direction %q: expected up or down", direction)
-	}
-	inputs := []inputStruct{{}}
-	inputs[0].asMouse(mouseInput{
-		MouseData: uint32(delta),
-		DwFlags:   mouseEventF_WHEEL,
-	})
 	return sendInputs(inputs)
 }
 
