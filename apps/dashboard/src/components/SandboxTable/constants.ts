@@ -4,7 +4,7 @@
  */
 
 import { SandboxClass, SandboxState } from '@daytona/api-client'
-import { AndroidLogoIcon, LinuxLogoIcon, SquaresFourIcon } from '@phosphor-icons/react'
+import { AndroidLogoIcon, LinuxLogoIcon, WindowsLogoIcon } from '@phosphor-icons/react'
 import { AlertTriangle, Archive, CheckCircle, Circle, Container, LucideIcon, Timer } from 'lucide-react'
 import { FacetedFilterOption } from './types'
 
@@ -114,7 +114,7 @@ const SANDBOX_CLASS_ICON_MAPPING: Record<SandboxClass, LucideIcon> = {
   [SandboxClass.CONTAINER]: Container,
   [SandboxClass.LINUX_VM]: LinuxLogoIcon,
   [SandboxClass.ANDROID]: AndroidLogoIcon,
-  [SandboxClass.WINDOWS]: SquaresFourIcon,
+  [SandboxClass.WINDOWS]: WindowsLogoIcon,
   [SandboxClass.UNKNOWN_DEFAULT_OPEN_API]: Container,
 }
 

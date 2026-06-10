@@ -119,8 +119,10 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
                       aria-label="Select region"
                       className={cn(
                         'w-auto max-w-40 gap-x-2 border-transparent bg-transparent px-2 lowercase hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent focus-visible:border-transparent',
-                        regionsForSelectedClass.length === 1 &&
-                          'pointer-events-none select-none disabled:opacity-100 [&>svg]:hidden',
+                        {
+                          'pointer-events-none select-none disabled:opacity-100 [&>svg]:hidden':
+                            regionsForSelectedClass.length === 1,
+                        },
                       )}
                     >
                       <SelectValue placeholder="Region" />
@@ -143,10 +145,7 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
         {usageOverviewQuery.isLoading ? (
           <UsageOverviewSkeleton />
         ) : usageOverviewUnavailable ? (
-          <CurrentUsageErrorState
-            onRetry={() => void usageOverviewQuery.refetch()}
-            retrying={usageOverviewQuery.isFetching}
-          />
+          <CurrentUsageErrorState onRetry={usageOverviewQuery.refetch} retrying={usageOverviewQuery.isFetching} />
         ) : (
           usageOverview &&
           currentRegionUsageOverview && (
@@ -207,7 +206,7 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
   )
 }
 
-function CurrentUsageErrorState({ onRetry, retrying }: { onRetry: () => void; retrying: boolean }) {
+function CurrentUsageErrorState({ onRetry, retrying }: { onRetry: () => unknown; retrying: boolean }) {
   return (
     <Empty className="rounded-none border-0 py-8">
       <EmptyHeader>
@@ -218,7 +217,7 @@ function CurrentUsageErrorState({ onRetry, retrying }: { onRetry: () => void; re
         <EmptyDescription>Something went wrong while fetching your resource usage. Please try again.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button variant="secondary" size="sm" onClick={onRetry} disabled={retrying}>
+        <Button variant="secondary" size="sm" onClick={() => onRetry()} disabled={retrying}>
           {retrying && <Spinner />}
           Retry
         </Button>
@@ -355,24 +354,21 @@ function UsageScopeAlertRow({
   return (
     <div className="flex min-w-0 gap-1.5 overflow-x-auto pt-4 text-xs">
       {alerts.map((alert) => (
-        <button
+        <Badge
           key={alert.key}
-          type="button"
-          className={cn(
-            'inline-flex h-6 shrink-0 items-center gap-1 rounded-full border px-2 text-xs transition-colors',
-            alert.severity === 'destructive'
-              ? 'border-destructive-separator bg-destructive-background text-destructive-foreground hover:bg-destructive-background/80'
-              : 'border-warning-separator bg-warning-background text-warning-foreground hover:bg-warning-background/80',
-          )}
-          onClick={() => onSelect(alert)}
+          asChild
+          variant={alert.severity === 'destructive' ? 'destructive' : 'warning'}
+          className="h-6 shrink-0 cursor-pointer gap-1 px-2 py-0 font-normal"
         >
-          <span className="font-medium">
-            {getSandboxClassLabel(alert.sandboxClass)} - {getRegionName(alert.regionId) ?? alert.regionId}
-          </span>
-          <span className="opacity-70">
-            {alert.resourceLabel} {Math.round(alert.percentage)}%
-          </span>
-        </button>
+          <button type="button" onClick={() => onSelect(alert)}>
+            <span className="font-medium">
+              {getSandboxClassLabel(alert.sandboxClass)} - {getRegionName(alert.regionId) ?? alert.regionId}
+            </span>
+            <span className="opacity-70">
+              {alert.resourceLabel} {Math.round(alert.percentage)}%
+            </span>
+          </button>
+        </Badge>
       ))}
     </div>
   )

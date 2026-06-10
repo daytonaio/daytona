@@ -21,36 +21,42 @@ export function UsageOverview({
   const isWindows = usageOverview.sandboxClass === SandboxClass.WINDOWS
   const gpuCurrent = isWindows ? 0 : usageOverview.currentGpuUsage
   const gpuTotal = isWindows ? 0 : usageOverview.totalGpuQuota
-  const gpuZeroQuotaValue = getGpuZeroQuotaValue({
-    isWindows,
-    hasGpuQuotaInClass,
-    current: gpuCurrent,
-  })
 
   return (
     <div className={cn('flex gap-4 [&>*]:flex-1 flex-col lg:flex-row', className)}>
       <ResourceUsageItem
         label="Compute"
-        value={getUsageValue(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota, 'vCPU')}
+        value={<UsageValue current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} unit="vCPU" />}
       >
         <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
       </ResourceUsageItem>
       <ResourceUsageItem
         label="Memory"
-        value={getUsageValue(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GiB')}
+        value={
+          <UsageValue current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} unit="GiB" />
+        }
       >
         <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
       </ResourceUsageItem>
       <ResourceUsageItem
         label="Storage"
-        value={getUsageValue(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GiB')}
+        value={<UsageValue current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} unit="GiB" />}
       >
         <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
       </ResourceUsageItem>
       <ResourceUsageItem
         label="GPU"
-        className={isWindows ? 'opacity-50' : undefined}
-        value={getUsageValue(gpuCurrent, gpuTotal, 'GPU', gpuZeroQuotaValue)}
+        className={cn({ 'opacity-50': isWindows })}
+        value={
+          <UsageValue
+            current={gpuCurrent}
+            total={gpuTotal}
+            unit="GPU"
+            zeroQuotaValue={
+              <GpuZeroQuotaValue isWindows={isWindows} hasGpuQuotaInClass={hasGpuQuotaInClass} current={gpuCurrent} />
+            }
+          />
+        }
       >
         <QuotaLine current={gpuCurrent} total={gpuTotal} />
       </ResourceUsageItem>
@@ -68,7 +74,17 @@ function formatUsageValue(value: number) {
   return truncated.toFixed(1)
 }
 
-function getUsageValue(current: number, total: number, unit: string, zeroQuotaValue?: ReactNode) {
+function UsageValue({
+  current,
+  total,
+  unit,
+  zeroQuotaValue,
+}: {
+  current: number
+  total: number
+  unit: string
+  zeroQuotaValue?: ReactNode
+}) {
   if (total > 0 || current > 0) {
     return <UsageLabel current={current} total={total} unit={unit} />
   }
@@ -76,7 +92,7 @@ function getUsageValue(current: number, total: number, unit: string, zeroQuotaVa
   return zeroQuotaValue ?? <span className="text-xs text-muted-foreground text-nowrap">0 / 0 {unit}</span>
 }
 
-function getGpuZeroQuotaValue({
+function GpuZeroQuotaValue({
   isWindows,
   hasGpuQuotaInClass,
   current,
@@ -84,9 +100,9 @@ function getGpuZeroQuotaValue({
   isWindows: boolean
   hasGpuQuotaInClass: boolean
   current: number
-}): ReactNode {
+}) {
   if (current > 0) {
-    return undefined
+    return null
   }
 
   if (isWindows) {
@@ -147,7 +163,7 @@ const UsageLabel = ({ current, total, unit }: { current: number; total: number; 
   return (
     <span
       className={cn('text-xs text-nowrap', {
-        'text-destructive': isHighUsage,
+        'text-destructive-foreground': isHighUsage,
       })}
     >
       {formatUsageValue(current)} <span className="opacity-50">/</span> {formatUsageValue(total)} {unit}
