@@ -245,9 +245,66 @@ func TestClassifyWindowsActionError(t *testing.T) {
 		t.Error("dead handle must be evicted from the element cache")
 	}
 
-	err = classifyWindowsActionError("other-handle", "Invoke", ole.NewError(0x80004005)) // E_FAIL
-	if !errors.Is(err, ErrActionNotSupported) {
-		t.Fatalf("generic COM error = %v, want ErrActionNotSupported", err)
+	// HRESULTs that unambiguously mean "the element refuses this action"
+	// map to the 400 sentinel.
+	for _, code := range []uintptr{
+		uiaErrElementNotEnabled,
+		uiaErrNotSupported,
+		uiaErrInvalidOperation,
+		hresultNoInterface,
+		hresultNotImplemented,
+	} {
+		err := classifyWindowsActionError("h", "Invoke", ole.NewError(code))
+		if !errors.Is(err, ErrActionNotSupported) {
+			t.Errorf("refusal HRESULT %#x = %v, want ErrActionNotSupported", code, err)
+		}
+		if !strings.HasPrefix(err.Error(), ErrActionNotSupported.Error()+":") {
+			t.Errorf("error %q must keep the sentinel prefix the daemon matches on", err.Error())
+		}
+	}
+
+	// Everything else — transient COM faults and non-COM errors — passes
+	// through untranslated so the daemon reports a retryable internal
+	// error instead of a permanent refusal (Linux classifyDbusError
+	// contract: unknown errors are returned as-is).
+	transient := ole.NewError(0x80004005) // E_FAIL
+	err = classifyWindowsActionError("h", "Invoke", transient)
+	if errors.Is(err, ErrActionNotSupported) || errors.Is(err, ErrNodeNotFound) {
+		t.Fatalf("generic COM error = %v, must not map to a sentinel", err)
+	}
+	if !errors.Is(err, transient) {
+		t.Errorf("generic COM error %v must wrap the original error", err)
+	}
+
+	plain := errors.New("rpc fault")
+	err = classifyWindowsActionError("h", "SetValue", plain)
+	if errors.Is(err, ErrActionNotSupported) || errors.Is(err, ErrNodeNotFound) {
+		t.Fatalf("non-COM error = %v, must not map to a sentinel", err)
+	}
+	if !errors.Is(err, plain) {
+		t.Errorf("non-COM error %v must wrap the original error", err)
+	}
+}
+
+func TestAccessibilityValidationRunsBeforeSTA(t *testing.T) {
+	// Malformed requests must be rejected by pure validation before any
+	// COM/STA work: the 400 must win even on hosts where CoInitializeEx
+	// fails, and must never queue behind in-flight UIA walks.
+	staStarted := staCh != nil
+	c := &ComputerUse{}
+
+	if _, err := c.GetAccessibilityTree(&computeruse.GetAccessibilityTreeRequest{Scope: "bogus"}); !errors.Is(err, ErrInvalidScope) {
+		t.Fatalf("GetAccessibilityTree(bogus scope) = %v, want ErrInvalidScope", err)
+	}
+	if _, err := c.FindAccessibilityNodes(&computeruse.FindAccessibilityNodesRequest{Scope: "bogus"}); !errors.Is(err, ErrInvalidScope) {
+		t.Fatalf("FindAccessibilityNodes(bogus scope) = %v, want ErrInvalidScope", err)
+	}
+	if _, err := c.FindAccessibilityNodes(&computeruse.FindAccessibilityNodesRequest{Name: "(", NameMatch: "regex"}); !errors.Is(err, ErrInvalidRequest) {
+		t.Fatalf("FindAccessibilityNodes(invalid regex) = %v, want ErrInvalidRequest", err)
+	}
+
+	if !staStarted && staCh != nil {
+		t.Error("pure request validation must not start the STA thread")
 	}
 }
 

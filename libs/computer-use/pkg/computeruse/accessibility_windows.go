@@ -180,18 +180,23 @@ func (c *ComputerUse) GetAccessibilityTree(req *computeruse.GetAccessibilityTree
 		req = &computeruse.GetAccessibilityTreeRequest{}
 	}
 
+	// Pure request validation runs before entering the STA (Linux parity:
+	// scope is parsed before connecting to the bus), so a malformed request
+	// 400s even on hosts where COM init fails and never queues behind
+	// in-flight UIA work on the single STA thread.
+	scope, err := parseWireScope(req.Scope)
+	if err != nil {
+		return nil, err
+	}
+
 	var resp *computeruse.AccessibilityTreeResponse
-	err := runOnSTA(func() error {
+	err = runOnSTA(func() error {
 		automation, err := newWindowsAutomation()
 		if err != nil {
 			return err
 		}
 		defer automation.Release()
 
-		scope, err := parseWireScope(req.Scope)
-		if err != nil {
-			return err
-		}
 		root, err := resolveWindowsScopeRoot(automation, scope, req.PID)
 		if err != nil {
 			return err
@@ -226,23 +231,25 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 		req = &computeruse.FindAccessibilityNodesRequest{}
 	}
 
+	// Pure request validation runs before entering the STA, as in
+	// GetAccessibilityTree.
+	scope, err := parseWireScope(req.Scope)
+	if err != nil {
+		return nil, err
+	}
+	matcher, err := buildWindowsFilterMatcher(req)
+	if err != nil {
+		return nil, err
+	}
+	limit := normalizeFindLimit(req.Limit)
+
 	var resp *computeruse.AccessibilityNodesResponse
-	err := runOnSTA(func() error {
+	err = runOnSTA(func() error {
 		automation, err := newWindowsAutomation()
 		if err != nil {
 			return err
 		}
 		defer automation.Release()
-
-		scope, err := parseWireScope(req.Scope)
-		if err != nil {
-			return err
-		}
-		matcher, err := buildWindowsFilterMatcher(req)
-		if err != nil {
-			return err
-		}
-		limit := normalizeFindLimit(req.Limit)
 
 		root, err := resolveWindowsScopeRoot(automation, scope, req.PID)
 		if err != nil {
@@ -961,29 +968,52 @@ func findWindowsWalk(walker *uia.TreeWalker, elt *uia.Element, match func(*compu
 	return *budget <= 0
 }
 
-// uiaErrElementNotAvailable is UIA_E_ELEMENTNOTAVAILABLE: the provider
-// behind the element is gone (window closed, control destroyed).
-const uiaErrElementNotAvailable uintptr = 0x80040201
+// UIA/COM HRESULTs whose meaning on action paths is unambiguous (values
+// from uiautomationcoreapi.h / winerror.h). Everything outside this set —
+// RPC faults, timeouts, E_FAIL, E_OUTOFMEMORY — is deliberately left
+// untranslated.
+const (
+	// uiaErrElementNotAvailable is UIA_E_ELEMENTNOTAVAILABLE: the provider
+	// behind the element is gone (window closed, control destroyed).
+	uiaErrElementNotAvailable uintptr = 0x80040201
+	// uiaErrElementNotEnabled is UIA_E_ELEMENTNOTENABLED: the element is
+	// disabled and refuses the action.
+	uiaErrElementNotEnabled uintptr = 0x80040200
+	// uiaErrNotSupported is UIA_E_NOTSUPPORTED: the provider rejects the
+	// requested operation.
+	uiaErrNotSupported uintptr = 0x80040204
+	// uiaErrInvalidOperation is UIA_E_INVALIDOPERATION: the operation is
+	// not valid in the element's current state.
+	uiaErrInvalidOperation uintptr = 0x80131509
+	// hresultNoInterface (E_NOINTERFACE) and hresultNotImplemented
+	// (E_NOTIMPL) are permanent "this object cannot do that" refusals.
+	hresultNoInterface    uintptr = 0x80004002
+	hresultNotImplemented uintptr = 0x80004001
+)
 
-// isWindowsElementNotAvailable reports whether err carries the UIA "element
-// no longer available" HRESULT. The binding surfaces every failing COM call
-// as *ole.OleError holding the raw HRESULT.
-func isWindowsElementNotAvailable(err error) bool {
-	var oleErr *ole.OleError
-	return errors.As(err, &oleErr) && oleErr.Code() == uiaErrElementNotAvailable
-}
-
-// classifyWindowsActionError mirrors the Linux classifyDbusError contract on
-// action paths: a call that failed because the element vanished maps to
-// ErrNodeNotFound (404 — "re-find the node"), anything else to
-// ErrActionNotSupported (400 — "pick another action"). Dead handles are
-// evicted so subsequent calls fail fast without another UIA round-trip.
+// classifyWindowsActionError follows the Linux classifyDbusError contract on
+// action paths: only failures with an unambiguous meaning are translated to
+// sentinel errors, anything else (transient RPC faults, timeouts, E_FAIL,
+// non-COM errors) is returned as-is so the daemon surfaces it as a
+// retryable internal error instead of a permanent refusal. A call that
+// failed because the element vanished maps to ErrNodeNotFound (404 —
+// "re-find the node") and evicts the dead handle so subsequent calls fail
+// fast without another UIA round-trip; refusal HRESULTs map to
+// ErrActionNotSupported (400 — "pick another action"). The binding
+// surfaces every failing COM call as *ole.OleError holding the raw HRESULT.
 func classifyWindowsActionError(handle, op string, err error) error {
-	if isWindowsElementNotAvailable(err) {
-		elementMap.remove(handle)
-		return fmt.Errorf("%w: %s: %v", ErrNodeNotFound, op, err)
+	var oleErr *ole.OleError
+	if errors.As(err, &oleErr) {
+		switch oleErr.Code() {
+		case uiaErrElementNotAvailable:
+			elementMap.remove(handle)
+			return fmt.Errorf("%w: %s: %v", ErrNodeNotFound, op, err)
+		case uiaErrElementNotEnabled, uiaErrNotSupported, uiaErrInvalidOperation,
+			hresultNoInterface, hresultNotImplemented:
+			return fmt.Errorf("%w: %s: %v", ErrActionNotSupported, op, err)
+		}
 	}
-	return fmt.Errorf("%w: %s: %v", ErrActionNotSupported, op, err)
+	return fmt.Errorf("%s: %w", op, err)
 }
 
 func invokeWindowsElement(handle string, elt *uia.Element, action string) error {
@@ -997,7 +1027,7 @@ func invokeWindowsElement(handle string, elt *uia.Element, action string) error 
 
 	if action == "" || action == actionInvoke || action == "click" || action == "press" {
 		pattern, err := windowsInvokePattern(elt)
-		if isWindowsElementNotAvailable(err) {
+		if err != nil {
 			return classifyWindowsActionError(handle, "InvokePattern", err)
 		}
 		if pattern != nil {
@@ -1014,7 +1044,7 @@ func invokeWindowsElement(handle string, elt *uia.Element, action string) error 
 
 	if action == "" || action == actionSelect {
 		pattern, err := windowsSelectionItemPattern(elt)
-		if isWindowsElementNotAvailable(err) {
+		if err != nil {
 			return classifyWindowsActionError(handle, "SelectionItemPattern", err)
 		}
 		if pattern != nil {
