@@ -1,0 +1,21 @@
+apps/api/src/filters/all-exceptions.filter.ts
+  s_bb92cc68558406::t_a77a242fd4e809 38,41,43-44
+apps/api/Dockerfile
+  s_bb92cc68558406::t_b473fbf877e49b 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "28a3b1a38e434bb1d477e49d3e713d9ba2524d0e",
+  "prompts": {},
+  "sessions": {
+    "s_bb92cc68558406": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61b66660-85d7-483f-83d3-52255737e517",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
