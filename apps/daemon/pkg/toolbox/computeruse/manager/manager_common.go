@@ -16,7 +16,6 @@ type pluginRef struct {
 	mu     sync.Mutex
 	client *plugin.Client
 	impl   computeruse.IComputerUse
-	path   string
 }
 
 var ComputerUseHandshakeConfig = plugin.HandshakeConfig{
@@ -27,9 +26,9 @@ var ComputerUseHandshakeConfig = plugin.HandshakeConfig{
 
 var computerUse = &pluginRef{}
 
-// spawnFunc starts the plugin process and returns the managed client, the
-// dispensed impl, and the plugin base path.
-type spawnFunc func() (*plugin.Client, computeruse.IComputerUse, string, error)
+// spawnFunc starts the plugin process and returns the managed client and the
+// dispensed impl.
+type spawnFunc func() (*plugin.Client, computeruse.IComputerUse, error)
 
 // getOrSpawn returns the cached plugin impl, or runs spawn under the manager
 // lock and caches its result. Exactly one concurrent caller executes spawn;
@@ -44,14 +43,13 @@ func getOrSpawn(spawn spawnFunc) (computeruse.IComputerUse, error) {
 		return computerUse.impl, nil
 	}
 
-	client, impl, basePath, err := spawn()
+	client, impl, err := spawn()
 	if err != nil {
 		return nil, err
 	}
 
 	computerUse.client = client
 	computerUse.impl = impl
-	computerUse.path = basePath
 	return impl, nil
 }
 
@@ -67,7 +65,8 @@ func (e *ComputerUseError) Error() string {
 }
 
 // KillComputerUse terminates the plugin client and clears the cached impl.
-// Used by the daemon's /computeruse/stop HTTP handler and shutdown path.
+// Used by the Windows daemon's /computeruse/stop HTTP handler and shutdown
+// path; the Linux daemon keeps the plugin alive for the process lifetime.
 //
 // It takes the manager lock, so a kill racing an in-flight spawn WAITS for
 // the spawn to finish and then terminates the freshly spawned client (waiting
@@ -81,5 +80,4 @@ func KillComputerUse() {
 	}
 	computerUse.client = nil
 	computerUse.impl = nil
-	computerUse.path = ""
 }

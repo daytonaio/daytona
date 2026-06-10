@@ -24,6 +24,8 @@ import (
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/recording"
 	session_svc "github.com/daytonaio/daemon/pkg/session"
+	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
+	recordingcontroller "github.com/daytonaio/daemon/pkg/toolbox/computeruse/recording"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
@@ -92,6 +94,7 @@ type server struct {
 	organizationId        *string
 	regionId              *string
 	snapshot              *string
+	computerUse           *computeruse.LazyComputerUse
 	ctx                   context.Context
 	cancel                context.CancelFunc
 }
@@ -100,6 +103,59 @@ type Telemetry struct {
 	TracerProvider *sdktrace.TracerProvider
 	MeterProvider  *metric.MeterProvider
 	LoggerProvider *otellog.LoggerProvider
+}
+
+// registerComputerUseRoutes registers the platform-independent computer-use
+// and recording routes shared by the Linux and Windows daemons, and returns
+// the LazyCheckMiddleware-guarded group so each platform can attach its own
+// /start and /stop wiring. The route set is part of the frozen wire contract
+// consumed by the generated SDKs; keep it identical on both platforms.
+func (s *server) registerComputerUseRoutes(controller *gin.RouterGroup, lazyCU *computeruse.LazyComputerUse, cuHandler computeruse.Handler) *gin.RouterGroup {
+	cuRoutes := controller.Group("/", computeruse.LazyCheckMiddleware(lazyCU))
+
+	cuRoutes.GET("/status", computeruse.WrapStatusHandler(lazyCU.GetStatus))
+	cuRoutes.GET("/process-status", cuHandler.GetComputerUseStatus)
+	cuRoutes.GET("/process/:processName/status", cuHandler.GetProcessStatus)
+	cuRoutes.POST("/process/:processName/restart", cuHandler.RestartProcess)
+	cuRoutes.GET("/process/:processName/logs", cuHandler.GetProcessLogs)
+	cuRoutes.GET("/process/:processName/errors", cuHandler.GetProcessErrors)
+
+	cuRoutes.GET("/screenshot", computeruse.WrapScreenshotHandler(lazyCU.TakeScreenshot))
+	cuRoutes.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(lazyCU.TakeRegionScreenshot))
+	cuRoutes.GET("/screenshot/compressed", computeruse.WrapCompressedScreenshotHandler(lazyCU.TakeCompressedScreenshot))
+	cuRoutes.GET("/screenshot/region/compressed", computeruse.WrapCompressedRegionScreenshotHandler(lazyCU.TakeCompressedRegionScreenshot))
+
+	cuRoutes.GET("/mouse/position", computeruse.WrapMousePositionHandler(lazyCU.GetMousePosition))
+	cuRoutes.POST("/mouse/move", computeruse.WrapMoveMouseHandler(lazyCU.MoveMouse))
+	cuRoutes.POST("/mouse/click", computeruse.WrapClickHandler(lazyCU.Click))
+	cuRoutes.POST("/mouse/drag", computeruse.WrapDragHandler(lazyCU.Drag))
+	cuRoutes.POST("/mouse/scroll", computeruse.WrapScrollHandler(lazyCU.Scroll))
+
+	cuRoutes.POST("/keyboard/type", computeruse.WrapTypeTextHandler(lazyCU.TypeText))
+	cuRoutes.POST("/keyboard/key", computeruse.WrapPressKeyHandler(lazyCU.PressKey))
+	cuRoutes.POST("/keyboard/hotkey", computeruse.WrapPressHotkeyHandler(lazyCU.PressHotkey))
+
+	cuRoutes.GET("/display/info", computeruse.WrapDisplayInfoHandler(lazyCU.GetDisplayInfo))
+	cuRoutes.GET("/display/windows", computeruse.WrapWindowsHandler(lazyCU.GetWindows))
+
+	cuRoutes.GET("/a11y/tree", computeruse.WrapGetAccessibilityTreeHandler(lazyCU.GetAccessibilityTree))
+	cuRoutes.POST("/a11y/find", computeruse.WrapFindAccessibilityNodesHandler(lazyCU.FindAccessibilityNodes))
+	cuRoutes.POST("/a11y/node/focus", computeruse.WrapFocusAccessibilityNodeHandler(lazyCU.FocusAccessibilityNode))
+	cuRoutes.POST("/a11y/node/invoke", computeruse.WrapInvokeAccessibilityNodeHandler(lazyCU.InvokeAccessibilityNode))
+	cuRoutes.POST("/a11y/node/value", computeruse.WrapSetAccessibilityNodeValueHandler(lazyCU.SetAccessibilityNodeValue))
+
+	recordingController := recordingcontroller.NewRecordingController(s.recordingService)
+	recordingsGroup := controller.Group("/recordings")
+	{
+		recordingsGroup.POST("/start", recordingController.StartRecording)
+		recordingsGroup.POST("/stop", recordingController.StopRecording)
+		recordingsGroup.GET("", recordingController.ListRecordings)
+		recordingsGroup.GET("/:id", recordingController.GetRecording)
+		recordingsGroup.GET("/:id/download", recordingController.DownloadRecording)
+		recordingsGroup.DELETE("/:id", recordingController.DeleteRecording)
+	}
+
+	return cuRoutes
 }
 
 func (s *server) Start() error {

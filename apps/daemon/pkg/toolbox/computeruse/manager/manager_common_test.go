@@ -25,7 +25,6 @@ func resetPluginRef() {
 	defer computerUse.mu.Unlock()
 	computerUse.client = nil
 	computerUse.impl = nil
-	computerUse.path = ""
 }
 
 func cachedImpl() computeruse.IComputerUse {
@@ -43,12 +42,12 @@ func TestGetOrSpawnSpawnsExactlyOnceUnderConcurrency(t *testing.T) {
 	entered := make(chan struct{})
 	release := make(chan struct{})
 
-	spawn := func() (*plugin.Client, computeruse.IComputerUse, string, error) {
+	spawn := func() (*plugin.Client, computeruse.IComputerUse, error) {
 		if spawns.Add(1) == 1 {
 			close(entered)
 		}
 		<-release
-		return nil, impl, "base", nil
+		return nil, impl, nil
 	}
 
 	firstDone := make(chan struct{})
@@ -103,11 +102,11 @@ func TestGetOrSpawnDoesNotCacheFailure(t *testing.T) {
 	boom := errors.New("boom")
 	impl := &fakeComputerUse{}
 
-	failThenSucceed := func() (*plugin.Client, computeruse.IComputerUse, string, error) {
+	failThenSucceed := func() (*plugin.Client, computeruse.IComputerUse, error) {
 		if spawns.Add(1) == 1 {
-			return nil, nil, "", boom
+			return nil, nil, boom
 		}
-		return nil, impl, "base", nil
+		return nil, impl, nil
 	}
 
 	if _, err := getOrSpawn(failThenSucceed); !errors.Is(err, boom) {
@@ -139,10 +138,10 @@ func TestKillComputerUseWaitsForInflightSpawn(t *testing.T) {
 	spawnDone := make(chan struct{})
 	go func() {
 		defer close(spawnDone)
-		got, err := getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, string, error) {
+		got, err := getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, error) {
 			close(entered)
 			<-release
-			return nil, impl, "base", nil
+			return nil, impl, nil
 		})
 		if err != nil || got != impl {
 			t.Errorf("spawn caller: got (%v, %v), want spawned impl", got, err)

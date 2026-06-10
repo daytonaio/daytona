@@ -8,17 +8,13 @@ package toolbox
 import (
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"sync"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse/manager"
-	recordingcontroller "github.com/daytonaio/daemon/pkg/toolbox/computeruse/recording"
 	"github.com/gin-gonic/gin"
 )
-
-var computerUseInstance computeruse.IComputerUse
 
 func resolvePluginPath(configDir string) string {
 	const pluginExe = "daytona-computer-use.exe"
@@ -32,12 +28,12 @@ func resolvePluginPath(configDir string) string {
 	if _, err := os.Stat(candidate); err == nil {
 		return candidate
 	}
-	return path.Join(configDir, pluginExe)
+	return filepath.Join(configDir, pluginExe)
 }
 
 func (s *server) registerPlatformRoutes(r *gin.Engine) {
 	lazyCU := computeruse.NewLazyComputerUse()
-	computerUseInstance = lazyCU
+	s.computerUse = lazyCU
 
 	cuHandler := computeruse.Handler{ComputerUse: lazyCU}
 
@@ -83,59 +79,18 @@ func (s *server) registerPlatformRoutes(r *gin.Engine) {
 			}
 			c.JSON(http.StatusOK, gin.H{"message": "Computer-use plugin was not running"})
 		})
-
-		cuRoutes := computerUseController.Group("/", computeruse.LazyCheckMiddleware(lazyCU))
-
-		cuRoutes.GET("/status", computeruse.WrapStatusHandler(lazyCU.GetStatus))
-		cuRoutes.GET("/process-status", cuHandler.GetComputerUseStatus)
-		cuRoutes.GET("/process/:processName/status", cuHandler.GetProcessStatus)
-		cuRoutes.POST("/process/:processName/restart", cuHandler.RestartProcess)
-		cuRoutes.GET("/process/:processName/logs", cuHandler.GetProcessLogs)
-		cuRoutes.GET("/process/:processName/errors", cuHandler.GetProcessErrors)
-
-		cuRoutes.GET("/screenshot", computeruse.WrapScreenshotHandler(lazyCU.TakeScreenshot))
-		cuRoutes.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(lazyCU.TakeRegionScreenshot))
-		cuRoutes.GET("/screenshot/compressed", computeruse.WrapCompressedScreenshotHandler(lazyCU.TakeCompressedScreenshot))
-		cuRoutes.GET("/screenshot/region/compressed", computeruse.WrapCompressedRegionScreenshotHandler(lazyCU.TakeCompressedRegionScreenshot))
-
-		cuRoutes.GET("/mouse/position", computeruse.WrapMousePositionHandler(lazyCU.GetMousePosition))
-		cuRoutes.POST("/mouse/move", computeruse.WrapMoveMouseHandler(lazyCU.MoveMouse))
-		cuRoutes.POST("/mouse/click", computeruse.WrapClickHandler(lazyCU.Click))
-		cuRoutes.POST("/mouse/drag", computeruse.WrapDragHandler(lazyCU.Drag))
-		cuRoutes.POST("/mouse/scroll", computeruse.WrapScrollHandler(lazyCU.Scroll))
-
-		cuRoutes.POST("/keyboard/type", computeruse.WrapTypeTextHandler(lazyCU.TypeText))
-		cuRoutes.POST("/keyboard/key", computeruse.WrapPressKeyHandler(lazyCU.PressKey))
-		cuRoutes.POST("/keyboard/hotkey", computeruse.WrapPressHotkeyHandler(lazyCU.PressHotkey))
-
-		cuRoutes.GET("/display/info", computeruse.WrapDisplayInfoHandler(lazyCU.GetDisplayInfo))
-		cuRoutes.GET("/display/windows", computeruse.WrapWindowsHandler(lazyCU.GetWindows))
-
-		cuRoutes.GET("/a11y/tree", computeruse.WrapGetAccessibilityTreeHandler(lazyCU.GetAccessibilityTree))
-		cuRoutes.POST("/a11y/find", computeruse.WrapFindAccessibilityNodesHandler(lazyCU.FindAccessibilityNodes))
-		cuRoutes.POST("/a11y/node/focus", computeruse.WrapFocusAccessibilityNodeHandler(lazyCU.FocusAccessibilityNode))
-		cuRoutes.POST("/a11y/node/invoke", computeruse.WrapInvokeAccessibilityNodeHandler(lazyCU.InvokeAccessibilityNode))
-		cuRoutes.POST("/a11y/node/value", computeruse.WrapSetAccessibilityNodeValueHandler(lazyCU.SetAccessibilityNodeValue))
 	}
 
-	recordingController := recordingcontroller.NewRecordingController(s.recordingService)
-	recordingsGroup := computerUseController.Group("/recordings")
-	{
-		recordingsGroup.POST("/start", recordingController.StartRecording)
-		recordingsGroup.POST("/stop", recordingController.StopRecording)
-		recordingsGroup.GET("", recordingController.ListRecordings)
-		recordingsGroup.GET("/:id", recordingController.GetRecording)
-		recordingsGroup.GET("/:id/download", recordingController.DownloadRecording)
-		recordingsGroup.DELETE("/:id", recordingController.DeleteRecording)
-	}
+	s.registerComputerUseRoutes(computerUseController, lazyCU, cuHandler)
 }
 
 func (s *server) shutdownPlatform() {
-	if computerUseInstance != nil {
-		s.logger.Info("Stopping computer-use plugin...")
-		if _, err := computerUseInstance.Stop(); err != nil {
-			s.logger.Error("Failed to stop computer-use plugin", "error", err)
-		}
-		manager.KillComputerUse()
+	if s.computerUse == nil || !s.computerUse.IsReady() {
+		return
 	}
+	s.logger.Info("Stopping computer-use plugin...")
+	if _, err := s.computerUse.Stop(); err != nil {
+		s.logger.Error("Failed to stop computer-use plugin", "error", err)
+	}
+	manager.KillComputerUse()
 }
