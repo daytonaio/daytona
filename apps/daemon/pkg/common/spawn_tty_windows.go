@@ -16,6 +16,51 @@ import (
 	"github.com/UserExistsError/conpty"
 )
 
+// guardedPty serializes Resize and Write against Close. conpty.Close
+// frees the raw Windows handles with no refcounting, so a late
+// Resize/Write on a freed (possibly recycled) handle value could hit
+// an unrelated open object — another session's pseudoconsole or file.
+// Resize and Write take the read lock and no-op/fail once closed;
+// Close takes the write lock, so in-flight calls finish while the
+// handles are still live. Reads stay unguarded by design: closing the
+// pty is what unblocks the pending stdout read (see SpawnTTY).
+type guardedPty struct {
+	mu     sync.RWMutex
+	closed bool
+	cpty   *conpty.ConPty
+}
+
+func (g *guardedPty) Write(p []byte) (int, error) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	if g.closed {
+		return 0, os.ErrClosed
+	}
+	return g.cpty.Write(p)
+}
+
+func (g *guardedPty) Resize(width, height int) error {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	if g.closed {
+		return nil
+	}
+	return g.cpty.Resize(width, height)
+}
+
+// Close is idempotent; conpty.Close is not (it closes raw Windows
+// handles, including the process handle, so a second call could close
+// unrelated handles that reused the same values).
+func (g *guardedPty) Close() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if g.closed {
+		return nil
+	}
+	g.closed = true
+	return g.cpty.Close()
+}
+
 func SpawnTTY(opts SpawnTTYOptions) error {
 	shell := GetShell()
 
@@ -68,29 +113,24 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 		return err
 	}
 
-	// conpty.Close is not idempotent: it closes raw Windows handles
-	// (including the process handle), so a second call could close
-	// unrelated handles that reused the same values.
-	var closeOnce sync.Once
+	pty := &guardedPty{cpty: cpty}
 	closePty := func() {
-		closeOnce.Do(func() {
-			if err := cpty.Close(); err != nil {
-				slog.Debug("Failed to close ConPTY", "error", err)
-			}
-		})
+		if err := pty.Close(); err != nil {
+			slog.Debug("Failed to close ConPTY", "error", err)
+		}
 	}
 	defer closePty()
 
 	go func() {
 		for win := range opts.SizeCh {
-			if err := cpty.Resize(win.Width, win.Height); err != nil {
+			if err := pty.Resize(win.Width, win.Height); err != nil {
 				slog.Debug("Failed to resize ConPTY", "error", err)
 			}
 		}
 	}()
 
 	go func() {
-		if _, err := io.Copy(cpty, opts.StdIn); err != nil && err != io.EOF {
+		if _, err := io.Copy(pty, opts.StdIn); err != nil && err != io.EOF {
 			slog.Debug("ConPTY stdin copy error", "error", err)
 		}
 	}()
@@ -136,7 +176,7 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 
 	// Stop the waiter before touching the handles: cancel its context and
 	// join it, so it cannot poll the raw process handle after closePty
-	// releases it (the handle value may be recycled; see the closeOnce
+	// releases it (the handle value may be recycled; see the guardedPty
 	// comment above). conpty.Wait checks the context at least once per
 	// second, so the join is bounded.
 	cancelWait()
