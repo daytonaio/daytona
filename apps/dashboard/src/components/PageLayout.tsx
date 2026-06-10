@@ -25,7 +25,7 @@ import { usePostHog } from 'posthog-js/react'
 import { type ComponentProps, type ReactNode, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from 'react-oidc-context'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { BannerStack } from './Banner'
 import { Button } from './ui/button'
 import {

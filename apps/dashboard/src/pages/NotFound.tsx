@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { RoutePath } from '@/enums/RoutePath'
 import { Home } from 'lucide-react'
+import React from 'react'
+import { useNavigate } from 'react-router'
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate()

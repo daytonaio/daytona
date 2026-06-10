@@ -17,7 +17,7 @@ const Logout = () => {
     void signoutRedirect()
   }, [signoutRedirect, posthog])
 
-  return <LoadingFallback />
+  return <LoadingFallback source="logout-signout-redirect" />
 }
 
 export default Logout

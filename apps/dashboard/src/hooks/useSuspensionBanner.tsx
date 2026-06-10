@@ -10,7 +10,7 @@ import { Organization } from '@daytona/api-client'
 import { addHours, formatDistanceToNow } from 'date-fns'
 import { CreditCardIcon, MailIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 
 const SUSPENSION_BANNER_ID = 'suspension-banner'
 

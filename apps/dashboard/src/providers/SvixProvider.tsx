@@ -16,7 +16,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import { RefreshCcw } from 'lucide-react'
 import React from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 import { SvixProvider as SvixReactProvider } from 'svix-react'
 
 interface SvixProviderProps {

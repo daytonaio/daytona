@@ -9,8 +9,8 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { RoutePath } from '@/enums/RoutePath'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
 
 export default function EmailVerify() {
   const { organizationId, email, token } = useParams<{
