@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/hashicorp/go-plugin"
 )
 
 // fakeComputerUse provides a unique non-nil IComputerUse identity for cache
@@ -19,6 +18,16 @@ import (
 type fakeComputerUse struct {
 	computeruse.IComputerUse
 }
+
+// fakePluginClient is a controllable pluginClient for the liveness-path
+// tests: Exited flips when the test simulates an out-of-band process death.
+type fakePluginClient struct {
+	exited atomic.Bool
+	kills  atomic.Int32
+}
+
+func (c *fakePluginClient) Exited() bool { return c.exited.Load() }
+func (c *fakePluginClient) Kill()        { c.kills.Add(1) }
 
 func resetPluginRef() {
 	computerUse.mu.Lock()
@@ -44,7 +53,7 @@ func TestGetOrSpawnSpawnsExactlyOnceUnderConcurrency(t *testing.T) {
 	entered := make(chan struct{})
 	release := make(chan struct{})
 
-	spawn := func() (*plugin.Client, computeruse.IComputerUse, error) {
+	spawn := func() (pluginClient, computeruse.IComputerUse, error) {
 		if spawns.Add(1) == 1 {
 			close(entered)
 		}
@@ -110,7 +119,7 @@ func TestGetOrSpawnDoesNotCacheFailure(t *testing.T) {
 	var published []computeruse.IComputerUse
 	record := func(impl computeruse.IComputerUse) { published = append(published, impl) }
 
-	failThenSucceed := func() (*plugin.Client, computeruse.IComputerUse, error) {
+	failThenSucceed := func() (pluginClient, computeruse.IComputerUse, error) {
 		if spawns.Add(1) == 1 {
 			return nil, nil, boom
 		}
@@ -153,7 +162,7 @@ func TestKillComputerUseWaitsForInflightSpawn(t *testing.T) {
 	spawnDone := make(chan struct{})
 	go func() {
 		defer close(spawnDone)
-		got, err := getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, error) {
+		got, err := getOrSpawn(func() (pluginClient, computeruse.IComputerUse, error) {
 			close(entered)
 			<-release
 			return nil, impl, nil
@@ -209,5 +218,92 @@ func TestKillComputerUseWithoutSpawnPublishesClear(t *testing.T) {
 	}
 	if cachedImpl() != nil {
 		t.Fatal("manager cache must stay empty")
+	}
+}
+
+func TestGetOrSpawnRespawnsAfterClientExit(t *testing.T) {
+	resetPluginRef()
+	t.Cleanup(resetPluginRef)
+
+	client1 := &fakePluginClient{}
+	impl1 := &fakeComputerUse{}
+	impl2 := &fakeComputerUse{}
+
+	var published []computeruse.IComputerUse
+	record := func(impl computeruse.IComputerUse) { published = append(published, impl) }
+
+	var spawns int
+	spawn := func() (pluginClient, computeruse.IComputerUse, error) {
+		spawns++
+		if spawns == 1 {
+			return client1, impl1, nil
+		}
+		return &fakePluginClient{}, impl2, nil
+	}
+
+	if got, err := getOrSpawn(spawn, record); err != nil || got != impl1 {
+		t.Fatalf("initial spawn: got (%v, %v), want impl1", got, err)
+	}
+	if got, err := getOrSpawn(spawn, record); err != nil || got != impl1 {
+		t.Fatalf("live cache hit: got (%v, %v), want cached impl1", got, err)
+	}
+	if spawns != 1 {
+		t.Fatalf("live client must be served from cache, spawn ran %d times", spawns)
+	}
+
+	client1.exited.Store(true) // plugin died out-of-band (crash, logoff)
+
+	if got, err := getOrSpawn(spawn, record); err != nil || got != impl2 {
+		t.Fatalf("respawn after death: got (%v, %v), want fresh impl2", got, err)
+	}
+	if spawns != 2 {
+		t.Fatalf("dead client must trigger a respawn, spawn ran %d times", spawns)
+	}
+	if got := client1.kills.Load(); got != 1 {
+		t.Fatalf("dead client must be killed to release bookkeeping, kills = %d", got)
+	}
+	if len(published) != 3 || published[0] != impl1 || published[1] != nil || published[2] != impl2 {
+		t.Fatalf("publishes must track cache state as (impl1, nil, impl2), got %v", published)
+	}
+}
+
+// TestGetOrSpawnDeadClientSpawnFailurePublishesClear pins the divergence
+// guard: when the cached client is dead and the respawn fails, the manager
+// cache and the published external cache are both cleared — the guarded
+// routes 503 from the middleware instead of RPCing a corpse.
+func TestGetOrSpawnDeadClientSpawnFailurePublishesClear(t *testing.T) {
+	resetPluginRef()
+	t.Cleanup(resetPluginRef)
+
+	client1 := &fakePluginClient{}
+	impl1 := &fakeComputerUse{}
+	boom := errors.New("boom")
+
+	var published []computeruse.IComputerUse
+	record := func(impl computeruse.IComputerUse) { published = append(published, impl) }
+
+	var spawns int
+	spawn := func() (pluginClient, computeruse.IComputerUse, error) {
+		spawns++
+		if spawns == 1 {
+			return client1, impl1, nil
+		}
+		return nil, nil, boom
+	}
+
+	if got, err := getOrSpawn(spawn, record); err != nil || got != impl1 {
+		t.Fatalf("initial spawn: got (%v, %v), want impl1", got, err)
+	}
+
+	client1.exited.Store(true)
+
+	if _, err := getOrSpawn(spawn, record); !errors.Is(err, boom) {
+		t.Fatalf("got %v, want the respawn error", err)
+	}
+	if cachedImpl() != nil {
+		t.Fatal("failed respawn must leave the manager cache cleared")
+	}
+	if len(published) != 2 || published[0] != impl1 || published[1] != nil {
+		t.Fatalf("publishes must be (impl1, nil), got %v", published)
 	}
 }

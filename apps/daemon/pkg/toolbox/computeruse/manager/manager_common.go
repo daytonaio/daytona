@@ -10,11 +10,21 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
+// pluginClient is the subset of *plugin.Client the manager needs for
+// lifecycle decisions. An interface so the liveness logic in getOrSpawn is
+// unit-testable without spawning a real child process.
+type pluginClient interface {
+	// Exited reports whether the underlying plugin process has terminated.
+	Exited() bool
+	// Kill terminates the plugin process; a no-op when it already exited.
+	Kill()
+}
+
 type pluginRef struct {
 	// mu serializes plugin lifecycle: spawn (getOrSpawn) and teardown
 	// (KillComputerUse). It guards all fields below.
 	mu     sync.Mutex
-	client *plugin.Client
+	client pluginClient
 	impl   computeruse.IComputerUse
 }
 
@@ -28,14 +38,21 @@ var computerUse = &pluginRef{}
 
 // spawnFunc starts the plugin process and returns the managed client and the
 // dispensed impl.
-type spawnFunc func() (*plugin.Client, computeruse.IComputerUse, error)
+type spawnFunc func() (pluginClient, computeruse.IComputerUse, error)
 
-// getOrSpawn returns the cached plugin impl, or runs spawn under the manager
-// lock, caches its result, and announces the fresh impl via publish (when
-// non-nil). Exactly one concurrent caller executes spawn; the rest block on
-// the lock and receive the cached instance, so no code path can start a
-// second plugin process. A failed spawn caches and publishes nothing, leaving
-// the next caller free to retry.
+// getOrSpawn returns the cached plugin impl while its process is alive, or
+// runs spawn under the manager lock, caches its result, and announces the
+// fresh impl via publish (when non-nil). Exactly one concurrent caller
+// executes spawn; the rest block on the lock and receive the cached instance,
+// so no code path can start a second plugin process. A failed spawn caches
+// and publishes nothing, leaving the next caller free to retry.
+//
+// A cached client whose process died out-of-band (crash, console-session
+// logoff on Windows) is not served: it is killed (releasing go-plugin
+// bookkeeping), cleared, published as nil, and replaced by a fresh spawn —
+// so an explicit /start after a plugin death respawns instead of returning a
+// corpse whose every RPC fails. A nil client (seeded only by unit-test
+// fakes) counts as alive.
 //
 // publish runs while the manager lock is held, so an external cache (the
 // daemon's LazyComputerUse) is updated atomically with the manager state:
@@ -45,7 +62,18 @@ func getOrSpawn(spawn spawnFunc, publish func(computeruse.IComputerUse)) (comput
 	defer computerUse.mu.Unlock()
 
 	if computerUse.impl != nil {
-		return computerUse.impl, nil
+		if computerUse.client == nil || !computerUse.client.Exited() {
+			return computerUse.impl, nil
+		}
+		// The plugin process died out-of-band: drop the corpse and fall
+		// through to respawn. publish(nil) keeps the external cache in
+		// lockstep with the manager even when the respawn below fails.
+		computerUse.client.Kill()
+		computerUse.client = nil
+		computerUse.impl = nil
+		if publish != nil {
+			publish(nil)
+		}
 	}
 
 	client, impl, err := spawn()

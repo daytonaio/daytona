@@ -33,8 +33,14 @@ const consoleSessionPollTimeout = 60 * time.Second
 // stop racing an in-flight spawn waits for it to finish and then kills the
 // fresh instance — nothing leaks.
 func GetComputerUse(logger *slog.Logger, path string, publish func(computeruse.IComputerUse)) (computeruse.IComputerUse, error) {
-	return getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, error) {
-		return spawnInConsoleSession(logger, path)
+	return getOrSpawn(func() (pluginClient, computeruse.IComputerUse, error) {
+		client, impl, err := spawnInConsoleSession(logger, path)
+		if err != nil {
+			// Return an untyped nil: wrapping a nil *plugin.Client in the
+			// pluginClient interface would make it compare non-nil.
+			return nil, nil, err
+		}
+		return client, impl, nil
 	}, publish)
 }
 

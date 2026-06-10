@@ -220,8 +220,14 @@ Note: Computer-use features will be disabled until dependencies are installed.`,
 // getOrSpawn). Concurrent callers are serialized by the manager lock:
 // exactly one spawn is ever in flight and every caller receives its result.
 func GetComputerUse(logger *slog.Logger, path string, publish func(computeruse.IComputerUse)) (computeruse.IComputerUse, error) {
-	return getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, error) {
-		return spawnPlugin(logger, path)
+	return getOrSpawn(func() (pluginClient, computeruse.IComputerUse, error) {
+		client, impl, err := spawnPlugin(logger, path)
+		if err != nil {
+			// Return an untyped nil: wrapping a nil *plugin.Client in the
+			// pluginClient interface would make it compare non-nil.
+			return nil, nil, err
+		}
+		return client, impl, nil
 	}, publish)
 }
 

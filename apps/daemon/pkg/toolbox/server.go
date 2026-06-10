@@ -107,8 +107,13 @@ type Telemetry struct {
 
 // registerComputerUseRoutes registers the platform-independent computer-use
 // and recording routes shared by the Linux and Windows daemons, and returns
-// the LazyCheckMiddleware-guarded group so each platform can attach its own
-// /start and /stop wiring. The route set is part of the frozen wire contract
+// the LazyCheckMiddleware-guarded group. The /start and /stop wiring is
+// platform-specific and deliberately asymmetric: Linux attaches them inside
+// the returned guarded group, which is safe only because its plugin spawns
+// at boot. Windows MUST attach them to the unguarded parent controller —
+// /start is the only code path that spawns the plugin there, and the guard
+// returns 503 until the plugin is ready, so guarding /start would deadlock
+// it into a permanent 503. The route set is part of the frozen wire contract
 // consumed by the generated SDKs; keep it identical on both platforms.
 func (s *server) registerComputerUseRoutes(controller *gin.RouterGroup, lazyCU *computeruse.LazyComputerUse, cuHandler computeruse.Handler) *gin.RouterGroup {
 	cuRoutes := controller.Group("/", computeruse.LazyCheckMiddleware(lazyCU))
