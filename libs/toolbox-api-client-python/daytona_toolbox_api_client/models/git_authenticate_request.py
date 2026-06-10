@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -25,15 +25,16 @@ from typing_extensions import Self
 
 _JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
-class GitRepoRequest(BaseModel):
+class GitAuthenticateRequest(BaseModel):
     """
-    GitRepoRequest
+    GitAuthenticateRequest
     """ # noqa: E501
-    password: Optional[StrictStr] = None
-    path: StrictStr
-    username: Optional[StrictStr] = None
+    host: Optional[StrictStr] = Field(default=None, description="Host defaults to github.com.")
+    password: StrictStr
+    protocol: Optional[StrictStr] = Field(default=None, description="Protocol defaults to https.")
+    username: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["password", "path", "username"]
+    __properties: ClassVar[List[str]] = ["host", "password", "protocol", "username"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,7 +53,7 @@ class GitRepoRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GitRepoRequest from a JSON string"""
+        """Create an instance of GitAuthenticateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -84,7 +85,7 @@ class GitRepoRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GitRepoRequest from a dict"""
+        """Create an instance of GitAuthenticateRequest from a dict"""
         if obj is None:
             return None
 
@@ -92,8 +93,9 @@ class GitRepoRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "host": obj.get("host"),
             "password": obj.get("password"),
-            "path": obj.get("path"),
+            "protocol": obj.get("protocol"),
             "username": obj.get("username")
         })
         # store additional fields in additional_properties

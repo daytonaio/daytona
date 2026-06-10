@@ -14,17 +14,27 @@
 package io.daytona.toolbox.client.api;
 
 import io.daytona.toolbox.client.ApiException;
+import io.daytona.toolbox.client.model.GitAddRemoteRequest;
 import io.daytona.toolbox.client.model.GitAddRequest;
+import io.daytona.toolbox.client.model.GitAuthenticateRequest;
 import io.daytona.toolbox.client.model.GitBranchRequest;
 import io.daytona.toolbox.client.model.GitCheckoutRequest;
 import io.daytona.toolbox.client.model.GitCloneRequest;
 import io.daytona.toolbox.client.model.GitCommitInfo;
 import io.daytona.toolbox.client.model.GitCommitRequest;
 import io.daytona.toolbox.client.model.GitCommitResponse;
+import io.daytona.toolbox.client.model.GitConfigResponse;
+import io.daytona.toolbox.client.model.GitConfigureUserRequest;
 import io.daytona.toolbox.client.model.GitDeleteBranchRequest;
-import io.daytona.toolbox.client.model.GitRepoRequest;
+import io.daytona.toolbox.client.model.GitInitRequest;
+import io.daytona.toolbox.client.model.GitPullRequest;
+import io.daytona.toolbox.client.model.GitPushRequest;
+import io.daytona.toolbox.client.model.GitResetRequest;
+import io.daytona.toolbox.client.model.GitRestoreRequest;
+import io.daytona.toolbox.client.model.GitSetConfigRequest;
 import io.daytona.toolbox.client.model.GitStatus;
 import io.daytona.toolbox.client.model.ListBranchResponse;
+import io.daytona.toolbox.client.model.ListRemotesResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +62,34 @@ public class GitApiTest {
     public void addFilesTest() throws ApiException {
         GitAddRequest request = null;
         api.addFiles(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Add a remote
+     *
+     * Add (or overwrite) a remote in the Git repository
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void addRemoteTest() throws ApiException {
+        GitAddRemoteRequest request = null;
+        api.addRemote(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Authenticate Git
+     *
+     * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void authenticateTest() throws ApiException {
+        GitAuthenticateRequest request = null;
+        api.authenticate(request);
         // TODO: test validations
     }
 
@@ -98,6 +136,20 @@ public class GitApiTest {
     }
 
     /**
+     * Configure Git user
+     *
+     * Configure the Git user name and email at the given scope
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void configureUserTest() throws ApiException {
+        GitConfigureUserRequest request = null;
+        api.configureUser(request);
+        // TODO: test validations
+    }
+
+    /**
      * Create a new branch
      *
      * Create a new branch in the Git repository
@@ -140,6 +192,22 @@ public class GitApiTest {
     }
 
     /**
+     * Get a Git config value
+     *
+     * Get a Git config value at the given scope (null when unset)
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getGitConfigTest() throws ApiException {
+        String key = null;
+        String path = null;
+        String scope = null;
+        GitConfigResponse response = api.getGitConfig(key, path, scope);
+        // TODO: test validations
+    }
+
+    /**
      * Get Git status
      *
      * Get the Git status of the repository at the specified path
@@ -150,6 +218,20 @@ public class GitApiTest {
     public void getStatusTest() throws ApiException {
         String path = null;
         GitStatus response = api.getStatus(path);
+        // TODO: test validations
+    }
+
+    /**
+     * Initialize a Git repository
+     *
+     * Initialize a new Git repository at the specified path
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void initRepositoryTest() throws ApiException {
+        GitInitRequest request = null;
+        api.initRepository(request);
         // TODO: test validations
     }
 
@@ -168,6 +250,20 @@ public class GitApiTest {
     }
 
     /**
+     * List remotes
+     *
+     * List the remotes configured in the Git repository
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void listRemotesTest() throws ApiException {
+        String path = null;
+        ListRemotesResponse response = api.listRemotes(path);
+        // TODO: test validations
+    }
+
+    /**
      * Pull changes from remote
      *
      * Pull changes from the remote Git repository
@@ -176,7 +272,7 @@ public class GitApiTest {
      */
     @Test
     public void pullChangesTest() throws ApiException {
-        GitRepoRequest request = null;
+        GitPullRequest request = null;
         api.pullChanges(request);
         // TODO: test validations
     }
@@ -190,8 +286,50 @@ public class GitApiTest {
      */
     @Test
     public void pushChangesTest() throws ApiException {
-        GitRepoRequest request = null;
+        GitPushRequest request = null;
         api.pushChanges(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Reset repository
+     *
+     * Reset the current HEAD to the specified state
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void resetChangesTest() throws ApiException {
+        GitResetRequest request = null;
+        api.resetChanges(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Restore files
+     *
+     * Restore working tree files or unstage changes
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void restoreFilesTest() throws ApiException {
+        GitRestoreRequest request = null;
+        api.restoreFiles(request);
+        // TODO: test validations
+    }
+
+    /**
+     * Set a Git config value
+     *
+     * Set a Git config key/value at the given scope
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void setGitConfigTest() throws ApiException {
+        GitSetConfigRequest request = null;
+        api.setGitConfig(request);
         // TODO: test validations
     }
 

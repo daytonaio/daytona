@@ -16,9 +16,9 @@ import (
 	"github.com/go-git/go-git/v5"
 )
 
-func (s *Service) Push(auth *http.BasicAuth) error {
+func (s *Service) Push(auth *http.BasicAuth, remote, branch string, setUpstream bool) error {
 	if isGitCLIModeEnabled() {
-		return s.PushCLI(auth)
+		return s.PushCLI(auth, remote, branch, setUpstream)
 	}
 
 	repo, err := git.PlainOpen(s.WorkDir)
@@ -26,37 +26,102 @@ func (s *Service) Push(auth *http.BasicAuth) error {
 		return err
 	}
 
-	ref, err := repo.Head()
+	branchRef, err := resolvePushBranchRef(repo, branch)
 	if err != nil {
 		return err
 	}
 
+	remoteName := remote
+	if remoteName == "" {
+		remoteName = "origin"
+	}
+
 	options := &git.PushOptions{
-		Auth: auth,
+		RemoteName: remoteName,
+		Auth:       auth,
 		RefSpecs: []config.RefSpec{
-			config.RefSpec(fmt.Sprintf("%s:%s", ref.Name(), ref.Name())),
+			config.RefSpec(fmt.Sprintf("%s:%s", branchRef, branchRef)),
 		},
 	}
 
-	return repo.Push(options)
+	err = repo.Push(options)
+	if err != nil && err != git.NoErrAlreadyUpToDate {
+		return err
+	}
+
+	if setUpstream {
+		return s.setUpstreamConfig(repo, branchRef.Short(), remoteName, branchRef)
+	}
+
+	return nil
 }
 
-func (s *Service) PushCLI(auth *http.BasicAuth) error {
+func resolvePushBranchRef(repo *git.Repository, branch string) (plumbing.ReferenceName, error) {
+	if branch != "" {
+		return plumbing.NewBranchReferenceName(branch), nil
+	}
+
+	ref, err := repo.Head()
+	if err != nil {
+		return "", err
+	}
+	return ref.Name(), nil
+}
+
+// setUpstreamConfig records branch.<name>.{remote,merge} (git push --set-upstream).
+func (s *Service) setUpstreamConfig(repo *git.Repository, branch, remote string, mergeRef plumbing.ReferenceName) error {
+	cfg, err := repo.Config()
+	if err != nil {
+		return err
+	}
+
+	if cfg.Branches == nil {
+		cfg.Branches = map[string]*config.Branch{}
+	}
+	// Merge into any existing branch entry so we don't wipe other settings (e.g. rebase).
+	b := cfg.Branches[branch]
+	if b == nil {
+		b = &config.Branch{}
+	}
+	b.Name = branch
+	b.Remote = remote
+	b.Merge = mergeRef
+	cfg.Branches[branch] = b
+
+	return repo.SetConfig(cfg)
+}
+
+func (s *Service) PushCLI(auth *http.BasicAuth, remote, branch string, setUpstream bool) error {
 	gitBin, err := exec.LookPath("git")
 	if err != nil {
 		return fmt.Errorf("git binary not found in PATH: %w", err)
 	}
 
-	// Match go-git's `repo.Push` semantics, which pushes the resolved HEAD
-	// ref as `<full-ref>:<full-ref>`. Resolve via the CLI rather than
-	// re-opening the repo with go-git to keep this codepath dependency-free
-	// (the whole point of the CLI fallback is bounded memory).
-	branchRef, err := resolveSymbolicHEAD(gitBin, s.WorkDir)
-	if err != nil {
-		return err
+	branchRef := ""
+	if branch != "" {
+		branchRef = string(plumbing.NewBranchReferenceName(branch))
+	} else {
+		// Match go-git's `repo.Push` semantics, which pushes the resolved HEAD
+		// ref as `<full-ref>:<full-ref>`. Resolve via the CLI rather than
+		// re-opening the repo with go-git to keep this codepath dependency-free
+		// (the whole point of the CLI fallback is bounded memory).
+		branchRef, err = resolveSymbolicHEAD(gitBin, s.WorkDir)
+		if err != nil {
+			return err
+		}
 	}
 
-	return s.gitCLIRun("git push", buildPushArgs(s.WorkDir, branchRef), auth, 64*1024)
+	remoteName := remote
+	if remoteName == "" {
+		remoteName = "origin"
+	}
+
+	return s.runGitCLI(gitCLIOptions{
+		op:       "git push",
+		args:     buildPushArgs(s.WorkDir, remoteName, branchRef, setUpstream),
+		auth:     auth,
+		tailSize: 64 * 1024,
+	})
 }
 
 // resolveSymbolicHEAD returns the fully-qualified ref name of the current
@@ -82,14 +147,24 @@ func resolveSymbolicHEAD(gitBin, workDir string) (string, error) {
 	return ref, nil
 }
 
-func buildPushArgs(workDir, branchRef string) []string {
-	return []string{
+func buildPushArgs(workDir, remote, branchRef string, setUpstream bool) []string {
+	// Note: no -c http.sslVerify=false here. go-git's default PushOptions
+	// does NOT skip TLS verification (unlike CloneOptions, where we set
+	// InsecureSkipTLS:true). Skipping verify on push would be a behavior
+	// change and a MITM risk for the basic-auth token.
+	args := []string{
 		"-C", workDir,
 		"-c", "credential.helper=",
 		"-c", "core.hooksPath=/dev/null",
 		"push",
-		"origin",
+	}
+	if setUpstream {
+		args = append(args, "--set-upstream")
+	}
+	args = append(args,
+		remote,
 		fmt.Sprintf("%s:%s", branchRef, branchRef),
 		"--progress",
-	}
+	)
+	return args
 }

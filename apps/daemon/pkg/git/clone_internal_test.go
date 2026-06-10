@@ -26,6 +26,7 @@ func TestBuildCloneArgs(t *testing.T) {
 		repo       *gitprovider.GitRepository
 		workDir    string
 		skipVerify bool
+		depth      int
 		expected   []string
 	}{
 		{
@@ -103,11 +104,28 @@ func TestBuildCloneArgs(t *testing.T) {
 				"--", "https://internal-git.example.com/org/repo", "/work-dir",
 			},
 		},
+		{
+			name: "depth adds --depth flag for shallow clone",
+			repo: &gitprovider.GitRepository{
+				Url:    "https://github.com/daytonaio/daytona",
+				Branch: "main",
+			},
+			workDir: "/work-dir",
+			depth:   1,
+			expected: []string{
+				"-c", "credential.helper=",
+				"-c", "core.hooksPath=/dev/null",
+				"clone", "--single-branch", "--progress",
+				"--branch", "main",
+				"--depth", "1",
+				"--", "https://github.com/daytonaio/daytona", "/work-dir",
+			},
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := buildCloneArgs(tc.repo, tc.workDir, tc.skipVerify)
+			got := buildCloneArgs(tc.repo, tc.workDir, tc.skipVerify, tc.depth)
 			require.Equal(t, tc.expected, got)
 
 			if !tc.skipVerify {
@@ -128,7 +146,7 @@ func TestBuildCloneArgs_NeverEmbedsCredsInURL(t *testing.T) {
 		Url:    "https://github.com/daytonaio/daytona",
 		Branch: "main",
 	}
-	args := buildCloneArgs(repo, "/work-dir", false)
+	args := buildCloneArgs(repo, "/work-dir", false, 0)
 
 	for _, arg := range args {
 		require.NotContains(t, arg, testCreds.Username, "username leaked into clone args: %q", arg)
@@ -137,8 +155,8 @@ func TestBuildCloneArgs_NeverEmbedsCredsInURL(t *testing.T) {
 	}
 }
 
-func TestBuildCloneEnv_WithCreds(t *testing.T) {
-	env := buildCloneEnv(nil, "/tmp/askpass.sh", testCreds)
+func TestBuildGitCLIEnv_WithCreds(t *testing.T) {
+	env := buildGitCLIEnv(nil, "/tmp/askpass.sh", testCreds)
 
 	require.Contains(t, env, "GIT_ASKPASS=/tmp/askpass.sh")
 	require.Contains(t, env, "GIT_TERMINAL_PROMPT=0")
@@ -146,8 +164,8 @@ func TestBuildCloneEnv_WithCreds(t *testing.T) {
 	require.Contains(t, env, "GIT_PASSWORD="+testCreds.Password)
 }
 
-func TestBuildCloneEnv_WithoutCreds(t *testing.T) {
-	env := buildCloneEnv(nil, "/tmp/askpass.sh", nil)
+func TestBuildGitCLIEnv_WithoutCreds(t *testing.T) {
+	env := buildGitCLIEnv(nil, "/tmp/askpass.sh", nil)
 
 	require.Contains(t, env, "GIT_ASKPASS=/tmp/askpass.sh")
 	require.Contains(t, env, "GIT_TERMINAL_PROMPT=0")
@@ -161,10 +179,10 @@ func TestBuildCloneEnv_WithoutCreds(t *testing.T) {
 	}), "GIT_PASSWORD must not be set when auth is nil")
 }
 
-// TestBuildCloneEnv_OverridesBaseEnv covers the glibc getenv-first-match
-// quirk: if baseEnv already has any of our managed keys, buildCloneEnv must
+// TestBuildGitCLIEnv_OverridesBaseEnv covers the glibc getenv-first-match
+// quirk: if baseEnv already has any of our managed keys, buildGitCLIEnv must
 // strip them so our values take effect inside the subprocess.
-func TestBuildCloneEnv_OverridesBaseEnv(t *testing.T) {
+func TestBuildGitCLIEnv_OverridesBaseEnv(t *testing.T) {
 	base := []string{
 		"PATH=/usr/bin",
 		"GIT_ASKPASS=/wrong/path",
@@ -172,7 +190,7 @@ func TestBuildCloneEnv_OverridesBaseEnv(t *testing.T) {
 		"GIT_PASSWORD=inherited-pass",
 		"HOME=/home/daytona",
 	}
-	env := buildCloneEnv(base, "/tmp/askpass.sh", testCreds)
+	env := buildGitCLIEnv(base, "/tmp/askpass.sh", testCreds)
 
 	// Base env unrelated to git is preserved.
 	require.Contains(t, env, "PATH=/usr/bin")
@@ -197,9 +215,9 @@ func TestBuildCloneEnv_OverridesBaseEnv(t *testing.T) {
 	require.Contains(t, env, "GIT_PASSWORD="+testCreds.Password)
 }
 
-func TestBuildCloneEnv_PreservesBaseEnv(t *testing.T) {
+func TestBuildGitCLIEnv_PreservesBaseEnv(t *testing.T) {
 	base := []string{"PATH=/usr/bin", "HOME=/home/daytona"}
-	env := buildCloneEnv(base, "/tmp/askpass.sh", nil)
+	env := buildGitCLIEnv(base, "/tmp/askpass.sh", nil)
 
 	require.Contains(t, env, "PATH=/usr/bin")
 	require.Contains(t, env, "HOME=/home/daytona")

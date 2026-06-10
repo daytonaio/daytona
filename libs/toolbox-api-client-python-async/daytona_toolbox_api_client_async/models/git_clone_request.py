@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -31,13 +31,14 @@ class GitCloneRequest(BaseModel):
     """ # noqa: E501
     branch: Optional[StrictStr] = None
     commit_id: Optional[StrictStr] = None
+    depth: Optional[StrictInt] = Field(default=None, description="Depth creates a shallow clone truncated to the given number of commits.")
     insecure_skip_tls: Optional[StrictBool] = Field(default=None, description="Skip TLS certificate verification for this clone. Defaults to false (verify). Set to true ONLY for trusted internal Git servers with self-signed or private-CA certs; credentials, if supplied, will be transmitted over an unverified TLS connection and are exposed to any MITM on the route.")
     password: Optional[StrictStr] = None
     path: StrictStr
     url: StrictStr
     username: Optional[StrictStr] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["branch", "commit_id", "insecure_skip_tls", "password", "path", "url", "username"]
+    __properties: ClassVar[List[str]] = ["branch", "commit_id", "depth", "insecure_skip_tls", "password", "path", "url", "username"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -98,6 +99,7 @@ class GitCloneRequest(BaseModel):
         _obj = cls.model_validate({
             "branch": obj.get("branch"),
             "commit_id": obj.get("commit_id"),
+            "depth": obj.get("depth"),
             "insecure_skip_tls": obj.get("insecure_skip_tls"),
             "password": obj.get("password"),
             "path": obj.get("path"),

@@ -44,7 +44,7 @@ func (s *Service) GetGitStatus() (*GitStatus, error) {
 		})
 	}
 
-	branchPublished, err := s.isBranchPublished()
+	upstream, err := s.getUpstreamBranch()
 	if err != nil {
 		return nil, err
 	}
@@ -57,18 +57,12 @@ func (s *Service) GetGitStatus() (*GitStatus, error) {
 	return &GitStatus{
 		CurrentBranch:   ref.Name().Short(),
 		Files:           files,
-		BranchPublished: branchPublished,
+		BranchPublished: upstream != "",
 		Ahead:           ahead,
 		Behind:          behind,
+		Detached:        !ref.Name().IsBranch(),
+		Upstream:        upstream,
 	}, nil
-}
-
-func (s *Service) isBranchPublished() (bool, error) {
-	upstream, err := s.getUpstreamBranch()
-	if err != nil {
-		return false, err
-	}
-	return upstream != "", nil
 }
 
 func (s *Service) getUpstreamBranch() (string, error) {

@@ -85,6 +85,138 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Add a remote
+    # Add (or overwrite) a remote in the Git repository
+    # @param request [GitAddRemoteRequest] Add remote request
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def add_remote(request, opts = {})
+      add_remote_with_http_info(request, opts)
+      nil
+    end
+
+    # Add a remote
+    # Add (or overwrite) a remote in the Git repository
+    # @param request [GitAddRemoteRequest] Add remote request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def add_remote_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.add_remote ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling GitApi.add_remote"
+      end
+      # resource path
+      local_var_path = '/git/remotes'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.add_remote",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#add_remote\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Authenticate Git
+    # Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+    # @param request [GitAuthenticateRequest] Authenticate request
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def authenticate(request, opts = {})
+      authenticate_with_http_info(request, opts)
+      nil
+    end
+
+    # Authenticate Git
+    # Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+    # @param request [GitAuthenticateRequest] Authenticate request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def authenticate_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.authenticate ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling GitApi.authenticate"
+      end
+      # resource path
+      local_var_path = '/git/credentials'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.authenticate",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#authenticate\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Checkout branch or commit
     # Switch to a different branch or commit in the Git repository
     # @param request [GitCheckoutRequest] Checkout request
@@ -285,6 +417,72 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Configure Git user
+    # Configure the Git user name and email at the given scope
+    # @param request [GitConfigureUserRequest] Configure user request
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def configure_user(request, opts = {})
+      configure_user_with_http_info(request, opts)
+      nil
+    end
+
+    # Configure Git user
+    # Configure the Git user name and email at the given scope
+    # @param request [GitConfigureUserRequest] Configure user request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def configure_user_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.configure_user ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling GitApi.configure_user"
+      end
+      # resource path
+      local_var_path = '/git/config/user'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.configure_user",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#configure_user\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Create a new branch
     # Create a new branch in the Git repository
     # @param request [GitBranchRequest] Create branch request
@@ -481,6 +679,76 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Get a Git config value
+    # Get a Git config value at the given scope (null when unset)
+    # @param key [String] Config key (e.g. user.name)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :path Repository path (required for local scope)
+    # @option opts [String] :scope Config scope: global (default), local or system
+    # @return [GitConfigResponse]
+    def get_git_config(key, opts = {})
+      data, _status_code, _headers = get_git_config_with_http_info(key, opts)
+      data
+    end
+
+    # Get a Git config value
+    # Get a Git config value at the given scope (null when unset)
+    # @param key [String] Config key (e.g. user.name)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :path Repository path (required for local scope)
+    # @option opts [String] :scope Config scope: global (default), local or system
+    # @return [Array<(GitConfigResponse, Integer, Hash)>] GitConfigResponse data, response status code and response headers
+    def get_git_config_with_http_info(key, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.get_git_config ...'
+      end
+      # verify the required parameter 'key' is set
+      if @api_client.config.client_side_validation && key.nil?
+        fail ArgumentError, "Missing the required parameter 'key' when calling GitApi.get_git_config"
+      end
+      # resource path
+      local_var_path = '/git/config'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'key'] = key
+      query_params[:'path'] = opts[:'path'] if !opts[:'path'].nil?
+      query_params[:'scope'] = opts[:'scope'] if !opts[:'scope'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'GitConfigResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.get_git_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#get_git_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get Git status
     # Get the Git status of the repository at the specified path
     # @param path [String] Repository path
@@ -541,6 +809,72 @@ module DaytonaToolboxApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: GitApi#get_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Initialize a Git repository
+    # Initialize a new Git repository at the specified path
+    # @param request [GitInitRequest] Init repository request
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def init_repository(request, opts = {})
+      init_repository_with_http_info(request, opts)
+      nil
+    end
+
+    # Initialize a Git repository
+    # Initialize a new Git repository at the specified path
+    # @param request [GitInitRequest] Init repository request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def init_repository_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.init_repository ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling GitApi.init_repository"
+      end
+      # resource path
+      local_var_path = '/git/init'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.init_repository",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#init_repository\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -609,9 +943,73 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # List remotes
+    # List the remotes configured in the Git repository
+    # @param path [String] Repository path
+    # @param [Hash] opts the optional parameters
+    # @return [ListRemotesResponse]
+    def list_remotes(path, opts = {})
+      data, _status_code, _headers = list_remotes_with_http_info(path, opts)
+      data
+    end
+
+    # List remotes
+    # List the remotes configured in the Git repository
+    # @param path [String] Repository path
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(ListRemotesResponse, Integer, Hash)>] ListRemotesResponse data, response status code and response headers
+    def list_remotes_with_http_info(path, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.list_remotes ...'
+      end
+      # verify the required parameter 'path' is set
+      if @api_client.config.client_side_validation && path.nil?
+        fail ArgumentError, "Missing the required parameter 'path' when calling GitApi.list_remotes"
+      end
+      # resource path
+      local_var_path = '/git/remotes'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'path'] = path
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'ListRemotesResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.list_remotes",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#list_remotes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Pull changes from remote
     # Pull changes from the remote Git repository
-    # @param request [GitRepoRequest] Pull request
+    # @param request [GitPullRequest] Pull request
     # @param [Hash] opts the optional parameters
     # @return [nil]
     def pull_changes(request, opts = {})
@@ -621,7 +1019,7 @@ module DaytonaToolboxApiClient
 
     # Pull changes from remote
     # Pull changes from the remote Git repository
-    # @param request [GitRepoRequest] Pull request
+    # @param request [GitPullRequest] Pull request
     # @param [Hash] opts the optional parameters
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
     def pull_changes_with_http_info(request, opts = {})
@@ -677,7 +1075,7 @@ module DaytonaToolboxApiClient
 
     # Push changes to remote
     # Push local changes to the remote Git repository
-    # @param request [GitRepoRequest] Push request
+    # @param request [GitPushRequest] Push request
     # @param [Hash] opts the optional parameters
     # @return [nil]
     def push_changes(request, opts = {})
@@ -687,7 +1085,7 @@ module DaytonaToolboxApiClient
 
     # Push changes to remote
     # Push local changes to the remote Git repository
-    # @param request [GitRepoRequest] Push request
+    # @param request [GitPushRequest] Push request
     # @param [Hash] opts the optional parameters
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
     def push_changes_with_http_info(request, opts = {})
@@ -737,6 +1135,204 @@ module DaytonaToolboxApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: GitApi#push_changes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Reset repository
+    # Reset the current HEAD to the specified state
+    # @param request [GitResetRequest] Reset request
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def reset_changes(request, opts = {})
+      reset_changes_with_http_info(request, opts)
+      nil
+    end
+
+    # Reset repository
+    # Reset the current HEAD to the specified state
+    # @param request [GitResetRequest] Reset request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def reset_changes_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.reset_changes ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling GitApi.reset_changes"
+      end
+      # resource path
+      local_var_path = '/git/reset'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.reset_changes",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#reset_changes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Restore files
+    # Restore working tree files or unstage changes
+    # @param request [GitRestoreRequest] Restore request
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def restore_files(request, opts = {})
+      restore_files_with_http_info(request, opts)
+      nil
+    end
+
+    # Restore files
+    # Restore working tree files or unstage changes
+    # @param request [GitRestoreRequest] Restore request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def restore_files_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.restore_files ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling GitApi.restore_files"
+      end
+      # resource path
+      local_var_path = '/git/restore'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.restore_files",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#restore_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Set a Git config value
+    # Set a Git config key/value at the given scope
+    # @param request [GitSetConfigRequest] Set config request
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def set_git_config(request, opts = {})
+      set_git_config_with_http_info(request, opts)
+      nil
+    end
+
+    # Set a Git config value
+    # Set a Git config key/value at the given scope
+    # @param request [GitSetConfigRequest] Set config request
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def set_git_config_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: GitApi.set_git_config ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling GitApi.set_git_config"
+      end
+      # resource path
+      local_var_path = '/git/config'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"GitApi.set_git_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: GitApi#set_git_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

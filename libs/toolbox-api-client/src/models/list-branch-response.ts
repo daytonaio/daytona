@@ -16,5 +16,9 @@
 
 export interface ListBranchResponse {
     'branches': Array<string>;
+    /**
+     * Current is the name of the checked out branch (empty when HEAD is detached).
+     */
+    'current'?: string;
 }
 

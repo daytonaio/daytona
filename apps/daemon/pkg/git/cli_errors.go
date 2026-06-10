@@ -5,66 +5,13 @@ package git
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"strings"
 
-	"github.com/daytonaio/daemon/pkg/childreap"
 	go_git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
-
-// gitCLIRun is the shared driver for clone, push, and pull on the git-CLI
-// codepath. It looks up `git`, writes a one-shot GIT_ASKPASS helper, runs
-// the supplied args with creds in env (never on argv / never in URL), and
-// classifies the resulting error through wrapCLIError so the toolbox handler
-// can map it to a sensible HTTP status.
-//
-// Params:
-//   - op        human-readable label for error messages ("git clone", ...).
-//   - args      git arguments — must NOT contain credentials.
-//   - auth      basic auth; pass nil for local-only ops (askpass is still
-//     written but never consulted — keeps the call sites symmetric).
-//   - tailSize  bytes of stderr+stdout retained for the error message.
-//
-// Memory: the askpass dir is cleaned up via defer on every exit path,
-// including panics. tailBuffer is bounded to tailSize regardless of how
-// chatty git is.
-func (s *Service) gitCLIRun(op string, args []string, auth *http.BasicAuth, tailSize int) error {
-	gitBin, err := exec.LookPath("git")
-	if err != nil {
-		return fmt.Errorf("git binary not found in PATH: %w", err)
-	}
-
-	askDir, err := os.MkdirTemp("", "daytona-git-*")
-	if err != nil {
-		return fmt.Errorf("create askpass temp dir: %w", err)
-	}
-	defer os.RemoveAll(askDir)
-
-	askPath := filepath.Join(askDir, "askpass.sh")
-	if err := os.WriteFile(askPath, []byte(askpassScript), 0o700); err != nil {
-		return fmt.Errorf("write askpass helper: %w", err)
-	}
-
-	cmd := exec.Command(gitBin, args...)
-	cmd.Env = buildCloneEnv(os.Environ(), askPath, auth)
-	tail := s.attachCmdOutput(cmd, tailSize)
-
-	// childreap.Run instead of cmd.Run so the reaper claiming the zombie
-	// first doesn't surface as a spurious "wait: no child processes".
-	exitCode, err := childreap.Run(cmd)
-	if err != nil {
-		return wrapCLIError(op, err, exitCode, tail.String(), auth)
-	}
-	if exitCode != 0 {
-		return wrapCLIError(op, nil, exitCode, tail.String(), auth)
-	}
-	return nil
-}
 
 // classifyCLIError inspects captured `git` CLI stderr/stdout and returns the
 // matching go-git sentinel error, or nil when no pattern matches. CLI paths

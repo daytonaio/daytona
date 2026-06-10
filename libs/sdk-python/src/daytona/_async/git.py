@@ -4,16 +4,25 @@
 from __future__ import annotations
 
 from daytona_toolbox_api_client_async import (
+    GitAddRemoteRequest,
     GitAddRequest,
     GitApi,
+    GitAuthenticateRequest,
     GitBranchRequest,
     GitCheckoutRequest,
     GitCloneRequest,
     GitCommitRequest,
+    GitConfigureUserRequest,
     GitDeleteBranchRequest,
-    GitRepoRequest,
+    GitInitRequest,
+    GitPullRequest,
+    GitPushRequest,
+    GitResetRequest,
+    GitRestoreRequest,
+    GitSetConfigRequest,
     GitStatus,
     ListBranchResponse,
+    ListRemotesResponse,
 )
 
 from .._utils.errors import intercept_errors
@@ -119,6 +128,7 @@ class AsyncGit:
         username: str | None = None,
         password: str | None = None,
         insecure_skip_tls: bool | None = None,
+        depth: int | None = None,
     ) -> None:
         """Clones a Git repository into the specified path. It supports
         cloning specific branches or commits, and can authenticate with the remote
@@ -137,6 +147,7 @@ class AsyncGit:
             insecure_skip_tls (bool | None): Skip TLS certificate verification (insecure).
                 Use only for trusted internal Git servers with self-signed or private-CA certs;
                 credentials, if supplied, are transmitted over an unverified TLS connection.
+            depth (int | None): Create a shallow clone truncated to the given number of commits.
 
         Example:
             ```python
@@ -172,6 +183,7 @@ class AsyncGit:
                 password=password,
                 commit_id=commit_id,
                 insecure_skip_tls=insecure_skip_tls,
+                depth=depth,
             ),
         )
 
@@ -222,6 +234,9 @@ class AsyncGit:
         path: str,
         username: str | None = None,
         password: str | None = None,
+        branch: str | None = None,
+        remote: str | None = None,
+        set_upstream: bool = False,
     ) -> None:
         """Pushes all local commits on the current branch to the remote
         repository. If the remote repository requires authentication, provide
@@ -232,6 +247,10 @@ class AsyncGit:
             the sandbox working directory.
             username (str | None): Git username for authentication.
             password (str | None): Git password or token for authentication.
+            branch (str | None): Branch to push. Defaults to the current branch.
+            remote (str | None): Remote to push to. Defaults to "origin".
+            set_upstream (bool, optional): Record the pushed branch as the upstream tracking
+                branch. Defaults to False.
 
         Example:
             ```python
@@ -244,13 +263,19 @@ class AsyncGit:
                 username="user",
                 password="github_token"
             )
+
+            # Push a new branch and set its upstream
+            await sandbox.git.push("workspace/repo", branch="feature", set_upstream=True)
             ```
         """
         await self._api_client.push_changes(
-            request=GitRepoRequest(
+            request=GitPushRequest(
                 path=path,
                 username=username,
                 password=password,
+                branch=branch,
+                remote=remote,
+                set_upstream=set_upstream,
             ),
         )
 
@@ -261,6 +286,8 @@ class AsyncGit:
         path: str,
         username: str | None = None,
         password: str | None = None,
+        branch: str | None = None,
+        remote: str | None = None,
     ) -> None:
         """Pulls changes from the remote repository. If the remote repository requires authentication,
         provide username and password/token.
@@ -270,6 +297,8 @@ class AsyncGit:
             the sandbox working directory.
             username (str | None): Git username for authentication.
             password (str | None): Git password or token for authentication.
+            branch (str | None): Branch to pull. Defaults to the current branch's upstream.
+            remote (str | None): Remote to pull from. Defaults to "origin".
 
         Example:
             ```python
@@ -282,13 +311,18 @@ class AsyncGit:
                 username="user",
                 password="github_token"
             )
+
+            # Pull a specific branch from a specific remote
+            await sandbox.git.pull("workspace/repo", remote="upstream", branch="main")
             ```
         """
         await self._api_client.pull_changes(
-            request=GitRepoRequest(
+            request=GitPullRequest(
                 path=path,
                 username=username,
                 password=password,
+                branch=branch,
+                remote=remote,
             ),
         )
 
@@ -387,5 +421,294 @@ class AsyncGit:
             request=GitDeleteBranchRequest(
                 path=path,
                 name=name,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to initialize repository: ")
+    @with_instrumentation()
+    async def init(self, path: str, bare: bool = False, initial_branch: str | None = None) -> None:
+        """Initializes a new Git repository at the specified path.
+
+        Args:
+            path (str): Path where the repository should be initialized. Relative paths are
+            resolved based on the sandbox working directory.
+            bare (bool, optional): Create a bare repository without a working tree. Defaults to False.
+            initial_branch (str | None): Name of the initial branch. If not specified, uses the
+                Git default.
+
+        Example:
+            ```python
+            await sandbox.git.init("workspace/repo", initial_branch="main")
+            ```
+        """
+        await self._api_client.init_repository(
+            request=GitInitRequest(
+                path=path,
+                bare=bare,
+                initial_branch=initial_branch,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to reset: ")
+    @with_instrumentation()
+    async def reset(
+        self,
+        path: str,
+        mode: str | None = None,
+        target: str | None = None,
+        files: list[str] | None = None,
+    ) -> None:
+        """Resets the current HEAD to the specified state.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
+            mode (str | None): Reset mode, one of "soft", "mixed" (default), "hard", "merge" or "keep".
+            target (str | None): Revision to reset to. Defaults to HEAD.
+            files (list[str] | None): Constrain the reset to the given paths.
+
+        Example:
+            ```python
+            # Unstage all changes (mixed reset to HEAD)
+            await sandbox.git.reset("workspace/repo")
+
+            # Hard reset to a previous commit
+            await sandbox.git.reset("workspace/repo", mode="hard", target="HEAD~1")
+            ```
+        """
+        await self._api_client.reset_changes(
+            request=GitResetRequest(
+                path=path,
+                mode=mode,
+                target=target,
+                files=files,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to restore files: ")
+    @with_instrumentation()
+    async def restore(
+        self,
+        path: str,
+        files: list[str],
+        staged: bool | None = None,
+        worktree: bool | None = None,
+        source: str | None = None,
+    ) -> None:
+        """Restores working tree files or unstages changes.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
+            files (list[str]): File paths to restore.
+            staged (bool | None): Restore the staging index for the given files.
+            worktree (bool | None): Restore the working tree for the given files. Defaults to
+                True when neither staged nor worktree is provided.
+            source (str | None): Restore file contents from the given revision instead of the index.
+
+        Example:
+            ```python
+            # Discard working tree changes
+            await sandbox.git.restore("workspace/repo", ["file.txt"])
+
+            # Unstage changes
+            await sandbox.git.restore("workspace/repo", ["file.txt"], staged=True)
+            ```
+        """
+        await self._api_client.restore_files(
+            request=GitRestoreRequest(
+                path=path,
+                files=files,
+                staged=staged,
+                worktree=worktree,
+                source=source,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to add remote: ")
+    @with_instrumentation()
+    async def remote_add(
+        self,
+        path: str,
+        name: str,
+        url: str,
+        fetch: bool = False,
+        overwrite: bool = False,
+    ) -> None:
+        """Adds (or overwrites) a remote in the repository.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
+            name (str): Name of the remote.
+            url (str): URL of the remote.
+            fetch (bool, optional): Fetch from the remote immediately after adding it. Defaults to False.
+            overwrite (bool, optional): Replace an existing remote with the same name. Defaults to False.
+
+        Example:
+            ```python
+            await sandbox.git.remote_add("workspace/repo", "origin", "https://github.com/user/repo.git")
+            ```
+        """
+        await self._api_client.add_remote(
+            request=GitAddRemoteRequest(
+                path=path,
+                name=name,
+                url=url,
+                fetch=fetch,
+                overwrite=overwrite,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to list remotes: ")
+    @with_instrumentation()
+    async def remotes(self, path: str) -> ListRemotesResponse:
+        """Lists the remotes configured in the repository.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
+
+        Returns:
+            ListRemotesResponse: The configured remotes (name + URL).
+
+        Example:
+            ```python
+            response = await sandbox.git.remotes("workspace/repo")
+            for remote in response.remotes:
+                print(f"{remote.name}: {remote.url}")
+            ```
+        """
+        return await self._api_client.list_remotes(
+            path=path,
+        )
+
+    @intercept_errors(message_prefix="Failed to get remote: ")
+    @with_instrumentation()
+    async def remote_get(self, path: str, name: str) -> str | None:
+        """Gets the URL of a remote, or None when it does not exist.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
+            name (str): Name of the remote.
+
+        Returns:
+            str | None: The remote URL, or None when the remote does not exist.
+
+        Example:
+            ```python
+            url = await sandbox.git.remote_get("workspace/repo", "origin")
+            ```
+        """
+        response = await self._api_client.list_remotes(path=path)
+        for remote in response.remotes:
+            if remote.name == name:
+                return remote.url
+        return None
+
+    @intercept_errors(message_prefix="Failed to set config: ")
+    @with_instrumentation()
+    async def set_config(self, key: str, value: str, scope: str = "global", path: str | None = None) -> None:
+        """Sets a Git config value at the given scope.
+
+        Args:
+            key (str): Config key in dotted form (e.g. "user.name").
+            value (str): Config value.
+            scope (str, optional): Config scope, one of "global" (default), "local" or "system".
+            path (str | None): Repository path, required when scope is "local".
+
+        Example:
+            ```python
+            await sandbox.git.set_config("user.name", "John Doe")
+            ```
+        """
+        await self._api_client.set_git_config(
+            request=GitSetConfigRequest(
+                path=path,
+                key=key,
+                value=value,
+                scope=scope,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to get config: ")
+    @with_instrumentation()
+    async def get_config(self, key: str, scope: str = "global", path: str | None = None) -> str | None:
+        """Gets a Git config value at the given scope, or None when unset.
+
+        Args:
+            key (str): Config key in dotted form (e.g. "user.name").
+            scope (str, optional): Config scope, one of "global" (default), "local" or "system".
+            path (str | None): Repository path, required when scope is "local".
+
+        Returns:
+            str | None: The config value, or None when the key is not set.
+
+        Example:
+            ```python
+            name = await sandbox.git.get_config("user.name")
+            ```
+        """
+        response = await self._api_client.get_git_config(key=key, scope=scope, path=path)
+        return response.value
+
+    @intercept_errors(message_prefix="Failed to configure user: ")
+    @with_instrumentation()
+    async def configure_user(self, name: str, email: str, scope: str = "global", path: str | None = None) -> None:
+        """Configures the Git user name and email at the given scope.
+
+        Args:
+            name (str): User name (user.name).
+            email (str): User email (user.email).
+            scope (str, optional): Config scope, one of "global" (default), "local" or "system".
+            path (str | None): Repository path, required when scope is "local".
+
+        Example:
+            ```python
+            await sandbox.git.configure_user("John Doe", "john@example.com")
+            ```
+        """
+        await self._api_client.configure_user(
+            request=GitConfigureUserRequest(
+                path=path,
+                name=name,
+                email=email,
+                scope=scope,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to authenticate: ")
+    @with_instrumentation()
+    async def dangerously_authenticate(
+        self,
+        username: str,
+        password: str,
+        host: str | None = None,
+        protocol: str | None = None,
+    ) -> None:
+        """Persists Git credentials globally so that subsequent operations against the
+        given host authenticate automatically.
+
+        Warning:
+            This stores the password in plaintext on disk via the Git credential store.
+
+        Args:
+            username (str): Git username.
+            password (str): Git password or token.
+            host (str | None): Host to authenticate against. Defaults to "github.com".
+            protocol (str | None): Protocol to authenticate against. Defaults to "https".
+
+        Example:
+            ```python
+            await sandbox.git.dangerously_authenticate("user", "github_token")
+            ```
+        """
+        await self._api_client.authenticate(
+            request=GitAuthenticateRequest(
+                username=username,
+                password=password,
+                host=host,
+                protocol=protocol,
             ),
         )

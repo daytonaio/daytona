@@ -14,19 +14,13 @@ require 'date'
 require 'time'
 
 module DaytonaToolboxApiClient
-  class GitRepoRequest < ApiModelBase
-    attr_accessor :password
-
-    attr_accessor :path
-
-    attr_accessor :username
+  class ListRemotesResponse < ApiModelBase
+    attr_accessor :remotes
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'password' => :'password',
-        :'path' => :'path',
-        :'username' => :'username'
+        :'remotes' => :'remotes'
       }
     end
 
@@ -43,9 +37,7 @@ module DaytonaToolboxApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'password' => :'String',
-        :'path' => :'String',
-        :'username' => :'String'
+        :'remotes' => :'Array<GitRemote>'
       }
     end
 
@@ -59,30 +51,24 @@ module DaytonaToolboxApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaToolboxApiClient::GitRepoRequest` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaToolboxApiClient::ListRemotesResponse` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaToolboxApiClient::GitRepoRequest`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaToolboxApiClient::ListRemotesResponse`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'password')
-        self.password = attributes[:'password']
-      end
-
-      if attributes.key?(:'path')
-        self.path = attributes[:'path']
+      if attributes.key?(:'remotes')
+        if (value = attributes[:'remotes']).is_a?(Array)
+          self.remotes = value
+        end
       else
-        self.path = nil
-      end
-
-      if attributes.key?(:'username')
-        self.username = attributes[:'username']
+        self.remotes = nil
       end
     end
 
@@ -91,8 +77,8 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @path.nil?
-        invalid_properties.push('invalid value for "path", path cannot be nil.')
+      if @remotes.nil?
+        invalid_properties.push('invalid value for "remotes", remotes cannot be nil.')
       end
 
       invalid_properties
@@ -102,18 +88,18 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @path.nil?
+      return false if @remotes.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] path Value to be assigned
-    def path=(path)
-      if path.nil?
-        fail ArgumentError, 'path cannot be nil'
+    # @param [Object] remotes Value to be assigned
+    def remotes=(remotes)
+      if remotes.nil?
+        fail ArgumentError, 'remotes cannot be nil'
       end
 
-      @path = path
+      @remotes = remotes
     end
 
     # Checks equality by comparing each attribute.
@@ -121,9 +107,7 @@ module DaytonaToolboxApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          password == o.password &&
-          path == o.path &&
-          username == o.username
+          remotes == o.remotes
     end
 
     # @see the `==` method
@@ -135,7 +119,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [password, path, username].hash
+      [remotes].hash
     end
 
     # Builds the object from hash

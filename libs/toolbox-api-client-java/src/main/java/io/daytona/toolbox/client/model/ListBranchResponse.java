@@ -57,6 +57,11 @@ public class ListBranchResponse {
   @javax.annotation.Nonnull
   private List<String> branches = new ArrayList<>();
 
+  public static final String SERIALIZED_NAME_CURRENT = "current";
+  @SerializedName(SERIALIZED_NAME_CURRENT)
+  @javax.annotation.Nullable
+  private String current;
+
   public ListBranchResponse() {
   }
 
@@ -84,6 +89,25 @@ public class ListBranchResponse {
 
   public void setBranches(@javax.annotation.Nonnull List<String> branches) {
     this.branches = branches;
+  }
+
+
+  public ListBranchResponse current(@javax.annotation.Nullable String current) {
+    this.current = current;
+    return this;
+  }
+
+  /**
+   * Current is the name of the checked out branch (empty when HEAD is detached).
+   * @return current
+   */
+  @javax.annotation.Nullable
+  public String getCurrent() {
+    return current;
+  }
+
+  public void setCurrent(@javax.annotation.Nullable String current) {
+    this.current = current;
   }
 
   /**
@@ -141,13 +165,14 @@ public class ListBranchResponse {
       return false;
     }
     ListBranchResponse listBranchResponse = (ListBranchResponse) o;
-    return Objects.equals(this.branches, listBranchResponse.branches)&&
+    return Objects.equals(this.branches, listBranchResponse.branches) &&
+        Objects.equals(this.current, listBranchResponse.current)&&
         Objects.equals(this.additionalProperties, listBranchResponse.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(branches, additionalProperties);
+    return Objects.hash(branches, current, additionalProperties);
   }
 
   @Override
@@ -155,6 +180,7 @@ public class ListBranchResponse {
     StringBuilder sb = new StringBuilder();
     sb.append("class ListBranchResponse {\n");
     sb.append("    branches: ").append(toIndentedString(branches)).append("\n");
+    sb.append("    current: ").append(toIndentedString(current)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -174,7 +200,7 @@ public class ListBranchResponse {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("branches"));
+    openapiFields = new HashSet<String>(Arrays.asList("branches", "current"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("branches"));
@@ -205,6 +231,9 @@ public class ListBranchResponse {
         throw new IllegalArgumentException("Expected the field `linkedContent` to be an array in the JSON string but got `null`");
       } else if (!jsonObj.get("branches").isJsonArray()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `branches` to be an array in the JSON string but got `%s`", jsonObj.get("branches").toString()));
+      }
+      if ((jsonObj.get("current") != null && !jsonObj.get("current").isJsonNull()) && !jsonObj.get("current").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `current` to be a primitive type in the JSON string but got `%s`", jsonObj.get("current").toString()));
       }
   }
 

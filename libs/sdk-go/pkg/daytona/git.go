@@ -98,6 +98,9 @@ func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*
 		if cloneOpts.InsecureSkipTLS != nil {
 			req.SetInsecureSkipTls(*cloneOpts.InsecureSkipTLS)
 		}
+		if cloneOpts.Depth != nil {
+			req.SetDepth(*cloneOpts.Depth)
+		}
 
 		httpResp, err := g.toolboxClient.GitAPI.CloneRepository(ctx).Request(*req).Execute()
 		if err != nil {
@@ -159,6 +162,8 @@ func (g *GitService) Status(ctx context.Context, path string) (*types.GitStatus,
 			Behind:          behind,
 			BranchPublished: branchPublished,
 			FileStatus:      convertFileStatus(status.GetFileStatus()),
+			Detached:        status.GetDetached(),
+			Upstream:        status.GetUpstream(),
 		}, nil
 	})
 }
@@ -387,12 +392,21 @@ func (g *GitService) Push(ctx context.Context, path string, opts ...func(*option
 	return withInstrumentationVoid(ctx, g.otel, "Git", "Push", func(ctx context.Context) error {
 		pushOpts := options.Apply(opts...)
 
-		req := toolbox.NewGitRepoRequest(path)
+		req := toolbox.NewGitPushRequest(path)
 		if pushOpts.Username != nil {
 			req.SetUsername(*pushOpts.Username)
 		}
 		if pushOpts.Password != nil {
 			req.SetPassword(*pushOpts.Password)
+		}
+		if pushOpts.Branch != nil {
+			req.SetBranch(*pushOpts.Branch)
+		}
+		if pushOpts.Remote != nil {
+			req.SetRemote(*pushOpts.Remote)
+		}
+		if pushOpts.SetUpstream != nil {
+			req.SetSetUpstream(*pushOpts.SetUpstream)
 		}
 
 		httpResp, err := g.toolboxClient.GitAPI.PushChanges(ctx).Request(*req).Execute()
@@ -428,12 +442,18 @@ func (g *GitService) Pull(ctx context.Context, path string, opts ...func(*option
 	return withInstrumentationVoid(ctx, g.otel, "Git", "Pull", func(ctx context.Context) error {
 		pullOpts := options.Apply(opts...)
 
-		req := toolbox.NewGitRepoRequest(path)
+		req := toolbox.NewGitPullRequest(path)
 		if pullOpts.Username != nil {
 			req.SetUsername(*pullOpts.Username)
 		}
 		if pullOpts.Password != nil {
 			req.SetPassword(*pullOpts.Password)
+		}
+		if pullOpts.Branch != nil {
+			req.SetBranch(*pullOpts.Branch)
+		}
+		if pullOpts.Remote != nil {
+			req.SetRemote(*pullOpts.Remote)
 		}
 
 		httpResp, err := g.toolboxClient.GitAPI.PullChanges(ctx).Request(*req).Execute()
@@ -441,6 +461,307 @@ func (g *GitService) Pull(ctx context.Context, path string, opts ...func(*option
 			return errors.ConvertToolboxError(err, httpResp)
 		}
 
+		return nil
+	})
+}
+
+// Init initializes a new Git repository at the specified path.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithBare]: Create a bare repository without a working tree
+//   - [options.WithInitialBranch]: Name of the initial branch
+//
+// Example:
+//
+//	err := sandbox.Git.Init(ctx, "/home/user/repo", options.WithInitialBranch("main"))
+func (g *GitService) Init(ctx context.Context, path string, opts ...func(*options.GitInit)) error {
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Init", func(ctx context.Context) error {
+		initOpts := options.Apply(opts...)
+
+		req := toolbox.NewGitInitRequest(path)
+		if initOpts.Bare != nil {
+			req.SetBare(*initOpts.Bare)
+		}
+		if initOpts.InitialBranch != nil {
+			req.SetInitialBranch(*initOpts.InitialBranch)
+		}
+
+		httpResp, err := g.toolboxClient.GitAPI.InitRepository(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+		return nil
+	})
+}
+
+// Reset resets the current HEAD to the specified state.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithResetMode]: Reset mode ("soft", "mixed", "hard", "merge" or "keep")
+//   - [options.WithResetTarget]: Revision to reset to (defaults to HEAD)
+//   - [options.WithResetFiles]: Constrain the reset to the given paths
+//
+// Example:
+//
+//	// Unstage all changes (mixed reset to HEAD)
+//	err := sandbox.Git.Reset(ctx, "/home/user/repo")
+//
+//	// Hard reset to a previous commit
+//	err := sandbox.Git.Reset(ctx, "/home/user/repo",
+//	    options.WithResetMode("hard"),
+//	    options.WithResetTarget("HEAD~1"),
+//	)
+func (g *GitService) Reset(ctx context.Context, path string, opts ...func(*options.GitReset)) error {
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Reset", func(ctx context.Context) error {
+		resetOpts := options.Apply(opts...)
+
+		req := toolbox.NewGitResetRequest(path)
+		if resetOpts.Mode != nil {
+			req.SetMode(*resetOpts.Mode)
+		}
+		if resetOpts.Target != nil {
+			req.SetTarget(*resetOpts.Target)
+		}
+		if len(resetOpts.Files) > 0 {
+			req.SetFiles(resetOpts.Files)
+		}
+
+		httpResp, err := g.toolboxClient.GitAPI.ResetChanges(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+		return nil
+	})
+}
+
+// Restore restores working tree files or unstages changes for the given paths.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithRestoreStaged]: Restore the staging index for the given files
+//   - [options.WithRestoreWorktree]: Restore the working tree for the given files
+//   - [options.WithRestoreSource]: Restore from the given revision instead of the index
+//
+// Example:
+//
+//	// Discard working tree changes
+//	err := sandbox.Git.Restore(ctx, "/home/user/repo", []string{"file.txt"})
+//
+//	// Unstage changes
+//	err := sandbox.Git.Restore(ctx, "/home/user/repo", []string{"file.txt"},
+//	    options.WithRestoreStaged(true),
+//	)
+func (g *GitService) Restore(ctx context.Context, path string, files []string, opts ...func(*options.GitRestore)) error {
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Restore", func(ctx context.Context) error {
+		restoreOpts := options.Apply(opts...)
+
+		req := toolbox.NewGitRestoreRequest(files, path)
+		if restoreOpts.Staged != nil {
+			req.SetStaged(*restoreOpts.Staged)
+		}
+		if restoreOpts.Worktree != nil {
+			req.SetWorktree(*restoreOpts.Worktree)
+		}
+		if restoreOpts.Source != nil {
+			req.SetSource(*restoreOpts.Source)
+		}
+
+		httpResp, err := g.toolboxClient.GitAPI.RestoreFiles(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+		return nil
+	})
+}
+
+// RemoteAdd adds (or overwrites) a remote in the repository.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithRemoteFetch]: Fetch from the remote immediately after adding it
+//   - [options.WithRemoteOverwrite]: Replace an existing remote with the same name
+//
+// Example:
+//
+//	err := sandbox.Git.RemoteAdd(ctx, "/home/user/repo", "origin", "https://github.com/user/repo.git")
+func (g *GitService) RemoteAdd(ctx context.Context, path, name, url string, opts ...func(*options.GitRemoteAdd)) error {
+	return withInstrumentationVoid(ctx, g.otel, "Git", "RemoteAdd", func(ctx context.Context) error {
+		remoteOpts := options.Apply(opts...)
+
+		req := toolbox.NewGitAddRemoteRequest(name, path, url)
+		if remoteOpts.Fetch != nil {
+			req.SetFetch(*remoteOpts.Fetch)
+		}
+		if remoteOpts.Overwrite != nil {
+			req.SetOverwrite(*remoteOpts.Overwrite)
+		}
+
+		httpResp, err := g.toolboxClient.GitAPI.AddRemote(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+		return nil
+	})
+}
+
+// Remotes lists the remotes configured in the repository.
+//
+// Example:
+//
+//	remotes, err := sandbox.Git.Remotes(ctx, "/home/user/repo")
+//	for _, r := range remotes {
+//	    fmt.Printf("%s: %s\n", r.Name, r.URL)
+//	}
+func (g *GitService) Remotes(ctx context.Context, path string) ([]types.GitRemote, error) {
+	return withInstrumentation(ctx, g.otel, "Git", "Remotes", func(ctx context.Context) ([]types.GitRemote, error) {
+		result, httpResp, err := g.toolboxClient.GitAPI.ListRemotes(ctx).Path(path).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
+
+		remotes := make([]types.GitRemote, 0, len(result.GetRemotes()))
+		for _, r := range result.GetRemotes() {
+			remotes = append(remotes, types.GitRemote{Name: r.GetName(), URL: r.GetUrl()})
+		}
+		return remotes, nil
+	})
+}
+
+// RemoteGet returns the URL of a remote, or an empty string when it does not exist.
+//
+// Example:
+//
+//	url, err := sandbox.Git.RemoteGet(ctx, "/home/user/repo", "origin")
+func (g *GitService) RemoteGet(ctx context.Context, path, name string) (string, error) {
+	return withInstrumentation(ctx, g.otel, "Git", "RemoteGet", func(ctx context.Context) (string, error) {
+		result, httpResp, err := g.toolboxClient.GitAPI.ListRemotes(ctx).Path(path).Execute()
+		if err != nil {
+			return "", errors.ConvertToolboxError(err, httpResp)
+		}
+
+		for _, r := range result.GetRemotes() {
+			if r.GetName() == name {
+				return r.GetUrl(), nil
+			}
+		}
+		return "", nil
+	})
+}
+
+// SetConfig sets a git config value at the given scope.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithConfigScope]: Config scope ("global" (default), "local" or "system")
+//   - [options.WithConfigPath]: Repository path, required when scope is "local"
+//
+// Example:
+//
+//	err := sandbox.Git.SetConfig(ctx, "user.name", "John Doe")
+func (g *GitService) SetConfig(ctx context.Context, key, value string, opts ...func(*options.GitConfig)) error {
+	return withInstrumentationVoid(ctx, g.otel, "Git", "SetConfig", func(ctx context.Context) error {
+		configOpts := options.Apply(opts...)
+
+		req := toolbox.NewGitSetConfigRequest(key, value)
+		if configOpts.Scope != nil {
+			req.SetScope(*configOpts.Scope)
+		}
+		if configOpts.Path != nil {
+			req.SetPath(*configOpts.Path)
+		}
+
+		httpResp, err := g.toolboxClient.GitAPI.SetGitConfig(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+		return nil
+	})
+}
+
+// GetConfig returns a git config value at the given scope, or an empty string
+// when the key is not set.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithConfigScope]: Config scope ("global" (default), "local" or "system")
+//   - [options.WithConfigPath]: Repository path, required when scope is "local"
+//
+// Example:
+//
+//	name, err := sandbox.Git.GetConfig(ctx, "user.name")
+func (g *GitService) GetConfig(ctx context.Context, key string, opts ...func(*options.GitConfig)) (string, error) {
+	return withInstrumentation(ctx, g.otel, "Git", "GetConfig", func(ctx context.Context) (string, error) {
+		configOpts := options.Apply(opts...)
+
+		req := g.toolboxClient.GitAPI.GetGitConfig(ctx).Key(key)
+		if configOpts.Scope != nil {
+			req = req.Scope(*configOpts.Scope)
+		}
+		if configOpts.Path != nil {
+			req = req.Path(*configOpts.Path)
+		}
+
+		result, httpResp, err := req.Execute()
+		if err != nil {
+			return "", errors.ConvertToolboxError(err, httpResp)
+		}
+		return result.GetValue(), nil
+	})
+}
+
+// ConfigureUser configures the git user name and email at the given scope.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithConfigScope]: Config scope ("global" (default), "local" or "system")
+//   - [options.WithConfigPath]: Repository path, required when scope is "local"
+//
+// Example:
+//
+//	err := sandbox.Git.ConfigureUser(ctx, "John Doe", "john@example.com")
+func (g *GitService) ConfigureUser(ctx context.Context, name, email string, opts ...func(*options.GitConfig)) error {
+	return withInstrumentationVoid(ctx, g.otel, "Git", "ConfigureUser", func(ctx context.Context) error {
+		configOpts := options.Apply(opts...)
+
+		req := toolbox.NewGitConfigureUserRequest(email, name)
+		if configOpts.Scope != nil {
+			req.SetScope(*configOpts.Scope)
+		}
+		if configOpts.Path != nil {
+			req.SetPath(*configOpts.Path)
+		}
+
+		httpResp, err := g.toolboxClient.GitAPI.ConfigureUser(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
+		return nil
+	})
+}
+
+// DangerouslyAuthenticate persists git credentials globally so that subsequent
+// operations against the given host authenticate automatically.
+//
+// This stores the password in plaintext on disk via the git credential store.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithAuthHost]: Host to authenticate against (defaults to "github.com")
+//   - [options.WithAuthProtocol]: Protocol to authenticate against (defaults to "https")
+//
+// Example:
+//
+//	err := sandbox.Git.DangerouslyAuthenticate(ctx, "user", "github_token")
+func (g *GitService) DangerouslyAuthenticate(ctx context.Context, username, password string, opts ...func(*options.GitAuthenticate)) error {
+	return withInstrumentationVoid(ctx, g.otel, "Git", "DangerouslyAuthenticate", func(ctx context.Context) error {
+		authOpts := options.Apply(opts...)
+
+		req := toolbox.NewGitAuthenticateRequest(password, username)
+		if authOpts.Host != nil {
+			req.SetHost(*authOpts.Host)
+		}
+		if authOpts.Protocol != nil {
+			req.SetProtocol(*authOpts.Protocol)
+		}
+
+		httpResp, err := g.toolboxClient.GitAPI.Authenticate(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 		return nil
 	})
 }

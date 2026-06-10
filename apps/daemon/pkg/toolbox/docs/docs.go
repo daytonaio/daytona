@@ -2033,6 +2033,142 @@ const docTemplate = `{
                 }
             }
         },
+        "/git/config": {
+            "get": {
+                "description": "Get a Git config value at the given scope (null when unset)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Get a Git config value",
+                "operationId": "GetGitConfig",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Config key (e.g. user.name)",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Repository path (required for local scope)",
+                        "name": "path",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Config scope: global (default), local or system",
+                        "name": "scope",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitConfigResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Set a Git config key/value at the given scope",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Set a Git config value",
+                "operationId": "SetGitConfig",
+                "parameters": [
+                    {
+                        "description": "Set config request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitSetConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/git/config/user": {
+            "post": {
+                "description": "Configure the Git user name and email at the given scope",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Configure Git user",
+                "operationId": "ConfigureUser",
+                "parameters": [
+                    {
+                        "description": "Configure user request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitConfigureUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/git/credentials": {
+            "post": {
+                "description": "Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Authenticate Git",
+                "operationId": "Authenticate",
+                "parameters": [
+                    {
+                        "description": "Authenticate request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitAuthenticateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/git/history": {
             "get": {
                 "description": "Get the commit history of the Git repository",
@@ -2066,6 +2202,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/git/init": {
+            "post": {
+                "description": "Initialize a new Git repository at the specified path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Initialize a Git repository",
+                "operationId": "InitRepository",
+                "parameters": [
+                    {
+                        "description": "Init repository request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitInitRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
         "/git/pull": {
             "post": {
                 "description": "Pull changes from the remote Git repository",
@@ -2087,7 +2255,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/GitRepoRequest"
+                            "$ref": "#/definitions/GitPullRequest"
                         }
                     }
                 ],
@@ -2119,7 +2287,131 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/GitRepoRequest"
+                            "$ref": "#/definitions/GitPushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/git/remotes": {
+            "get": {
+                "description": "List the remotes configured in the Git repository",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "List remotes",
+                "operationId": "ListRemotes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Repository path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ListRemotesResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add (or overwrite) a remote in the Git repository",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Add a remote",
+                "operationId": "AddRemote",
+                "parameters": [
+                    {
+                        "description": "Add remote request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitAddRemoteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/git/reset": {
+            "post": {
+                "description": "Reset the current HEAD to the specified state",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Reset repository",
+                "operationId": "ResetChanges",
+                "parameters": [
+                    {
+                        "description": "Reset request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitResetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/git/restore": {
+            "post": {
+                "description": "Restore working tree files or unstage changes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "git"
+                ],
+                "summary": "Restore files",
+                "operationId": "RestoreFiles",
+                "parameters": [
+                    {
+                        "description": "Restore request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitRestoreRequest"
                         }
                     }
                 ],
@@ -3886,6 +4178,33 @@ const docTemplate = `{
                 }
             }
         },
+        "GitAddRemoteRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "path",
+                "url"
+            ],
+            "properties": {
+                "fetch": {
+                    "description": "Fetch fetches from the remote immediately after adding it.",
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "overwrite": {
+                    "description": "Overwrite replaces an existing remote with the same name.",
+                    "type": "boolean"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "GitAddRequest": {
             "type": "object",
             "required": [
@@ -3901,6 +4220,29 @@ const docTemplate = `{
                     }
                 },
                 "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitAuthenticateRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "host": {
+                    "description": "Host defaults to github.com.",
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "protocol": {
+                    "description": "Protocol defaults to https.",
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -3947,6 +4289,10 @@ const docTemplate = `{
                 },
                 "commit_id": {
                     "type": "string"
+                },
+                "depth": {
+                    "description": "Depth creates a shallow clone truncated to the given number of commits.",
+                    "type": "integer"
                 },
                 "insecure_skip_tls": {
                     "description": "Skip TLS certificate verification for this clone. Defaults to false (verify).\nSet to true ONLY for trusted internal Git servers with self-signed or\nprivate-CA certs; credentials, if supplied, will be transmitted over an\nunverified TLS connection and are exposed to any MITM on the route.",
@@ -4030,6 +4376,38 @@ const docTemplate = `{
                 }
             }
         },
+        "GitConfigResponse": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "Value is the config value, null when the key is not set.",
+                    "type": "string"
+                }
+            }
+        },
+        "GitConfigureUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Path is the repository path, required when scope is \"local\".",
+                    "type": "string"
+                },
+                "scope": {
+                    "description": "Scope is one of global (default), local or system.",
+                    "type": "string"
+                }
+            }
+        },
         "GitDeleteBranchRequest": {
             "type": "object",
             "required": [
@@ -4045,19 +4423,169 @@ const docTemplate = `{
                 }
             }
         },
-        "GitRepoRequest": {
+        "GitInitRequest": {
             "type": "object",
             "required": [
                 "path"
             ],
             "properties": {
+                "bare": {
+                    "description": "Bare creates a repository without a working tree.",
+                    "type": "boolean"
+                },
+                "initial_branch": {
+                    "description": "InitialBranch sets the name of the initial branch.",
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitPullRequest": {
+            "type": "object",
+            "required": [
+                "path"
+            ],
+            "properties": {
+                "branch": {
+                    "description": "Branch to pull (defaults to the current branch's upstream).",
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
                 "path": {
                     "type": "string"
                 },
+                "remote": {
+                    "description": "Remote to pull from (defaults to \"origin\").",
+                    "type": "string"
+                },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitPushRequest": {
+            "type": "object",
+            "required": [
+                "path"
+            ],
+            "properties": {
+                "branch": {
+                    "description": "Branch to push (defaults to the current branch).",
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "remote": {
+                    "description": "Remote to push to (defaults to \"origin\").",
+                    "type": "string"
+                },
+                "set_upstream": {
+                    "description": "SetUpstream records the pushed branch as the upstream tracking branch.",
+                    "type": "boolean"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitRemote": {
+            "type": "object",
+            "required": [
+                "name",
+                "url"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitResetRequest": {
+            "type": "object",
+            "required": [
+                "path"
+            ],
+            "properties": {
+                "files": {
+                    "description": "Files constrains the reset to the given paths.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "mode": {
+                    "description": "Mode is one of soft, mixed (default), hard, merge or keep.",
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "target": {
+                    "description": "Target is the revision to reset to (defaults to HEAD).",
+                    "type": "string"
+                }
+            }
+        },
+        "GitRestoreRequest": {
+            "type": "object",
+            "required": [
+                "files",
+                "path"
+            ],
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "path": {
+                    "type": "string"
+                },
+                "source": {
+                    "description": "Source restores file contents from the given revision instead of the index.",
+                    "type": "string"
+                },
+                "staged": {
+                    "description": "Staged restores the staging index for the given files.",
+                    "type": "boolean"
+                },
+                "worktree": {
+                    "description": "Worktree restores the working tree for the given files.",
+                    "type": "boolean"
+                }
+            }
+        },
+        "GitSetConfigRequest": {
+            "type": "object",
+            "required": [
+                "key",
+                "value"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Path is the repository path, required when scope is \"local\".",
+                    "type": "string"
+                },
+                "scope": {
+                    "description": "Scope is one of global (default), local or system.",
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             }
@@ -4081,11 +4609,19 @@ const docTemplate = `{
                 "currentBranch": {
                     "type": "string"
                 },
+                "detached": {
+                    "description": "Detached is true when HEAD is not on a branch (detached HEAD state).",
+                    "type": "boolean"
+                },
                 "fileStatus": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/FileStatus"
                     }
+                },
+                "upstream": {
+                    "description": "Upstream is the upstream tracking branch (e.g. \"origin/main\"), empty when unset.",
+                    "type": "string"
                 }
             }
         },
@@ -4182,6 +4718,10 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "current": {
+                    "description": "Current is the name of the checked out branch (empty when HEAD is detached).",
+                    "type": "string"
                 }
             }
         },
@@ -4209,6 +4749,20 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Recording"
+                    }
+                }
+            }
+        },
+        "ListRemotesResponse": {
+            "type": "object",
+            "required": [
+                "remotes"
+            ],
+            "properties": {
+                "remotes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/GitRemote"
                     }
                 }
             }

@@ -69,6 +69,28 @@ Clones a repository with optional branch, commit, credentials, and TLS verificat
 
 - `io.daytona.sdk.exception.DaytonaException` - if cloning fails
 
+#### clone()
+```java
+public void clone(String url, String path, String branch, String commitId, String username, String password, Boolean insecureSkipTls, Integer depth)
+```
+
+Clones a repository with optional branch, commit, credentials, TLS verification override, and shallow depth.
+
+**Parameters**:
+
+- `url` _String_ - repository URL
+- `path` _String_ - destination path in the Sandbox
+- `branch` _String_ - branch to clone; `null` uses default branch
+- `commitId` _String_ - commit SHA to checkout after clone; `null` skips detached checkout
+- `username` _String_ - username for authenticated remotes
+- `password` _String_ - password or token for authenticated remotes
+- `insecureSkipTls` _Boolean_ - when `true`, skip TLS certificate verification (insecure)
+- `depth` _Integer_ - create a shallow clone truncated to the given number of commits; `null` clones full history
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if cloning fails
+
 #### branches()
 ```java
 public Map<String, Object> branches(String path)
@@ -160,6 +182,26 @@ Pushes local commits to remote.
 
 - `io.daytona.sdk.exception.DaytonaException` - if push fails
 
+#### push()
+```java
+public void push(String path, String username, String password, String branch, String remote, Boolean setUpstream)
+```
+
+Pushes local commits to remote with optional credentials, branch, remote, and upstream tracking.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `username` _String_ - username for authenticated remotes
+- `password` _String_ - password or token for authenticated remotes
+- `branch` _String_ - branch to push; `null` uses the current branch
+- `remote` _String_ - remote to push to; `null` uses "origin"
+- `setUpstream` _Boolean_ - when `true`, record the pushed branch as the upstream tracking branch
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if push fails
+
 #### pull()
 ```java
 public void pull(String path)
@@ -174,3 +216,391 @@ Pulls updates from remote.
 **Throws**:
 
 - `io.daytona.sdk.exception.DaytonaException` - if pull fails
+
+#### pull()
+```java
+public void pull(String path, String username, String password, String branch, String remote)
+```
+
+Pulls updates from remote with optional credentials, branch, and remote.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `username` _String_ - username for authenticated remotes
+- `password` _String_ - password or token for authenticated remotes
+- `branch` _String_ - branch to pull; `null` uses the current branch's upstream
+- `remote` _String_ - remote to pull from; `null` uses "origin"
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if pull fails
+
+#### createBranch()
+```java
+public void createBranch(String path, String name)
+```
+
+Creates a new branch at the current HEAD.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `name` _String_ - name of the new branch
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if branch creation fails
+
+#### checkoutBranch()
+```java
+public void checkoutBranch(String path, String branch)
+```
+
+Checks out a branch or commit.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `branch` _String_ - branch name or commit SHA to checkout
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if checkout fails
+
+#### deleteBranch()
+```java
+public void deleteBranch(String path, String name)
+```
+
+Deletes a branch.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `name` _String_ - name of the branch to delete
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if deletion fails
+
+#### init()
+```java
+public void init(String path)
+```
+
+Initializes a new Git repository at the specified path.
+
+**Parameters**:
+
+- `path` _String_ - destination path in the Sandbox
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if initialization fails
+
+#### init()
+```java
+public void init(String path, Boolean bare, String initialBranch)
+```
+
+Initializes a new Git repository with optional bare mode and initial branch.
+
+**Parameters**:
+
+- `path` _String_ - destination path in the Sandbox
+- `bare` _Boolean_ - when `true`, create a bare repository without a working tree
+- `initialBranch` _String_ - name of the initial branch; `null` uses the Git default
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if initialization fails
+
+#### reset()
+```java
+public void reset(String path)
+```
+
+Resets the current HEAD to HEAD (mixed reset, unstaging changes).
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if reset fails
+
+#### reset()
+```java
+public void reset(String path, String mode, String target, List<String> files)
+```
+
+Resets the current HEAD to the specified state.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `mode` _String_ - reset mode: "soft", "mixed" (default), "hard", "merge" or "keep"; `null` uses "mixed"
+- `target` _String_ - revision to reset to; `null` uses HEAD
+- `files` _List\<String\>_ - constrain the reset to the given paths; `null` resets all
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if reset fails
+
+#### restore()
+```java
+public void restore(String path, List<String> files)
+```
+
+Restores working tree files for the given paths (discarding local changes).
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `files` _List\<String\>_ - file paths to restore
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if restore fails
+
+#### restore()
+```java
+public void restore(String path, List<String> files, Boolean staged, Boolean worktree, String source)
+```
+
+Restores working tree files or unstages changes.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `files` _List\<String\>_ - file paths to restore
+- `staged` _Boolean_ - restore the staging index for the given files
+- `worktree` _Boolean_ - restore the working tree for the given files; defaults to `true` when both are `null`
+- `source` _String_ - restore file contents from the given revision instead of the index
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if restore fails
+
+#### remoteAdd()
+```java
+public void remoteAdd(String path, String name, String url)
+```
+
+Adds a remote to the repository.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `name` _String_ - name of the remote
+- `url` _String_ - URL of the remote
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if adding the remote fails
+
+#### remoteAdd()
+```java
+public void remoteAdd(String path, String name, String url, Boolean fetch, Boolean overwrite)
+```
+
+Adds (or overwrites) a remote in the repository.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `name` _String_ - name of the remote
+- `url` _String_ - URL of the remote
+- `fetch` _Boolean_ - when `true`, fetch from the remote immediately after adding it
+- `overwrite` _Boolean_ - when `true`, replace an existing remote with the same name
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if adding the remote fails
+
+#### remotes()
+```java
+public List<GitRemote> remotes(String path)
+```
+
+Lists the remotes configured in the repository.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+
+**Returns**:
+
+- `List\<GitRemote\>` - the configured remotes (name + URL)
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if listing remotes fails
+
+#### remoteGet()
+```java
+public String remoteGet(String path, String name)
+```
+
+Gets the URL of a remote, or `null` when it does not exist.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `name` _String_ - name of the remote
+
+**Returns**:
+
+- `String` - the remote URL, or `null` when the remote does not exist
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the operation fails
+
+#### setConfig()
+```java
+public void setConfig(String key, String value)
+```
+
+Sets a Git config value at the global scope.
+
+**Parameters**:
+
+- `key` _String_ - config key in dotted form (e.g. "user.name")
+- `value` _String_ - config value
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if setting config fails
+
+#### setConfig()
+```java
+public void setConfig(String key, String value, String scope, String path)
+```
+
+Sets a Git config value at the given scope.
+
+**Parameters**:
+
+- `key` _String_ - config key in dotted form (e.g. "user.name")
+- `value` _String_ - config value
+- `scope` _String_ - config scope: "global" (default), "local" or "system"
+- `path` _String_ - repository path, required when scope is "local"
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if setting config fails
+
+#### getConfig()
+```java
+public String getConfig(String key)
+```
+
+Gets a Git config value at the global scope, or `null` when unset.
+
+**Parameters**:
+
+- `key` _String_ - config key in dotted form (e.g. "user.name")
+
+**Returns**:
+
+- `String` - the config value, or `null` when the key is not set
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if getting config fails
+
+#### getConfig()
+```java
+public String getConfig(String key, String scope, String path)
+```
+
+Gets a Git config value at the given scope, or `null` when unset.
+
+**Parameters**:
+
+- `key` _String_ - config key in dotted form (e.g. "user.name")
+- `scope` _String_ - config scope: "global" (default), "local" or "system"
+- `path` _String_ - repository path, required when scope is "local"
+
+**Returns**:
+
+- `String` - the config value, or `null` when the key is not set
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if getting config fails
+
+#### configureUser()
+```java
+public void configureUser(String name, String email)
+```
+
+Configures the Git user name and email at the global scope.
+
+**Parameters**:
+
+- `name` _String_ - user name (user.name)
+- `email` _String_ - user email (user.email)
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if configuring user fails
+
+#### configureUser()
+```java
+public void configureUser(String name, String email, String scope, String path)
+```
+
+Configures the Git user name and email at the given scope.
+
+**Parameters**:
+
+- `name` _String_ - user name (user.name)
+- `email` _String_ - user email (user.email)
+- `scope` _String_ - config scope: "global" (default), "local" or "system"
+- `path` _String_ - repository path, required when scope is "local"
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if configuring user fails
+
+#### dangerouslyAuthenticate()
+```java
+public void dangerouslyAuthenticate(String username, String password)
+```
+
+Persists Git credentials globally so that subsequent operations against github.com authenticate automatically.
+
+This stores the password in plaintext on disk via the Git credential store.
+
+**Parameters**:
+
+- `username` _String_ - Git username
+- `password` _String_ - Git password or token
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if authentication fails
+
+#### dangerouslyAuthenticate()
+```java
+public void dangerouslyAuthenticate(String username, String password, String host, String protocol)
+```
+
+Persists Git credentials globally so that subsequent operations against the given host authenticate automatically.
+
+This stores the password in plaintext on disk via the Git credential store.
+
+**Parameters**:
+
+- `username` _String_ - Git username
+- `password` _String_ - Git password or token
+- `host` _String_ - host to authenticate against; `null` uses "github.com"
+- `protocol` _String_ - protocol to authenticate against; `null` uses "https"
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if authentication fails

@@ -59,6 +59,18 @@ type GitClone struct {
 	Username        *string // Username for HTTPS authentication
 	Password        *string // Password or token for HTTPS authentication
 	InsecureSkipTLS *bool   // Skip TLS certificate verification (insecure). Use only for trusted internal Git servers with self-signed or private-CA certs.
+	Depth           *int32  // Create a shallow clone truncated to the given number of commits
+}
+
+// WithDepth creates a shallow clone truncated to the given number of commits.
+//
+// Example:
+//
+//	err := sandbox.Git.Clone(ctx, url, path, options.WithDepth(1))
+func WithDepth(depth int32) func(*GitClone) {
+	return func(opts *GitClone) {
+		opts.Depth = &depth
+	}
 }
 
 // WithBranch sets the branch to clone instead of the repository's default branch.
@@ -181,8 +193,33 @@ func WithForce(force bool) func(*GitDeleteBranch) {
 
 // GitPush holds optional parameters for [daytona.GitService.Push].
 type GitPush struct {
-	Username *string // Username for HTTPS authentication
-	Password *string // Password or token for HTTPS authentication
+	Username    *string // Username for HTTPS authentication
+	Password    *string // Password or token for HTTPS authentication
+	Branch      *string // Branch to push (defaults to the current branch)
+	Remote      *string // Remote to push to (defaults to "origin")
+	SetUpstream *bool   // Record the pushed branch as the upstream tracking branch
+}
+
+// WithPushBranch sets the branch to push instead of the current branch.
+func WithPushBranch(branch string) func(*GitPush) {
+	return func(opts *GitPush) {
+		opts.Branch = &branch
+	}
+}
+
+// WithPushRemote sets the remote to push to instead of "origin".
+func WithPushRemote(remote string) func(*GitPush) {
+	return func(opts *GitPush) {
+		opts.Remote = &remote
+	}
+}
+
+// WithSetUpstream records the pushed branch as the upstream tracking branch
+// (git push --set-upstream).
+func WithSetUpstream(setUpstream bool) func(*GitPush) {
+	return func(opts *GitPush) {
+		opts.SetUpstream = &setUpstream
+	}
 }
 
 // WithPushUsername sets the username for HTTPS authentication when pushing.
@@ -217,6 +254,22 @@ func WithPushPassword(password string) func(*GitPush) {
 type GitPull struct {
 	Username *string // Username for HTTPS authentication
 	Password *string // Password or token for HTTPS authentication
+	Branch   *string // Branch to pull (defaults to the current branch's upstream)
+	Remote   *string // Remote to pull from (defaults to "origin")
+}
+
+// WithPullBranch sets the branch to pull instead of the current branch's upstream.
+func WithPullBranch(branch string) func(*GitPull) {
+	return func(opts *GitPull) {
+		opts.Branch = &branch
+	}
+}
+
+// WithPullRemote sets the remote to pull from instead of "origin".
+func WithPullRemote(remote string) func(*GitPull) {
+	return func(opts *GitPull) {
+		opts.Remote = &remote
+	}
 }
 
 // WithPullUsername sets the username for HTTPS authentication when pulling.
@@ -244,5 +297,143 @@ func WithPullUsername(username string) func(*GitPull) {
 func WithPullPassword(password string) func(*GitPull) {
 	return func(opts *GitPull) {
 		opts.Password = &password
+	}
+}
+
+// GitInit holds optional parameters for [daytona.GitService.Init].
+type GitInit struct {
+	Bare          *bool   // Create a bare repository without a working tree
+	InitialBranch *string // Name of the initial branch (defaults to the Git default)
+}
+
+// WithBare creates a bare repository without a working tree.
+func WithBare(bare bool) func(*GitInit) {
+	return func(opts *GitInit) {
+		opts.Bare = &bare
+	}
+}
+
+// WithInitialBranch sets the name of the initial branch.
+func WithInitialBranch(initialBranch string) func(*GitInit) {
+	return func(opts *GitInit) {
+		opts.InitialBranch = &initialBranch
+	}
+}
+
+// GitReset holds optional parameters for [daytona.GitService.Reset].
+type GitReset struct {
+	Mode   *string  // Reset mode: "soft", "mixed" (default), "hard", "merge" or "keep"
+	Target *string  // Revision to reset to (defaults to HEAD)
+	Files  []string // Constrain the reset to the given paths
+}
+
+// WithResetMode sets the reset mode ("soft", "mixed", "hard", "merge" or "keep").
+func WithResetMode(mode string) func(*GitReset) {
+	return func(opts *GitReset) {
+		opts.Mode = &mode
+	}
+}
+
+// WithResetTarget sets the revision to reset to.
+func WithResetTarget(target string) func(*GitReset) {
+	return func(opts *GitReset) {
+		opts.Target = &target
+	}
+}
+
+// WithResetFiles constrains the reset to the given paths.
+func WithResetFiles(files []string) func(*GitReset) {
+	return func(opts *GitReset) {
+		opts.Files = files
+	}
+}
+
+// GitRestore holds optional parameters for [daytona.GitService.Restore].
+type GitRestore struct {
+	Staged   *bool   // Restore the staging index for the given files
+	Worktree *bool   // Restore the working tree for the given files (default when neither is set)
+	Source   *string // Restore file contents from the given revision instead of the index
+}
+
+// WithRestoreStaged restores the staging index for the given files.
+func WithRestoreStaged(staged bool) func(*GitRestore) {
+	return func(opts *GitRestore) {
+		opts.Staged = &staged
+	}
+}
+
+// WithRestoreWorktree restores the working tree for the given files.
+func WithRestoreWorktree(worktree bool) func(*GitRestore) {
+	return func(opts *GitRestore) {
+		opts.Worktree = &worktree
+	}
+}
+
+// WithRestoreSource restores file contents from the given revision instead of the index.
+func WithRestoreSource(source string) func(*GitRestore) {
+	return func(opts *GitRestore) {
+		opts.Source = &source
+	}
+}
+
+// GitRemoteAdd holds optional parameters for [daytona.GitService.RemoteAdd].
+type GitRemoteAdd struct {
+	Fetch     *bool // Fetch from the remote immediately after adding it
+	Overwrite *bool // Replace an existing remote with the same name
+}
+
+// WithRemoteFetch fetches from the remote immediately after adding it.
+func WithRemoteFetch(fetch bool) func(*GitRemoteAdd) {
+	return func(opts *GitRemoteAdd) {
+		opts.Fetch = &fetch
+	}
+}
+
+// WithRemoteOverwrite replaces an existing remote with the same name.
+func WithRemoteOverwrite(overwrite bool) func(*GitRemoteAdd) {
+	return func(opts *GitRemoteAdd) {
+		opts.Overwrite = &overwrite
+	}
+}
+
+// GitConfig holds optional parameters for the git config operations
+// ([daytona.GitService.SetConfig], [daytona.GitService.GetConfig] and
+// [daytona.GitService.ConfigureUser]).
+type GitConfig struct {
+	Scope *string // Config scope: "global" (default), "local" or "system"
+	Path  *string // Repository path, required when scope is "local"
+}
+
+// WithConfigScope sets the config scope ("global", "local" or "system").
+func WithConfigScope(scope string) func(*GitConfig) {
+	return func(opts *GitConfig) {
+		opts.Scope = &scope
+	}
+}
+
+// WithConfigPath sets the repository path (required for the "local" scope).
+func WithConfigPath(path string) func(*GitConfig) {
+	return func(opts *GitConfig) {
+		opts.Path = &path
+	}
+}
+
+// GitAuthenticate holds optional parameters for [daytona.GitService.DangerouslyAuthenticate].
+type GitAuthenticate struct {
+	Host     *string // Host to authenticate against (defaults to "github.com")
+	Protocol *string // Protocol to authenticate against (defaults to "https")
+}
+
+// WithAuthHost sets the host to authenticate against.
+func WithAuthHost(host string) func(*GitAuthenticate) {
+	return func(opts *GitAuthenticate) {
+		opts.Host = &host
+	}
+}
+
+// WithAuthProtocol sets the protocol to authenticate against.
+func WithAuthProtocol(protocol string) func(*GitAuthenticate) {
+	return func(opts *GitAuthenticate) {
+		opts.Protocol = &protocol
 	}
 }

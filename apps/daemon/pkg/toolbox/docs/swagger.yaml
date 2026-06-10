@@ -386,6 +386,25 @@ definitions:
           type: string
         type: array
     type: object
+  GitAddRemoteRequest:
+    properties:
+      fetch:
+        description: Fetch fetches from the remote immediately after adding it.
+        type: boolean
+      name:
+        type: string
+      overwrite:
+        description: Overwrite replaces an existing remote with the same name.
+        type: boolean
+      path:
+        type: string
+      url:
+        type: string
+    required:
+      - name
+      - path
+      - url
+    type: object
   GitAddRequest:
     properties:
       files:
@@ -398,6 +417,22 @@ definitions:
     required:
       - files
       - path
+    type: object
+  GitAuthenticateRequest:
+    properties:
+      host:
+        description: Host defaults to github.com.
+        type: string
+      password:
+        type: string
+      protocol:
+        description: Protocol defaults to https.
+        type: string
+      username:
+        type: string
+    required:
+      - password
+      - username
     type: object
   GitBranchRequest:
     properties:
@@ -425,6 +460,10 @@ definitions:
         type: string
       commit_id:
         type: string
+      depth:
+        description: Depth creates a shallow clone truncated to the given number of
+          commits.
+        type: integer
       insecure_skip_tls:
         description: |-
           Skip TLS certificate verification for this clone. Defaults to false (verify).
@@ -488,6 +527,28 @@ definitions:
     required:
       - hash
     type: object
+  GitConfigResponse:
+    properties:
+      value:
+        description: Value is the config value, null when the key is not set.
+        type: string
+    type: object
+  GitConfigureUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      path:
+        description: Path is the repository path, required when scope is "local".
+        type: string
+      scope:
+        description: Scope is one of global (default), local or system.
+        type: string
+    required:
+      - email
+      - name
+    type: object
   GitDeleteBranchRequest:
     properties:
       name:
@@ -498,16 +559,122 @@ definitions:
       - name
       - path
     type: object
-  GitRepoRequest:
+  GitInitRequest:
     properties:
+      bare:
+        description: Bare creates a repository without a working tree.
+        type: boolean
+      initial_branch:
+        description: InitialBranch sets the name of the initial branch.
+        type: string
+      path:
+        type: string
+    required:
+      - path
+    type: object
+  GitPullRequest:
+    properties:
+      branch:
+        description: Branch to pull (defaults to the current branch's upstream).
+        type: string
       password:
         type: string
       path:
+        type: string
+      remote:
+        description: Remote to pull from (defaults to "origin").
         type: string
       username:
         type: string
     required:
       - path
+    type: object
+  GitPushRequest:
+    properties:
+      branch:
+        description: Branch to push (defaults to the current branch).
+        type: string
+      password:
+        type: string
+      path:
+        type: string
+      remote:
+        description: Remote to push to (defaults to "origin").
+        type: string
+      set_upstream:
+        description: SetUpstream records the pushed branch as the upstream tracking
+          branch.
+        type: boolean
+      username:
+        type: string
+    required:
+      - path
+    type: object
+  GitRemote:
+    properties:
+      name:
+        type: string
+      url:
+        type: string
+    required:
+      - name
+      - url
+    type: object
+  GitResetRequest:
+    properties:
+      files:
+        description: Files constrains the reset to the given paths.
+        items:
+          type: string
+        type: array
+      mode:
+        description: Mode is one of soft, mixed (default), hard, merge or keep.
+        type: string
+      path:
+        type: string
+      target:
+        description: Target is the revision to reset to (defaults to HEAD).
+        type: string
+    required:
+      - path
+    type: object
+  GitRestoreRequest:
+    properties:
+      files:
+        items:
+          type: string
+        type: array
+      path:
+        type: string
+      source:
+        description: Source restores file contents from the given revision instead
+          of the index.
+        type: string
+      staged:
+        description: Staged restores the staging index for the given files.
+        type: boolean
+      worktree:
+        description: Worktree restores the working tree for the given files.
+        type: boolean
+    required:
+      - files
+      - path
+    type: object
+  GitSetConfigRequest:
+    properties:
+      key:
+        type: string
+      path:
+        description: Path is the repository path, required when scope is "local".
+        type: string
+      scope:
+        description: Scope is one of global (default), local or system.
+        type: string
+      value:
+        type: string
+    required:
+      - key
+      - value
     type: object
   GitStatus:
     properties:
@@ -519,10 +686,18 @@ definitions:
         type: boolean
       currentBranch:
         type: string
+      detached:
+        description: Detached is true when HEAD is not on a branch (detached HEAD
+          state).
+        type: boolean
       fileStatus:
         items:
           $ref: '#/definitions/FileStatus'
         type: array
+      upstream:
+        description: Upstream is the upstream tracking branch (e.g. "origin/main"),
+          empty when unset.
+        type: string
     required:
       - currentBranch
       - fileStatus
@@ -588,6 +763,10 @@ definitions:
         items:
           type: string
         type: array
+      current:
+        description: Current is the name of the checked out branch (empty when HEAD
+          is detached).
+        type: string
     required:
       - branches
     type: object
@@ -608,6 +787,15 @@ definitions:
         type: array
     required:
       - recordings
+    type: object
+  ListRemotesResponse:
+    properties:
+      remotes:
+        items:
+          $ref: '#/definitions/GitRemote'
+        type: array
+    required:
+      - remotes
     type: object
   LspCompletionParams:
     properties:
@@ -2491,6 +2679,97 @@ paths:
       summary: Commit changes
       tags:
         - git
+  /git/config:
+    get:
+      description: Get a Git config value at the given scope (null when unset)
+      operationId: GetGitConfig
+      parameters:
+        - description: Config key (e.g. user.name)
+          in: query
+          name: key
+          required: true
+          type: string
+        - description: Repository path (required for local scope)
+          in: query
+          name: path
+          type: string
+        - description: 'Config scope: global (default), local or system'
+          in: query
+          name: scope
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/GitConfigResponse'
+      summary: Get a Git config value
+      tags:
+        - git
+    post:
+      consumes:
+        - application/json
+      description: Set a Git config key/value at the given scope
+      operationId: SetGitConfig
+      parameters:
+        - description: Set config request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitSetConfigRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Set a Git config value
+      tags:
+        - git
+  /git/config/user:
+    post:
+      consumes:
+        - application/json
+      description: Configure the Git user name and email at the given scope
+      operationId: ConfigureUser
+      parameters:
+        - description: Configure user request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitConfigureUserRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Configure Git user
+      tags:
+        - git
+  /git/credentials:
+    post:
+      consumes:
+        - application/json
+      description: Persist Git credentials globally via the credential store. Stores
+        the password in plaintext on disk.
+      operationId: Authenticate
+      parameters:
+        - description: Authenticate request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitAuthenticateRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Authenticate Git
+      tags:
+        - git
   /git/history:
     get:
       description: Get the commit history of the Git repository
@@ -2513,6 +2792,27 @@ paths:
       summary: Get commit history
       tags:
         - git
+  /git/init:
+    post:
+      consumes:
+        - application/json
+      description: Initialize a new Git repository at the specified path
+      operationId: InitRepository
+      parameters:
+        - description: Init repository request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitInitRequest'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+      summary: Initialize a Git repository
+      tags:
+        - git
   /git/pull:
     post:
       consumes:
@@ -2525,7 +2825,7 @@ paths:
           name: request
           required: true
           schema:
-            $ref: '#/definitions/GitRepoRequest'
+            $ref: '#/definitions/GitPullRequest'
       produces:
         - application/json
       responses:
@@ -2546,13 +2846,95 @@ paths:
           name: request
           required: true
           schema:
-            $ref: '#/definitions/GitRepoRequest'
+            $ref: '#/definitions/GitPushRequest'
       produces:
         - application/json
       responses:
         '200':
           description: OK
       summary: Push changes to remote
+      tags:
+        - git
+  /git/remotes:
+    get:
+      description: List the remotes configured in the Git repository
+      operationId: ListRemotes
+      parameters:
+        - description: Repository path
+          in: query
+          name: path
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRemotesResponse'
+      summary: List remotes
+      tags:
+        - git
+    post:
+      consumes:
+        - application/json
+      description: Add (or overwrite) a remote in the Git repository
+      operationId: AddRemote
+      parameters:
+        - description: Add remote request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitAddRemoteRequest'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+      summary: Add a remote
+      tags:
+        - git
+  /git/reset:
+    post:
+      consumes:
+        - application/json
+      description: Reset the current HEAD to the specified state
+      operationId: ResetChanges
+      parameters:
+        - description: Reset request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitResetRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Reset repository
+      tags:
+        - git
+  /git/restore:
+    post:
+      consumes:
+        - application/json
+      description: Restore working tree files or unstage changes
+      operationId: RestoreFiles
+      parameters:
+        - description: Restore request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitRestoreRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Restore files
       tags:
         - git
   /git/status:
