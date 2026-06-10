@@ -1,6 +1,6 @@
 //go:build windows
 
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package computeruse
@@ -30,7 +30,7 @@ func TestResolveKeyNormalizedModifiers(t *testing.T) {
 		"cmd":   0x5B,
 	}
 	for _, modifier := range supportedModifierNames {
-		vk, ok := resolveKey(modifier)
+		vk, _, ok := resolveKey(modifier)
 		require.True(t, ok, "modifier %q must resolve", modifier)
 		assert.Equal(t, expected[modifier], vk, "modifier %q", modifier)
 	}
@@ -55,10 +55,10 @@ func TestResolveKeyConsumesNormalizedChords(t *testing.T) {
 			chord, err := normalizeKeyboardPress(tc.key, tc.modifiers)
 			require.NoError(t, err, "press(%q, %v)", tc.key, tc.modifiers)
 
-			_, ok := resolveKey(chord.key)
+			_, _, ok := resolveKey(chord.key)
 			assert.True(t, ok, "press(%q, %v): normalized key %q must resolve", tc.key, tc.modifiers, chord.key)
 			for _, modifier := range chord.modifiers {
-				_, ok := resolveKey(modifier)
+				_, _, ok := resolveKey(modifier)
 				assert.True(t, ok, "press(%q, %v): normalized modifier %q must resolve", tc.key, tc.modifiers, modifier)
 			}
 		}
@@ -69,12 +69,40 @@ func TestResolveKeyConsumesNormalizedChords(t *testing.T) {
 			chord, err := normalizeKeyboardHotkey(raw)
 			require.NoError(t, err, "hotkey(%q)", raw)
 
-			_, ok := resolveKey(chord.key)
+			_, _, ok := resolveKey(chord.key)
 			assert.True(t, ok, "hotkey(%q): normalized key %q must resolve", raw, chord.key)
 			for _, modifier := range chord.modifiers {
-				_, ok := resolveKey(modifier)
+				_, _, ok := resolveKey(modifier)
 				assert.True(t, ok, "hotkey(%q): normalized modifier %q must resolve", raw, modifier)
 			}
 		}
 	})
+}
+
+// Numpad Enter shares VK_RETURN with the main Enter key; the extended-key
+// flag is the only thing that distinguishes the two in a SendInput event.
+func TestResolveKeyExtendedFlag(t *testing.T) {
+	vkEnter, ext, ok := resolveKey("enter")
+	require.True(t, ok, "enter must resolve")
+	assert.False(t, ext, "main enter must not be extended")
+
+	vkNumEnter, ext, ok := resolveKey("num_enter")
+	require.True(t, ok, "num_enter must resolve")
+	assert.True(t, ext, "numpad enter must be extended")
+	assert.Equal(t, vkEnter, vkNumEnter, "enter and num_enter share VK_RETURN")
+
+	for token := range extendedVirtualKeys {
+		_, ext, ok := resolveKey(token)
+		require.True(t, ok, "extended token %q must resolve", token)
+		assert.True(t, ext, "token %q must report extended", token)
+	}
+}
+
+// Every extended-key token must be a canonical virtualKeyCodes token,
+// otherwise the entry is dead (resolveKey would never look it up).
+func TestExtendedVirtualKeysAreKnownTokens(t *testing.T) {
+	for token := range extendedVirtualKeys {
+		_, ok := virtualKeyCodes[token]
+		assert.True(t, ok, "extended token %q has no virtual-key mapping", token)
+	}
 }

@@ -144,6 +144,24 @@ var virtualKeyCodes = map[string]uint16{
 	"5": 0x35, "6": 0x36, "7": 0x37, "8": 0x38, "9": 0x39,
 }
 
+// Canonical tokens that are "extended" keys — the E0-prefixed scan codes on
+// a physical keyboard. Windows distinguishes some of these from their twins
+// solely via KEYEVENTF_EXTENDEDKEY (e.g. numpad Enter vs the main Enter key,
+// which share VK_RETURN), so key events for them must carry the flag.
+//
+// Per the Win32 "Keyboard Input Overview", the extended keys are the
+// right-hand ALT and CTRL keys, the INS/DEL/HOME/END/PGUP/PGDN/arrow
+// navigation cluster, NUM LOCK, the numpad divide and ENTER keys, and the
+// Windows / Application keys.
+var extendedVirtualKeys = map[string]bool{
+	"ralt": true, "rctrl": true,
+	"cmd": true, "lcmd": true, "rcmd": true, "menu": true,
+	"insert": true, "delete": true,
+	"home": true, "end": true, "pageup": true, "pagedown": true,
+	"left": true, "up": true, "right": true, "down": true,
+	"num_lock": true, "num/": true, "num_enter": true,
+}
+
 // pointStruct mirrors the Win32 POINT struct.
 type pointStruct struct {
 	X int32
@@ -310,14 +328,15 @@ func mouseScroll(amount int, direction string) error {
 // Keyboard
 // ---------------------------------------------------------------------------
 
-// resolveKey maps a key name (e.g. "a", "enter", "f5") to a virtual-key code.
+// resolveKey maps a key name (e.g. "a", "enter", "f5") to a virtual-key code
+// plus whether the key requires KEYEVENTF_EXTENDEDKEY.
 //
-// Returns (vk, ok). When ok is false the caller should fall back to typing
-// the literal characters as Unicode.
-func resolveKey(name string) (uint16, bool) {
+// Returns (vk, extended, ok). When ok is false the caller should fall back
+// to typing the literal characters as Unicode.
+func resolveKey(name string) (uint16, bool, bool) {
 	lower := strings.ToLower(name)
 	if vk, ok := virtualKeyCodes[lower]; ok {
-		return vk, true
+		return vk, extendedVirtualKeys[lower], true
 	}
 	// Single printable character — use VkKeyScanW to translate.
 	runes := []rune(name)
@@ -325,15 +344,18 @@ func resolveKey(name string) (uint16, bool) {
 		ret, _, _ := procVkKeyScanW.Call(uintptr(uint16(runes[0])))
 		// Low byte = VK code. -1 means no translation.
 		if int16(ret) != -1 {
-			return uint16(ret & 0xFF), true
+			return uint16(ret & 0xFF), false, true
 		}
 	}
-	return 0, false
+	return 0, false, false
 }
 
 // keyPress sends a single KEYDOWN or KEYUP event for a virtual key.
-func keyPress(vk uint16, up bool) error {
+func keyPress(vk uint16, extended, up bool) error {
 	flags := uint32(0)
+	if extended {
+		flags |= keyEventF_EXTENDEDKEY
+	}
 	if up {
 		flags |= keyEventF_KEYUP
 	}
@@ -352,29 +374,33 @@ func keyPress(vk uint16, up bool) error {
 // keyTap presses `key` while holding any modifier keys, then releases all.
 func keyTap(key string, modifiers []string) error {
 	// Resolve modifiers.
-	modVKs := make([]uint16, 0, len(modifiers))
+	type resolved struct {
+		vk       uint16
+		extended bool
+	}
+	mods := make([]resolved, 0, len(modifiers))
 	for _, m := range modifiers {
-		vk, ok := resolveKey(m)
+		vk, ext, ok := resolveKey(m)
 		if !ok {
 			return fmt.Errorf("unknown modifier: %q", m)
 		}
-		modVKs = append(modVKs, vk)
+		mods = append(mods, resolved{vk, ext})
 	}
 
 	// Press modifiers down.
-	for _, vk := range modVKs {
-		if err := keyPress(vk, false); err != nil {
+	for _, mod := range mods {
+		if err := keyPress(mod.vk, mod.extended, false); err != nil {
 			return err
 		}
 	}
 
 	// Tap the main key.
-	if vk, ok := resolveKey(key); ok {
-		if err := keyPress(vk, false); err != nil {
+	if vk, ext, ok := resolveKey(key); ok {
+		if err := keyPress(vk, ext, false); err != nil {
 			return err
 		}
 		time.Sleep(10 * time.Millisecond)
-		if err := keyPress(vk, true); err != nil {
+		if err := keyPress(vk, ext, true); err != nil {
 			return err
 		}
 	} else {
@@ -385,8 +411,8 @@ func keyTap(key string, modifiers []string) error {
 	}
 
 	// Release modifiers in reverse order.
-	for i := len(modVKs) - 1; i >= 0; i-- {
-		if err := keyPress(modVKs[i], true); err != nil {
+	for i := len(mods) - 1; i >= 0; i-- {
+		if err := keyPress(mods[i].vk, mods[i].extended, true); err != nil {
 			return err
 		}
 	}
