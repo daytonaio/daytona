@@ -32,6 +32,14 @@ func validateLabel(label string) error {
 		return ErrInvalidLabel
 	}
 
+	// Reject ".." anywhere, not just a leading dot: defense-in-depth against
+	// traversal, and the recording dashboard's serveVideo 403s any path
+	// containing "..", so a recording named after such a label would be
+	// accepted here but permanently unplayable there.
+	if strings.Contains(label, "..") {
+		return ErrInvalidLabel
+	}
+
 	if strings.HasPrefix(trimmed, ".") {
 		return ErrInvalidLabel
 	}

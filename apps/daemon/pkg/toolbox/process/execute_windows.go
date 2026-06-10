@@ -21,6 +21,17 @@ import (
 // SDKs are translated into a native shell command first, with extracted env
 // vars applied to the process environment — same convention as the SSH
 // non-PTY handler (ssh/server_windows.go).
+//
+// Unlike the Linux build, which pipes the command to the shell via stdin to
+// avoid ARG_MAX, the command here is passed on the command line
+// (`<shell> /C <command>`), so Windows length limits apply: cmd.exe rejects
+// lines longer than 8191 characters ("The input line is too long") and
+// CreateProcess caps the full command line at 32767. Oversized commands fail
+// loudly with a non-zero exit. The divergence is deliberate: the obvious
+// workaround — writing the command to a temp .cmd and running that — is not
+// semantically transparent (batch files echo commands and expand % args
+// differently than `/C`), which would turn today's loud failure into silent
+// mangling. A semantics-preserving large-command path is future work.
 func buildExecCmd(command string) *exec.Cmd {
 	parsedCommand, envVars := common.ParseShellWrapper(command)
 	cmd := common.NewShellCommand(common.GetShell(), parsedCommand)
