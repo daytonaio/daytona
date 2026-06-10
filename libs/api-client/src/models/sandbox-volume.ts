@@ -16,7 +16,7 @@
 
 export interface SandboxVolume {
     /**
-     * The ID of the volume
+     * The ID or name of the volume. Resolved to the volume ID on sandbox create.
      */
     'volumeId': string;
     /**

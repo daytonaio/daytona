@@ -21,7 +21,7 @@ var _ MappedNullable = &SandboxVolume{}
 
 // SandboxVolume struct for SandboxVolume
 type SandboxVolume struct {
-	// The ID of the volume
+	// The ID or name of the volume. Resolved to the volume ID on sandbox create.
 	VolumeId string `json:"volumeId"`
 	// The mount path for the volume
 	MountPath string `json:"mountPath"`

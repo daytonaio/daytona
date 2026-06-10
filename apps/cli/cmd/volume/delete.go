@@ -14,7 +14,7 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [VOLUME_ID]",
+	Use:     "delete [VOLUME_ID_OR_NAME]",
 	Short:   "Delete a volume",
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("delete"),
@@ -26,7 +26,12 @@ var DeleteCmd = &cobra.Command{
 			return err
 		}
 
-		res, err := apiClient.VolumesAPI.DeleteVolume(ctx, args[0]).Execute()
+		vol, err := resolveVolume(ctx, apiClient, args[0])
+		if err != nil {
+			return err
+		}
+
+		res, err := apiClient.VolumesAPI.DeleteVolume(ctx, vol.Id).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

@@ -61,7 +61,7 @@ options:
   - name: volume
     shorthand: v
     default_value: '[]'
-    usage: 'Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)'
+    usage: 'Volumes to mount (format: VOLUME_ID_OR_NAME:MOUNT_PATH)'
 inherited_options:
   - name: help
     default_value: 'false'

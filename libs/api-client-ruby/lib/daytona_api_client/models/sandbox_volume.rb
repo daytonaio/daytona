@@ -15,7 +15,7 @@ require 'time'
 
 module DaytonaApiClient
   class SandboxVolume < ApiModelBase
-    # The ID of the volume
+    # The ID or name of the volume. Resolved to the volume ID on sandbox create.
     attr_accessor :volume_id
 
     # The mount path for the volume

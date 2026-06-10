@@ -17,9 +17,21 @@ import (
 	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/google/uuid"
 )
 
 const volumeMountPrefix = "daytona-volume-"
+
+// volumeId becomes part of the host mount path and the S3 bucket name, so require
+// the canonical lowercase UUID form (rejects braced/URN/dashless/uppercase variants,
+// which uuid.Parse would otherwise accept).
+func isValidVolumeId(volumeId string) bool {
+	parsed, err := uuid.Parse(volumeId)
+	if err != nil {
+		return false
+	}
+	return parsed.String() == volumeId
+}
 
 func getVolumeMountBasePath() string {
 	if config.GetEnvironment() == "development" {
@@ -34,10 +46,20 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 	// mount to become ready; doing them sequentially made create-time scale
 	// linearly with the number of mounted volumes.
 	uniqueMounts := make(map[string]string, len(volumes)) // volumeIdPrefixed -> baseMountPath
+	mountBase := filepath.Clean(getVolumeMountBasePath())
 	for _, vol := range volumes {
+		if !isValidVolumeId(vol.VolumeId) {
+			return nil, fmt.Errorf("invalid volumeId %q: must be a volume UUID", vol.VolumeId)
+		}
 		volumeIdPrefixed := fmt.Sprintf("%s%s", volumeMountPrefix, vol.VolumeId)
 		if _, ok := uniqueMounts[volumeIdPrefixed]; !ok {
-			uniqueMounts[volumeIdPrefixed] = filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
+			baseMountPath := filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
+			// Defense in depth: the path must stay a direct child of mountBase so a
+			// traversal string can never escape it or collide with another volume.
+			if filepath.Dir(baseMountPath) != mountBase || filepath.Base(baseMountPath) != volumeIdPrefixed {
+				return nil, fmt.Errorf("invalid volumeId %q: resolves outside volume mount base", vol.VolumeId)
+			}
+			uniqueMounts[volumeIdPrefixed] = baseMountPath
 		}
 	}
 
