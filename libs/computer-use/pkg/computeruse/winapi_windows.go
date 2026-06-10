@@ -280,22 +280,37 @@ func buttonFlags(button string) (uint32, uint32, error) {
 }
 
 func mouseClick(button string, double bool) error {
+	// Mirror keyTap below: a button successfully pressed must be released
+	// even when a later SendInput fails (UIPI, secure desktop, locked
+	// session), or it stays logically held system-wide and turns every
+	// subsequent move into a drag. The release here is best-effort; the
+	// success path clears held as it releases with error propagation.
+	held := false
+	defer func() {
+		if held {
+			_ = mouseUp(button)
+		}
+	}()
 	if err := mouseDown(button); err != nil {
 		return err
 	}
+	held = true
 	time.Sleep(20 * time.Millisecond)
 	if err := mouseUp(button); err != nil {
 		return err
 	}
+	held = false
 	if double {
 		time.Sleep(50 * time.Millisecond)
 		if err := mouseDown(button); err != nil {
 			return err
 		}
+		held = true
 		time.Sleep(20 * time.Millisecond)
 		if err := mouseUp(button); err != nil {
 			return err
 		}
+		held = false
 	}
 	return nil
 }
@@ -320,9 +335,18 @@ func mouseUp(button string) error {
 	return sendInputs(inputs)
 }
 
+// maxScrollAmount bounds a single scroll request. Past ~17.9M notches the
+// wheel-delta product below overflows int32 and silently flips the scroll
+// direction; any amount remotely near that is garbage input. Keep in sync
+// with the identical bound in mouse.go (linux).
+const maxScrollAmount = 10000
+
 // mouseScroll scrolls by `amount` wheel notches in canonical `direction`
 // ("up" or "down", as produced by normalizeScrollDirection).
 func mouseScroll(amount int, direction string) error {
+	if amount > maxScrollAmount {
+		return fmt.Errorf("scroll amount %d exceeds maximum of %d", amount, maxScrollAmount)
+	}
 	delta := int32(wheelDelta * amount)
 	switch direction {
 	case scrollDirectionUp:
@@ -354,9 +378,13 @@ func resolveKey(name string) (uint16, bool, bool) {
 	if vk, ok := virtualKeyCodes[lower]; ok {
 		return vk, extendedVirtualKeys[lower], true
 	}
-	// Single printable character — use VkKeyScanW to translate.
+	// Single printable character — use VkKeyScanW to translate. VkKeyScanW
+	// takes a WCHAR, so only BMP runes are eligible; a non-BMP rune must
+	// return ok=false so the caller takes the Unicode fallback (typed as a
+	// surrogate pair) instead of silently truncating to a colliding BMP
+	// code unit (e.g. U+10030 -> 0x0030, the '0' key).
 	runes := []rune(name)
-	if len(runes) == 1 {
+	if len(runes) == 1 && runes[0] <= 0xFFFF {
 		ret, _, _ := procVkKeyScanW.Call(uintptr(uint16(runes[0])))
 		// Low byte = VK code. -1 means no translation.
 		if int16(ret) != -1 {

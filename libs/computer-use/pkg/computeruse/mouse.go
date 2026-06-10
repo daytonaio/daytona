@@ -6,6 +6,7 @@
 package computeruse
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -13,6 +14,12 @@ import (
 	"github.com/go-vgo/robotgo"
 	log "github.com/sirupsen/logrus"
 )
+
+// maxScrollAmount bounds a single scroll request. robotgo.ScrollSmooth loops
+// once per notch with a sleep, so an unbounded amount would block the input
+// path for hours on one request. Keep in sync with the identical bound in
+// winapi_windows.go (windows).
+const maxScrollAmount = 10000
 
 func (u *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, error) {
 	// Debug: Check DISPLAY environment variable
@@ -158,6 +165,9 @@ func (u *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.
 	amount, err := normalizeScrollAmount(req.Amount)
 	if err != nil {
 		return nil, err
+	}
+	if amount > maxScrollAmount {
+		return nil, fmt.Errorf("scroll amount %d exceeds maximum of %d", amount, maxScrollAmount)
 	}
 	req.Amount = amount
 

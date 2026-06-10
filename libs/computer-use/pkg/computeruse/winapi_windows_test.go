@@ -165,3 +165,21 @@ func TestGetWindowsListDoesNotLeakCallbacks(t *testing.T) {
 		}
 	}
 }
+
+// resolveKey feeds VkKeyScanW a WCHAR, so a non-BMP rune cannot be resolved
+// to a virtual key: truncating it to 16 bits would collide with an unrelated
+// BMP character (U+10030 -> 0x0030 -> the '0' key). It must report ok=false
+// so callers take the Unicode surrogate-pair fallback instead.
+func TestResolveKeyRejectsNonBMPRunes(t *testing.T) {
+	for _, name := range []string{"\U00010030", "\U0001F600"} {
+		_, _, ok := resolveKey(name)
+		assert.Falsef(t, ok, "non-BMP rune %q must not resolve to a virtual key", name)
+	}
+}
+
+// mouseScroll must reject amounts beyond maxScrollAmount: past ~17.9M notches
+// the int32 wheel-delta product wraps and a scroll-up silently scrolls down.
+func TestMouseScrollRejectsExcessiveAmount(t *testing.T) {
+	assert.Error(t, mouseScroll(maxScrollAmount+1, scrollDirectionUp))
+	assert.Error(t, mouseScroll(maxScrollAmount+1, scrollDirectionDown))
+}

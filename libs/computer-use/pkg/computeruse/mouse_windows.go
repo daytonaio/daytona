@@ -123,6 +123,16 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	if err := mouseDown(req.Button); err != nil {
 		return nil, err
 	}
+	// Mirror keyTap/mouseClick in winapi_windows.go: if anything fails while
+	// the button is held (UIPI, secure desktop, locked session), release it
+	// best-effort so it does not stay logically held system-wide and turn
+	// every subsequent move into a drag-select.
+	held := true
+	defer func() {
+		if held {
+			_ = mouseUp(req.Button)
+		}
+	}()
 	time.Sleep(300 * time.Millisecond) // Increased delay
 
 	// Move to end position while holding (smoothly)
@@ -133,6 +143,7 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	if err := mouseUp(req.Button); err != nil {
 		return nil, err
 	}
+	held = false
 	time.Sleep(50 * time.Millisecond)
 
 	// Get final position
