@@ -10,7 +10,6 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
-	view_common "github.com/daytonaio/daytona/cli/views/common"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/spf13/cobra"
 )
@@ -42,24 +41,7 @@ var ArchiveCmd = &cobra.Command{
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		if archiveWaitFlag {
-			err = common.AwaitSandboxState(ctx, apiClient, sandboxIdOrNameArg, archiveTimeoutFlag, apiclient.SANDBOXSTATE_ARCHIVED)
-			if err != nil {
-				return err
-			}
-		}
-
-		if common.FormatFlag != "" {
-			sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxIdOrNameArg).Execute()
-			if err != nil {
-				return apiclient_cli.HandleErrorResponse(res, err)
-			}
-			common.NewFormatter(sandbox).Print()
-			return nil
-		}
-
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s marked for archival", sandboxIdOrNameArg))
-		return nil
+		return finishLifecycleAction(ctx, apiClient, sandboxIdOrNameArg, archiveWaitFlag, archiveTimeoutFlag, apiclient.SANDBOXSTATE_ARCHIVED, fmt.Sprintf("Sandbox %s marked for archival", sandboxIdOrNameArg))
 	},
 }
 

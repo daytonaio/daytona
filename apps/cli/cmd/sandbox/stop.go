@@ -62,24 +62,7 @@ var StopCmd = &cobra.Command{
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		if stopWaitFlag {
-			err = common.AwaitSandboxState(ctx, apiClient, sandboxIdOrNameArg, stopTimeoutFlag, apiclient.SANDBOXSTATE_STOPPED)
-			if err != nil {
-				return err
-			}
-		}
-
-		if common.FormatFlag != "" {
-			sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxIdOrNameArg).Execute()
-			if err != nil {
-				return apiclient_cli.HandleErrorResponse(res, err)
-			}
-			common.NewFormatter(sandbox).Print()
-			return nil
-		}
-
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s stopped", sandboxIdOrNameArg))
-		return nil
+		return finishLifecycleAction(ctx, apiClient, sandboxIdOrNameArg, stopWaitFlag, stopTimeoutFlag, apiclient.SANDBOXSTATE_STOPPED, fmt.Sprintf("Sandbox %s stopped", sandboxIdOrNameArg))
 	},
 }
 

@@ -5,7 +5,6 @@ package sandbox
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -125,8 +124,7 @@ var CreateCmd = &cobra.Command{
 		sandbox, res, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*createSandbox).Execute()
 		if err != nil {
 			createErr := apiclient_cli.HandleErrorResponse(res, err)
-			var cliErr *clierr.Error
-			if createIfExistsFlag != "reuse" || !errors.As(createErr, &cliErr) || cliErr.Category != clierr.CategoryConflict {
+			if createIfExistsFlag != "reuse" || !clierr.HasCategory(createErr, clierr.CategoryConflict) {
 				return createErr
 			}
 			existing, res, err := apiClient.SandboxAPI.GetSandbox(ctx, nameFlag).Execute()

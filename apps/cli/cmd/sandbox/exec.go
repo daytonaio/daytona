@@ -31,7 +31,12 @@ Exits with the remote command's exit code; exit code 255 indicates a CLI-side fa
 	Example: `  daytona exec my-sandbox -- ls -la /workspace
   daytona exec my-sandbox -- python -c "print('hi')"
   daytona exec my-sandbox --cwd /workspace --format json -- npm test`,
-	Args: cobra.MinimumNArgs(2),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 2 {
+			return clierr.New(clierr.CategoryUsage, "missing required arguments: sandbox and command")
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

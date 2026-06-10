@@ -112,3 +112,47 @@ func TestAwaitSandboxStateContextCanceled(t *testing.T) {
 		t.Fatal("expected error for canceled context, got nil")
 	}
 }
+
+// stateTestSnapshotJSON renders a minimal SnapshotDto payload containing
+// every property the generated client requires plus the given state.
+func stateTestSnapshotJSON(state string) string {
+	return fmt.Sprintf(`{
+		"id": "snap-1",
+		"general": false,
+		"name": "my-snapshot",
+		"state": %q,
+		"size": null,
+		"entrypoint": [],
+		"cpu": 1,
+		"gpu": 0,
+		"mem": 1,
+		"disk": 3,
+		"errorReason": null,
+		"createdAt": "2024-01-01T00:00:00Z",
+		"updatedAt": "2024-01-01T00:00:00Z",
+		"lastUsedAt": null
+	}`, state)
+}
+
+func TestAwaitSnapshotStateTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, stateTestSnapshotJSON("pending"))
+	}))
+	t.Cleanup(server.Close)
+	apiClient := stateTestApiClient(server.URL)
+
+	start := time.Now()
+	err := common.AwaitSnapshotState(context.Background(), apiClient, "my-snapshot", 50*time.Millisecond, apiclient.SNAPSHOTSTATE_ACTIVE)
+	elapsed := time.Since(start)
+
+	if err == nil {
+		t.Fatal("expected timeout error, got nil")
+	}
+	if !clierr.HasCategory(err, clierr.CategoryTimeout) {
+		t.Errorf("HasCategory(err, timeout) = false, err = %v", err)
+	}
+	if elapsed >= time.Second {
+		t.Errorf("timeout took %s, expected to expire well before the next 1s poll", elapsed)
+	}
+}

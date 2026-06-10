@@ -28,6 +28,30 @@ func requireSandboxArg(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// finishLifecycleAction is the shared epilogue of the start/stop/archive
+// commands: optionally wait for the sandbox to reach the target state, then
+// either print the fresh sandbox via the formatter (--format) or render the
+// human success message.
+func finishLifecycleAction(ctx context.Context, apiClient *apiclient.APIClient, ref string, wait bool, timeout time.Duration, target apiclient.SandboxState, humanMsg string) error {
+	if wait {
+		if err := common.AwaitSandboxState(ctx, apiClient, ref, timeout, target); err != nil {
+			return err
+		}
+	}
+
+	if common.FormatFlag != "" {
+		sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, ref).Execute()
+		if err != nil {
+			return apiclient_cli.HandleErrorResponse(res, err)
+		}
+		common.NewFormatter(sandbox).Print()
+		return nil
+	}
+
+	view_common.RenderInfoMessageBold(humanMsg)
+	return nil
+}
+
 var (
 	startWaitFlag    bool
 	startTimeoutFlag time.Duration
@@ -55,25 +79,7 @@ var StartCmd = &cobra.Command{
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		if startWaitFlag {
-			err = common.AwaitSandboxState(ctx, apiClient, sandboxIdOrNameArg, startTimeoutFlag, apiclient.SANDBOXSTATE_STARTED)
-			if err != nil {
-				return err
-			}
-		}
-
-		if common.FormatFlag != "" {
-			sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxIdOrNameArg).Execute()
-			if err != nil {
-				return apiclient_cli.HandleErrorResponse(res, err)
-			}
-			common.NewFormatter(sandbox).Print()
-			return nil
-		}
-
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s started", sandboxIdOrNameArg))
-
-		return nil
+		return finishLifecycleAction(ctx, apiClient, sandboxIdOrNameArg, startWaitFlag, startTimeoutFlag, apiclient.SANDBOXSTATE_STARTED, fmt.Sprintf("Sandbox %s started", sandboxIdOrNameArg))
 	},
 }
 
