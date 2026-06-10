@@ -11,7 +11,8 @@ import (
 // labelPattern restricts labels to characters that are safe to embed in a
 // file name on every supported OS. Only plain spaces are allowed — not the
 // full \s class (tab/newline/CR/FF/VT), which is invalid in Windows file
-// names and unsafe to embed in paths and logs.
+// names and unsafe to embed in paths and logs. The allowlist also excludes
+// path separators (/ and \), so no separate separator check is needed.
 var labelPattern = regexp.MustCompile(`^[A-Za-z0-9. _-]+$`)
 
 // validateLabel validates a user-provided label to prevent path injection
@@ -25,10 +26,6 @@ func validateLabel(label string) error {
 	}
 
 	if len(label) > maxLabelLength {
-		return ErrInvalidLabel
-	}
-
-	if strings.Contains(label, "/") || strings.Contains(label, "\\") {
 		return ErrInvalidLabel
 	}
 
