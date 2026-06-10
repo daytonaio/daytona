@@ -1878,8 +1878,8 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/fork' \
 To view the fork tree for a sandbox and all its related sandboxes:
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
-2. Click the three-dot menu (**⋮**) next to a forked sandbox
-3. Select **View Forks**
+2. Click the three-dot menu (**⋮**) next to a sandbox
+3. Select **View Fork Tree**
 
 The fork tree displays each sandbox in the hierarchy along with its current state and creation time, allowing you to trace the lineage of any fork back to its origin.
 
@@ -1964,6 +1964,13 @@ Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxe
 
 A snapshot captures an immutable, point-in-time copy of a sandbox's filesystem and memory that you can use as a base to create new sandboxes, effectively templating a known-good environment for reuse. You can think of it as a checkpoint you can restore from whenever you need a clean, identical starting point.
 
+[Windows sandboxes](#windows-sandboxes) use the `includeMemory` parameter to control whether the snapshot also captures the sandbox's memory.
+
+| **Include memory** | **Snapshot contents**     | **Required sandbox state** |
+| ------------------- | ------------------------- | -------------------------- |
+| **`false`** (default)   | Filesystem only           | Stopped                    |
+| **`true`**              | Filesystem and memory     | Started                    |
+
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
@@ -2017,7 +2024,8 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/snapshot' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
-  "name": "my-sandbox-snapshot"
+  "name": "my-sandbox-snapshot",
+  "includeMemory": false
 }'
 ```
 
