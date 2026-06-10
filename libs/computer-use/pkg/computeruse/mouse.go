@@ -46,6 +46,14 @@ func (u *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse
 	}, nil
 }
 
+// robotgoMouseButton translates our canonical "middle" to robotgo's "center".
+func robotgoMouseButton(canonical string) string {
+	if canonical == middleMouseButton {
+		return "center"
+	}
+	return canonical
+}
+
 func (u *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.MouseClickResponse, error) {
 	button, err := normalizeMouseButton(req.Button)
 	if err != nil {

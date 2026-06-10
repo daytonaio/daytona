@@ -44,10 +44,11 @@ func (c *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse
 
 // Click performs a mouse click at the specified coordinates
 func (c *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.MouseClickResponse, error) {
-	// Default to left button
-	if req.Button == "" {
-		req.Button = "left"
+	button, err := normalizeMouseButton(req.Button)
+	if err != nil {
+		return nil, err
 	}
+	req.Button = button
 
 	// Move mouse to position first
 	if err := setMousePosition(req.X, req.Y); err != nil {
@@ -85,10 +86,11 @@ func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
 
 // Drag performs a mouse drag from start to end coordinates
 func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.MouseDragResponse, error) {
-	// Default to left button
-	if req.Button == "" {
-		req.Button = "left"
+	button, err := normalizeMouseButton(req.Button)
+	if err != nil {
+		return nil, err
 	}
+	req.Button = button
 
 	// Move to start position
 	if err := setMousePosition(req.StartX, req.StartY); err != nil {
@@ -137,10 +139,17 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 
 // Scroll scrolls the mouse wheel at the specified coordinates
 func (c *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.ScrollResponse, error) {
-	// Default amount if not specified
-	if req.Amount == 0 {
-		req.Amount = 3
+	direction, err := normalizeScrollDirection(req.Direction)
+	if err != nil {
+		return nil, err
 	}
+	req.Direction = direction
+
+	amount, err := normalizeScrollAmount(req.Amount)
+	if err != nil {
+		return nil, err
+	}
+	req.Amount = amount
 
 	// Move mouse to scroll position
 	if err := setMousePosition(req.X, req.Y); err != nil {

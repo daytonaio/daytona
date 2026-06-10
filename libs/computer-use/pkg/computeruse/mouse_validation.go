@@ -1,5 +1,3 @@
-//go:build linux
-
 // Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
@@ -30,14 +28,6 @@ func normalizeMouseButton(button string) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported mouse button %q: expected one of left, right, middle", button)
 	}
-}
-
-// robotgoMouseButton translates our canonical "middle" to robotgo's "center".
-func robotgoMouseButton(canonical string) string {
-	if canonical == middleMouseButton {
-		return "center"
-	}
-	return canonical
 }
 
 func normalizeScrollDirection(direction string) (string, error) {

@@ -7,6 +7,7 @@ package computeruse
 
 import (
 	"testing"
+	"unsafe"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -104,5 +105,61 @@ func TestExtendedVirtualKeysAreKnownTokens(t *testing.T) {
 	for token := range extendedVirtualKeys {
 		_, ok := virtualKeyCodes[token]
 		assert.True(t, ok, "extended token %q has no virtual-key mapping", token)
+	}
+}
+
+// inputStruct is handed to SendInput verbatim and reinterpreted through
+// unsafe casts, so its layout must match the 64-bit Win32 INPUT exactly:
+// 40 bytes total, union at offset 8, and 8-byte alignment (mouseInput and
+// keybdInput both carry a pointer-aligned ExtraInfo field).
+func TestInputStructLayout(t *testing.T) {
+	var in inputStruct
+	assert.Equal(t, uintptr(40), unsafe.Sizeof(in), "INPUT must be 40 bytes on 64-bit Windows")
+	assert.Equal(t, uintptr(8), unsafe.Offsetof(in.U), "union must start at offset 8")
+	assert.Equal(t, uintptr(8), unsafe.Alignof(in), "INPUT must be 8-byte aligned for the unsafe union casts")
+}
+
+// buttonFlags receives canonical names from normalizeMouseButton; anything
+// else — including the raw spellings normalization handles — must error.
+func TestButtonFlags(t *testing.T) {
+	leftDown, leftUp, err := buttonFlags("left")
+	require.NoError(t, err)
+	assert.Equal(t, uint32(mouseEventF_LEFTDOWN), leftDown)
+	assert.Equal(t, uint32(mouseEventF_LEFTUP), leftUp)
+
+	rightDown, rightUp, err := buttonFlags("right")
+	require.NoError(t, err)
+	assert.Equal(t, uint32(mouseEventF_RIGHTDOWN), rightDown)
+	assert.Equal(t, uint32(mouseEventF_RIGHTUP), rightUp)
+
+	middleDown, middleUp, err := buttonFlags("middle")
+	require.NoError(t, err)
+	assert.Equal(t, uint32(mouseEventF_MIDDLEDOWN), middleDown)
+	assert.Equal(t, uint32(mouseEventF_MIDDLEUP), middleUp)
+
+	for _, raw := range []string{"", " left ", "Left", "center", "wheel"} {
+		_, _, err := buttonFlags(raw)
+		assert.Errorf(t, err, "non-canonical button %q must be rejected", raw)
+	}
+}
+
+// mouseScroll must reject non-canonical directions instead of treating them
+// as scroll-up; only normalizeScrollDirection output is accepted.
+func TestMouseScrollRejectsNonCanonicalDirection(t *testing.T) {
+	for _, raw := range []string{"", "left", "Up", " down "} {
+		err := mouseScroll(1, raw)
+		assert.Errorf(t, err, "non-canonical direction %q must be rejected", raw)
+	}
+}
+
+// getWindowsList must not compile a new syscall callback per call: the Go
+// runtime caps a process at ~2000 callbacks and never releases them, so a
+// per-call syscall.NewCallback panics under sustained GetWindows polling.
+func TestGetWindowsListDoesNotLeakCallbacks(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping 2100-iteration callback-leak regression in -short mode")
+	}
+	for i := 0; i < 2100; i++ {
+		_ = getWindowsList()
 	}
 }
