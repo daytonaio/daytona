@@ -78,30 +78,34 @@ const (
 // MapVirtualKey translation types.
 const mapVkVkToVsc = 0
 
-// Virtual-key codes we reference by name from the public API. Anything not
-// listed here is parsed via VkKeyScanW (printable characters) or treated as a
-// single Unicode character.
+// Virtual-key codes for the canonical key tokens emitted by
+// keyboard_normalization.go. Aliases (e.g. "command", "return", "esc") are
+// resolved there before reaching this map — do not add alias rows here.
+// Anything not listed is parsed via VkKeyScanW (printable characters) or
+// treated as a single Unicode character.
 var virtualKeyCodes = map[string]uint16{
 	// Modifiers
-	"shift":   0x10,
-	"ctrl":    0x11,
-	"control": 0x11,
-	"alt":     0x12,
-	"cmd":     0x5B, // Windows / Super key
-	"win":     0x5B,
-	"super":   0x5B,
-	"meta":    0x5B,
-	"lwin":    0x5B,
-	"rwin":    0x5C,
+	"shift":  0x10,
+	"ctrl":   0x11,
+	"alt":    0x12,
+	"cmd":    0x5B, // Windows / Super key
+	"lshift": 0xA0,
+	"rshift": 0xA1,
+	"lctrl":  0xA2,
+	"rctrl":  0xA3,
+	"lalt":   0xA4,
+	"ralt":   0xA5,
+	"lcmd":   0x5B,
+	"rcmd":   0x5C,
 
 	// Whitespace / control
 	"backspace": 0x08,
 	"tab":       0x09,
 	"enter":     0x0D,
-	"return":    0x0D,
 	"escape":    0x1B,
-	"esc":       0x1B,
 	"space":     0x20,
+	"capslock":  0x14,
+	"menu":      0x5D, // VK_APPS
 
 	// Navigation
 	"pageup":   0x21,
@@ -114,21 +118,26 @@ var virtualKeyCodes = map[string]uint16{
 	"down":     0x28,
 	"insert":   0x2D,
 	"delete":   0x2E,
-	"del":      0x2E,
 
 	// Function keys
-	"f1":  0x70,
-	"f2":  0x71,
-	"f3":  0x72,
-	"f4":  0x73,
-	"f5":  0x74,
-	"f6":  0x75,
-	"f7":  0x76,
-	"f8":  0x77,
-	"f9":  0x78,
-	"f10": 0x79,
-	"f11": 0x7A,
-	"f12": 0x7B,
+	"f1": 0x70, "f2": 0x71, "f3": 0x72, "f4": 0x73,
+	"f5": 0x74, "f6": 0x75, "f7": 0x76, "f8": 0x77,
+	"f9": 0x78, "f10": 0x79, "f11": 0x7A, "f12": 0x7B,
+	"f13": 0x7C, "f14": 0x7D, "f15": 0x7E, "f16": 0x7F,
+	"f17": 0x80, "f18": 0x81, "f19": 0x82, "f20": 0x83,
+	"f21": 0x84, "f22": 0x85, "f23": 0x86, "f24": 0x87,
+
+	// Numpad
+	"num0": 0x60, "num1": 0x61, "num2": 0x62, "num3": 0x63, "num4": 0x64,
+	"num5": 0x65, "num6": 0x66, "num7": 0x67, "num8": 0x68, "num9": 0x69,
+	"num*":      0x6A, // VK_MULTIPLY
+	"num+":      0x6B, // VK_ADD
+	"num-":      0x6D, // VK_SUBTRACT
+	"num.":      0x6E, // VK_DECIMAL
+	"num/":      0x6F, // VK_DIVIDE
+	"num_enter": 0x0D,
+	"num_equal": 0x92, // VK_OEM_NEC_EQUAL
+	"num_lock":  0x90,
 
 	// Numeric/letters - digits 0-9
 	"0": 0x30, "1": 0x31, "2": 0x32, "3": 0x33, "4": 0x34,

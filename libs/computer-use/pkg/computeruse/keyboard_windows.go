@@ -6,9 +6,7 @@
 package computeruse
 
 import (
-	"fmt"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"strings"
 )
 
 // TypeText types text with optional delay between keystrokes
@@ -21,7 +19,12 @@ func (c *ComputerUse) TypeText(req *computeruse.KeyboardTypeRequest) (*computeru
 
 // PressKey presses a key with optional modifiers
 func (c *ComputerUse) PressKey(req *computeruse.KeyboardPressRequest) (*computeruse.Empty, error) {
-	if err := keyTap(req.Key, req.Modifiers); err != nil {
+	chord, err := normalizeKeyboardPress(req.Key, req.Modifiers)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := keyTap(chord.key, chord.modifiers); err != nil {
 		return nil, err
 	}
 	return new(computeruse.Empty), nil
@@ -29,17 +32,13 @@ func (c *ComputerUse) PressKey(req *computeruse.KeyboardPressRequest) (*computer
 
 // PressHotkey presses a hotkey combination (e.g., "ctrl+c", "alt+f4")
 func (c *ComputerUse) PressHotkey(req *computeruse.KeyboardHotkeyRequest) (*computeruse.Empty, error) {
-	keys := strings.Split(req.Keys, "+")
-	if len(keys) < 2 {
-		return nil, fmt.Errorf("invalid hotkey format: expected format like 'ctrl+c'")
-	}
-
-	mainKey := keys[len(keys)-1]
-	modifiers := keys[:len(keys)-1]
-
-	if err := keyTap(mainKey, modifiers); err != nil {
+	chord, err := normalizeKeyboardHotkey(req.Keys)
+	if err != nil {
 		return nil, err
 	}
 
+	if err := keyTap(chord.key, chord.modifiers); err != nil {
+		return nil, err
+	}
 	return new(computeruse.Empty), nil
 }
