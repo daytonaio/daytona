@@ -32,6 +32,10 @@ var ApiCmd = &cobra.Command{
 	Long: `Make an authenticated HTTP request to the Daytona API and print the raw response body to stdout.
 
 PATH is resolved against the active profile's API URL and the request is authenticated with the active profile's credentials. Responses with status 400 or above still print the body, then exit non-zero.`,
+	Example: `  daytona api /sandbox
+  daytona api /sandbox/my-sandbox -X DELETE
+  daytona api /snapshots -X POST --input snapshot.json
+  cat body.json | daytona api /sandbox -X POST --input -`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		method, err := normalizeMethod(apiMethodFlag)

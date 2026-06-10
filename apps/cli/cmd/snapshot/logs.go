@@ -19,9 +19,11 @@ import (
 var logsFollowFlag bool
 
 var LogsCmd = &cobra.Command{
-	Use:     "logs [SNAPSHOT_ID | SNAPSHOT_NAME]",
-	Short:   "View the build logs of a snapshot",
-	Long:    "View the build logs of a snapshot. With --follow the logs are streamed until the snapshot build reaches a terminal state.",
+	Use:   "logs [SNAPSHOT_ID | SNAPSHOT_NAME]",
+	Short: "View the build logs of a snapshot",
+	Long:  "View the build logs of a snapshot. With --follow the logs are streamed until the snapshot build reaches a terminal state.",
+	Example: `  daytona snapshot logs my-snapshot:1.0
+  daytona snapshot logs my-snapshot:1.0 --follow`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {

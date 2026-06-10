@@ -19,9 +19,11 @@ import (
 var logsFollowFlag bool
 
 var LogsCmd = &cobra.Command{
-	Use:     "logs [SANDBOX_ID | SANDBOX_NAME]",
-	Short:   "View the build logs of a sandbox",
-	Long:    "View the build logs of a sandbox. With --follow the logs are streamed until the sandbox build reaches a terminal state.",
+	Use:   "logs [SANDBOX_ID | SANDBOX_NAME]",
+	Short: "View the build logs of a sandbox",
+	Long:  "View the build logs of a sandbox. With --follow the logs are streamed until the sandbox build reaches a terminal state.",
+	Example: `  daytona logs my-sandbox
+  daytona logs my-sandbox --follow`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {

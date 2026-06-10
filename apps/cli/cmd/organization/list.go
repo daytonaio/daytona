@@ -14,8 +14,10 @@ import (
 )
 
 var ListCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List all organizations",
+	Use:   "list",
+	Short: "List all organizations",
+	Example: `  daytona organization list
+  daytona organization list --format json`,
 	Args:    cobra.NoArgs,
 	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {

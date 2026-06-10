@@ -36,7 +36,10 @@ var (
 var StartCmd = &cobra.Command{
 	Use:   "start [SANDBOX_ID | SANDBOX_NAME]",
 	Short: "Start a sandbox",
-	Args:  requireSandboxArg,
+	Example: `  daytona start my-sandbox
+  daytona start my-sandbox --wait --timeout 2m
+  daytona start my-sandbox --wait --format json`,
+	Args: requireSandboxArg,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

@@ -24,7 +24,10 @@ var (
 var StopCmd = &cobra.Command{
 	Use:   "stop [SANDBOX_ID | SANDBOX_NAME]",
 	Short: "Stop a sandbox",
-	Args:  requireSandboxArg,
+	Example: `  daytona stop my-sandbox
+  daytona stop my-sandbox --wait --timeout 2m
+  daytona stop my-sandbox --force --format json`,
+	Args: requireSandboxArg,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

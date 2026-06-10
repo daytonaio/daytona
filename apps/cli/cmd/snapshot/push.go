@@ -29,7 +29,9 @@ var PushCmd = &cobra.Command{
 	Use:   "push [SNAPSHOT]",
 	Short: "Push local snapshot",
 	Long:  "Push a local Docker image to Daytona. To securely build it on our infrastructure, use 'daytona snapshot build'",
-	Args:  cobra.ExactArgs(1),
+	Example: `  daytona snapshot push my-image:latest --name my-snapshot:1.0
+  daytona snapshot push my-image:latest --name my-snapshot:1.0 --cpu 2 --memory 4`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		sourceImage := args[0]

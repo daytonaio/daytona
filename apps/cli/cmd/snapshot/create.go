@@ -20,8 +20,11 @@ import (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:     "create [SNAPSHOT]",
-	Short:   "Create a snapshot",
+	Use:   "create [SNAPSHOT]",
+	Short: "Create a snapshot",
+	Example: `  daytona snapshot create my-snapshot:1.0 --image ubuntu:22.04 --entrypoint "sleep infinity"
+  daytona snapshot create my-snapshot:1.0 --dockerfile ./Dockerfile --context ./app
+  daytona snapshot create my-snapshot:1.0 --image ubuntu:22.04 --cpu 2 --memory 4 --disk 10`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {

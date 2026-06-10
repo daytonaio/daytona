@@ -23,8 +23,11 @@ import (
 const SANDBOX_TERMINAL_PORT = 22222
 
 var CreateCmd = &cobra.Command{
-	Use:     "create [flags]",
-	Short:   "Create a new sandbox",
+	Use:   "create [flags]",
+	Short: "Create a new sandbox",
+	Example: `  daytona create --snapshot my-snapshot:1.0 --name my-sandbox
+  daytona create --name my-sandbox --env-file .env --if-exists reuse
+  daytona create --snapshot my-snapshot:1.0 --name my-sandbox --format json`,
 	Args:    cobra.NoArgs,
 	Aliases: common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -23,7 +23,10 @@ var (
 var ArchiveCmd = &cobra.Command{
 	Use:   "archive [SANDBOX_ID | SANDBOX_NAME]",
 	Short: "Archive a sandbox",
-	Args:  requireSandboxArg,
+	Example: `  daytona archive my-sandbox
+  daytona archive my-sandbox --wait --timeout 10m
+  daytona archive my-sandbox --wait --format json`,
+	Args: requireSandboxArg,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

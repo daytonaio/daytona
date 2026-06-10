@@ -39,6 +39,9 @@ Exactly one of SOURCE or DESTINATION must reference a sandbox path using the
 <sandbox>:<path> form, where <sandbox> is a sandbox ID or name. Directories
 are copied recursively. Copying into an existing directory places the source
 basename inside it, and missing parent directories are created.`,
+	Example: `  daytona cp ./config.yaml my-sandbox:/workspace/config.yaml
+  daytona cp my-sandbox:/workspace/output ./output
+  daytona cp ./src my-sandbox:/workspace/src --format json`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		req, err := parseCpArgs(args[0], args[1])

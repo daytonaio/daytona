@@ -15,7 +15,9 @@ import (
 var InitCmd = &cobra.Command{
 	Use:   "init [AGENT_NAME]",
 	Short: "Initialize Daytona MCP Server with an agent (currently supported: claude, windsurf, cursor)",
-	Args:  cobra.MaximumNArgs(1),
+	Example: `  daytona mcp init claude
+  daytona mcp init cursor`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			return fmt.Errorf("agent name is required")

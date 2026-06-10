@@ -21,7 +21,10 @@ import (
 var UseCmd = &cobra.Command{
 	Use:   "use [ORGANIZATION]",
 	Short: "Set active organization",
-	Args:  cobra.MaximumNArgs(1),
+	Example: `  daytona organization use my-org
+  # With no argument, pick from a list interactively
+  daytona organization use`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var chosenOrganization *apiclient.Organization
 		ctx := context.Background()

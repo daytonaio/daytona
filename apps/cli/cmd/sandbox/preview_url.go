@@ -34,8 +34,11 @@ func newPreviewUrlOutput(previewUrl *apiclient.SignedPortPreviewUrl, expiresInSe
 }
 
 var PreviewUrlCmd = &cobra.Command{
-	Use:     "preview-url [SANDBOX_ID | SANDBOX_NAME]",
-	Short:   "Get signed preview URL for a sandbox port",
+	Use:   "preview-url [SANDBOX_ID | SANDBOX_NAME]",
+	Short: "Get signed preview URL for a sandbox port",
+	Example: `  daytona preview-url my-sandbox --port 3000
+  daytona preview-url my-sandbox --port 3000 --expires 7200
+  daytona preview-url my-sandbox --port 3000 --format json`,
 	Args:    requireSandboxArg,
 	Aliases: common.GetAliases("preview-url"),
 	RunE: func(cmd *cobra.Command, args []string) error {

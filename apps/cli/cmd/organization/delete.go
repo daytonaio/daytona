@@ -20,8 +20,11 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [ORGANIZATION]",
-	Short:   "Delete an organization",
+	Use:   "delete [ORGANIZATION]",
+	Short: "Delete an organization",
+	Example: `  daytona organization delete my-org
+  # With no argument, pick from a list interactively
+  daytona organization delete`,
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -14,7 +14,9 @@ import (
 var StartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start Daytona MCP Server",
-	Args:  cobra.NoArgs,
+	Example: `  # Typically launched by an MCP client (see 'daytona mcp init')
+  daytona mcp start`,
+	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		server := mcp.NewDaytonaMCPServer()
 

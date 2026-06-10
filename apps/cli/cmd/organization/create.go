@@ -23,7 +23,9 @@ var regionFlag string
 var CreateCmd = &cobra.Command{
 	Use:   "create [ORGANIZATION_NAME]",
 	Short: "Create a new organization and set it as active",
-	Args:  cobra.ExactArgs(1),
+	Example: `  daytona organization create my-org
+  daytona organization create my-org --region us`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

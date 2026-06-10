@@ -59,8 +59,11 @@ type deleteSingleResult struct {
 }
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [SNAPSHOT_ID | SNAPSHOT_NAME]",
-	Short:   "Delete a snapshot",
+	Use:   "delete [SNAPSHOT_ID | SNAPSHOT_NAME]",
+	Short: "Delete a snapshot",
+	Example: `  daytona snapshot delete my-snapshot:1.0
+  daytona snapshot delete --all --dry-run
+  daytona snapshot delete --all --yes --format json`,
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {

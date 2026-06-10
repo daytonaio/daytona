@@ -64,8 +64,12 @@ type deleteSingleResult struct {
 }
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [SANDBOX_ID | SANDBOX_NAME]",
-	Short:   "Delete a sandbox",
+	Use:   "delete [SANDBOX_ID | SANDBOX_NAME]",
+	Short: "Delete a sandbox",
+	Example: `  daytona delete my-sandbox
+  daytona delete my-sandbox --wait --format json
+  daytona delete --all --dry-run
+  daytona delete --all --yes`,
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {

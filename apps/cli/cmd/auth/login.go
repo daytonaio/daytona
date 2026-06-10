@@ -23,8 +23,11 @@ import (
 )
 
 var LoginCmd = &cobra.Command{
-	Use:     "login",
-	Short:   "Log in to Daytona",
+	Use:   "login",
+	Short: "Log in to Daytona",
+	Example: `  daytona login
+  daytona login --api-key $DAYTONA_API_KEY
+  daytona login --api-key-stdin < ~/.daytona-api-key`,
 	Args:    cobra.NoArgs,
 	GroupID: internal.USER_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {

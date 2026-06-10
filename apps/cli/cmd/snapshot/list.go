@@ -20,9 +20,12 @@ var (
 )
 
 var ListCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List all snapshots",
-	Long:    "List all available Daytona snapshots",
+	Use:   "list",
+	Short: "List all snapshots",
+	Long:  "List all available Daytona snapshots",
+	Example: `  daytona snapshot list
+  daytona snapshot list --limit 50
+  daytona snapshot list --format json`,
 	Args:    cobra.NoArgs,
 	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {

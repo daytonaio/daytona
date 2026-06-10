@@ -15,8 +15,11 @@ import (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:     "create [NAME]",
-	Short:   "Create a volume",
+	Use:   "create [NAME]",
+	Short: "Create a volume",
+	Example: `  daytona volume create my-volume
+  # Mount it when creating a sandbox
+  daytona create --snapshot my-snapshot:1.0 --volume my-volume:/data`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {
