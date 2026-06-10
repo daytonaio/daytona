@@ -5549,13 +5549,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@esm2cjs/cacheable-lookup@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "@esm2cjs/cacheable-lookup@npm:7.0.0"
-  checksum: 10c0/acba474cd1871408f8fd897dd119e97e7581f0bf37557fab339514264dc859e2bc63fb3569040b34e4651a96347d5a6d70c4e73e100bb6685dbb15584421cd7c
-  languageName: node
-  linkType: hard
-
 "@expressive-code/core@npm:^0.41.3":
   version: 0.41.3
   resolution: "@expressive-code/core@npm:0.41.3"
@@ -19554,6 +19547,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cacheable-lookup@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "cacheable-lookup@npm:6.1.0"
+  checksum: 10c0/fe922b24e9868ac65cbd3b4ccd7449063d572431471aab71cbca49a2b33839c7c888b237b0922ae6b8f4ddf25d61debe204e473195d2e77a835099b8953aeb0a
+  languageName: node
+  linkType: hard
+
 "cacheable-lookup@npm:^7.0.0":
   version: 7.0.0
   resolution: "cacheable-lookup@npm:7.0.0"
@@ -21470,7 +21470,6 @@ __metadata:
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.3"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.2"
     "@eslint/js": "npm:^9.8.0"
-    "@esm2cjs/cacheable-lookup": "npm:^7.0.0"
     "@headless-tree/core": "npm:^1.6.3"
     "@headless-tree/react": "npm:^1.6.3"
     "@iarna/toml": "npm:^2.2.5"
@@ -21601,7 +21600,7 @@ __metadata:
     busboy: "npm:^1.0.0"
     cache-manager: "npm:^6.4.1"
     cache-manager-memcached-store: "npm:^6.0.1"
-    cacheable-lookup: "npm:^7.0.0"
+    cacheable-lookup: "npm:^6.1.0"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.1"
     class-variance-authority: "npm:^0.7.1"
