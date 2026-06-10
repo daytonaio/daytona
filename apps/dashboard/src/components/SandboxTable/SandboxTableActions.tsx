@@ -103,7 +103,7 @@ export function SandboxTableActions({
         })
       }
 
-      if (isVmSandbox && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
+      if (sandbox.gpu === 0 && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
         items.push({
           key: 'create-snapshot',
           label: 'Create Snapshot',

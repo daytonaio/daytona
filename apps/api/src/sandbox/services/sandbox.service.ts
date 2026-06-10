@@ -1083,10 +1083,6 @@ export class SandboxService {
 
     const sourceSandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (![SandboxClass.LINUX_VM, SandboxClass.WINDOWS].includes(sourceSandbox.sandboxClass)) {
-      throw new HttpException('Forking is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
-    }
-
     const region = await this.regionService.findOne(sourceSandbox.region)
     if (!region) {
       throw new NotFoundException(`Region with ID ${sourceSandbox.region} not found`)
