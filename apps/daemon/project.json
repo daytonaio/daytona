@@ -35,7 +35,7 @@
           "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=$VERSION'\""]
         }
       },
-      "dependsOn": ["build-amd64"]
+      "dependsOn": ["build-amd64", "build-windows-amd64"]
     },
     "build-amd64": {
       "executor": "@nx-go/nx-go:build",
@@ -82,7 +82,7 @@
       "options": {
         "cmd": "gow",
         "cwd": ".",
-        "main": "{projectRoot}/cmd/daemon/main.go"
+        "main": "./{projectRoot}/cmd/daemon"
       },
       "configurations": {
         "production": {}

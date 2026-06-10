@@ -46,7 +46,7 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/main.go",
-        "outputPath": "dist/libs/computer-use-amd64.exe",
+        "outputPath": "dist/libs/computer-use-windows-amd64.exe",
         "env": {
           "GOARCH": "amd64",
           "GOOS": "windows",
@@ -59,7 +59,7 @@
         "{projectRoot}/go.sum",
         "sharedGlobals"
       ],
-      "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64.exe"],
+      "outputs": ["{workspaceRoot}/dist/libs/computer-use-windows-amd64.exe"],
       "cache": true
     },
     "format": {
