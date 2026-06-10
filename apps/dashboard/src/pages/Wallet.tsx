@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { AutomaticTopUp, BillingType, Invoice } from '@daytona/billing-api-client'
 import { BillingInfoCard } from '@/components/BillingInfoCard'
 import { ChargesTable } from '@/components/Charges'
 import { InvoicesTable } from '@/components/Invoices'
@@ -13,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
@@ -27,6 +27,7 @@ import { useChargesQuery } from '@/hooks/queries/useChargesQuery'
 import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
+import { AutomaticTopUp, BillingType, Invoice } from '@daytona/billing-api-client'
 import { CreditCardIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
@@ -206,7 +207,6 @@ const Wallet = () => {
     [selectedOrganization],
   )
 
-  const isBillingLoading = walletQuery.isLoading
   const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
   const showCreditCardBonusPrompt = Boolean(
     hasNoPaymentMethod && user?.profile.email_verified && selectedOrganization?.personal,
@@ -232,7 +232,7 @@ const Wallet = () => {
 
       <PageContent>
         <PageIntro title="Wallet" />
-        {isBillingLoading && (
+        {walletQuery.isLoading && (
           <div className="flex flex-col gap-6">
             <Card className="flex flex-col gap-4">
               <CardContent className="flex flex-col gap-4">
@@ -256,6 +256,9 @@ const Wallet = () => {
               </CardContent>
             </Card>
           </div>
+        )}
+        {walletQuery.isError && !wallet && (
+          <WalletErrorState onRetry={() => walletQuery.refetch()} retrying={walletQuery.isFetching} />
         )}
         {wallet && (
           <>
@@ -598,6 +601,26 @@ const Wallet = () => {
         )}
       </PageContent>
     </PageLayout>
+  )
+}
+
+function WalletErrorState({ onRetry, retrying }: { onRetry: () => void; retrying: boolean }) {
+  return (
+    <Empty className="flex-none rounded-md border py-12">
+      <EmptyHeader>
+        <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+          <TriangleAlertIcon />
+        </EmptyMedia>
+        <EmptyTitle className="text-destructive">Failed to load wallet</EmptyTitle>
+        <EmptyDescription>Something went wrong while fetching your wallet. Please try again.</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button variant="secondary" size="sm" onClick={onRetry} disabled={retrying}>
+          {retrying && <Spinner />}
+          Retry
+        </Button>
+      </EmptyContent>
+    </Empty>
   )
 }
 
