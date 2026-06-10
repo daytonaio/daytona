@@ -67,8 +67,25 @@ func activeConsoleUserToken() (windows.Token, error) {
 	}
 }
 
-// GetComputerUse spawns the plugin binary into the active console session and
-// returns an IComputerUse client. Subsequent calls return the cached impl.
+// GetComputerUse returns the cached IComputerUse client, or spawns the plugin
+// binary into the active console session. Concurrent callers are serialized by
+// the manager lock (getOrSpawn): exactly one spawn is ever in flight and every
+// caller receives its result. KillComputerUse takes the same lock, so a stop
+// racing an in-flight spawn waits for it to finish and then kills the fresh
+// instance — nothing leaks.
+func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse, error) {
+	return getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, string, error) {
+		client, impl, err := spawnInConsoleSession(logger, path)
+		if err != nil {
+			return nil, nil, "", err
+		}
+		return client, impl, filepath.Dir(path), nil
+	})
+}
+
+// spawnInConsoleSession spawns the plugin binary into the active console
+// session and dispenses an IComputerUse client. Callers must hold the manager
+// lock (via getOrSpawn).
 //
 // Single-tenant ephemeral VM assumptions:
 //   - No AutoMTLS (only one user on the box; localhost TCP is fine).
@@ -77,17 +94,14 @@ func activeConsoleUserToken() (windows.Token, error) {
 //     by Windows is sufficient — Tailscale and WireGuard both rely on this).
 //
 // On error the plugin client is killed in a defer so we don't leak the child.
-func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse, error) {
-	if computerUse.impl != nil {
-		return computerUse.impl, nil
-	}
+func spawnInConsoleSession(logger *slog.Logger, path string) (*plugin.Client, computeruse.IComputerUse, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("computer-use plugin not found at path: %s", path)
+		return nil, nil, fmt.Errorf("computer-use plugin not found at path: %s", path)
 	}
 
 	token, err := activeConsoleUserToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	// token ownership transfers to SysProcAttr; do NOT Close it here.
 
@@ -128,28 +142,24 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 
 	rpcClient, err := client.Client()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get RPC client for computer-use plugin: %w", err)
+		return nil, nil, fmt.Errorf("failed to get RPC client for computer-use plugin: %w", err)
 	}
 
 	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to dispense computer-use plugin: %w", err)
+		return nil, nil, fmt.Errorf("failed to dispense computer-use plugin: %w", err)
 	}
 
 	impl, ok := raw.(computeruse.IComputerUse)
 	if !ok {
-		return nil, fmt.Errorf("unexpected type from computer-use plugin: %T", raw)
+		return nil, nil, fmt.Errorf("unexpected type from computer-use plugin: %T", raw)
 	}
 
 	if _, err := impl.Initialize(); err != nil {
-		return nil, fmt.Errorf("failed to initialize computer-use plugin: %w", err)
+		return nil, nil, fmt.Errorf("failed to initialize computer-use plugin: %w", err)
 	}
 
 	success = true
 	logger.Info("Computer-use plugin initialized successfully (Windows, session-spawned)")
-	computerUse.client = client
-	computerUse.impl = impl
-	computerUse.path = filepath.Dir(path)
-
-	return impl, nil
+	return client, impl, nil
 }
