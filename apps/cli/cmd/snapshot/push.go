@@ -158,7 +158,7 @@ var PushCmd = &cobra.Command{
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, 0, apiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, pushTimeoutFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
@@ -170,7 +170,8 @@ var PushCmd = &cobra.Command{
 }
 
 var (
-	nameFlag string
+	nameFlag        string
+	pushTimeoutFlag time.Duration
 )
 
 func init() {
@@ -180,6 +181,7 @@ func init() {
 	PushCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	PushCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
 	PushCmd.Flags().StringVar(&regionIdFlag, "region", "", "ID of the region where the snapshot will be available (defaults to organization default region)")
+	PushCmd.Flags().DurationVar(&pushTimeoutFlag, "timeout", 0, "Maximum time to wait for the snapshot to be validated (0 means wait indefinitely)")
 
 	_ = PushCmd.MarkFlagRequired("name")
 }

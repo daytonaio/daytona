@@ -110,7 +110,7 @@ var CreateCmd = &cobra.Command{
 			}()
 
 			// Accept any post-build state — transient states can be skipped between polls.
-			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName, 0,
+			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName, createTimeoutFlag,
 				apiclient.SNAPSHOTSTATE_PENDING,
 				apiclient.SNAPSHOTSTATE_PULLING,
 				apiclient.SNAPSHOTSTATE_ACTIVE,
@@ -126,7 +126,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, snapshotName, 0, apiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, snapshotName, createTimeoutFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
@@ -147,6 +147,7 @@ var (
 	memoryFlag         int32
 	diskFlag           int32
 	regionIdFlag       string
+	createTimeoutFlag  time.Duration
 )
 
 func init() {
@@ -158,6 +159,7 @@ func init() {
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
 	CreateCmd.Flags().StringVar(&regionIdFlag, "region", "", "ID of the region where the snapshot will be available (defaults to organization default region)")
+	CreateCmd.Flags().DurationVar(&createTimeoutFlag, "timeout", 0, "Maximum time to wait for the snapshot to become active (0 means wait indefinitely)")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "context")
