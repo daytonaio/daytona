@@ -13,7 +13,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -24,15 +23,9 @@ import (
 
 // ---------------------------------------------------------------------------
 // Public plugin-internal types (mirror the wire shape the daemon will expose).
+// A11yScope and the sentinel errors live in accessibility_common.go, shared
+// with the Windows implementation.
 // ---------------------------------------------------------------------------
-
-type A11yScope string
-
-const (
-	A11yScopeFocused A11yScope = "focused"
-	A11yScopePID     A11yScope = "pid"
-	A11yScopeAll     A11yScope = "all"
-)
 
 type A11yBounds struct {
 	X      int
@@ -60,19 +53,6 @@ type A11yFilter struct {
 }
 
 // ---------------------------------------------------------------------------
-// Sentinel errors (wire-translated by the daemon layer).
-// ---------------------------------------------------------------------------
-
-var (
-	ErrA11yUnavailable    = errors.New("accessibility bus not reachable")
-	ErrNoAccessibleRoot   = errors.New("no accessible root for focused window")
-	ErrNodeNotFound       = errors.New("accessibility node not found")
-	ErrActionNotSupported = errors.New("action not supported by node")
-	ErrInvalidScope       = errors.New("invalid accessibility scope")
-	ErrInvalidRequest     = errors.New("invalid accessibility request")
-)
-
-// ---------------------------------------------------------------------------
 // AT-SPI protocol constants.
 // ---------------------------------------------------------------------------
 
@@ -90,10 +70,6 @@ const (
 	ifaceApplication  = "org.a11y.atspi.Application"
 
 	coordTypeScreen uint32 = 0 // AT-SPI CoordType_SCREEN
-
-	// Hard cap on nodes visited during a single tree walk. Tuneable if real
-	// workloads demand it; sized to survive a full xfce4 desktop dump.
-	walkBudget = 20000
 
 	// State bit indices of interest. Covers the full AT-SPI StateType enum
 	// (AT-SPI uses 2x uint32 = 64 bit-slots; ~44 are defined today).
@@ -411,15 +387,6 @@ func getInterfaces(obj dbus.BusObject) []string {
 	return ifaces
 }
 
-func containsStr(haystack []string, needle string) bool {
-	for _, s := range haystack {
-		if s == needle {
-			return true
-		}
-	}
-	return false
-}
-
 func getExtents(obj dbus.BusObject) (A11yBounds, bool) {
 	var ext struct {
 		X, Y, W, H int32
@@ -594,7 +561,7 @@ func (c *ComputerUse) getAccessibilityTree(scope A11yScope, pid int, maxDepth in
 	if err != nil {
 		return nil, false, err
 	}
-	budget := walkBudget
+	budget := a11yWalkBudget
 	node, err := walkNode(conn, root.Sender, root.Path, maxDepth, &budget)
 	if err != nil {
 		return nil, false, err
@@ -617,7 +584,7 @@ func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int
 		return nil, err
 	}
 
-	if maxDepth == 0 {
+	if !a11yDepthAllowsDescent(maxDepth) {
 		return node, nil
 	}
 
@@ -630,10 +597,7 @@ func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int
 		return node, nil
 	}
 
-	nextDepth := maxDepth
-	if maxDepth > 0 {
-		nextDepth = maxDepth - 1
-	}
+	nextDepth := a11yNextDepth(maxDepth)
 
 	for _, r := range refs {
 		if *budget <= 0 {
@@ -658,20 +622,10 @@ func walkNode(conn *dbus.Conn, sender string, path dbus.ObjectPath, maxDepth int
 // Find.
 // ---------------------------------------------------------------------------
 
-const (
-	findDefaultLimit = 500
-	findCeilingLimit = 5000
-)
-
 // findAccessibilityNodes walks the same scope as getAccessibilityTree but
 // returns a flat list of matches. Children of returned nodes are always nil.
 func (c *ComputerUse) findAccessibilityNodes(scope A11yScope, pid int, filter A11yFilter, limit int) ([]*A11yNode, bool, error) {
-	if limit <= 0 {
-		limit = findDefaultLimit
-	}
-	if limit > findCeilingLimit {
-		limit = findCeilingLimit
-	}
+	limit = normalizeFindLimit(limit)
 
 	matcher, err := buildFilterMatcher(filter)
 	if err != nil {
@@ -687,7 +641,7 @@ func (c *ComputerUse) findAccessibilityNodes(scope A11yScope, pid int, filter A1
 		return nil, false, err
 	}
 
-	budget := walkBudget
+	budget := a11yWalkBudget
 	matches := make([]*A11yNode, 0, 16)
 	truncated, err := findWalk(conn, root.Sender, root.Path, matcher, &matches, limit, &budget, false)
 	if err != nil {
@@ -745,56 +699,15 @@ func findWalk(conn *dbus.Conn, sender string, path dbus.ObjectPath, match func(*
 // Filter logic (pure, unit-testable).
 // ---------------------------------------------------------------------------
 
-// buildFilterMatcher returns a predicate that implements the filter semantics
-// documented in the API spec. All fields are AND-ed; empty fields are ignored.
-// Regex compilation failures are surfaced to the caller.
+// buildFilterMatcher adapts the shared buildA11yMatcher semantics
+// (accessibility_common.go) to the plugin-internal A11yFilter/A11yNode
+// types.
 func buildFilterMatcher(f A11yFilter) (func(*A11yNode) bool, error) {
-	var nameRe *regexp.Regexp
-	nameMatch := f.NameMatch
-	if nameMatch == "" {
-		nameMatch = "substring"
+	match, err := buildA11yMatcher(f.Role, f.Name, f.NameMatch, f.States)
+	if err != nil {
+		return nil, err
 	}
-	if nameMatch != "exact" && nameMatch != "substring" && nameMatch != "regex" {
-		return nil, fmt.Errorf("%w: unknown nameMatch mode %q, want exact|substring|regex", ErrInvalidRequest, nameMatch)
-	}
-	if f.Name != "" && nameMatch == "regex" {
-		re, err := regexp.Compile(f.Name)
-		if err != nil {
-			return nil, fmt.Errorf("%w: invalid regex for name filter: %v", ErrInvalidRequest, err)
-		}
-		nameRe = re
-	}
-
-	role := strings.ToLower(f.Role)
-	states := append([]string(nil), f.States...)
-
-	return func(n *A11yNode) bool {
-		if role != "" && strings.ToLower(n.Role) != role {
-			return false
-		}
-		if f.Name != "" {
-			switch nameMatch {
-			case "exact":
-				if n.Name != f.Name {
-					return false
-				}
-			case "substring":
-				if !strings.Contains(n.Name, f.Name) {
-					return false
-				}
-			case "regex":
-				if nameRe == nil || !nameRe.MatchString(n.Name) {
-					return false
-				}
-			}
-		}
-		for _, want := range states {
-			if !containsStr(n.States, want) {
-				return false
-			}
-		}
-		return true
-	}, nil
+	return func(n *A11yNode) bool { return match(n.Role, n.Name, n.States) }, nil
 }
 
 // ---------------------------------------------------------------------------
@@ -927,22 +840,8 @@ func (c *ComputerUse) setAccessibilityNodeValue(id string, value string) error {
 // sentinel errors unchanged so the handler can use errors.Is.
 // ---------------------------------------------------------------------------
 
-// parseWireScope validates a scope string coming over the wire. The empty
-// string is treated as the default ("focused"). Returns ErrInvalidScope
-// wrapped with a descriptive message on unknown scopes so the handler can map
-// to 400 Bad Request.
-func parseWireScope(s string) (A11yScope, error) {
-	switch strings.ToLower(strings.TrimSpace(s)) {
-	case "", "focused":
-		return A11yScopeFocused, nil
-	case "pid":
-		return A11yScopePID, nil
-	case "all":
-		return A11yScopeAll, nil
-	default:
-		return "", fmt.Errorf("%w: got %q, expected focused|pid|all", ErrInvalidScope, s)
-	}
-}
+// parseWireScope lives in accessibility_common.go, shared with the Windows
+// implementation.
 
 // toWireBounds converts an internal A11yBounds to the daemon wire shape.
 func toWireBounds(b A11yBounds) computeruse.AccessibilityBounds {
