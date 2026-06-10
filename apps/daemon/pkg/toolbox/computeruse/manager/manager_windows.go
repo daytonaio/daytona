@@ -103,7 +103,11 @@ func spawnInConsoleSession(logger *slog.Logger, path string) (*plugin.Client, co
 	if err != nil {
 		return nil, nil, err
 	}
-	// token ownership transfers to SysProcAttr; do NOT Close it here.
+	// CreateProcessAsUser references the token into the child during Start();
+	// our duplicated handle stays ours and must outlive cmd.Start(), which
+	// client.Client() below invokes synchronously — so closing at function
+	// exit is safe on every path and prevents a per-spawn handle leak.
+	defer token.Close()
 
 	cmd := exec.Command(path)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
