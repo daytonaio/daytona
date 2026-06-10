@@ -7,34 +7,7 @@ package computeruse
 
 import (
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/kbinani/screenshot"
 )
-
-// GetDisplayInfo returns information about all available displays
-func (c *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error) {
-	n := screenshot.NumActiveDisplays()
-	displays := make([]computeruse.DisplayInfo, n)
-
-	for i := 0; i < n; i++ {
-		bounds := screenshot.GetDisplayBounds(i)
-		displays[i] = computeruse.DisplayInfo{
-			ID: i,
-			Position: computeruse.Position{
-				X: bounds.Min.X,
-				Y: bounds.Min.Y,
-			},
-			Size: computeruse.Size{
-				Width:  bounds.Dx(),
-				Height: bounds.Dy(),
-			},
-			IsActive: true, // Assuming all detected displays are active
-		}
-	}
-
-	return &computeruse.DisplayInfoResponse{
-		Displays: displays,
-	}, nil
-}
 
 // GetWindows returns information about all open windows
 func (c *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {

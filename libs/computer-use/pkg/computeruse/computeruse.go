@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
+	"github.com/go-vgo/robotgo"
 	"github.com/godbus/dbus/v5"
 	log "github.com/sirupsen/logrus"
 )
@@ -692,5 +693,48 @@ func (c *ComputerUse) GetStatus() (*computeruse.ComputerUseStatusResponse, error
 
 	return &computeruse.ComputerUseStatusResponse{
 		Status: "inactive",
+	}, nil
+}
+
+// getMousePosition is the Linux side of the per-OS mouse-position seam used
+// by the shared screenshot pipeline in screenshot.go. The Windows
+// counterpart lives in winapi_windows.go.
+func getMousePosition() (int, int) {
+	return robotgo.Location()
+}
+
+func (c *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
+	// This is a simplified version - robotgo's window functions
+	// might need additional setup depending on the platform
+
+	titles, err := robotgo.FindIds("")
+	if err != nil {
+		return nil, err
+	}
+
+	windows := make([]computeruse.WindowInfo, 0)
+	for _, id := range titles {
+		title := robotgo.GetTitle(id)
+		if title != "" {
+			// Get window position and size (this might need platform-specific implementation)
+			// For now, we'll use placeholder values
+			windows = append(windows, computeruse.WindowInfo{
+				ID:    id,
+				Title: title,
+				Position: computeruse.Position{
+					X: 0, // Would need platform-specific implementation
+					Y: 0, // Would need platform-specific implementation
+				},
+				Size: computeruse.Size{
+					Width:  0, // Would need platform-specific implementation
+					Height: 0, // Would need platform-specific implementation
+				},
+				IsActive: false, // Would need platform-specific implementation
+			})
+		}
+	}
+
+	return &computeruse.WindowsResponse{
+		Windows: windows,
 	}, nil
 }
