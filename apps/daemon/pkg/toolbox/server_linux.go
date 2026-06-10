@@ -65,13 +65,11 @@ func (s *server) registerPlatformRoutes(r *gin.Engine) {
 			pluginPath = path.Join(s.configDir, "daytona-computer-use")
 		}
 
-		impl, err := manager.GetComputerUse(s.logger, pluginPath)
-		if err != nil {
+		if _, err := manager.GetComputerUse(s.logger, pluginPath, lazyCU.Set); err != nil {
 			s.logger.Error("Computer-Use error", "error", err)
 			s.logger.Info("Continuing without computer-use functionality...")
 			return
 		}
-		lazyCU.Set(impl)
 		s.logger.Info("Computer-use plugin loaded successfully")
 	}()
 

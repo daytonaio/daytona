@@ -216,12 +216,13 @@ Note: Computer-use features will be disabled until dependencies are installed.`,
 }
 
 // GetComputerUse returns the cached IComputerUse client, or spawns the plugin
-// binary. Concurrent callers are serialized by the manager lock (getOrSpawn):
+// binary, publishing the fresh impl via publish under the manager lock (see
+// getOrSpawn). Concurrent callers are serialized by the manager lock:
 // exactly one spawn is ever in flight and every caller receives its result.
-func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse, error) {
+func GetComputerUse(logger *slog.Logger, path string, publish func(computeruse.IComputerUse)) (computeruse.IComputerUse, error) {
 	return getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, error) {
 		return spawnPlugin(logger, path)
-	})
+	}, publish)
 }
 
 // spawnPlugin starts the plugin binary and dispenses an IComputerUse client.
