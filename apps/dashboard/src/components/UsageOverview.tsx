@@ -19,9 +19,13 @@ export function UsageOverview({
   className?: string
 }) {
   const isWindows = usageOverview.sandboxClass === SandboxClass.WINDOWS
-  const showGpuContactSales = !isWindows && !hasGpuQuotaInClass
   const gpuCurrent = isWindows ? 0 : usageOverview.currentGpuUsage
   const gpuTotal = isWindows ? 0 : usageOverview.totalGpuQuota
+  const gpuZeroQuotaValue = getGpuZeroQuotaValue({
+    isWindows,
+    hasGpuQuotaInClass,
+    current: gpuCurrent,
+  })
 
   return (
     <div className={cn('flex gap-4 [&>*]:flex-1 flex-col lg:flex-row', className)}>
@@ -46,21 +50,7 @@ export function UsageOverview({
       <ResourceUsageItem
         label="GPU"
         className={isWindows ? 'opacity-50' : undefined}
-        value={getUsageValue(
-          gpuCurrent,
-          gpuTotal,
-          'GPU',
-          isWindows ? (
-            <span className="text-xs text-muted-foreground text-nowrap">Coming soon</span>
-          ) : showGpuContactSales ? (
-            <a
-              href="mailto:sales@daytona.io?subject=GPU%20quota%20request"
-              className="text-xs font-medium text-foreground underline underline-offset-2 hover:text-muted-foreground text-nowrap"
-            >
-              Contact Sales
-            </a>
-          ) : undefined,
-        )}
+        value={getUsageValue(gpuCurrent, gpuTotal, 'GPU', gpuZeroQuotaValue)}
       >
         <QuotaLine current={gpuCurrent} total={gpuTotal} />
       </ResourceUsageItem>
@@ -79,11 +69,42 @@ function formatUsageValue(value: number) {
 }
 
 function getUsageValue(current: number, total: number, unit: string, zeroQuotaValue?: ReactNode) {
-  if (total > 0) {
+  if (total > 0 || current > 0) {
     return <UsageLabel current={current} total={total} unit={unit} />
   }
 
   return zeroQuotaValue ?? <span className="text-xs text-muted-foreground text-nowrap">0 / 0 {unit}</span>
+}
+
+function getGpuZeroQuotaValue({
+  isWindows,
+  hasGpuQuotaInClass,
+  current,
+}: {
+  isWindows: boolean
+  hasGpuQuotaInClass: boolean
+  current: number
+}): ReactNode {
+  if (current > 0) {
+    return undefined
+  }
+
+  if (isWindows) {
+    return <span className="text-xs text-muted-foreground text-nowrap">Coming soon</span>
+  }
+
+  if (hasGpuQuotaInClass) {
+    return <span className="text-xs text-muted-foreground text-nowrap">Unavailable in region</span>
+  }
+
+  return (
+    <a
+      href="mailto:sales@daytona.io?subject=GPU%20quota%20request"
+      className="text-xs font-medium text-foreground underline underline-offset-2 hover:text-muted-foreground text-nowrap"
+    >
+      Contact Sales
+    </a>
+  )
 }
 
 export function UsageOverviewSkeleton() {
@@ -121,7 +142,7 @@ function ResourceUsageItem({
 
 const UsageLabel = ({ current, total, unit }: { current: number; total: number; unit: string }) => {
   const percentage = total > 0 ? (current / total) * 100 : 0
-  const isHighUsage = percentage > 90
+  const isHighUsage = total > 0 ? percentage > 90 : current > 0
 
   return (
     <span

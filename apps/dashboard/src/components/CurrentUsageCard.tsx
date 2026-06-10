@@ -1,14 +1,17 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { getSandboxClassIcon, getSandboxClassLabel } from '@/components/SandboxTable/constants'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
@@ -18,6 +21,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import { SandboxClass, type Organization, type RegionUsageOverview } from '@daytona/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
+import { AlertCircle } from 'lucide-react'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 
 export function CurrentUsageCard({ organizationTier }: { organizationTier?: { tier?: number | null } | null }) {
@@ -45,6 +49,7 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
     currentEntry: currentRegionUsageOverview,
   } = useUsageScopeSelection(usageOverview?.regionUsage, selectedOrganization?.defaultRegionId)
   const usageScopeAlerts = getUsageScopeAlerts(usageOverview?.regionUsage ?? [])
+  const usageOverviewUnavailable = usageOverviewQuery.isError && !usageOverview
 
   return (
     <Card>
@@ -137,6 +142,11 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
       <CardContent className="p-0 flex flex-col">
         {usageOverviewQuery.isLoading ? (
           <UsageOverviewSkeleton />
+        ) : usageOverviewUnavailable ? (
+          <CurrentUsageErrorState
+            onRetry={() => void usageOverviewQuery.refetch()}
+            retrying={usageOverviewQuery.isFetching}
+          />
         ) : (
           usageOverview &&
           currentRegionUsageOverview && (
@@ -173,19 +183,19 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
           className="border-t border-border"
           rateLimits={[
             {
-              value: selectedOrganization?.authenticatedRateLimit || config?.rateLimit?.authenticated?.limit,
+              value: selectedOrganization?.authenticatedRateLimit ?? config?.rateLimit?.authenticated?.limit,
               label: 'General Requests',
               ttlSeconds:
                 selectedOrganization?.authenticatedRateLimitTtlSeconds ?? config?.rateLimit?.authenticated?.ttl,
             },
             {
-              value: selectedOrganization?.sandboxCreateRateLimit || config?.rateLimit?.sandboxCreate?.limit,
+              value: selectedOrganization?.sandboxCreateRateLimit ?? config?.rateLimit?.sandboxCreate?.limit,
               label: 'Sandbox Creation',
               ttlSeconds:
                 selectedOrganization?.sandboxCreateRateLimitTtlSeconds ?? config?.rateLimit?.sandboxCreate?.ttl,
             },
             {
-              value: selectedOrganization?.sandboxLifecycleRateLimit || config?.rateLimit?.sandboxLifecycle?.limit,
+              value: selectedOrganization?.sandboxLifecycleRateLimit ?? config?.rateLimit?.sandboxLifecycle?.limit,
               label: 'Sandbox Lifecycle',
               ttlSeconds:
                 selectedOrganization?.sandboxLifecycleRateLimitTtlSeconds ?? config?.rateLimit?.sandboxLifecycle?.ttl,
@@ -194,6 +204,26 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
         />
       </CardContent>
     </Card>
+  )
+}
+
+function CurrentUsageErrorState({ onRetry, retrying }: { onRetry: () => void; retrying: boolean }) {
+  return (
+    <Empty className="rounded-none border-0 py-8">
+      <EmptyHeader>
+        <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+          <AlertCircle />
+        </EmptyMedia>
+        <EmptyTitle className="text-destructive">Failed to load current usage</EmptyTitle>
+        <EmptyDescription>Something went wrong while fetching your resource usage. Please try again.</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button variant="secondary" size="sm" onClick={onRetry} disabled={retrying}>
+          {retrying && <Spinner />}
+          Retry
+        </Button>
+      </EmptyContent>
+    </Empty>
   )
 }
 
@@ -470,7 +500,7 @@ function RateLimits({
   title: ReactNode
   description: ReactNode
 }) {
-  const isEmpty = rateLimits.every(({ value }) => !value)
+  const isEmpty = rateLimits.every(({ value }) => !hasLimitValue(value))
   if (isEmpty) return null
 
   // When items carry resourceType, render each type as its own desktop column
@@ -490,7 +520,7 @@ function RateLimits({
             <div key={column[0].resourceType} className="flex flex-col gap-2 sm:gap-4">
               {column.map(
                 ({ label, value, unit, ttlSeconds }) =>
-                  value && (
+                  hasLimitValue(value) && (
                     <RateLimitItem key={label} label={label} value={value} unit={unit} ttlSeconds={ttlSeconds} />
                   ),
               )}
@@ -501,7 +531,9 @@ function RateLimits({
         <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-3">
           {rateLimits.map(
             ({ label, value, unit, ttlSeconds }) =>
-              value && <RateLimitItem key={label} label={label} value={value} unit={unit} ttlSeconds={ttlSeconds} />,
+              hasLimitValue(value) && (
+                <RateLimitItem key={label} label={label} value={value} unit={unit} ttlSeconds={ttlSeconds} />
+              ),
           )}
         </div>
       )}
@@ -527,13 +559,13 @@ function groupByResourceType(items: LimitItem[]): LimitItem[][] | null {
 }
 
 function formatTtl(ttlSeconds?: number | null): string {
-  if (!ttlSeconds) return ' / min'
-  if (ttlSeconds % 60 === 0) return ` / ${ttlSeconds / 60}min`
+  if (ttlSeconds == null) return ' / min'
+  if (ttlSeconds >= 60 && ttlSeconds % 60 === 0) return ` / ${ttlSeconds / 60}min`
   return ` / ${ttlSeconds}s`
 }
 
 function RateLimitItem({ label, value, unit, ttlSeconds }: LimitItem) {
-  if (!value) {
+  if (!hasLimitValue(value)) {
     return null
   }
 
@@ -541,9 +573,13 @@ function RateLimitItem({ label, value, unit, ttlSeconds }: LimitItem) {
     <div className="flex flex-col">
       <div className="text-muted-foreground text-xs">{label}</div>
       <div className="text-foreground text-sm font-medium">
-        {value?.toLocaleString()}
+        {value.toLocaleString()}
         {unit ? ` ${unit}` : formatTtl(ttlSeconds)}
       </div>
     </div>
   )
+}
+
+function hasLimitValue(value: LimitItem['value']): value is number {
+  return value !== null && value !== undefined
 }

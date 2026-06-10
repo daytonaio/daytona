@@ -102,7 +102,7 @@ export function TierUpgradeCard({ tiers, organizationTier, requirementsState, or
                   </li>
                 ))}
               </ul>
-              {requirements.length && !canUpgrade && (
+              {requirements.length > 0 && !canUpgrade && (
                 <div className="text-xs text-muted-foreground">Please complete all requirements to upgrade.</div>
               )}
               <Button
