@@ -6,6 +6,7 @@
 package computeruse
 
 import (
+	"syscall"
 	"testing"
 	"unicode/utf16"
 	"unsafe"
@@ -213,4 +214,23 @@ func TestAppendRuneInputs(t *testing.T) {
 	assert.Equal(t, event{uint16(hi), keyEventF_UNICODE | keyEventF_KEYUP}, keyEvent(inputs[1]))
 	assert.Equal(t, event{uint16(lo), keyEventF_UNICODE}, keyEvent(inputs[2]))
 	assert.Equal(t, event{uint16(lo), keyEventF_UNICODE | keyEventF_KEYUP}, keyEvent(inputs[3]))
+}
+
+// SendInput blocked by UIPI (or an inaccessible desktop) returns 0 without
+// setting a last error, so LazyProc.Call hands back syscall.Errno(0) whose
+// message is "The operation completed successfully." — the error must not
+// surface that contradiction on the documented dominant failure mode.
+func TestSendInputErrorZeroErrnoNamesBlockedInput(t *testing.T) {
+	err := sendInputError(0, 1, syscall.Errno(0))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "0/1")
+	assert.Contains(t, err.Error(), "UIPI")
+	assert.NotContains(t, err.Error(), "completed successfully")
+
+	// Genuine errnos keep their system message.
+	denied := syscall.Errno(5) // ERROR_ACCESS_DENIED
+	err = sendInputError(0, 2, denied)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "0/2")
+	assert.Contains(t, err.Error(), denied.Error())
 }

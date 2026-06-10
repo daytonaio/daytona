@@ -226,9 +226,22 @@ func sendInputs(inputs []inputStruct) error {
 		unsafe.Sizeof(inputs[0]),
 	)
 	if int(ret) != len(inputs) {
-		return fmt.Errorf("SendInput sent %d/%d events: %v", ret, len(inputs), err)
+		return sendInputError(int(ret), len(inputs), err)
 	}
 	return nil
+}
+
+// sendInputError formats a partial-send failure from SendInput. When input
+// is blocked by UIPI or the calling desktop is inaccessible, SendInput
+// returns 0 *without* setting a last error, so the raw errno would read
+// "The operation completed successfully." — actively misleading on the
+// documented dominant failure mode. Report that case explicitly; keep the
+// errno for genuine failures.
+func sendInputError(sent, total int, err error) error {
+	if errno, ok := err.(syscall.Errno); ok && errno == 0 {
+		return fmt.Errorf("SendInput sent %d/%d events: no error code set (input likely blocked by UIPI or an inaccessible desktop)", sent, total)
+	}
+	return fmt.Errorf("SendInput sent %d/%d events: %v", sent, total, err)
 }
 
 // ---------------------------------------------------------------------------
