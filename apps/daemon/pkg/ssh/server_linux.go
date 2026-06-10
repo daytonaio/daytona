@@ -223,7 +223,10 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	exitCode, waitErr := childreap.Wait(cmd)
 
 	if waitErr != nil || exitCode != 0 {
-		s.logger.Info("Command exited", "command", session.RawCommand(), "exitCode", exitCode, "error", waitErr)
+		// RawCommand is omitted: the SDK wrapper embeds base64-encoded env
+		// secrets (API keys, tokens) that must not reach the persisted
+		// daemon log.
+		s.logger.Info("Command exited", "exitCode", exitCode, "error", waitErr)
 		// childreap.Wait can return -1 (signal-terminated or unrecoverable
 		// status). The SSH protocol carries exit status as uint32, so a
 		// negative value gets serialized as 4294967295 — confusing to

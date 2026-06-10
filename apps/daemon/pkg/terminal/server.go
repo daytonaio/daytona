@@ -56,6 +56,11 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	sizeCh := make(chan common.TTYSize)
 	stdInReader, stdInWriter := io.Pipe()
 	stdOutReader, stdOutWriter := io.Pipe()
+	// Unblock SpawnTTY's internal stdin copier and the stdout pump below
+	// when the handler returns; otherwise both stay blocked in Read forever
+	// (two goroutines + two pipes leaked per terminal session).
+	defer stdInWriter.Close()
+	defer stdOutWriter.Close()
 
 	go func() {
 		defer close(sizeCh)
@@ -84,6 +89,10 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	go func() {
+		// On websocket write failure the pump exits; close the read side so
+		// SpawnTTY's pending pipe writes fail instead of blocking forever,
+		// letting it tear down the shell and return.
+		defer stdOutReader.Close()
 		buf := make([]byte, 1024)
 		for {
 			n, err := stdOutReader.Read(buf)
