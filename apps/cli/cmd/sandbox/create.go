@@ -143,7 +143,7 @@ var CreateCmd = &cobra.Command{
 			}
 
 			// Accept any post-pending state — transient states can be skipped between polls.
-			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id,
+			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, 0,
 				apiclient.SANDBOXSTATE_BUILDING_SNAPSHOT,
 				apiclient.SANDBOXSTATE_PULLING_SNAPSHOT,
 				apiclient.SANDBOXSTATE_STARTING,
@@ -156,16 +156,18 @@ var CreateCmd = &cobra.Command{
 			logsContext, stopLogs := context.WithCancel(context.Background())
 			defer stopLogs()
 
-			go common.ReadBuildLogs(logsContext, common.ReadLogParams{
-				Id:                   sandbox.Id,
-				ServerUrl:            activeProfile.Api.Url,
-				ServerApi:            activeProfile.Api,
-				ActiveOrganizationId: activeProfile.ActiveOrganizationId,
-				Follow:               util.Pointer(true),
-				ResourceType:         common.ResourceTypeSandbox,
-			})
+			go func() {
+				_ = common.ReadBuildLogs(logsContext, common.ReadLogParams{
+					Id:                   sandbox.Id,
+					ServerUrl:            activeProfile.Api.Url,
+					ServerApi:            activeProfile.Api,
+					ActiveOrganizationId: activeProfile.ActiveOrganizationId,
+					Follow:               util.Pointer(true),
+					ResourceType:         common.ResourceTypeSandbox,
+				})
+			}()
 
-			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, apiclient.SANDBOXSTATE_STARTED)
+			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, 0, apiclient.SANDBOXSTATE_STARTED)
 			if err != nil {
 				return err
 			}

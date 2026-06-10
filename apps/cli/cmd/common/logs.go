@@ -8,12 +8,14 @@ package common
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,7 +35,10 @@ const (
 	ResourceTypeSnapshot ResourceType = "snapshots"
 )
 
-func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
+// ReadBuildLogs streams build logs to stdout until the stream ends or ctx is
+// canceled. Cancellation is the caller's signal to stop and returns nil; in
+// follow mode an EOF keeps polling for more output until then.
+func ReadBuildLogs(ctx context.Context, params ReadLogParams) error {
 	url := fmt.Sprintf("%s/%s/%s/build-logs", params.ServerUrl, params.ResourceType, params.Id)
 	if params.Follow != nil && *params.Follow {
 		url = fmt.Sprintf("%s?follow=true", url)
@@ -41,8 +46,7 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		log.Errorf("Failed to create request: %v", err)
-		return
+		return clierr.Newf(clierr.CategoryNetwork, "failed to create request: %v", err)
 	}
 
 	if params.ServerApi.Key != nil {
@@ -60,14 +64,15 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Errorf("Failed to connect to server: %v", err)
-		return
+		if ctx.Err() != nil {
+			return nil
+		}
+		return clierr.Newf(clierr.CategoryNetwork, "failed to connect to server: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Errorf("Server returned a non-OK status while retrieving logs: %d", resp.StatusCode)
-		return
+		return clierr.FromHTTPStatus(resp.StatusCode, fmt.Sprintf("server returned a non-OK status while retrieving logs: %d", resp.StatusCode))
 	}
 
 	reader := bufio.NewReader(resp.Body)
@@ -76,7 +81,7 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 	for {
 		select {
 		case <-ctx.Done():
-			return
+			return nil
 		default:
 			n, err := reader.Read(buffer)
 			if n > 0 {
@@ -84,24 +89,23 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 			}
 
 			if err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					if params.Follow != nil && *params.Follow {
 						time.Sleep(500 * time.Millisecond)
 						continue
 					}
-					return
+					return nil
 				}
-				if err == context.Canceled {
-					return
+				if ctx.Err() != nil || errors.Is(err, context.Canceled) {
+					return nil
 				}
 				// In follow mode the upstream proxy can reset long-lived streams; the
 				// build itself is unaffected and the caller still polls for completion.
 				if params.Follow != nil && *params.Follow {
 					log.Warnf("Build log stream interrupted (%v); the build is still running, waiting for it to complete...", err)
-					return
+					return nil
 				}
-				log.Errorf("Error reading from stream: %v", err)
-				return
+				return clierr.Newf(clierr.CategoryNetwork, "error reading from stream: %v", err)
 			}
 		}
 	}

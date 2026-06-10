@@ -95,17 +95,19 @@ var CreateCmd = &cobra.Command{
 			logsContext, stopLogs := context.WithCancel(context.Background())
 			defer stopLogs()
 
-			go common.ReadBuildLogs(logsContext, common.ReadLogParams{
-				Id:                   snapshot.Id,
-				ServerUrl:            activeProfile.Api.Url,
-				ServerApi:            activeProfile.Api,
-				ActiveOrganizationId: activeProfile.ActiveOrganizationId,
-				Follow:               util.Pointer(true),
-				ResourceType:         common.ResourceTypeSnapshot,
-			})
+			go func() {
+				_ = common.ReadBuildLogs(logsContext, common.ReadLogParams{
+					Id:                   snapshot.Id,
+					ServerUrl:            activeProfile.Api.Url,
+					ServerApi:            activeProfile.Api,
+					ActiveOrganizationId: activeProfile.ActiveOrganizationId,
+					Follow:               util.Pointer(true),
+					ResourceType:         common.ResourceTypeSnapshot,
+				})
+			}()
 
 			// Accept any post-build state — transient states can be skipped between polls.
-			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName,
+			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName, 0,
 				apiclient.SNAPSHOTSTATE_PENDING,
 				apiclient.SNAPSHOTSTATE_PULLING,
 				apiclient.SNAPSHOTSTATE_ACTIVE,
@@ -121,7 +123,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, snapshotName, apiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, snapshotName, 0, apiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err

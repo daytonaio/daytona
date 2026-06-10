@@ -156,7 +156,7 @@ var PushCmd = &cobra.Command{
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, 0, apiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
