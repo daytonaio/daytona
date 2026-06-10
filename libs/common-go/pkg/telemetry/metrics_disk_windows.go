@@ -6,11 +6,23 @@
 package telemetry
 
 import (
+	"os"
 	"syscall"
 	"unsafe"
 )
 
 func getDiskStats(path string) (*DiskStats, error) {
+	// Callers pass the POSIX root "/" (see metrics.go), which on Windows
+	// resolves against the current drive of the process working directory.
+	// Sample the system drive explicitly instead.
+	if path == "/" || path == "\\" {
+		drive := os.Getenv("SystemDrive") // e.g. "C:"
+		if drive == "" {
+			drive = "C:"
+		}
+		path = drive + `\`
+	}
+
 	kernel32, err := syscall.LoadDLL("kernel32.dll")
 	if err != nil {
 		return nil, err
