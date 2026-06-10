@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/auth"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/internal/clierr"
 	"github.com/spf13/cobra"
@@ -48,10 +49,13 @@ PATH is resolved against the active profile's API URL and the request is authent
 			return err
 		}
 
-		// GetApiClient validates the profile and refreshes the OAuth token
-		// when needed; the raw request below is then built from the
-		// (possibly refreshed) active profile.
-		if _, err := apiclient_cli.GetApiClient(nil, nil); err != nil {
+		// Refresh the OAuth token up front: GetApiClient only triggers a
+		// refresh once a client instance is already cached, so a fresh
+		// process would build the raw request below with an expired token.
+		// GetApiClient is dropped entirely — its only other effect here was
+		// profile validation, which GetConfig/GetActiveProfile below already
+		// perform (and RefreshTokenIfNeeded re-checks the credentials).
+		if err := auth.RefreshTokenIfNeeded(cmd.Context()); err != nil {
 			return err
 		}
 

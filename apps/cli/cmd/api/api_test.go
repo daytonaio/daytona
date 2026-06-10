@@ -5,8 +5,11 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"errors"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -165,5 +168,131 @@ func TestTrailingNewlineWriter(t *testing.T) {
 				t.Errorf("output = %q, want %q", got, tt.want)
 			}
 		})
+	}
+}
+
+// apiTestEnv points the CLI at the given test server using API-key auth and
+// a sandboxed config dir. SHELL is cleared so the first GetConfig call does
+// not try to install shell autocompletion into the real home directory.
+func apiTestEnv(t *testing.T, serverURL string) {
+	t.Helper()
+	t.Setenv("DAYTONA_CONFIG_DIR", t.TempDir())
+	t.Setenv("DAYTONA_API_KEY", "test-api-key")
+	t.Setenv("DAYTONA_API_URL", serverURL)
+	t.Setenv("SHELL", "")
+}
+
+// runApiCmd invokes ApiCmd's RunE with the given flag values and path,
+// returning everything the command wrote to stdout alongside its error.
+func runApiCmd(t *testing.T, method, input, path string) (string, error) {
+	t.Helper()
+
+	prevMethod, prevInput := apiMethodFlag, apiInputFlag
+	t.Cleanup(func() { apiMethodFlag, apiInputFlag = prevMethod, prevInput })
+	apiMethodFlag, apiInputFlag = method, input
+
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prevStdout := os.Stdout
+	os.Stdout = w
+	ApiCmd.SetContext(context.Background())
+	runErr := ApiCmd.RunE(ApiCmd, []string{path})
+	os.Stdout = prevStdout
+
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	out, err := io.ReadAll(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return string(out), runErr
+}
+
+func TestApiCmdKeyAuthRequestAndBodyRelay(t *testing.T) {
+	var gotAuth, gotOrg, gotSource, gotAccept string
+	mux := http.NewServeMux()
+	mux.HandleFunc("/sandbox", func(w http.ResponseWriter, r *http.Request) {
+		gotAuth = r.Header.Get("Authorization")
+		gotOrg = r.Header.Get("X-Daytona-Organization-ID")
+		gotSource = r.Header.Get("X-Daytona-Source")
+		gotAccept = r.Header.Get("Accept")
+		// Deliberately no trailing newline: the command must append one.
+		if _, err := w.Write([]byte(`{"items":[]}`)); err != nil {
+			t.Error(err)
+		}
+	})
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+	apiTestEnv(t, server.URL)
+
+	out, err := runApiCmd(t, http.MethodGet, "", "/sandbox")
+	if err != nil {
+		t.Fatalf("RunE returned unexpected error: %v", err)
+	}
+
+	if gotAuth != "Bearer test-api-key" {
+		t.Errorf("Authorization = %q, want %q", gotAuth, "Bearer test-api-key")
+	}
+	if gotOrg != "" {
+		t.Errorf("X-Daytona-Organization-ID = %q, want absent for key auth", gotOrg)
+	}
+	if gotSource != "cli" {
+		t.Errorf("X-Daytona-Source = %q, want %q", gotSource, "cli")
+	}
+	if gotAccept != "application/json" {
+		t.Errorf("Accept = %q, want %q", gotAccept, "application/json")
+	}
+	if out != "{\"items\":[]}\n" {
+		t.Errorf("stdout = %q, want body relayed with trailing newline", out)
+	}
+}
+
+func TestApiCmdNotFoundPrintsBodyAndFails(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/sandbox/missing", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		if _, err := w.Write([]byte(`{"message":"sandbox not found"}`)); err != nil {
+			t.Error(err)
+		}
+	})
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+	apiTestEnv(t, server.URL)
+
+	out, err := runApiCmd(t, http.MethodGet, "", "/sandbox/missing")
+
+	if out != "{\"message\":\"sandbox not found\"}\n" {
+		t.Errorf("stdout = %q, want error body relayed with trailing newline", out)
+	}
+	var cliErr *clierr.Error
+	if !errors.As(err, &cliErr) {
+		t.Fatalf("expected *clierr.Error, got %T: %v", err, err)
+	}
+	if cliErr.Category != clierr.CategoryNotFound {
+		t.Errorf("category = %q, want %q", cliErr.Category, clierr.CategoryNotFound)
+	}
+	if !strings.Contains(cliErr.Message, "HTTP 404") {
+		t.Errorf("message = %q, want it to mention HTTP 404", cliErr.Message)
+	}
+}
+
+func TestApiCmdInputWithGetRejected(t *testing.T) {
+	// Must fail during flag validation, before any request is made.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Error("unexpected request to API server")
+	}))
+	t.Cleanup(server.Close)
+	apiTestEnv(t, server.URL)
+
+	out, err := runApiCmd(t, http.MethodGet, "-", "/sandbox")
+	assertUsageError(t, err)
+	if out != "" {
+		t.Errorf("stdout = %q, want empty", out)
 	}
 }
