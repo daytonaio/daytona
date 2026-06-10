@@ -691,6 +691,18 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/copilotkit/copilotkit-generative-ui-coding-agent-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.copilotkit'),
+          disablePagination: true,
+          attrs: {
+            icon: 'copilotkit.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/reinforcement-learning/trl-grpo-training',
             locale
           ),
