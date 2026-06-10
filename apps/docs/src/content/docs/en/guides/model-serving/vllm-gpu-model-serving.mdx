@@ -109,7 +109,8 @@ The script targets `us-east-1`, currently the region for GPU sandboxes, and crea
             auto_stop_interval=0,
             ephemeral=True,
             env_vars=env_vars,
-        )
+        ),
+        timeout=600,
     )
     ```
   </TabItem>
@@ -216,7 +217,7 @@ Paste the printed `export` lines into your shell, then use any OpenAI-compatible
 <Tabs>
   <TabItem label="curl" icon="seti:shell">
     ```bash
-    curl -s "$ENDPOINT/v1/chat/completions" \
+    curl -sS --connect-timeout 30 --max-time 120 "$ENDPOINT/v1/chat/completions" \
       -H "x-daytona-preview-token: $TOKEN" \
       -H "Content-Type: application/json" \
       -d '{

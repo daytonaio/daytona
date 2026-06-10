@@ -41,7 +41,8 @@ sb = daytona.create(
         auto_stop_interval=0,
         ephemeral=True,
         env_vars=env_vars,
-    )
+    ),
+    timeout=600,
 )
 print(f"sandbox {sb.id} up", flush=True)
 

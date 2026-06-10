@@ -6,7 +6,7 @@
 : "${ENDPOINT:?set ENDPOINT to the preview URL}"
 : "${TOKEN:?set TOKEN to the preview token}"
 
-curl -s "$ENDPOINT/v1/chat/completions" \
+curl -sS --connect-timeout 30 --max-time 120 "$ENDPOINT/v1/chat/completions" \
   -H "x-daytona-preview-token: $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
