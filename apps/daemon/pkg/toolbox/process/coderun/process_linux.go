@@ -10,6 +10,12 @@ import (
 	"syscall"
 )
 
+// codeRunPlatformError reports whether code execution is supported on this
+// platform. Always nil on Linux.
+func codeRunPlatformError() error {
+	return nil
+}
+
 func setNewProcessGroup(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 }
