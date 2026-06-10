@@ -37,7 +37,6 @@ import {
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
 import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
-import { PaginatedSandboxesDtoDeprecated } from '../dto/paginated-sandboxes.deprecated.dto'
 import { RunnerService } from '../services/runner.service'
 import { RunnerAuthContextGuard } from '../guards/runner-auth-context.guard'
 import { RunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
@@ -69,7 +68,6 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
-import { ListSandboxesQueryDtoDeprecated } from '../dto/list-sandboxes-query.deprecated.dto'
 import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
 import { ForkSandboxDto } from '../dto/fork-sandbox.dto'
 import { ProxyAuthContextGuard } from '../guards/proxy-auth-context.guard'
@@ -143,88 +141,6 @@ export class SandboxController {
     @Query() query: ListSandboxesQueryDto,
   ): Promise<ListSandboxesResponseDto> {
     return this.sandboxService.search(authContext.organizationId, query)
-  }
-
-  @Get('paginated')
-  @ApiOperation({
-    summary: '[DEPRECATED] List all sandboxes paginated',
-    operationId: 'listSandboxesPaginated_deprecated',
-    deprecated: true,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Paginated list of all sandboxes',
-    type: PaginatedSandboxesDtoDeprecated,
-  })
-  @UseGuards(OrganizationAuthContextGuard)
-  async listSandboxesPaginated(
-    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
-    @Query() queryParams: ListSandboxesQueryDtoDeprecated,
-  ): Promise<PaginatedSandboxesDtoDeprecated> {
-    const {
-      page,
-      limit,
-      id,
-      name,
-      labels,
-      includeErroredDeleted: includeErroredDestroyed,
-      states,
-      snapshots,
-      regions,
-      minCpu,
-      maxCpu,
-      minMemoryGiB,
-      maxMemoryGiB,
-      minDiskGiB,
-      maxDiskGiB,
-      lastEventAfter,
-      lastEventBefore,
-      sort: sortField,
-      order: sortDirection,
-    } = queryParams
-
-    let parsedLabels: { [key: string]: string } | undefined
-    if (labels) {
-      try {
-        parsedLabels = JSON.parse(labels)
-      } catch {
-        throw new BadRequestError('Invalid labels JSON format')
-      }
-    }
-
-    const result = await this.sandboxService.findAllPaginatedDeprecated(
-      authContext.organizationId,
-      page,
-      limit,
-      {
-        id,
-        name,
-        labels: parsedLabels,
-        includeErroredDestroyed,
-        states,
-        snapshots,
-        regionIds: regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
-      },
-      {
-        field: sortField,
-        direction: sortDirection,
-      },
-    )
-
-    return {
-      items: await this.sandboxService.toSandboxDtos(result.items),
-      total: result.total,
-      page: result.page,
-      totalPages: result.totalPages,
-    }
   }
 
   @Post()

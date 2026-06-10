@@ -137,7 +137,6 @@ src/main/java/io/daytona/api/client/model/OtelConfig.java
 src/main/java/io/daytona/api/client/model/PaginatedAuditLogs.java
 src/main/java/io/daytona/api/client/model/PaginatedJobs.java
 src/main/java/io/daytona/api/client/model/PaginatedLogs.java
-src/main/java/io/daytona/api/client/model/PaginatedSandboxesDeprecated.java
 src/main/java/io/daytona/api/client/model/PaginatedSnapshots.java
 src/main/java/io/daytona/api/client/model/PaginatedTraces.java
 src/main/java/io/daytona/api/client/model/PollJobsResponse.java
@@ -338,7 +337,6 @@ src/test/java/io/daytona/api/client/model/OtelConfigTest.java
 src/test/java/io/daytona/api/client/model/PaginatedAuditLogsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedJobsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedLogsTest.java
-src/test/java/io/daytona/api/client/model/PaginatedSandboxesDeprecatedTest.java
 src/test/java/io/daytona/api/client/model/PaginatedSnapshotsTest.java
 src/test/java/io/daytona/api/client/model/PaginatedTracesTest.java
 src/test/java/io/daytona/api/client/model/PollJobsResponseTest.java

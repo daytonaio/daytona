@@ -123,7 +123,6 @@ lib/daytona_api_client/models/otel_config.rb
 lib/daytona_api_client/models/paginated_audit_logs.rb
 lib/daytona_api_client/models/paginated_jobs.rb
 lib/daytona_api_client/models/paginated_logs.rb
-lib/daytona_api_client/models/paginated_sandboxes_deprecated.rb
 lib/daytona_api_client/models/paginated_snapshots.rb
 lib/daytona_api_client/models/paginated_traces.rb
 lib/daytona_api_client/models/poll_jobs_response.rb

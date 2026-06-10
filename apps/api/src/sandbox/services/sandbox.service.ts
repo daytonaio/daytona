@@ -14,7 +14,7 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
+import { Not, Repository, LessThan, In, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxFork } from '../entities/sandbox-fork.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
@@ -63,13 +63,6 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
-import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
-import {
-  SandboxSortFieldDeprecated,
-  SandboxSortDirectionDeprecated,
-  DEFAULT_SANDBOX_SORT_FIELD_DEPRECATED,
-  DEFAULT_SANDBOX_SORT_DIRECTION_DEPRECATED,
-} from '../dto/list-sandboxes-query.deprecated.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import {
@@ -1471,125 +1464,6 @@ export class SandboxService {
       await this.snapshotService
         .rollbackPendingUsage(organizationId, pendingSnapshotCountIncrement)
         .catch((err) => this.logger.error(`Failed to roll back pending snapshot quota for org ${organizationId}:`, err))
-    }
-  }
-
-  async findAllPaginatedDeprecated(
-    organizationId: string,
-    page = 1,
-    limit = 10,
-    filters?: {
-      id?: string
-      name?: string
-      labels?: { [key: string]: string }
-      includeErroredDestroyed?: boolean
-      states?: SandboxState[]
-      snapshots?: string[]
-      regionIds?: string[]
-      minCpu?: number
-      maxCpu?: number
-      minMemoryGiB?: number
-      maxMemoryGiB?: number
-      minDiskGiB?: number
-      maxDiskGiB?: number
-      lastEventAfter?: Date
-      lastEventBefore?: Date
-    },
-    sort?: {
-      field?: SandboxSortFieldDeprecated
-      direction?: SandboxSortDirectionDeprecated
-    },
-  ): Promise<PaginatedList<Sandbox>> {
-    const pageNum = Number(page)
-    const limitNum = Number(limit)
-
-    const {
-      id,
-      name,
-      labels,
-      includeErroredDestroyed,
-      states,
-      snapshots,
-      regionIds,
-      minCpu,
-      maxCpu,
-      minMemoryGiB,
-      maxMemoryGiB,
-      minDiskGiB,
-      maxDiskGiB,
-      lastEventAfter,
-      lastEventBefore,
-    } = filters || {}
-
-    const {
-      field: sortField = DEFAULT_SANDBOX_SORT_FIELD_DEPRECATED,
-      direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION_DEPRECATED,
-    } = sort || {}
-
-    const baseFindOptions: FindOptionsWhere<Sandbox> = {
-      organizationId,
-      ...(id ? { id: ILike(`${id}%`) } : {}),
-      ...(name ? { name: ILike(`${name}%`) } : {}),
-      ...(labels ? { labels: JsonContains(labels) } : {}),
-      ...(snapshots ? { snapshot: In(snapshots) } : {}),
-      ...(regionIds ? { region: In(regionIds) } : {}),
-    }
-
-    baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
-    baseFindOptions.mem = createRangeFilter(minMemoryGiB, maxMemoryGiB)
-    baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
-
-    const lastActivityFilter = createRangeFilter(lastEventAfter, lastEventBefore)
-    if (lastActivityFilter) {
-      baseFindOptions.lastActivityAt = { lastActivityAt: lastActivityFilter }
-    }
-
-    const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
-    const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
-
-    const nonErrorStatesToInclude = statesToInclude.filter((state) => !errorStates.includes(state))
-    const errorStatesToInclude = statesToInclude.filter((state) => errorStates.includes(state))
-
-    const where: FindOptionsWhere<Sandbox>[] = []
-
-    if (nonErrorStatesToInclude.length > 0) {
-      where.push({
-        ...baseFindOptions,
-        state: In(nonErrorStatesToInclude),
-      })
-    }
-
-    if (errorStatesToInclude.length > 0) {
-      where.push({
-        ...baseFindOptions,
-        state: In(errorStatesToInclude),
-        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
-      })
-    }
-
-    const [items, total] = await this.sandboxRepository.findAndCount({
-      where,
-      relations: ['lastActivityAt'],
-      order: {
-        ...(sortField === SandboxSortFieldDeprecated.LAST_ACTIVITY_AT
-          ? { lastActivityAt: { lastActivityAt: { direction: sortDirection, nulls: 'LAST' } } }
-          : {
-              [sortField]: {
-                direction: sortDirection,
-                nulls: 'LAST',
-              },
-            }),
-        ...(sortField !== SandboxSortFieldDeprecated.CREATED_AT && { createdAt: 'DESC' }),
-      },
-      skip: (pageNum - 1) * limitNum,
-      take: limitNum,
-    })
-
-    return {
-      items,
-      total,
-      page: pageNum,
-      totalPages: Math.ceil(total / limitNum),
     }
   }
 

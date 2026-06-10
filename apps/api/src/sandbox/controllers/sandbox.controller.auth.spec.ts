@@ -37,18 +37,6 @@ describe('[AUTH] SandboxController', () => {
     expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
   })
 
-  it('listSandboxesPaginated', () => {
-    const methodName = trackMethod('listSandboxesPaginated')
-    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
-    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
-      AuthStrategyType.API_KEY,
-      AuthStrategyType.JWT,
-    ])
-    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
-    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
-    expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
-  })
-
   it('createSandbox', () => {
     const methodName = trackMethod('createSandbox')
     expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)

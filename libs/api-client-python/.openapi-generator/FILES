@@ -121,7 +121,6 @@ daytona_api_client/models/otel_config.py
 daytona_api_client/models/paginated_audit_logs.py
 daytona_api_client/models/paginated_jobs.py
 daytona_api_client/models/paginated_logs.py
-daytona_api_client/models/paginated_sandboxes_deprecated.py
 daytona_api_client/models/paginated_snapshots.py
 daytona_api_client/models/paginated_traces.py
 daytona_api_client/models/poll_jobs_response.py
