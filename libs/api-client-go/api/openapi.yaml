@@ -11006,9 +11006,9 @@ components:
         subpath: users/alice
       properties:
         volumeId:
-          description: The ID of the volume
+          description: The ID or name of the volume. Resolved to the volume ID on
+            sandbox create.
           example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-          format: uuid
           type: string
         mountPath:
           description: The mount path for the volume

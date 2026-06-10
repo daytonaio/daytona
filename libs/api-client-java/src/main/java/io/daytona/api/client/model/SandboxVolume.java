@@ -21,7 +21,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.UUID;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -54,7 +53,7 @@ public class SandboxVolume {
   public static final String SERIALIZED_NAME_VOLUME_ID = "volumeId";
   @SerializedName(SERIALIZED_NAME_VOLUME_ID)
   @javax.annotation.Nonnull
-  private UUID volumeId;
+  private String volumeId;
 
   public static final String SERIALIZED_NAME_MOUNT_PATH = "mountPath";
   @SerializedName(SERIALIZED_NAME_MOUNT_PATH)
@@ -69,21 +68,21 @@ public class SandboxVolume {
   public SandboxVolume() {
   }
 
-  public SandboxVolume volumeId(@javax.annotation.Nonnull UUID volumeId) {
+  public SandboxVolume volumeId(@javax.annotation.Nonnull String volumeId) {
     this.volumeId = volumeId;
     return this;
   }
 
   /**
-   * The ID of the volume
+   * The ID or name of the volume. Resolved to the volume ID on sandbox create.
    * @return volumeId
    */
   @javax.annotation.Nonnull
-  public UUID getVolumeId() {
+  public String getVolumeId() {
     return volumeId;
   }
 
-  public void setVolumeId(@javax.annotation.Nonnull UUID volumeId) {
+  public void setVolumeId(@javax.annotation.Nonnull String volumeId) {
     this.volumeId = volumeId;
   }
 

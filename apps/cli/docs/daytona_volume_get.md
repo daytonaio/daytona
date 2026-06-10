@@ -3,7 +3,7 @@
 Get volume details
 
 ```
-daytona volume get [VOLUME_ID] [flags]
+daytona volume get [VOLUME_ID_OR_NAME] [flags]
 ```
 
 ### Options

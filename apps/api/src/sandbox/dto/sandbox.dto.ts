@@ -5,7 +5,7 @@
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator'
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 import { BackupState } from '../enums/backup-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -16,14 +16,14 @@ import { GpuType } from '../enums/gpu-type.enum'
 @ApiSchema({ name: 'SandboxVolume' })
 export class SandboxVolume {
   @ApiProperty({
-    description: 'The ID of the volume',
+    description: 'The ID or name of the volume. Resolved to the volume ID on sandbox create.',
     example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-    format: 'uuid',
   })
-  // Must be the volume UUID, never a name. This value is forwarded to the runner
-  // and used to build the host bind-mount source (/mnt/daytona-volume-<volumeId>);
-  // a non-UUID (e.g. a name containing "../") would escape that base path.
-  @IsUUID()
+  // Kept as volumeId (not volumeIdOrName): the schema is shared with responses/storage
+  // where it is always the UUID. SandboxService.resolveVolumes swaps names for UUIDs
+  // before storage/forwarding; the runner rejects non-UUIDs.
+  @IsString()
+  @IsNotEmpty()
   volumeId: string
 
   @ApiProperty({

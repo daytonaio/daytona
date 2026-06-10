@@ -63,6 +63,7 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
+import { Volume } from '../entities/volume.entity'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import {
   SandboxSortFieldDeprecated,
@@ -563,16 +564,14 @@ export class SandboxService {
         pendingGpuIncrement = gpu
       }
 
+      // Resolve volume names to UUIDs before runner assignment, so invalid references fail fast
+      const resolvedVolumes = await this.resolveVolumes(organization.id, createSandboxDto.volumes)
+
       // GPU sandboxes are always ephemeral: they get exclusive ownership of a
       // runner for their lifetime and are auto-deleted on first stop. Skip the
       // warm-pool path entirely so we always provision a fresh container on a
       // currently-unoccupied GPU runner.
-      if (gpu > 0) {
-        const volumeIdOrNames = (createSandboxDto.volumes ?? []).map((v) => v.volumeId)
-        if (volumeIdOrNames.length > 0) {
-          await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
-        }
-      } else if (!linkedSandbox && (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0)) {
+      if (gpu <= 0 && !linkedSandbox && (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0)) {
         const skipWarmPool = (await this.redis.exists(`warm-pool:skip:${snapshot.id}`)) === 1
 
         if (!skipWarmPool) {
@@ -593,9 +592,6 @@ export class SandboxService {
             return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
           }
         }
-      } else if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
-        const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
-        await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
       // Serialize GPU runner assignment per region: getRunnersAtGpuCapacity reads
@@ -670,8 +666,8 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
-      if (createSandboxDto.volumes !== undefined) {
-        sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
+      if (resolvedVolumes !== undefined) {
+        sandbox.volumes = resolvedVolumes
       }
 
       sandbox.runnerId = runner.id
@@ -893,10 +889,8 @@ export class SandboxService {
         pendingGpuIncrement = gpu
       }
 
-      if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
-        const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
-        await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
-      }
+      // Resolve volume names to UUIDs, failing fast on invalid references
+      const resolvedVolumes = await this.resolveVolumes(organization.id, createSandboxDto.volumes)
 
       const sandbox = new Sandbox({ region: region.id, name: createSandboxDto.name })
 
@@ -933,8 +927,8 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
-      if (createSandboxDto.volumes !== undefined) {
-        sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
+      if (resolvedVolumes !== undefined) {
+        sandbox.volumes = resolvedVolumes
       }
 
       if (sandbox.sandboxClass !== SandboxClass.CONTAINER) {
@@ -3209,20 +3203,52 @@ export class SandboxService {
     return networkAllowList
   }
 
-  private resolveVolumes(volumes: SandboxVolume[]): SandboxVolume[] {
+  // Resolves each volumeId (which may be a volume name) to the volume's UUID — the
+  // runner builds a host mount path from this value, so only UUIDs may be stored.
+  private async resolveVolumes(
+    organizationId: string,
+    volumes?: SandboxVolume[],
+  ): Promise<SandboxVolume[] | undefined> {
+    if (volumes === undefined || volumes.length === 0) {
+      return volumes
+    }
+
+    const volumeIdOrNames = volumes.map((volume) => volume.volumeId)
+    const foundVolumes = await this.volumeService.validateVolumes(organizationId, volumeIdOrNames)
+
+    // The batch query result carries no link back to the input entries — index it
+    // so each entry can pick up the ID of the volume it referenced.
+    const volumesById = new Map<string, Volume>()
+    const volumesByName = new Map<string, Volume>()
+    for (const foundVolume of foundVolumes) {
+      volumesById.set(foundVolume.id, foundVolume)
+      volumesByName.set(foundVolume.name, foundVolume)
+    }
+
+    const resolved = volumes.map((volume) => {
+      // UUID-shaped references are IDs, anything else is a name (same rule as snapshots)
+      const matchedVolume = isValidUuid(volume.volumeId)
+        ? volumesById.get(volume.volumeId)
+        : volumesByName.get(volume.volumeId)
+      if (matchedVolume === undefined || !isValidUuid(matchedVolume.id)) {
+        throw new BadRequestError(`Volume '${volume.volumeId}' could not be resolved to a valid volume ID`)
+      }
+      return { ...volume, volumeId: matchedVolume.id }
+    })
+
     try {
-      validateMountPaths(volumes)
+      validateMountPaths(resolved)
     } catch (error) {
       throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume mount configuration')
     }
 
     try {
-      validateSubpaths(volumes)
+      validateSubpaths(resolved)
     } catch (error) {
       throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume subpath configuration')
     }
 
-    return volumes
+    return resolved
   }
 
   async createSshAccess(
