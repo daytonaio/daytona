@@ -408,7 +408,7 @@ func (c *ComputerUse) SetAccessibilityNodeValue(req *computeruse.AccessibilitySe
 			return fmt.Errorf("%w: ValuePattern", ErrActionNotSupported)
 		}
 		defer pattern.Release()
-		if readonly, err := pattern.CurrentIsReadonly(); err == nil && readonly {
+		if windowsBoolProperty(unsafe.Pointer(pattern), pattern.VTable().Get_CurrentIsReadonly) {
 			return fmt.Errorf("%w: value is read-only", ErrActionNotSupported)
 		}
 		if err := pattern.SetValue(req.Value); err != nil {
@@ -659,29 +659,27 @@ func windowsElementBounds(elt *uia.Element) computeruse.AccessibilityBounds {
 
 func windowsElementStates(elt *uia.Element, valuePattern *uia.ValuePattern) []string {
 	states := make([]string, 0, 8)
-	if windowsBoolProperty(elt.CurrentIsEnabled) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsEnabled) {
 		states = append(states, "enabled", "sensitive")
 	}
-	if windowsBoolProperty(elt.CurrentIsKeyboardFocusable) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsKeyboardFocusable) {
 		states = append(states, "focusable")
 	}
-	if windowsBoolProperty(elt.CurrentHasKeyboardFocus) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentHasKeyboardFocus) {
 		states = append(states, "focused", "active")
 	}
-	if offscreen, err := elt.CurrentIsOffscreen(); err == nil {
+	if offscreen, ok := windowsBoolPropertyOK(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsOffscreen); ok {
 		if offscreen {
 			states = append(states, "offscreen")
 		} else {
 			states = append(states, "visible", "showing")
 		}
 	}
-	if windowsBoolProperty(elt.CurrentIsPassword) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsPassword) {
 		states = append(states, "password")
 	}
-	if valuePattern != nil {
-		if readonly, err := valuePattern.CurrentIsReadonly(); err == nil && readonly {
-			states = append(states, "read_only")
-		}
+	if valuePattern != nil && windowsBoolProperty(unsafe.Pointer(valuePattern), valuePattern.VTable().Get_CurrentIsReadonly) {
+		states = append(states, "read_only")
 	}
 	return states
 }
@@ -1102,9 +1100,32 @@ func windowsBSTRProperty(elt *uia.Element, getter uintptr) string {
 	return value
 }
 
-func windowsBoolProperty(fn func() (bool, error)) bool {
-	value, err := fn()
-	return err == nil && value
+// The binding's bool getters (CurrentIsEnabled and friends, plus
+// ValuePattern.CurrentIsReadonly) pass the address of a 1-byte Go bool as
+// the COM BOOL* out-param; the provider's 4-byte store clobbers the 3
+// adjacent stack bytes on every call (binding replacement is deferred,
+// like the BSTR and pattern-getter workarounds above). windowsBoolProperty
+// owns the fetch through the raw vtable getter with a correctly sized
+// BOOL. this is the raw COM interface pointer the getter belongs to
+// (*uia.Element, *uia.ValuePattern). Failures read as false.
+func windowsBoolProperty(this unsafe.Pointer, getter uintptr) bool {
+	value, ok := windowsBoolPropertyOK(this, getter)
+	return ok && value
+}
+
+// windowsBoolPropertyOK additionally reports whether the fetch succeeded,
+// for the tri-state consumer (offscreen -> offscreen/visible/neither).
+func windowsBoolPropertyOK(this unsafe.Pointer, getter uintptr) (value, ok bool) {
+	var retVal int32
+	hr, _, _ := syscall.SyscallN(
+		getter,
+		uintptr(this),
+		uintptr(unsafe.Pointer(&retVal)),
+	)
+	if hr != 0 {
+		return false, false
+	}
+	return retVal != 0, true
 }
 
 // windowsControlTypeRoles maps UIA control type IDs to the canonical,
