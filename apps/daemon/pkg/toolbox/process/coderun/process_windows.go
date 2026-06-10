@@ -27,8 +27,14 @@ func codeRunPlatformError() error {
 // the whole process tree via taskkill /T instead of POSIX process groups.
 func setNewProcessGroup(cmd *exec.Cmd) {}
 
-// killProcessGroupHard kills the process and all of its descendants, the
-// closest Windows equivalent of the process-group SIGKILL in process_linux.go.
+// killProcessGroupHard kills the process and its descendants via taskkill /T,
+// which walks the live parent-PID chain — the closest Windows equivalent of
+// the process-group SIGKILL in process_linux.go, with one known gap: Windows
+// does not reparent orphans, so a grandchild whose intermediate parent has
+// already exited is unreachable from the root and survives (the Linux pgid
+// kill still catches that case). The faithful primitive is a Job Object
+// created at spawn (JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE + TerminateJobObject
+// on timeout) — tracked as follow-up work. Mirrors process.killExecProcessGroup.
 func killProcessGroupHard(pid int) error {
 	return common.KillProcessTree(pid)
 }

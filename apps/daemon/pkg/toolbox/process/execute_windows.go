@@ -44,9 +44,15 @@ func buildExecCmd(command string) *exec.Cmd {
 	return cmd
 }
 
-// killExecProcessGroup kills the shell and all of its descendants.
-// taskkill /T walks the parent-PID tree — the closest Windows equivalent of
-// the process-group SIGKILL in execute_linux.go. Mirrors
+// killExecProcessGroup kills the shell and its descendants via taskkill /T,
+// which walks the live parent-PID chain — the closest Windows equivalent of
+// the process-group SIGKILL in execute_linux.go, with one known gap: Windows
+// does not reparent orphans, so a grandchild whose intermediate parent has
+// already exited is unreachable from the root and survives (the Linux pgid
+// kill still catches that case). Such a survivor holding the inherited output
+// pipe is exactly what cmd.WaitDelay above bounds. The faithful primitive is
+// a Job Object created at spawn (JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE +
+// TerminateJobObject on timeout) — tracked as follow-up work. Mirrors
 // coderun.killProcessGroupHard.
 func killExecProcessGroup(cmd *exec.Cmd) error {
 	if err := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(cmd.Process.Pid)).Run(); err == nil {
