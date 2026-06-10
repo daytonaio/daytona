@@ -33,7 +33,7 @@ enableMocking().then(() =>
       <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
         <QueryProvider>
           <ThemeProvider>
-            <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={<LoadingFallback source="config-suspense" />}>
               <ConfigProvider>
                 <PostHogProviderWrapper>
                   <NuqsAdapter>

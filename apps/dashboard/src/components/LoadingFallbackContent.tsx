@@ -4,23 +4,31 @@
  */
 
 import { cn } from '@/lib/utils'
+import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Spinner } from './ui/spinner'
 
-export function LoadingFallbackContent({ className }: { className?: string }) {
+type LoadingFallbackContentProps = {
+  className?: string
+  source?: string
+}
+
+export function LoadingFallbackContent({ className, source = 'unknown' }: LoadingFallbackContentProps) {
   const [showLongLoadingMessage, setShowLongLoadingMessage] = useState(false)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLongLoadingMessage(true)
+      console.warn('[dashboard] Loading fallback still mounted after 5s', { source })
     }, 5_000)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [queryClient, source])
 
   return (
-    <div className={cn('flex items-center justify-center flex-col gap-2', className)}>
+    <div className={cn('flex items-center justify-center flex-col gap-2', className)} data-loading-source={source}>
       <Spinner className="w-8 h-8 animate-spin" />
       <motion.div
         initial={{ opacity: 0, y: 10 }}

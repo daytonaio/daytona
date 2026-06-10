@@ -46,7 +46,14 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }
 
   if (isLoading || !api) {
-    return <LoadingFallback />
+    let loadingSource = 'api-provider:missing-api'
+    if (activeNavigator) {
+      loadingSource = `api-provider:${activeNavigator}`
+    } else if (isLoading) {
+      loadingSource = 'api-provider:auth-loading'
+    }
+
+    return <LoadingFallback source={loadingSource} />
   }
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>

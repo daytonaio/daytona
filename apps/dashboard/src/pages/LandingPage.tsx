@@ -36,10 +36,10 @@ const LandingPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <LoadingFallback />
+    return <LoadingFallback source="landing-auth-loading" />
   }
 
-  return <LoadingFallback />
+  return <LoadingFallback source="landing-signin-redirect" />
 }
 
 export default LandingPage
