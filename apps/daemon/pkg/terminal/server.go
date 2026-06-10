@@ -4,7 +4,6 @@
 package terminal
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -52,25 +51,14 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Cancelled when the websocket read loop exits (client gone). On Windows
-	// SpawnTTY tears down the ConPTY session on cancellation; on Linux the
-	// Ctx is not yet honored (see SpawnTTYOptions).
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
-
 	decoder := NewUTF8Decoder()
 
 	sizeCh := make(chan common.TTYSize)
 	stdInReader, stdInWriter := io.Pipe()
 	stdOutReader, stdOutWriter := io.Pipe()
-	defer stdOutWriter.Close()
 
 	go func() {
-		// Unblock SpawnTTY's stdin copy and resize consumer when the client
-		// goes away, in addition to cancelling the session ctx.
-		defer cancel()
 		defer close(sizeCh)
-		defer stdInWriter.Close()
 		for {
 			messageType, p, err := conn.ReadMessage()
 			if err != nil {
@@ -126,7 +114,6 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = common.SpawnTTY(common.SpawnTTYOptions{
-		Ctx:    ctx,
 		Dir:    dir,
 		StdIn:  stdInReader,
 		StdOut: stdOutWriter,

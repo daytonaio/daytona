@@ -6,7 +6,6 @@
 package common
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -65,38 +64,6 @@ func GetShell() string {
 	return "powershell.exe"
 }
 
-// ShellCommand builds an exec.Cmd that runs commandLine through shell.
-//
-// For cmd.exe the command line must bypass Go's default per-argument
-// quoting: os/exec escapes embedded quotes as \" (MSVCRT rules), which
-// cmd.exe does not understand, so quoted arguments would reach the child
-// program with literal quote characters. Instead the raw line is passed
-// via SysProcAttr.CmdLine using `cmd /S /C "<commandLine>"` — with /S,
-// cmd strips only the outer quote pair and runs the command verbatim.
-// PowerShell parses \" natively, so the default quoting is correct there.
-func ShellCommand(shell, commandLine string) *exec.Cmd {
-	if IsPowerShell(shell) {
-		return exec.Command(shell, "-NoProfile", "-NonInteractive", "-Command", commandLine)
-	}
-	cmd := exec.Command(shell)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		CmdLine: fmt.Sprintf(`"%s" /S /C "%s"`, shell, commandLine),
-	}
-	return cmd
-}
-
-// GetShellArgs returns the arguments needed to execute a command in the shell.
-// For PowerShell: -NoProfile -NonInteractive -Command
-// For cmd.exe: /C
-func GetShellArgs(shell string) []string {
-	// Check if it's PowerShell
-	if isPowerShell(shell) {
-		return []string{"-NoProfile", "-NonInteractive", "-Command"}
-	}
-	// Assume cmd.exe
-	return []string{"/C"}
-}
-
 // NewShellCommand returns an exec.Cmd that runs command through shell.
 // An empty command yields an interactive shell invocation.
 //
@@ -112,7 +79,7 @@ func NewShellCommand(shell, command string) *exec.Cmd {
 		return exec.Command(shell)
 	}
 	if IsPowerShell(shell) {
-		return exec.Command(shell, append(GetShellArgs(shell), command)...)
+		return exec.Command(shell, "-NoProfile", "-NonInteractive", "-Command", command)
 	}
 	// cmd.Args is bypassed when SysProcAttr.CmdLine is set; keep it
 	// populated anyway so logs and debuggers show the intended invocation.
@@ -121,11 +88,6 @@ func NewShellCommand(shell, command string) *exec.Cmd {
 		CmdLine: `"` + shell + `" /C ` + command,
 	}
 	return cmd
-}
-
-// isPowerShell checks if the shell path refers to PowerShell (internal use)
-func isPowerShell(shell string) bool {
-	return IsPowerShell(shell)
 }
 
 // IsPowerShell checks if the shell path refers to PowerShell

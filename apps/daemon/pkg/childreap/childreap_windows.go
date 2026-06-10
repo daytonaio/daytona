@@ -14,7 +14,6 @@
 package childreap
 
 import (
-	"bytes"
 	"errors"
 	"os/exec"
 )
@@ -34,53 +33,6 @@ func Wait(cmd *exec.Cmd) (int, error) {
 // against, cmd.Wait is always the sole status consumer.
 func Reap(cmd *exec.Cmd) (int, error) {
 	return Wait(cmd)
-}
-
-// Run starts cmd and waits for it to finish. Like the Linux implementation,
-// non-zero exits are reported via the exit code, not the error.
-func Run(cmd *exec.Cmd) (int, error) {
-	if cmd == nil {
-		return -1, errors.New("childreap.Run: nil cmd")
-	}
-	if err := cmd.Start(); err != nil {
-		return -1, err
-	}
-	return Wait(cmd)
-}
-
-// CombinedOutput runs cmd with stdout and stderr both captured into a
-// single buffer. Returns (output, exitCode, err); err being nil does NOT
-// mean the command succeeded — check exitCode for that.
-func CombinedOutput(cmd *exec.Cmd) ([]byte, int, error) {
-	if cmd == nil {
-		return nil, -1, errors.New("childreap.CombinedOutput: nil cmd")
-	}
-	if cmd.Stdout != nil {
-		return nil, -1, errors.New("childreap.CombinedOutput: cmd.Stdout already set")
-	}
-	if cmd.Stderr != nil {
-		return nil, -1, errors.New("childreap.CombinedOutput: cmd.Stderr already set")
-	}
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
-	code, err := Run(cmd)
-	return buf.Bytes(), code, err
-}
-
-// Output runs cmd and captures stdout into a buffer. Stderr is left as-is.
-// Returns (stdout, exitCode, err); see Run for the (exitCode, err) contract.
-func Output(cmd *exec.Cmd) ([]byte, int, error) {
-	if cmd == nil {
-		return nil, -1, errors.New("childreap.Output: nil cmd")
-	}
-	if cmd.Stdout != nil {
-		return nil, -1, errors.New("childreap.Output: cmd.Stdout already set")
-	}
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	code, err := Run(cmd)
-	return buf.Bytes(), code, err
 }
 
 // foldExitError mirrors the Linux contract: *exec.ExitError carries a real

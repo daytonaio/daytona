@@ -132,6 +132,7 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	sizeCh := make(chan common.TTYSize)
 
 	go func() {
+		defer close(sizeCh)
 		for win := range winCh {
 			sizeCh <- common.TTYSize{
 				Height: win.Height,
