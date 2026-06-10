@@ -38,6 +38,7 @@ var (
 	procIsWindowVisible   = user32.NewProc("IsWindowVisible")
 	procGetWindowRect     = user32.NewProc("GetWindowRect")
 	procMapVirtualKeyW    = user32.NewProc("MapVirtualKeyW")
+	procGetForegroundWnd  = user32.NewProc("GetForegroundWindow")
 )
 
 // SendInput type field.
@@ -234,10 +235,25 @@ func sendInputs(inputs []inputStruct) error {
 // Mouse
 // ---------------------------------------------------------------------------
 
-func getMousePosition() (int, int) {
+// getMousePositionChecked reads the cursor position, reporting failure
+// instead of fabricating (0,0). GetCursorPos fails with ERROR_ACCESS_DENIED
+// when the calling desktop is unavailable (locked session, secure desktop),
+// so API handlers must surface the error rather than return zero values.
+func getMousePositionChecked() (int, int, error) {
 	var pt pointStruct
-	procGetCursorPos.Call(uintptr(unsafe.Pointer(&pt)))
-	return int(pt.X), int(pt.Y)
+	ret, _, err := procGetCursorPos.Call(uintptr(unsafe.Pointer(&pt)))
+	if ret == 0 {
+		return 0, 0, fmt.Errorf("GetCursorPos failed: %v", err)
+	}
+	return int(pt.X), int(pt.Y), nil
+}
+
+// getMousePosition is the Windows side of the per-OS mouse-position seam
+// used by the shared screenshot pipeline in screenshot.go, where cursor
+// drawing is best-effort. Mouse API handlers use getMousePositionChecked.
+func getMousePosition() (int, int) {
+	x, y, _ := getMousePositionChecked()
+	return x, y
 }
 
 func setMousePosition(x, y int) error {
@@ -470,6 +486,7 @@ func typeString(text string, delay int) error {
 
 // windowInfo describes a top-level window enumerated by getWindowsList.
 type windowInfo struct {
+	HWND    uintptr
 	Title   string
 	Visible bool
 	X       int
@@ -513,6 +530,7 @@ var (
 		// usually internal Win32 helpers that pollute the listing.
 		if title != "" || visible {
 			enumWindowsCollected = append(enumWindowsCollected, windowInfo{
+				HWND:    hwnd,
 				Title:   title,
 				Visible: visible,
 				X:       x,
@@ -525,14 +543,27 @@ var (
 	})
 )
 
-// getWindowsList enumerates all top-level windows.
-func getWindowsList() []windowInfo {
+// getWindowsList enumerates all top-level windows. The enumeration callback
+// always returns 1, so a zero return from EnumWindows is a real failure
+// (e.g. inaccessible desktop), not an aborted walk — report it instead of
+// passing off an empty desktop.
+func getWindowsList() ([]windowInfo, error) {
 	enumWindowsMu.Lock()
 	defer enumWindowsMu.Unlock()
 
 	enumWindowsCollected = nil
-	procEnumWindows.Call(enumWindowsCallback, 0)
+	ret, _, err := procEnumWindows.Call(enumWindowsCallback, 0)
 	collected := enumWindowsCollected
 	enumWindowsCollected = nil
-	return collected
+	if ret == 0 {
+		return nil, fmt.Errorf("EnumWindows failed: %v", err)
+	}
+	return collected, nil
+}
+
+// getForegroundWindow returns the HWND of the current foreground window, or
+// 0 when no window has focus (e.g. a screensaver or secure desktop is up).
+func getForegroundWindow() uintptr {
+	hwnd, _, _ := procGetForegroundWnd.Call()
+	return hwnd
 }

@@ -12,7 +12,10 @@ import (
 
 // GetMousePosition returns the current mouse cursor position
 func (c *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, error) {
-	x, y := getMousePosition()
+	x, y, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MousePositionResponse{
 		Position: computeruse.Position{
@@ -32,7 +35,10 @@ func (c *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse
 	time.Sleep(50 * time.Millisecond)
 
 	// Get the mouse position after move
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MousePositionResponse{
 		Position: computeruse.Position{
@@ -62,7 +68,10 @@ func (c *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.Mo
 	}
 
 	// Get position after click
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MouseClickResponse{
 		Position: computeruse.Position{
@@ -127,7 +136,10 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	time.Sleep(50 * time.Millisecond)
 
 	// Get final position
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MouseDragResponse{
 		Position: computeruse.Position{

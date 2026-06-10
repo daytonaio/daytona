@@ -160,6 +160,8 @@ func TestGetWindowsListDoesNotLeakCallbacks(t *testing.T) {
 		t.Skip("skipping 2100-iteration callback-leak regression in -short mode")
 	}
 	for i := 0; i < 2100; i++ {
-		_ = getWindowsList()
+		if _, err := getWindowsList(); err != nil {
+			t.Fatalf("getWindowsList: %v", err)
+		}
 	}
 }
