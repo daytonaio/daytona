@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/cli/cmd"
+	api "github.com/daytonaio/daytona/cli/cmd/api"
 	"github.com/daytonaio/daytona/cli/cmd/auth"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/cmd/mcp"
@@ -54,6 +55,7 @@ func init() {
 	rootCmd.AddCommand(cmd.AutoCompleteCmd)
 	rootCmd.AddCommand(cmd.GenerateDocsCmd)
 	rootCmd.AddCommand(cmd.VersionCmd)
+	rootCmd.AddCommand(api.ApiCmd)
 
 	// Add sandbox subcommands as top-level shortcuts
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.CreateCmd))
@@ -66,6 +68,8 @@ func init() {
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.SSHCmd))
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.ExecCmd))
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.PreviewUrlCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.CpCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.LogsCmd))
 
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
