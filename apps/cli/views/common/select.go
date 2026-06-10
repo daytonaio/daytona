@@ -6,6 +6,8 @@ package common
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 )
 
 // SelectItem represents an item in the selection list
@@ -94,6 +96,10 @@ func (m SelectModel) View() string {
 // Select displays a selection prompt with the given title and items
 // Returns the selected item's title and any error that occurred
 func Select(title string, items []SelectItem) (string, error) {
+	if !internal.Interactive() {
+		return "", clierr.New(clierr.CategoryUsage, "cannot prompt for input in non-interactive mode").WithHint("re-run interactively or provide the value via flags")
+	}
+
 	p := tea.NewProgram(NewSelectModel(title, items), tea.WithAltScreen())
 	m, err := p.Run()
 	if err != nil {

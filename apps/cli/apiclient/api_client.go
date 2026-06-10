@@ -39,9 +39,10 @@ const DaytonaSourceHeader = "X-Daytona-Source"
 const API_VERSION_HEADER = "X-Daytona-Api-Version"
 
 func checkVersionsMismatch(res *http.Response) {
-	// If the CLI is running in a structured output mode (e.g. json/yaml),
-	// avoid printing human-readable warnings that could break consumers.
-	if internal.SuppressVersionMismatchWarning {
+	// If the CLI is running in a structured output mode (e.g. json/yaml) or
+	// with prompting disabled (--no-input), avoid printing human-readable
+	// warnings that could break consumers.
+	if internal.SuppressVersionMismatchWarning || internal.NoInput {
 		return
 	}
 

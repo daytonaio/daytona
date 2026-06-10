@@ -10,6 +10,8 @@ import (
 	"github.com/charmbracelet/huh"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/organization"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -47,6 +49,9 @@ var CreateCmd = &cobra.Command{
 		case len(regions) == 1:
 			chosenRegion = &regions[0]
 		default:
+			if !internal.Interactive() {
+				return clierr.New(clierr.CategoryUsage, "cannot prompt for input in non-interactive mode").WithHint("pass --region")
+			}
 			var chosenRegionId string
 			var regionOptions []huh.Option[string]
 
