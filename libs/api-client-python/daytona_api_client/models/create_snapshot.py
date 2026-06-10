@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client.models.create_build_info import CreateBuildInfo
 from daytona_api_client.models.gpu_type import GpuType
@@ -44,8 +44,9 @@ class CreateSnapshot(BaseModel):
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", serialization_alias="buildInfo")
     region_id: Optional[StrictStr] = Field(default=None, description="ID of the region where the snapshot will be available. Defaults to organization default region if not specified.", serialization_alias="regionId")
     sandbox_class: Optional[SandboxClass] = Field(default=None, description="Target sandbox class. Determines which runners can host sandboxes created from this snapshot.", serialization_alias="sandboxClass")
+    cold: Optional[StrictBool] = Field(default=False, description="When true, the snapshot is \"cold\": it is never auto-propagated to runners. Sandboxes can still be created from it via an on-demand pull (they briefly enter the pulling_snapshot state). Defaults to false (warm).")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "cpu", "gpu", "gpuType", "memory", "disk", "buildInfo", "regionId", "sandboxClass"]
+    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "cpu", "gpu", "gpuType", "memory", "disk", "buildInfo", "regionId", "sandboxClass", "cold"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -117,7 +118,8 @@ class CreateSnapshot(BaseModel):
             "disk": obj.get("disk"),
             "build_info": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
             "region_id": obj.get("regionId"),
-            "sandbox_class": obj.get("sandboxClass")
+            "sandbox_class": obj.get("sandboxClass"),
+            "cold": obj.get("cold") if obj.get("cold") is not None else False
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -25,6 +25,8 @@ type SnapshotDto struct {
 	Id string `json:"id"`
 	OrganizationId *string `json:"organizationId,omitempty"`
 	General bool `json:"general"`
+	// Whether the snapshot is cold (never auto-propagated to runners; pulled on demand).
+	Cold bool `json:"cold"`
 	Name string `json:"name"`
 	ImageName *string `json:"imageName,omitempty"`
 	State SnapshotState `json:"state"`
@@ -59,10 +61,11 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, cold bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
+	this.Cold = cold
 	this.Name = name
 	this.State = state
 	this.Size = size
@@ -164,6 +167,30 @@ func (o *SnapshotDto) GetGeneralOk() (*bool, bool) {
 // SetGeneral sets field value
 func (o *SnapshotDto) SetGeneral(v bool) {
 	o.General = v
+}
+
+// GetCold returns the Cold field value
+func (o *SnapshotDto) GetCold() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.Cold
+}
+
+// GetColdOk returns a tuple with the Cold field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetColdOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Cold, true
+}
+
+// SetCold sets field value
+func (o *SnapshotDto) SetCold(v bool) {
+	o.Cold = v
 }
 
 // GetName returns the Name field value
@@ -701,6 +728,7 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 		toSerialize["organizationId"] = o.OrganizationId
 	}
 	toSerialize["general"] = o.General
+	toSerialize["cold"] = o.Cold
 	toSerialize["name"] = o.Name
 	if !IsNil(o.ImageName) {
 		toSerialize["imageName"] = o.ImageName
@@ -751,6 +779,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"id",
 		"general",
+		"cold",
 		"name",
 		"state",
 		"size",
@@ -795,6 +824,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "organizationId")
 		delete(additionalProperties, "general")
+		delete(additionalProperties, "cold")
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "imageName")
 		delete(additionalProperties, "state")

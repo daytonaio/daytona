@@ -68,6 +68,7 @@ const formSchema = z.object({
   gpuType: z.nativeEnum(GpuType).optional(),
   regionId: z.string().optional(),
   sandboxClass: z.nativeEnum(SandboxClass).optional(),
+  cold: z.boolean().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -83,6 +84,7 @@ const defaultValues: FormValues = {
   gpuType: undefined,
   regionId: undefined,
   sandboxClass: SandboxClass.CONTAINER,
+  cold: false,
 }
 
 export const CreateSnapshotSheet = ({
@@ -150,6 +152,7 @@ export const CreateSnapshotSheet = ({
             gpuType: value.gpu && value.gpuType ? [value.gpuType] : undefined,
             regionId: value.regionId,
             sandboxClass: value.sandboxClass,
+            cold: value.cold,
           },
           organizationId: selectedOrganization.id,
         })
@@ -465,6 +468,28 @@ export const CreateSnapshotSheet = ({
                     have an entrypoint, 'sleep infinity' will be used as the default.
                   </FieldDescription>
                 </Field>
+              )}
+            </form.Field>
+
+            <form.Field name="cold">
+              {(field) => (
+                <div className="flex items-start gap-2 pt-1">
+                  <Checkbox
+                    id={field.name}
+                    className="mt-0.5"
+                    checked={field.state.value ?? false}
+                    onCheckedChange={(checked) => field.handleChange(checked === true)}
+                  />
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor={field.name} className="text-sm font-normal">
+                      Cold snapshot
+                    </Label>
+                    <FieldDescription>
+                      Cold snapshots are not pre-distributed to runners. Creating a sandbox is still possible, but the
+                      first one briefly pulls the snapshot on demand. Use for rarely-used snapshots to save resources.
+                    </FieldDescription>
+                  </div>
+                </div>
               )}
             </form.Field>
           </form>

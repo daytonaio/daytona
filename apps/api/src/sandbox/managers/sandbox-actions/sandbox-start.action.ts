@@ -178,6 +178,9 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
+    const snapshotPullScoreThreshold = this.configService.get('runnerScore.thresholds.snapshotPull')
+
+    const processingScoreThreshold = isBuild ? declarativeBuildScoreThreshold : snapshotPullScoreThreshold
 
     const buildInfoOverloadedRunnerIds = isBuild
       ? await this.getBuildInfoOverloadedRunnerIds(snapshotRef, sandbox.cpu)
@@ -245,7 +248,7 @@ export class SandboxStartAction extends SandboxAction {
         continue
       }
 
-      if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
+      if (processingScoreThreshold === undefined || runner.availabilityScore >= processingScoreThreshold) {
         if (snapshotRunner.state === targetState) {
           await this.updateSandboxState(sandbox, targetSandboxState, lockCode, runner.id)
           return SYNC_AGAIN
@@ -276,10 +279,10 @@ export class SandboxStartAction extends SandboxAction {
         gpu: sandbox.gpu,
         gpuType: sandbox.gpuType ?? null,
         excludedRunnerIds: excludedRunnerIds,
-        ...(isBuild &&
-          declarativeBuildScoreThreshold !== undefined && {
-            availabilityScoreThreshold: declarativeBuildScoreThreshold,
-          }),
+        // Must match the Phase 2 reuse check, else Phase 3 picks a runner Phase 2 won't reuse, churning pulls.
+        ...(processingScoreThreshold !== undefined && {
+          availabilityScoreThreshold: processingScoreThreshold,
+        }),
       })
     } catch {
       // TODO: reconsider the timeout here

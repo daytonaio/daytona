@@ -43,6 +43,8 @@ type CreateSnapshot struct {
 	RegionId *string `json:"regionId,omitempty"`
 	// Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
 	SandboxClass *SandboxClass `json:"sandboxClass,omitempty"`
+	// When true, the snapshot is \"cold\": it is never auto-propagated to runners. Sandboxes can still be created from it via an on-demand pull (they briefly enter the pulling_snapshot state). Defaults to false (warm).
+	Cold *bool `json:"cold,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -55,6 +57,8 @@ type _CreateSnapshot CreateSnapshot
 func NewCreateSnapshot(name string) *CreateSnapshot {
 	this := CreateSnapshot{}
 	this.Name = name
+	var cold bool = false
+	this.Cold = &cold
 	return &this
 }
 
@@ -63,6 +67,8 @@ func NewCreateSnapshot(name string) *CreateSnapshot {
 // but it doesn't guarantee that properties required by API are set
 func NewCreateSnapshotWithDefaults() *CreateSnapshot {
 	this := CreateSnapshot{}
+	var cold bool = false
+	this.Cold = &cold
 	return &this
 }
 
@@ -410,6 +416,38 @@ func (o *CreateSnapshot) SetSandboxClass(v SandboxClass) {
 	o.SandboxClass = &v
 }
 
+// GetCold returns the Cold field value if set, zero value otherwise.
+func (o *CreateSnapshot) GetCold() bool {
+	if o == nil || IsNil(o.Cold) {
+		var ret bool
+		return ret
+	}
+	return *o.Cold
+}
+
+// GetColdOk returns a tuple with the Cold field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSnapshot) GetColdOk() (*bool, bool) {
+	if o == nil || IsNil(o.Cold) {
+		return nil, false
+	}
+	return o.Cold, true
+}
+
+// HasCold returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasCold() bool {
+	if o != nil && !IsNil(o.Cold) {
+		return true
+	}
+
+	return false
+}
+
+// SetCold gets a reference to the given bool and assigns it to the Cold field.
+func (o *CreateSnapshot) SetCold(v bool) {
+	o.Cold = &v
+}
+
 func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -450,6 +488,9 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.SandboxClass) {
 		toSerialize["sandboxClass"] = o.SandboxClass
+	}
+	if !IsNil(o.Cold) {
+		toSerialize["cold"] = o.Cold
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -505,6 +546,7 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "buildInfo")
 		delete(additionalProperties, "regionId")
 		delete(additionalProperties, "sandboxClass")
+		delete(additionalProperties, "cold")
 		o.AdditionalProperties = additionalProperties
 	}
 

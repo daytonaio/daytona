@@ -69,6 +69,14 @@ public class SnapshotDtoTest {
     }
 
     /**
+     * Test the property 'cold'
+     */
+    @Test
+    public void coldTest() {
+        // TODO: test cold
+    }
+
+    /**
      * Test the property 'name'
      */
     @Test

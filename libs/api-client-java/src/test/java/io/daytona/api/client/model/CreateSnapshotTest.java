@@ -130,4 +130,12 @@ public class CreateSnapshotTest {
         // TODO: test sandboxClass
     }
 
+    /**
+     * Test the property 'cold'
+     */
+    @Test
+    public void coldTest() {
+        // TODO: test cold
+    }
+
 }

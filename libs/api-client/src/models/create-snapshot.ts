@@ -68,6 +68,10 @@ export interface CreateSnapshot {
      * Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
      */
     'sandboxClass'?: SandboxClass;
+    /**
+     * When true, the snapshot is \"cold\": it is never auto-propagated to runners. Sandboxes can still be created from it via an on-demand pull (they briefly enter the pulling_snapshot state). Defaults to false (warm).
+     */
+    'cold'?: boolean;
 }
 
 

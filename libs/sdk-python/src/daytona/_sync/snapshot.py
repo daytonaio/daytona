@@ -165,6 +165,7 @@ class SnapshotService:
         create_snapshot_req.sandbox_class = (
             SyncSandboxClass(params.sandbox_class.value) if params.sandbox_class is not None else None
         )
+        create_snapshot_req.cold = params.cold
 
         created_snapshot: SnapshotDto = self.__snapshots_api.create_snapshot(create_snapshot_req)
 

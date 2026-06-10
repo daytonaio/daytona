@@ -74,6 +74,8 @@ class CreateSnapshotParams(BaseModel):
             Defaults to organization default region if not specified.
         sandbox_class (SandboxClass | None): Target sandbox class. Determines which runners
             can host sandboxes created from this snapshot.
+        cold (bool | None): When True, the snapshot is not auto-propagated to runners; sandboxes
+            pull it on demand. Defaults to False (warm).
     """
 
     name: str
@@ -82,3 +84,4 @@ class CreateSnapshotParams(BaseModel):
     entrypoint: list[str] | None = None
     region_id: str | None = None
     sandbox_class: SandboxClass | None = None
+    cold: bool | None = None
