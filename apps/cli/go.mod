@@ -4,7 +4,7 @@ go 1.25.4
 
 require (
 	github.com/charmbracelet/bubbletea v1.1.0
-	github.com/daytonaio/daytona/libs/api-client-go v0.185.0
+	github.com/daytonaio/daytona/libs/api-client-go v0.186.0
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/mark3labs/mcp-go v0.32.0
