@@ -82,7 +82,7 @@
       "options": {
         "cmd": "gow",
         "cwd": ".",
-        "main": "./{projectRoot}/cmd/daemon"
+        "main": "{projectRoot}/cmd/daemon/main.go"
       },
       "configurations": {
         "production": {}
