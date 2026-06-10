@@ -70,7 +70,12 @@ const runCommand = defineTool({
   parameters: z.object({
     sandboxId: z.string(),
     command: z.string().describe('Shell command. Use && to chain. Absolute paths or `cd /home/daytona && ...`.'),
-    background: z.boolean().optional().describe('Run asynchronously and return immediately. Use for dev servers.'),
+    background: z
+      .boolean()
+      .optional()
+      .describe(
+        'Run asynchronously and return immediately. Use for long-lived non-preview processes such as watchers or log tails; for user-visible dev servers, use startWebServer.',
+      ),
   }),
   execute: async ({ sandboxId, command, background }) => {
     const sandbox = await daytona.get(sandboxId)

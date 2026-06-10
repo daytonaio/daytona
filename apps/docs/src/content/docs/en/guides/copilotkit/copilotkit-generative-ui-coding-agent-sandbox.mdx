@@ -15,7 +15,7 @@ Every tool call streams into the chat as generative UI: shell commands render as
 
 ### 1. Workflow Overview
 
-The agent has 11 tools and a sandbox. On the first prompt it calls `createSandbox`, then chains shell commands, file writes, and filesystem queries until the user's request is done. When the user asks for something they should see in a browser, the agent starts a dev server in the background and then calls `getPreviewUrl` to surface the running app as a live iframe inside the chat.
+The agent has 11 tools and a sandbox. On the first prompt it calls `createSandbox`, then chains shell commands, file writes, and filesystem queries until the user's request is done. When the user asks for something they should see in a browser, the agent calls `startWebServer` with the dev-server command and its port; that tool spawns the server in the background, polls for a ready signal, and returns the preview URL, which the frontend embeds as a live iframe inside the chat.
 
 Follow-up turns trigger more `writeFile` calls. If the iframe is up and the dev server has HMR, edits reload the inner page in place, so a chat back-and-forth becomes a live editing loop on the running app.
 
@@ -209,17 +209,22 @@ const createSandbox = defineTool({
 })
 ```
 
-`runCommand` is the most heavily-used tool. The `background` flag flips between a synchronous `executeCommand` (blocks until exit, returns stdout) and an asynchronous `executeSessionCommand({ runAsync: true })` (returns immediately, leaves the process running). Dev servers go through the background path; everything else uses the synchronous one:
+`runCommand` is the most heavily-used tool. The `background` flag flips between a synchronous `executeCommand` (blocks until exit, returns stdout) and an asynchronous `executeSessionCommand({ runAsync: true })` (returns immediately, leaves the process running). The background path is for long-lived non-preview processes the agent won't need to interact with again, like test watchers, build watchers, or log tails. Dev servers the user should see in a browser go through the dedicated `startWebServer` tool instead, which spawns the server, polls its logs for a ready signal, and returns the preview URL atomically:
 
 ```typescript
 const runCommand = defineTool({
   name: 'runCommand',
   description:
-    'Execute a shell command in the sandbox. Set background:true for dev servers and other long-lived processes. Use plain commands (rm, mv, mkdir, chmod, ...) for filesystem ops that do not need structured output.',
+    'Execute a shell command in the sandbox. Set background:true for long-lived fire-and-forget processes (test watchers, build watchers, log followers) the agent will not need to interact with again. Use plain commands (rm, mv, mkdir, chmod, ...) for filesystem ops that do not need structured output. For dev servers the user should see in a browser, use startWebServer instead — it returns the preview URL atomically.',
   parameters: z.object({
     sandboxId: z.string(),
     command: z.string().describe('Shell command. Use && to chain. Absolute paths or `cd /home/daytona && ...`.'),
-    background: z.boolean().optional().describe('Run asynchronously and return immediately. Use for dev servers.'),
+    background: z
+      .boolean()
+      .optional()
+      .describe(
+        'Run asynchronously and return immediately. Use for long-lived non-preview processes such as watchers or log tails; for user-visible dev servers, use startWebServer.',
+      ),
   }),
   execute: async ({ sandboxId, command, background }) => {
     const sandbox = await daytona.get(sandboxId)
@@ -257,7 +262,7 @@ const writeFile = defineTool({
 })
 ```
 
-`getPreviewUrl` is the bridge to the iframe-in-chat experience. It returns the public proxy URL for the given port; the frontend renderer then embeds that URL as an `<iframe>` in the chat card:
+`getPreviewUrl` returns the Daytona proxy URL for any port the sandbox has open. It is the standalone counterpart to `startWebServer`: use it when the agent has already brought up a hosted process by other means (a previous `runCommand`, an already-running service) and just needs the URL to surface as an iframe, without spawning a new dev server:
 
 ```typescript
 const getPreviewUrl = defineTool({
@@ -350,7 +355,7 @@ function parseResult<T>(result: unknown): T | undefined {
 }
 ```
 
-Each render hook references a named Zod schema and a result type declared at the top of `app/page.tsx`. The `getPreviewUrl` renderer is the one users notice most: while the tool is `inProgress`/`executing` it shows a shimmering skeleton, and once `complete` it flips to a live `<iframe>` pointing at the Daytona preview URL:
+Each render hook references a named Zod schema and a result type declared at the top of `app/page.tsx`. The renderer for `startWebServer` (and the fallback `getPreviewUrl`) is the one users notice most: while either tool is `inProgress`/`executing` the card shows a shimmering skeleton, and once `complete` it flips to a live `<iframe>` pointing at the Daytona preview URL. Both tools share the same `PreviewCard` component because the shape of the data the card needs (`url` and `port`) is identical; the `getPreviewUrl` registration is shown below:
 
 ```tsx
 const getPreviewUrlParams = z.object({
