@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from 'react-oidc-context'
 import LoadingFallback from '@/components/LoadingFallback'
 import { RoutePath } from '@/enums/RoutePath'
+import React from 'react'
+import { useAuth } from 'react-oidc-context'
+import { Navigate, useLocation } from 'react-router'
 
 const LandingPage: React.FC = () => {
   const { signinRedirect, isAuthenticated, isLoading } = useAuth()

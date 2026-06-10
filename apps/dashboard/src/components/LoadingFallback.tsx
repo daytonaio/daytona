@@ -39,7 +39,11 @@ function SidebarSkeletonItem({ width }: { width: string }) {
   )
 }
 
-const LoadingFallback = () => {
+type LoadingFallbackProps = {
+  source?: string
+}
+
+const LoadingFallback = ({ source = 'unknown' }: LoadingFallbackProps) => {
   return (
     <SidebarProvider isBannerVisible={false}>
       <SidebarComponent isBannerVisible={false} collapsible="icon">
@@ -83,7 +87,7 @@ const LoadingFallback = () => {
       </SidebarComponent>
       <SidebarInset className="overflow-hidden">
         <div className="absolute inset-0 p-6 bg-background z-[3]">
-          <LoadingFallbackContent className="h-full" />
+          <LoadingFallbackContent className="h-full" source={source} />
         </div>
       </SidebarInset>
     </SidebarProvider>

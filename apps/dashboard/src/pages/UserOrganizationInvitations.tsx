@@ -12,7 +12,7 @@ import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvit
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationInvitation } from '@daytona/api-client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 
 const UserOrganizationInvitations: React.FC = () => {

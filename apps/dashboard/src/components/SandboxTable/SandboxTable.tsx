@@ -32,7 +32,7 @@ import {
 import { Container } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
 import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useCommandPaletteActions } from '../CommandPalette'
 import { SelectionToast } from '../SelectionToast'
 import { Button } from '../ui/button'

@@ -19,8 +19,8 @@ import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizati
 import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
-import { useRegions } from '@/hooks/useRegions'
 import { useRegionClassSelection } from '@/hooks/useRegionClassSelection'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import type { Organization, RegionUsageOverview, SandboxClass } from '@daytona/api-client'
@@ -28,7 +28,7 @@ import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
 import { ReactNode, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 export default function Limits() {
   const { user } = useAuth()
