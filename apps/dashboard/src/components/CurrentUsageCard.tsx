@@ -4,9 +4,10 @@
  */
 
 import { LiveIndicator } from '@/components/LiveIndicator'
-import { getSandboxClassLabel } from '@/components/SandboxTable/constants'
+import { getSandboxClassIcon, getSandboxClassLabel } from '@/components/SandboxTable/constants'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
@@ -79,19 +80,27 @@ export function CurrentUsageCard({ organizationTier }: { organizationTier?: { ti
             className="-mx-4 gap-0 pt-5"
           >
             <div className="flex items-end justify-between gap-3 pr-4 shadow-[inset_0_-1px] shadow-border">
-              <div className="min-w-0 overflow-x-auto">
-                <TabsList variant="underline" className="min-w-max border-b-0">
+              <ScrollArea
+                fade="mask"
+                horizontal
+                vertical={false}
+                fadeOffset={36}
+                className="h-[42px] min-w-0 flex-1 [&_[data-slot=scroll-area-scrollbar]]:hidden [&_[data-slot=scroll-area-viewport]]:pb-px"
+              >
+                <TabsList variant="underline" className="h-[41px] w-max min-w-full border-b-0">
                   {classes.map((sandboxClass) => {
+                    const Icon = getSandboxClassIcon(sandboxClass)
                     const label = getSandboxClassLabel(sandboxClass)
 
                     return (
-                      <TabsTrigger key={sandboxClass} value={sandboxClass} className="gap-2 px-4 py-2">
+                      <TabsTrigger key={sandboxClass} value={sandboxClass} className="h-[41px] gap-2 py-0">
+                        <Icon className="size-4 shrink-0" />
                         <span>{label}</span>
                       </TabsTrigger>
                     )
                   })}
                 </TabsList>
-              </div>
+              </ScrollArea>
               {regionsForSelectedClass.length > 0 && (
                 <div className="flex shrink-0 items-center gap-1 pb-1">
                   <span className="text-xs text-muted-foreground">Region:</span>
