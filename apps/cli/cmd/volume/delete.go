@@ -6,6 +6,7 @@ package volume
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
@@ -14,7 +15,7 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [VOLUME_ID]",
+	Use:     "delete [VOLUME_ID_OR_NAME]",
 	Short:   "Delete a volume",
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("delete"),
@@ -26,7 +27,27 @@ var DeleteCmd = &cobra.Command{
 			return err
 		}
 
-		res, err := apiClient.VolumesAPI.DeleteVolume(ctx, args[0]).Execute()
+		// UUID-shaped arguments are treated as volume IDs first, but volume names
+		// may also be UUID-shaped, so resolve by name when no ID matches. The
+		// fallback only runs when the ID lookup found nothing, so it can never
+		// delete a different volume than the one referenced.
+		if isVolumeId(args[0]) {
+			res, err := apiClient.VolumesAPI.DeleteVolume(ctx, args[0]).Execute()
+			if err == nil {
+				view_common.RenderInfoMessageBold(fmt.Sprintf("Volume %s deleted", args[0]))
+				return nil
+			}
+			if res == nil || res.StatusCode != http.StatusNotFound {
+				return apiclient.HandleErrorResponse(res, err)
+			}
+		}
+
+		vol, res, err := apiClient.VolumesAPI.GetVolumeByName(ctx, args[0]).Execute()
+		if err != nil {
+			return apiclient.HandleErrorResponse(res, err)
+		}
+
+		res, err = apiClient.VolumesAPI.DeleteVolume(ctx, vol.Id).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

@@ -23,9 +23,14 @@ import (
 const volumeMountPrefix = "daytona-volume-"
 
 // volumeId becomes part of the host mount path and the S3 bucket name, so require
-// the canonical UUID form (the length check excludes braced/URN/dashless variants).
+// the canonical lowercase UUID form (rejects braced/URN/dashless/uppercase variants,
+// which uuid.Parse would otherwise accept).
 func isValidVolumeId(volumeId string) bool {
-	return len(volumeId) == 36 && uuid.Validate(volumeId) == nil
+	parsed, err := uuid.Parse(volumeId)
+	if err != nil {
+		return false
+	}
+	return parsed.String() == volumeId
 }
 
 func getVolumeMountBasePath() string {

@@ -1,6 +1,6 @@
 name: daytona volume delete
 synopsis: Delete a volume
-usage: daytona volume delete [VOLUME_ID] [flags]
+usage: daytona volume delete [VOLUME_ID_OR_NAME] [flags]
 inherited_options:
   - name: help
     default_value: 'false'

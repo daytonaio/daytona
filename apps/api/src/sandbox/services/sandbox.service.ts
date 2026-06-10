@@ -63,7 +63,6 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
-import { Volume } from '../entities/volume.entity'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import {
   SandboxSortFieldDeprecated,
@@ -3214,22 +3213,10 @@ export class SandboxService {
     }
 
     const volumeIdOrNames = volumes.map((volume) => volume.volumeId)
-    const foundVolumes = await this.volumeService.validateVolumes(organizationId, volumeIdOrNames)
-
-    // The batch query result carries no link back to the input entries — index it
-    // so each entry can pick up the ID of the volume it referenced.
-    const volumesById = new Map<string, Volume>()
-    const volumesByName = new Map<string, Volume>()
-    for (const foundVolume of foundVolumes) {
-      volumesById.set(foundVolume.id, foundVolume)
-      volumesByName.set(foundVolume.name, foundVolume)
-    }
+    const foundVolumes = await this.volumeService.getVolumesByIdOrName(organizationId, volumeIdOrNames)
 
     const resolved = volumes.map((volume) => {
-      // UUID-shaped references are IDs, anything else is a name (same rule as snapshots)
-      const matchedVolume = isValidUuid(volume.volumeId)
-        ? volumesById.get(volume.volumeId)
-        : volumesByName.get(volume.volumeId)
+      const matchedVolume = foundVolumes.get(volume.volumeId)
       if (matchedVolume === undefined || !isValidUuid(matchedVolume.id)) {
         throw new BadRequestError(`Volume '${volume.volumeId}' could not be resolved to a valid volume ID`)
       }

@@ -34,11 +34,15 @@ var GetCmd = &cobra.Command{
 			return err
 		}
 
-		// UUID-shaped arguments are volume IDs, anything else is a name
+		// UUID-shaped arguments are looked up as volume IDs first, but volume names
+		// may also be UUID-shaped, so fall back to a name lookup when no ID matches
 		var vol *apiclient.VolumeDto
 		var res *http.Response
 		if isVolumeId(args[0]) {
 			vol, res, err = apiClient.VolumesAPI.GetVolume(ctx, args[0]).Execute()
+			if err != nil && res != nil && res.StatusCode == http.StatusNotFound {
+				vol, res, err = apiClient.VolumesAPI.GetVolumeByName(ctx, args[0]).Execute()
+			}
 		} else {
 			vol, res, err = apiClient.VolumesAPI.GetVolumeByName(ctx, args[0]).Execute()
 		}
