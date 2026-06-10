@@ -63,6 +63,12 @@ func (e *Error) WithCode(code int) *Error {
 	return e
 }
 
+// HasCategory reports whether err is (or wraps) an *Error with the given category.
+func HasCategory(err error, cat Category) bool {
+	var cliErr *Error
+	return errors.As(err, &cliErr) && cliErr.Category == cat
+}
+
 // ExitCode maps an error to a process exit code: an explicit Code wins,
 // usage errors exit 2, wait timeouts exit 124, everything else exits 1.
 func ExitCode(err error) int {

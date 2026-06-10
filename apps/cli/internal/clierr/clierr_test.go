@@ -108,3 +108,26 @@ func TestWithCodeOverride(t *testing.T) {
 		t.Errorf("ExitCode after WithCode(255) = %d, want 255", got)
 	}
 }
+
+func TestHasCategory(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		cat  clierr.Category
+		want bool
+	}{
+		{name: "direct match", err: clierr.New(clierr.CategoryNotFound, "gone"), cat: clierr.CategoryNotFound, want: true},
+		{name: "wrapped match", err: fmt.Errorf("context: %w", clierr.New(clierr.CategoryNotFound, "gone")), cat: clierr.CategoryNotFound, want: true},
+		{name: "nil error", err: nil, cat: clierr.CategoryNotFound, want: false},
+		{name: "wrong category", err: clierr.New(clierr.CategoryServer, "boom"), cat: clierr.CategoryNotFound, want: false},
+		{name: "plain error", err: errors.New("boom"), cat: clierr.CategoryNotFound, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := clierr.HasCategory(tt.err, tt.cat); got != tt.want {
+				t.Errorf("HasCategory(%v, %q) = %v, want %v", tt.err, tt.cat, got, tt.want)
+			}
+		})
+	}
+}

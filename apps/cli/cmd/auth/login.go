@@ -33,31 +33,11 @@ var LoginCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		if apiKeyFlag != "" {
-			return updateProfileWithLogin(nil, &apiKeyFlag)
+		key, err := resolveAPIKey(apiKeyFlag, loginApiKeyStdinFlag, loginApiKeyFileFlag, os.Stdin)
+		if err != nil {
+			return err
 		}
-
-		if loginApiKeyStdinFlag {
-			data, err := io.ReadAll(os.Stdin)
-			if err != nil {
-				return fmt.Errorf("error reading API key from stdin: %w", err)
-			}
-			key := strings.TrimSpace(string(data))
-			if key == "" {
-				return clierr.New(clierr.CategoryUsage, "empty API key on stdin")
-			}
-			return updateProfileWithLogin(nil, &key)
-		}
-
-		if loginApiKeyFileFlag != "" {
-			data, err := os.ReadFile(loginApiKeyFileFlag)
-			if err != nil {
-				return fmt.Errorf("error reading API key file: %w", err)
-			}
-			key := strings.TrimSpace(string(data))
-			if key == "" {
-				return clierr.Newf(clierr.CategoryUsage, "empty API key in file %s", loginApiKeyFileFlag)
-			}
+		if key != "" {
 			return updateProfileWithLogin(nil, &key)
 		}
 
@@ -118,6 +98,42 @@ func init() {
 	LoginCmd.Flags().BoolVar(&loginApiKeyStdinFlag, "api-key-stdin", false, "Read the API key from stdin")
 	LoginCmd.Flags().StringVar(&loginApiKeyFileFlag, "api-key-file", "", "Read the API key from a file")
 	LoginCmd.MarkFlagsMutuallyExclusive("api-key", "api-key-stdin", "api-key-file")
+}
+
+// resolveAPIKey resolves the API key from the non-interactive sources, in
+// precedence order: --api-key value, stdin (--api-key-stdin), then a file
+// (--api-key-file). It returns "" with a nil error when no source was given,
+// in which case the caller falls back to the interactive flow.
+func resolveAPIKey(flagVal string, stdinFlag bool, fileFlag string, stdin io.Reader) (string, error) {
+	if flagVal != "" {
+		return flagVal, nil
+	}
+
+	if stdinFlag {
+		data, err := io.ReadAll(stdin)
+		if err != nil {
+			return "", fmt.Errorf("error reading API key from stdin: %w", err)
+		}
+		key := strings.TrimSpace(string(data))
+		if key == "" {
+			return "", clierr.New(clierr.CategoryUsage, "empty API key on stdin")
+		}
+		return key, nil
+	}
+
+	if fileFlag != "" {
+		data, err := os.ReadFile(fileFlag)
+		if err != nil {
+			return "", fmt.Errorf("error reading API key file: %w", err)
+		}
+		key := strings.TrimSpace(string(data))
+		if key == "" {
+			return "", clierr.Newf(clierr.CategoryUsage, "empty API key in file %s", fileFlag)
+		}
+		return key, nil
+	}
+
+	return "", nil
 }
 
 func updateProfileWithLogin(tokenConfig *config.Token, apiKey *string) error {

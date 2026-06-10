@@ -5,36 +5,11 @@ package sandbox
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/daytonaio/daytona/cli/internal/clierr"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 )
-
-func TestDeleteIsNotFound(t *testing.T) {
-	tests := []struct {
-		name string
-		err  error
-		want bool
-	}{
-		{name: "nil error", err: nil, want: false},
-		{name: "plain error", err: errors.New("boom"), want: false},
-		{name: "not found clierr", err: clierr.New(clierr.CategoryNotFound, "sandbox not found"), want: true},
-		{name: "other category clierr", err: clierr.New(clierr.CategoryServer, "internal error"), want: false},
-		{name: "wrapped not found", err: fmt.Errorf("context: %w", clierr.New(clierr.CategoryNotFound, "gone")), want: true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := deleteIsNotFound(tt.err); got != tt.want {
-				t.Errorf("deleteIsNotFound(%v) = %v, want %v", tt.err, got, tt.want)
-			}
-		})
-	}
-}
 
 func TestSandboxDryRunResult(t *testing.T) {
 	state := apiclient.SANDBOXSTATE_STARTED

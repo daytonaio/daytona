@@ -75,26 +75,21 @@ var DeleteCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
+		if len(args) == 0 && !allFlag {
+			return clierr.New(clierr.CategoryUsage, "missing required argument: sandbox ID or name (or pass --all)")
+		}
+
 		apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 		if err != nil {
 			return err
 		}
 
 		if len(args) == 0 {
-			if allFlag {
-				return deleteAllSandboxes(ctx, apiClient)
-			}
-			return cmd.Help()
+			return deleteAllSandboxes(ctx, apiClient)
 		}
 
 		return deleteSingleSandbox(ctx, apiClient, args[0])
 	},
-}
-
-// deleteIsNotFound reports whether err is a not_found CLI error.
-func deleteIsNotFound(err error) bool {
-	var cliErr *clierr.Error
-	return errors.As(err, &cliErr) && cliErr.Category == clierr.CategoryNotFound
 }
 
 // sandboxDryRunResult builds the dry-run payload for the given sandboxes.
@@ -130,7 +125,7 @@ func awaitSandboxDeleted(ctx context.Context, apiClient *apiclient.APIClient, id
 		sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, id).Execute()
 		if err != nil {
 			handled := apiclient_cli.HandleErrorResponse(res, err)
-			if deleteIsNotFound(handled) {
+			if clierr.HasCategory(handled, clierr.CategoryNotFound) {
 				return nil
 			}
 			return handled
@@ -266,7 +261,7 @@ func deleteSingleSandbox(ctx context.Context, apiClient *apiclient.APIClient, sa
 	sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxIdOrNameArg).Execute()
 	if err != nil {
 		handled := apiclient_cli.HandleErrorResponse(res, err)
-		if deleteIgnoreNotFoundFlag && deleteIsNotFound(handled) {
+		if deleteIgnoreNotFoundFlag && clierr.HasCategory(handled, clierr.CategoryNotFound) {
 			return sandboxNotFoundOutput(sandboxIdOrNameArg)
 		}
 		return handled
@@ -293,7 +288,7 @@ func deleteSingleSandbox(ctx context.Context, apiClient *apiclient.APIClient, sa
 	_, res, err = apiClient.SandboxAPI.DeleteSandbox(ctx, sandbox.Id).Execute()
 	if err != nil {
 		handled := apiclient_cli.HandleErrorResponse(res, err)
-		if deleteIgnoreNotFoundFlag && deleteIsNotFound(handled) {
+		if deleteIgnoreNotFoundFlag && clierr.HasCategory(handled, clierr.CategoryNotFound) {
 			return sandboxNotFoundOutput(sandboxIdOrNameArg)
 		}
 		return handled
