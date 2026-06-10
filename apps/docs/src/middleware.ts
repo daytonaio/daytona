@@ -42,7 +42,7 @@ export const onRequest = defineMiddleware(
         )
       } catch {
         // During prerender the target server doesn't exist yet; fall through
-        return next()
+        return rewrite404ForMarkdownAccept(await next(), request)
       }
     }
 
