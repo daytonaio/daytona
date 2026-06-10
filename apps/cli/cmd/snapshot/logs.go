@@ -5,7 +5,6 @@ package snapshot
 
 import (
 	"context"
-	"time"
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
@@ -24,7 +23,7 @@ var LogsCmd = &cobra.Command{
 	Long:  "View the build logs of a snapshot. With --follow the logs are streamed until the snapshot build reaches a terminal state.",
 	Example: `  daytona snapshot logs my-snapshot:1.0
   daytona snapshot logs my-snapshot:1.0 --follow`,
-	Args:    cobra.ExactArgs(1),
+	Args:    requireSnapshotArg,
 	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -62,47 +61,36 @@ var LogsCmd = &cobra.Command{
 			return common.ReadBuildLogs(ctx, params)
 		}
 
-		logsCtx, stopLogs := context.WithCancel(ctx)
-		defer stopLogs()
-
-		streamDone := make(chan error, 1)
-		go func() {
-			streamDone <- common.ReadBuildLogs(logsCtx, params)
-		}()
-
-		for {
+		return common.FollowBuildLogs(ctx, params, func(ctx context.Context) (bool, error) {
 			snap, res, err := apiClient.SnapshotsAPI.GetSnapshot(ctx, snapshot.Id).Execute()
 			if err != nil {
-				return apiclient_cli.HandleErrorResponse(res, err)
+				return false, apiclient_cli.HandleErrorResponse(res, err)
 			}
-
-			if done, failed := isSnapshotBuildDone(snap.State); done {
-				// Grace period so trailing log output is flushed before the
-				// stream is canceled.
-				time.Sleep(250 * time.Millisecond)
-				stopLogs()
-				if streamDone != nil {
-					<-streamDone
-				}
-				if failed {
-					if reason := snap.GetErrorReason(); reason != "" {
-						return clierr.Newf(clierr.CategoryServer, "snapshot processing failed: %s", reason)
-					}
-					return clierr.New(clierr.CategoryServer, "snapshot processing failed")
-				}
-				return nil
+			done, failed := isSnapshotBuildDone(snap.State)
+			if !done {
+				return false, nil
 			}
-
-			select {
-			case err := <-streamDone:
-				streamDone = nil
-				if err != nil {
-					return err
-				}
-			case <-time.After(time.Second):
+			if !failed {
+				return true, nil
 			}
-		}
+			if reason := snap.GetErrorReason(); reason != "" {
+				return true, clierr.Newf(clierr.CategoryServer, "snapshot processing failed: %s", reason)
+			}
+			return true, clierr.New(clierr.CategoryServer, "snapshot processing failed")
+		})
 	},
+}
+
+// requireSnapshotArg validates that exactly one snapshot ID or name argument
+// is provided, returning a usage-category error otherwise.
+func requireSnapshotArg(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		return clierr.New(clierr.CategoryUsage, "missing required argument: snapshot ID or name")
+	}
+	if len(args) > 1 {
+		return clierr.Newf(clierr.CategoryUsage, "expected a single snapshot ID or name argument, received %d arguments", len(args))
+	}
+	return nil
 }
 
 // isSnapshotBuildDone reports whether the snapshot state is terminal for log

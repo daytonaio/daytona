@@ -5,7 +5,6 @@ package sandbox
 
 import (
 	"context"
-	"time"
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
@@ -24,7 +23,7 @@ var LogsCmd = &cobra.Command{
 	Long:  "View the build logs of a sandbox. With --follow the logs are streamed until the sandbox build reaches a terminal state.",
 	Example: `  daytona logs my-sandbox
   daytona logs my-sandbox --follow`,
-	Args:    cobra.ExactArgs(1),
+	Args:    requireSandboxArg,
 	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -62,48 +61,26 @@ var LogsCmd = &cobra.Command{
 			return common.ReadBuildLogs(ctx, params)
 		}
 
-		logsCtx, stopLogs := context.WithCancel(ctx)
-		defer stopLogs()
-
-		streamDone := make(chan error, 1)
-		go func() {
-			streamDone <- common.ReadBuildLogs(logsCtx, params)
-		}()
-
-		for {
+		return common.FollowBuildLogs(ctx, params, func(ctx context.Context) (bool, error) {
 			sb, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandbox.Id).Execute()
 			if err != nil {
-				return apiclient_cli.HandleErrorResponse(res, err)
+				return false, apiclient_cli.HandleErrorResponse(res, err)
 			}
-
-			if sb.State != nil {
-				if done, failed := isSandboxBuildDone(*sb.State); done {
-					// Grace period so trailing log output is flushed before the
-					// stream is canceled.
-					time.Sleep(250 * time.Millisecond)
-					stopLogs()
-					if streamDone != nil {
-						<-streamDone
-					}
-					if failed {
-						if reason := sb.GetErrorReason(); reason != "" {
-							return clierr.Newf(clierr.CategoryServer, "sandbox processing failed: %s", reason)
-						}
-						return clierr.New(clierr.CategoryServer, "sandbox processing failed")
-					}
-					return nil
-				}
+			if sb.State == nil {
+				return false, nil
 			}
-
-			select {
-			case err := <-streamDone:
-				streamDone = nil
-				if err != nil {
-					return err
-				}
-			case <-time.After(time.Second):
+			done, failed := isSandboxBuildDone(*sb.State)
+			if !done {
+				return false, nil
 			}
-		}
+			if !failed {
+				return true, nil
+			}
+			if reason := sb.GetErrorReason(); reason != "" {
+				return true, clierr.Newf(clierr.CategoryServer, "sandbox processing failed: %s", reason)
+			}
+			return true, clierr.New(clierr.CategoryServer, "sandbox processing failed")
+		})
 	},
 }
 
