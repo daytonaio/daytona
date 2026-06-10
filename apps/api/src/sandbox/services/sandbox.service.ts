@@ -23,6 +23,9 @@ import { ForkSandboxDto } from '../dto/fork-sandbox.dto'
 import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { isRegistryBasedSandboxClass } from '../utils/sandbox-class.util'
+import { OpenFeature } from '@openfeature/server-sdk'
+import { FeatureFlags } from '../../common/constants/feature-flags'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
 import { RunnerService } from './runner.service'
@@ -1286,9 +1289,7 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (![SandboxClass.LINUX_VM, SandboxClass.WINDOWS].includes(sandbox.sandboxClass)) {
-      throw new HttpException('Snapshotting is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
-    }
+    const includeMemory = dto.includeMemory ?? false
 
     try {
       if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
@@ -1305,6 +1306,17 @@ export class SandboxService {
 
       const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
+      if (sandbox.sandboxClass === SandboxClass.WINDOWS) {
+        if (includeMemory && sandbox.state !== SandboxState.STARTED) {
+          throw new BadRequestError('Snapshots with memory require the Windows sandbox to be running (STARTED)')
+        }
+        if (!includeMemory && sandbox.state !== SandboxState.STOPPED) {
+          throw new BadRequestError('Filesystem-only snapshots require the Windows sandbox to be stopped (STOPPED)')
+        }
+      } else if (includeMemory) {
+        throw new BadRequestError('includeMemory is only supported for Windows sandboxes')
+      }
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const region = await this.regionService.findOne(sandbox.region)
@@ -1312,7 +1324,15 @@ export class SandboxService {
         throw new NotFoundException(`Region with ID ${sandbox.region} not found`)
       }
 
-      const registry = (await this.dockerRegistryService.getAvailableInternalRegistry(sandbox.region)) ?? undefined
+      let registry: DockerRegistry | undefined
+      if (isRegistryBasedSandboxClass(sandbox.sandboxClass)) {
+        registry = (await this.dockerRegistryService.getAvailableInternalRegistry(sandbox.region)) ?? undefined
+        if (sandbox.sandboxClass === SandboxClass.CONTAINER && !registry) {
+          throw new BadRequestError(
+            'No internal registry is available for this sandbox region; cannot snapshot a container sandbox',
+          )
+        }
+      }
 
       const { pendingSnapshotCountIncremented } = await this.snapshotService.validateOrganizationQuotas(
         organization,
@@ -1372,7 +1392,7 @@ export class SandboxService {
         })
       } else {
         try {
-          await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry)
+          await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry, includeMemory)
         } catch (error) {
           await this.sandboxRepository.updateWhere(sandbox.id, {
             updateData: {

@@ -131,6 +131,7 @@ export interface RunnerAdapter {
     snapshotName: string,
     organizationId: string,
     registry?: DockerRegistry,
+    includeMemory?: boolean,
   ): Promise<CreateSandboxSnapshotResult | undefined>
 
   recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart?: boolean): Promise<void>

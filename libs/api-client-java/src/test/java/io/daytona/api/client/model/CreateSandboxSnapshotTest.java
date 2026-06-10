@@ -45,4 +45,12 @@ public class CreateSandboxSnapshotTest {
         // TODO: test name
     }
 
+    /**
+     * Test the property 'includeMemory'
+     */
+    @Test
+    public void includeMemoryTest() {
+        // TODO: test includeMemory
+    }
+
 }

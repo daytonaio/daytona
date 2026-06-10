@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsString } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsBoolean, IsOptional, IsString } from 'class-validator'
 import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateSandboxSnapshot' })
@@ -16,4 +16,13 @@ export class CreateSandboxSnapshotDto {
   @IsString()
   @IsSafeDisplayString()
   name: string
+
+  @ApiPropertyOptional({
+    description:
+      "Include the VM's memory in the snapshot. VM sandboxes only. When true the sandbox must be STARTED; when false (default) VM sandboxes must be STOPPED. Container sandboxes do not support memory snapshots.",
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  includeMemory?: boolean
 }

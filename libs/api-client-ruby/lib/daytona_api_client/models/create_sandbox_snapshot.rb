@@ -18,10 +18,14 @@ module DaytonaApiClient
     # Name for the new snapshot
     attr_accessor :name
 
+    # Include the VM's memory in the snapshot. VM sandboxes only. When true the sandbox must be STARTED; when false (default) VM sandboxes must be STOPPED. Container sandboxes do not support memory snapshots.
+    attr_accessor :include_memory
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'name' => :'name'
+        :'name' => :'name',
+        :'include_memory' => :'includeMemory'
       }
     end
 
@@ -38,7 +42,8 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'name' => :'String'
+        :'name' => :'String',
+        :'include_memory' => :'Boolean'
       }
     end
 
@@ -68,6 +73,12 @@ module DaytonaApiClient
         self.name = attributes[:'name']
       else
         self.name = nil
+      end
+
+      if attributes.key?(:'include_memory')
+        self.include_memory = attributes[:'include_memory']
+      else
+        self.include_memory = false
       end
     end
 
@@ -106,7 +117,8 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          name == o.name
+          name == o.name &&
+          include_memory == o.include_memory
     end
 
     # @see the `==` method
@@ -118,7 +130,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name].hash
+      [name, include_memory].hash
     end
 
     # Builds the object from hash

@@ -11637,12 +11637,19 @@ components:
       type: object
     CreateSandboxSnapshot:
       example:
+        includeMemory: false
         name: my-dev-env-v1
       properties:
         name:
           description: Name for the new snapshot
           example: my-dev-env-v1
           type: string
+        includeMemory:
+          default: false
+          description: Include the VM's memory in the snapshot. VM sandboxes only.
+            When true the sandbox must be STARTED; when false (default) VM sandboxes
+            must be STOPPED. Container sandboxes do not support memory snapshots.
+          type: boolean
       required:
       - name
       type: object

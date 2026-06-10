@@ -103,27 +103,20 @@ export function SandboxTableActions({
         })
       }
 
-      if (isVmSandbox && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
+      if (sandbox.gpu === 0 && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
         items.push({
           key: 'create-snapshot',
           label: 'Create Snapshot',
           onClick: () => onCreateSnapshot?.(),
           disabled: isLoading,
         })
+      }
 
+      if (isVmSandbox && sandbox.state === SandboxState.STARTED) {
         items.push({
           key: 'fork',
           label: 'Fork',
           onClick: () => onFork?.(),
-          disabled: isLoading,
-        })
-      }
-
-      if (isVmSandbox) {
-        items.push({
-          key: 'view-forks',
-          label: 'View Fork Tree',
-          onClick: () => onViewForks?.(),
           disabled: isLoading,
         })
       }
@@ -139,6 +132,16 @@ export function SandboxTableActions({
         key: 'revoke-ssh',
         label: 'Revoke SSH Access',
         onClick: () => onRevokeSshAccess(sandbox.id),
+        disabled: isLoading,
+      })
+    }
+
+    // Viewing the fork tree is read-only, so it's available regardless of write permission.
+    if (isVmSandbox) {
+      items.push({
+        key: 'view-forks',
+        label: 'View Fork Tree',
+        onClick: () => onViewForks?.(),
         disabled: isLoading,
       })
     }
@@ -180,52 +183,60 @@ export function SandboxTableActions({
     isVmSandbox,
   ])
 
-  if (!writePermitted && !deletePermitted) {
+  if (menuItems.length === 0) {
     return null
   }
 
+  // The primary start/stop/recover and terminal controls are write actions; hide them from
+  // users who can only view (e.g. read-only users reaching the read-only "View Fork Tree").
+  const showWriteControls = writePermitted || deletePermitted
+
   return (
     <div className="flex items-center justify-end gap-2">
-      <TooltipButton
-        variant="ghost"
-        size="icon-sm"
-        tooltipText={primaryActionTooltip}
-        aria-label={primaryActionTooltip}
-        onClick={(e) => {
-          e.stopPropagation()
-          if (sandbox.state === SandboxState.STARTED) {
-            onStop(sandbox.id)
-          } else if (sandbox.state === SandboxState.ERROR && sandbox.recoverable) {
-            onRecover(sandbox.id)
-          } else {
-            onStart(sandbox.id)
-          }
-        }}
-        disabled={isLoading}
-      >
-        {sandbox.state === SandboxState.STARTED ? (
-          <Square className="w-4 h-4" />
-        ) : sandbox.state === SandboxState.STOPPING || sandbox.state === SandboxState.STARTING ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : sandbox.state === SandboxState.ERROR && sandbox.recoverable ? (
-          <Wrench className="w-4 h-4" />
-        ) : (
-          <Play className="w-4 h-4" />
-        )}
-      </TooltipButton>
+      {showWriteControls && (
+        <>
+          <TooltipButton
+            variant="ghost"
+            size="icon-sm"
+            tooltipText={primaryActionTooltip}
+            aria-label={primaryActionTooltip}
+            onClick={(e) => {
+              e.stopPropagation()
+              if (sandbox.state === SandboxState.STARTED) {
+                onStop(sandbox.id)
+              } else if (sandbox.state === SandboxState.ERROR && sandbox.recoverable) {
+                onRecover(sandbox.id)
+              } else {
+                onStart(sandbox.id)
+              }
+            }}
+            disabled={isLoading}
+          >
+            {sandbox.state === SandboxState.STARTED ? (
+              <Square className="w-4 h-4" />
+            ) : sandbox.state === SandboxState.STOPPING || sandbox.state === SandboxState.STARTING ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : sandbox.state === SandboxState.ERROR && sandbox.recoverable ? (
+              <Wrench className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+          </TooltipButton>
 
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label="Open terminal"
-        onClick={(e) => {
-          e.stopPropagation()
-          onOpenTerminal?.()
-        }}
-        disabled={isLoading}
-      >
-        <Terminal className="w-4 h-4" />
-      </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Open terminal"
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpenTerminal?.()
+            }}
+            disabled={isLoading}
+          >
+            <Terminal className="w-4 h-4" />
+          </Button>
+        </>
+      )}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
