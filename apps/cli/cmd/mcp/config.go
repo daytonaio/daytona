@@ -13,7 +13,7 @@ import (
 )
 
 var ConfigCmd = &cobra.Command{
-	Use:   "config [AGENT_NAME]",
+	Use:   "config",
 	Short: "Outputs JSON configuration for Daytona MCP Server",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -38,9 +38,3 @@ var CreateCmd = &cobra.Command{
 		return nil
 	},
 }
-
-var sizeFlag int32
-
-func init() {
-	CreateCmd.Flags().Int32VarP(&sizeFlag, "size", "s", 10, "Size of the volume in GB")
-}
