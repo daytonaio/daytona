@@ -172,13 +172,10 @@ func (c *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-	}
-
-	if req.ShowCursor {
-		response.CursorPosition = &computeruse.Position{
+		CursorPosition: &computeruse.Position{
 			X: mouseX,
 			Y: mouseY,
-		}
+		},
 	}
 
 	return response, nil
@@ -219,13 +216,10 @@ func (c *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-	}
-
-	if req.ShowCursor {
-		response.CursorPosition = &computeruse.Position{
+		CursorPosition: &computeruse.Position{
 			X: mouseX + req.X,
 			Y: mouseY + req.Y,
-		}
+		},
 	}
 
 	return response, nil
