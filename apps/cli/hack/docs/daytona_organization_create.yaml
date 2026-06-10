@@ -2,19 +2,19 @@ name: daytona organization create
 synopsis: Create a new organization and set it as active
 usage: daytona organization create [ORGANIZATION_NAME] [flags]
 options:
-    - name: region
-      shorthand: r
-      usage: Default region (id or name) for the organization
+  - name: region
+    shorthand: r
+    usage: Default region (id or name) for the organization
 inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-    - name: no-input
-      default_value: "false"
-      usage: |
-        Never prompt for input; fail instead when input would be required
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
 example: |4-
       daytona organization create my-org
       daytona organization create my-org --region us
 see_also:
-    - daytona organization - Manage Daytona organizations
+  - daytona organization - Manage Daytona organizations

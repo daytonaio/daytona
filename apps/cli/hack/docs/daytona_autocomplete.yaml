@@ -2,12 +2,12 @@ name: daytona autocomplete
 synopsis: Adds a completion script for your shell environment
 usage: daytona autocomplete [bash|zsh|fish|powershell] [flags]
 inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-    - name: no-input
-      default_value: "false"
-      usage: |
-        Never prompt for input; fail instead when input would be required
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
 see_also:
-    - daytona - Daytona CLI
+  - daytona - Daytona CLI

@@ -3,28 +3,28 @@ synopsis: List all snapshots
 description: List all available Daytona snapshots
 usage: daytona snapshot list [flags]
 options:
-    - name: format
-      shorthand: f
-      usage: Output format. Must be one of (yaml, json)
-    - name: limit
-      shorthand: l
-      default_value: "100"
-      usage: Maximum number of items per page
-    - name: page
-      shorthand: p
-      default_value: "1"
-      usage: Page number for pagination (starting from 1)
+  - name: format
+    shorthand: f
+    usage: Output format. Must be one of (yaml, json)
+  - name: limit
+    shorthand: l
+    default_value: '100'
+    usage: Maximum number of items per page
+  - name: page
+    shorthand: p
+    default_value: '1'
+    usage: Page number for pagination (starting from 1)
 inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-    - name: no-input
-      default_value: "false"
-      usage: |
-        Never prompt for input; fail instead when input would be required
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
 example: |4-
       daytona snapshot list
       daytona snapshot list --limit 50
       daytona snapshot list --format json
 see_also:
-    - daytona snapshot - Manage Daytona snapshots
+  - daytona snapshot - Manage Daytona snapshots

@@ -1,30 +1,30 @@
 name: daytona exec
 synopsis: Execute a command in a sandbox
 description: |-
-    Execute a command in a running sandbox.
+  Execute a command in a running sandbox.
 
-    Exits with the remote command's exit code; exit code 255 indicates a CLI-side failure (for example the sandbox was not found or is not running).
+  Exits with the remote command's exit code; exit code 255 indicates a CLI-side failure (for example the sandbox was not found or is not running).
 usage: daytona exec [SANDBOX_ID | SANDBOX_NAME] -- [COMMAND] [ARGS...] [flags]
 options:
-    - name: cwd
-      usage: Working directory for command execution
-    - name: format
-      shorthand: f
-      usage: Output format. Must be one of (yaml, json)
-    - name: timeout
-      default_value: "0"
-      usage: Command timeout in seconds (0 for no timeout)
+  - name: cwd
+    usage: Working directory for command execution
+  - name: format
+    shorthand: f
+    usage: Output format. Must be one of (yaml, json)
+  - name: timeout
+    default_value: '0'
+    usage: Command timeout in seconds (0 for no timeout)
 inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-    - name: no-input
-      default_value: "false"
-      usage: |
-        Never prompt for input; fail instead when input would be required
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
 example: |4-
       daytona exec my-sandbox -- ls -la /workspace
       daytona exec my-sandbox -- python -c "print('hi')"
       daytona exec my-sandbox --cwd /workspace --format json -- npm test
 see_also:
-    - daytona - Daytona CLI
+  - daytona - Daytona CLI
