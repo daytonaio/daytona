@@ -52,13 +52,13 @@ export class ObjectStorageService {
           Statement: [
             {
               Effect: 'Allow',
-              Action: ['s3:AbortMultipartUpload', 's3:GetObject', 's3:ListMultipartUploadParts', 's3:PutObject'],
+              Action: ['s3:PutObject', 's3:GetObject'],
               Resource: [`arn:aws:s3:::${bucket}/${organizationId}/*`],
             },
-            // Bucket-level actions only expose bucket metadata and object keys, not object contents.
+            // ListBucket only shows object keys and some metadata, not the actual objects
             {
               Effect: 'Allow',
-              Action: ['s3:GetBucketLocation', 's3:ListBucket', 's3:ListBucketMultipartUploads'],
+              Action: ['s3:ListBucket'],
               Resource: [`arn:aws:s3:::${bucket}`],
             },
           ],
