@@ -80,7 +80,7 @@ function AppRoot() {
   const location = useLocation()
   const posthog = usePostHog()
 
-  const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
+  const { error: authError, isAuthenticated, signoutRedirect, user } = useAuth()
 
   useEffect(() => {
     if (isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {

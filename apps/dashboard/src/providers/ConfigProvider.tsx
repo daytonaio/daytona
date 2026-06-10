@@ -42,7 +42,7 @@ export function ConfigProvider(props: Props) {
       },
       scope: 'openid profile email',
       redirect_uri: window.location.origin,
-      staleStateAgeInSeconds: 60,
+      staleStateAgeInSeconds: 5 * 60,
       accessTokenExpiringNotificationTimeInSeconds: 290,
       userStore: new WebStorageStateStore({ store: stateStore }),
       onSigninCallback: (user) => {
