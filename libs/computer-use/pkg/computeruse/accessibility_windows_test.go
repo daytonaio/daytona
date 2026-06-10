@@ -308,6 +308,26 @@ func TestAccessibilityValidationRunsBeforeSTA(t *testing.T) {
 	}
 }
 
+func TestRunOnSTAReentrantCallPanics(t *testing.T) {
+	// A nested runOnSTA call from the STA thread can never be serviced —
+	// the single consumer goroutine is busy executing the outer closure —
+	// so it must panic loudly instead of hanging every a11y request. If
+	// the guard regresses this test deadlocks and fails via the go test
+	// timeout rather than asserting.
+	var recovered any
+	err := runOnSTA(func() error {
+		defer func() { recovered = recover() }()
+		_ = runOnSTA(func() error { return nil })
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("outer runOnSTA returned %v, want nil", err)
+	}
+	if recovered == nil {
+		t.Fatal("re-entrant runOnSTA on the STA thread must panic, not deadlock")
+	}
+}
+
 func TestElementCachePutAmortizesGC(t *testing.T) {
 	c := &elementCache{elts: map[string]*cachedElement{
 		"expired": {expiry: time.Now().Add(-time.Minute)},

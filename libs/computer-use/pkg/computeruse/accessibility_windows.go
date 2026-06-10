@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 	"unsafe"
@@ -21,6 +22,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/go-ole/go-ole"
 	uia "github.com/uandersonricardo/uiautomation"
+	"golang.org/x/sys/windows"
 )
 
 // The wire-contract sentinel errors (ErrA11yUnavailable and friends), scope
@@ -34,6 +36,14 @@ var (
 	staOnce    sync.Once
 	staCh      chan func()
 	staInitErr error
+
+	// staThreadID identifies the locked STA OS thread so runOnSTA can detect
+	// re-entrant calls. Stored once on the STA thread before it consumes
+	// staCh; a racy zero read during startup can only skip the check, never
+	// fire it (0 is not a valid Windows thread ID, and only closures already
+	// running on the STA thread — which observe the store in program order —
+	// can match it).
+	staThreadID atomic.Uint32
 )
 
 func startSTA() {
@@ -41,6 +51,7 @@ func startSTA() {
 		staCh = make(chan func(), 16)
 		go func() {
 			runtime.LockOSThread()
+			staThreadID.Store(windows.GetCurrentThreadId())
 			staInitErr = ole.CoInitializeEx(0, ole.COINIT_APARTMENTTHREADED)
 			if staInitErr == nil {
 				defer ole.CoUninitialize()
@@ -52,8 +63,18 @@ func startSTA() {
 	})
 }
 
+// runOnSTA marshals fn onto the STA thread and blocks until it returns. It
+// must never be called from code already running on the STA thread (i.e. from
+// inside another runOnSTA closure): the single consumer goroutine would be
+// busy executing the outer closure, so the nested call could never be
+// serviced and would block on <-done forever, wedging every later a11y
+// request behind it. The guard turns that silent permanent hang into an
+// immediate panic.
 func runOnSTA(fn func() error) error {
 	startSTA()
+	if windows.GetCurrentThreadId() == staThreadID.Load() {
+		panic("computeruse: re-entrant runOnSTA call on the STA thread would deadlock")
+	}
 	done := make(chan error, 1)
 	staCh <- func() { done <- fn() }
 	return <-done
