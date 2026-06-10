@@ -10,9 +10,12 @@ import (
 	"fmt"
 	"regexp"
 	"runtime"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/go-ole/go-ole"
@@ -119,7 +122,6 @@ const (
 	windowsA11yScopeAll     windowsA11yScope = "all"
 
 	windowsA11yWalkBudget   = 20000
-	windowsA11yDefaultDepth = 10
 	windowsFindDefaultLimit = 500
 	windowsFindCeilingLimit = 5000
 	actionInvoke            = "invoke"
@@ -155,12 +157,11 @@ func (c *ComputerUse) GetAccessibilityTree(req *computeruse.GetAccessibilityTree
 		}
 		defer walker.Release()
 
-		maxDepth := req.MaxDepth
-		if maxDepth == 0 {
-			maxDepth = windowsA11yDefaultDepth
-		}
+		// MaxDepth follows the Linux walker contract: 0 visits only the
+		// root, negative values are unbounded (the daemon defaults an
+		// absent maxDepth query parameter to -1).
 		budget := windowsA11yWalkBudget
-		node, err := walkWindowsNode(walker, root, maxDepth, &budget)
+		node, err := walkWindowsNode(walker, root, req.MaxDepth, &budget)
 		if err != nil {
 			return err
 		}
@@ -193,67 +194,85 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 		if err != nil {
 			return err
 		}
+		matcher, err := buildWindowsFilterMatcher(req)
+		if err != nil {
+			return err
+		}
+		limit := normalizeWindowsFindLimit(req.Limit)
+
 		root, err := resolveWindowsScopeRoot(automation, scope, req.PID)
 		if err != nil {
 			return err
 		}
 
-		matcher, err := buildWindowsFilterMatcher(req)
-		if err != nil {
-			return err
+		plan := planWindowsFindConditions(req.Role, req.Name, req.NameMatch)
+		if plan.impossible {
+			// The role vocabulary is closed (control-type table plus the
+			// control_type_N fallback), so no node can ever satisfy this
+			// filter; skip the walk entirely.
+			releaseElement(root)
+			resp = &computeruse.AccessibilityNodesResponse{Matches: []computeruse.AccessibilityNode{}}
+			return nil
 		}
 
-		condition, err := automation.CreateTrueCondition()
-		if err != nil {
-			return fmt.Errorf("%w: CreateTrueCondition: %v", errA11yUnavailable, err)
-		}
-		defer condition.Release()
-
-		found, err := root.FindAll(uia.TreeScopeSubtree, condition)
-		if err != nil {
-			return fmt.Errorf("%w: FindAll: %v", errA11yUnavailable, err)
-		}
-		defer found.Release()
-
-		limit := req.Limit
-		if limit <= 0 {
-			limit = windowsFindDefaultLimit
-		}
-		if limit > windowsFindCeilingLimit {
-			limit = windowsFindCeilingLimit
-		}
-
-		length, err := found.Length()
-		if err != nil {
-			return fmt.Errorf("%w: FindAll length: %v", errA11yUnavailable, err)
-		}
-
-		matches := make([]computeruse.AccessibilityNode, 0, limit)
+		matches := make([]computeruse.AccessibilityNode, 0, 16)
 		budget := windowsA11yWalkBudget
 		truncated := false
-		for i := int32(0); i < length; i++ {
-			if budget <= 0 {
-				truncated = true
-				break
-			}
-			budget--
 
-			elt, err := found.GetElement(i)
-			if err != nil || elt == nil {
-				continue
-			}
-			node := windowsNodeFromElement(elt, false)
-			if !matcher(node) {
-				releaseElement(elt)
-				continue
-			}
+		if condition := buildWindowsFindCondition(automation, plan, req.Name); condition != nil {
+			// Role/name pushed into a native UIA condition: the provider
+			// filters server-side and only candidates are materialized
+			// cross-process. The Go matcher re-checks every candidate (the
+			// native condition is a superset) and applies what UIA cannot
+			// express: regex name matching and state filters.
+			defer condition.Release()
+			defer releaseElement(root)
 
-			node.ID = cacheWindowsElement(elt)
-			matches = append(matches, *node)
-			if len(matches) >= limit {
-				truncated = i < length-1
-				break
+			found, err := root.FindAll(uia.TreeScopeSubtree, condition)
+			if err != nil {
+				return fmt.Errorf("%w: FindAll: %v", errA11yUnavailable, err)
 			}
+			defer found.Release()
+
+			length, err := found.Length()
+			if err != nil {
+				return fmt.Errorf("%w: FindAll length: %v", errA11yUnavailable, err)
+			}
+			for i := int32(0); i < length; i++ {
+				if budget <= 0 {
+					truncated = true
+					break
+				}
+				budget--
+
+				elt, err := found.GetElement(i)
+				if err != nil || elt == nil {
+					continue
+				}
+				node := windowsNodeFromElement(elt, false)
+				if !matcher(node) {
+					releaseElement(elt)
+					continue
+				}
+
+				node.ID = cacheWindowsElement(elt)
+				matches = append(matches, *node)
+				if len(matches) >= limit {
+					truncated = true
+					break
+				}
+			}
+		} else {
+			// Nothing natively expressible (regex name or state-only
+			// filters): walk lazily and stop as soon as the limit or node
+			// budget is reached instead of materializing the whole tree.
+			walker, err := automation.ControlViewWalker()
+			if err != nil {
+				releaseElement(root)
+				return fmt.Errorf("%w: ControlViewWalker: %v", errA11yUnavailable, err)
+			}
+			defer walker.Release()
+			truncated = findWindowsWalk(walker, root, matcher, &matches, limit, &budget)
 		}
 
 		resp = &computeruse.AccessibilityNodesResponse{Matches: matches, Truncated: truncated}
@@ -317,6 +336,12 @@ func (c *ComputerUse) SetAccessibilityNodeValue(req *computeruse.AccessibilitySe
 	if strings.TrimSpace(req.ID) == "" {
 		return nil, fmt.Errorf("%w: id is required", errA11yInvalidRequest)
 	}
+	if strings.ContainsRune(req.Value, 0) {
+		// ValuePattern.SetValue marshals through ole.SysAllocString, which
+		// panics on interior NUL — on the locked STA thread that would
+		// kill the plugin process (same class as the find name filter).
+		return nil, fmt.Errorf("%w: value must not contain NUL", errA11yInvalidRequest)
+	}
 
 	err := runOnSTA(func() error {
 		elt, ok := elementMap.get(req.ID)
@@ -373,7 +398,10 @@ func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope windowsA11yScop
 		if err != nil || elt == nil {
 			return nil, fmt.Errorf("%w: GetFocusedElement: %v", errA11yNoAccessibleRoot, err)
 		}
-		return elt, nil
+		// Linux resolves scope=focused to the focused application's root,
+		// not the focused control; hoist to the top-level window so tree
+		// and find cover the whole foreground app.
+		return windowsTopLevelAncestor(automation, elt), nil
 	case windowsA11yScopeAll:
 		root, err := automation.GetRootElement()
 		if err != nil || root == nil {
@@ -389,6 +417,7 @@ func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope windowsA11yScop
 			return nil, fmt.Errorf("%w: GetRootElement: %v", errA11yNoAccessibleRoot, err)
 		}
 		elt, err := findWindowsRootByPID(automation, root, pid)
+		releaseElement(root) // only needed as the FindAll anchor
 		if err != nil {
 			return nil, err
 		}
@@ -401,14 +430,23 @@ func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope windowsA11yScop
 	}
 }
 
+// findWindowsRootByPID resolves scope=pid through a native ProcessId
+// property condition so UIA filters server-side instead of materializing the
+// entire desktop tree cross-process. Top-level windows (desktop children)
+// are preferred — a Window-typed match over the first match — with a deep,
+// still condition-narrowed probe as fallback for processes whose UI is
+// hosted inside another process's window. Returns nil when the pid owns no
+// accessible element.
 func findWindowsRootByPID(automation *uia.UIAutomation, root *uia.Element, pid int) (*uia.Element, error) {
-	condition, err := automation.CreateTrueCondition()
-	if err != nil {
-		return nil, fmt.Errorf("%w: CreateTrueCondition: %v", errA11yUnavailable, err)
+	value := ole.NewVariant(ole.VT_I4, int64(pid))
+	condition, err := automation.CreatePropertyCondition(uia.ProcessIdPropertyId, &value)
+	ole.VariantClear(&value)
+	if err != nil || condition == nil {
+		return nil, fmt.Errorf("%w: CreatePropertyCondition: %v", errA11yUnavailable, err)
 	}
 	defer condition.Release()
 
-	found, err := root.FindAll(uia.TreeScopeSubtree, condition)
+	found, err := root.FindAll(uia.TreeScopeChildren, condition)
 	if err != nil {
 		return nil, fmt.Errorf("%w: FindAll: %v", errA11yUnavailable, err)
 	}
@@ -420,22 +458,14 @@ func findWindowsRootByPID(automation *uia.UIAutomation, root *uia.Element, pid i
 	}
 
 	var fallback *uia.Element
-	for i := int32(0); i < length && i < windowsA11yWalkBudget; i++ {
+	for i := int32(0); i < length; i++ {
 		elt, err := found.GetElement(i)
 		if err != nil || elt == nil {
 			continue
 		}
-		processID, err := elt.CurrentProcessId()
-		if err != nil || int(processID) != pid {
-			releaseElement(elt)
-			continue
-		}
-
 		controlType, err := elt.CurrentControlType()
 		if err == nil && controlType == uia.WindowControlTypeId {
-			if fallback != nil {
-				releaseElement(fallback)
-			}
+			releaseElement(fallback)
 			return elt, nil
 		}
 		if fallback == nil {
@@ -444,7 +474,49 @@ func findWindowsRootByPID(automation *uia.UIAutomation, root *uia.Element, pid i
 		}
 		releaseElement(elt)
 	}
-	return fallback, nil
+	if fallback != nil {
+		return fallback, nil
+	}
+
+	// No top-level window owned by the pid; probe the subtree with the same
+	// native condition (FindFirst short-circuits at the first match).
+	elt, err := root.FindFirst(uia.TreeScopeDescendants, condition)
+	if err != nil {
+		return nil, fmt.Errorf("%w: FindFirst: %v", errA11yUnavailable, err)
+	}
+	return elt, nil
+}
+
+// windowsTopLevelAncestor climbs from elt to its top-level window — the
+// element whose parent is the desktop root. Returns elt unchanged when the
+// parent chain cannot be resolved. Ownership of the returned element passes
+// to the caller; intermediate elements are released.
+func windowsTopLevelAncestor(automation *uia.UIAutomation, elt *uia.Element) *uia.Element {
+	walker, err := automation.ControlViewWalker()
+	if err != nil {
+		return elt
+	}
+	defer walker.Release()
+
+	current := elt
+	parent, err := walker.GetParentElement(current)
+	if err != nil || parent == nil {
+		return current // already the desktop root (or detached)
+	}
+	// Cap the climb defensively; real window chains are a handful of hops.
+	for hops := 0; hops < 64; hops++ {
+		grand, err := walker.GetParentElement(parent)
+		if err != nil || grand == nil {
+			// parent is the desktop root: current is the top-level window.
+			releaseElement(parent)
+			return current
+		}
+		releaseElement(current)
+		current = parent
+		parent = grand
+	}
+	releaseElement(parent)
+	return current
 }
 
 func walkWindowsNode(walker *uia.TreeWalker, elt *uia.Element, maxDepth int, budget *int) (*computeruse.AccessibilityNode, error) {
@@ -454,14 +526,10 @@ func walkWindowsNode(walker *uia.TreeWalker, elt *uia.Element, maxDepth int, bud
 	*budget--
 
 	node := windowsNodeFromElement(elt, true)
-	if maxDepth == 0 {
+	if !windowsDepthAllowsDescent(maxDepth) {
 		return node, nil
 	}
-
-	nextDepth := maxDepth
-	if maxDepth > 0 {
-		nextDepth = maxDepth - 1
-	}
+	nextDepth := windowsNextDepth(maxDepth)
 
 	child, err := walker.GetFirstChildElement(elt)
 	if err != nil || child == nil {
@@ -502,25 +570,20 @@ func windowsNodeFromElement(elt *uia.Element, cache bool) *computeruse.Accessibi
 	return node
 }
 
+// windowsElementRole maps the element's control type to the canonical role
+// vocabulary. LocalizedControlType is intentionally never consulted: it is
+// translated by the OS language pack, which would break cross-platform role
+// filters.
 func windowsElementRole(elt *uia.Element) string {
-	localized := strings.TrimSpace(windowsStringProperty(elt.CurrentLocalizedControlType))
-	if localized != "" {
-		return localized
+	controlType, err := elt.CurrentControlType()
+	if err != nil {
+		return windowsRoleUnknown
 	}
-	if controlType, err := elt.CurrentControlType(); err == nil {
-		if name := strings.TrimSpace(uia.ControlTypeNames[controlType]); name != "" {
-			return normalizeWindowsControlTypeName(name)
-		}
-		return fmt.Sprintf("control_type_%d", controlType)
-	}
-	return "unknown"
+	return windowsRoleName(controlType)
 }
 
 func windowsElementDescription(elt *uia.Element) string {
-	if help := strings.TrimSpace(windowsStringProperty(elt.CurrentHelpText)); help != "" {
-		return help
-	}
-	return strings.TrimSpace(windowsStringProperty(elt.CurrentLocalizedControlType))
+	return strings.TrimSpace(windowsStringProperty(elt.CurrentHelpText))
 }
 
 func windowsElementBounds(elt *uia.Element) computeruse.AccessibilityBounds {
@@ -636,6 +699,213 @@ func buildWindowsFilterMatcher(req *computeruse.FindAccessibilityNodesRequest) (
 	}, nil
 }
 
+// windowsFindPlan describes how much of a find filter can be pushed into
+// native UIA search conditions. Native conditions only ever narrow the
+// candidate set to a superset of the matcher's accept set —
+// buildWindowsFilterMatcher remains the source of truth and re-checks every
+// candidate — so a missing or wider condition costs time, never correctness.
+type windowsFindPlan struct {
+	// roleControlTypes lists the control types OR-ed into a native role
+	// condition. Empty means the role cannot narrow natively.
+	roleControlTypes []uia.ControlTypeId
+	// nameFlags holds the property-condition flags for a native name
+	// condition; meaningful only when nameNative is true.
+	nameFlags  uia.PropertyConditionFlags
+	nameNative bool
+	// impossible marks filters no emitted node can ever satisfy (the role
+	// vocabulary is closed), allowing an immediate empty result.
+	impossible bool
+}
+
+// planWindowsFindConditions decides which filter parts are natively
+// expressible. Pure logic, unit-tested; assumes nameMatch was already
+// validated by buildWindowsFilterMatcher.
+func planWindowsFindConditions(role, name, nameMatch string) windowsFindPlan {
+	var plan windowsFindPlan
+	role = strings.ToLower(strings.TrimSpace(role))
+	if role != "" {
+		switch ids, ok := windowsControlTypesForRole(role); {
+		case role == windowsRoleUnknown:
+			// "unknown" doubles as the fallback for unreadable control
+			// types, so narrowing it to ControlType==Custom could drop
+			// candidates the matcher would accept. Walk unnarrowed.
+		case ok:
+			plan.roleControlTypes = ids
+		default:
+			plan.impossible = true
+			return plan
+		}
+	}
+	// An interior NUL cannot round-trip through a BSTR: go-ole's
+	// SysAllocString panics on it (syscall.StringToUTF16Ptr), killing the
+	// locked STA thread and with it the plugin process. Such names stay
+	// Go-side, where the matcher returns the same (empty) match set the
+	// Linux implementation produces.
+	if name != "" && !strings.ContainsRune(name, 0) {
+		switch nameMatch {
+		case "", "substring":
+			// IgnoreCase only widens the candidate set (safe); the
+			// matcher restores exact case semantics. MatchSubstring needs
+			// Windows 10 1809+ — the builder degrades to a Go-side-only
+			// name filter when the OS rejects it.
+			plan.nameFlags = uia.PropertyConditionFlagsIgnoreCase | uia.PropertyConditionFlagsMatchSubstring
+			plan.nameNative = true
+		case "exact":
+			plan.nameFlags = uia.PropertyConditionFlagsIgnoreCase
+			plan.nameNative = true
+		}
+		// regex stays Go-side.
+	}
+	return plan
+}
+
+// buildWindowsFindCondition turns a plan into a UIA condition, best-effort:
+// any COM failure degrades to a wider (or nil) condition rather than an
+// error, because a nil condition falls back to the walker path and the
+// Go-side matcher re-filters every candidate anyway. The filter is AND-ed
+// with the control-view condition so native FindAll searches the same
+// element universe as the walker fallback and the tree endpoint
+// (ControlViewWalker); a bare property condition would traverse the raw
+// view and surface elements those paths never emit.
+func buildWindowsFindCondition(automation *uia.UIAutomation, plan windowsFindPlan, name string) *uia.Condition {
+	condition := windowsRoleCondition(automation, plan.roleControlTypes)
+	if plan.nameNative && name != "" {
+		nameCondition := windowsNameCondition(automation, name, plan.nameFlags)
+		switch {
+		case condition == nil:
+			condition = nameCondition
+		case nameCondition != nil:
+			combined, err := automation.CreateAndCondition(condition, nameCondition)
+			condition.Release()
+			nameCondition.Release()
+			if err != nil || combined == nil {
+				return nil
+			}
+			condition = combined
+		}
+	}
+	if condition == nil {
+		return nil
+	}
+	controlView, err := automation.ControlViewCondition()
+	if err != nil || controlView == nil {
+		condition.Release()
+		return nil
+	}
+	combined, err := automation.CreateAndCondition(condition, controlView)
+	condition.Release()
+	controlView.Release()
+	if err != nil || combined == nil {
+		return nil
+	}
+	return combined
+}
+
+// windowsRoleCondition ORs a ControlType property condition for every
+// control type mapped to the requested role. Partial failures abandon the
+// whole role condition: an incomplete OR would narrow to a subset of the
+// matcher's accept set and silently drop matches.
+func windowsRoleCondition(automation *uia.UIAutomation, controlTypes []uia.ControlTypeId) *uia.Condition {
+	var combined *uia.Condition
+	for _, controlType := range controlTypes {
+		value := ole.NewVariant(ole.VT_I4, int64(controlType))
+		condition, err := automation.CreatePropertyCondition(uia.ControlTypePropertyId, &value)
+		ole.VariantClear(&value)
+		if err != nil || condition == nil {
+			releaseCondition(combined)
+			return nil
+		}
+		if combined == nil {
+			combined = condition
+			continue
+		}
+		next, err := automation.CreateOrCondition(combined, condition)
+		combined.Release()
+		condition.Release()
+		if err != nil || next == nil {
+			return nil
+		}
+		combined = next
+	}
+	return combined
+}
+
+// windowsNameCondition builds a native Name property condition. Returns nil
+// when the name cannot be marshaled to a BSTR (interior NUL) or the OS
+// rejects the flags (MatchSubstring needs Windows 10 1809+); the caller
+// then relies on the Go-side matcher alone.
+func windowsNameCondition(automation *uia.UIAutomation, name string, flags uia.PropertyConditionFlags) *uia.Condition {
+	if strings.ContainsRune(name, 0) {
+		// ole.SysAllocString panics on interior NUL.
+		return nil
+	}
+	bstr := ole.SysAllocString(name)
+	if bstr == nil {
+		return nil
+	}
+	value := ole.NewVariant(ole.VT_BSTR, int64(uintptr(unsafe.Pointer(bstr))))
+	condition, err := automation.CreatePropertyConditionEx(uia.NamePropertyId, &value, flags)
+	ole.VariantClear(&value) // frees the BSTR; the condition keeps its own copy
+	if err != nil || condition == nil {
+		return nil
+	}
+	return condition
+}
+
+func releaseCondition(condition *uia.Condition) {
+	if condition != nil {
+		condition.Release()
+	}
+}
+
+// findWindowsWalk mirrors the Linux findWalk: a pre-order depth-first walk
+// that stops as soon as the result limit or the node budget is reached, so
+// an unnarrowed find never materializes more of the tree than it returns.
+// It takes ownership of elt and releases every element it visits unless
+// ownership is handed to the element cache for a returned match. Reports
+// whether the walk was truncated.
+func findWindowsWalk(walker *uia.TreeWalker, elt *uia.Element, match func(*computeruse.AccessibilityNode) bool, out *[]computeruse.AccessibilityNode, limit int, budget *int) bool {
+	if elt == nil {
+		return false
+	}
+	if *budget <= 0 {
+		releaseElement(elt)
+		return true
+	}
+	*budget--
+
+	node := windowsNodeFromElement(elt, false)
+	matched := match(node)
+
+	// Fetch the first child while elt is still alive; children of returned
+	// nodes stay nil per the find contract.
+	child, _ := walker.GetFirstChildElement(elt)
+	if matched {
+		node.ID = cacheWindowsElement(elt) // cache takes ownership of elt
+		*out = append(*out, *node)
+		if len(*out) >= limit {
+			releaseElement(child)
+			return true
+		}
+	} else {
+		releaseElement(elt)
+	}
+
+	for child != nil {
+		if *budget <= 0 {
+			releaseElement(child)
+			return true
+		}
+		next, _ := walker.GetNextSiblingElement(child)
+		if findWindowsWalk(walker, child, match, out, limit, budget) {
+			releaseElement(next)
+			return true
+		}
+		child = next
+	}
+	return *budget <= 0
+}
+
 func invokeWindowsElement(elt *uia.Element, action string) error {
 	action = strings.ToLower(strings.TrimSpace(action))
 	if action == "" || action == actionInvoke || action == "click" || action == "press" {
@@ -698,16 +968,129 @@ func windowsBoolProperty(fn func() (bool, error)) bool {
 	return err == nil && value
 }
 
-func normalizeWindowsControlTypeName(name string) string {
-	name = strings.TrimSuffix(name, "Control")
-	var out strings.Builder
-	for i, r := range name {
-		if i > 0 && r >= 'A' && r <= 'Z' {
-			out.WriteByte(' ')
-		}
-		out.WriteRune(r)
+// windowsControlTypeRoles maps UIA control type IDs to the canonical,
+// non-localized role vocabulary the Linux AT-SPI implementation emits
+// (at-spi2-core role names), keeping role filters portable across
+// platforms and OS display languages.
+var windowsControlTypeRoles = map[uia.ControlTypeId]string{
+	uia.ButtonControlTypeId:       "push button",
+	uia.CalendarControlTypeId:     "calendar",
+	uia.CheckBoxControlTypeId:     "check box",
+	uia.ComboBoxControlTypeId:     "combo box",
+	uia.EditControlTypeId:         "entry",
+	uia.HyperlinkControlTypeId:    "link",
+	uia.ImageControlTypeId:        "image",
+	uia.ListItemControlTypeId:     "list item",
+	uia.ListControlTypeId:         "list",
+	uia.MenuControlTypeId:         "menu",
+	uia.MenuBarControlTypeId:      "menu bar",
+	uia.MenuItemControlTypeId:     "menu item",
+	uia.ProgressBarControlTypeId:  "progress bar",
+	uia.RadioButtonControlTypeId:  "radio button",
+	uia.ScrollBarControlTypeId:    "scroll bar",
+	uia.SliderControlTypeId:       "slider",
+	uia.SpinnerControlTypeId:      "spin button",
+	uia.StatusBarControlTypeId:    "status bar",
+	uia.TabControlTypeId:          "page tab list",
+	uia.TabItemControlTypeId:      "page tab",
+	uia.TextControlTypeId:         "label",
+	uia.ToolBarControlTypeId:      "tool bar",
+	uia.ToolTipControlTypeId:      "tool tip",
+	uia.TreeControlTypeId:         "tree",
+	uia.TreeItemControlTypeId:     "tree item",
+	uia.CustomControlTypeId:       "unknown",
+	uia.GroupControlTypeId:        "panel",
+	uia.ThumbControlTypeId:        "unknown",
+	uia.DataGridControlTypeId:     "table",
+	uia.DataItemControlTypeId:     "table cell",
+	uia.DocumentControlTypeId:     "document frame",
+	uia.SplitButtonControlTypeId:  "push button",
+	uia.WindowControlTypeId:       "frame",
+	uia.PaneControlTypeId:         "panel",
+	uia.HeaderControlTypeId:       "header",
+	uia.HeaderItemControlTypeId:   "column header",
+	uia.TableControlTypeId:        "table",
+	uia.TitleBarControlTypeId:     "title bar",
+	uia.SeparatorControlTypeId:    "separator",
+	uia.SemanticZoomControlTypeId: "panel",
+	uia.AppBarControlTypeId:       "tool bar",
+}
+
+const (
+	// windowsRoleUnknown is emitted for the Custom/Thumb control types and
+	// whenever the control type cannot be read.
+	windowsRoleUnknown = "unknown"
+	// windowsRoleRawPrefix prefixes the numeric fallback role for control
+	// type IDs outside the standard UIA set.
+	windowsRoleRawPrefix = "control_type_"
+)
+
+// windowsRoleControlTypes is the inverse of windowsControlTypeRoles: role
+// name -> every control type that emits it, sorted for deterministic native
+// condition construction.
+var windowsRoleControlTypes = buildWindowsRoleControlTypes()
+
+func buildWindowsRoleControlTypes() map[string][]uia.ControlTypeId {
+	m := make(map[string][]uia.ControlTypeId, len(windowsControlTypeRoles))
+	for id, role := range windowsControlTypeRoles {
+		m[role] = append(m[role], id)
 	}
-	return strings.ToLower(out.String())
+	for _, ids := range m {
+		sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	}
+	return m
+}
+
+// windowsRoleName resolves a control type ID to its canonical role string.
+// IDs outside the standard UIA set fall back to a stable numeric form so
+// they remain filterable.
+func windowsRoleName(controlType uia.ControlTypeId) string {
+	if role, ok := windowsControlTypeRoles[controlType]; ok {
+		return role
+	}
+	return fmt.Sprintf("%s%d", windowsRoleRawPrefix, controlType)
+}
+
+// windowsControlTypesForRole inverts windowsRoleName for native filter
+// narrowing. The role is matched case-insensitively, mirroring the Go-side
+// matcher semantics.
+func windowsControlTypesForRole(role string) ([]uia.ControlTypeId, bool) {
+	role = strings.ToLower(strings.TrimSpace(role))
+	if ids, ok := windowsRoleControlTypes[role]; ok {
+		return ids, true
+	}
+	if raw, ok := strings.CutPrefix(role, windowsRoleRawPrefix); ok {
+		if v, err := strconv.Atoi(raw); err == nil {
+			return []uia.ControlTypeId{uia.ControlTypeId(v)}, true
+		}
+	}
+	return nil, false
+}
+
+// Depth semantics mirror the Linux walker contract: 0 visits only the
+// current node, positive values bound descent, negative values are
+// unbounded.
+func windowsDepthAllowsDescent(maxDepth int) bool {
+	return maxDepth != 0
+}
+
+func windowsNextDepth(maxDepth int) int {
+	if maxDepth > 0 {
+		return maxDepth - 1
+	}
+	return maxDepth
+}
+
+// normalizeWindowsFindLimit applies the Linux find limit defaults: non
+// positive limits fall back to the default, oversized limits are capped.
+func normalizeWindowsFindLimit(limit int) int {
+	if limit <= 0 {
+		return windowsFindDefaultLimit
+	}
+	if limit > windowsFindCeilingLimit {
+		return windowsFindCeilingLimit
+	}
+	return limit
 }
 
 func containsWindowsString(values []string, want string) bool {
