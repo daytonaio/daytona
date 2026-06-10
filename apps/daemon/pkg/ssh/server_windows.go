@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"maps"
 	"os"
 	"os/exec"
+	"slices"
 
 	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
@@ -143,7 +145,11 @@ func (s *Server) handleNonPty(session ssh.Session) {
 		var parsedCommand string
 		parsedCommand, envVars = common.ParseShellWrapper(rawCmd)
 		if parsedCommand != rawCmd {
-			s.logger.Debug("Parsed shell wrapper", "raw", rawCmd, "parsed", parsedCommand, "env", envVars)
+			// Log env var names only: the decoded values are the secrets the
+			// SDK wrapper base64-encodes (API keys, tokens) and must never
+			// reach the persisted daemon log. The raw command is omitted for
+			// the same reason — it embeds those values base64-encoded.
+			s.logger.Debug("Parsed shell wrapper", "parsed", parsedCommand, "envKeys", slices.Sorted(maps.Keys(envVars)))
 		}
 
 		finalCommand = parsedCommand

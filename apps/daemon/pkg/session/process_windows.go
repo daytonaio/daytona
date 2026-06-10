@@ -11,12 +11,18 @@ import (
 )
 
 // setNewProcessGroup is a no-op on Windows. Process group semantics are a
-// POSIX concept; Windows uses Job Objects (not wired up here). Per-process
-// termination via the signalProcessTree fallback is sufficient.
+// POSIX concept; Windows uses Job Objects (not wired up here).
 func setNewProcessGroup(cmd *exec.Cmd) {}
 
-// killProcessGroup is a no-op on Windows. Callers also invoke
-// signalProcessTree, which is portable and handles termination via gopsutil.
+// killProcessGroup is a no-op on Windows. Callers fall back to
+// signalProcessTree, but that delivers via os.Process.Signal, which on
+// Windows supports only SIGKILL (TerminateProcess) — the graceful SIGTERM
+// pass in terminateSession silently does nothing, so every delete would
+// burn the full grace period before the SIGKILL pass. Tolerable only
+// because this path is currently unreachable (SupportedOnPlatform is
+// false, so Create refuses); anyone wiring Windows sessions up must
+// implement a real tree kill here (taskkill /T /F — see
+// killExecProcessGroup in toolbox/process/execute_windows.go).
 func killProcessGroup(pid int, sig syscall.Signal) {}
 
 // SupportedOnPlatform is false on Windows: Execute drives the session shell

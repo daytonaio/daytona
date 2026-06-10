@@ -26,7 +26,16 @@ func Wait(cmd *exec.Cmd) (int, error) {
 	if cmd == nil || cmd.Process == nil {
 		return -1, errors.New("childreap.Wait: cmd not started")
 	}
-	return foldExitError(cmd.Wait())
+	err := cmd.Wait()
+	// exec.ErrWaitDelay substitutes for a nil error only: the process itself
+	// exited (ProcessState is populated, and a non-zero status would have
+	// surfaced as *exec.ExitError instead) but an inherited I/O pipe was
+	// still open when WaitDelay expired. The exit status WAS recovered, so
+	// honor the package contract and return it without an error.
+	if errors.Is(err, exec.ErrWaitDelay) {
+		return cmd.ProcessState.ExitCode(), nil
+	}
+	return foldExitError(err)
 }
 
 // Reap is equivalent to Wait on Windows: with no PID-1 reaper to race

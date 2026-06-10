@@ -10,6 +10,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"syscall"
 
 	"github.com/UserExistsError/conpty"
 )
@@ -17,9 +18,13 @@ import (
 func SpawnTTY(opts SpawnTTYOptions) error {
 	shell := GetShell()
 
-	cmdLine := shell
+	// conpty.Start passes this verbatim as lpCommandLine to CreateProcessW
+	// with lpApplicationName=nil, so an unquoted path containing spaces
+	// (e.g. DAYTONA_SHELL=pwsh.exe resolving under C:\Program Files) would
+	// be parsed ambiguously (CWE-428). Quote it like NewShellCommand does.
+	cmdLine := syscall.EscapeArg(shell)
 	if IsPowerShell(shell) {
-		cmdLine = shell + " -NoLogo"
+		cmdLine += " -NoLogo"
 	}
 
 	cols := opts.InitCols

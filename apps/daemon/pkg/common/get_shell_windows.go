@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 )
 
 // GetShell returns the path to the preferred shell on Windows.
@@ -75,18 +76,27 @@ func GetShell() string {
 // SysProcAttr.CmdLine, as the os/exec documentation prescribes for
 // cmd.exe-style parsers.
 func NewShellCommand(shell, command string) *exec.Cmd {
-	if command == "" {
-		return exec.Command(shell)
+	var cmd *exec.Cmd
+	switch {
+	case command == "":
+		cmd = exec.Command(shell)
+	case IsPowerShell(shell):
+		cmd = exec.Command(shell, "-NoProfile", "-NonInteractive", "-Command", command)
+	default:
+		// cmd.Args is bypassed when SysProcAttr.CmdLine is set; keep it
+		// populated anyway so logs and debuggers show the intended invocation.
+		cmd = exec.Command(shell, "/C", command)
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			CmdLine: `"` + shell + `" /C ` + command,
+		}
 	}
-	if IsPowerShell(shell) {
-		return exec.Command(shell, "-NoProfile", "-NonInteractive", "-Command", command)
-	}
-	// cmd.Args is bypassed when SysProcAttr.CmdLine is set; keep it
-	// populated anyway so logs and debuggers show the intended invocation.
-	cmd := exec.Command(shell, "/C", command)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		CmdLine: `"` + shell + `" /C ` + command,
-	}
+	// I/O-drain backstop: cmd.Wait blocks until the internal pipe-copy
+	// goroutines hit EOF when Stdout/Stderr are not *os.File, so an orphaned
+	// descendant that inherited the handles (e.g. `start /B server`) would
+	// wedge the caller forever (golang/go#23019). Bound that drain phase the
+	// way childreap.Wait's hangTimeout does on Linux. childreap.Wait
+	// recovers the real exit code when the backstop fires (exec.ErrWaitDelay).
+	cmd.WaitDelay = 30 * time.Second
 	return cmd
 }
 
