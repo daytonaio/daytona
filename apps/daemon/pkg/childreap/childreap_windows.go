@@ -11,6 +11,16 @@
 // code with a nil error, and a non-nil error is returned only when cmd
 // couldn't be started or no exit status could be recovered. Callers must
 // check exitCode != 0 to detect command failure.
+//
+// Timing, however, is NOT at parity with Linux: Wait and Reap both
+// delegate to raw cmd.Wait, which blocks until the runtime's pipe-drain
+// copy goroutines finish (golang/go#23019). In particular, Windows Reap
+// does not deliver the Linux Reap guarantee of returning as soon as the
+// exit status is known — with piped stdio (StdoutPipe, bytes.Buffer, …)
+// it can block indefinitely on an undrained or inherited pipe unless
+// cmd.WaitDelay is set. Current Windows callers avoid this by using only
+// *os.File stdio (no copy goroutines); teardown-path callers that pipe
+// stdio MUST set cmd.WaitDelay.
 package childreap
 
 import (
@@ -39,7 +49,10 @@ func Wait(cmd *exec.Cmd) (int, error) {
 }
 
 // Reap is equivalent to Wait on Windows: with no PID-1 reaper to race
-// against, cmd.Wait is always the sole status consumer.
+// against, cmd.Wait is always the sole status consumer. Unlike the Linux
+// Reap, it does NOT return as soon as the exit status is known: it is raw
+// cmd.Wait and may block indefinitely draining stdio pipes unless
+// cmd.WaitDelay is set (see the package comment).
 func Reap(cmd *exec.Cmd) (int, error) {
 	return Wait(cmd)
 }

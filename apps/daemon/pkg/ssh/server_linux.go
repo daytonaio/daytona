@@ -142,12 +142,14 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	}()
 
 	err := common.SpawnTTY(common.SpawnTTYOptions{
-		Dir:    dir,
-		StdIn:  session,
-		StdOut: session,
-		Term:   ptyReq.Term,
-		Env:    env,
-		SizeCh: sizeCh,
+		Dir:      dir,
+		StdIn:    session,
+		StdOut:   session,
+		Term:     ptyReq.Term,
+		Env:      env,
+		InitCols: ptyReq.Window.Width,
+		InitRows: ptyReq.Window.Height,
+		SizeCh:   sizeCh,
 	})
 
 	if err != nil {

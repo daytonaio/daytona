@@ -35,6 +35,18 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 		f, err = pty.Start(cmd)
 	}
 	if err != nil {
+		// SpawnTTY owns SizeCh consumption even on failure: senders (the
+		// ssh window-change forwarders, the terminal ws reader) block in
+		// an unbuffered send, and closing the channel cannot unblock a
+		// parked sender. Keep draining until the sender closes the
+		// channel, or every failed spawn permanently leaks the sender
+		// goroutine (see the Windows sibling).
+		if opts.SizeCh != nil {
+			go func() {
+				for range opts.SizeCh {
+				}
+			}()
+		}
 		return err
 	}
 

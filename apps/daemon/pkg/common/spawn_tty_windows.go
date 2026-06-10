@@ -53,6 +53,18 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 	cpty, err := conpty.Start(cmdLine, cptyOpts...)
 	if err != nil {
 		slog.Error("Failed to start ConPTY", "command", cmdLine, "error", err)
+		// SpawnTTY owns SizeCh consumption even on failure: senders (the
+		// ssh window-change forwarders, the terminal ws reader) block in
+		// an unbuffered send, and closing the channel cannot unblock a
+		// parked sender. Keep draining until the sender closes the
+		// channel, or every failed spawn permanently leaks the sender
+		// goroutine.
+		if opts.SizeCh != nil {
+			go func() {
+				for range opts.SizeCh {
+				}
+			}()
+		}
 		return err
 	}
 
@@ -84,16 +96,35 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 	}()
 
 	// Wait for the shell in the background. On natural exit, close the
-	// pty: ClosePseudoConsole detaches conhost, so the stdout copy below
-	// drains the remaining output and hits EOF instead of blocking forever.
+	// pty so the stdout copy below unblocks: ClosePseudoConsole detaches
+	// conhost, which fails the pending read. Note conpty.Close is
+	// all-or-nothing — it also closes cmdOut, the very handle the copy
+	// reads from — so output buffered but not yet read when the shell
+	// exits may be dropped (the read fails with ERROR_INVALID_HANDLE
+	// rather than draining to EOF). Full tail fidelity would need a
+	// two-phase close (ClosePseudoConsole, drain, then CloseHandle) that
+	// the library does not offer.
+	waitCtx, cancelWait := context.WithCancel(context.Background())
+	defer cancelWait()
 	waitErrCh := make(chan error, 1)
 	go func() {
-		exitCode, waitErr := cpty.Wait(context.Background())
-		if waitErr == nil {
+		exitCode, waitErr := cpty.Wait(waitCtx)
+		switch {
+		case waitErr == nil:
 			slog.Debug("ConPTY session exited", "exit_code", exitCode)
+			closePty()
+		case waitCtx.Err() != nil:
+			// Canceled by the disconnect path below — not a wait
+			// failure. Report nil so clean disconnects return nil,
+			// mirroring Linux.
+			waitErr = nil
+		default:
+			// The wait itself failed (the process handle could not be
+			// queried). Close anyway so the stdout copy below cannot
+			// block forever on a pty nobody else will close.
+			closePty()
 		}
 		waitErrCh <- waitErr
-		closePty()
 	}()
 
 	// Mirror the Linux flow: the stdout copy is the synchronization point.
@@ -103,12 +134,20 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 		slog.Debug("ConPTY stdout copy error", "error", err)
 	}
 
-	// Client disconnect: terminate the shell (ClosePseudoConsole tears down
-	// the attached console processes) and unblock the wait goroutine, whose
-	// polled process handle is now closed.
+	// Stop the waiter before touching the handles: cancel its context and
+	// join it, so it cannot poll the raw process handle after closePty
+	// releases it (the handle value may be recycled; see the closeOnce
+	// comment above). conpty.Wait checks the context at least once per
+	// second, so the join is bounded.
+	cancelWait()
+	waitErr := <-waitErrCh
+
+	// Client disconnect: terminate the shell (ClosePseudoConsole tears
+	// down the attached console processes). No-op when the wait goroutine
+	// already closed the pty after a natural exit.
 	closePty()
 
-	if waitErr := <-waitErrCh; waitErr != nil {
+	if waitErr != nil {
 		slog.Debug("ConPTY wait error", "error", waitErr)
 		return waitErr
 	}
