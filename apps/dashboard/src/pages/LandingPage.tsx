@@ -27,16 +27,16 @@ const LandingPage: React.FC = () => {
     }
   }, [activeNavigator, isAuthenticated, isLoading, location.pathname, location.search, signinRedirect])
 
-  if (isLoading) {
-    return <LoadingFallback />
-  }
-
   if (isAuthenticated) {
     return <Navigate to={`${RoutePath.DASHBOARD}${location.search}`} replace />
   }
 
   if (hasTriedSigninRef.current && !activeNavigator && !isLoading) {
     throw new Error('Unable to start sign-in redirect')
+  }
+
+  if (isLoading) {
+    return <LoadingFallback />
   }
 
   return <LoadingFallback />

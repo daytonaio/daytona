@@ -4,7 +4,7 @@
  */
 
 import { ApiContext } from '@/contexts/ApiContext'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { hasAuthParams, useAuth } from 'react-oidc-context'
 import LoadingFallback from '@/components/LoadingFallback'
 import { ApiClient } from '@/api/apiClient'
@@ -16,27 +16,21 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const config = useConfig()
   const location = useLocation()
 
-  const apiRef = useRef<ApiClient | null>(null)
   const hasTriedSigninRef = useRef(false)
-  const [isApiReady, setIsApiReady] = useState(false)
+  const [hasTriedSignin, setHasTriedSignin] = useState(false)
 
-  // Initialize API client as soon as user is available
-  useEffect(() => {
-    if (user) {
-      if (!apiRef.current) {
-        apiRef.current = new ApiClient(config, user.access_token)
-      } else {
-        apiRef.current.setAccessToken(user.access_token)
-      }
-      setIsApiReady(true)
-    } else {
-      setIsApiReady(false)
+  const api = useMemo(() => {
+    if (!isAuthenticated || !user) {
+      return null
     }
-  }, [user, config])
+
+    return new ApiClient(config, user.access_token)
+  }, [config, isAuthenticated, user?.access_token])
 
   useEffect(() => {
     if (!hasAuthParams() && !isAuthenticated && !activeNavigator && !isLoading && !hasTriedSigninRef.current) {
       hasTriedSigninRef.current = true
+      setHasTriedSignin(true)
       signinRedirect({
         state: {
           returnTo: location.pathname + location.search,
@@ -47,13 +41,13 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [activeNavigator, isAuthenticated, isLoading, location.pathname, location.search, signinRedirect])
 
-  if (hasTriedSigninRef.current && !isAuthenticated && !activeNavigator && !isLoading) {
+  if (hasTriedSignin && !isAuthenticated && !activeNavigator && !isLoading) {
     throw new Error('Unable to start sign-in redirect')
   }
 
-  if (isLoading || !isApiReady) {
+  if (isLoading || !api) {
     return <LoadingFallback />
   }
 
-  return <ApiContext.Provider value={apiRef.current}>{children}</ApiContext.Provider>
+  return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>
 }
