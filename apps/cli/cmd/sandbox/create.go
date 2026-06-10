@@ -5,14 +5,15 @@ package sandbox
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	"github.com/daytonaio/daytona/cli/util"
 	views_common "github.com/daytonaio/daytona/cli/views/common"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -28,6 +29,15 @@ var CreateCmd = &cobra.Command{
 	Aliases: common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+
+		switch createIfExistsFlag {
+		case "error", "reuse":
+		default:
+			return clierr.Newf(clierr.CategoryUsage, "invalid --if-exists value %q: must be one of error, reuse", createIfExistsFlag)
+		}
+		if createIfExistsFlag == "reuse" && nameFlag == "" {
+			return clierr.New(clierr.CategoryUsage, "--if-exists reuse requires --name")
+		}
 
 		apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 		if err != nil {
@@ -46,24 +56,18 @@ var CreateCmd = &cobra.Command{
 		if userFlag != "" {
 			createSandbox.SetUser(userFlag)
 		}
-		if len(envFlag) > 0 {
-			env := make(map[string]string)
-			for _, e := range envFlag {
-				parts := strings.SplitN(e, "=", 2)
-				if len(parts) == 2 {
-					env[parts[0]] = parts[1]
-				}
-			}
+		env, err := common.ResolveKeyValuePairs(envFlag, createEnvFileFlag, "env")
+		if err != nil {
+			return err
+		}
+		if len(env) > 0 {
 			createSandbox.SetEnv(env)
 		}
-		if len(labelsFlag) > 0 {
-			labels := make(map[string]string)
-			for _, l := range labelsFlag {
-				parts := strings.SplitN(l, "=", 2)
-				if len(parts) == 2 {
-					labels[parts[0]] = parts[1]
-				}
-			}
+		labels, err := common.ResolveKeyValuePairs(labelsFlag, createLabelFileFlag, "label")
+		if err != nil {
+			return err
+		}
+		if len(labels) > 0 {
 			createSandbox.SetLabels(labels)
 		}
 		if publicFlag {
@@ -106,44 +110,35 @@ var CreateCmd = &cobra.Command{
 		}
 
 		if len(volumesFlag) > 0 {
-			volumes := make([]apiclient.SandboxVolume, 0, len(volumesFlag))
-			for _, v := range volumesFlag {
-				parts := strings.SplitN(v, ":", 2)
-				if len(parts) == 2 {
-					volumeId := parts[0]
-					mountPath := parts[1]
-					volume := apiclient.SandboxVolume{
-						VolumeId:  volumeId,
-						MountPath: mountPath,
-					}
-					volumes = append(volumes, volume)
-				}
+			volumes, err := common.ParseVolumeSpecs(volumesFlag)
+			if err != nil {
+				return err
 			}
-			if len(volumes) > 0 {
-				createSandbox.SetVolumes(volumes)
-			}
+			createSandbox.SetVolumes(volumes)
 		}
 
 		var sandbox *apiclient.Sandbox
 
 		sandbox, res, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*createSandbox).Execute()
 		if err != nil {
-			return apiclient_cli.HandleErrorResponse(res, err)
+			createErr := apiclient_cli.HandleErrorResponse(res, err)
+			var cliErr *clierr.Error
+			if createIfExistsFlag != "reuse" || !errors.As(createErr, &cliErr) || cliErr.Category != clierr.CategoryConflict {
+				return createErr
+			}
+			existing, res, err := apiClient.SandboxAPI.GetSandbox(ctx, nameFlag).Execute()
+			if err != nil {
+				return apiclient_cli.HandleErrorResponse(res, err)
+			}
+			sandbox = existing
+			if common.FormatFlag == "" {
+				views_common.RenderInfoMessage(fmt.Sprintf("Sandbox '%s' already exists, reusing it", nameFlag))
+			}
 		}
 
 		if sandbox.State != nil && *sandbox.State == apiclient.SANDBOXSTATE_PENDING_BUILD {
-			c, err := config.GetConfig()
-			if err != nil {
-				return err
-			}
-
-			activeProfile, err := c.GetActiveProfile()
-			if err != nil {
-				return err
-			}
-
 			// Accept any post-pending state — transient states can be skipped between polls.
-			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, 0,
+			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, createTimeoutFlag,
 				apiclient.SANDBOXSTATE_BUILDING_SNAPSHOT,
 				apiclient.SANDBOXSTATE_PULLING_SNAPSHOT,
 				apiclient.SANDBOXSTATE_STARTING,
@@ -153,28 +148,54 @@ var CreateCmd = &cobra.Command{
 				return err
 			}
 
-			logsContext, stopLogs := context.WithCancel(context.Background())
-			defer stopLogs()
+			stopLogs := func() {}
+			if common.FormatFlag == "" {
+				c, err := config.GetConfig()
+				if err != nil {
+					return err
+				}
 
-			go func() {
-				_ = common.ReadBuildLogs(logsContext, common.ReadLogParams{
-					Id:                   sandbox.Id,
-					ServerUrl:            activeProfile.Api.Url,
-					ServerApi:            activeProfile.Api,
-					ActiveOrganizationId: activeProfile.ActiveOrganizationId,
-					Follow:               util.Pointer(true),
-					ResourceType:         common.ResourceTypeSandbox,
-				})
-			}()
+				activeProfile, err := c.GetActiveProfile()
+				if err != nil {
+					return err
+				}
 
-			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, 0, apiclient.SANDBOXSTATE_STARTED)
+				logsContext, cancelLogs := context.WithCancel(context.Background())
+				defer cancelLogs()
+				stopLogs = cancelLogs
+
+				go func() {
+					_ = common.ReadBuildLogs(logsContext, common.ReadLogParams{
+						Id:                   sandbox.Id,
+						ServerUrl:            activeProfile.Api.Url,
+						ServerApi:            activeProfile.Api,
+						ActiveOrganizationId: activeProfile.ActiveOrganizationId,
+						Follow:               util.Pointer(true),
+						ResourceType:         common.ResourceTypeSandbox,
+					})
+				}()
+			}
+
+			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, createTimeoutFlag, apiclient.SANDBOXSTATE_STARTED)
 			if err != nil {
 				return err
 			}
 
-			// Wait for the last logs to be read
-			time.Sleep(250 * time.Millisecond)
+			if common.FormatFlag == "" {
+				// Wait for the last logs to be read
+				time.Sleep(250 * time.Millisecond)
+			}
 			stopLogs()
+		}
+
+		if common.FormatFlag != "" {
+			freshSandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandbox.Id).Execute()
+			if err != nil {
+				return apiclient_cli.HandleErrorResponse(res, err)
+			}
+			formattedData := common.NewFormatter(freshSandbox)
+			formattedData.Print()
+			return nil
 		}
 
 		previewUrl, res, err := apiClient.SandboxAPI.GetPortPreviewUrl(ctx, sandbox.Id, SANDBOX_TERMINAL_PORT).Execute()
@@ -211,6 +232,10 @@ var (
 	contextFlag          []string
 	networkBlockAllFlag  bool
 	networkAllowListFlag string
+	createEnvFileFlag    string
+	createLabelFileFlag  string
+	createIfExistsFlag   string
+	createTimeoutFlag    time.Duration
 )
 
 func init() {
@@ -233,7 +258,13 @@ func init() {
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
 	CreateCmd.Flags().BoolVar(&networkBlockAllFlag, "network-block-all", false, "Whether to block all network access for the sandbox")
 	CreateCmd.Flags().StringVar(&networkAllowListFlag, "network-allow-list", "", "Comma-separated list of allowed CIDR network addresses for the sandbox")
+	CreateCmd.Flags().StringVar(&createEnvFileFlag, "env-file", "", "Read environment variables from a dotenv-style file (entries from --env override file values)")
+	CreateCmd.Flags().StringVar(&createLabelFileFlag, "label-file", "", "Read labels from a dotenv-style file (entries from --label override file values)")
+	CreateCmd.Flags().StringVar(&createIfExistsFlag, "if-exists", "error", "Behavior when a sandbox with the same name already exists (error, reuse; reuse requires --name)")
+	CreateCmd.Flags().DurationVar(&createTimeoutFlag, "timeout", 0, "Maximum time to wait for the sandbox to start (0 means wait indefinitely)")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "context")
+
+	common.RegisterFormatFlagNoShorthand(CreateCmd)
 }
