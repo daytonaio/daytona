@@ -26,6 +26,7 @@ daytona snapshot push [SNAPSHOT] [flags]
       --memory int32        Memory that will be allocated to the underlying sandboxes in GB (default: 1)
   -n, --name string         Specify the Snapshot name
       --region string       ID of the region where the snapshot will be available (defaults to organization default region)
+      --timeout duration    Maximum time to wait for the snapshot to be validated (0 means wait indefinitely)
 ```
 
 ### Options inherited from parent commands

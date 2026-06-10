@@ -7,7 +7,7 @@ SSH into a sandbox
 Establish an SSH connection to a running sandbox
 
 ```
-daytona ssh [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona ssh [SANDBOX_ID | SANDBOX_NAME] [flags]
 ```
 
 ### Examples

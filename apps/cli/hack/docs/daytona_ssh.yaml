@@ -1,7 +1,7 @@
 name: daytona ssh
 synopsis: SSH into a sandbox
 description: Establish an SSH connection to a running sandbox
-usage: daytona ssh [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+usage: daytona ssh [SANDBOX_ID | SANDBOX_NAME] [flags]
 options:
     - name: expires
       default_value: "1440"

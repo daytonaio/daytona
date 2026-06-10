@@ -1,6 +1,6 @@
 name: daytona info
 synopsis: Get sandbox info
-usage: daytona info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+usage: daytona info [SANDBOX_ID | SANDBOX_NAME] [flags]
 options:
     - name: format
       shorthand: f

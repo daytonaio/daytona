@@ -31,6 +31,10 @@ options:
     - name: region
       usage: |
         ID of the region where the snapshot will be available (defaults to organization default region)
+    - name: timeout
+      default_value: 0s
+      usage: |
+        Maximum time to wait for the snapshot to become active (0 means wait indefinitely)
 inherited_options:
     - name: help
       default_value: "false"

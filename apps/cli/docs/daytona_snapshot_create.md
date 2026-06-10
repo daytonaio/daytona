@@ -25,6 +25,7 @@ daytona snapshot create [SNAPSHOT] [flags]
   -i, --image string          The image name for the snapshot
       --memory int32          Memory that will be allocated to the underlying sandboxes in GB (default: 1)
       --region string         ID of the region where the snapshot will be available (defaults to organization default region)
+      --timeout duration      Maximum time to wait for the snapshot to become active (0 means wait indefinitely)
 ```
 
 ### Options inherited from parent commands

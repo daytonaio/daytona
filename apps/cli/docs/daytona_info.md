@@ -3,7 +3,7 @@
 Get sandbox info
 
 ```
-daytona info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona info [SANDBOX_ID | SANDBOX_NAME] [flags]
 ```
 
 ### Examples
