@@ -42,7 +42,7 @@ basename inside it, and missing parent directories are created.`,
 	Example: `  daytona cp ./config.yaml my-sandbox:/workspace/config.yaml
   daytona cp my-sandbox:/workspace/output ./output
   daytona cp ./src my-sandbox:/workspace/src --format json`,
-	Args: cobra.ExactArgs(2),
+	Args: cpRequireSourceAndDestination,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		req, err := parseCpArgs(args[0], args[1])
 		if err != nil {
@@ -99,6 +99,19 @@ type cpRequest struct {
 	remotePath string
 	localPath  string
 	upload     bool
+}
+
+// cpRequireSourceAndDestination validates that exactly the SOURCE and
+// DESTINATION arguments are provided, returning a usage-category error
+// otherwise (same style as requireSandboxArg).
+func cpRequireSourceAndDestination(cmd *cobra.Command, args []string) error {
+	if len(args) < 2 {
+		return clierr.New(clierr.CategoryUsage, "missing required arguments: SOURCE and DESTINATION")
+	}
+	if len(args) > 2 {
+		return clierr.Newf(clierr.CategoryUsage, "expected exactly 2 arguments (SOURCE and DESTINATION), received %d", len(args))
+	}
+	return nil
 }
 
 // parseCpEndpoint splits a cp argument into its sandbox and path parts. An
@@ -295,14 +308,19 @@ func cpDownloadFile(ctx context.Context, apiClient *apiclient.APIClient, sandbox
 }
 
 // cpWriteLocalFile copies the downloaded temp file to localPath, creating
-// parent directories as needed, then closes and removes the temp file.
+// parent directories as needed, then closes and removes the temp file. A nil
+// tmp means the remote file was empty (the generated client skips creating a
+// temp file for empty response bodies); the local file is still created, and
+// truncated if it already exists.
 func cpWriteLocalFile(tmp *os.File, localPath string) (err error) {
-	defer func() { _ = os.Remove(tmp.Name()) }()
-	defer func() {
-		if closeErr := tmp.Close(); closeErr != nil && err == nil {
-			err = closeErr
-		}
-	}()
+	if tmp != nil {
+		defer func() { _ = os.Remove(tmp.Name()) }()
+		defer func() {
+			if closeErr := tmp.Close(); closeErr != nil && err == nil {
+				err = closeErr
+			}
+		}()
+	}
 
 	if dir := filepath.Dir(localPath); dir != "" {
 		if mkErr := os.MkdirAll(dir, 0o755); mkErr != nil {
@@ -314,9 +332,11 @@ func cpWriteLocalFile(tmp *os.File, localPath string) (err error) {
 	if err != nil {
 		return err
 	}
-	if _, copyErr := io.Copy(dst, tmp); copyErr != nil {
-		_ = dst.Close()
-		return copyErr
+	if tmp != nil {
+		if _, copyErr := io.Copy(dst, tmp); copyErr != nil {
+			_ = dst.Close()
+			return copyErr
+		}
 	}
 	return dst.Close()
 }
