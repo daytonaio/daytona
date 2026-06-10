@@ -20,8 +20,8 @@ github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UF
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/daytonaio/daytona/libs/api-client-go v0.185.0 h1:4f+gGNWmfOxZZtT3NehbUUdbHXYYLD1H7KprycOluTs=
-github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.185.0 h1:zukT06jMssw3EJNe9z0ZGXjboLesAJ3Djw+8gRZAt4c=
+github.com/daytonaio/daytona/libs/api-client-go v0.186.0 h1:HISFZpCnlX5cmZy37h4DYzcsHfwtb+4yiNFmJFqIR0g=
+github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.186.0 h1:jL4NH4WVhx77p4y2fjzeNag9MYeUW29iXDHu2faZD1o=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
