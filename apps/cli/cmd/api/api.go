@@ -37,7 +37,15 @@ PATH is resolved against the active profile's API URL and the request is authent
   daytona api /sandbox/my-sandbox -X DELETE
   daytona api /snapshots -X POST --input snapshot.json
   cat body.json | daytona api /sandbox -X POST --input -`,
-	Args: cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return clierr.New(clierr.CategoryUsage, "missing required argument: PATH")
+		}
+		if len(args) > 1 {
+			return clierr.Newf(clierr.CategoryUsage, "accepts 1 argument, received %d", len(args))
+		}
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		method, err := normalizeMethod(apiMethodFlag)
 		if err != nil {

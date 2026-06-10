@@ -15,6 +15,7 @@ import (
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/docker"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	views_common "github.com/daytonaio/daytona/cli/views/common"
 	views_util "github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -128,11 +129,18 @@ var PushCmd = &cobra.Command{
 
 		// Poll until the image is really available on the registry
 		// This is a workaround for harbor's delay in making newly created images available
+		registryDeadline := time.Time{}
+		if pushTimeoutFlag > 0 {
+			registryDeadline = time.Now().Add(pushTimeoutFlag)
+		}
 		for {
 			_, err := dockerClient.DistributionInspect(ctx, targetImage,
 				base64.URLEncoding.EncodeToString(encodedAuthConfig))
 			if err == nil {
 				break
+			}
+			if !registryDeadline.IsZero() && time.Now().After(registryDeadline) {
+				return clierr.Newf(clierr.CategoryTimeout, "timed out after %s waiting for image %q to become available on the registry", pushTimeoutFlag, targetImage)
 			}
 			time.Sleep(time.Second)
 		}

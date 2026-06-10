@@ -4,10 +4,16 @@
 package sandbox
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 )
 
@@ -91,4 +97,50 @@ func TestDeleteSingleResultJSONShape(t *testing.T) {
 			}
 		})
 	}
+}
+
+func awaitTestClient(serverURL string) *apiclient.APIClient {
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{{URL: serverURL}}
+	return apiclient.NewAPIClient(clientConfig)
+}
+
+func TestAwaitSandboxDeleted(t *testing.T) {
+	t.Run("not found means deleted", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = fmt.Fprint(w, `{"error":"Not Found","message":"sandbox gone"}`)
+		}))
+		defer server.Close()
+
+		if err := awaitSandboxDeleted(context.Background(), awaitTestClient(server.URL), "sbx-1", time.Second); err != nil {
+			t.Fatalf("awaitSandboxDeleted() = %v, want nil", err)
+		}
+	})
+
+	t.Run("destroyed state means deleted", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(w, testSandboxJSON("destroyed"))
+		}))
+		defer server.Close()
+
+		if err := awaitSandboxDeleted(context.Background(), awaitTestClient(server.URL), "sbx-1", time.Second); err != nil {
+			t.Fatalf("awaitSandboxDeleted() = %v, want nil", err)
+		}
+	})
+
+	t.Run("timeout while sandbox persists", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(w, testSandboxJSON("started"))
+		}))
+		defer server.Close()
+
+		err := awaitSandboxDeleted(context.Background(), awaitTestClient(server.URL), "sbx-1", 50*time.Millisecond)
+		if !clierr.HasCategory(err, clierr.CategoryTimeout) {
+			t.Fatalf("awaitSandboxDeleted() = %v, want timeout-category error", err)
+		}
+	})
 }
