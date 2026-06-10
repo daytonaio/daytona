@@ -355,7 +355,7 @@ export default function (pi: ExtensionAPI) {
     } catch (err) {
       active = null
       // Delete the half-created sandbox so it doesn't leak (best-effort).
-      if (created) await created.delete().catch(() => {})
+      if (created) await created.delete().catch(() => undefined)
       setStatus(ctx, undefined)
       ctx.ui.notify(`Daytona: failed to start sandbox — ${errorMessage(err)}`, 'error')
     }
