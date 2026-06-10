@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 	"unsafe"
 
@@ -446,7 +447,7 @@ func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope A11yScope, pid 
 	case A11yScopeAll:
 		root, err := automation.GetRootElement()
 		if err != nil || root == nil {
-			return nil, fmt.Errorf("%w: GetRootElement: %v", ErrNoAccessibleRoot, err)
+			return nil, fmt.Errorf("%w: GetRootElement: %v", ErrA11yUnavailable, err)
 		}
 		return root, nil
 	case A11yScopePID:
@@ -455,7 +456,7 @@ func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope A11yScope, pid 
 		}
 		root, err := automation.GetRootElement()
 		if err != nil || root == nil {
-			return nil, fmt.Errorf("%w: GetRootElement: %v", ErrNoAccessibleRoot, err)
+			return nil, fmt.Errorf("%w: GetRootElement: %v", ErrA11yUnavailable, err)
 		}
 		elt, err := findWindowsRootByPID(automation, root, pid)
 		releaseElement(root) // only needed as the FindAll anchor
@@ -608,7 +609,7 @@ func windowsNodeFromElement(elt *uia.Element, cache bool) *computeruse.Accessibi
 	valuePattern, _ := windowsValuePattern(elt)
 	node := &computeruse.AccessibilityNode{
 		Role:        windowsElementRole(elt),
-		Name:        windowsStringProperty(elt.CurrentName),
+		Name:        windowsBSTRProperty(elt, elt.VTable().Get_CurrentName),
 		Description: windowsElementDescription(elt),
 		Bounds:      windowsElementBounds(elt),
 		States:      windowsElementStates(elt, valuePattern),
@@ -636,7 +637,7 @@ func windowsElementRole(elt *uia.Element) string {
 }
 
 func windowsElementDescription(elt *uia.Element) string {
-	return strings.TrimSpace(windowsStringProperty(elt.CurrentHelpText))
+	return strings.TrimSpace(windowsBSTRProperty(elt, elt.VTable().Get_CurrentHelpText))
 }
 
 func windowsElementBounds(elt *uia.Element) computeruse.AccessibilityBounds {
@@ -1078,11 +1079,26 @@ func newWindowsElementHandle() string {
 	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
-func windowsStringProperty(fn func() (string, error)) string {
-	value, err := fn()
-	if err != nil {
+// The binding's string property getters (CurrentName and friends) convert
+// the UIA-returned BSTR with ole.BstrToString but never SysFreeString it,
+// leaking one native allocation per call — one per node Name/Description
+// fetch on every tree/find request, invisible to Go heap profiling
+// (binding replacement is deferred, like the pattern-getter workaround
+// above). windowsBSTRProperty owns the whole fetch: raw vtable getter,
+// convert, free. Failures and null BSTRs read as "", matching the binding
+// getters' behavior.
+func windowsBSTRProperty(elt *uia.Element, getter uintptr) string {
+	var retVal *uint16
+	hr, _, _ := syscall.SyscallN(
+		getter,
+		uintptr(unsafe.Pointer(elt)),
+		uintptr(unsafe.Pointer(&retVal)),
+	)
+	if hr != 0 || retVal == nil {
 		return ""
 	}
+	value := ole.BstrToString(retVal)
+	ole.SysFreeString((*int16)(unsafe.Pointer(retVal)))
 	return value
 }
 
