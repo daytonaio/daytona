@@ -12,6 +12,7 @@ import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
 import { RequiredOrganizationResourcePermissions } from '../decorators/required-organization-resource-permissions.decorator'
+import { RequiredAnyOrganizationResourcePermissions } from '../decorators/required-any-organization-resource-permissions.decorator'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { UserAuthContext, isUserAuthContext } from '../../common/interfaces/user-auth-context.interface'
 import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
@@ -24,7 +25,8 @@ import { AccessDeniedException } from '../../common/exceptions/access-denied.exc
 /**
  * Guard that validates access to an organization, enforces role/permission requirements, and enriches the auth context with organization data.
  *
- * Enforces the `@RequiredOrganizationMemberRole` and `@RequiredOrganizationResourcePermissions` decorators.
+ * Enforces the `@RequiredOrganizationMemberRole`, `@RequiredOrganizationResourcePermissions` and
+ * `@RequiredAnyOrganizationResourcePermissions` decorators.
  */
 @Injectable()
 export class OrganizationAuthContextGuard extends AuthContextGuard {
@@ -153,7 +155,8 @@ export class OrganizationAuthContextGuard extends AuthContextGuard {
   /**
    * Checks if the organization user has authorization for the required role and(or) permissions.
    *
-   * Enforces the `RequiredOrganizationMemberRole` and `RequiredOrganizationResourcePermissions` decorators.
+   * Enforces the `RequiredOrganizationMemberRole`, `RequiredOrganizationResourcePermissions` and
+   * `RequiredAnyOrganizationResourcePermissions` decorators.
    */
   private isAuthorized(
     context: ExecutionContext,
@@ -179,7 +182,12 @@ export class OrganizationAuthContextGuard extends AuthContextGuard {
       context.getClass(),
     ])
 
-    if (!requiredPermissions) {
+    const requiredAnyPermissions = this.reflector.getAllAndOverride(RequiredAnyOrganizationResourcePermissions, [
+      context.getHandler(),
+      context.getClass(),
+    ])
+
+    if (!requiredPermissions && !requiredAnyPermissions) {
       return true
     }
 
@@ -187,6 +195,14 @@ export class OrganizationAuthContextGuard extends AuthContextGuard {
       ? new Set(authContext.apiKey.permissions)
       : new Set(organizationUser.assignedRoles.flatMap((role) => role.permissions))
 
-    return requiredPermissions.every((permission) => assignedPermissions.has(permission))
+    if (requiredPermissions && !requiredPermissions.every((permission) => assignedPermissions.has(permission))) {
+      return false
+    }
+
+    if (requiredAnyPermissions && !requiredAnyPermissions.some((permission) => assignedPermissions.has(permission))) {
+      return false
+    }
+
+    return true
   }
 }

@@ -28,6 +28,7 @@ import { CustomHeaders } from '../../common/constants/header.constants'
 import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
 import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
+import { RequiredAnyOrganizationResourcePermissions } from '../../organization/decorators/required-any-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
@@ -122,6 +123,10 @@ export class DockerRegistryController {
     description: 'Temporary registry access has been generated',
     type: RegistryPushAccessDto,
   })
+  @RequiredAnyOrganizationResourcePermissions([
+    OrganizationResourcePermission.WRITE_SNAPSHOTS,
+    OrganizationResourcePermission.WRITE_SANDBOXES,
+  ])
   async getTransientPushAccess(
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query('regionId') regionId?: string,

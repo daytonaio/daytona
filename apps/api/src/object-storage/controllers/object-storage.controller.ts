@@ -14,6 +14,8 @@ import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
+import { RequiredAnyOrganizationResourcePermissions } from '../../organization/decorators/required-any-organization-resource-permissions.decorator'
+import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 
 @Controller('object-storage')
 @ApiTags('object-storage')
@@ -37,6 +39,10 @@ export class ObjectStorageController {
     description: 'Temporary storage access has been generated',
     type: StorageAccessDto,
   })
+  @RequiredAnyOrganizationResourcePermissions([
+    OrganizationResourcePermission.WRITE_SNAPSHOTS,
+    OrganizationResourcePermission.WRITE_SANDBOXES,
+  ])
   async getPushAccess(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<StorageAccessDto> {
     return this.objectStorageService.getPushAccess(authContext.organizationId)
   }
