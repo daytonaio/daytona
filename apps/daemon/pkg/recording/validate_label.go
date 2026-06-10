@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+// labelPattern restricts labels to characters that are safe to embed in a
+// file name on every supported OS. Only plain spaces are allowed — not the
+// full \s class (tab/newline/CR/FF/VT), which is invalid in Windows file
+// names and unsafe to embed in paths and logs.
+var labelPattern = regexp.MustCompile(`^[A-Za-z0-9. _-]+$`)
+
 // validateLabel validates a user-provided label to prevent path injection
 // and ensure it's safe for use in a filename. Returns error if invalid.
 func validateLabel(label string) error {
@@ -30,8 +36,7 @@ func validateLabel(label string) error {
 		return ErrInvalidLabel
 	}
 
-	safePattern := regexp.MustCompile(`^[A-Za-z0-9.\s_-]+$`)
-	if !safePattern.MatchString(label) {
+	if !labelPattern.MatchString(label) {
 		return ErrInvalidLabel
 	}
 
