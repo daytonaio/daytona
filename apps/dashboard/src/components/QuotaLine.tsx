@@ -21,30 +21,15 @@ const transition = {
 } as const
 
 const QuotaLine: React.FC<QuotaLineProps> = ({ current, total, className }) => {
-  const percentage = Math.min(Math.max((current / total) * 100, 0), 100)
-
-  const greenWidth = Math.min(percentage, 60)
-  const yellowWidth = Math.min(Math.max(percentage - 60, 0), 30)
-  const redWidth = Math.min(Math.max(percentage - 90, 0), 10)
+  const percentage = total > 0 ? Math.min(Math.max((current / total) * 100, 0), 100) : current > 0 ? 100 : 0
+  const hiddenPercentage = 100 - percentage
 
   return (
-    <div className={cn('w-full h-2 bg-muted rounded-full overflow-clip flex relative', className)}>
+    <div className={cn('w-full h-2 bg-muted rounded-full overflow-clip relative', className)}>
       <motion.div
-        className="h-full bg-green-500"
-        initial={{ width: 0 }}
-        animate={{ width: `${greenWidth}%` }}
-        transition={transition}
-      />
-      <motion.div
-        className="h-full bg-yellow-400"
-        initial={{ width: 0 }}
-        animate={{ width: `${yellowWidth}%` }}
-        transition={transition}
-      />
-      <motion.div
-        className="h-full bg-red-500"
-        initial={{ width: 0 }}
-        animate={{ width: `${redWidth}%` }}
+        className="absolute inset-0 bg-[linear-gradient(90deg,#22c55e_0%,#22c55e_60%,#facc15_75%,#ef4444_100%)]"
+        initial={{ clipPath: 'inset(0 100% 0 0)' }}
+        animate={{ clipPath: `inset(0 ${hiddenPercentage}% 0 0)` }}
         transition={transition}
       />
     </div>
