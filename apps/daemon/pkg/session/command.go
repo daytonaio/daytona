@@ -55,7 +55,14 @@ func (s *SessionService) GetSessionCommand(sessionId, cmdId string) (*Command, e
 		return nil, fmt.Errorf("failed to read exit code file: %w", err)
 	}
 
-	exitCodeInt, err := strconv.Atoi(strings.TrimSpace(string(exitCode)))
+	trimmed := strings.TrimSpace(string(exitCode))
+	if trimmed == "" {
+		// The writer creates the exit-code file before flushing its content;
+		// an empty read means the write is still in flight, not a result.
+		return command, nil
+	}
+
+	exitCodeInt, err := strconv.Atoi(trimmed)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert exit code to int: %w", err)
 	}
