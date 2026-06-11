@@ -42,21 +42,10 @@ func NewClient(endpoint, accessKey, secretKey, bucket string, useSSL bool, sessi
 }
 
 func (c *Client) UploadFile(ctx context.Context, objectName string, data []byte) error {
-	exists, err := c.minioClient.BucketExists(ctx, c.bucket)
-	if err != nil {
-		return fmt.Errorf("error checking bucket existence: %w", err)
-	}
-	if !exists {
-		err = c.minioClient.MakeBucket(ctx, c.bucket, minio.MakeBucketOptions{})
-		if err != nil {
-			return fmt.Errorf("error creating bucket: %w", err)
-		}
-	}
-
 	reader := bytes.NewReader(data)
 	objectSize := int64(len(data))
 
-	_, err = c.minioClient.PutObject(ctx, c.bucket, objectName, reader, objectSize, minio.PutObjectOptions{
+	_, err := c.minioClient.PutObject(ctx, c.bucket, objectName, reader, objectSize, minio.PutObjectOptions{
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
@@ -378,14 +367,6 @@ func (c *Client) ProcessFile(ctx context.Context, filePath, orgID string, existi
 }
 
 func (c *Client) CreateDirectory(ctx context.Context, directoryPath string) error {
-	exists, err := c.minioClient.BucketExists(ctx, c.bucket)
-	if err != nil {
-		return fmt.Errorf("error checking bucket existence: %w", err)
-	}
-	if !exists {
-		return fmt.Errorf("bucket does not exist")
-	}
-
 	// Ensure the directory path ends with a slash to represent a directory
 	if !strings.HasSuffix(directoryPath, "/") {
 		directoryPath = directoryPath + "/"
@@ -394,7 +375,7 @@ func (c *Client) CreateDirectory(ctx context.Context, directoryPath string) erro
 	// Create an empty object to represent the directory
 	emptyContent := []byte{}
 	reader := bytes.NewReader(emptyContent)
-	_, err = c.minioClient.PutObject(ctx, c.bucket, directoryPath, reader, 0, minio.PutObjectOptions{
+	_, err := c.minioClient.PutObject(ctx, c.bucket, directoryPath, reader, 0, minio.PutObjectOptions{
 		ContentType: "application/directory",
 	})
 	if err != nil {
