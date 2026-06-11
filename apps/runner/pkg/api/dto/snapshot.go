@@ -31,6 +31,12 @@ type CreateSnapshotFromSandboxRequestDTO struct {
 	Name           string       `json:"name" validate:"required" example:"my-snapshot:latest"`
 	OrganizationId string       `json:"organizationId,omitempty"`
 	Registry       *RegistryDTO `json:"registry" validate:"required"`
+	// Async, when true, makes the runner return 202 immediately and run the
+	// capture in the background; progress is queried via
+	// GET /sandboxes/{sandboxId}/snapshot-from-sandbox. When false or omitted
+	// the runner captures synchronously and responds 200 with the image
+	// metadata (legacy behavior).
+	Async bool `json:"async,omitempty"`
 } //	@name	CreateSnapshotFromSandboxRequest
 
 func HashWithoutPrefix(hash string) string {

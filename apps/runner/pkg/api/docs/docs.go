@@ -626,8 +626,60 @@ const docTemplate = `{
             }
         },
         "/sandboxes/{sandboxId}/snapshot-from-sandbox": {
+            "get": {
+                "description": "Report the state of the asynchronous snapshot capture for the sandbox. Returns state NONE when the runner is not tracking a capture for the sandbox (none was started, it was started on another runner, or the runner restarted).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sandbox"
+                ],
+                "summary": "Get snapshot-from-sandbox capture status",
+                "operationId": "SnapshotFromSandboxStatus",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SnapshotFromSandboxStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.",
+                "description": "Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag. When the request body sets async=true the capture runs in the background, the endpoint responds 202 immediately, and progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox.",
                 "produces": [
                     "application/json"
                 ],
@@ -659,6 +711,12 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/SnapshotInfoResponse"
+                        }
+                    },
+                    "202": {
+                        "description": "Snapshot capture started (async=true)",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -1650,6 +1708,10 @@ const docTemplate = `{
                 "registry"
             ],
             "properties": {
+                "async": {
+                    "description": "Async, when true, makes the runner return 202 immediately and run the\ncapture in the background; progress is queried via\nGET /sandboxes/{sandboxId}/snapshot-from-sandbox. When false or omitted\nthe runner captures synchronously and responds 200 with the image\nmetadata (legacy behavior).",
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string",
                     "example": "my-snapshot:latest"
@@ -1979,6 +2041,23 @@ const docTemplate = `{
                 }
             }
         },
+        "SnapshotFromSandboxStatusResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "snapshot": {
+                    "$ref": "#/definitions/SnapshotInfoResponse"
+                },
+                "state": {
+                    "$ref": "#/definitions/enums.SnapshotFromSandboxState"
+                }
+            }
+        },
         "SnapshotInfoResponse": {
             "type": "object",
             "properties": {
@@ -2123,6 +2202,21 @@ const docTemplate = `{
                 "SandboxStateError",
                 "SandboxStateUnknown",
                 "SandboxStatePullingSnapshot"
+            ]
+        },
+        "enums.SnapshotFromSandboxState": {
+            "type": "string",
+            "enum": [
+                "NONE",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "FAILED"
+            ],
+            "x-enum-varnames": [
+                "SnapshotFromSandboxStateNone",
+                "SnapshotFromSandboxStateInProgress",
+                "SnapshotFromSandboxStateCompleted",
+                "SnapshotFromSandboxStateFailed"
             ]
         }
     },

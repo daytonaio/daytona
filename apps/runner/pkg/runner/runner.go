@@ -19,25 +19,27 @@ import (
 )
 
 type RunnerInstanceConfig struct {
-	Logger             *slog.Logger
-	BackupInfoCache    *cache.BackupInfoCache
-	SnapshotErrorCache *cache.SnapshotErrorCache
-	Docker             *docker.DockerClient
-	MetricsCollector   *metrics.Collector
-	SandboxService     *services.SandboxService
-	NetRulesManager    *netrules.NetRulesManager
-	SSHGatewayService  *sshgateway.Service
+	Logger                       *slog.Logger
+	BackupInfoCache              *cache.BackupInfoCache
+	SnapshotFromSandboxInfoCache *cache.SnapshotFromSandboxInfoCache
+	SnapshotErrorCache           *cache.SnapshotErrorCache
+	Docker                       *docker.DockerClient
+	MetricsCollector             *metrics.Collector
+	SandboxService               *services.SandboxService
+	NetRulesManager              *netrules.NetRulesManager
+	SSHGatewayService            *sshgateway.Service
 }
 
 type Runner struct {
-	Logger             *slog.Logger
-	BackupInfoCache    *cache.BackupInfoCache
-	SnapshotErrorCache *cache.SnapshotErrorCache
-	Docker             *docker.DockerClient
-	MetricsCollector   *metrics.Collector
-	SandboxService     *services.SandboxService
-	NetRulesManager    *netrules.NetRulesManager
-	SSHGatewayService  *sshgateway.Service
+	Logger                       *slog.Logger
+	BackupInfoCache              *cache.BackupInfoCache
+	SnapshotFromSandboxInfoCache *cache.SnapshotFromSandboxInfoCache
+	SnapshotErrorCache           *cache.SnapshotErrorCache
+	Docker                       *docker.DockerClient
+	MetricsCollector             *metrics.Collector
+	SandboxService               *services.SandboxService
+	NetRulesManager              *netrules.NetRulesManager
+	SSHGatewayService            *sshgateway.Service
 }
 
 var runner *Runner
@@ -58,14 +60,15 @@ func GetInstance(config *RunnerInstanceConfig) (*Runner, error) {
 		}
 
 		runner = &Runner{
-			Logger:             logger.With(slog.String("component", "runner")),
-			BackupInfoCache:    config.BackupInfoCache,
-			SnapshotErrorCache: config.SnapshotErrorCache,
-			Docker:             config.Docker,
-			SandboxService:     config.SandboxService,
-			MetricsCollector:   config.MetricsCollector,
-			NetRulesManager:    config.NetRulesManager,
-			SSHGatewayService:  config.SSHGatewayService,
+			Logger:                       logger.With(slog.String("component", "runner")),
+			BackupInfoCache:              config.BackupInfoCache,
+			SnapshotFromSandboxInfoCache: config.SnapshotFromSandboxInfoCache,
+			SnapshotErrorCache:           config.SnapshotErrorCache,
+			Docker:                       config.Docker,
+			SandboxService:               config.SandboxService,
+			MetricsCollector:             config.MetricsCollector,
+			NetRulesManager:              config.NetRulesManager,
+			SSHGatewayService:            config.SSHGatewayService,
 		}
 	}
 

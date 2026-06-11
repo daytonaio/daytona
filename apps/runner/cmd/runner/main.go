@@ -140,10 +140,14 @@ func run() int {
 	}
 
 	backupInfoCache := cache.NewBackupInfoCache(ctx, cfg.BackupInfoCacheRetention)
+	// Reuses BACKUP_INFO_CACHE_RETENTION: capture status entries serve the same
+	// operational purpose as backup status entries.
+	snapshotFromSandboxInfoCache := cache.NewSnapshotFromSandboxInfoCache(ctx, cfg.BackupInfoCacheRetention)
 
 	dockerClient, err := docker.NewDockerClient(ctx, docker.DockerClientConfig{
 		ApiClient:                    cli,
 		BackupInfoCache:              backupInfoCache,
+		SnapshotFromSandboxInfoCache: snapshotFromSandboxInfoCache,
 		Logger:                       logger,
 		AWSRegion:                    cfg.AWSRegion,
 		AWSEndpointUrl:               cfg.AWSEndpointUrl,
@@ -228,14 +232,15 @@ func run() int {
 	metricsCollector.Start(ctx)
 
 	_, err = runner.GetInstance(&runner.RunnerInstanceConfig{
-		Logger:             logger,
-		BackupInfoCache:    backupInfoCache,
-		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
-		Docker:             dockerClient,
-		SandboxService:     sandboxService,
-		MetricsCollector:   metricsCollector,
-		NetRulesManager:    netRulesManager,
-		SSHGatewayService:  sshGatewayService,
+		Logger:                       logger,
+		BackupInfoCache:              backupInfoCache,
+		SnapshotFromSandboxInfoCache: snapshotFromSandboxInfoCache,
+		SnapshotErrorCache:           cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
+		Docker:                       dockerClient,
+		SandboxService:               sandboxService,
+		MetricsCollector:             metricsCollector,
+		NetRulesManager:              netRulesManager,
+		SSHGatewayService:            sshGatewayService,
 	})
 	if err != nil {
 		logger.Error("Failed to initialize runner instance", "error", err)
