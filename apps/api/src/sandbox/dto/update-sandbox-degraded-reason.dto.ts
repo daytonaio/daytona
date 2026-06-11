@@ -4,11 +4,12 @@
  */
 
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { IsOptional, IsString } from 'class-validator'
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class UpdateSandboxDegradedReasonDto {
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @ApiPropertyOptional({
     description: 'Degraded reason; omit or send null to clear',
     nullable: true,
