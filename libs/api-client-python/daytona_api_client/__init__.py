@@ -223,6 +223,7 @@ if TYPE_CHECKING:
     from daytona_api_client.models.update_organization_region_quota import UpdateOrganizationRegionQuota
     from daytona_api_client.models.update_organization_role import UpdateOrganizationRole
     from daytona_api_client.models.update_region import UpdateRegion
+    from daytona_api_client.models.update_sandbox_degraded_reason_dto import UpdateSandboxDegradedReasonDto
     from daytona_api_client.models.update_sandbox_network_settings import UpdateSandboxNetworkSettings
     from daytona_api_client.models.update_sandbox_state_dto import UpdateSandboxStateDto
     from daytona_api_client.models.url import Url
@@ -438,6 +439,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "UpdateOrganizationRegionQuota": "daytona_api_client.models.update_organization_region_quota",
     "UpdateOrganizationRole": "daytona_api_client.models.update_organization_role",
     "UpdateRegion": "daytona_api_client.models.update_region",
+    "UpdateSandboxDegradedReasonDto": "daytona_api_client.models.update_sandbox_degraded_reason_dto",
     "UpdateSandboxNetworkSettings": "daytona_api_client.models.update_sandbox_network_settings",
     "UpdateSandboxStateDto": "daytona_api_client.models.update_sandbox_state_dto",
     "Url": "daytona_api_client.models.url",
@@ -667,6 +669,7 @@ __all__ = [
     "UpdateOrganizationRegionQuota",
     "UpdateOrganizationRole",
     "UpdateRegion",
+    "UpdateSandboxDegradedReasonDto",
     "UpdateSandboxNetworkSettings",
     "UpdateSandboxStateDto",
     "Url",

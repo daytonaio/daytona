@@ -52,6 +52,7 @@ import io.daytona.api.client.model.SshAccessDto;
 import io.daytona.api.client.model.SshAccessValidationDto;
 import io.daytona.api.client.model.ToolboxProxyUrl;
 import io.daytona.api.client.model.TraceSpan;
+import io.daytona.api.client.model.UpdateSandboxDegradedReasonDto;
 import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
 import io.daytona.api.client.model.UpdateSandboxStateDto;
 import io.daytona.api.client.model.Url;
@@ -5936,6 +5937,147 @@ public class SandboxApi {
         okhttp3.Call localVarCall = updatePublicStatusValidateBeforeCall(sandboxIdOrName, isPublic, xDaytonaOrganizationID, _callback);
         Type localVarReturnType = new TypeToken<Sandbox>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for updateSandboxDegradedReason
+     * @param sandboxId ID of the sandbox (required)
+     * @param updateSandboxDegradedReasonDto  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateSandboxDegradedReasonCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = updateSandboxDegradedReasonDto;
+
+        // create path and map variables
+        String localVarPath = "/sandbox/{sandboxId}/degraded-reason"
+            .replace("{" + "sandboxId" + "}", localVarApiClient.escapeString(sandboxId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (xDaytonaOrganizationID != null) {
+            localVarHeaderParams.put("X-Daytona-Organization-ID", localVarApiClient.parameterToString(xDaytonaOrganizationID));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call updateSandboxDegradedReasonValidateBeforeCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'sandboxId' is set
+        if (sandboxId == null) {
+            throw new ApiException("Missing the required parameter 'sandboxId' when calling updateSandboxDegradedReason(Async)");
+        }
+
+        // verify the required parameter 'updateSandboxDegradedReasonDto' is set
+        if (updateSandboxDegradedReasonDto == null) {
+            throw new ApiException("Missing the required parameter 'updateSandboxDegradedReasonDto' when calling updateSandboxDegradedReason(Async)");
+        }
+
+        return updateSandboxDegradedReasonCall(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID, _callback);
+
+    }
+
+    /**
+     * Update sandbox degraded reason
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param updateSandboxDegradedReasonDto  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+     </table>
+     */
+    public void updateSandboxDegradedReason(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
+        updateSandboxDegradedReasonWithHttpInfo(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID);
+    }
+
+    /**
+     * Update sandbox degraded reason
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param updateSandboxDegradedReasonDto  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> updateSandboxDegradedReasonWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
+        okhttp3.Call localVarCall = updateSandboxDegradedReasonValidateBeforeCall(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Update sandbox degraded reason (asynchronously)
+     * 
+     * @param sandboxId ID of the sandbox (required)
+     * @param updateSandboxDegradedReasonDto  (required)
+     * @param xDaytonaOrganizationID Use with JWT to specify the organization ID (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateSandboxDegradedReasonAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = updateSandboxDegradedReasonValidateBeforeCall(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**

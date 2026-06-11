@@ -111,6 +111,10 @@ export interface Sandbox {
      */
     'recoverable'?: boolean;
     /**
+     * Reason the sandbox is currently degraded (e.g. file-descriptor exhaustion). Set by the runner while the condition persists and cleared automatically when it resolves.
+     */
+    'degradedReason'?: string;
+    /**
      * The state of the backup
      */
     'backupState'?: SandboxBackupStateEnum;

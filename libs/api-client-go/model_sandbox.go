@@ -61,6 +61,8 @@ type Sandbox struct {
 	ErrorReason *string `json:"errorReason,omitempty"`
 	// Whether the sandbox error is recoverable.
 	Recoverable *bool `json:"recoverable,omitempty"`
+	// Reason the sandbox is currently degraded (e.g. file-descriptor exhaustion). Set by the runner while the condition persists and cleared automatically when it resolves.
+	DegradedReason *string `json:"degradedReason,omitempty"`
 	// The state of the backup
 	BackupState *string `json:"backupState,omitempty"`
 	// The creation timestamp of the last backup
@@ -663,6 +665,38 @@ func (o *Sandbox) SetRecoverable(v bool) {
 	o.Recoverable = &v
 }
 
+// GetDegradedReason returns the DegradedReason field value if set, zero value otherwise.
+func (o *Sandbox) GetDegradedReason() string {
+	if o == nil || IsNil(o.DegradedReason) {
+		var ret string
+		return ret
+	}
+	return *o.DegradedReason
+}
+
+// GetDegradedReasonOk returns a tuple with the DegradedReason field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetDegradedReasonOk() (*string, bool) {
+	if o == nil || IsNil(o.DegradedReason) {
+		return nil, false
+	}
+	return o.DegradedReason, true
+}
+
+// HasDegradedReason returns a boolean if a field has been set.
+func (o *Sandbox) HasDegradedReason() bool {
+	if o != nil && !IsNil(o.DegradedReason) {
+		return true
+	}
+
+	return false
+}
+
+// SetDegradedReason gets a reference to the given string and assigns it to the DegradedReason field.
+func (o *Sandbox) SetDegradedReason(v string) {
+	o.DegradedReason = &v
+}
+
 // GetBackupState returns the BackupState field value if set, zero value otherwise.
 func (o *Sandbox) GetBackupState() string {
 	if o == nil || IsNil(o.BackupState) {
@@ -1179,6 +1213,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Recoverable) {
 		toSerialize["recoverable"] = o.Recoverable
 	}
+	if !IsNil(o.DegradedReason) {
+		toSerialize["degradedReason"] = o.DegradedReason
+	}
 	if !IsNil(o.BackupState) {
 		toSerialize["backupState"] = o.BackupState
 	}
@@ -1298,6 +1335,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "desiredState")
 		delete(additionalProperties, "errorReason")
 		delete(additionalProperties, "recoverable")
+		delete(additionalProperties, "degradedReason")
 		delete(additionalProperties, "backupState")
 		delete(additionalProperties, "backupCreatedAt")
 		delete(additionalProperties, "autoStopInterval")
