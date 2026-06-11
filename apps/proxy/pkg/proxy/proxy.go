@@ -244,6 +244,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		Addr:    fmt.Sprintf(":%d", config.ProxyPort),
 		Handler: router,
 	}
+	common_proxy.ApplyServerTimeouts(httpServer)
 
 	listener, err := net.Listen("tcp", httpServer.Addr)
 	if err != nil {
