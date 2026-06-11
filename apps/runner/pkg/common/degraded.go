@@ -102,7 +102,7 @@ type toolboxExecuteResponse struct {
 func ClassifyToolboxFdExhaustion(daemonPath string, statusCode int, contentType string, body []byte) (string, bool) {
 	switch {
 	case statusCode >= 400:
-		if !strings.Contains(contentType, "application/json") {
+		if !strings.Contains(strings.ToLower(contentType), "application/json") {
 			return "", false
 		}
 		if msg := string(body); MatchFdExhaustion(msg) {

@@ -116,6 +116,14 @@ func TestClassifyToolboxFdExhaustion(t *testing.T) {
 			wantOk:      true,
 		},
 		{
+			name:        "error response with uppercase content type",
+			daemonPath:  "/process/session/abc/exec",
+			statusCode:  500,
+			contentType: "Application/JSON; charset=UTF-8",
+			body:        `{"statusCode":500,"message":"failed to execute command: fork/exec /bin/sh: too many open files"}`,
+			wantOk:      true,
+		},
+		{
 			name:        "error response without fd text",
 			daemonPath:  "/process/session/abc/exec",
 			statusCode:  500,

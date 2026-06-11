@@ -96,11 +96,13 @@ func sniffFdExhaustion(resp *http.Response, sandboxId string, daemonPath string)
 	// "fits within the cap" from "longer than reported".
 	body, err := io.ReadAll(io.LimitReader(resp.Body, bodyCap+1))
 	if err != nil {
-		// Partial read: hand back what was consumed plus the original body so
-		// the proxy surfaces the same read error to the client; skip
-		// classification.
+		// Partial read: replay what was consumed, then the read error itself.
+		// The error was swallowed by our ReadAll, and the transport stream is
+		// in an undefined state after a failed read — storing the error is the
+		// only way the client observably sees the same failure instead of a
+		// silent truncation. Skip classification.
 		resp.Body = &compositeReadCloser{
-			Reader: io.MultiReader(bytes.NewReader(body), resp.Body),
+			Reader: io.MultiReader(bytes.NewReader(body), &errReader{err: err}),
 			Closer: resp.Body,
 		}
 		return
@@ -134,6 +136,12 @@ type compositeReadCloser struct {
 	io.Reader
 	io.Closer
 }
+
+// errReader yields a stored error once preceding readers in a MultiReader
+// chain are drained, replaying a read failure to downstream consumers.
+type errReader struct{ err error }
+
+func (e *errReader) Read([]byte) (int, error) { return 0, e.err }
 
 func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	runner, err := runner.GetInstance(nil)
