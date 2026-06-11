@@ -18,7 +18,7 @@ func ValidateEnvKeys(envs map[string]string) error {
 			return fmt.Errorf("invalid environment variable name: '%s'", key)
 		}
 	}
-	return nil
+	return validateEnvKeysPlatform(envs)
 }
 
 func ApplyEnvs(cmd *exec.Cmd, envs map[string]string) {

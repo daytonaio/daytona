@@ -7,12 +7,15 @@ package process
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os/exec"
 	"strings"
 	"sync/atomic"
 	"time"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 
 	"github.com/daytonaio/daemon/pkg/common"
 
@@ -37,12 +40,17 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 
 		var request ExecuteRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
-			c.AbortWithError(http.StatusBadRequest, errors.New("command is required"))
+			c.Error(common_errors.NewBadRequestError(fmt.Errorf("invalid request body: %w", err)))
 			return
 		}
 
 		if strings.TrimSpace(request.Command) == "" {
-			c.AbortWithError(http.StatusBadRequest, errors.New("empty command"))
+			c.Error(common_errors.NewBadRequestError(errors.New("command cannot be empty or whitespace-only")))
+			return
+		}
+
+		if err := common.ValidateEnvKeys(request.Envs); err != nil {
+			c.Error(common_errors.NewBadRequestError(err))
 			return
 		}
 
@@ -70,6 +78,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd
 		}
+		common.ApplyEnvs(cmd, request.Envs)
 
 		timeout := 360 * time.Second
 		if request.Timeout != nil && *request.Timeout > 0 {
