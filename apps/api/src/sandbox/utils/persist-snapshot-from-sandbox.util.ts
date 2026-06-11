@@ -48,12 +48,16 @@ export type CreatePendingSnapshotFromSandboxParams = Omit<
 /**
  * Identifies a snapshot-from-sandbox capture record awaiting its result.
  *
- * Capture records are the only PENDING rows with an empty imageName and no
- * buildInfo: createFromPull rejects empty image names and createFromBuildInfo
- * always sets buildInfo.
+ * Capture records are the only PENDING rows with an empty imageName, no
+ * buildInfo and no ref: createFromPull rejects empty image names,
+ * createFromBuildInfo always sets buildInfo, and activateSnapshotFromSandbox
+ * sets ref. The ref check excludes previously-captured snapshots that were
+ * deactivated and reactivated (INACTIVE -> PENDING): those keep their empty
+ * imageName but carry the ref written at activation, and must go through the
+ * regular pull-by-ref flow instead of the capture timeout.
  */
 export function isPendingCaptureSnapshot(snapshot: Snapshot): boolean {
-  return snapshot.state === SnapshotState.PENDING && !snapshot.buildInfo && !snapshot.imageName
+  return snapshot.state === SnapshotState.PENDING && !snapshot.buildInfo && !snapshot.imageName && !snapshot.ref
 }
 
 /**

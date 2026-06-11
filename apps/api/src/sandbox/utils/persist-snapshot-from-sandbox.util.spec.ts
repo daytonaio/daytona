@@ -89,7 +89,7 @@ function captureRecord(overrides: Partial<Snapshot> = {}): Snapshot {
 }
 
 describe('isPendingCaptureSnapshot', () => {
-  it('is true only for pending records with empty imageName and no buildInfo', () => {
+  it('is true only for pending records with empty imageName, no buildInfo and no ref', () => {
     expect(isPendingCaptureSnapshot(captureRecord())).toBe(true)
   })
 
@@ -98,6 +98,7 @@ describe('isPendingCaptureSnapshot', () => {
     ['pending with buildInfo', captureRecord({ buildInfo: { snapshotRef: 'ref' } as BuildInfo })],
     ['active capture-shaped record', captureRecord({ state: SnapshotState.ACTIVE })],
     ['errored capture-shaped record', captureRecord({ state: SnapshotState.ERROR })],
+    ['reactivated capture record with ref', captureRecord({ ref: 'registry.example.com/daytona/daytona-abc:daytona' })],
   ])('is false for %s', (_label, snapshot) => {
     expect(isPendingCaptureSnapshot(snapshot)).toBe(false)
   })
