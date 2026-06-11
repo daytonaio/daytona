@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SandboxState, SandboxApi, SandboxBackupStateEnum, Configuration } from '@daytona/api-client'
+import {
+  SandboxState,
+  SandboxApi,
+  SandboxBackupStateEnum,
+  Configuration,
+  SnapshotsApi,
+  SnapshotState,
+} from '@daytona/api-client'
 import type {
   Sandbox as SandboxDto,
   SandboxListItem as SandboxListItemDto,
@@ -18,6 +25,7 @@ import type {
   UpdateSandboxNetworkSettings,
   SandboxListSortField,
   SandboxListSortDirection,
+  SnapshotDto,
 } from '@daytona/api-client'
 import { Daytona } from './Daytona'
 import type { Resources } from './Daytona'
@@ -138,6 +146,7 @@ export class Sandbox {
     private readonly clientConfig: Configuration,
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
+    private readonly snapshotsApi: SnapshotsApi,
   ) {
     this.processSandboxDto(sandboxDto)
 
@@ -369,6 +378,7 @@ export class Sandbox {
       structuredClone(this.clientConfig),
       Daytona.createAxiosInstance(),
       this.sandboxApi,
+      this.snapshotsApi,
     )
 
     const timeElapsed = Date.now() - startTime
@@ -382,7 +392,9 @@ export class Sandbox {
    *
    * This captures the Sandbox's filesystem into a reusable snapshot that can be
    * used to create new Sandboxes. The Sandbox will temporarily enter a
-   * 'snapshotting' state and return to its previous state when complete.
+   * 'snapshotting' state and return to its previous state when complete. The
+   * method waits until the snapshot record reaches the 'active' state and throws
+   * a DaytonaError carrying the snapshot's error reason if the capture fails.
    *
    * @param {string} name - Name for the new snapshot
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
@@ -412,25 +424,50 @@ export class Sandbox {
 
     const timeElapsed = Date.now() - startTime
     const remainingTimeout = timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout
-    await this.waitForSnapshotComplete(remainingTimeout)
+    await this.waitForSnapshotComplete(name, remainingTimeout)
   }
 
-  private async waitForSnapshotComplete(timeout: number) {
+  private async waitForSnapshotComplete(name: string, timeout: number) {
     let checkInterval = 100
     const startTime = Date.now()
 
-    while (this.state === SandboxState.SNAPSHOTTING) {
-      await this.refreshData()
-
-      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
-        throw new DaytonaError(
-          `Sandbox ${this.id} snapshot failed with state: ${this.state}, error reason: ${this.errorReason}`,
-        )
+    while (true) {
+      let snapshot: SnapshotDto | undefined
+      try {
+        snapshot = (await this.snapshotsApi.getSnapshot(name)).data
+      } catch (error) {
+        if (!(error instanceof DaytonaNotFoundError)) {
+          throw error
+        }
+        // Legacy APIs create the snapshot record only after a successful capture.
+        // Tolerate the missing record while the sandbox is still snapshotting.
+        await this.refreshData()
+        if (this.state !== SandboxState.SNAPSHOTTING) {
+          // Pre-#4991 APIs persist the record and restore the sandbox state in separate steps,
+          // so a poll can observe the reverted sandbox before the record lands. Re-read once
+          // before declaring the capture failed.
+          try {
+            snapshot = (await this.snapshotsApi.getSnapshot(name)).data
+          } catch (graceError) {
+            if (!(graceError instanceof DaytonaNotFoundError)) {
+              throw graceError
+            }
+            throw new DaytonaError(
+              `Sandbox ${this.id} snapshot '${name}' failed: no snapshot record exists and sandbox is no longer snapshotting (state: ${this.state}, error reason: ${this.errorReason})`,
+            )
+          }
+        }
       }
 
-      if (this.state !== SandboxState.SNAPSHOTTING) {
-        return
+      if (snapshot) {
+        if (snapshot.state === SnapshotState.ACTIVE) {
+          return
+        }
+        if (snapshot.state === SnapshotState.ERROR || snapshot.state === SnapshotState.BUILD_FAILED) {
+          throw new DaytonaError(
+            `Snapshot ${name} failed with state: ${snapshot.state}, error reason: ${snapshot.errorReason}`,
+          )
+        }
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {

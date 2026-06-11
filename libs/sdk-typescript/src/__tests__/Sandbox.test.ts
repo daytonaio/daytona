@@ -13,6 +13,14 @@ jest.mock(
       ERROR: 'error',
       BUILD_FAILED: 'build_failed',
       DESTROYED: 'destroyed',
+      SNAPSHOTTING: 'snapshotting',
+      STARTED: 'started',
+    },
+    SnapshotState: {
+      PENDING: 'pending',
+      ACTIVE: 'active',
+      ERROR: 'error',
+      BUILD_FAILED: 'build_failed',
     },
   }),
   { virtual: true },
@@ -52,7 +60,11 @@ const baseDto: SandboxDto = {
 
 const makeSandbox = (
   overrides: Partial<SandboxDto> = {},
-): { sandbox: import('../Sandbox').Sandbox; sandboxApi: Record<string, jest.Mock> } => {
+): {
+  sandbox: import('../Sandbox').Sandbox
+  sandboxApi: Record<string, jest.Mock>
+  snapshotsApi: Record<string, jest.Mock>
+} => {
   const { Sandbox } = require('../Sandbox') as typeof import('../Sandbox')
   const sandboxApi = {
     startSandbox: jest.fn(),
@@ -76,6 +88,10 @@ const makeSandbox = (
     validateSshAccess: jest.fn(),
   }
 
+  const snapshotsApi = {
+    getSnapshot: jest.fn(),
+  }
+
   const cfg: Configuration = {
     basePath: 'http://proxy',
     baseOptions: { headers: {} },
@@ -90,9 +106,10 @@ const makeSandbox = (
     cfg,
     axiosInstance as unknown as never,
     sandboxApi as unknown as never,
+    snapshotsApi as unknown as never,
   )
 
-  return { sandbox, sandboxApi }
+  return { sandbox, sandboxApi, snapshotsApi }
 }
 
 describe('Sandbox', () => {
@@ -242,15 +259,80 @@ describe('Sandbox', () => {
   })
 
   it('creates sandbox snapshots and waits for completion', async () => {
-    const { sandbox, sandboxApi } = makeSandbox({ state: 'snapshotting' })
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
     sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
-    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    snapshotsApi.getSnapshot
+      .mockResolvedValueOnce(createApiResponse({ state: 'pending' }))
+      .mockResolvedValueOnce(createApiResponse({ state: 'active' }))
 
     await sandbox._experimental_createSnapshot('snap-1', 1)
 
     expect(sandboxApi.createSandboxSnapshot).toHaveBeenCalledWith('sb-1', { name: 'snap-1' }, undefined, {
       timeout: 1000,
     })
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledWith('snap-1')
+    expect(snapshotsApi.getSnapshot.mock.calls.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('throws when snapshot record reports a failed capture', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse({ state: 'error', errorReason: 'capture failed' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).rejects.toThrow(
+      'Snapshot snap-1 failed with state: error, error reason: capture failed',
+    )
+  })
+
+  it('throws when snapshot record reports a failed build', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    snapshotsApi.getSnapshot.mockResolvedValue(
+      createApiResponse({ state: 'build_failed', errorReason: 'build failed' }),
+    )
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).rejects.toThrow(
+      'Snapshot snap-1 failed with state: build_failed, error reason: build failed',
+    )
+  })
+
+  it('tolerates missing snapshot record while sandbox is still snapshotting (legacy API)', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    snapshotsApi.getSnapshot
+      .mockRejectedValueOnce(new DaytonaNotFoundError('not found'))
+      .mockResolvedValueOnce(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    expect(snapshotsApi.getSnapshot.mock.calls.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('recovers when the snapshot record appears on the grace re-read after the sandbox reverted', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    snapshotsApi.getSnapshot
+      .mockRejectedValueOnce(new DaytonaNotFoundError('not found'))
+      .mockResolvedValueOnce(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledTimes(2)
+  })
+
+  it('fails when sandbox reverted and no snapshot record exists (legacy failure)', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    snapshotsApi.getSnapshot.mockRejectedValue(new DaytonaNotFoundError('not found'))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).rejects.toThrow(
+      "Sandbox sb-1 snapshot 'snap-1' failed: no snapshot record exists and sandbox is no longer snapshotting (state: started",
+    )
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledTimes(2)
   })
 
   it('waitUntilStarted throws when sandbox enters an error state', async () => {
