@@ -145,9 +145,7 @@ Standalone packages and libraries for interacting with Daytona using Java:
 
 ## Deployments
 
-Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona provides a customer managed compute model, where you bring your own compute (BYOC) infrastructure: Daytona's control plane orchestrates sandboxes while execution happens on runner machines you manage.
-
-- [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
+Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona provides a [bring your own compute (BYOC)](https://www.daytona.io/docs/bring-your-own-compute/) model, where the execution of sandboxes happens on your own compute infrastructure while Daytona's control plane orchestrates the sandbox lifecycle.
 
 ## Quick Start
 
