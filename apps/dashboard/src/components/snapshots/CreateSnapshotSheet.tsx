@@ -486,7 +486,7 @@ export const CreateSnapshotSheet = ({
                     </Label>
                     <FieldDescription>
                       Cold snapshots are not pre-distributed to runners. Creating a sandbox is still possible, but the
-                      first one briefly pulls the snapshot on demand. Use for rarely-used snapshots to save resources.
+                      first one briefly pulls the snapshot on demand.
                     </FieldDescription>
                   </div>
                 </div>

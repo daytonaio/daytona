@@ -67,7 +67,7 @@ export class SandboxStartAction extends SandboxAction {
           // Using the PULLING_SNAPSHOT state for the case where the runner isn't assigned yet as well
           return this.handleUnassignedRunnerSandbox(sandbox, lockCode)
         } else {
-          return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
+          return this.handleRunnerSandboxPullingSnapshotStateOnDesiredStateStart(sandbox, lockCode)
         }
       }
       case SandboxState.PENDING_BUILD: {
@@ -112,6 +112,63 @@ export class SandboxStartAction extends SandboxAction {
       .cache(`sandbox:buildInfo:${sandbox.id}`, SANDBOX_BUILD_INFO_CACHE_TTL_MS)
       .getMany()
     sandbox.buildInfo = result?.buildInfo ?? null
+  }
+
+  /**
+   * Drives a runner-assigned sandbox waiting for its snapshot to be pulled to the runner
+   * (the on-demand/cold pull path). Mirrors the BUILDING_SNAPSHOT handler: progress is driven
+   * by the SnapshotRunner record, not by runner sandboxInfo — the sandbox does not exist on
+   * the runner yet, so asking the runner about it cannot make progress (on v2, sandboxInfo
+   * just echoes the DB state back, which would loop forever).
+   */
+  private async handleRunnerSandboxPullingSnapshotStateOnDesiredStateStart(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+  ): Promise<SyncState> {
+    // Check for timeout - allow up to 60 minutes since the last sandbox update
+    const timeoutMinutes = 60
+    const timeoutMs = timeoutMinutes * 60 * 1000
+
+    if (sandbox.updatedAt && Date.now() - sandbox.updatedAt.getTime() > timeoutMs) {
+      await this.updateSandboxState(
+        sandbox,
+        SandboxState.ERROR,
+        lockCode,
+        undefined,
+        'Timeout while pulling snapshot to runner',
+      )
+      return DONT_SYNC_AGAIN
+    }
+
+    if (!sandbox.snapshot) {
+      return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
+    }
+
+    const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+    const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, snapshot.ref)
+
+    if (!snapshotRunner) {
+      // No pull is tracked for this runner — the sandbox may already exist on the runner and be
+      // pulling the image inline during create; let the runner report its state.
+      return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
+    }
+
+    switch (snapshotRunner.state) {
+      case SnapshotRunnerState.READY: {
+        // Snapshot is on the runner — proceed to creating the sandbox on it
+        await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode)
+        return SYNC_AGAIN
+      }
+      case SnapshotRunnerState.ERROR: {
+        await this.updateSandboxState(sandbox, SandboxState.ERROR, lockCode, undefined, snapshotRunner.errorReason)
+        return DONT_SYNC_AGAIN
+      }
+      default: {
+        // Still pulling - sleep for a second and go back to syncing instance state
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return SYNC_AGAIN
+      }
+    }
   }
 
   private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(
@@ -236,8 +293,14 @@ export class SandboxStartAction extends SandboxAction {
       }
 
       if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-        await this.updateSandboxState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
-        return DONT_SYNC_AGAIN
+        // A failed build is deterministic — it would fail on any runner, so fail the sandbox.
+        // A failed pull is runner-specific (disk, network) — skip this runner and let another
+        // runner (or a fresh pull below) serve the sandbox.
+        if (isBuild) {
+          await this.updateSandboxState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
+          return DONT_SYNC_AGAIN
+        }
+        continue
       }
 
       if (runner.unschedulable || runner.draining || runner.state !== RunnerState.READY) {
@@ -310,8 +373,19 @@ export class SandboxStartAction extends SandboxAction {
       await this.updateSandboxState(sandbox, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
     } else {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+      // A stale ERROR entry from a previous failed pull would block this sandbox in the
+      // PULLING_SNAPSHOT handler (createSnapshotRunnerEntry keeps the existing row on conflict).
+      // Delete it and recreate fresh — the established retry pattern, see snapshot.manager.
+      const existingSnapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
+      if (existingSnapshotRunner && existingSnapshotRunner.state === SnapshotRunnerState.ERROR) {
+        await this.runnerService.removeSnapshotRunner(existingSnapshotRunner.id)
+      }
       await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.PULLING_SNAPSHOT)
-      this.pullSnapshotToRunner(snapshot, runner)
+      // Fire-and-forget: SnapshotRunner state progression is driven by the
+      // sync-runner-snapshot-states cron; an unhandled rejection here must not crash the process.
+      this.pullSnapshotToRunner(snapshot, runner).catch((err) =>
+        this.logger.error(`Failed to pull snapshot to runner ${runner.id}: ${err?.message ?? err}`),
+      )
       await this.updateSandboxState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
     }
 
