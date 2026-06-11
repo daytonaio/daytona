@@ -6,6 +6,8 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 import { DataSource, EntityManager, Repository } from 'typeorm'
 import { OrganizationRoleService } from './organization-role.service'
 import { OrganizationEvents } from '../constants/organization-events.constant'
@@ -30,7 +32,18 @@ export class OrganizationUserService {
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
+
+  /**
+   * Evicts the cached organization-user authorization record so that role and permission
+   * changes take effect immediately, rather than remaining stale for the duration of the
+   * OrganizationAuthContextGuard cache TTL. Must be called after every mutation that changes
+   * a member's role, assigned roles, or membership.
+   */
+  private async evictOrganizationUserCache(organizationId: string, userId: string): Promise<void> {
+    await this.redis.del(`organization-user:${organizationId}:${userId}`)
+  }
 
   async findAll(organizationId: string): Promise<OrganizationUserDto[]> {
     const organizationUsers = await this.organizationUserRepository.find({
@@ -131,6 +144,8 @@ export class OrganizationUserService {
       organizationUser = await this.organizationUserRepository.save(organizationUser)
     }
 
+    await this.evictOrganizationUserCache(organizationId, userId)
+
     const user = await this.userService.findOne(userId)
 
     return OrganizationUserDto.fromEntities(organizationUser, user)
@@ -174,6 +189,8 @@ export class OrganizationUserService {
     }
 
     await entityManager.remove(organizationUser)
+
+    await this.evictOrganizationUserCache(organizationUser.organizationId, organizationUser.userId)
   }
 
   private async createWithEntityManager(
