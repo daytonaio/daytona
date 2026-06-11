@@ -61,6 +61,7 @@ type Proxy struct {
 	cookieDomain *string
 
 	apiclient                      *apiclient.APIClient
+	userAPIHTTPClient              *http.Client
 	runnerCache                    common_cache.ICache[RunnerInfo]
 	sandboxRunnerCache             common_cache.ICache[RunnerInfo]
 	sandboxPublicCache             common_cache.ICache[bool]
@@ -80,6 +81,10 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 	}
 
 	proxy.apiclient = config.ApiClient
+	proxy.userAPIHTTPClient = &http.Client{
+		Transport: config.ApiHTTPTransport,
+		Timeout:   config.ApiClientTimeout(),
+	}
 
 	if config.Redis != nil {
 		var err error
@@ -239,6 +244,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		Addr:    fmt.Sprintf(":%d", config.ProxyPort),
 		Handler: router,
 	}
+	common_proxy.ApplyServerTimeouts(httpServer)
 
 	listener, err := net.Listen("tcp", httpServer.Addr)
 	if err != nil {
