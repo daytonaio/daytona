@@ -111,6 +111,10 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		proxy.sandboxLastActivityUpdateCache = common_cache.NewMapCache[bool](ctx)
 	}
 
+	if config.MetricsPort != 0 {
+		startDebugServer(ctx, config.MetricsPort)
+	}
+
 	shutdownWg := &sync.WaitGroup{}
 
 	router := gin.New()
