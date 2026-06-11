@@ -8,6 +8,7 @@ package common
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 )
 
@@ -19,7 +20,14 @@ import (
 // already exited are not reachable this way; killing those would need Job
 // Objects.
 func KillProcessTree(pid int) error {
-	if err := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(pid)).Run(); err == nil {
+	// Resolve taskkill from System32 instead of PATH: service sessions can
+	// run with a minimal or tampered PATH, silently degrading the tree kill
+	// to the parent-only fallback.
+	taskkill := "taskkill"
+	if systemRoot := os.Getenv("SystemRoot"); systemRoot != "" {
+		taskkill = filepath.Join(systemRoot, "System32", "taskkill.exe")
+	}
+	if err := exec.Command(taskkill, "/T", "/F", "/PID", strconv.Itoa(pid)).Run(); err == nil {
 		return nil
 	}
 	// Fall back to killing the immediate process (e.g. taskkill unavailable).
