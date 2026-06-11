@@ -33,7 +33,12 @@ type Config struct {
 	ToolboxOnlyMode       bool               `envconfig:"TOOLBOX_ONLY_MODE"`
 	PreviewWarningEnabled bool               `envconfig:"PREVIEW_WARNING_ENABLED"`
 	ShutdownTimeoutSec    int                `envconfig:"SHUTDOWN_TIMEOUT_SEC"`
+	ApiClientTimeoutSec   int                `envconfig:"API_CLIENT_TIMEOUT_SEC"`
 	ApiClient             *apiclient.APIClient
+	// ApiHTTPTransport is the shared transport for HTTP clients that talk to the
+	// Daytona API. Tighter IdleConnTimeout than http.DefaultTransport so we
+	// don't reuse a connection the API server has already closed.
+	ApiHTTPTransport http.RoundTripper
 }
 
 type OidcConfig struct {
@@ -45,6 +50,18 @@ type OidcConfig struct {
 }
 
 var DEFAULT_PROXY_PORT int = 4000
+
+const defaultApiClientTimeout = 60 * time.Second
+
+// ApiClientTimeout returns the configured API client timeout, falling back to
+// the default when unset so a zero value can never produce an already-expired
+// context (which would silently drop API calls).
+func (c *Config) ApiClientTimeout() time.Duration {
+	if c.ApiClientTimeoutSec <= 0 {
+		return defaultApiClientTimeout
+	}
+	return time.Duration(c.ApiClientTimeoutSec) * time.Second
+}
 
 var config *Config
 
@@ -98,8 +115,24 @@ func GetConfig() (*Config, error) {
 
 	config.ApiClient = apiclient.NewAPIClient(clientConfig)
 
+	// Clone http.DefaultTransport so we inherit its dial/TLS/H2 defaults, then
+	// shorten IdleConnTimeout so we don't race the API server closing idle keep-alives.
+	// Guard the type assertion so an unexpected http.DefaultTransport replacement
+	// can't panic at startup; fall back to the current DefaultTransport as-is so we
+	// don't silently lose its proxy/H2/dial defaults by using an empty transport.
+	var apiTransport http.RoundTripper = http.DefaultTransport
+	if dt, ok := http.DefaultTransport.(*http.Transport); ok {
+		cloned := dt.Clone()
+		cloned.IdleConnTimeout = 30 * time.Second
+		apiTransport = cloned
+	} else {
+		log.Println("Warning: http.DefaultTransport is not *http.Transport; using it as-is for the API client transport")
+	}
+	config.ApiHTTPTransport = apiTransport
+
 	config.ApiClient.GetConfig().HTTPClient = &http.Client{
-		Transport: http.DefaultTransport,
+		Transport: config.ApiHTTPTransport,
+		Timeout:   config.ApiClientTimeout(),
 	}
 
 	ctx := context.Background()
