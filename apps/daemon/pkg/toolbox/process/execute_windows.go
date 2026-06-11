@@ -9,14 +9,36 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/common"
 
 	"github.com/gin-gonic/gin"
 )
+
+// killProcessTree kills the process and all of its descendants.
+// taskkill /T walks the live parent-PID tree, the closest Windows equivalent
+// of the process-group SIGKILL on Linux: grandchildren spawned by the cmd.exe
+// wrapper inherit the output pipes and would otherwise keep CombinedOutput
+// blocked long after the timeout fired. Descendants whose intermediate parent
+// already exited are not reachable this way; killing those would need Job
+// Objects.
+func killProcessTree(pid int) error {
+	if err := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(pid)).Run(); err == nil {
+		return nil
+	}
+	// Fall back to killing the immediate process (e.g. taskkill unavailable).
+	p, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	return p.Kill()
+}
 
 // ExecuteCommand godoc
 //
@@ -77,12 +99,12 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			timeout = time.Duration(*request.Timeout) * time.Second
 		}
 
-		timeoutReached := false
+		var timeoutReached atomic.Bool
 		timer := time.AfterFunc(timeout, func() {
-			timeoutReached = true
+			timeoutReached.Store(true)
 			if cmd.Process != nil {
-				if err := cmd.Process.Kill(); err != nil {
-					logger.Error("Failed to kill process on timeout", "error", err)
+				if err := killProcessTree(cmd.Process.Pid); err != nil {
+					logger.Error("Failed to kill process tree on timeout", "error", err)
 					return
 				}
 			}
@@ -97,7 +119,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			if timeoutReached {
+			if timeoutReached.Load() {
 				c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
 				return
 			}
