@@ -1,0 +1,106 @@
+name: '[PR] Code coverage'
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  # New commit on branch cancels running workflows of the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+
+jobs:
+  coverage:
+    # Coverage uploads require code-quality write access, which fork PRs do not get
+    if: github.repository == 'daytonaio/daytona' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    permissions:
+      contents: read
+      code-quality: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-toolchain
+        with:
+          install-ruby: 'false'
+          install-java: 'false'
+          install-swag: 'false'
+
+      - name: Test API with coverage
+        run: |
+          yarn nx test api --coverage --coverageReporters=cobertura --coverageReporters=text-summary --skipNxCache
+          # jest emits filenames relative to apps/api; rewrite them repo-relative
+          sed -i "s|<source>.*</source>|<source>.</source>|" coverage/apps/daytona/cobertura-coverage.xml
+          sed -i "s|filename=\"|filename=\"apps/api/|g" coverage/apps/daytona/cobertura-coverage.xml
+
+      - name: Upload API coverage
+        uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
+        with:
+          file: coverage/apps/daytona/cobertura-coverage.xml
+          language: TypeScript
+          label: coverage/api
+
+      - name: Test Python SDK with coverage
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          pip install pytest pytest-asyncio pytest-cov
+          # relative_files keeps report paths repo-relative for GitHub's file mapping
+          printf '[run]\nrelative_files = true\n' > /tmp/coveragerc
+          poetry run python -m pytest libs/sdk-python/tests/ --tb=short \
+            --ignore=libs/sdk-python/tests/test_e2e.py \
+            --cov=libs/sdk-python/src/daytona \
+            --cov-config=/tmp/coveragerc \
+            --cov-report=xml:coverage/sdk-python/coverage.xml
+
+      - name: Upload Python SDK coverage
+        uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
+        with:
+          file: coverage/sdk-python/coverage.xml
+          language: Python
+          label: coverage/sdk-python
+
+      - name: Test Go modules with coverage
+        run: |
+          for mod in apps/daemon libs/sdk-go apps/cli; do
+            name=$(basename "$mod")
+            (cd "$mod" && go test -coverprofile=coverage.out ./...)
+            mkdir -p "coverage/go-$name"
+            (cd "$mod" && go run github.com/boumenot/gocover-cobertura@v1.5.0 < coverage.out > "$GITHUB_WORKSPACE/coverage/go-$name/coverage.xml")
+            # gocover-cobertura emits module-relative filenames; rewrite them repo-relative
+            sed -i "s|<source>.*</source>|<source>.</source>|" "coverage/go-$name/coverage.xml"
+            sed -i "s|filename=\"|filename=\"$mod/|g" "coverage/go-$name/coverage.xml"
+          done
+
+      - name: Upload daemon coverage
+        uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
+        with:
+          file: coverage/go-daemon/coverage.xml
+          language: Go
+          label: coverage/daemon
+
+      - name: Upload Go SDK coverage
+        uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
+        with:
+          file: coverage/go-sdk-go/coverage.xml
+          language: Go
+          label: coverage/sdk-go
+
+      - name: Upload CLI coverage
+        uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
+        with:
+          file: coverage/go-cli/coverage.xml
+          language: Go
+          label: coverage/cli
