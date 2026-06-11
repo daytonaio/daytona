@@ -145,9 +145,8 @@ Standalone packages and libraries for interacting with Daytona using Java:
 
 ## Deployments
 
-Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
+Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona provides a customer managed compute model, where you bring your own compute (BYOC) infrastructure and orchestrate sandboxes while execution happens on machines you manage.
 
-- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [`docker`](docker) directory using Docker Compose
 - [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
 
 ## Quick Start
