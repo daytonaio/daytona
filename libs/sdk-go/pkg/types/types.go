@@ -149,6 +149,7 @@ type Snapshot struct {
 	ID             string     `json:"id"`
 	OrganizationID string     `json:"organizationId,omitempty"`
 	General        bool       `json:"general"`
+	Cold           bool       `json:"cold"`
 	Name           string     `json:"name"`
 	ImageName      string     `json:"imageName,omitempty"`
 	State          string     `json:"state"`

@@ -568,6 +568,7 @@ func mapSnapshotFromAPI(apiSnapshot *apiclient.SnapshotDto) *types.Snapshot {
 	snapshot := &types.Snapshot{
 		ID:         apiSnapshot.GetId(),
 		General:    apiSnapshot.GetGeneral(),
+		Cold:       apiSnapshot.GetCold(),
 		Name:       apiSnapshot.GetName(),
 		State:      string(apiSnapshot.GetState()),
 		Entrypoint: apiSnapshot.GetEntrypoint(),
