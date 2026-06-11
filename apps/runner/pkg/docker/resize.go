@@ -126,6 +126,7 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		d.logger.DebugContext(ctx, "Setting memory", "gigabytes", memory)
 	}
 
+	platform := sandboxPlatformFromDockerPlatform(originalContainer.Platform)
 	err = utils.RetryWithExponentialBackoff(
 		ctx,
 		fmt.Sprintf("create sandbox %s", sandboxId),
@@ -133,8 +134,6 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		utils.DEFAULT_BASE_DELAY,
 		utils.DEFAULT_MAX_DELAY,
 		func() error {
-			platform := getSandboxPlatform()
-
 			_, createErr := d.apiClient.ContainerCreate(
 				ctx,
 				originalContainer.Config,

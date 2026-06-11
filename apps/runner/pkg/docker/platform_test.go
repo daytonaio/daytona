@@ -20,7 +20,7 @@ func TestParseSandboxPlatformDefaultsToAmd64(t *testing.T) {
 func TestParseSandboxPlatformAllowsNative(t *testing.T) {
 	t.Setenv("DAYTONA_RUNNER_PLATFORM", "native")
 	platform := getSandboxPlatform()
-	expectPlatform := "linux/" + runtimeArchitecture(runtime.GOARCH)
+	expectPlatform := "linux/" + expectedRuntimeSandboxArchitecture()
 
 	if platform.String() != expectPlatform {
 		t.Fatalf("expected %s, got %s", expectPlatform, platform.String())
@@ -43,10 +43,45 @@ func TestParseSandboxPlatformAcceptsArm64(t *testing.T) {
 	}
 }
 
+func TestImageArchSupportedAcceptsAmd64Aliases(t *testing.T) {
+	t.Setenv("DAYTONA_RUNNER_PLATFORM", "amd64")
+
+	for _, imageArch := range []string{"amd64", "x86_64", "x64"} {
+		if got := isImageArchSupported(imageArch); !got {
+			t.Fatalf("expected %s image arch to be supported for amd64 platform", imageArch)
+		}
+	}
+}
+
+func TestSandboxPlatformFromDockerPlatformPrefersOriginalContainerPlatform(t *testing.T) {
+	t.Setenv("DAYTONA_RUNNER_PLATFORM", "arm64")
+
+	platform := sandboxPlatformFromDockerPlatform("linux/amd64")
+	if platform.String() != "linux/amd64" {
+		t.Fatalf("expected original container platform linux/amd64, got %s", platform.String())
+	}
+
+	fallback := sandboxPlatformFromDockerPlatform("")
+	if fallback.String() != "linux/arm64" {
+		t.Fatalf("expected configured fallback linux/arm64, got %s", fallback.String())
+	}
+}
+
 func TestParseSandboxPlatformFallbackForInvalidInput(t *testing.T) {
 	t.Setenv("DAYTONA_RUNNER_PLATFORM", "not-a-platform")
 	platform := getSandboxPlatform()
 	if platform.String() != "linux/amd64" {
 		t.Fatalf("expected linux/amd64, got %s", platform.String())
+	}
+}
+
+func expectedRuntimeSandboxArchitecture() string {
+	switch runtime.GOARCH {
+	case "amd64", "x86_64", "x64":
+		return "amd64"
+	case "arm64", "aarch64":
+		return "arm64"
+	default:
+		return runtime.GOARCH
 	}
 }

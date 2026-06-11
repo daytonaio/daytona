@@ -100,6 +100,13 @@ func getSandboxContainerArchs() []string {
 	}
 }
 
+func sandboxPlatformFromDockerPlatform(dockerPlatform string) sandboxPlatform {
+	if strings.TrimSpace(dockerPlatform) == "" {
+		return getSandboxPlatform()
+	}
+	return parseSandboxPlatform(dockerPlatform)
+}
+
 func sandboxImagePlatform() string {
 	platform := getSandboxPlatform()
 	return fmt.Sprintf("%s/%s", platform.os, platform.architecture)
@@ -110,9 +117,17 @@ func (p sandboxPlatform) String() string {
 }
 
 func isImageArchSupported(imageArch string) bool {
-	normalizedImageArch := strings.ToLower(strings.TrimSpace(imageArch))
+	normalizedImageArch, ok := normalizeArchitecture(imageArch)
+	if !ok {
+		normalizedImageArch = strings.ToLower(strings.TrimSpace(imageArch))
+	}
+
 	for _, supported := range getSandboxContainerArchs() {
-		if normalizedImageArch == supported {
+		normalizedSupported, ok := normalizeArchitecture(supported)
+		if !ok {
+			normalizedSupported = strings.ToLower(strings.TrimSpace(supported))
+		}
+		if normalizedImageArch == normalizedSupported {
 			return true
 		}
 	}
