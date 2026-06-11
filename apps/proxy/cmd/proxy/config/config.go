@@ -20,6 +20,7 @@ import (
 
 type Config struct {
 	ProxyPort             int                `envconfig:"PROXY_PORT" validate:"required"`
+	MetricsPort           int                `envconfig:"METRICS_PORT"`
 	ProxyProtocol         string             `envconfig:"PROXY_PROTOCOL" validate:"required"`
 	ProxyApiKey           string             `envconfig:"PROXY_API_KEY" validate:"required"`
 	CookieDomain          *string            `envconfig:"COOKIE_DOMAIN"`
