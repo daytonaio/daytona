@@ -281,6 +281,19 @@ describe('Sandbox', () => {
     expect(sandbox.state).toBe('started')
   })
 
+  it('resolves a successful capture even when the success-path refresh fails', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox
+      .mockResolvedValueOnce(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+      .mockRejectedValue(new Error('transient network failure'))
+    snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    // The refresh failure is swallowed; local state simply stays stale.
+    expect(sandbox.state).toBe('snapshotting')
+  })
+
   it('throws when snapshot record reports a failed capture', async () => {
     const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
     sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))

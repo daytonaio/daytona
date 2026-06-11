@@ -470,7 +470,8 @@ export class Sandbox {
         if (snapshot.state === SnapshotState.ACTIVE) {
           // Record polling bypasses the sandbox, so sync local data
           // (state would otherwise stay SNAPSHOTTING) before resolving.
-          await this.refreshData()
+          // Best-effort: a refresh failure must never reject a successful capture.
+          await this.refreshDataSafe()
           return
         }
         if (snapshot.state === SnapshotState.ERROR || snapshot.state === SnapshotState.BUILD_FAILED) {
