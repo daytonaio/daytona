@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
@@ -25,6 +25,8 @@ import { UserDeletedEvent } from '../../user/events/user-deleted.event'
 
 @Injectable()
 export class OrganizationUserService {
+  private readonly logger = new Logger(OrganizationUserService.name)
+
   constructor(
     @InjectRepository(OrganizationUser)
     private readonly organizationUserRepository: Repository<OrganizationUser>,
@@ -38,11 +40,18 @@ export class OrganizationUserService {
   /**
    * Evicts the cached organization-user authorization record so that role and permission
    * changes take effect immediately, rather than remaining stale for the duration of the
-   * OrganizationAuthContextGuard cache TTL. Must be called after every mutation that changes
-   * a member's role, assigned roles, or membership.
+   * OrganizationAuthContextGuard cache TTL. Must be called after the mutation has committed.
+   *
+   * Cache eviction failures are logged and swallowed: they must not turn an already-committed
+   * access change into a request failure, and the entry self-expires at the guard's TTL. Mirrors
+   * ApiKeyService.invalidateApiKeyCache.
    */
   private async evictOrganizationUserCache(organizationId: string, userId: string): Promise<void> {
-    await this.redis.del(`organization-user:${organizationId}:${userId}`)
+    try {
+      await this.redis.del(`organization-user:${organizationId}:${userId}`)
+    } catch (error) {
+      this.logger.error('Failed to evict organization-user cache:', error)
+    }
   }
 
   async findAll(organizationId: string): Promise<OrganizationUserDto[]> {
@@ -164,6 +173,12 @@ export class OrganizationUserService {
     }
 
     await this.removeWithEntityManager(this.organizationUserRepository.manager, organizationUser)
+
+    // Evict after the removal has committed (the repository manager autocommits). Done here rather
+    // than inside removeWithEntityManager so eviction never runs inside a caller-owned transaction
+    // (e.g. the user-deletion flow), where a concurrent guard read could re-cache the still-present
+    // row before commit.
+    await this.evictOrganizationUserCache(organizationId, userId)
   }
 
   private async removeWithEntityManager(
@@ -189,8 +204,6 @@ export class OrganizationUserService {
     }
 
     await entityManager.remove(organizationUser)
-
-    await this.evictOrganizationUserCache(organizationUser.organizationId, organizationUser.userId)
   }
 
   private async createWithEntityManager(
@@ -246,6 +259,10 @@ export class OrganizationUserService {
     //  - auto-delete the organization if there are no other members
     //  - auto-promote a new owner if there are other members
     */
+    // No cache eviction here: the user is being deleted and can no longer authenticate, so the
+    // guard never reads their organization-user cache, and any cached entry self-expires at the TTL.
+    // Evicting inside this caller-owned transaction would also race a concurrent read re-caching the
+    // not-yet-removed row before commit.
     await Promise.all(memberships.map((membership) => this.removeWithEntityManager(payload.entityManager, membership)))
   }
 

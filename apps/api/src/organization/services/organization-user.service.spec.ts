@@ -95,4 +95,13 @@ describe('[AUTH] OrganizationUserService cache eviction', () => {
     expect(mockEntityManager.remove).toHaveBeenCalled()
     expect(mockRedis.del).toHaveBeenCalledWith(CACHE_KEY)
   })
+
+  it('does not fail an already-committed mutation when cache eviction errors', async () => {
+    mockRepo.findOne.mockResolvedValue(createMockOrganizationUser({ role: OrganizationMemberRole.MEMBER }))
+    mockRedis.del.mockRejectedValue(new Error('redis unavailable'))
+
+    await expect(service.delete(MOCK_ORGANIZATION_ID, MOCK_USER_ID)).resolves.toBeUndefined()
+    expect(mockEntityManager.remove).toHaveBeenCalled()
+    expect(mockRedis.del).toHaveBeenCalledWith(CACHE_KEY)
+  })
 })
