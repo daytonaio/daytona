@@ -55,7 +55,7 @@ func (s *SessionService) GetSessionCommand(sessionId, cmdId string) (*Command, e
 		return nil, fmt.Errorf("failed to read exit code file: %w", err)
 	}
 
-	exitCodeInt, err := strconv.Atoi(strings.TrimRight(string(exitCode), "\n"))
+	exitCodeInt, err := strconv.Atoi(strings.TrimSpace(string(exitCode)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert exit code to int: %w", err)
 	}
