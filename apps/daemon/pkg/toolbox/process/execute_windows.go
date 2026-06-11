@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"time"
 
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
-
 	"github.com/daytonaio/daemon/pkg/common"
 )
 
