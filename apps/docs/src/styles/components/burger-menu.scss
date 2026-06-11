@@ -373,18 +373,6 @@ $hamburger-types: (
     margin-left: unset;
   }
 
-  .github {
-    background: var(--block-bg-color);
-    border-radius: 3px;
-
-    a {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      line-height: 2.14;
-    }
-  }
-
   .call {
     background: #007fff33;
     text-align: center;
