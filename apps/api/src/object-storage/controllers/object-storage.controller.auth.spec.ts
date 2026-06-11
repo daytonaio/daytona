@@ -6,9 +6,11 @@
 import { ObjectStorageController } from './object-storage.controller'
 import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
+import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import {
   getAuthContextGuards,
   getAllowedAuthStrategies,
+  getRequiredAnyOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
   isPublicEndpoint,
@@ -25,5 +27,9 @@ describe('[AUTH] ObjectStorageController', () => {
       AuthStrategyType.JWT,
     ])
     expectArrayMatch(getAuthContextGuards(ObjectStorageController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getRequiredAnyOrganizationResourcePermissions(ObjectStorageController, methodName), [
+      OrganizationResourcePermission.WRITE_SNAPSHOTS,
+      OrganizationResourcePermission.WRITE_SANDBOXES,
+    ])
   })
 })

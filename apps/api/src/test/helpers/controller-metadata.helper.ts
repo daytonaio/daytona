@@ -16,6 +16,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { RequiredOrganizationMemberRole } from '../../organization/decorators/required-organization-member-role.decorator'
 import { OrganizationMemberRole } from '../../organization/enums/organization-member-role.enum'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
+import { RequiredAnyOrganizationResourcePermissions } from '../../organization/decorators/required-any-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 
 const GUARDS_METADATA_KEY = '__guards__'
@@ -210,6 +211,40 @@ export function getRequiredOrganizationResourcePermissions(
   }
 
   return Reflect.getMetadata(RequiredOrganizationResourcePermissions.KEY, controller) as
+    | OrganizationResourcePermission[]
+    | undefined
+}
+
+/**
+ * Gets the required any-of organization resource permissions for a controller method or class.
+ *
+ * Checks method-level metadata first, then falls back to class-level.
+ */
+export function getRequiredAnyOrganizationResourcePermissions(
+  controller: ControllerType,
+): OrganizationResourcePermission[] | undefined
+export function getRequiredAnyOrganizationResourcePermissions<T extends object>(
+  controller: Type<T>,
+  methodName: keyof T & string,
+): OrganizationResourcePermission[] | undefined
+export function getRequiredAnyOrganizationResourcePermissions(
+  controller: ControllerType,
+  methodName?: string,
+): OrganizationResourcePermission[] | undefined {
+  if (methodName) {
+    assertMethodExists(controller, methodName)
+    const method = (controller.prototype as Record<string, unknown>)[methodName]
+    if (typeof method === 'function') {
+      const methodPermissions = Reflect.getMetadata(RequiredAnyOrganizationResourcePermissions.KEY, method) as
+        | OrganizationResourcePermission[]
+        | undefined
+      if (methodPermissions !== undefined) {
+        return methodPermissions
+      }
+    }
+  }
+
+  return Reflect.getMetadata(RequiredAnyOrganizationResourcePermissions.KEY, controller) as
     | OrganizationResourcePermission[]
     | undefined
 }
