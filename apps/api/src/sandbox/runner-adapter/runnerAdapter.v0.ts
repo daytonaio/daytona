@@ -49,6 +49,11 @@ const isDebugEnabled = process.env.DEBUG === 'true'
 // Network error codes that should trigger a retry
 const RETRYABLE_NETWORK_ERROR_CODES = ['ECONNRESET', 'ETIMEDOUT']
 
+// Per-request timeout for snapshot capture status polls; keeps one hung
+// connection from eating the whole poll budget (the instance-wide axios
+// timeout is 15 minutes).
+const SNAPSHOT_STATUS_POLL_TIMEOUT_MS = 30 * 1_000
+
 @Injectable()
 export class RunnerAdapterV0 implements RunnerAdapter {
   private readonly logger = new Logger(RunnerAdapterV0.name)
@@ -486,12 +491,30 @@ export class RunnerAdapterV0 implements RunnerAdapter {
 
       let status: SnapshotFromSandboxStatusResponse
       try {
-        const response = await this.sandboxApiClient.snapshotFromSandboxStatus(sandboxId)
+        const response = await this.sandboxApiClient.snapshotFromSandboxStatus(sandboxId, {
+          timeout: SNAPSHOT_STATUS_POLL_TIMEOUT_MS,
+        })
         status = response.data
       } catch (err) {
-        // Transient poll failures (network blips, runner briefly unreachable)
-        // are tolerated; the poll budget bounds them.
         const reason = err instanceof Error ? err.message : String(err)
+        const statusCode =
+          err instanceof RunnerApiError ? err.statusCode : axios.isAxiosError(err) ? err.response?.status : undefined
+
+        if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
+          // Permanent client errors will not heal with more polling. A 404 may
+          // also be a route miss: the runner restarted into an older version
+          // that lacks the status endpoint, indistinguishable from a missing
+          // capture record here.
+          if (statusCode === 404) {
+            throw new Error(
+              `runner no longer exposes the snapshot capture status (runner restarted or downgraded?): ${reason}`,
+            )
+          }
+          throw new Error(`snapshot capture status poll failed with HTTP ${statusCode}: ${reason}`)
+        }
+
+        // Transient poll failures (network blips, per-request timeouts, runner
+        // 5xx) are tolerated; the poll budget bounds them.
         this.logger.warn(`Failed to poll snapshot capture status for sandbox ${sandboxId}: ${reason}`)
         continue
       }

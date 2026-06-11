@@ -5,6 +5,7 @@
 
 import { RunnerAdapterV0 } from './runnerAdapter.v0'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { RunnerApiError } from '../errors/runner-api-error'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 
 const POLL_INTERVAL_MS = 5_000
@@ -98,6 +99,9 @@ describe('RunnerAdapterV0.createSnapshotFromSandbox', () => {
       cmd: completedSnapshot.cmd,
     })
     expect(sandboxApi.snapshotFromSandboxStatus).toHaveBeenCalledTimes(2)
+    // Every poll must carry a short per-request timeout so a hung connection
+    // cannot consume the whole poll budget via the instance-wide axios timeout.
+    expect(sandboxApi.snapshotFromSandboxStatus).toHaveBeenCalledWith('sbx-1', { timeout: 30_000 })
   })
 
   it('throws the runner-reported error when status is FAILED', async () => {
@@ -143,24 +147,55 @@ describe('RunnerAdapterV0.createSnapshotFromSandbox', () => {
     await expectation
   })
 
-  it('tolerates transient poll errors and keeps polling', async () => {
+  it('tolerates transient poll errors (network, per-request timeout, 5xx) and keeps polling', async () => {
     const { adapter, sandboxApi } = createAdapter()
     sandboxApi.snapshotFromSandbox.mockResolvedValue({ status: 202, data: 'Snapshot capture started' })
     sandboxApi.snapshotFromSandboxStatus
       .mockRejectedValueOnce(new Error('ECONNRESET'))
+      .mockRejectedValueOnce(new RunnerApiError('timeout of 30000ms exceeded', undefined, 'ECONNABORTED'))
+      .mockRejectedValueOnce(new RunnerApiError('upstream unavailable', 503))
       .mockResolvedValueOnce({
         status: 200,
         data: { state: 'COMPLETED', name: 'my-snap', snapshot: completedSnapshot },
       })
 
     const resultPromise = adapter.createSnapshotFromSandbox('sbx-1', 'my-snap', 'org-1', registry)
-    await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS)
-    await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS)
+    for (let i = 0; i < 4; i++) {
+      await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS)
+    }
 
     await expect(resultPromise).resolves.toEqual(
       expect.objectContaining({ ref: completedSnapshot.name, hash: completedSnapshot.hash }),
     )
-    expect(sandboxApi.snapshotFromSandboxStatus).toHaveBeenCalledTimes(2)
+    expect(sandboxApi.snapshotFromSandboxStatus).toHaveBeenCalledTimes(4)
+  })
+
+  it('fails fast when a status poll returns a permanent 4xx error', async () => {
+    const { adapter, sandboxApi } = createAdapter()
+    sandboxApi.snapshotFromSandbox.mockResolvedValue({ status: 202, data: 'Snapshot capture started' })
+    sandboxApi.snapshotFromSandboxStatus.mockRejectedValue(new RunnerApiError('sandbox is not running', 400))
+
+    const resultPromise = adapter.createSnapshotFromSandbox('sbx-1', 'my-snap', 'org-1', registry)
+    const expectation = expect(resultPromise).rejects.toThrow(
+      'snapshot capture status poll failed with HTTP 400: sandbox is not running',
+    )
+    await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS)
+    await expectation
+    expect(sandboxApi.snapshotFromSandboxStatus).toHaveBeenCalledTimes(1)
+  })
+
+  it('treats a 404 from the status endpoint as permanent and hints at runner restart/downgrade', async () => {
+    const { adapter, sandboxApi } = createAdapter()
+    sandboxApi.snapshotFromSandbox.mockResolvedValue({ status: 202, data: 'Snapshot capture started' })
+    sandboxApi.snapshotFromSandboxStatus.mockRejectedValue(new RunnerApiError('404 page not found', 404))
+
+    const resultPromise = adapter.createSnapshotFromSandbox('sbx-1', 'my-snap', 'org-1', registry)
+    const expectation = expect(resultPromise).rejects.toThrow(
+      'runner no longer exposes the snapshot capture status (runner restarted or downgraded?): 404 page not found',
+    )
+    await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS)
+    await expectation
+    expect(sandboxApi.snapshotFromSandboxStatus).toHaveBeenCalledTimes(1)
   })
 
   it('times out after sandboxSnapshottingTimeoutMin and throws', async () => {
