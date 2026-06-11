@@ -155,9 +155,9 @@ export class SandboxStartAction extends SandboxAction {
 
     switch (snapshotRunner.state) {
       case SnapshotRunnerState.READY: {
-        // Snapshot is on the runner — proceed to creating the sandbox on it
-        await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode)
-        return SYNC_AGAIN
+        // Snapshot is on the runner — create the sandbox directly, skipping the user-visible
+        // UNKNOWN state write. Same as the normal create path, so failures error the sandbox.
+        return this.handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox, lockCode)
       }
       case SnapshotRunnerState.ERROR: {
         await this.updateSandboxState(sandbox, SandboxState.ERROR, lockCode, undefined, snapshotRunner.errorReason)
