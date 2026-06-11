@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils'
 import { getColumnSizeStyles } from '@/lib/utils/table'
 import { flexRender } from '@tanstack/react-table'
 import { Receipt } from 'lucide-react'
-import { Pagination } from '../Pagination'
-import { Skeleton } from '../ui/skeleton'
+import { Pagination } from '../../Pagination'
+import { Skeleton } from '../../ui/skeleton'
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table'
+} from '../../ui/table'
 import { ChargesTableHeader } from './ChargesTableHeader'
 import { ChargesTableProps } from './types'
 import { useChargesTable } from './useChargesTable'

@@ -7,8 +7,8 @@ import { Invoice } from '@daytona/billing-api-client'
 import { formatAmount } from '@/lib/utils'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
 import React from 'react'
-import { SortOrderIcon } from '../SortIcon'
-import { Badge } from '../ui/badge'
+import { SortOrderIcon } from '../../SortIcon'
+import { Badge } from '../../ui/badge'
 import { InvoicesTableActions } from './InvoicesTableActions'
 
 export type InvoicesTableMeta = {

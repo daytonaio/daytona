@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { SearchInput } from '../SearchInput'
+import { SearchInput } from '../../SearchInput'
 import { ChargesTableHeaderProps } from './types'
 
 export function ChargesTableHeader({ table }: ChargesTableHeaderProps) {
