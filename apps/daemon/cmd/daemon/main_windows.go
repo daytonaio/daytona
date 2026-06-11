@@ -17,7 +17,10 @@ import (
 	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/pkg/recording"
+	"github.com/daytonaio/daemon/pkg/recordingdashboard"
 	"github.com/daytonaio/daemon/pkg/session"
+	"github.com/daytonaio/daemon/pkg/ssh"
+	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -92,15 +95,45 @@ func run() int {
 		}
 	}()
 
+	// Start terminal server
+	go func() {
+		if err := terminal.StartTerminalServer(22222); err != nil {
+			errChan <- err
+		}
+	}()
+
+	// Start recording dashboard server
+	go func() {
+		if err := recordingdashboard.NewDashboardServer(logger, recordingService).Start(); err != nil {
+			errChan <- err
+		}
+	}()
+
+	sshServer := ssh.NewServer(logger, workDir, workDir)
+
+	go func() {
+		if err := sshServer.Start(); err != nil {
+			errChan <- err
+		}
+	}()
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
+	exitCode := 0
 	select {
 	case err := <-errChan:
-		logger.Error("Toolbox server error", "error", err)
-		return 1
+		logger.Error("Server error", "error", err)
+		// Unlike Linux main.go (which returns 0 here), keep the pre-port
+		// Windows behavior of exiting non-zero on a server error.
+		exitCode = 1
 	case <-sigChan:
 		logger.Info("Received shutdown signal")
-		return 0
 	}
+
+	// Toolbox server graceful shutdown
+	toolBoxServer.Shutdown()
+
+	slog.Info("Shutdown complete")
+	return exitCode
 }
