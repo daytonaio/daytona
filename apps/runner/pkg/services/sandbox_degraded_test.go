@@ -361,3 +361,39 @@ func TestSeedFromApiReturnsErrorForRetry(t *testing.T) {
 		t.Fatal("seedFromApi must return an error so the startup retry loop can re-attempt")
 	}
 }
+
+// TestSeedFromApiWithRetrySucceedsAfterFailures pins the startup retry loop:
+// it keeps re-attempting through transient API failures (there is no give-up
+// path) and returns once a seed succeeds.
+func TestSeedFromApiWithRetrySucceedsAfterFailures(t *testing.T) {
+	prevBackoff := degradedSeedInitialBackoff
+	degradedSeedInitialBackoff = time.Millisecond
+	t.Cleanup(func() { degradedSeedInitialBackoff = prevBackoff })
+
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if calls.Add(1) <= 3 {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`[]`))
+	}))
+	defer srv.Close()
+
+	s := newDegradedTestService(t, srv.URL)
+	done := make(chan struct{})
+	go func() {
+		s.seedFromApiWithRetry(context.Background())
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(10 * time.Second):
+		t.Fatal("seedFromApiWithRetry did not return after a successful seed")
+	}
+	if got := calls.Load(); got != 4 {
+		t.Fatalf("got %d seed attempts, want 4 (3 failures, then success)", got)
+	}
+}

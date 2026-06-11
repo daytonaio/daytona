@@ -27,12 +27,17 @@ const (
 	degradedStaleAfter = 30 * time.Minute
 	// degradedPushTimeout bounds a single push to the API.
 	degradedPushTimeout = 10 * time.Second
-	// degradedSeedMaxAttempts bounds how many times the startup seed from
-	// the API is attempted before giving up.
-	degradedSeedMaxAttempts = 5
+)
+
+// Seed-retry backoff bounds. Vars (not consts) so the retry-loop test can
+// shrink them.
+var (
 	// degradedSeedInitialBackoff is the first retry delay for the startup
 	// seed; it doubles per attempt.
 	degradedSeedInitialBackoff = 5 * time.Second
+	// degradedSeedMaxBackoff caps the exponential backoff between startup
+	// seed attempts.
+	degradedSeedMaxBackoff = 5 * time.Minute
 )
 
 type SandboxDegradedServiceConfig struct {
@@ -137,19 +142,15 @@ func (s *SandboxDegradedService) Start(ctx context.Context) {
 	}()
 }
 
-// seedFromApiWithRetry runs seedFromApi with a bounded exponential backoff,
-// so a runner restart while the API is briefly unreachable does not strand
-// pre-existing degradedReason flags.
+// seedFromApiWithRetry runs seedFromApi until it succeeds, with exponential
+// backoff capped at degradedSeedMaxBackoff, so a runner restart during an
+// API outage of any length does not strand pre-existing degradedReason
+// flags. It only stops early when ctx is cancelled (runner shutdown).
 func (s *SandboxDegradedService) seedFromApiWithRetry(ctx context.Context) {
 	backoff := degradedSeedInitialBackoff
 	for attempt := 1; ; attempt++ {
 		err := s.seedFromApi(ctx)
 		if err == nil {
-			return
-		}
-		if attempt >= degradedSeedMaxAttempts {
-			s.log.WarnContext(ctx, "Giving up seeding degraded sandboxes; flags set before this restart stay untracked and only clear via the API state-transition invariant or a fresh sighting",
-				"attempts", attempt, "error", err)
 			return
 		}
 		s.log.WarnContext(ctx, "Failed to seed degraded sandboxes, retrying",
@@ -160,6 +161,9 @@ func (s *SandboxDegradedService) seedFromApiWithRetry(ctx context.Context) {
 		case <-time.After(backoff):
 		}
 		backoff *= 2
+		if backoff > degradedSeedMaxBackoff {
+			backoff = degradedSeedMaxBackoff
+		}
 	}
 }
 

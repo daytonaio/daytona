@@ -14,25 +14,34 @@ func TestMatchFdExhaustion(t *testing.T) {
 		msg  string
 		want bool
 	}{
-		{"emfile code", "EMFILE: too many open files", true},
+		// Real syscall/runtime formats — all carry the strerror phrase or
+		// an errno 24, and must classify.
+		{"go open", "open /x: too many open files", true},
+		{"node emfile", "Error: EMFILE: too many open files, open '/x'", true},
+		{"node legacy emfile", "Error: EMFILE, too many open files", true},
+		{"strace emfile", "EMFILE (Too many open files)", true},
+		{"python errno 24", "[Errno 24] Too many open files", true},
 		{"accept4 emfile", "accept4: too many open files", true},
 		{"fork exec emfile", "fork/exec /bin/sh: too many open files", true},
 		{"enfile system-wide", "too many open files in system", true},
-		{"node style", "Error: EMFILE, too many open files", true},
-		{"bare emfile code", "spawn failed with EMFILE", true},
-		{"bare enfile code", "socket: ENFILE", true},
+		{"errno space 24", "socket failed: errno 24", true},
+		{"errno equals 24", "errno=24", true},
+		{"errno colon 24", "errno: 24", true},
 		{"loader with errno 24", "error while loading shared libraries: libc.so.6: cannot open shared object file: Error 24", true},
-		{"errno equals emfile", "errno=EMFILE", true},
-		{"parenthesized emfile", "accept4 failed (EMFILE)", true},
+		// Bare EMFILE/ENFILE tokens without the phrase or errno number are
+		// filename-shaped or echoed text, never a real error format.
 		{"emfile in path segment", "/tmp/EMFILE.txt: no such file", false},
-		{"emfile path directory", "open EMFILE/data: permission denied", false},
+		{"emfile filename at start", "EMFILE.txt: permission denied", false},
 		{"emfile glued to word", "openEMFILE", false},
+		{"emfile command echo", "cat EMFILE", false},
+		{"bare emfile code", "spawn failed with EMFILE", false},
+		{"bare enfile code", "socket: ENFILE", false},
 		{"enfile glued to word", "myENFILEhandler crashed", false},
 		{"empty", "", false},
 		{"file not found", "file not found", false},
 		{"storage error", "no space left on device", false},
 		{"substring trap", "systemfile missing", false},
-		{"lowercase emfile not matched", "emfile is a project name", false},
+		{"other errno", "errno 240", false},
 		{"loader without errno 24", "error while loading shared libraries: libfoo.so: cannot open shared object file: No such file or directory", false},
 	}
 
