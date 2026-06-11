@@ -1,7 +1,12 @@
 // Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Configuration, Sandbox as SandboxDto } from '@daytona/api-client'
+import {
+  Configuration as MockedConfiguration,
+  SnapshotsApi as MockedSnapshotsApi,
+  type Configuration,
+  type Sandbox as SandboxDto,
+} from '@daytona/api-client'
 import { createApiResponse } from './helpers'
 import { DaytonaNotFoundError } from '../errors/DaytonaError'
 
@@ -360,7 +365,10 @@ describe('Sandbox', () => {
 
   it('defaults snapshotsApi to an API-targeted client when omitted', async () => {
     const { Sandbox } = require('../Sandbox') as typeof import('../Sandbox')
-    const apiClient = require('@daytona/api-client') as { SnapshotsApi: jest.Mock; Configuration: jest.Mock }
+    const apiClient = {
+      SnapshotsApi: MockedSnapshotsApi as unknown as jest.Mock,
+      Configuration: MockedConfiguration as unknown as jest.Mock,
+    }
     apiClient.SnapshotsApi.mockClear()
     apiClient.Configuration.mockClear()
 
