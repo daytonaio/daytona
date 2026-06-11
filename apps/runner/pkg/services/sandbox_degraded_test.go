@@ -248,3 +248,116 @@ func TestClassifyInspect(t *testing.T) {
 		})
 	}
 }
+
+// waitForGuardRelease polls until the entry's pushing guard is released and
+// returns a snapshot of the entry.
+func waitForGuardRelease(t *testing.T, s *SandboxDegradedService, sandboxId string) degradedEntry {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		s.mu.Lock()
+		entry, ok := s.entries[sandboxId]
+		var snapshot degradedEntry
+		if ok {
+			snapshot = *entry
+		}
+		s.mu.Unlock()
+		if ok && !snapshot.pushing {
+			return snapshot
+		}
+		time.Sleep(2 * time.Millisecond)
+	}
+	t.Fatalf("pushing guard for %s was not released within deadline", sandboxId)
+	return degradedEntry{}
+}
+
+// TestReportFdExhaustionClaimsBeforeSpawn pins the spawn-then-claim ordering:
+// the pushing guard must be observable immediately after ReportFdExhaustion
+// returns, before the push goroutine has run. If the goroutine claimed
+// instead, a probe tick in the spawn window would observe pushing=false,
+// push a clear, and the late reason push would strand the flag.
+func TestReportFdExhaustionClaimsBeforeSpawn(t *testing.T) {
+	started := make(chan struct{})
+	release := make(chan struct{})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		close(started)
+		<-release
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	s := newDegradedTestService(t, srv.URL)
+
+	s.ReportFdExhaustion("sb", "fd-exhaustion: too many open files")
+
+	// Synchronous check, deliberately before the push goroutine is allowed
+	// to make progress (the server blocks until release is closed).
+	if !s.pushInFlight("sb") {
+		t.Fatal("pushing guard must be claimed before ReportFdExhaustion returns")
+	}
+
+	<-started
+	close(release)
+
+	entry := waitForGuardRelease(t, s, "sb")
+	if !entry.reported {
+		t.Fatalf("push completion must mark the entry reported, got %+v", entry)
+	}
+}
+
+// TestReportFdExhaustionRetriesAfterRejectedPush pins the push error path: a
+// non-2xx response (e.g. the API's 409 while the sandbox is not STARTED yet)
+// must leave the entry unreported with the guard released, so the next probe
+// tick's refresh retries the push — and the retry succeeds once the API
+// accepts it.
+func TestReportFdExhaustionRetriesAfterRejectedPush(t *testing.T) {
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if calls.Add(1) == 1 {
+			w.WriteHeader(http.StatusConflict)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	s := newDegradedTestService(t, srv.URL)
+	s.ReportFdExhaustion("sb", "fd-exhaustion: too many open files")
+
+	entry := waitForGuardRelease(t, s, "sb")
+	if entry.reported {
+		t.Fatal("a rejected push must not mark the entry reported")
+	}
+	if got := calls.Load(); got != 1 {
+		t.Fatalf("first push: got %d calls, want 1", got)
+	}
+
+	// The next probe tick re-confirms the condition and refreshes — the
+	// unreported entry must be re-pushed.
+	s.refresh("sb", "fd-exhaustion: too many open files")
+
+	if got := calls.Load(); got != 2 {
+		t.Fatalf("retry push: got %d calls, want 2", got)
+	}
+	s.mu.Lock()
+	reported := s.entries["sb"] != nil && s.entries["sb"].reported
+	s.mu.Unlock()
+	if !reported {
+		t.Fatal("successful retry must mark the entry reported")
+	}
+}
+
+// TestSeedFromApiReturnsErrorForRetry pins the contract the startup retry
+// loop depends on: a failed seed must surface an error instead of being
+// swallowed, so seedFromApiWithRetry can re-attempt it.
+func TestSeedFromApiReturnsErrorForRetry(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+
+	s := newDegradedTestService(t, srv.URL)
+	if err := s.seedFromApi(context.Background()); err == nil {
+		t.Fatal("seedFromApi must return an error so the startup retry loop can re-attempt")
+	}
+}

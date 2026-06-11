@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/docker/docker/api/types/container"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -30,16 +31,13 @@ const daemonExecProbeBodyLimit = 64 * 1024
 
 // ProbeDaemonExec checks whether the sandbox daemon can spawn a process by
 // executing the shell builtin `true` via POST /process/execute (the same path
-// user execs take). It returns healthy=true when the command exits 0,
+// user execs take). It takes the caller's container inspect response (the
+// probe loop already inspected this tick — re-inspecting here would double
+// the docker API load). It returns healthy=true when the command exits 0,
 // healthy=false with the observed error text when the daemon responded but
 // the exec failed, and a non-nil error when the outcome is indeterminate
-// (container/IP not resolvable, transport or decode failure).
-func (d *DockerClient) ProbeDaemonExec(ctx context.Context, sandboxId string) (bool, string, error) {
-	c, err := d.ContainerInspect(ctx, sandboxId)
-	if err != nil {
-		return false, "", err
-	}
-
+// (IP not resolvable, transport or decode failure).
+func (d *DockerClient) ProbeDaemonExec(ctx context.Context, c *container.InspectResponse) (bool, string, error) {
 	containerIP := GetContainerIpAddress(ctx, c)
 	if containerIP == "" {
 		return false, "", errors.New("sandbox IP not found? Is the sandbox started?")

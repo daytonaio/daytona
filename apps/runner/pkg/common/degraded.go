@@ -5,6 +5,7 @@ package common
 
 import (
 	"encoding/json"
+	"regexp"
 	"strings"
 )
 
@@ -16,10 +17,10 @@ const DegradedReasonFdExhaustionPrefix = "fd-exhaustion: "
 const maxObservedLen = 200
 
 // MatchFdExhaustion reports whether msg carries a file-descriptor exhaustion
-// signature: EMFILE/ENFILE error codes (case-sensitive to avoid substring false
-// positives), the classic "too many open files" text (which also covers
-// ENFILE's "too many open files in system"), or a dynamic-loader failure
-// co-occurring with errno 24.
+// signature: EMFILE/ENFILE errno codes (matched case-sensitively as standalone
+// tokens, see fdErrnoTokenRe), the classic "too many open files" text (which
+// also covers ENFILE's "too many open files in system"), or a dynamic-loader
+// failure co-occurring with errno 24.
 //
 // NOTE: these signatures are surfacing-only. They must NEVER be added to
 // recoverableErrorPatterns (recovery.go) — fd exhaustion must not trigger
@@ -35,7 +36,7 @@ func MatchFdExhaustion(msg string) bool {
 	if strings.Contains(lower, "too many open files") {
 		return true
 	}
-	if strings.Contains(msg, "EMFILE") || strings.Contains(msg, "ENFILE") {
+	if matchFdErrnoToken(msg) {
 		return true
 	}
 
@@ -51,8 +52,19 @@ func matchLoaderFdExhaustion(msg, lower string) bool {
 	}
 	return strings.Contains(lower, "error 24") ||
 		strings.Contains(lower, "too many open files") ||
-		strings.Contains(msg, "EMFILE") ||
-		strings.Contains(msg, "ENFILE")
+		matchFdErrnoToken(msg)
+}
+
+// fdErrnoTokenRe matches EMFILE/ENFILE only as standalone tokens: not glued
+// to other word characters (openEMFILE) and not adjacent to a path separator
+// (/tmp/EMFILE.txt), so user-controlled text echoed in errors cannot
+// false-positive. Case-sensitive on purpose — errno codes are uppercase.
+var fdErrnoTokenRe = regexp.MustCompile(`(^|[^/0-9A-Za-z_])(EMFILE|ENFILE)($|[^/0-9A-Za-z_])`)
+
+// matchFdErrnoToken reports whether msg contains EMFILE or ENFILE as a
+// standalone errno token (see fdErrnoTokenRe).
+func matchFdErrnoToken(msg string) bool {
+	return fdErrnoTokenRe.MatchString(msg)
 }
 
 // FdExhaustionReason builds the degradedReason value from the observed error

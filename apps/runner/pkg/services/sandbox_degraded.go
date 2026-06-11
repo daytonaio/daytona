@@ -27,6 +27,12 @@ const (
 	degradedStaleAfter = 30 * time.Minute
 	// degradedPushTimeout bounds a single push to the API.
 	degradedPushTimeout = 10 * time.Second
+	// degradedSeedMaxAttempts bounds how many times the startup seed from
+	// the API is attempted before giving up.
+	degradedSeedMaxAttempts = 5
+	// degradedSeedInitialBackoff is the first retry delay for the startup
+	// seed; it doubles per attempt.
+	degradedSeedInitialBackoff = 5 * time.Second
 )
 
 type SandboxDegradedServiceConfig struct {
@@ -79,7 +85,11 @@ func (s *SandboxDegradedService) getClient() (*apiclient.APIClient, error) {
 // ReportFdExhaustion records an fd-exhaustion sighting for a sandbox. The
 // reason must be the final degradedReason value (e.g. produced by
 // common.ClassifyToolboxFdExhaustion). Cheap map upsert; the first sighting
-// triggers an async push to the API (single-flight per sandbox).
+// claims the pushing guard synchronously — before this function returns —
+// and pushes the reason to the API asynchronously (single-flight per
+// sandbox). Claiming before the goroutine spawn is load-bearing: a probe
+// tick running in the spawn window would otherwise observe pushing=false,
+// push a clear, and the late reason push would strand the flag.
 func (s *SandboxDegradedService) ReportFdExhaustion(sandboxId string, reason string) {
 	if sandboxId == "" || reason == "" {
 		return
@@ -93,23 +103,25 @@ func (s *SandboxDegradedService) ReportFdExhaustion(sandboxId string, reason str
 	}
 	entry.reason = reason
 	entry.lastConfirmed = time.Now()
-	shouldPush := !entry.reported && !entry.pushing
+	claimed := !entry.reported && !entry.pushing
+	if claimed {
+		entry.pushing = true
+	}
 	s.mu.Unlock()
 
-	if !shouldPush {
+	if !claimed {
 		return
 	}
 
-	go s.pushReasonGuarded(sandboxId, reason)
+	go s.runClaimedReasonPush(sandboxId, reason)
 }
 
 // Start seeds tracking from the API (healing runner restarts) and runs the
 // probe loop until ctx is done.
 func (s *SandboxDegradedService) Start(ctx context.Context) {
 	s.log.InfoContext(ctx, "Starting sandbox degraded tracking")
+	go s.seedFromApiWithRetry(ctx)
 	go func() {
-		s.seedFromApi(ctx)
-
 		ticker := time.NewTicker(degradedProbeInterval)
 		defer ticker.Stop()
 
@@ -125,21 +137,45 @@ func (s *SandboxDegradedService) Start(ctx context.Context) {
 	}()
 }
 
+// seedFromApiWithRetry runs seedFromApi with a bounded exponential backoff,
+// so a runner restart while the API is briefly unreachable does not strand
+// pre-existing degradedReason flags.
+func (s *SandboxDegradedService) seedFromApiWithRetry(ctx context.Context) {
+	backoff := degradedSeedInitialBackoff
+	for attempt := 1; ; attempt++ {
+		err := s.seedFromApi(ctx)
+		if err == nil {
+			return
+		}
+		if attempt >= degradedSeedMaxAttempts {
+			s.log.WarnContext(ctx, "Giving up seeding degraded sandboxes; flags set before this restart stay untracked and only clear via the API state-transition invariant or a fresh sighting",
+				"attempts", attempt, "error", err)
+			return
+		}
+		s.log.WarnContext(ctx, "Failed to seed degraded sandboxes, retrying",
+			"attempt", attempt, "backoff", backoff, "error", err)
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(backoff):
+		}
+		backoff *= 2
+	}
+}
+
 // seedFromApi restores tracking for sandboxes that already carry a
-// degradedReason, so a runner restart cannot strand a stale flag. Best-effort.
-func (s *SandboxDegradedService) seedFromApi(ctx context.Context) {
+// degradedReason, so a runner restart cannot strand a stale flag.
+func (s *SandboxDegradedService) seedFromApi(ctx context.Context) error {
 	client, err := s.getClient()
 	if err != nil {
-		s.log.WarnContext(ctx, "Failed to seed degraded sandboxes", "error", err)
-		return
+		return err
 	}
 
 	sandboxes, _, err := client.SandboxAPI.GetSandboxesForRunner(ctx).
 		States(string(apiclient.SANDBOXSTATE_STARTED)).
 		Execute()
 	if err != nil {
-		s.log.WarnContext(ctx, "Failed to seed degraded sandboxes", "error", err)
-		return
+		return err
 	}
 
 	now := time.Now()
@@ -159,6 +195,7 @@ func (s *SandboxDegradedService) seedFromApi(ctx context.Context) {
 		}
 		s.log.InfoContext(ctx, "Restored degraded sandbox tracking", "sandboxId", sandbox.Id, "reason", *sandbox.DegradedReason)
 	}
+	return nil
 }
 
 func (s *SandboxDegradedService) probeTrackedSandboxes(ctx context.Context) {
@@ -220,7 +257,7 @@ func (s *SandboxDegradedService) probeSandbox(ctx context.Context, sandboxId str
 		return
 	}
 
-	healthy, observed, err := s.docker.ProbeDaemonExec(ctx, sandboxId)
+	healthy, observed, err := s.docker.ProbeDaemonExec(ctx, c)
 
 	switch {
 	case err == nil && healthy:
@@ -287,16 +324,24 @@ func (s *SandboxDegradedService) claimReasonPush(sandboxId string) bool {
 	return true
 }
 
-// pushReasonGuarded is the single entry point for pushing a degradedReason:
-// it claims entry.pushing under s.mu before the push and clears it on
-// completion, so the clear paths (healthy clear, stale expiry) can observe
-// an in-flight push and skip. A clear landing mid-push would otherwise be
-// overwritten by the late push, stranding a stale degradedReason.
+// pushReasonGuarded is the entry point for pushing a degradedReason from
+// synchronous paths (refresh): it claims entry.pushing and runs the push.
+// ReportFdExhaustion claims inline instead, so the guard is already held
+// when its push goroutine spawns.
 func (s *SandboxDegradedService) pushReasonGuarded(sandboxId string, reason string) {
 	if !s.claimReasonPush(sandboxId) {
 		return
 	}
+	s.runClaimedReasonPush(sandboxId, reason)
+}
 
+// runClaimedReasonPush executes the HTTP push for an already-claimed
+// entry.pushing guard and releases it on completion, so the clear paths
+// (healthy clear, stale expiry) can observe an in-flight push and skip.
+// A clear landing mid-push would otherwise be overwritten by the late push,
+// stranding a stale degradedReason. The caller MUST hold the claim
+// (claimReasonPush or the inline claim in ReportFdExhaustion).
+func (s *SandboxDegradedService) runClaimedReasonPush(sandboxId string, reason string) {
 	err := s.pushReason(sandboxId, reason)
 
 	s.mu.Lock()
