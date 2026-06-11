@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -31,6 +30,7 @@ type FileInfo struct {
 	Owner string `json:"owner"`
 	Permissions string `json:"permissions"`
 	Size int32 `json:"size"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _FileInfo FileInfo
@@ -296,6 +296,11 @@ func (o FileInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["owner"] = o.Owner
 	toSerialize["permissions"] = o.Permissions
 	toSerialize["size"] = o.Size
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -331,15 +336,28 @@ func (o *FileInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varFileInfo := _FileInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varFileInfo)
+	err = json.Unmarshal(data, &varFileInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = FileInfo(varFileInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "group")
+		delete(additionalProperties, "isDir")
+		delete(additionalProperties, "modTime")
+		delete(additionalProperties, "mode")
+		delete(additionalProperties, "modifiedAt")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "owner")
+		delete(additionalProperties, "permissions")
+		delete(additionalProperties, "size")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

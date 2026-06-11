@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -24,6 +23,7 @@ type ReplaceRequest struct {
 	Files []string `json:"files"`
 	NewValue string `json:"newValue"`
 	Pattern string `json:"pattern"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ReplaceRequest ReplaceRequest
@@ -133,6 +133,11 @@ func (o ReplaceRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize["files"] = o.Files
 	toSerialize["newValue"] = o.NewValue
 	toSerialize["pattern"] = o.Pattern
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -162,15 +167,22 @@ func (o *ReplaceRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varReplaceRequest := _ReplaceRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varReplaceRequest)
+	err = json.Unmarshal(data, &varReplaceRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ReplaceRequest(varReplaceRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "files")
+		delete(additionalProperties, "newValue")
+		delete(additionalProperties, "pattern")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

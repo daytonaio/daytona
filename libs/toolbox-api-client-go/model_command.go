@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -24,6 +23,7 @@ type Command struct {
 	Command string `json:"command"`
 	ExitCode *int32 `json:"exitCode,omitempty"`
 	Id string `json:"id"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Command Command
@@ -142,6 +142,11 @@ func (o Command) ToMap() (map[string]interface{}, error) {
 		toSerialize["exitCode"] = o.ExitCode
 	}
 	toSerialize["id"] = o.Id
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -170,15 +175,22 @@ func (o *Command) UnmarshalJSON(data []byte) (err error) {
 
 	varCommand := _Command{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCommand)
+	err = json.Unmarshal(data, &varCommand)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Command(varCommand)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "command")
+		delete(additionalProperties, "exitCode")
+		delete(additionalProperties, "id")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

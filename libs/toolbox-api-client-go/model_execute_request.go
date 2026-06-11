@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -28,6 +27,7 @@ type ExecuteRequest struct {
 	Envs *map[string]string `json:"envs,omitempty"`
 	// Timeout in seconds, defaults to 10 seconds
 	Timeout *int32 `json:"timeout,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ExecuteRequest ExecuteRequest
@@ -190,6 +190,11 @@ func (o ExecuteRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Timeout) {
 		toSerialize["timeout"] = o.Timeout
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -217,15 +222,23 @@ func (o *ExecuteRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varExecuteRequest := _ExecuteRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varExecuteRequest)
+	err = json.Unmarshal(data, &varExecuteRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ExecuteRequest(varExecuteRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "command")
+		delete(additionalProperties, "cwd")
+		delete(additionalProperties, "envs")
+		delete(additionalProperties, "timeout")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

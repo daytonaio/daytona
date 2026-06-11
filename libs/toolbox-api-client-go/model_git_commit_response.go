@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &GitCommitResponse{}
 // GitCommitResponse struct for GitCommitResponse
 type GitCommitResponse struct {
 	Hash string `json:"hash"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitCommitResponse GitCommitResponse
@@ -79,6 +79,11 @@ func (o GitCommitResponse) MarshalJSON() ([]byte, error) {
 func (o GitCommitResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["hash"] = o.Hash
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *GitCommitResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varGitCommitResponse := _GitCommitResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitCommitResponse)
+	err = json.Unmarshal(data, &varGitCommitResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitCommitResponse(varGitCommitResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "hash")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

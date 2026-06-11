@@ -20,7 +20,10 @@ var _ MappedNullable = &ComputerUseStatusResponse{}
 // ComputerUseStatusResponse struct for ComputerUseStatusResponse
 type ComputerUseStatusResponse struct {
 	Status *string `json:"status,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ComputerUseStatusResponse ComputerUseStatusResponse
 
 // NewComputerUseStatusResponse instantiates a new ComputerUseStatusResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -84,7 +87,33 @@ func (o ComputerUseStatusResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ComputerUseStatusResponse) UnmarshalJSON(data []byte) (err error) {
+	varComputerUseStatusResponse := _ComputerUseStatusResponse{}
+
+	err = json.Unmarshal(data, &varComputerUseStatusResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ComputerUseStatusResponse(varComputerUseStatusResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "status")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableComputerUseStatusResponse struct {

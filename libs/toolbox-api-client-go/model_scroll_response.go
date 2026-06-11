@@ -20,7 +20,10 @@ var _ MappedNullable = &ScrollResponse{}
 // ScrollResponse struct for ScrollResponse
 type ScrollResponse struct {
 	Success *bool `json:"success,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ScrollResponse ScrollResponse
 
 // NewScrollResponse instantiates a new ScrollResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -84,7 +87,33 @@ func (o ScrollResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Success) {
 		toSerialize["success"] = o.Success
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ScrollResponse) UnmarshalJSON(data []byte) (err error) {
+	varScrollResponse := _ScrollResponse{}
+
+	err = json.Unmarshal(data, &varScrollResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ScrollResponse(varScrollResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "success")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableScrollResponse struct {

@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -25,6 +24,7 @@ type SessionExecuteRequest struct {
 	Command string `json:"command"`
 	RunAsync *bool `json:"runAsync,omitempty"`
 	SuppressInputEcho *bool `json:"suppressInputEcho,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SessionExecuteRequest SessionExecuteRequest
@@ -187,6 +187,11 @@ func (o SessionExecuteRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.SuppressInputEcho) {
 		toSerialize["suppressInputEcho"] = o.SuppressInputEcho
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -214,15 +219,23 @@ func (o *SessionExecuteRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varSessionExecuteRequest := _SessionExecuteRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSessionExecuteRequest)
+	err = json.Unmarshal(data, &varSessionExecuteRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SessionExecuteRequest(varSessionExecuteRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "async")
+		delete(additionalProperties, "command")
+		delete(additionalProperties, "runAsync")
+		delete(additionalProperties, "suppressInputEcho")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

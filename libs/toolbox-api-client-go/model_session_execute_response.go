@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -26,6 +25,7 @@ type SessionExecuteResponse struct {
 	Output *string `json:"output,omitempty"`
 	Stderr *string `json:"stderr,omitempty"`
 	Stdout *string `json:"stdout,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SessionExecuteResponse SessionExecuteResponse
@@ -223,6 +223,11 @@ func (o SessionExecuteResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Stdout) {
 		toSerialize["stdout"] = o.Stdout
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -250,15 +255,24 @@ func (o *SessionExecuteResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varSessionExecuteResponse := _SessionExecuteResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSessionExecuteResponse)
+	err = json.Unmarshal(data, &varSessionExecuteResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SessionExecuteResponse(varSessionExecuteResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "cmdId")
+		delete(additionalProperties, "exitCode")
+		delete(additionalProperties, "output")
+		delete(additionalProperties, "stderr")
+		delete(additionalProperties, "stdout")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

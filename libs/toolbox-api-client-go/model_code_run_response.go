@@ -22,7 +22,10 @@ type CodeRunResponse struct {
 	Artifacts *CodeRunArtifacts `json:"artifacts,omitempty"`
 	ExitCode *int32 `json:"exitCode,omitempty"`
 	Result *string `json:"result,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _CodeRunResponse CodeRunResponse
 
 // NewCodeRunResponse instantiates a new CodeRunResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -156,7 +159,35 @@ func (o CodeRunResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Result) {
 		toSerialize["result"] = o.Result
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *CodeRunResponse) UnmarshalJSON(data []byte) (err error) {
+	varCodeRunResponse := _CodeRunResponse{}
+
+	err = json.Unmarshal(data, &varCodeRunResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = CodeRunResponse(varCodeRunResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "artifacts")
+		delete(additionalProperties, "exitCode")
+		delete(additionalProperties, "result")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableCodeRunResponse struct {

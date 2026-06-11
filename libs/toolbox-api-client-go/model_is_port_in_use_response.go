@@ -20,7 +20,10 @@ var _ MappedNullable = &IsPortInUseResponse{}
 // IsPortInUseResponse struct for IsPortInUseResponse
 type IsPortInUseResponse struct {
 	IsInUse *bool `json:"isInUse,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _IsPortInUseResponse IsPortInUseResponse
 
 // NewIsPortInUseResponse instantiates a new IsPortInUseResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -84,7 +87,33 @@ func (o IsPortInUseResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.IsInUse) {
 		toSerialize["isInUse"] = o.IsInUse
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *IsPortInUseResponse) UnmarshalJSON(data []byte) (err error) {
+	varIsPortInUseResponse := _IsPortInUseResponse{}
+
+	err = json.Unmarshal(data, &varIsPortInUseResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = IsPortInUseResponse(varIsPortInUseResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "isInUse")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableIsPortInUseResponse struct {

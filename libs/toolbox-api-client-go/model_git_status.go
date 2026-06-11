@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -26,6 +25,7 @@ type GitStatus struct {
 	BranchPublished *bool `json:"branchPublished,omitempty"`
 	CurrentBranch string `json:"currentBranch"`
 	FileStatus []FileStatus `json:"fileStatus"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitStatus GitStatus
@@ -214,6 +214,11 @@ func (o GitStatus) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["currentBranch"] = o.CurrentBranch
 	toSerialize["fileStatus"] = o.FileStatus
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -242,15 +247,24 @@ func (o *GitStatus) UnmarshalJSON(data []byte) (err error) {
 
 	varGitStatus := _GitStatus{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitStatus)
+	err = json.Unmarshal(data, &varGitStatus)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitStatus(varGitStatus)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "ahead")
+		delete(additionalProperties, "behind")
+		delete(additionalProperties, "branchPublished")
+		delete(additionalProperties, "currentBranch")
+		delete(additionalProperties, "fileStatus")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &WorkDirResponse{}
 // WorkDirResponse struct for WorkDirResponse
 type WorkDirResponse struct {
 	Dir string `json:"dir"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _WorkDirResponse WorkDirResponse
@@ -79,6 +79,11 @@ func (o WorkDirResponse) MarshalJSON() ([]byte, error) {
 func (o WorkDirResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["dir"] = o.Dir
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *WorkDirResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varWorkDirResponse := _WorkDirResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varWorkDirResponse)
+	err = json.Unmarshal(data, &varWorkDirResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = WorkDirResponse(varWorkDirResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "dir")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

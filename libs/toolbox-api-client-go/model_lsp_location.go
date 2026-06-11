@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &LspLocation{}
 type LspLocation struct {
 	Range LspRange `json:"range"`
 	Uri string `json:"uri"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _LspLocation LspLocation
@@ -106,6 +106,11 @@ func (o LspLocation) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["range"] = o.Range
 	toSerialize["uri"] = o.Uri
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -134,15 +139,21 @@ func (o *LspLocation) UnmarshalJSON(data []byte) (err error) {
 
 	varLspLocation := _LspLocation{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varLspLocation)
+	err = json.Unmarshal(data, &varLspLocation)
 
 	if err != nil {
 		return err
 	}
 
 	*o = LspLocation(varLspLocation)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "range")
+		delete(additionalProperties, "uri")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

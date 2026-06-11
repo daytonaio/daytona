@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &InitializeRequest{}
 // InitializeRequest struct for InitializeRequest
 type InitializeRequest struct {
 	Token string `json:"token"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _InitializeRequest InitializeRequest
@@ -79,6 +79,11 @@ func (o InitializeRequest) MarshalJSON() ([]byte, error) {
 func (o InitializeRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["token"] = o.Token
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *InitializeRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varInitializeRequest := _InitializeRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varInitializeRequest)
+	err = json.Unmarshal(data, &varInitializeRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = InitializeRequest(varInitializeRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "token")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -21,7 +21,10 @@ var _ MappedNullable = &ProcessRestartResponse{}
 type ProcessRestartResponse struct {
 	Message *string `json:"message,omitempty"`
 	ProcessName *string `json:"processName,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ProcessRestartResponse ProcessRestartResponse
 
 // NewProcessRestartResponse instantiates a new ProcessRestartResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -120,7 +123,34 @@ func (o ProcessRestartResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ProcessName) {
 		toSerialize["processName"] = o.ProcessName
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ProcessRestartResponse) UnmarshalJSON(data []byte) (err error) {
+	varProcessRestartResponse := _ProcessRestartResponse{}
+
+	err = json.Unmarshal(data, &varProcessRestartResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ProcessRestartResponse(varProcessRestartResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "message")
+		delete(additionalProperties, "processName")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableProcessRestartResponse struct {

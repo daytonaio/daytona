@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &AccessibilityInvokeRequest{}
 type AccessibilityInvokeRequest struct {
 	Action *string `json:"action,omitempty"`
 	Id string `json:"id"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _AccessibilityInvokeRequest AccessibilityInvokeRequest
@@ -115,6 +115,11 @@ func (o AccessibilityInvokeRequest) ToMap() (map[string]interface{}, error) {
 		toSerialize["action"] = o.Action
 	}
 	toSerialize["id"] = o.Id
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -142,15 +147,21 @@ func (o *AccessibilityInvokeRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varAccessibilityInvokeRequest := _AccessibilityInvokeRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varAccessibilityInvokeRequest)
+	err = json.Unmarshal(data, &varAccessibilityInvokeRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = AccessibilityInvokeRequest(varAccessibilityInvokeRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "action")
+		delete(additionalProperties, "id")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

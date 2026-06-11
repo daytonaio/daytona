@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &PtyResizeRequest{}
 type PtyResizeRequest struct {
 	Cols int32 `json:"cols"`
 	Rows int32 `json:"rows"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PtyResizeRequest PtyResizeRequest
@@ -106,6 +106,11 @@ func (o PtyResizeRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["cols"] = o.Cols
 	toSerialize["rows"] = o.Rows
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -134,15 +139,21 @@ func (o *PtyResizeRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varPtyResizeRequest := _PtyResizeRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPtyResizeRequest)
+	err = json.Unmarshal(data, &varPtyResizeRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PtyResizeRequest(varPtyResizeRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "cols")
+		delete(additionalProperties, "rows")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

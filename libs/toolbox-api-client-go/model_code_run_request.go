@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -27,6 +26,7 @@ type CodeRunRequest struct {
 	// python, javascript, typescript
 	Language string `json:"language"`
 	Timeout *int32 `json:"timeout,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CodeRunRequest CodeRunRequest
@@ -215,6 +215,11 @@ func (o CodeRunRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Timeout) {
 		toSerialize["timeout"] = o.Timeout
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -243,15 +248,24 @@ func (o *CodeRunRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varCodeRunRequest := _CodeRunRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCodeRunRequest)
+	err = json.Unmarshal(data, &varCodeRunRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CodeRunRequest(varCodeRunRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "argv")
+		delete(additionalProperties, "code")
+		delete(additionalProperties, "envs")
+		delete(additionalProperties, "language")
+		delete(additionalProperties, "timeout")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

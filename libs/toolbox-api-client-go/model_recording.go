@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -29,6 +28,7 @@ type Recording struct {
 	SizeBytes *int32 `json:"sizeBytes,omitempty"`
 	StartTime string `json:"startTime"`
 	Status string `json:"status"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Recording Recording
@@ -295,6 +295,11 @@ func (o Recording) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["startTime"] = o.StartTime
 	toSerialize["status"] = o.Status
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -326,15 +331,27 @@ func (o *Recording) UnmarshalJSON(data []byte) (err error) {
 
 	varRecording := _Recording{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varRecording)
+	err = json.Unmarshal(data, &varRecording)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Recording(varRecording)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "durationSeconds")
+		delete(additionalProperties, "endTime")
+		delete(additionalProperties, "fileName")
+		delete(additionalProperties, "filePath")
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "sizeBytes")
+		delete(additionalProperties, "startTime")
+		delete(additionalProperties, "status")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

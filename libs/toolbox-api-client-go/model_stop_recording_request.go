@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &StopRecordingRequest{}
 // StopRecordingRequest struct for StopRecordingRequest
 type StopRecordingRequest struct {
 	Id string `json:"id"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _StopRecordingRequest StopRecordingRequest
@@ -79,6 +79,11 @@ func (o StopRecordingRequest) MarshalJSON() ([]byte, error) {
 func (o StopRecordingRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *StopRecordingRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varStopRecordingRequest := _StopRecordingRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varStopRecordingRequest)
+	err = json.Unmarshal(data, &varStopRecordingRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = StopRecordingRequest(varStopRecordingRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

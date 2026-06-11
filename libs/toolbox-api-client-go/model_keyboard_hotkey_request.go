@@ -21,7 +21,10 @@ var _ MappedNullable = &KeyboardHotkeyRequest{}
 type KeyboardHotkeyRequest struct {
 	// e.g., \"ctrl+c\", \"cmd+v\"
 	Keys *string `json:"keys,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _KeyboardHotkeyRequest KeyboardHotkeyRequest
 
 // NewKeyboardHotkeyRequest instantiates a new KeyboardHotkeyRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -85,7 +88,33 @@ func (o KeyboardHotkeyRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Keys) {
 		toSerialize["keys"] = o.Keys
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *KeyboardHotkeyRequest) UnmarshalJSON(data []byte) (err error) {
+	varKeyboardHotkeyRequest := _KeyboardHotkeyRequest{}
+
+	err = json.Unmarshal(data, &varKeyboardHotkeyRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = KeyboardHotkeyRequest(varKeyboardHotkeyRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "keys")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableKeyboardHotkeyRequest struct {

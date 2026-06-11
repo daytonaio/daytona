@@ -26,7 +26,10 @@ type WindowInfo struct {
 	Width *int32 `json:"width,omitempty"`
 	X *int32 `json:"x,omitempty"`
 	Y *int32 `json:"y,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _WindowInfo WindowInfo
 
 // NewWindowInfo instantiates a new WindowInfo object
 // This constructor will assign default values to properties that have it defined,
@@ -300,7 +303,39 @@ func (o WindowInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Y) {
 		toSerialize["y"] = o.Y
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *WindowInfo) UnmarshalJSON(data []byte) (err error) {
+	varWindowInfo := _WindowInfo{}
+
+	err = json.Unmarshal(data, &varWindowInfo)
+
+	if err != nil {
+		return err
+	}
+
+	*o = WindowInfo(varWindowInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "height")
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "isActive")
+		delete(additionalProperties, "title")
+		delete(additionalProperties, "width")
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableWindowInfo struct {

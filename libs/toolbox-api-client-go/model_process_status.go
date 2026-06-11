@@ -23,7 +23,10 @@ type ProcessStatus struct {
 	Pid *int32 `json:"pid,omitempty"`
 	Priority *int32 `json:"priority,omitempty"`
 	Running *bool `json:"running,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ProcessStatus ProcessStatus
 
 // NewProcessStatus instantiates a new ProcessStatus object
 // This constructor will assign default values to properties that have it defined,
@@ -192,7 +195,36 @@ func (o ProcessStatus) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Running) {
 		toSerialize["running"] = o.Running
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ProcessStatus) UnmarshalJSON(data []byte) (err error) {
+	varProcessStatus := _ProcessStatus{}
+
+	err = json.Unmarshal(data, &varProcessStatus)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ProcessStatus(varProcessStatus)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "autoRestart")
+		delete(additionalProperties, "pid")
+		delete(additionalProperties, "priority")
+		delete(additionalProperties, "running")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableProcessStatus struct {
