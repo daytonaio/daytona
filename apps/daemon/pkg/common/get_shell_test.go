@@ -97,6 +97,19 @@ func TestResolveShellShWhenFileMissingAndNoShellEnv(t *testing.T) {
 	}
 }
 
+func TestResolveShellShWhenFileMissingAndEmptyShellEnv(t *testing.T) {
+	t.Setenv("SHELL", "")
+	path := filepath.Join(t.TempDir(), "does-not-exist")
+
+	shell, ok := resolveShell(path)
+	if ok {
+		t.Fatal("expected failed resolution for missing file")
+	}
+	if shell != "sh" {
+		t.Fatalf("expected sh, got %q", shell)
+	}
+}
+
 func TestResolveShellIgnoresCommentLines(t *testing.T) {
 	unsetShellEnv(t)
 	path := writeShellsFile(t, "# /usr/bin/zsh\n#/bin/zsh\n/bin/bash\n")

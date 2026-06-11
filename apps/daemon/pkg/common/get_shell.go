@@ -42,7 +42,7 @@ func GetShell() string {
 
 // resolveShell reads the shells file at path and picks a shell by preference
 // order: /usr/bin/zsh > /bin/zsh > /usr/bin/bash > /bin/bash > $SHELL (if
-// set) > sh. The boolean reports whether the file was read successfully.
+// non-empty) > sh. The boolean reports whether the file was read successfully.
 func resolveShell(path string) (string, bool) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -69,7 +69,7 @@ func resolveShell(path string) (string, bool) {
 }
 
 func shellFallback() string {
-	if shellEnv, shellSet := os.LookupEnv("SHELL"); shellSet {
+	if shellEnv := os.Getenv("SHELL"); shellEnv != "" {
 		return shellEnv
 	}
 
