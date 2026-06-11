@@ -259,10 +259,10 @@ export class OrganizationUserService {
     //  - auto-delete the organization if there are no other members
     //  - auto-promote a new owner if there are other members
     */
-    // No cache eviction here: the user is being deleted and can no longer authenticate, so the
-    // guard never reads their organization-user cache, and any cached entry self-expires at the TTL.
-    // Evicting inside this caller-owned transaction would also race a concurrent read re-caching the
-    // not-yet-removed row before commit.
+    // Cache eviction is intentionally not done here. The DELETED event is emitted inside the
+    // deletion transaction, so evicting now would race a concurrent read re-caching the
+    // not-yet-removed row before commit; effective eviction has to run post-commit. Any residual
+    // entry is bounded by the guard's short cache TTL. Handled as a separate change.
     await Promise.all(memberships.map((membership) => this.removeWithEntityManager(payload.entityManager, membership)))
   }
 
