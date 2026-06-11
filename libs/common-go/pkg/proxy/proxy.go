@@ -4,10 +4,14 @@
 package proxy
 
 import (
+	"context"
+	"errors"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +33,29 @@ var proxyTransport http.RoundTripper = &retryTransport{
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 	},
+}
+
+// 32 KiB buffer pool shared across all proxied requests.
+var proxyBufPool = &bufferPool{
+	pool: sync.Pool{
+		New: func() interface{} {
+			b := make([]byte, 32*1024)
+			return &b
+		},
+	},
+}
+
+type bufferPool struct {
+	pool sync.Pool
+}
+
+func (bp *bufferPool) Get() []byte {
+	buf := bp.pool.Get().(*[]byte)
+	return *buf
+}
+
+func (bp *bufferPool) Put(b []byte) {
+	bp.pool.Put(&b)
 }
 
 // ProxyRequest handles proxying requests to a sandbox's container
@@ -74,8 +101,26 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 					req.Header.Add(key, value)
 				}
 			},
-			Transport:      proxyTransport,
+			Transport:  proxyTransport,
+			BufferPool: proxyBufPool,
+			// Periodic flushing covers fixed-Content-Length streams that Go's
+			// auto-flush detection misses, without forcing a flush per write
+			// on bulk transfers.
+			FlushInterval:  100 * time.Millisecond,
 			ModifyResponse: modifyResponse,
+			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+				// Client went away; nothing to report or write.
+				if errors.Is(err, context.Canceled) {
+					return
+				}
+				// Don't log r.Host: preview hosts can embed signed tokens.
+				slog.Warn("proxy error", "method", r.Method, "path", r.URL.Path, "error", err)
+				if ctx.Writer.Written() {
+					ctx.Abort()
+					return
+				}
+				ctx.AbortWithStatus(http.StatusBadGateway)
+			},
 		}
 
 		reverseProxy.ServeHTTP(ctx.Writer, ctx.Request)
