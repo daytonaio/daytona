@@ -582,7 +582,7 @@ base = daytona.create(
     )
 )
 
-# Device sandbox: an Android 14 emulator linked to the base
+# Device sandbox: an Android 16 emulator linked to the base
 device = daytona.create(
     CreateSandboxFromSnapshotParams(
         snapshot="android-16",
@@ -617,7 +617,7 @@ const base = await daytona.create({
   ),
 });
 
-// Device sandbox: an Android 14 emulator linked to the base
+// Device sandbox: an Android 16 emulator linked to the base
 const device = await daytona.create(
   {
     snapshot: "android-16",
@@ -654,7 +654,7 @@ base = daytona.create(
   )
 )
 
-# Device sandbox: an Android 14 emulator linked to the base
+# Device sandbox: an Android 16 emulator linked to the base
 device = daytona.create(
   Daytona::CreateSandboxFromSnapshotParams.new(
     snapshot: 'android-16',
@@ -700,7 +700,7 @@ func main() {
 			Run("ln -s /opt/platform-tools/adb /usr/local/bin/adb"),
 	})
 
-	// Device sandbox: an Android 14 emulator linked to the base
+	// Device sandbox: an Android 16 emulator linked to the base
 	device, _ := client.Create(ctx, types.SnapshotParams{
 		Snapshot: "android-16",
 		SandboxBaseParams: types.SandboxBaseParams{
@@ -734,7 +734,7 @@ curl 'https://app.daytona.io/api/sandbox' \
   }
 }'
 
-# Create the device sandbox (replace BASE_SANDBOX_ID with the id from the first response)
+# Create the device sandbox
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
