@@ -64,6 +64,13 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		defer close(sizeCh)
+		// The client is gone when this loop exits: close the stdin feed so
+		// SpawnTTY's stdin copier sees EOF and tears the shell down even
+		// when it is idle (an idle shell produces no output, so the stdout
+		// pump cannot be the one to notice the disconnect). The handler's
+		// own deferred Close is unreachable until SpawnTTY returns, which
+		// is exactly what this unblocks.
+		defer stdInWriter.Close()
 		for {
 			messageType, p, err := conn.ReadMessage()
 			if err != nil {
