@@ -3098,6 +3098,30 @@ export class SandboxService {
     })
   }
 
+  // used by the runner to surface/clear a degraded condition (e.g. file-descriptor exhaustion) on a running sandbox
+  async updateDegradedReason(sandboxId: string, degradedReason: string | null): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    if ((sandbox.degradedReason ?? null) === degradedReason) {
+      return
+    }
+
+    if (degradedReason !== null && sandbox.state !== SandboxState.STARTED) {
+      this.logger.debug(
+        `Ignoring degraded reason for sandbox ${sandboxId} in state ${sandbox.state} (only applies to started sandboxes)`,
+      )
+      return
+    }
+
+    await this.sandboxRepository.update(sandbox.id, { updateData: { degradedReason }, entity: sandbox })
+  }
+
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
   private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
     await this.createForWarmPool(event.warmPool)
