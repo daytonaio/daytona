@@ -15,12 +15,17 @@ import (
 
 // proxyTransport wraps *http.Transport with retryTransport for stale-connection
 // handling. If direct *http.Transport access is needed, split into two variables.
+//
+// IdleConnTimeout must be shorter than the peer's idle timeout to avoid
+// reusing a connection it already closed.
 var proxyTransport http.RoundTripper = &retryTransport{
 	base: &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,
-		IdleConnTimeout:     90 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
+		IdleConnTimeout:     30 * time.Second,
 		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 	},
