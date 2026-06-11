@@ -478,9 +478,17 @@ export const CreateSandboxSheet = ({
   )
   const getRegionsForSnapshot = useCallback(
     (snapshotName?: string) => {
-      const snapshot = snapshots.find((snapshot) => snapshot.name === snapshotName)
-      if (!snapshot?.regionIds?.length) {
+      if (!snapshotName) {
         return regions
+      }
+
+      const snapshot = snapshots.find((snapshot) => snapshot.name === snapshotName)
+      if (!snapshot) {
+        return []
+      }
+
+      if (!snapshot.regionIds?.length) {
+        return []
       }
 
       const snapshotRegionIds = new Set(snapshot.regionIds)
@@ -948,9 +956,11 @@ export const CreateSandboxSheet = ({
                     </SelectContent>
                   </Select>
                   <FieldDescription>
-                    {selectedSource === Source.SNAPSHOT && selectedSnapshot?.regionIds?.length
-                      ? 'Only regions where the selected snapshot is available are shown.'
-                      : 'The region where the sandbox will be created.'}
+                    {selectedSource === Source.SNAPSHOT && selectedSnapshot && snapshotFilteredRegions.length === 0
+                      ? 'The selected snapshot is not available in any selectable region.'
+                      : selectedSource === Source.SNAPSHOT && selectedSnapshot?.regionIds?.length
+                        ? 'Only regions where the selected snapshot is available are shown.'
+                        : 'The region where the sandbox will be created.'}
                   </FieldDescription>
                 </Field>
               )}
