@@ -132,9 +132,8 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 
 func (s *Server) handleNonPty(session ssh.Session) {
 	shell := common.GetShell()
-	shellArgs := common.GetShellArgs(shell)
 
-	var args []string
+	var cmd *exec.Cmd
 	if len(session.Command()) > 0 {
 		rawCmd := session.RawCommand()
 
@@ -145,10 +144,10 @@ func (s *Server) handleNonPty(session ssh.Session) {
 
 		finalCommand := common.BuildWindowsCommandForShell(parsedCommand, envVars, common.IsPowerShell(shell))
 
-		args = append(shellArgs, finalCommand)
+		cmd = common.ShellCommand(shell, finalCommand)
+	} else {
+		cmd = exec.Command(shell)
 	}
-
-	cmd := exec.Command(shell, args...)
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Dir = s.workDir
 

@@ -52,7 +52,6 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		}
 
 		shell := common.GetShell()
-		shellArgs := common.GetShellArgs(shell)
 
 		isPowerShell := common.IsPowerShell(shell)
 		finalCommand := common.BuildWindowsCommandForShell(parsedCommand, envVars, isPowerShell)
@@ -66,8 +65,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 
 		execStartTime := time.Now()
 
-		args := append(shellArgs, finalCommand)
-		cmd := exec.Command(shell, args...)
+		cmd := common.ShellCommand(shell, finalCommand)
 
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd

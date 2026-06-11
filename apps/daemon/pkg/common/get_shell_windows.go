@@ -6,10 +6,12 @@
 package common
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // GetShell returns the path to the preferred shell on Windows.
@@ -63,21 +65,24 @@ func GetShell() string {
 	return "powershell.exe"
 }
 
-// GetShellArgs returns the arguments needed to execute a command in the shell.
-// For PowerShell: -NoProfile -NonInteractive -Command
-// For cmd.exe: /C
-func GetShellArgs(shell string) []string {
-	// Check if it's PowerShell
-	if isPowerShell(shell) {
-		return []string{"-NoProfile", "-NonInteractive", "-Command"}
+// ShellCommand builds an exec.Cmd that runs commandLine through shell.
+//
+// For cmd.exe the command line must bypass Go's default per-argument
+// quoting: os/exec escapes embedded quotes as \" (MSVCRT rules), which
+// cmd.exe does not understand, so quoted arguments would reach the child
+// program with literal quote characters. Instead the raw line is passed
+// via SysProcAttr.CmdLine using `cmd /S /C "<commandLine>"` — with /S,
+// cmd strips only the outer quote pair and runs the command verbatim.
+// PowerShell parses \" natively, so the default quoting is correct there.
+func ShellCommand(shell, commandLine string) *exec.Cmd {
+	if IsPowerShell(shell) {
+		return exec.Command(shell, "-NoProfile", "-NonInteractive", "-Command", commandLine)
 	}
-	// Assume cmd.exe
-	return []string{"/C"}
-}
-
-// isPowerShell checks if the shell path refers to PowerShell (internal use)
-func isPowerShell(shell string) bool {
-	return IsPowerShell(shell)
+	cmd := exec.Command(shell)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		CmdLine: fmt.Sprintf(`"%s" /S /C "%s"`, shell, commandLine),
+	}
+	return cmd
 }
 
 // IsPowerShell checks if the shell path refers to PowerShell
