@@ -51,6 +51,9 @@ type SandboxFdUsage struct {
 	// percent. Processes with an unlimited RLIMIT_NOFILE contribute to OpenFds
 	// but not here, since they cannot hit EMFILE.
 	UsagePercent float64
+	// memberPids is the set of PIDs listed in cgroup.procs, used to exclude
+	// already-attributed processes from runtime-helper fd attribution.
+	memberPids map[int]struct{}
 }
 
 // sampleSandboxFdUsage samples file descriptor usage of every process in the
@@ -85,8 +88,10 @@ func sampleSandboxFdUsage(procfsRoot, cgroupfsRoot string, initPid int) (*Sandbo
 		return nil, err
 	}
 
-	usage := &SandboxFdUsage{}
+	usage := &SandboxFdUsage{memberPids: make(map[int]struct{}, len(pids))}
 	for _, pid := range pids {
+		usage.memberPids[pid] = struct{}{}
+
 		proc, err := fs.Proc(pid)
 		if err != nil {
 			continue
@@ -118,6 +123,94 @@ func sampleSandboxFdUsage(procfsRoot, cgroupfsRoot string, initPid int) (*Sandbo
 	}
 
 	return usage, nil
+}
+
+// sampleRuntimeHelperFds best-effort sums the open file descriptors of the
+// runtime helper processes (containerd-shim, conmon and friends) serving the
+// container whose init process is initPid: the helper tree is init's parent
+// and that parent's descendants, minus the processes already attributed
+// through the container cgroup. Descendants are discovered via
+// /proc/<pid>/task/<tid>/children, which requires CONFIG_PROC_CHILDREN.
+func sampleRuntimeHelperFds(procfsRoot string, initPid int, cgroupMembers map[int]struct{}) (uint64, error) {
+	fs, err := procfs.NewFS(procfsRoot)
+	if err != nil {
+		return 0, fmt.Errorf("failed to open procfs at %s: %w", procfsRoot, err)
+	}
+
+	initProc, err := fs.Proc(initPid)
+	if err != nil {
+		return 0, fmt.Errorf("failed to access init process %d: %w", initPid, err)
+	}
+
+	stat, err := initProc.Stat()
+	if err != nil {
+		return 0, fmt.Errorf("failed to read stat of pid %d: %w", initPid, err)
+	}
+
+	if stat.PPID <= 1 {
+		return 0, fmt.Errorf("init process %d has no runtime helper parent", initPid)
+	}
+
+	var total uint64
+	visited := make(map[int]struct{})
+	queue := []int{stat.PPID}
+	for len(queue) > 0 {
+		pid := queue[0]
+		queue = queue[1:]
+
+		if _, ok := visited[pid]; ok {
+			continue
+		}
+		visited[pid] = struct{}{}
+
+		// Cgroup members (and their descendants, which share the cgroup) are
+		// already attributed through sampleSandboxFdUsage.
+		if _, member := cgroupMembers[pid]; member {
+			continue
+		}
+
+		if proc, err := fs.Proc(pid); err == nil {
+			if openFds, err := countOpenFds(procfsRoot, proc); err == nil {
+				total += openFds
+			}
+		}
+
+		children, err := readProcChildren(procfsRoot, pid)
+		if err != nil {
+			continue
+		}
+		queue = append(queue, children...)
+	}
+
+	return total, nil
+}
+
+// readProcChildren collects the child PIDs of a process from its
+// /proc/<pid>/task/<tid>/children files.
+func readProcChildren(procfsRoot string, pid int) ([]int, error) {
+	taskDir := filepath.Join(procfsRoot, strconv.Itoa(pid), "task")
+	tids, err := os.ReadDir(taskDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var children []int
+	for _, tid := range tids {
+		data, err := os.ReadFile(filepath.Join(taskDir, tid.Name(), "children"))
+		if err != nil {
+			continue
+		}
+
+		for _, field := range strings.Fields(string(data)) {
+			child, err := strconv.Atoi(field)
+			if err != nil {
+				continue
+			}
+			children = append(children, child)
+		}
+	}
+
+	return children, nil
 }
 
 // countOpenFds returns the number of open file descriptors of proc. On Linux

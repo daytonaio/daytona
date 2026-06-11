@@ -61,4 +61,12 @@ var (
 		},
 		[]string{"sandbox_id"},
 	)
+
+	SandboxRuntimeHelperOpenFds = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "sandbox_runtime_helper_open_fds",
+			Help: "Open file descriptors of the sandbox's runtime helper processes (shim and friends) outside the container cgroup",
+		},
+		[]string{"sandbox_id"},
+	)
 )

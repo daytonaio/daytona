@@ -355,6 +355,22 @@ func (c *Collector) sampleContainerFdUsage(ctx context.Context, containerJSON *c
 			"threshold_percent", c.fdWarn.thresholdPercent)
 	case fdWarnEventNone:
 	}
+
+	// Best-effort fd attribution for runtime helper processes (shim and
+	// friends) whenever a runtime name is present in HostConfig. dockerd
+	// backfills the default runtime name ("runc") at create, so this also
+	// runs for default-runtime containers; attribution is best-effort for
+	// any runtime. Never feeds the warning/percentage path; on failure the
+	// metric is simply absent.
+	if containerJSON.HostConfig != nil && containerJSON.HostConfig.Runtime != "" {
+		helperFds, err := sampleRuntimeHelperFds(procRoot, containerJSON.State.Pid, usage.memberPids)
+		if err != nil {
+			c.log.DebugContext(ctx, "Failed to sample runtime helper fd usage", "sandbox_id", sandboxId, "error", err)
+			common.SandboxRuntimeHelperOpenFds.DeleteLabelValues(sandboxId)
+		} else {
+			common.SandboxRuntimeHelperOpenFds.WithLabelValues(sandboxId).Set(float64(helperFds))
+		}
+	}
 }
 
 // cleanupFdMetrics deletes gauge label sets for sandboxes that disappeared
@@ -365,6 +381,7 @@ func (c *Collector) cleanupFdMetrics(seen map[string]struct{}) {
 			common.SandboxOpenFds.DeleteLabelValues(sandboxId)
 			common.SandboxFdLimit.DeleteLabelValues(sandboxId)
 			common.SandboxFdUsagePercent.DeleteLabelValues(sandboxId)
+			common.SandboxRuntimeHelperOpenFds.DeleteLabelValues(sandboxId)
 		}
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -213,5 +214,48 @@ func TestFdWarnTrackerPrune(t *testing.T) {
 	// A surviving sandbox keeps its rate-limit state.
 	if got := tracker.observe("kept", 80, now.Add(time.Second)); got != fdWarnEventNone {
 		t.Errorf("kept sandbox inside re-warn window: got %v, want none", got)
+	}
+}
+
+func TestSampleRuntimeHelperFds(t *testing.T) {
+	root := t.TempDir()
+	procDir := filepath.Join(root, "proc")
+
+	// Container init (pid 100) is a child of the runtime helper (pid 50) and
+	// a cgroup member: its fds must not be attributed to the helper.
+	writeFile(t, filepath.Join(procDir, "100", "stat"), "100 (init) S 50"+strings.Repeat(" 0", 40)+"\n")
+	for i := range 9 {
+		writeFile(t, filepath.Join(procDir, "100", "fd", strconv.Itoa(i)), "")
+	}
+
+	// Helper (pid 50) with 7 fds; its children are the init and a sidecar.
+	for i := range 7 {
+		writeFile(t, filepath.Join(procDir, "50", "fd", strconv.Itoa(i)), "")
+	}
+	writeFile(t, filepath.Join(procDir, "50", "task", "50", "children"), "100 51 ")
+
+	// Sidecar helper (pid 51) with 4 fds and no children file.
+	for i := range 4 {
+		writeFile(t, filepath.Join(procDir, "51", "fd", strconv.Itoa(i)), "")
+	}
+
+	total, err := sampleRuntimeHelperFds(procDir, 100, map[int]struct{}{100: {}})
+	if err != nil {
+		t.Fatalf("sampleRuntimeHelperFds: %v", err)
+	}
+	if total != 11 {
+		t.Errorf("total = %d, want 11 (7 helper + 4 sidecar, cgroup member excluded)", total)
+	}
+}
+
+func TestSampleRuntimeHelperFdsNoParent(t *testing.T) {
+	root := t.TempDir()
+	procDir := filepath.Join(root, "proc")
+
+	// Init reparented to pid 1: no helper to attribute to.
+	writeFile(t, filepath.Join(procDir, "100", "stat"), "100 (init) S 1"+strings.Repeat(" 0", 40)+"\n")
+
+	if _, err := sampleRuntimeHelperFds(procDir, 100, nil); err == nil {
+		t.Error("expected error when init has no runtime helper parent")
 	}
 }
