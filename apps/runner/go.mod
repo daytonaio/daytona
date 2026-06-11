@@ -22,6 +22,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/prometheus/client_golang v1.23.2
+	github.com/prometheus/procfs v0.20.1
 	github.com/samber/slog-gin v1.20.1
 	github.com/shirou/gopsutil/v4 v4.25.12
 	github.com/swaggo/files v1.0.1
@@ -120,7 +121,6 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
-	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.10.0 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect

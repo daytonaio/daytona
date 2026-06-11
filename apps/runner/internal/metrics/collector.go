@@ -11,6 +11,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -47,6 +49,10 @@ type Collector struct {
 	allocatedDiskGiB    float32
 	startedSandboxCount float32
 
+	// Per-sandbox host-side fd usage sampling (Linux only)
+	fdSamplingEnabled bool
+	lastFdSandboxIds  map[string]struct{}
+
 	// Intervals for snapshotting metrics in seconds
 	cpuUsageSnapshotInterval           time.Duration
 	allocatedResourcesSnapshotInterval time.Duration
@@ -82,11 +88,17 @@ func NewCollector(cfg CollectorConfig) *Collector {
 		cpuRing:                            ring.New(cfg.WindowSize),
 		cpuUsageSnapshotInterval:           cfg.CPUUsageSnapshotInterval,
 		allocatedResourcesSnapshotInterval: cfg.AllocatedResourcesSnapshotInterval,
+		fdSamplingEnabled:                  runtime.GOOS == "linux",
+		lastFdSandboxIds:                   make(map[string]struct{}),
 	}
 }
 
 // Start begins needed metrics collection processes
 func (c *Collector) Start(ctx context.Context) {
+	if !c.fdSamplingEnabled {
+		c.log.InfoContext(ctx, "Per-sandbox file descriptor sampling disabled", "goos", runtime.GOOS)
+	}
+
 	go c.snapshotCPUUsage(ctx)
 	go c.snapshotAllocatedResources(ctx)
 }
@@ -254,8 +266,19 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 			var totalAllocatedDiskGB float32 = 0          // Disk in GB
 			var startedSandboxCount float32 = 0           // Count of running containers
 
+			var seenFdSandboxIds map[string]struct{}
+			if c.fdSamplingEnabled {
+				seenFdSandboxIds = make(map[string]struct{})
+			}
+
 			for _, ctr := range containers {
-				cpu, memory, disk, err := c.getContainerAllocatedResources(ctx, ctr.ID)
+				containerJSON, err := c.docker.ContainerInspect(ctx, ctr.ID)
+				if err != nil {
+					c.log.WarnContext(ctx, "Failed to get allocated resources for container", "container_id", ctr.ID, "error", err)
+					continue
+				}
+
+				cpu, memory, disk, err := getContainerAllocatedResources(containerJSON)
 				if err != nil {
 					c.log.WarnContext(ctx, "Failed to get allocated resources for container", "container_id", ctr.ID, "error", err)
 					continue
@@ -270,6 +293,15 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 
 				// For disk: count all containers (running and stopped)
 				totalAllocatedDiskGB += disk
+
+				if c.fdSamplingEnabled && ctr.State == "running" && containerJSON.State != nil && containerJSON.State.Pid > 0 {
+					c.sampleContainerFdUsage(ctx, containerJSON, seenFdSandboxIds)
+				}
+			}
+
+			if c.fdSamplingEnabled {
+				c.cleanupFdMetrics(seenFdSandboxIds)
+				c.lastFdSandboxIds = seenFdSandboxIds
 			}
 
 			// Convert to original API units
@@ -283,13 +315,37 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 	}
 }
 
-func (c *Collector) getContainerAllocatedResources(ctx context.Context, containerId string) (float32, float32, float32, error) {
-	// Inspect the container to get its resource configuration
-	containerJSON, err := c.docker.ContainerInspect(ctx, containerId)
+// sampleContainerFdUsage samples host-side fd usage of a running sandbox
+// container and updates the per-sandbox Prometheus gauges. The container name
+// is the sandbox ID.
+func (c *Collector) sampleContainerFdUsage(ctx context.Context, containerJSON *container.InspectResponse, seen map[string]struct{}) {
+	sandboxId := strings.TrimPrefix(containerJSON.Name, "/")
+
+	usage, err := sampleSandboxFdUsage(procRoot, cgroupRoot, containerJSON.State.Pid)
 	if err != nil {
-		return 0, 0, 0, err
+		c.log.DebugContext(ctx, "Failed to sample sandbox fd usage", "sandbox_id", sandboxId, "error", err)
+		return
 	}
 
+	seen[sandboxId] = struct{}{}
+	common.SandboxOpenFds.WithLabelValues(sandboxId).Set(float64(usage.OpenFds))
+	common.SandboxFdLimit.WithLabelValues(sandboxId).Set(float64(usage.WorstFdLimit))
+	common.SandboxFdUsagePercent.WithLabelValues(sandboxId).Set(usage.UsagePercent)
+}
+
+// cleanupFdMetrics deletes gauge label sets for sandboxes that disappeared
+// since the previous snapshot so no stale series linger.
+func (c *Collector) cleanupFdMetrics(seen map[string]struct{}) {
+	for sandboxId := range c.lastFdSandboxIds {
+		if _, ok := seen[sandboxId]; !ok {
+			common.SandboxOpenFds.DeleteLabelValues(sandboxId)
+			common.SandboxFdLimit.DeleteLabelValues(sandboxId)
+			common.SandboxFdUsagePercent.DeleteLabelValues(sandboxId)
+		}
+	}
+}
+
+func getContainerAllocatedResources(containerJSON *container.InspectResponse) (float32, float32, float32, error) {
 	if containerJSON.HostConfig == nil {
 		return 0, 0, 0, nil
 	}
@@ -313,7 +369,7 @@ func (c *Collector) getContainerAllocatedResources(ctx context.Context, containe
 	// Disk allocation from StorageOpt (assuming xfs filesystem)
 	storageGB, err := common.ParseStorageOptSizeGB(containerJSON.HostConfig.StorageOpt)
 	if err != nil {
-		return allocatedCpu, allocatedMemory, 0, fmt.Errorf("error parsing storage quota for container %s: %v", containerId, err)
+		return allocatedCpu, allocatedMemory, 0, fmt.Errorf("error parsing storage quota for container %s: %v", containerJSON.ID, err)
 	}
 
 	if storageGB > 0 {
