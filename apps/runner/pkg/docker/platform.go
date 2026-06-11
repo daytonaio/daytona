@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package docker
@@ -103,10 +103,6 @@ func getSandboxContainerArchs() []string {
 func sandboxImagePlatform() string {
 	platform := getSandboxPlatform()
 	return fmt.Sprintf("%s/%s", platform.os, platform.architecture)
-}
-
-func (p sandboxPlatform) asRemotePlatform() (string, string) {
-	return p.os, p.architecture
 }
 
 func (p sandboxPlatform) String() string {
