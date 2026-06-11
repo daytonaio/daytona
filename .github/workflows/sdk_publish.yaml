@@ -41,6 +41,28 @@ jobs:
     runs-on: blacksmith-16vcpu-ubuntu-2404
     permissions:
       contents: read
+    name: Publish ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: TypeScript SDK
+            projects: sdk-typescript
+          - name: OpenCode Plugin
+            projects: opencode-plugin
+            # sdk-typescript is published by its own job; without this flag
+            # opencode-plugin's publish would re-publish it via nx dependsOn
+            exclude-task-deps: 'true'
+          - name: Analytics API Client
+            projects: analytics-api-client
+          - name: Billing API Client
+            projects: billing-api-client
+          - name: Python SDK
+            projects: sdk-python
+          - name: Ruby SDK
+            projects: sdk-ruby
+          - name: Java SDK
+            projects: sdk-java
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
@@ -77,6 +99,7 @@ jobs:
           git config --global user.email "daytona-release@users.noreply.github.com"
 
       - name: Configure RubyGems credentials
+        if: matrix.projects == 'sdk-ruby'
         run: |
           mkdir -p ~/.gem
           echo "---" > ~/.gem/credentials
@@ -86,7 +109,12 @@ jobs:
       - name: Publish projects
         run: |
           source "$(poetry env info --path)/bin/activate"
-          yarn publish
+          if [ "${{ matrix.exclude-task-deps }}" = "true" ]; then
+            yarn nx run-many --target=build --projects=${{ matrix.projects }}
+            yarn nx run-many --target=publish --projects=${{ matrix.projects }} --excludeTaskDependencies
+          else
+            yarn nx run-many --target=publish --projects=${{ matrix.projects }}
+          fi
 
       - name: Cleanup credentials
         if: always()
@@ -100,12 +128,18 @@ jobs:
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}" 2>/dev/null || true
 
   update-homebrew-tap:
-    if: ${{ inputs.npm_tag == 'latest' }}
-    needs: publish
+    if: ${{ github.repository == 'daytonaio/daytona' && inputs.npm_tag == 'latest' }}
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions: {}
     name: Update Homebrew CLI tap
     steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected vX.Y.Z or vX.Y.Z-suffix)"
+            exit 1
+          fi
+
       - name: Update version
         run: |
           curl -f -X POST -H "Accept: application/vnd.github+json" \
