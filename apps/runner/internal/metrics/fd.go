@@ -25,7 +25,8 @@ const (
 
 	// fdWarnClearMarginPercent is the hysteresis band below the warning
 	// threshold: a warned sandbox must drop more than this many percentage
-	// points below the threshold before its warning state clears.
+	// points below the threshold before its warning state clears (see
+	// fdWarnTracker.clearFloor for thresholds at or below the margin).
 	fdWarnClearMarginPercent = 5.0
 	// fdRewarnInterval is how long a sandbox staying above the threshold is
 	// kept silent after a warning before it is warned about again.
@@ -102,12 +103,15 @@ func sampleSandboxFdUsage(procfsRoot, cgroupfsRoot string, initPid int) (*Sandbo
 			continue
 		}
 
+		// The fd count is valid on its own: it always feeds the sum, and
+		// only the limit/percentage update below depends on a readable
+		// limits file.
+		usage.OpenFds += openFds
+
 		limits, err := proc.Limits()
 		if err != nil {
 			continue
 		}
-
-		usage.OpenFds += openFds
 
 		if limits.OpenFiles == 0 || limits.OpenFiles == fdLimitUnlimited {
 			continue
@@ -311,8 +315,8 @@ type fdWarnState struct {
 // fdWarnTracker rate-limits per-sandbox fd usage warnings: a sandbox is
 // warned about when its usage crosses thresholdPercent, re-warned at most
 // every fdRewarnInterval while it stays above, and re-armed only after usage
-// drops below thresholdPercent-fdWarnClearMarginPercent (hysteresis), so
-// usage oscillating around the threshold cannot spam the log.
+// drops below the clearFloor hysteresis band, so usage oscillating around
+// the threshold cannot spam the log.
 type fdWarnTracker struct {
 	thresholdPercent float64
 	states           map[string]*fdWarnState
@@ -343,12 +347,25 @@ func (t *fdWarnTracker) observe(sandboxId string, percent float64, now time.Time
 		return fdWarnEventNone
 	}
 
-	if state != nil && state.active && percent < t.thresholdPercent-fdWarnClearMarginPercent {
+	if state != nil && state.active && percent < t.clearFloor() {
 		state.active = false
 		return fdWarnEventClear
 	}
 
 	return fdWarnEventNone
+}
+
+// clearFloor is the usage percentage below which a warned sandbox re-arms.
+// Normally thresholdPercent-fdWarnClearMarginPercent; for thresholds at or
+// below the margin that floor would be <= 0 and unreachable (usage is never
+// negative), so half the threshold is used instead, keeping the floor
+// reachable for every valid threshold (1-100).
+func (t *fdWarnTracker) clearFloor() float64 {
+	floor := t.thresholdPercent - fdWarnClearMarginPercent
+	if floor <= 0 {
+		floor = t.thresholdPercent / 2
+	}
+	return floor
 }
 
 // prune drops state for sandboxes absent from seen so a recreated sandbox

@@ -327,13 +327,21 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 func (c *Collector) sampleContainerFdUsage(ctx context.Context, containerJSON *container.InspectResponse, seen map[string]struct{}) {
 	sandboxId := strings.TrimPrefix(containerJSON.Name, "/")
 
+	// The sandbox is present whether or not sampling succeeds below:
+	// recording it in seen up front keeps the warn tracker's rate-limit
+	// state across transient sampling failures, so recovery does not
+	// immediately re-warn.
+	seen[sandboxId] = struct{}{}
+
 	usage, err := sampleSandboxFdUsage(procRoot, cgroupRoot, containerJSON.State.Pid)
 	if err != nil {
 		c.log.DebugContext(ctx, "Failed to sample sandbox fd usage", "sandbox_id", sandboxId, "error", err)
+		// cleanupFdMetrics skips seen sandboxes, so drop this sandbox's
+		// gauges explicitly: no stale values for the failed tick.
+		deleteSandboxFdMetrics(sandboxId)
 		return
 	}
 
-	seen[sandboxId] = struct{}{}
 	common.SandboxOpenFds.WithLabelValues(sandboxId).Set(float64(usage.OpenFds))
 	common.SandboxFdLimit.WithLabelValues(sandboxId).Set(float64(usage.WorstFdLimit))
 	common.SandboxFdUsagePercent.WithLabelValues(sandboxId).Set(usage.UsagePercent)
@@ -378,12 +386,17 @@ func (c *Collector) sampleContainerFdUsage(ctx context.Context, containerJSON *c
 func (c *Collector) cleanupFdMetrics(seen map[string]struct{}) {
 	for sandboxId := range c.lastFdSandboxIds {
 		if _, ok := seen[sandboxId]; !ok {
-			common.SandboxOpenFds.DeleteLabelValues(sandboxId)
-			common.SandboxFdLimit.DeleteLabelValues(sandboxId)
-			common.SandboxFdUsagePercent.DeleteLabelValues(sandboxId)
-			common.SandboxRuntimeHelperOpenFds.DeleteLabelValues(sandboxId)
+			deleteSandboxFdMetrics(sandboxId)
 		}
 	}
+}
+
+// deleteSandboxFdMetrics drops every fd gauge label set of a sandbox.
+func deleteSandboxFdMetrics(sandboxId string) {
+	common.SandboxOpenFds.DeleteLabelValues(sandboxId)
+	common.SandboxFdLimit.DeleteLabelValues(sandboxId)
+	common.SandboxFdUsagePercent.DeleteLabelValues(sandboxId)
+	common.SandboxRuntimeHelperOpenFds.DeleteLabelValues(sandboxId)
 }
 
 func getContainerAllocatedResources(containerJSON *container.InspectResponse) (float32, float32, float32, error) {

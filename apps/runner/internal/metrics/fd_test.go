@@ -55,17 +55,23 @@ func TestSampleSandboxFdUsage(t *testing.T) {
 	writeProcEntry(t, procDir, 100, "0::/sandbox-test", 3, "100")
 	writeProcEntry(t, procDir, 101, "0::/sandbox-test", 8, "10")
 	writeProcEntry(t, procDir, 102, "0::/sandbox-test", 5, "unlimited")
+	// PID 103 has open fds but no limits file (e.g. it exited between the
+	// fd count and the limits read): the fds still count toward the sum,
+	// only the limit/percentage update is skipped.
+	for i := range 2 {
+		writeFile(t, filepath.Join(procDir, "103", "fd", strconv.Itoa(i)), "")
+	}
 	// PID 999 is listed in cgroup.procs but missing from /proc: exited
 	// between the cgroup.procs read and sampling, must be skipped.
-	writeFile(t, filepath.Join(cgroupDir, "sandbox-test", "cgroup.procs"), "100\n101\n102\n999\n")
+	writeFile(t, filepath.Join(cgroupDir, "sandbox-test", "cgroup.procs"), "100\n101\n102\n103\n999\n")
 
 	usage, err := sampleSandboxFdUsage(procDir, cgroupDir, 100)
 	if err != nil {
 		t.Fatalf("sampleSandboxFdUsage: %v", err)
 	}
 
-	if usage.OpenFds != 16 {
-		t.Errorf("OpenFds = %d, want 16 (3+8+5, unlimited counts toward the sum)", usage.OpenFds)
+	if usage.OpenFds != 18 {
+		t.Errorf("OpenFds = %d, want 18 (3+8+5+2, unlimited and missing-limits both count toward the sum)", usage.OpenFds)
 	}
 	if usage.UsagePercent != 80 {
 		t.Errorf("UsagePercent = %v, want 80 (worst process 101: 8/10)", usage.UsagePercent)
@@ -162,6 +168,27 @@ func TestFdWarnTrackerHysteresis(t *testing.T) {
 		t.Errorf("staying below band after clear: got %v, want none", got)
 	}
 	if got := tracker.observe("sb", 70, now.Add(5*time.Second)); got != fdWarnEventWarn {
+		t.Errorf("re-crossing threshold after clear: got %v, want warn", got)
+	}
+}
+
+// TestFdWarnTrackerLowThresholdClear covers thresholds at or below the clear
+// margin, where the floor falls back to threshold/2 so warnings can still
+// clear (threshold-5 would be negative and unreachable).
+func TestFdWarnTrackerLowThresholdClear(t *testing.T) {
+	tracker := newFdWarnTracker(3)
+	now := time.Now()
+
+	if got := tracker.observe("sb", 3, now); got != fdWarnEventWarn {
+		t.Fatalf("crossing threshold: got %v, want warn", got)
+	}
+	if got := tracker.observe("sb", 2, now.Add(time.Second)); got != fdWarnEventNone {
+		t.Errorf("inside hysteresis band (1.5-3): got %v, want none", got)
+	}
+	if got := tracker.observe("sb", 1, now.Add(2*time.Second)); got != fdWarnEventClear {
+		t.Errorf("dropping below band: got %v, want clear", got)
+	}
+	if got := tracker.observe("sb", 3, now.Add(3*time.Second)); got != fdWarnEventWarn {
 		t.Errorf("re-crossing threshold after clear: got %v, want warn", got)
 	}
 }
