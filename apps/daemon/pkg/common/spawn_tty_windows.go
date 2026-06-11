@@ -24,6 +24,9 @@ type TTYSize struct {
 }
 
 type SpawnTTYOptions struct {
+	// Ctx, when non-nil, bounds the spawned session: on cancellation the
+	// TTY is torn down and the attached process is terminated.
+	Ctx      context.Context
 	Dir      string
 	StdIn    io.Reader
 	StdOut   io.Writer
@@ -65,6 +68,16 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 	}
 	defer cpty.Close()
 
+	// Bind the session lifetime to the caller's context so a disconnected
+	// client unblocks the Wait below and the deferred Close kills the
+	// attached process instead of leaking it.
+	parent := opts.Ctx
+	if parent == nil {
+		parent = context.Background()
+	}
+	ctx, cancel := context.WithCancel(parent)
+	defer cancel()
+
 	go func() {
 		for win := range opts.SizeCh {
 			if err := cpty.Resize(win.Width, win.Height); err != nil {
@@ -74,6 +87,8 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 	}()
 
 	go func() {
+		// Client EOF/disconnect ends the stdin copy: cancel so Wait returns.
+		defer cancel()
 		if _, err := io.Copy(cpty, opts.StdIn); err != nil && err != io.EOF {
 			slog.Debug("ConPTY stdin copy error", "error", err)
 		}
@@ -85,8 +100,15 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 		}
 	}()
 
-	exitCode, err := cpty.Wait(context.Background())
+	exitCode, err := cpty.Wait(ctx)
 	if err != nil {
+		if ctx.Err() != nil {
+			// Cancellation is a normal session end: the caller's ctx fired
+			// (client connection gone) or stdin hit EOF. The deferred Close
+			// tears down the ConPTY and terminates the attached process.
+			slog.Debug("ConPTY session ended by client disconnect")
+			return nil
+		}
 		slog.Debug("ConPTY wait error", "error", err)
 		return err
 	}

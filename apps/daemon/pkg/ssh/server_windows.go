@@ -118,6 +118,7 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	}()
 
 	err := common.SpawnTTY(common.SpawnTTYOptions{
+		Ctx:      session.Context(),
 		Dir:      dir,
 		StdIn:    session,
 		StdOut:   session,

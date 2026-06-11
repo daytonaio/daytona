@@ -6,6 +6,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -22,6 +23,10 @@ type TTYSize struct {
 }
 
 type SpawnTTYOptions struct {
+	// Ctx, when non-nil, bounds the spawned session: on cancellation the
+	// TTY is torn down and the attached process is terminated. Not yet
+	// honored by the Linux implementation.
+	Ctx    context.Context
 	Dir    string
 	StdIn  io.Reader
 	StdOut io.Writer
