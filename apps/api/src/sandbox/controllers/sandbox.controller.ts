@@ -692,6 +692,10 @@ export class SandboxController {
     status: 200,
     description: 'Sandbox degraded reason has been successfully updated',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Sandbox is not started; a degraded reason can only be set on a started sandbox',
+  })
   @AuthStrategy(AuthStrategyType.API_KEY)
   @UseGuards(RunnerAuthContextGuard, SandboxAccessGuard)
   async updateSandboxDegradedReason(

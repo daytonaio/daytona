@@ -3113,10 +3113,13 @@ export class SandboxService {
     }
 
     if (degradedReason !== null && sandbox.state !== SandboxState.STARTED) {
-      this.logger.debug(
-        `Ignoring degraded reason for sandbox ${sandboxId} in state ${sandbox.state} (only applies to started sandboxes)`,
+      // A silent OK here would make the runner believe the flag landed and
+      // never re-push (e.g. a push racing sandbox startup). 409 keeps the
+      // runner retrying until the sandbox is STARTED. Clearing (null) stays
+      // idempotent and is accepted in any state.
+      throw new ConflictException(
+        `Sandbox ${sandboxId} is in state ${sandbox.state}; degraded reason only applies to started sandboxes`,
       )
-      return
     }
 
     await this.sandboxRepository.update(sandbox.id, { updateData: { degradedReason }, entity: sandbox })
