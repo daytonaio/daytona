@@ -16,6 +16,8 @@ import (
 
 	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
+	"github.com/daytonaio/daemon/pkg/recording"
+	"github.com/daytonaio/daemon/pkg/session"
 	"github.com/daytonaio/daemon/pkg/toolbox"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -56,6 +58,14 @@ func run() int {
 		return 2
 	}
 
+	sessionService := session.NewSessionService(logger, configDir, c.TerminationGracePeriod, c.TerminationCheckInterval)
+
+	recordingsDir := c.RecordingsDir
+	if recordingsDir == "" {
+		recordingsDir = filepath.Join(configDir, "recordings")
+	}
+	recordingService := recording.NewRecordingService(logger, recordingsDir)
+
 	workDir, err := os.Getwd()
 	if err != nil {
 		logger.Error("Failed to get current working directory", "error", err)
@@ -63,14 +73,16 @@ func run() int {
 	}
 
 	toolBoxServer := toolbox.NewServer(toolbox.ServerConfig{
-		Logger:         logger,
-		WorkDir:        workDir,
-		ConfigDir:      configDir,
-		OtelEndpoint:   c.OtelEndpoint,
-		SandboxId:      c.SandboxId,
-		OrganizationId: c.OrganizationId,
-		RegionId:       c.RegionId,
-		Snapshot:       c.Snapshot,
+		Logger:           logger,
+		WorkDir:          workDir,
+		ConfigDir:        configDir,
+		OtelEndpoint:     c.OtelEndpoint,
+		SandboxId:        c.SandboxId,
+		SessionService:   sessionService,
+		RecordingService: recordingService,
+		OrganizationId:   c.OrganizationId,
+		RegionId:         c.RegionId,
+		Snapshot:         c.Snapshot,
 	})
 
 	errChan := make(chan error)
