@@ -5952,6 +5952,7 @@ public class SandboxApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Sandbox is not started; a degraded reason can only be set on a started sandbox </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call updateSandboxDegradedReasonCall(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback _callback) throws ApiException {
@@ -6032,6 +6033,7 @@ public class SandboxApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Sandbox is not started; a degraded reason can only be set on a started sandbox </td><td>  -  </td></tr>
      </table>
      */
     public void updateSandboxDegradedReason(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
@@ -6051,6 +6053,7 @@ public class SandboxApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Sandbox is not started; a degraded reason can only be set on a started sandbox </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<Void> updateSandboxDegradedReasonWithHttpInfo(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID) throws ApiException {
@@ -6072,6 +6075,7 @@ public class SandboxApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> Sandbox degraded reason has been successfully updated </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> Sandbox is not started; a degraded reason can only be set on a started sandbox </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call updateSandboxDegradedReasonAsync(@javax.annotation.Nonnull String sandboxId, @javax.annotation.Nonnull UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto, @javax.annotation.Nullable String xDaytonaOrganizationID, final ApiCallback<Void> _callback) throws ApiException {
