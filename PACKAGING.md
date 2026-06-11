@@ -1,7 +1,6 @@
 # Packaging Guidelines for Daytona
 
 The Daytona team appreciates any efforts to make our software more accessible to users on various platforms.
-While we encourage packaging and distribution of our open-source project, we have some important guidelines, particularly regarding naming.
 
 ## Critical Naming Guideline
 
@@ -23,7 +22,7 @@ While we encourage packaging and distribution of our open-source project, we hav
 5. **Standard Note**: Please include the following standard note in your package description or metadata:
 
    ```
-   This package contains an unofficial distribution of Daytona, an open source project
+   This package contains an unofficial distribution of Daytona,
    developed by Daytona Platforms Inc. This package is not officially supported or endorsed
    by the Daytona project. For the official version, please visit https://github.com/daytonaio/daytona.
    ```
