@@ -22,6 +22,8 @@ jest.mock(
       ERROR: 'error',
       BUILD_FAILED: 'build_failed',
     },
+    Configuration: jest.fn((params: Record<string, unknown> = {}) => ({ ...params })),
+    SnapshotsApi: jest.fn(() => ({ getSnapshot: jest.fn() })),
   }),
   { virtual: true },
 )
@@ -261,7 +263,9 @@ describe('Sandbox', () => {
   it('creates sandbox snapshots and waits for completion', async () => {
     const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
     sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
-    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    sandboxApi.getSandbox
+      .mockResolvedValueOnce(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+      .mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
     snapshotsApi.getSnapshot
       .mockResolvedValueOnce(createApiResponse({ state: 'pending' }))
       .mockResolvedValueOnce(createApiResponse({ state: 'active' }))
@@ -273,17 +277,23 @@ describe('Sandbox', () => {
     })
     expect(snapshotsApi.getSnapshot).toHaveBeenCalledWith('snap-1')
     expect(snapshotsApi.getSnapshot.mock.calls.length).toBeGreaterThanOrEqual(2)
+    // The success path refreshes local sandbox data once the record turns active.
+    expect(sandbox.state).toBe('started')
   })
 
   it('throws when snapshot record reports a failed capture', async () => {
     const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
     sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
-    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    sandboxApi.getSandbox
+      .mockResolvedValueOnce(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+      .mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
     snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse({ state: 'error', errorReason: 'capture failed' }))
 
     await expect(sandbox._experimental_createSnapshot('snap-1', 1)).rejects.toThrow(
       'Snapshot snap-1 failed with state: error, error reason: capture failed',
     )
+    // The failure path refreshes local sandbox data before throwing.
+    expect(sandbox.state).toBe('started')
   })
 
   it('throws when snapshot record reports a failed build', async () => {
@@ -333,6 +343,37 @@ describe('Sandbox', () => {
       "Sandbox sb-1 snapshot 'snap-1' failed: no snapshot record exists and sandbox is no longer snapshotting (state: started",
     )
     expect(snapshotsApi.getSnapshot).toHaveBeenCalledTimes(2)
+  })
+
+  it('defaults snapshotsApi to an API-targeted client when omitted', async () => {
+    const { Sandbox } = require('../Sandbox') as typeof import('../Sandbox')
+    const apiClient = require('@daytona/api-client') as { SnapshotsApi: jest.Mock; Configuration: jest.Mock }
+    apiClient.SnapshotsApi.mockClear()
+    apiClient.Configuration.mockClear()
+
+    const cfg = { basePath: 'http://api', baseOptions: { headers: {} } } as unknown as Configuration
+    const sandboxApi = {
+      createSandboxSnapshot: jest.fn().mockResolvedValue(createApiResponse(undefined)),
+      getSandbox: jest.fn().mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' })),
+    }
+
+    const sandbox = new Sandbox(
+      { ...baseDto, state: 'snapshotting' },
+      cfg,
+      { defaults: { baseURL: '' } } as unknown as never,
+      sandboxApi as unknown as never,
+    )
+
+    // The default SnapshotsApi must be built from the API base path captured
+    // before the constructor repoints clientConfig at the toolbox proxy.
+    expect(apiClient.Configuration).toHaveBeenCalledWith(expect.objectContaining({ basePath: 'http://api' }))
+    expect(cfg.basePath).toBe('http://proxy/sb-1')
+
+    const snapshotsApi = apiClient.SnapshotsApi.mock.results[0].value as { getSnapshot: jest.Mock }
+    snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledWith('snap-1')
   })
 
   it('waitUntilStarted throws when sandbox enters an error state', async () => {

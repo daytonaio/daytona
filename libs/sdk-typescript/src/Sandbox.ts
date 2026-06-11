@@ -135,6 +135,7 @@ export class Sandbox {
   public toolboxProxyUrl: string
 
   private infoApi: InfoApi
+  private readonly snapshotsApi: SnapshotsApi
 
   /**
    * Creates a new Sandbox instance
@@ -146,8 +147,14 @@ export class Sandbox {
     private readonly clientConfig: Configuration,
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
-    private readonly snapshotsApi: SnapshotsApi,
+    snapshotsApi?: SnapshotsApi,
   ) {
+    // clientConfig still targets the Daytona API at this point (it is repurposed
+    // for the toolbox below), so a default SnapshotsApi built from a copy of it
+    // polls the correct host when the caller does not provide one.
+    this.snapshotsApi =
+      snapshotsApi ?? new SnapshotsApi(new Configuration({ ...clientConfig }), '', Daytona.createAxiosInstance())
+
     this.processSandboxDto(sandboxDto)
 
     // Set the toolbox base URL
@@ -461,9 +468,13 @@ export class Sandbox {
 
       if (snapshot) {
         if (snapshot.state === SnapshotState.ACTIVE) {
+          // Record polling bypasses the sandbox, so sync local data
+          // (state would otherwise stay SNAPSHOTTING) before resolving.
+          await this.refreshData()
           return
         }
         if (snapshot.state === SnapshotState.ERROR || snapshot.state === SnapshotState.BUILD_FAILED) {
+          await this.refreshDataSafe()
           throw new DaytonaError(
             `Snapshot ${name} failed with state: ${snapshot.state}, error reason: ${snapshot.errorReason}`,
           )
