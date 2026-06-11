@@ -10,10 +10,12 @@ import (
 	"sync"
 	"time"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/docker"
+	"github.com/docker/docker/api/types/container"
 )
 
 const (
@@ -92,31 +94,13 @@ func (s *SandboxDegradedService) ReportFdExhaustion(sandboxId string, reason str
 	entry.reason = reason
 	entry.lastConfirmed = time.Now()
 	shouldPush := !entry.reported && !entry.pushing
-	if shouldPush {
-		entry.pushing = true
-	}
 	s.mu.Unlock()
 
 	if !shouldPush {
 		return
 	}
 
-	go func() {
-		err := s.pushReason(sandboxId, reason)
-
-		s.mu.Lock()
-		if entry, ok := s.entries[sandboxId]; ok {
-			entry.pushing = false
-			entry.reported = err == nil
-		}
-		s.mu.Unlock()
-
-		if err != nil {
-			s.log.Warn("Failed to push degraded reason, will retry on next probe tick", "sandboxId", sandboxId, "error", err)
-		} else {
-			s.log.Info("Marked sandbox degraded", "sandboxId", sandboxId, "reason", reason)
-		}
-	}()
+	go s.pushReasonGuarded(sandboxId, reason)
 }
 
 // Start seeds tracking from the API (healing runner restarts) and runs the
@@ -190,14 +174,49 @@ func (s *SandboxDegradedService) probeTrackedSandboxes(ctx context.Context) {
 	}
 }
 
+// probeAction is the disposition of a tracked sandbox after a container
+// inspect.
+type probeAction int
+
+const (
+	// probeActionProbe: the container is running — probe the daemon.
+	probeActionProbe probeAction = iota
+	// probeActionDrop: the container is definitively gone or not running —
+	// drop tracking without pushing; the API-side invariant already clears
+	// the field on the state transition.
+	probeActionDrop
+	// probeActionRetry: indeterminate inspect failure — keep the entry and
+	// retry next tick, with stale expiry as the backstop. Dropping here
+	// would strand the flag: the API only clears it on state transitions.
+	probeActionRetry
+)
+
+// classifyInspect maps a ContainerInspect result to a probe disposition.
+// Only a definitive "container not found" drops tracking on error; any
+// other inspect failure is treated as transient.
+func classifyInspect(c *container.InspectResponse, err error) probeAction {
+	if err != nil {
+		if common_errors.IsNotFoundError(err) {
+			return probeActionDrop
+		}
+		return probeActionRetry
+	}
+	if c == nil || c.State == nil || !c.State.Running {
+		return probeActionDrop
+	}
+	return probeActionProbe
+}
+
 func (s *SandboxDegradedService) probeSandbox(ctx context.Context, sandboxId string) {
-	// Drop tracking without pushing when the container is gone or not
-	// running — the API-side invariant already clears the field on the state
-	// transition.
 	c, err := s.docker.ContainerInspect(ctx, sandboxId)
-	if err != nil || c == nil || c.State == nil || !c.State.Running {
+	switch classifyInspect(c, err) {
+	case probeActionDrop:
 		s.drop(sandboxId)
 		s.log.DebugContext(ctx, "Dropped degraded tracking for non-running sandbox", "sandboxId", sandboxId)
+		return
+	case probeActionRetry:
+		s.log.DebugContext(ctx, "Skipping degraded probe after container inspect failure", "sandboxId", sandboxId, "error", err)
+		s.expireIfStale(ctx, sandboxId)
 		return
 	}
 
@@ -239,23 +258,9 @@ func (s *SandboxDegradedService) refresh(sandboxId string, reason string) {
 	}
 	entry.reason = reason
 	entry.lastConfirmed = time.Now()
-	needsPush := !entry.reported && !entry.pushing
 	s.mu.Unlock()
 
-	if !needsPush {
-		return
-	}
-
-	if err := s.pushReason(sandboxId, reason); err != nil {
-		s.log.Warn("Failed to push degraded reason, will retry on next probe tick", "sandboxId", sandboxId, "error", err)
-		return
-	}
-
-	s.mu.Lock()
-	if entry, ok := s.entries[sandboxId]; ok {
-		entry.reported = true
-	}
-	s.mu.Unlock()
+	s.pushReasonGuarded(sandboxId, reason)
 }
 
 // pushInFlight reports whether an async degradedReason push is still running
@@ -267,13 +272,62 @@ func (s *SandboxDegradedService) pushInFlight(sandboxId string) bool {
 	return ok && entry.pushing
 }
 
+// claimReasonPush atomically claims the entry's pushing guard when a reason
+// push is needed: the sandbox is tracked, not yet reported, and no other
+// push is in flight. The claimant must clear the guard when the push
+// completes (pushReasonGuarded does both).
+func (s *SandboxDegradedService) claimReasonPush(sandboxId string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	entry, ok := s.entries[sandboxId]
+	if !ok || entry.reported || entry.pushing {
+		return false
+	}
+	entry.pushing = true
+	return true
+}
+
+// pushReasonGuarded is the single entry point for pushing a degradedReason:
+// it claims entry.pushing under s.mu before the push and clears it on
+// completion, so the clear paths (healthy clear, stale expiry) can observe
+// an in-flight push and skip. A clear landing mid-push would otherwise be
+// overwritten by the late push, stranding a stale degradedReason.
+func (s *SandboxDegradedService) pushReasonGuarded(sandboxId string, reason string) {
+	if !s.claimReasonPush(sandboxId) {
+		return
+	}
+
+	err := s.pushReason(sandboxId, reason)
+
+	s.mu.Lock()
+	if entry, ok := s.entries[sandboxId]; ok {
+		entry.pushing = false
+		entry.reported = err == nil
+	}
+	s.mu.Unlock()
+
+	if err != nil {
+		s.log.Warn("Failed to push degraded reason, will retry on next probe tick", "sandboxId", sandboxId, "error", err)
+	} else {
+		s.log.Info("Marked sandbox degraded", "sandboxId", sandboxId, "reason", reason)
+	}
+}
+
 func (s *SandboxDegradedService) expireIfStale(ctx context.Context, sandboxId string) {
 	s.mu.Lock()
 	entry, ok := s.entries[sandboxId]
 	stale := ok && time.Since(entry.lastConfirmed) > degradedStaleAfter
+	pushing := ok && entry.pushing
 	s.mu.Unlock()
 
 	if !stale {
+		return
+	}
+
+	// Skip the clear while a reason push is in flight — the push could land
+	// after the clear, stranding a stale degradedReason. Retried next tick.
+	if pushing {
+		s.log.DebugContext(ctx, "Skipping stale degraded clear while reason push is in flight", "sandboxId", sandboxId)
 		return
 	}
 

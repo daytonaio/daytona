@@ -91,10 +91,23 @@ func sniffFdExhaustion(resp *http.Response, sandboxId string, daemonPath string)
 		return
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	// ContentLength is advisory: bound the read so a misreporting daemon
+	// cannot make us buffer unbounded. Reading bodyCap+1 distinguishes
+	// "fits within the cap" from "longer than reported".
+	body, err := io.ReadAll(io.LimitReader(resp.Body, bodyCap+1))
 	if err != nil {
 		// Partial read: hand back what was consumed plus the original body so
 		// the proxy surfaces the same read error to the client; skip
+		// classification.
+		resp.Body = &compositeReadCloser{
+			Reader: io.MultiReader(bytes.NewReader(body), resp.Body),
+			Closer: resp.Body,
+		}
+		return
+	}
+	if int64(len(body)) > bodyCap {
+		// The body exceeds the cap despite the reported ContentLength —
+		// restore the consumed bytes ahead of the unread remainder and skip
 		// classification.
 		resp.Body = &compositeReadCloser{
 			Reader: io.MultiReader(bytes.NewReader(body), resp.Body),
