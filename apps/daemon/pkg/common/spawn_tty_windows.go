@@ -133,6 +133,13 @@ func SpawnTTY(opts SpawnTTYOptions) error {
 		if _, err := io.Copy(pty, opts.StdIn); err != nil && err != io.EOF {
 			slog.Debug("ConPTY stdin copy error", "error", err)
 		}
+		// Stdin EOF/error means the client is gone (the SSH session or the
+		// terminal ws pipe closed). Tear the pty down so an idle shell does
+		// not outlive the connection: without output in flight, the stdout
+		// copy below has nothing to fail on and would park forever.
+		// guardedPty makes this safe and idempotent against the waiter and
+		// the deferred close.
+		closePty()
 	}()
 
 	// Wait for the shell in the background. On natural exit, close the
