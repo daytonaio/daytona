@@ -52,6 +52,7 @@ jobs:
           file: coverage/apps/daytona/cobertura-coverage.xml
           language: TypeScript
           label: coverage/api
+          fail-on-error: false
 
       - name: Test Python SDK with coverage
         run: |
@@ -71,6 +72,7 @@ jobs:
           file: coverage/sdk-python/coverage.xml
           language: Python
           label: coverage/sdk-python
+          fail-on-error: false
 
       - name: Test Go modules with coverage
         run: |
@@ -90,6 +92,7 @@ jobs:
           file: coverage/go-daemon/coverage.xml
           language: Go
           label: coverage/daemon
+          fail-on-error: false
 
       - name: Upload Go SDK coverage
         uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
@@ -97,6 +100,7 @@ jobs:
           file: coverage/go-sdk-go/coverage.xml
           language: Go
           label: coverage/sdk-go
+          fail-on-error: false
 
       - name: Upload CLI coverage
         uses: actions/upload-code-coverage@abb5995db9e0199b0e2bb9dbd136fce4cb1ec4d3 # v1.3.0
@@ -104,3 +108,4 @@ jobs:
           file: coverage/go-cli/coverage.xml
           language: Go
           label: coverage/cli
+          fail-on-error: false
