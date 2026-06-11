@@ -214,4 +214,31 @@ describe('RunnerAdapterV0.createSnapshotFromSandbox', () => {
     }
     await expectation
   })
+
+  it('clamps the per-poll timeout to the remaining capture budget near the deadline', async () => {
+    const { adapter, sandboxApi } = createAdapter()
+    sandboxApi.snapshotFromSandbox.mockResolvedValue({ status: 202, data: 'Snapshot capture started' })
+    sandboxApi.snapshotFromSandboxStatus.mockResolvedValue({
+      status: 200,
+      data: { state: 'IN_PROGRESS', name: 'my-snap' },
+    })
+
+    const resultPromise = adapter.createSnapshotFromSandbox('sbx-1', 'my-snap', 'org-1', registry)
+    const expectation = expect(resultPromise).rejects.toThrow('Timed out waiting for snapshot capture after 1 minutes')
+    // 1 minute budget / 5s interval -> polls fire at t=5s..60s.
+    for (let i = 0; i < 13; i++) {
+      await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS)
+    }
+    await expectation
+
+    const timeouts = sandboxApi.snapshotFromSandboxStatus.mock.calls.map(([, opts]) => opts.timeout)
+    expect(timeouts).toHaveLength(12)
+    // While the remaining budget exceeds the per-poll cap (t=5s..30s), the
+    // full 30s timeout applies...
+    expect(timeouts.slice(0, 6)).toEqual(Array(6).fill(30_000))
+    // ...then each poll is clamped to the remaining budget (t=35s..55s)...
+    expect(timeouts.slice(6, 11)).toEqual([25_000, 20_000, 15_000, 10_000, 5_000])
+    // ...and the last poll (t=60s, budget exhausted mid-sleep) floors at 1s.
+    expect(timeouts[11]).toBe(1_000)
+  })
 })

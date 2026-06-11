@@ -484,16 +484,18 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     const pollTimeoutMin = this.configService.getOrThrow('sandboxSnapshottingTimeoutMin')
     const pollTimeoutMs = pollTimeoutMin * 60 * 1_000
     const pollIntervalMs = 5 * 1_000 // 5 seconds
-    const startTime = Date.now()
+    const deadline = Date.now() + pollTimeoutMs
 
-    while (Date.now() - startTime < pollTimeoutMs) {
+    while (Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
+
+      // Clamp the per-request timeout to the remaining poll budget so a
+      // request fired near the deadline cannot overshoot it (floored at 1s).
+      const timeout = Math.max(1_000, Math.min(SNAPSHOT_STATUS_POLL_TIMEOUT_MS, deadline - Date.now()))
 
       let status: SnapshotFromSandboxStatusResponse
       try {
-        const response = await this.sandboxApiClient.snapshotFromSandboxStatus(sandboxId, {
-          timeout: SNAPSHOT_STATUS_POLL_TIMEOUT_MS,
-        })
+        const response = await this.sandboxApiClient.snapshotFromSandboxStatus(sandboxId, { timeout })
         status = response.data
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err)
