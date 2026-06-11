@@ -1392,8 +1392,6 @@ export class SandboxService {
       // ACTIVE/ERROR), so the outer catch's rollback must not fire.
       pendingSnapshotCountIncrement = undefined
 
-      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
       // v2 runners enqueue a SNAPSHOT_SANDBOX job and resolve immediately
       // with `undefined`; the job state handler will persist the resulting
       // Snapshot on completion.
@@ -1405,40 +1403,46 @@ export class SandboxService {
       // background and immediately return the SNAPSHOTTING sandbox to the
       // caller. The background promise persists the snapshot or reverts
       // sandbox state on failure.
-      if (runner.apiVersion === '0') {
-        void this.runV0SnapshotFromSandbox({
-          sandbox,
-          previousState: sandbox.state,
-          snapshotName: dto.name,
-          organizationId: organization.id,
-          registry,
-          runner,
-          runnerAdapter,
-        })
-      } else {
-        try {
-          await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry, includeMemory)
-        } catch (error) {
-          await this.sandboxRepository.updateWhere(sandbox.id, {
-            updateData: {
-              state: sandbox.state,
-              pending: false,
-            },
-            whereCondition: { state: SandboxState.SNAPSHOTTING },
+      //
+      // Any synchronous initiation failure (adapter creation or v2 job
+      // dispatch) must restore the sandbox state and fail the pending
+      // capture record; otherwise both would linger until the cron timeout.
+      try {
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+        if (runner.apiVersion === '0') {
+          void this.runV0SnapshotFromSandbox({
+            sandbox,
+            previousState: sandbox.state,
+            snapshotName: dto.name,
+            organizationId: organization.id,
+            registry,
+            runner,
+            runnerAdapter,
           })
-
-          await this.snapshotService
-            .failSnapshotFromSandbox({
-              organizationId: organization.id,
-              name: dto.name,
-              errorReason: error?.message || 'Failed to dispatch snapshot job',
-            })
-            .catch((err) =>
-              this.logger.error(`Failed to mark snapshot ${dto.name} as errored for org ${organization.id}:`, err),
-            )
-
-          throw error
+        } else {
+          await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry, includeMemory)
         }
+      } catch (error) {
+        await this.sandboxRepository.updateWhere(sandbox.id, {
+          updateData: {
+            state: sandbox.state,
+            pending: false,
+          },
+          whereCondition: { state: SandboxState.SNAPSHOTTING },
+        })
+
+        await this.snapshotService
+          .failSnapshotFromSandbox({
+            organizationId: organization.id,
+            name: dto.name,
+            errorReason: error?.message || 'Failed to initiate snapshot from sandbox',
+          })
+          .catch((err) =>
+            this.logger.error(`Failed to mark snapshot ${dto.name} as errored for org ${organization.id}:`, err),
+          )
+
+        throw error
       }
 
       return updatedSandbox
