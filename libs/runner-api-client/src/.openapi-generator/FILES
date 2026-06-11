@@ -16,6 +16,7 @@ models/create-snapshot-from-sandbox-request.ts
 models/dto-volume-dto.ts
 models/enums-backup-state.ts
 models/enums-sandbox-state.ts
+models/enums-snapshot-from-sandbox-state.ts
 models/error-response.ts
 models/index.ts
 models/inspect-snapshot-in-registry-request.ts
@@ -31,6 +32,7 @@ models/runner-service-info.ts
 models/sandbox-info-response.ts
 models/snapshot-digest-response.ts
 models/snapshot-exists-response.ts
+models/snapshot-from-sandbox-status-response.ts
 models/snapshot-info-response.ts
 models/start-sandbox-response.ts
 models/stop-sandbox-dto.ts

@@ -40,6 +40,8 @@ import type { ResizeSandboxDTO } from '../models';
 // @ts-ignore
 import type { SandboxInfoResponse } from '../models';
 // @ts-ignore
+import type { SnapshotFromSandboxStatusResponse } from '../models';
+// @ts-ignore
 import type { SnapshotInfoResponse } from '../models';
 // @ts-ignore
 import type { StartSandboxResponse } from '../models';
@@ -370,7 +372,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag. When the request body sets async=true the capture runs in the background, the endpoint responds 202 immediately, and progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox.
          * @summary Snapshot a running sandbox
          * @param {string} sandboxId Sandbox ID
          * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
@@ -405,6 +407,43 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Report the state of the asynchronous snapshot capture for the sandbox. Returns state NONE when the runner is not tracking a capture for the sandbox (none was started, it was started on another runner, or the runner restarted).
+         * @summary Get snapshot-from-sandbox capture status
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        snapshotFromSandboxStatus: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxId' is not null or undefined
+            assertParamExists('snapshotFromSandboxStatus', 'sandboxId', sandboxId)
+            const localVarPath = `/sandboxes/{sandboxId}/snapshot-from-sandbox`
+                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -656,7 +695,7 @@ export const SandboxApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag. When the request body sets async=true the capture runs in the background, the endpoint responds 202 immediately, and progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox.
          * @summary Snapshot a running sandbox
          * @param {string} sandboxId Sandbox ID
          * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
@@ -667,6 +706,19 @@ export const SandboxApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.snapshotFromSandbox(sandboxId, body, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SandboxApi.snapshotFromSandbox']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Report the state of the asynchronous snapshot capture for the sandbox. Returns state NONE when the runner is not tracking a capture for the sandbox (none was started, it was started on another runner, or the runner restarted).
+         * @summary Get snapshot-from-sandbox capture status
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async snapshotFromSandboxStatus(sandboxId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotFromSandboxStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.snapshotFromSandboxStatus(sandboxId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SandboxApi.snapshotFromSandboxStatus']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -806,7 +858,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.resize(sandboxId, sandbox, options).then((request) => request(axios, basePath));
         },
         /**
-         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+         * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag. When the request body sets async=true the capture runs in the background, the endpoint responds 202 immediately, and progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox.
          * @summary Snapshot a running sandbox
          * @param {string} sandboxId Sandbox ID
          * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
@@ -815,6 +867,16 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          */
         snapshotFromSandbox(sandboxId: string, body: CreateSnapshotFromSandboxRequest, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotInfoResponse> {
             return localVarFp.snapshotFromSandbox(sandboxId, body, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Report the state of the asynchronous snapshot capture for the sandbox. Returns state NONE when the runner is not tracking a capture for the sandbox (none was started, it was started on another runner, or the runner restarted).
+         * @summary Get snapshot-from-sandbox capture status
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        snapshotFromSandboxStatus(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotFromSandboxStatusResponse> {
+            return localVarFp.snapshotFromSandboxStatus(sandboxId, options).then((request) => request(axios, basePath));
         },
         /**
          * Start sandbox
@@ -950,7 +1012,7 @@ export class SandboxApi extends BaseAPI {
     }
 
     /**
-     * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+     * Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag. When the request body sets async=true the capture runs in the background, the endpoint responds 202 immediately, and progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox.
      * @summary Snapshot a running sandbox
      * @param {string} sandboxId Sandbox ID
      * @param {CreateSnapshotFromSandboxRequest} body Snapshot from sandbox
@@ -959,6 +1021,17 @@ export class SandboxApi extends BaseAPI {
      */
     public snapshotFromSandbox(sandboxId: string, body: CreateSnapshotFromSandboxRequest, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).snapshotFromSandbox(sandboxId, body, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Report the state of the asynchronous snapshot capture for the sandbox. Returns state NONE when the runner is not tracking a capture for the sandbox (none was started, it was started on another runner, or the runner restarted).
+     * @summary Get snapshot-from-sandbox capture status
+     * @param {string} sandboxId Sandbox ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public snapshotFromSandboxStatus(sandboxId: string, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).snapshotFromSandboxStatus(sandboxId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
