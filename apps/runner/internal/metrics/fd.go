@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/prometheus/procfs"
 )
@@ -21,6 +22,14 @@ const (
 	// procRoot and cgroupRoot are the host mount points of procfs and cgroupfs.
 	procRoot   = "/proc"
 	cgroupRoot = "/sys/fs/cgroup"
+
+	// fdWarnClearMarginPercent is the hysteresis band below the warning
+	// threshold: a warned sandbox must drop more than this many percentage
+	// points below the threshold before its warning state clears.
+	fdWarnClearMarginPercent = 5.0
+	// fdRewarnInterval is how long a sandbox staying above the threshold is
+	// kept silent after a warning before it is warned about again.
+	fdRewarnInterval = 10 * time.Minute
 )
 
 // fdLimitUnlimited is the value procfs reports for an "unlimited" soft RLIMIT_NOFILE.
@@ -186,4 +195,75 @@ func readCgroupProcs(path string) ([]int, error) {
 	}
 
 	return pids, scanner.Err()
+}
+
+// fdWarnEvent is the outcome of observing a sandbox fd usage sample.
+type fdWarnEvent int
+
+const (
+	fdWarnEventNone fdWarnEvent = iota
+	// fdWarnEventWarn fires when usage crosses the threshold, or stays above
+	// it for longer than fdRewarnInterval since the last warning.
+	fdWarnEventWarn
+	// fdWarnEventClear fires once when usage of a warned sandbox drops below
+	// the hysteresis band.
+	fdWarnEventClear
+)
+
+type fdWarnState struct {
+	active     bool
+	lastWarnAt time.Time
+}
+
+// fdWarnTracker rate-limits per-sandbox fd usage warnings: a sandbox is
+// warned about when its usage crosses thresholdPercent, re-warned at most
+// every fdRewarnInterval while it stays above, and re-armed only after usage
+// drops below thresholdPercent-fdWarnClearMarginPercent (hysteresis), so
+// usage oscillating around the threshold cannot spam the log.
+type fdWarnTracker struct {
+	thresholdPercent float64
+	states           map[string]*fdWarnState
+}
+
+func newFdWarnTracker(thresholdPercent float64) *fdWarnTracker {
+	return &fdWarnTracker{
+		thresholdPercent: thresholdPercent,
+		states:           make(map[string]*fdWarnState),
+	}
+}
+
+// observe records a usage sample for a sandbox and reports whether the caller
+// should emit a warning or a recovery notice. The clock is injected via now.
+func (t *fdWarnTracker) observe(sandboxId string, percent float64, now time.Time) fdWarnEvent {
+	state := t.states[sandboxId]
+
+	if percent >= t.thresholdPercent {
+		if state == nil {
+			t.states[sandboxId] = &fdWarnState{active: true, lastWarnAt: now}
+			return fdWarnEventWarn
+		}
+		if !state.active || now.Sub(state.lastWarnAt) >= fdRewarnInterval {
+			state.active = true
+			state.lastWarnAt = now
+			return fdWarnEventWarn
+		}
+		return fdWarnEventNone
+	}
+
+	if state != nil && state.active && percent < t.thresholdPercent-fdWarnClearMarginPercent {
+		state.active = false
+		return fdWarnEventClear
+	}
+
+	return fdWarnEventNone
+}
+
+// prune drops state for sandboxes absent from seen so a recreated sandbox
+// warns fresh.
+func (t *fdWarnTracker) prune(seen map[string]struct{}) {
+	for sandboxId := range t.states {
+		if _, ok := seen[sandboxId]; !ok {
+			delete(t.states, sandboxId)
+		}
+	}
 }

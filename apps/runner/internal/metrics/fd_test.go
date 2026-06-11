@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/prometheus/procfs"
 )
@@ -138,4 +139,79 @@ func TestResolveCgroupDir(t *testing.T) {
 			t.Error("expected error for entries without unified or pids hierarchy")
 		}
 	})
+}
+
+func TestFdWarnTrackerHysteresis(t *testing.T) {
+	tracker := newFdWarnTracker(70)
+	now := time.Now()
+
+	if got := tracker.observe("sb", 70, now); got != fdWarnEventWarn {
+		t.Fatalf("crossing threshold: got %v, want warn", got)
+	}
+	if got := tracker.observe("sb", 67, now.Add(time.Second)); got != fdWarnEventNone {
+		t.Errorf("inside hysteresis band (65-70): got %v, want none", got)
+	}
+	if got := tracker.observe("sb", 71, now.Add(2*time.Second)); got != fdWarnEventNone {
+		t.Errorf("re-crossing threshold while active inside re-warn window: got %v, want none", got)
+	}
+	if got := tracker.observe("sb", 64, now.Add(3*time.Second)); got != fdWarnEventClear {
+		t.Errorf("dropping below band: got %v, want clear", got)
+	}
+	if got := tracker.observe("sb", 64, now.Add(4*time.Second)); got != fdWarnEventNone {
+		t.Errorf("staying below band after clear: got %v, want none", got)
+	}
+	if got := tracker.observe("sb", 70, now.Add(5*time.Second)); got != fdWarnEventWarn {
+		t.Errorf("re-crossing threshold after clear: got %v, want warn", got)
+	}
+}
+
+func TestFdWarnTrackerRewarnInterval(t *testing.T) {
+	tracker := newFdWarnTracker(70)
+	start := time.Now()
+
+	if got := tracker.observe("sb", 80, start); got != fdWarnEventWarn {
+		t.Fatalf("initial cross: got %v, want warn", got)
+	}
+
+	// Sustained usage above threshold: silent until the re-warn interval elapses.
+	for _, elapsed := range []time.Duration{time.Minute, 5 * time.Minute, fdRewarnInterval - time.Second} {
+		if got := tracker.observe("sb", 80, start.Add(elapsed)); got != fdWarnEventNone {
+			t.Errorf("at %v: got %v, want none", elapsed, got)
+		}
+	}
+
+	if got := tracker.observe("sb", 80, start.Add(fdRewarnInterval)); got != fdWarnEventWarn {
+		t.Errorf("after re-warn interval: got %v, want warn", got)
+	}
+
+	// The window restarts from the second warning: exactly one warn per window.
+	if got := tracker.observe("sb", 80, start.Add(fdRewarnInterval+9*time.Minute)); got != fdWarnEventNone {
+		t.Errorf("inside second window: got %v, want none", got)
+	}
+	if got := tracker.observe("sb", 80, start.Add(2*fdRewarnInterval)); got != fdWarnEventWarn {
+		t.Errorf("after second window: got %v, want warn", got)
+	}
+}
+
+func TestFdWarnTrackerPrune(t *testing.T) {
+	tracker := newFdWarnTracker(70)
+	now := time.Now()
+
+	if got := tracker.observe("gone", 80, now); got != fdWarnEventWarn {
+		t.Fatalf("initial cross: got %v, want warn", got)
+	}
+	if got := tracker.observe("kept", 80, now); got != fdWarnEventWarn {
+		t.Fatalf("initial cross: got %v, want warn", got)
+	}
+
+	tracker.prune(map[string]struct{}{"kept": {}})
+
+	// A recreated sandbox with the same ID warns fresh.
+	if got := tracker.observe("gone", 80, now.Add(time.Second)); got != fdWarnEventWarn {
+		t.Errorf("pruned sandbox: got %v, want warn", got)
+	}
+	// A surviving sandbox keeps its rate-limit state.
+	if got := tracker.observe("kept", 80, now.Add(time.Second)); got != fdWarnEventNone {
+		t.Errorf("kept sandbox inside re-warn window: got %v, want none", got)
+	}
 }

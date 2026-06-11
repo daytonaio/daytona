@@ -32,6 +32,9 @@ type CollectorConfig struct {
 	WindowSize                         int
 	CPUUsageSnapshotInterval           time.Duration
 	AllocatedResourcesSnapshotInterval time.Duration
+	// SandboxFdUsageWarningThresholdPercent is the worst-process fd usage
+	// percentage at or above which a sandbox is warned about.
+	SandboxFdUsageWarningThresholdPercent float64
 }
 
 // Collector collects system metrics
@@ -52,6 +55,7 @@ type Collector struct {
 	// Per-sandbox host-side fd usage sampling (Linux only)
 	fdSamplingEnabled bool
 	lastFdSandboxIds  map[string]struct{}
+	fdWarn            *fdWarnTracker
 
 	// Intervals for snapshotting metrics in seconds
 	cpuUsageSnapshotInterval           time.Duration
@@ -90,6 +94,7 @@ func NewCollector(cfg CollectorConfig) *Collector {
 		allocatedResourcesSnapshotInterval: cfg.AllocatedResourcesSnapshotInterval,
 		fdSamplingEnabled:                  runtime.GOOS == "linux",
 		lastFdSandboxIds:                   make(map[string]struct{}),
+		fdWarn:                             newFdWarnTracker(cfg.SandboxFdUsageWarningThresholdPercent),
 	}
 }
 
@@ -301,6 +306,7 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 
 			if c.fdSamplingEnabled {
 				c.cleanupFdMetrics(seenFdSandboxIds)
+				c.fdWarn.prune(seenFdSandboxIds)
 				c.lastFdSandboxIds = seenFdSandboxIds
 			}
 
@@ -331,6 +337,24 @@ func (c *Collector) sampleContainerFdUsage(ctx context.Context, containerJSON *c
 	common.SandboxOpenFds.WithLabelValues(sandboxId).Set(float64(usage.OpenFds))
 	common.SandboxFdLimit.WithLabelValues(sandboxId).Set(float64(usage.WorstFdLimit))
 	common.SandboxFdUsagePercent.WithLabelValues(sandboxId).Set(usage.UsagePercent)
+
+	switch c.fdWarn.observe(sandboxId, usage.UsagePercent, time.Now()) {
+	case fdWarnEventWarn:
+		c.log.WarnContext(ctx, "Sandbox file descriptor usage above threshold",
+			"sandbox_id", sandboxId,
+			"open_fds", usage.OpenFds,
+			"worst_pid", usage.WorstPid,
+			"worst_open_fds", usage.WorstOpenFds,
+			"fd_limit", usage.WorstFdLimit,
+			"usage_percent", usage.UsagePercent,
+			"threshold_percent", c.fdWarn.thresholdPercent)
+	case fdWarnEventClear:
+		c.log.InfoContext(ctx, "Sandbox file descriptor usage recovered",
+			"sandbox_id", sandboxId,
+			"usage_percent", usage.UsagePercent,
+			"threshold_percent", c.fdWarn.thresholdPercent)
+	case fdWarnEventNone:
+	}
 }
 
 // cleanupFdMetrics deletes gauge label sets for sandboxes that disappeared
