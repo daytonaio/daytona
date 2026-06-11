@@ -665,10 +665,11 @@ device = daytona.create(
   )
 )
 
-# Drive the device from the base over the link network
-base.process.exec(command: "adb connect #{device.name}:5555")
+# Drive the device from the base over the link network,
+# addressing it by the name set at creation
+base.process.exec(command: 'adb connect android-emulator:5555')
 response = base.process.exec(
-  command: "adb -s #{device.name}:5555 shell getprop ro.build.version.release"
+  command: 'adb -s android-emulator:5555 shell getprop ro.build.version.release'
 )
 ```
 
@@ -776,7 +777,7 @@ Create the parent sandbox first, then create one or more children whose create r
   Linked sandboxes are always ephemeral and cannot be persisted or resumed after stop. The [auto-delete interval](#auto-delete-interval) must be exactly `0` on create; this is enforced, not a default. The [auto-stop interval](#auto-stop-interval) sets the idle period in minutes after which the child sandbox stops. Once stopped, linked children are auto-deleted. Deleting the parent deletes all of its linked children (cascade). One parent may have many linked children (1:N).
 - **Networking**
 
-  TCP connections establish from the parent sandbox to the child sandbox using the child sandbox's ID as the host. The traffic stays on the internal link network. For example: `telnet DEVICE_SANDBOX_ID 5555` reaches port `5555` on the linked child sandbox.
+  Linked sandboxes share an internal link network. Connections work in both directions: the parent can reach each child and each child can reach the parent. Every sandbox on the link network is registered under its sandbox name and ID as DNS aliases, so either works as the host. For example: `telnet DEVICE_SANDBOX_ID 5555` from the parent reaches port `5555` on the linked child sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -837,7 +838,8 @@ child = daytona.create(
   )
 )
 
-# The link network also registers each sandbox under its ID as a DNS alias
+# The link network registers each sandbox under its name and ID as DNS aliases.
+# The Ruby SDK does not expose the sandbox name, so address the parent by ID.
 response = child.process.exec(command: "curl http://#{parent.id}:3000/")
 ```
 
