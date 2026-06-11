@@ -873,8 +873,8 @@ public class App {
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-# --memory is in MB; --disk is in GB
-daytona create --cpu 2 --memory 4096 --disk 8
+# --auto-delete 0 has the same effect as ephemeral: true
+daytona create --auto-delete 0 --auto-stop 5
 ```
 
 </TabItem>
@@ -886,9 +886,8 @@ curl 'https://app.daytona.io/api/sandbox' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
-  "cpu": 2,
-  "memory": 4,
-  "disk": 8
+  "autoDeleteInterval": 0,
+  "autoStopInterval": 5
 }'
 ```
 
