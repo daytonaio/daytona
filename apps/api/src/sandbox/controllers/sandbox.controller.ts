@@ -719,6 +719,7 @@ export class SandboxController {
     description: 'Snapshot creation has been initiated',
     type: SandboxDto,
   })
+  @ApiResponse({ status: 409, description: 'A snapshot with this name already exists for the organization' })
   @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
