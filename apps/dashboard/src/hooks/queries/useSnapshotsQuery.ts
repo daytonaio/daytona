@@ -80,7 +80,7 @@ export function useSnapshotQuery(
   })
 }
 
-export function useSnapshotsQuery(params: SnapshotQueryParams) {
+export function useSnapshotsQuery(params: SnapshotQueryParams, { enabled = true }: { enabled?: boolean } = {}) {
   const { snapshotApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
 
@@ -104,7 +104,7 @@ export function useSnapshotsQuery(params: SnapshotQueryParams) {
 
       return response.data
     },
-    enabled: !!selectedOrganization,
+    enabled: enabled && !!selectedOrganization,
     placeholderData: keepPreviousData,
     staleTime: 1000 * 10,
     gcTime: 1000 * 60 * 5,
