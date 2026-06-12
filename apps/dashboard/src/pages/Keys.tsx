@@ -64,6 +64,8 @@ const Keys: React.FC = () => {
         organizationId: selectedOrganization.id,
       })
       toast.success('API key revoked successfully')
+      setShowRevokeDialog(false)
+      setApiKeyToRevoke(null)
     } catch (error) {
       handleApiError(error, 'Failed to revoke API key')
     } finally {
