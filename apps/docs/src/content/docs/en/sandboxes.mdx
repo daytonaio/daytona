@@ -757,7 +757,7 @@ curl 'https://app.daytona.io/api/sandbox' \
 For connecting tools like Android Studio from your machine, tunnel through the base sandbox, not the device. In the following snippet, the device appears as `localhost:5555`:
 
 ```bash
-ssh -L 5555:DEVICE_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
+ssh -L 5555:LINKED_SANDBOX_ID:5555 SSH_ACCESS_TOKEN@ssh.app.daytona.io
 ```
 
 ##### Customization rules
@@ -777,7 +777,7 @@ Create the parent sandbox first, then create one or more children whose create r
   Linked sandboxes are always ephemeral and cannot be persisted or resumed after stop. The [auto-delete interval](#auto-delete-interval) must be exactly `0` on create; this is enforced, not a default. The [auto-stop interval](#auto-stop-interval) sets the idle period in minutes after which the child sandbox stops. Once stopped, linked children are auto-deleted. Deleting the parent deletes all of its linked children (cascade). One parent may have many linked children (1:N).
 - **Networking**
 
-  Linked sandboxes share an internal link network. Connections work in both directions: the parent can reach each child and each child can reach the parent. Every sandbox on the link network is registered under its sandbox name and ID as DNS aliases, so either works as the host. For example: `telnet DEVICE_SANDBOX_ID 5555` from the parent reaches port `5555` on the linked child sandbox.
+  Linked sandboxes share an internal link network. Connections work in both directions: the parent can reach each child and each child can reach the parent. Every sandbox on the link network is registered under its sandbox name and ID as DNS aliases, so either works as the host. For example: `telnet LINKED_SANDBOX_ID 5555` from the parent reaches port `5555` on the linked child sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
