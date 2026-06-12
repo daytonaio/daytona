@@ -1,4 +1,9 @@
-> **Daytona open source is no longer supported or maintained**. <br /> Daytona resources now live at [github.com/daytona](https://github.com/daytona). [Read more]().
+> [!IMPORTANT]
+> **This repository is no longer maintained.**
+>
+> As of June 11, 2026, Daytona's core development has moved to a private codebase. <br /> This repo will receive no further updates, fixes, or releases. <br /> It remains public and free to use, fork, and build on under the [GNU Affero General Public License](LICENSE), as is and without support or warranty.
+>
+> Current SDKs, docs, and integrations: [github.com/daytona](https://github.com/daytona)
 
 &nbsp;
 
