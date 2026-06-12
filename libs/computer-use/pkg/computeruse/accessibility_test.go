@@ -583,3 +583,36 @@ func TestToWireNodesFlat(t *testing.T) {
 		t.Errorf("unexpected IDs: %+v", out)
 	}
 }
+
+func TestNormalizeFindLimit(t *testing.T) {
+	tests := map[int]int{
+		-1:                   findDefaultLimit,
+		0:                    findDefaultLimit,
+		1:                    1,
+		findDefaultLimit:     findDefaultLimit,
+		findCeilingLimit:     findCeilingLimit,
+		findCeilingLimit + 1: findCeilingLimit,
+	}
+	for in, want := range tests {
+		if got := normalizeFindLimit(in); got != want {
+			t.Errorf("normalizeFindLimit(%d) = %d, want %d", in, got, want)
+		}
+	}
+}
+
+func TestA11yDepthSemantics(t *testing.T) {
+	if a11yDepthAllowsDescent(0) {
+		t.Error("maxDepth 0 must visit the root only")
+	}
+	for _, depth := range []int{-1, -5, 1, 3} {
+		if !a11yDepthAllowsDescent(depth) {
+			t.Errorf("maxDepth %d must allow descent", depth)
+		}
+	}
+	next := map[int]int{-5: -5, -1: -1, 1: 0, 3: 2}
+	for depth, want := range next {
+		if got := a11yNextDepth(depth); got != want {
+			t.Errorf("a11yNextDepth(%d) = %d, want %d", depth, got, want)
+		}
+	}
+}

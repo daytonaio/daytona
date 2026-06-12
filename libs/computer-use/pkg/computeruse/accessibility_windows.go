@@ -7,31 +7,27 @@ package computeruse
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
-	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"syscall"
 	"time"
 	"unsafe"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/go-ole/go-ole"
 	uia "github.com/uandersonricardo/uiautomation"
+	"golang.org/x/sys/windows"
 )
 
-// Sentinel errors mirroring the Linux AT-SPI implementation. The daemon maps
-// these by exact leading text across the plugin RPC boundary.
-var (
-	errA11yUnavailable        = fmt.Errorf("accessibility bus not reachable")
-	errA11yNoAccessibleRoot   = fmt.Errorf("no accessible root for focused window")
-	errA11yNodeNotFound       = fmt.Errorf("accessibility node not found")
-	errA11yActionNotSupported = fmt.Errorf("action not supported by node")
-	errA11yInvalidScope       = fmt.Errorf("invalid accessibility scope")
-	errA11yInvalidRequest     = fmt.Errorf("invalid accessibility request")
-)
+// The wire-contract sentinel errors (ErrA11yUnavailable and friends), scope
+// parsing, walk/find limits, and filter matcher semantics are shared with
+// the Linux implementation in accessibility_common.go.
 
 // COM/UI Automation requires calls from a Single-Threaded Apartment. Go
 // goroutines move between OS threads, so all UIA work is serialized through one
@@ -40,6 +36,14 @@ var (
 	staOnce    sync.Once
 	staCh      chan func()
 	staInitErr error
+
+	// staThreadID identifies the locked STA OS thread so runOnSTA can detect
+	// re-entrant calls. Stored once on the STA thread before it consumes
+	// staCh; a racy zero read during startup can only skip the check, never
+	// fire it (0 is not a valid Windows thread ID, and only closures already
+	// running on the STA thread — which observe the store in program order —
+	// can match it).
+	staThreadID atomic.Uint32
 )
 
 func startSTA() {
@@ -47,6 +51,7 @@ func startSTA() {
 		staCh = make(chan func(), 16)
 		go func() {
 			runtime.LockOSThread()
+			staThreadID.Store(windows.GetCurrentThreadId())
 			staInitErr = ole.CoInitializeEx(0, ole.COINIT_APARTMENTTHREADED)
 			if staInitErr == nil {
 				defer ole.CoUninitialize()
@@ -58,8 +63,18 @@ func startSTA() {
 	})
 }
 
+// runOnSTA marshals fn onto the STA thread and blocks until it returns. It
+// must never be called from code already running on the STA thread (i.e. from
+// inside another runOnSTA closure): the single consumer goroutine would be
+// busy executing the outer closure, so the nested call could never be
+// serviced and would block on <-done forever, wedging every later a11y
+// request behind it. The guard turns that silent permanent hang into an
+// immediate panic.
 func runOnSTA(fn func() error) error {
 	startSTA()
+	if windows.GetCurrentThreadId() == staThreadID.Load() {
+		panic("computeruse: re-entrant runOnSTA call on the STA thread would deadlock")
+	}
 	done := make(chan error, 1)
 	staCh <- func() { done <- fn() }
 	return <-done
@@ -69,8 +84,9 @@ func runOnSTA(fn func() error) error {
 // are not stable enough for later HTTP calls, so Windows keeps a short-lived
 // session map from generated UUID handles to COM element pointers.
 type elementCache struct {
-	mu   sync.Mutex
-	elts map[string]*cachedElement
+	mu     sync.Mutex
+	elts   map[string]*cachedElement
+	nextGC time.Time
 }
 
 type cachedElement struct {
@@ -78,15 +94,38 @@ type cachedElement struct {
 	expiry time.Time
 }
 
-const elementCacheTTL = 5 * time.Minute
+const (
+	elementCacheTTL = 5 * time.Minute
+
+	// elementCacheGCInterval amortizes expiry sweeps. gcLocked is a full
+	// map scan, so running it on every put made budget-sized tree walks
+	// accidentally quadratic on the serialized STA thread; expired entries
+	// are also reclaimed lazily per-key in get.
+	elementCacheGCInterval = time.Minute
+
+	// elementCacheMaxEntries caps live COM element proxies. The margin
+	// above a11yWalkBudget is load-bearing: overflow eviction removes
+	// oldest-expiry entries first and a single request inserts at most
+	// a11yWalkBudget entries (always the newest expiries), so eviction can
+	// only ever reclaim earlier requests' entries — never an element the
+	// in-flight walk still dereferences from its recursion stack.
+	elementCacheMaxEntries = 30000
+)
 
 var elementMap = &elementCache{elts: map[string]*cachedElement{}}
 
 func (c *elementCache) put(handle string, elt *uia.Element) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.elts[handle] = &cachedElement{elt: elt, expiry: time.Now().Add(elementCacheTTL)}
-	c.gcLocked()
+	now := time.Now()
+	if now.After(c.nextGC) {
+		c.gcLocked(now)
+		c.nextGC = now.Add(elementCacheGCInterval)
+	}
+	if len(c.elts) >= elementCacheMaxEntries {
+		c.evictOldestLocked()
+	}
+	c.elts[handle] = &cachedElement{elt: elt, expiry: now.Add(elementCacheTTL)}
 }
 
 func (c *elementCache) get(handle string) (*uia.Element, bool) {
@@ -104,8 +143,46 @@ func (c *elementCache) get(handle string) (*uia.Element, bool) {
 	return ce.elt, true
 }
 
-func (c *elementCache) gcLocked() {
-	now := time.Now()
+// remove evicts a single handle, releasing its element. Used when an action
+// discovers the underlying UI element is gone, so later calls 404 without
+// another UIA round-trip.
+func (c *elementCache) remove(handle string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if ce, ok := c.elts[handle]; ok {
+		delete(c.elts, handle)
+		releaseElement(ce.elt)
+	}
+}
+
+// evictOldestLocked drops the tenth of the cache closest to expiry — expiry
+// order is insertion/refresh order, so this is least-recently-used-first.
+// Evicting in batches keeps overflow handling amortized instead of
+// re-scanning the whole map for every insertion at the cap.
+func (c *elementCache) evictOldestLocked() {
+	drop := len(c.elts) / 10
+	if drop < 1 {
+		drop = 1
+	}
+	type expiringHandle struct {
+		handle string
+		expiry time.Time
+	}
+	entries := make([]expiringHandle, 0, len(c.elts))
+	for handle, ce := range c.elts {
+		entries = append(entries, expiringHandle{handle, ce.expiry})
+	}
+	sort.Slice(entries, func(i, j int) bool { return entries[i].expiry.Before(entries[j].expiry) })
+	if drop > len(entries) {
+		drop = len(entries)
+	}
+	for _, e := range entries[:drop] {
+		releaseElement(c.elts[e.handle].elt)
+		delete(c.elts, e.handle)
+	}
+}
+
+func (c *elementCache) gcLocked(now time.Time) {
 	for k, v := range c.elts {
 		if now.After(v.expiry) {
 			delete(c.elts, k)
@@ -114,19 +191,10 @@ func (c *elementCache) gcLocked() {
 	}
 }
 
-type windowsA11yScope string
-
 const (
-	windowsA11yScopeFocused windowsA11yScope = "focused"
-	windowsA11yScopePID     windowsA11yScope = "pid"
-	windowsA11yScopeAll     windowsA11yScope = "all"
-
-	windowsA11yWalkBudget   = 20000
-	windowsFindDefaultLimit = 500
-	windowsFindCeilingLimit = 5000
-	actionInvoke            = "invoke"
-	actionSelect            = "select"
-	actionSetValue          = "set_value"
+	actionInvoke   = "invoke"
+	actionSelect   = "select"
+	actionSetValue = "set_value"
 )
 
 func (c *ComputerUse) GetAccessibilityTree(req *computeruse.GetAccessibilityTreeRequest) (*computeruse.AccessibilityTreeResponse, error) {
@@ -134,18 +202,23 @@ func (c *ComputerUse) GetAccessibilityTree(req *computeruse.GetAccessibilityTree
 		req = &computeruse.GetAccessibilityTreeRequest{}
 	}
 
+	// Pure request validation runs before entering the STA (Linux parity:
+	// scope is parsed before connecting to the bus), so a malformed request
+	// 400s even on hosts where COM init fails and never queues behind
+	// in-flight UIA work on the single STA thread.
+	scope, err := parseWireScope(req.Scope)
+	if err != nil {
+		return nil, err
+	}
+
 	var resp *computeruse.AccessibilityTreeResponse
-	err := runOnSTA(func() error {
+	err = runOnSTA(func() error {
 		automation, err := newWindowsAutomation()
 		if err != nil {
 			return err
 		}
 		defer automation.Release()
 
-		scope, err := parseWindowsWireScope(req.Scope)
-		if err != nil {
-			return err
-		}
 		root, err := resolveWindowsScopeRoot(automation, scope, req.PID)
 		if err != nil {
 			return err
@@ -153,20 +226,18 @@ func (c *ComputerUse) GetAccessibilityTree(req *computeruse.GetAccessibilityTree
 
 		walker, err := automation.ControlViewWalker()
 		if err != nil {
-			return fmt.Errorf("%w: ControlViewWalker: %v", errA11yUnavailable, err)
+			releaseElement(root)
+			return fmt.Errorf("%w: ControlViewWalker: %v", ErrA11yUnavailable, err)
 		}
 		defer walker.Release()
 
 		// MaxDepth follows the Linux walker contract: 0 visits only the
 		// root, negative values are unbounded (the daemon defaults an
 		// absent maxDepth query parameter to -1).
-		budget := windowsA11yWalkBudget
-		node, err := walkWindowsNode(walker, root, req.MaxDepth, &budget)
-		if err != nil {
-			return err
-		}
+		budget := a11yWalkBudget
+		node := walkWindowsNode(walker, root, req.MaxDepth, &budget)
 		if node == nil {
-			return errA11yNoAccessibleRoot
+			return ErrNoAccessibleRoot
 		}
 		resp = &computeruse.AccessibilityTreeResponse{Root: *node, Truncated: budget <= 0}
 		return nil
@@ -182,23 +253,25 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 		req = &computeruse.FindAccessibilityNodesRequest{}
 	}
 
+	// Pure request validation runs before entering the STA, as in
+	// GetAccessibilityTree.
+	scope, err := parseWireScope(req.Scope)
+	if err != nil {
+		return nil, err
+	}
+	matcher, err := buildWindowsFilterMatcher(req)
+	if err != nil {
+		return nil, err
+	}
+	limit := normalizeFindLimit(req.Limit)
+
 	var resp *computeruse.AccessibilityNodesResponse
-	err := runOnSTA(func() error {
+	err = runOnSTA(func() error {
 		automation, err := newWindowsAutomation()
 		if err != nil {
 			return err
 		}
 		defer automation.Release()
-
-		scope, err := parseWindowsWireScope(req.Scope)
-		if err != nil {
-			return err
-		}
-		matcher, err := buildWindowsFilterMatcher(req)
-		if err != nil {
-			return err
-		}
-		limit := normalizeWindowsFindLimit(req.Limit)
 
 		root, err := resolveWindowsScopeRoot(automation, scope, req.PID)
 		if err != nil {
@@ -216,7 +289,7 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 		}
 
 		matches := make([]computeruse.AccessibilityNode, 0, 16)
-		budget := windowsA11yWalkBudget
+		budget := a11yWalkBudget
 		truncated := false
 
 		if condition := buildWindowsFindCondition(automation, plan, req.Name); condition != nil {
@@ -230,13 +303,13 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 
 			found, err := root.FindAll(uia.TreeScopeSubtree, condition)
 			if err != nil {
-				return fmt.Errorf("%w: FindAll: %v", errA11yUnavailable, err)
+				return fmt.Errorf("%w: FindAll: %v", ErrA11yUnavailable, err)
 			}
 			defer found.Release()
 
 			length, err := found.Length()
 			if err != nil {
-				return fmt.Errorf("%w: FindAll length: %v", errA11yUnavailable, err)
+				return fmt.Errorf("%w: FindAll length: %v", ErrA11yUnavailable, err)
 			}
 			for i := int32(0); i < length; i++ {
 				if budget <= 0 {
@@ -269,7 +342,7 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 			walker, err := automation.ControlViewWalker()
 			if err != nil {
 				releaseElement(root)
-				return fmt.Errorf("%w: ControlViewWalker: %v", errA11yUnavailable, err)
+				return fmt.Errorf("%w: ControlViewWalker: %v", ErrA11yUnavailable, err)
 			}
 			defer walker.Release()
 			truncated = findWindowsWalk(walker, root, matcher, &matches, limit, &budget)
@@ -286,19 +359,19 @@ func (c *ComputerUse) FindAccessibilityNodes(req *computeruse.FindAccessibilityN
 
 func (c *ComputerUse) FocusAccessibilityNode(req *computeruse.AccessibilityNodeRequest) (*computeruse.Empty, error) {
 	if req == nil {
-		return nil, fmt.Errorf("%w: request is required", errA11yInvalidRequest)
+		return nil, fmt.Errorf("%w: request is required", ErrInvalidRequest)
 	}
 	if strings.TrimSpace(req.ID) == "" {
-		return nil, fmt.Errorf("%w: id is required", errA11yInvalidRequest)
+		return nil, fmt.Errorf("%w: id is required", ErrInvalidRequest)
 	}
 
 	err := runOnSTA(func() error {
 		elt, ok := elementMap.get(req.ID)
 		if !ok || elt == nil {
-			return errA11yNodeNotFound
+			return ErrNodeNotFound
 		}
 		if err := elt.SetFocus(); err != nil {
-			return fmt.Errorf("%w: SetFocus: %v", errA11yActionNotSupported, err)
+			return classifyWindowsActionError(req.ID, "SetFocus", err)
 		}
 		return nil
 	})
@@ -310,18 +383,18 @@ func (c *ComputerUse) FocusAccessibilityNode(req *computeruse.AccessibilityNodeR
 
 func (c *ComputerUse) InvokeAccessibilityNode(req *computeruse.AccessibilityInvokeRequest) (*computeruse.Empty, error) {
 	if req == nil {
-		return nil, fmt.Errorf("%w: request is required", errA11yInvalidRequest)
+		return nil, fmt.Errorf("%w: request is required", ErrInvalidRequest)
 	}
 	if strings.TrimSpace(req.ID) == "" {
-		return nil, fmt.Errorf("%w: id is required", errA11yInvalidRequest)
+		return nil, fmt.Errorf("%w: id is required", ErrInvalidRequest)
 	}
 
 	err := runOnSTA(func() error {
 		elt, ok := elementMap.get(req.ID)
 		if !ok || elt == nil {
-			return errA11yNodeNotFound
+			return ErrNodeNotFound
 		}
-		return invokeWindowsElement(elt, req.Action)
+		return invokeWindowsElement(req.ID, elt, req.Action)
 	})
 	if err != nil {
 		return nil, err
@@ -331,33 +404,36 @@ func (c *ComputerUse) InvokeAccessibilityNode(req *computeruse.AccessibilityInvo
 
 func (c *ComputerUse) SetAccessibilityNodeValue(req *computeruse.AccessibilitySetValueRequest) (*computeruse.Empty, error) {
 	if req == nil {
-		return nil, fmt.Errorf("%w: request is required", errA11yInvalidRequest)
+		return nil, fmt.Errorf("%w: request is required", ErrInvalidRequest)
 	}
 	if strings.TrimSpace(req.ID) == "" {
-		return nil, fmt.Errorf("%w: id is required", errA11yInvalidRequest)
+		return nil, fmt.Errorf("%w: id is required", ErrInvalidRequest)
 	}
 	if strings.ContainsRune(req.Value, 0) {
 		// ValuePattern.SetValue marshals through ole.SysAllocString, which
 		// panics on interior NUL — on the locked STA thread that would
 		// kill the plugin process (same class as the find name filter).
-		return nil, fmt.Errorf("%w: value must not contain NUL", errA11yInvalidRequest)
+		return nil, fmt.Errorf("%w: value must not contain NUL", ErrInvalidRequest)
 	}
 
 	err := runOnSTA(func() error {
 		elt, ok := elementMap.get(req.ID)
 		if !ok || elt == nil {
-			return errA11yNodeNotFound
+			return ErrNodeNotFound
 		}
-		pattern, err := elt.GetValuePattern()
-		if err != nil || pattern == nil {
-			return fmt.Errorf("%w: ValuePattern", errA11yActionNotSupported)
+		pattern, err := windowsValuePattern(elt)
+		if err != nil {
+			return classifyWindowsActionError(req.ID, "ValuePattern", err)
+		}
+		if pattern == nil {
+			return fmt.Errorf("%w: ValuePattern", ErrActionNotSupported)
 		}
 		defer pattern.Release()
-		if readonly, err := pattern.CurrentIsReadonly(); err == nil && readonly {
-			return fmt.Errorf("%w: value is read-only", errA11yActionNotSupported)
+		if windowsBoolProperty(unsafe.Pointer(pattern), pattern.VTable().Get_CurrentIsReadonly) {
+			return fmt.Errorf("%w: value is read-only", ErrActionNotSupported)
 		}
 		if err := pattern.SetValue(req.Value); err != nil {
-			return fmt.Errorf("%w: SetValue: %v", errA11yActionNotSupported, err)
+			return classifyWindowsActionError(req.ID, "SetValue", err)
 		}
 		return nil
 	})
@@ -369,52 +445,39 @@ func (c *ComputerUse) SetAccessibilityNodeValue(req *computeruse.AccessibilitySe
 
 func newWindowsAutomation() (*uia.UIAutomation, error) {
 	if staInitErr != nil {
-		return nil, fmt.Errorf("%w: CoInitializeEx: %v", errA11yUnavailable, staInitErr)
+		return nil, fmt.Errorf("%w: CoInitializeEx: %v", ErrA11yUnavailable, staInitErr)
 	}
 	automation, err := uia.NewUIAutomation()
 	if err != nil {
-		return nil, fmt.Errorf("%w: NewUIAutomation: %v", errA11yUnavailable, err)
+		return nil, fmt.Errorf("%w: NewUIAutomation: %v", ErrA11yUnavailable, err)
 	}
 	return automation, nil
 }
 
-func parseWindowsWireScope(s string) (windowsA11yScope, error) {
-	switch strings.ToLower(strings.TrimSpace(s)) {
-	case "", "focused":
-		return windowsA11yScopeFocused, nil
-	case "pid":
-		return windowsA11yScopePID, nil
-	case "all":
-		return windowsA11yScopeAll, nil
-	default:
-		return "", fmt.Errorf("%w: got %q, expected focused|pid|all", errA11yInvalidScope, s)
-	}
-}
-
-func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope windowsA11yScope, pid int) (*uia.Element, error) {
+func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope A11yScope, pid int) (*uia.Element, error) {
 	switch scope {
-	case windowsA11yScopeFocused:
+	case A11yScopeFocused:
 		elt, err := automation.GetFocusedElement()
 		if err != nil || elt == nil {
-			return nil, fmt.Errorf("%w: GetFocusedElement: %v", errA11yNoAccessibleRoot, err)
+			return nil, fmt.Errorf("%w: GetFocusedElement: %v", ErrNoAccessibleRoot, err)
 		}
 		// Linux resolves scope=focused to the focused application's root,
 		// not the focused control; hoist to the top-level window so tree
 		// and find cover the whole foreground app.
 		return windowsTopLevelAncestor(automation, elt), nil
-	case windowsA11yScopeAll:
+	case A11yScopeAll:
 		root, err := automation.GetRootElement()
 		if err != nil || root == nil {
-			return nil, fmt.Errorf("%w: GetRootElement: %v", errA11yNoAccessibleRoot, err)
+			return nil, fmt.Errorf("%w: GetRootElement: %v", ErrA11yUnavailable, err)
 		}
 		return root, nil
-	case windowsA11yScopePID:
+	case A11yScopePID:
 		if pid <= 0 {
-			return nil, fmt.Errorf("%w: pid must be positive", errA11yInvalidRequest)
+			return nil, fmt.Errorf("%w: pid must be positive", ErrInvalidRequest)
 		}
 		root, err := automation.GetRootElement()
 		if err != nil || root == nil {
-			return nil, fmt.Errorf("%w: GetRootElement: %v", errA11yNoAccessibleRoot, err)
+			return nil, fmt.Errorf("%w: GetRootElement: %v", ErrA11yUnavailable, err)
 		}
 		elt, err := findWindowsRootByPID(automation, root, pid)
 		releaseElement(root) // only needed as the FindAll anchor
@@ -422,11 +485,11 @@ func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope windowsA11yScop
 			return nil, err
 		}
 		if elt == nil {
-			return nil, errA11yNoAccessibleRoot
+			return nil, ErrNoAccessibleRoot
 		}
 		return elt, nil
 	default:
-		return nil, fmt.Errorf("%w: unknown scope %q", errA11yInvalidScope, scope)
+		return nil, fmt.Errorf("%w: unknown scope %q", ErrInvalidScope, scope)
 	}
 }
 
@@ -442,19 +505,19 @@ func findWindowsRootByPID(automation *uia.UIAutomation, root *uia.Element, pid i
 	condition, err := automation.CreatePropertyCondition(uia.ProcessIdPropertyId, &value)
 	ole.VariantClear(&value)
 	if err != nil || condition == nil {
-		return nil, fmt.Errorf("%w: CreatePropertyCondition: %v", errA11yUnavailable, err)
+		return nil, fmt.Errorf("%w: CreatePropertyCondition: %v", ErrA11yUnavailable, err)
 	}
 	defer condition.Release()
 
 	found, err := root.FindAll(uia.TreeScopeChildren, condition)
 	if err != nil {
-		return nil, fmt.Errorf("%w: FindAll: %v", errA11yUnavailable, err)
+		return nil, fmt.Errorf("%w: FindAll: %v", ErrA11yUnavailable, err)
 	}
 	defer found.Release()
 
 	length, err := found.Length()
 	if err != nil {
-		return nil, fmt.Errorf("%w: FindAll length: %v", errA11yUnavailable, err)
+		return nil, fmt.Errorf("%w: FindAll length: %v", ErrA11yUnavailable, err)
 	}
 
 	var fallback *uia.Element
@@ -482,7 +545,7 @@ func findWindowsRootByPID(automation *uia.UIAutomation, root *uia.Element, pid i
 	// native condition (FindFirst short-circuits at the first match).
 	elt, err := root.FindFirst(uia.TreeScopeDescendants, condition)
 	if err != nil {
-		return nil, fmt.Errorf("%w: FindFirst: %v", errA11yUnavailable, err)
+		return nil, fmt.Errorf("%w: FindFirst: %v", ErrA11yUnavailable, err)
 	}
 	return elt, nil
 }
@@ -519,50 +582,62 @@ func windowsTopLevelAncestor(automation *uia.UIAutomation, elt *uia.Element) *ui
 	return current
 }
 
-func walkWindowsNode(walker *uia.TreeWalker, elt *uia.Element, maxDepth int, budget *int) (*computeruse.AccessibilityNode, error) {
-	if *budget <= 0 || elt == nil {
-		return nil, nil
+// walkWindowsNode recursively materialises a wire node tree rooted at elt.
+// It takes ownership of elt: ownership passes to the element cache when the
+// node is materialised, and elt is released on the budget-exhausted entry
+// path. budget is decremented on every visited node; when it hits zero,
+// descent stops and the caller infers truncation.
+func walkWindowsNode(walker *uia.TreeWalker, elt *uia.Element, maxDepth int, budget *int) *computeruse.AccessibilityNode {
+	if elt == nil {
+		return nil
+	}
+	if *budget <= 0 {
+		releaseElement(elt)
+		return nil
 	}
 	*budget--
 
-	node := windowsNodeFromElement(elt, true)
-	if !windowsDepthAllowsDescent(maxDepth) {
-		return node, nil
+	node := windowsNodeFromElement(elt, true) // cache takes ownership of elt
+	if !a11yDepthAllowsDescent(maxDepth) {
+		return node
 	}
-	nextDepth := windowsNextDepth(maxDepth)
+	nextDepth := a11yNextDepth(maxDepth)
 
 	child, err := walker.GetFirstChildElement(elt)
-	if err != nil || child == nil {
-		return node, nil
+	if err != nil {
+		return node
 	}
 	for child != nil {
 		if *budget <= 0 {
+			releaseElement(child)
 			break
 		}
-		current := child
-		next, _ := walker.GetNextSiblingElement(current)
-		childNode, err := walkWindowsNode(walker, current, nextDepth, budget)
-		if err != nil {
-			releaseElement(current)
-			child = next
-			continue
-		}
-		if childNode != nil {
+		// Fetch the sibling before recursing: the recursion hands child to
+		// the element cache, after which this frame must not touch it.
+		next, _ := walker.GetNextSiblingElement(child)
+		if childNode := walkWindowsNode(walker, child, nextDepth, budget); childNode != nil {
 			node.Children = append(node.Children, childNode)
 		}
 		child = next
 	}
-	return node, nil
+	return node
 }
 
 func windowsNodeFromElement(elt *uia.Element, cache bool) *computeruse.AccessibilityNode {
+	// One ValuePattern fetch feeds both the read_only state and the
+	// set_value action; a node losing its provider mid-walk just reports
+	// fewer capabilities.
+	valuePattern, _ := windowsValuePattern(elt)
 	node := &computeruse.AccessibilityNode{
 		Role:        windowsElementRole(elt),
-		Name:        windowsStringProperty(elt.CurrentName),
+		Name:        windowsBSTRProperty(elt, elt.VTable().Get_CurrentName),
 		Description: windowsElementDescription(elt),
 		Bounds:      windowsElementBounds(elt),
-		States:      windowsElementStates(elt),
-		Actions:     windowsElementActions(elt),
+		States:      windowsElementStates(elt, valuePattern),
+		Actions:     windowsElementActions(elt, valuePattern != nil),
+	}
+	if valuePattern != nil {
+		valuePattern.Release()
 	}
 	if cache {
 		node.ID = cacheWindowsElement(elt)
@@ -583,7 +658,7 @@ func windowsElementRole(elt *uia.Element) string {
 }
 
 func windowsElementDescription(elt *uia.Element) string {
-	return strings.TrimSpace(windowsStringProperty(elt.CurrentHelpText))
+	return strings.TrimSpace(windowsBSTRProperty(elt, elt.VTable().Get_CurrentHelpText))
 }
 
 func windowsElementBounds(elt *uia.Element) computeruse.AccessibilityBounds {
@@ -603,100 +678,107 @@ func windowsElementBounds(elt *uia.Element) computeruse.AccessibilityBounds {
 	}
 }
 
-func windowsElementStates(elt *uia.Element) []string {
+func windowsElementStates(elt *uia.Element, valuePattern *uia.ValuePattern) []string {
 	states := make([]string, 0, 8)
-	if windowsBoolProperty(elt.CurrentIsEnabled) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsEnabled) {
 		states = append(states, "enabled", "sensitive")
 	}
-	if windowsBoolProperty(elt.CurrentIsKeyboardFocusable) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsKeyboardFocusable) {
 		states = append(states, "focusable")
 	}
-	if windowsBoolProperty(elt.CurrentHasKeyboardFocus) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentHasKeyboardFocus) {
 		states = append(states, "focused", "active")
 	}
-	if offscreen, err := elt.CurrentIsOffscreen(); err == nil {
+	if offscreen, ok := windowsBoolPropertyOK(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsOffscreen); ok {
 		if offscreen {
 			states = append(states, "offscreen")
 		} else {
 			states = append(states, "visible", "showing")
 		}
 	}
-	if windowsBoolProperty(elt.CurrentIsPassword) {
+	if windowsBoolProperty(unsafe.Pointer(elt), elt.VTable().Get_CurrentIsPassword) {
 		states = append(states, "password")
 	}
-	if pattern, err := elt.GetValuePattern(); err == nil && pattern != nil {
-		if readonly, err := pattern.CurrentIsReadonly(); err == nil && readonly {
-			states = append(states, "read_only")
-		}
-		pattern.Release()
+	if valuePattern != nil && windowsBoolProperty(unsafe.Pointer(valuePattern), valuePattern.VTable().Get_CurrentIsReadonly) {
+		states = append(states, "read_only")
 	}
 	return states
 }
 
-func windowsElementActions(elt *uia.Element) []string {
+func windowsElementActions(elt *uia.Element, hasValuePattern bool) []string {
 	actions := make([]string, 0, 3)
-	if pattern, err := elt.GetInvokePattern(); err == nil && pattern != nil {
+	if windowsHasPattern(elt, uia.InvokePatternId) {
 		actions = append(actions, actionInvoke)
-		pattern.Release()
 	}
-	if pattern, err := elt.GetSelectionItemPattern(); err == nil && pattern != nil {
+	if windowsHasPattern(elt, uia.SelectionItemPatternId) {
 		actions = append(actions, actionSelect)
-		pattern.Release()
 	}
-	if pattern, err := elt.GetValuePattern(); err == nil && pattern != nil {
+	if hasValuePattern {
 		actions = append(actions, actionSetValue)
-		pattern.Release()
 	}
 	return actions
 }
 
+// The binding's typed pattern getters (GetInvokePattern and friends)
+// QueryInterface the IUnknown out-param of GetCurrentPattern without ever
+// releasing it, permanently leaking one COM reference per successful call
+// (binding replacement is deferred). The helpers below own the whole fetch:
+// probe, QI, release the intermediate, hand back only the typed interface.
+
+// windowsHasPattern reports whether the element supports a UIA pattern
+// without retaining any reference — capability probing for States/Actions.
+func windowsHasPattern(elt *uia.Element, patternId uia.PatternId) bool {
+	obj, err := elt.GetCurrentPattern(patternId)
+	if err != nil || obj == nil {
+		return false
+	}
+	obj.Release()
+	return true
+}
+
+// windowsPattern fetches a typed UIA pattern interface. Returns (nil, nil)
+// when the element does not support the pattern (S_OK + null out-param) and
+// the raw COM error when the call itself fails (e.g. the element is gone).
+// The caller owns the returned interface and must Release it.
+func windowsPattern(elt *uia.Element, patternId uia.PatternId, iid *ole.GUID) (unsafe.Pointer, error) {
+	obj, err := elt.GetCurrentPattern(patternId)
+	if err != nil {
+		return nil, err
+	}
+	if obj == nil {
+		return nil, nil
+	}
+	typed, err := obj.QueryInterface(iid)
+	obj.Release()
+	if err != nil {
+		return nil, err
+	}
+	return unsafe.Pointer(typed), nil
+}
+
+func windowsValuePattern(elt *uia.Element) (*uia.ValuePattern, error) {
+	p, err := windowsPattern(elt, uia.ValuePatternId, uia.IID_IUIAutomationValuePattern)
+	return (*uia.ValuePattern)(p), err
+}
+
+func windowsInvokePattern(elt *uia.Element) (*uia.InvokePattern, error) {
+	p, err := windowsPattern(elt, uia.InvokePatternId, uia.IID_IUIAutomationInvokePattern)
+	return (*uia.InvokePattern)(p), err
+}
+
+func windowsSelectionItemPattern(elt *uia.Element) (*uia.SelectionItemPattern, error) {
+	p, err := windowsPattern(elt, uia.SelectionItemPatternId, uia.IID_IUIAutomationSelectionItemPattern)
+	return (*uia.SelectionItemPattern)(p), err
+}
+
+// buildWindowsFilterMatcher adapts the shared buildA11yMatcher semantics
+// (accessibility_common.go) to the wire request/node types.
 func buildWindowsFilterMatcher(req *computeruse.FindAccessibilityNodesRequest) (func(*computeruse.AccessibilityNode) bool, error) {
-	nameMatch := req.NameMatch
-	if nameMatch == "" {
-		nameMatch = "substring"
+	match, err := buildA11yMatcher(req.Role, req.Name, req.NameMatch, req.States)
+	if err != nil {
+		return nil, err
 	}
-	if nameMatch != "exact" && nameMatch != "substring" && nameMatch != "regex" {
-		return nil, fmt.Errorf("%w: unknown nameMatch mode %q, want exact|substring|regex", errA11yInvalidRequest, nameMatch)
-	}
-
-	var nameRe *regexp.Regexp
-	if req.Name != "" && nameMatch == "regex" {
-		re, err := regexp.Compile(req.Name)
-		if err != nil {
-			return nil, fmt.Errorf("%w: invalid regex for name filter: %v", errA11yInvalidRequest, err)
-		}
-		nameRe = re
-	}
-
-	role := strings.ToLower(req.Role)
-	states := append([]string(nil), req.States...)
-	return func(n *computeruse.AccessibilityNode) bool {
-		if role != "" && strings.ToLower(n.Role) != role {
-			return false
-		}
-		if req.Name != "" {
-			switch nameMatch {
-			case "exact":
-				if n.Name != req.Name {
-					return false
-				}
-			case "substring":
-				if !strings.Contains(n.Name, req.Name) {
-					return false
-				}
-			case "regex":
-				if nameRe == nil || !nameRe.MatchString(n.Name) {
-					return false
-				}
-			}
-		}
-		for _, want := range states {
-			if !containsWindowsString(n.States, want) {
-				return false
-			}
-		}
-		return true
-	}, nil
+	return func(n *computeruse.AccessibilityNode) bool { return match(n.Role, n.Name, n.States) }, nil
 }
 
 // windowsFindPlan describes how much of a find filter can be pushed into
@@ -906,37 +988,98 @@ func findWindowsWalk(walker *uia.TreeWalker, elt *uia.Element, match func(*compu
 	return *budget <= 0
 }
 
-func invokeWindowsElement(elt *uia.Element, action string) error {
+// UIA/COM HRESULTs whose meaning on action paths is unambiguous (values
+// from uiautomationcoreapi.h / winerror.h). Everything outside this set —
+// RPC faults, timeouts, E_FAIL, E_OUTOFMEMORY — is deliberately left
+// untranslated.
+const (
+	// uiaErrElementNotAvailable is UIA_E_ELEMENTNOTAVAILABLE: the provider
+	// behind the element is gone (window closed, control destroyed).
+	uiaErrElementNotAvailable uintptr = 0x80040201
+	// uiaErrElementNotEnabled is UIA_E_ELEMENTNOTENABLED: the element is
+	// disabled and refuses the action.
+	uiaErrElementNotEnabled uintptr = 0x80040200
+	// uiaErrNotSupported is UIA_E_NOTSUPPORTED: the provider rejects the
+	// requested operation.
+	uiaErrNotSupported uintptr = 0x80040204
+	// uiaErrInvalidOperation is UIA_E_INVALIDOPERATION: the operation is
+	// not valid in the element's current state.
+	uiaErrInvalidOperation uintptr = 0x80131509
+	// hresultNoInterface (E_NOINTERFACE) and hresultNotImplemented
+	// (E_NOTIMPL) are permanent "this object cannot do that" refusals.
+	hresultNoInterface    uintptr = 0x80004002
+	hresultNotImplemented uintptr = 0x80004001
+)
+
+// classifyWindowsActionError follows the Linux classifyDbusError contract on
+// action paths: only failures with an unambiguous meaning are translated to
+// sentinel errors, anything else (transient RPC faults, timeouts, E_FAIL,
+// non-COM errors) is returned as-is so the daemon surfaces it as a
+// retryable internal error instead of a permanent refusal. A call that
+// failed because the element vanished maps to ErrNodeNotFound (404 —
+// "re-find the node") and evicts the dead handle so subsequent calls fail
+// fast without another UIA round-trip; refusal HRESULTs map to
+// ErrActionNotSupported (400 — "pick another action"). The binding
+// surfaces every failing COM call as *ole.OleError holding the raw HRESULT.
+func classifyWindowsActionError(handle, op string, err error) error {
+	var oleErr *ole.OleError
+	if errors.As(err, &oleErr) {
+		switch oleErr.Code() {
+		case uiaErrElementNotAvailable:
+			elementMap.remove(handle)
+			return fmt.Errorf("%w: %s: %v", ErrNodeNotFound, op, err)
+		case uiaErrElementNotEnabled, uiaErrNotSupported, uiaErrInvalidOperation,
+			hresultNoInterface, hresultNotImplemented:
+			return fmt.Errorf("%w: %s: %v", ErrActionNotSupported, op, err)
+		}
+	}
+	return fmt.Errorf("%s: %w", op, err)
+}
+
+func invokeWindowsElement(handle string, elt *uia.Element, action string) error {
 	action = strings.ToLower(strings.TrimSpace(action))
+	if action == actionSetValue {
+		// Advertised in Actions for value-capable nodes, but the invoke
+		// request cannot carry a value; keep the sentinel prefix the daemon
+		// matches on and point the caller at the dedicated endpoint.
+		return fmt.Errorf("%w: set_value takes a value; use the node value endpoint", ErrActionNotSupported)
+	}
+
 	if action == "" || action == actionInvoke || action == "click" || action == "press" {
-		pattern, err := elt.GetInvokePattern()
-		if err == nil && pattern != nil {
+		pattern, err := windowsInvokePattern(elt)
+		if err != nil {
+			return classifyWindowsActionError(handle, "InvokePattern", err)
+		}
+		if pattern != nil {
 			defer pattern.Release()
 			if err := pattern.Invoke(); err != nil {
-				return fmt.Errorf("%w: Invoke: %v", errA11yActionNotSupported, err)
+				return classifyWindowsActionError(handle, "Invoke", err)
 			}
 			return nil
 		}
 		if action != "" {
-			return fmt.Errorf("%w: InvokePattern", errA11yActionNotSupported)
+			return fmt.Errorf("%w: InvokePattern", ErrActionNotSupported)
 		}
 	}
 
 	if action == "" || action == actionSelect {
-		pattern, err := elt.GetSelectionItemPattern()
-		if err == nil && pattern != nil {
+		pattern, err := windowsSelectionItemPattern(elt)
+		if err != nil {
+			return classifyWindowsActionError(handle, "SelectionItemPattern", err)
+		}
+		if pattern != nil {
 			defer pattern.Release()
 			if err := pattern.Select(); err != nil {
-				return fmt.Errorf("%w: Select: %v", errA11yActionNotSupported, err)
+				return classifyWindowsActionError(handle, "Select", err)
 			}
 			return nil
 		}
 		if action == actionSelect {
-			return fmt.Errorf("%w: SelectionItemPattern", errA11yActionNotSupported)
+			return fmt.Errorf("%w: SelectionItemPattern", ErrActionNotSupported)
 		}
 	}
 
-	return errA11yActionNotSupported
+	return ErrActionNotSupported
 }
 
 func cacheWindowsElement(elt *uia.Element) string {
@@ -955,17 +1098,55 @@ func newWindowsElementHandle() string {
 	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
-func windowsStringProperty(fn func() (string, error)) string {
-	value, err := fn()
-	if err != nil {
+// The binding's string property getters (CurrentName and friends) convert
+// the UIA-returned BSTR with ole.BstrToString but never SysFreeString it,
+// leaking one native allocation per call — one per node Name/Description
+// fetch on every tree/find request, invisible to Go heap profiling
+// (binding replacement is deferred, like the pattern-getter workaround
+// above). windowsBSTRProperty owns the whole fetch: raw vtable getter,
+// convert, free. Failures and null BSTRs read as "", matching the binding
+// getters' behavior.
+func windowsBSTRProperty(elt *uia.Element, getter uintptr) string {
+	var retVal *uint16
+	hr, _, _ := syscall.SyscallN(
+		getter,
+		uintptr(unsafe.Pointer(elt)),
+		uintptr(unsafe.Pointer(&retVal)),
+	)
+	if hr != 0 || retVal == nil {
 		return ""
 	}
+	value := ole.BstrToString(retVal)
+	ole.SysFreeString((*int16)(unsafe.Pointer(retVal)))
 	return value
 }
 
-func windowsBoolProperty(fn func() (bool, error)) bool {
-	value, err := fn()
-	return err == nil && value
+// The binding's bool getters (CurrentIsEnabled and friends, plus
+// ValuePattern.CurrentIsReadonly) pass the address of a 1-byte Go bool as
+// the COM BOOL* out-param; the provider's 4-byte store clobbers the 3
+// adjacent stack bytes on every call (binding replacement is deferred,
+// like the BSTR and pattern-getter workarounds above). windowsBoolProperty
+// owns the fetch through the raw vtable getter with a correctly sized
+// BOOL. this is the raw COM interface pointer the getter belongs to
+// (*uia.Element, *uia.ValuePattern). Failures read as false.
+func windowsBoolProperty(this unsafe.Pointer, getter uintptr) bool {
+	value, ok := windowsBoolPropertyOK(this, getter)
+	return ok && value
+}
+
+// windowsBoolPropertyOK additionally reports whether the fetch succeeded,
+// for the tri-state consumer (offscreen -> offscreen/visible/neither).
+func windowsBoolPropertyOK(this unsafe.Pointer, getter uintptr) (value, ok bool) {
+	var retVal int32
+	hr, _, _ := syscall.SyscallN(
+		getter,
+		uintptr(this),
+		uintptr(unsafe.Pointer(&retVal)),
+	)
+	if hr != 0 {
+		return false, false
+	}
+	return retVal != 0, true
 }
 
 // windowsControlTypeRoles maps UIA control type IDs to the canonical,
@@ -1065,41 +1246,6 @@ func windowsControlTypesForRole(role string) ([]uia.ControlTypeId, bool) {
 		}
 	}
 	return nil, false
-}
-
-// Depth semantics mirror the Linux walker contract: 0 visits only the
-// current node, positive values bound descent, negative values are
-// unbounded.
-func windowsDepthAllowsDescent(maxDepth int) bool {
-	return maxDepth != 0
-}
-
-func windowsNextDepth(maxDepth int) int {
-	if maxDepth > 0 {
-		return maxDepth - 1
-	}
-	return maxDepth
-}
-
-// normalizeWindowsFindLimit applies the Linux find limit defaults: non
-// positive limits fall back to the default, oversized limits are capped.
-func normalizeWindowsFindLimit(limit int) int {
-	if limit <= 0 {
-		return windowsFindDefaultLimit
-	}
-	if limit > windowsFindCeilingLimit {
-		return windowsFindCeilingLimit
-	}
-	return limit
-}
-
-func containsWindowsString(values []string, want string) bool {
-	for _, value := range values {
-		if value == want {
-			return true
-		}
-	}
-	return false
 }
 
 func releaseElement(elt *uia.Element) {

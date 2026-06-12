@@ -33,6 +33,11 @@ import (
 //	@id				CodeRun
 func CodeRun(logger *slog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if err := codeRunPlatformError(); err != nil {
+			c.Error(err)
+			return
+		}
+
 		var request CodeRunRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
 			c.Error(common_errors.NewInvalidBodyRequestError(err))

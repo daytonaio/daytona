@@ -1,4 +1,4 @@
-//go:build linux
+//go:build linux || windows
 
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
@@ -10,90 +10,22 @@ import (
 	"encoding/base64"
 	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
 	"image/png"
-	"os"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/go-vgo/robotgo"
 	"github.com/kbinani/screenshot"
-	log "github.com/sirupsen/logrus"
 )
 
-func validateScreenshotRegion(width, height int) error {
-	if width <= 0 || height <= 0 {
-		return fmt.Errorf("invalid screenshot region: width and height must be greater than zero")
-	}
+// The capture pipeline below is shared between Linux and Windows. The only
+// platform-specific call is getMousePosition(), implemented per OS (robotgo
+// on Linux in computeruse.go, GetCursorPos on Windows in winapi_windows.go).
 
-	return nil
-}
-
-// drawCursor draws a simple cursor at the given position
-func drawCursor(img *image.RGBA, x, y int) {
-	// Define cursor colors
-	white := color.RGBA{255, 255, 255, 255}
-	black := color.RGBA{0, 0, 0, 255}
-
-	// Draw a simple crosshair cursor
-	cursorSize := 20
-
-	// Draw white outline (thicker)
-	for i := -1; i <= 1; i++ {
-		for j := -1; j <= 1; j++ {
-			// Horizontal line
-			for dx := -cursorSize; dx <= cursorSize; dx++ {
-				px, py := x+dx, y+i
-				if px >= 0 && px < img.Bounds().Dx() && py >= 0 && py < img.Bounds().Dy() {
-					img.Set(px, py, white)
-				}
-			}
-			// Vertical line
-			for dy := -cursorSize; dy <= cursorSize; dy++ {
-				px, py := x+j, y+dy
-				if px >= 0 && px < img.Bounds().Dx() && py >= 0 && py < img.Bounds().Dy() {
-					img.Set(px, py, white)
-				}
-			}
-		}
-	}
-
-	// Draw black center
-	// Horizontal line
-	for dx := -cursorSize; dx <= cursorSize; dx++ {
-		px := x + dx
-		if px >= 0 && px < img.Bounds().Dx() && y >= 0 && y < img.Bounds().Dy() {
-			img.Set(px, y, black)
-		}
-	}
-	// Vertical line
-	for dy := -cursorSize; dy <= cursorSize; dy++ {
-		py := y + dy
-		if x >= 0 && x < img.Bounds().Dx() && py >= 0 && py < img.Bounds().Dy() {
-			img.Set(x, py, black)
-		}
-	}
-
-	// Draw center dot
-	for i := -2; i <= 2; i++ {
-		for j := -2; j <= 2; j++ {
-			px, py := x+i, y+j
-			if px >= 0 && px < img.Bounds().Dx() && py >= 0 && py < img.Bounds().Dy() {
-				img.Set(px, py, color.RGBA{255, 0, 0, 255}) // Red center
-			}
-		}
-	}
-}
-
-func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
-	// Debug: Check DISPLAY environment variable
-	display := os.Getenv("DISPLAY")
-	log.Infof("TakeScreenshot: DISPLAY=%s", display)
-
+// TakeScreenshot takes a screenshot of the entire screen
+func (c *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
 	bounds := screenshot.GetDisplayBounds(0)
 	img, err := screenshot.CaptureRect(bounds)
 	if err != nil {
-		log.Errorf("TakeScreenshot error: %v", err)
 		return nil, err
 	}
 
@@ -104,7 +36,7 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 	// Draw cursor if requested
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		mouseX, mouseY = robotgo.Location()
+		mouseX, mouseY = getMousePosition()
 		drawCursor(rgbaImg, mouseX, mouseY)
 	}
 
@@ -124,21 +56,11 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 		},
 	}
 
-	if req.ShowCursor {
-		response.CursorPosition = &computeruse.Position{
-			X: mouseX,
-			Y: mouseY,
-		}
-	}
-
 	return response, nil
 }
 
-func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
-	// Debug: Check DISPLAY environment variable
-	display := os.Getenv("DISPLAY")
-	log.Infof("TakeRegionScreenshot: DISPLAY=%s", display)
-
+// TakeRegionScreenshot takes a screenshot of a specific region
+func (c *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
 	if err := validateScreenshotRegion(req.Width, req.Height); err != nil {
 		return nil, err
 	}
@@ -156,7 +78,7 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 	// Draw cursor if requested and it's within the region
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		absoluteMouseX, absoluteMouseY := robotgo.Location()
+		absoluteMouseX, absoluteMouseY := getMousePosition()
 		// Convert to relative coordinates within the region
 		mouseX = absoluteMouseX - req.X
 		mouseY = absoluteMouseY - req.Y
@@ -182,12 +104,136 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 		},
 	}
 
+	return response, nil
+}
+
+// TakeCompressedScreenshot takes a compressed screenshot of the entire screen
+func (c *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	params := ImageCompressionParams{
+		Format:  req.Format,
+		Quality: req.Quality,
+		Scale:   req.Scale,
+	}
+
+	bounds := screenshot.GetDisplayBounds(0)
+	img, err := screenshot.CaptureRect(bounds)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert to RGBA for drawing
+	rgbaImg := image.NewRGBA(img.Bounds())
+	draw.Draw(rgbaImg, rgbaImg.Bounds(), img, image.Point{}, draw.Src)
+
+	// Draw cursor if requested
+	mouseX, mouseY := 0, 0
+	if req.ShowCursor {
+		mouseX, mouseY = getMousePosition()
+		drawCursor(rgbaImg, mouseX, mouseY)
+	}
+
+	// Encode with compression
+	imageData, err := encodeImageWithCompression(rgbaImg, params)
+	if err != nil {
+		return nil, err
+	}
+
+	base64Str := base64.StdEncoding.EncodeToString(imageData)
+
+	response := &computeruse.ScreenshotResponse{
+		Screenshot: base64Str,
+		SizeBytes:  len(imageData),
+	}
+
 	if req.ShowCursor {
 		response.CursorPosition = &computeruse.Position{
-			X: mouseX + req.X,
-			Y: mouseY + req.Y,
+			X: int(float64(mouseX) * params.Scale),
+			Y: int(float64(mouseY) * params.Scale),
 		}
 	}
 
 	return response, nil
+}
+
+// TakeCompressedRegionScreenshot takes a compressed screenshot of a specific region
+func (c *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.CompressedRegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	params := ImageCompressionParams{
+		Format:  req.Format,
+		Quality: req.Quality,
+		Scale:   req.Scale,
+	}
+
+	if err := validateScreenshotRegion(req.Width, req.Height); err != nil {
+		return nil, err
+	}
+
+	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
+	img, err := screenshot.CaptureRect(rect)
+	if err != nil {
+		return nil, fmt.Errorf("failed to capture screenshot region x=%d y=%d width=%d height=%d: %w", req.X, req.Y, req.Width, req.Height, err)
+	}
+
+	// Convert to RGBA for drawing
+	rgbaImg := image.NewRGBA(img.Bounds())
+	draw.Draw(rgbaImg, rgbaImg.Bounds(), img, image.Point{}, draw.Src)
+
+	// Draw cursor if requested and it's within the region
+	mouseX, mouseY := 0, 0
+	if req.ShowCursor {
+		absoluteMouseX, absoluteMouseY := getMousePosition()
+		mouseX = absoluteMouseX - req.X
+		mouseY = absoluteMouseY - req.Y
+
+		if mouseX >= 0 && mouseX < req.Width && mouseY >= 0 && mouseY < req.Height {
+			drawCursor(rgbaImg, mouseX, mouseY)
+		}
+	}
+
+	// Encode with compression
+	imageData, err := encodeImageWithCompression(rgbaImg, params)
+	if err != nil {
+		return nil, err
+	}
+
+	base64Str := base64.StdEncoding.EncodeToString(imageData)
+
+	response := &computeruse.ScreenshotResponse{
+		Screenshot: base64Str,
+		SizeBytes:  len(imageData),
+	}
+
+	if req.ShowCursor {
+		response.CursorPosition = &computeruse.Position{
+			X: req.X + int(float64(mouseX)*params.Scale),
+			Y: req.Y + int(float64(mouseY)*params.Scale),
+		}
+	}
+
+	return response, nil
+}
+
+// GetDisplayInfo returns information about all available displays
+func (c *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error) {
+	n := screenshot.NumActiveDisplays()
+	displays := make([]computeruse.DisplayInfo, n)
+
+	for i := 0; i < n; i++ {
+		bounds := screenshot.GetDisplayBounds(i)
+		displays[i] = computeruse.DisplayInfo{
+			ID: i,
+			Position: computeruse.Position{
+				X: bounds.Min.X,
+				Y: bounds.Min.Y,
+			},
+			Size: computeruse.Size{
+				Width:  bounds.Dx(),
+				Height: bounds.Dy(),
+			},
+			IsActive: true, // Assuming all detected displays are active
+		}
+	}
+
+	return &computeruse.DisplayInfoResponse{
+		Displays: displays,
+	}, nil
 }

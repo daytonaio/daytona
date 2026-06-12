@@ -12,7 +12,10 @@ import (
 
 // GetMousePosition returns the current mouse cursor position
 func (c *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, error) {
-	x, y := getMousePosition()
+	x, y, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MousePositionResponse{
 		Position: computeruse.Position{
@@ -32,7 +35,10 @@ func (c *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse
 	time.Sleep(50 * time.Millisecond)
 
 	// Get the mouse position after move
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MousePositionResponse{
 		Position: computeruse.Position{
@@ -44,10 +50,11 @@ func (c *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse
 
 // Click performs a mouse click at the specified coordinates
 func (c *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.MouseClickResponse, error) {
-	// Default to left button
-	if req.Button == "" {
-		req.Button = "left"
+	button, err := normalizeMouseButton(req.Button)
+	if err != nil {
+		return nil, err
 	}
+	req.Button = button
 
 	// Move mouse to position first
 	if err := setMousePosition(req.X, req.Y); err != nil {
@@ -61,7 +68,10 @@ func (c *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.Mo
 	}
 
 	// Get position after click
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MouseClickResponse{
 		Position: computeruse.Position{
@@ -85,10 +95,11 @@ func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
 
 // Drag performs a mouse drag from start to end coordinates
 func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.MouseDragResponse, error) {
-	// Default to left button
-	if req.Button == "" {
-		req.Button = "left"
+	button, err := normalizeMouseButton(req.Button)
+	if err != nil {
+		return nil, err
 	}
+	req.Button = button
 
 	// Move to start position
 	if err := setMousePosition(req.StartX, req.StartY); err != nil {
@@ -112,6 +123,16 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	if err := mouseDown(req.Button); err != nil {
 		return nil, err
 	}
+	// Mirror keyTap/mouseClick in winapi_windows.go: if anything fails while
+	// the button is held (UIPI, secure desktop, locked session), release it
+	// best-effort so it does not stay logically held system-wide and turn
+	// every subsequent move into a drag-select.
+	held := true
+	defer func() {
+		if held {
+			_ = mouseUp(req.Button)
+		}
+	}()
 	time.Sleep(300 * time.Millisecond) // Increased delay
 
 	// Move to end position while holding (smoothly)
@@ -122,10 +143,14 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	if err := mouseUp(req.Button); err != nil {
 		return nil, err
 	}
+	held = false
 	time.Sleep(50 * time.Millisecond)
 
 	// Get final position
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePositionChecked()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MouseDragResponse{
 		Position: computeruse.Position{
@@ -137,10 +162,17 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 
 // Scroll scrolls the mouse wheel at the specified coordinates
 func (c *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.ScrollResponse, error) {
-	// Default amount if not specified
-	if req.Amount == 0 {
-		req.Amount = 3
+	direction, err := normalizeScrollDirection(req.Direction)
+	if err != nil {
+		return nil, err
 	}
+	req.Direction = direction
+
+	amount, err := normalizeScrollAmount(req.Amount)
+	if err != nil {
+		return nil, err
+	}
+	req.Amount = amount
 
 	// Move mouse to scroll position
 	if err := setMousePosition(req.X, req.Y); err != nil {

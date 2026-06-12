@@ -21,13 +21,22 @@ func ValidateEnvKeys(envs map[string]string) error {
 	return validateEnvKeysPlatform(envs)
 }
 
+// ApplyEnvs layers envs onto the command's environment. A nil cmd.Env starts
+// from the daemon's environment; repeated calls accumulate instead of
+// resetting, so wrapper-extracted vars survive a later request-env
+// application (os/exec keeps the last duplicate, giving later calls
+// precedence per key).
 func ApplyEnvs(cmd *exec.Cmd, envs map[string]string) {
 	if len(envs) == 0 {
 		return
+	}
+	base := cmd.Env
+	if base == nil {
+		base = os.Environ()
 	}
 	pairs := make([]string, 0, len(envs))
 	for key, value := range envs {
 		pairs = append(pairs, fmt.Sprintf("%s=%s", key, value))
 	}
-	cmd.Env = append(os.Environ(), pairs...)
+	cmd.Env = append(base, pairs...)
 }

@@ -215,19 +215,31 @@ Note: Computer-use features will be disabled until dependencies are installed.`,
 	}
 }
 
-func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse, error) {
-	if computerUse.impl != nil {
-		return computerUse.impl, nil
-	}
+// GetComputerUse returns the cached IComputerUse client, or spawns the plugin
+// binary, publishing the fresh impl via publish under the manager lock (see
+// getOrSpawn). Concurrent callers are serialized by the manager lock:
+// exactly one spawn is ever in flight and every caller receives its result.
+func GetComputerUse(logger *slog.Logger, path string, publish func(computeruse.IComputerUse)) (computeruse.IComputerUse, error) {
+	return getOrSpawn(func() (pluginClient, computeruse.IComputerUse, error) {
+		client, impl, err := spawnPlugin(logger, path)
+		if err != nil {
+			// Return an untyped nil: wrapping a nil *plugin.Client in the
+			// pluginClient interface would make it compare non-nil.
+			return nil, nil, err
+		}
+		return client, impl, nil
+	}, publish)
+}
 
+// spawnPlugin starts the plugin binary and dispenses an IComputerUse client.
+// Callers must hold the manager lock (via getOrSpawn). On error the plugin
+// client is killed in a defer so we don't leak the child.
+func spawnPlugin(logger *slog.Logger, path string) (*plugin.Client, computeruse.IComputerUse, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("computer-use plugin not found at path: %s", path)
+		return nil, nil, fmt.Errorf("computer-use plugin not found at path: %s", path)
 	}
 
 	pluginName := filepath.Base(path)
-	pluginBasePath := filepath.Dir(path)
-
-	pluginName = strings.TrimSuffix(pluginName, ".exe")
 
 	// Pre-flight check: detect critical issues (missing shared libraries, wrong
 	// architecture, permission errors) before starting the go-plugin client.
@@ -235,7 +247,7 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 	// WaitGroup race condition in its goroutine, crashing the entire daemon.
 	pluginErr := detectPluginError(logger, path)
 	if pluginErr != nil && pluginErr.Type != "plugin" {
-		return nil, fmt.Errorf("failed to start computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
+		return nil, nil, fmt.Errorf("failed to start computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
 	}
 
 	hclogger := hclog.New(&hclog.LoggerOptions{
@@ -268,31 +280,27 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 	if err != nil {
 		pluginErr := detectPluginError(logger, path)
 		if pluginErr != nil {
-			return nil, fmt.Errorf("failed to get RPC client for computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
+			return nil, nil, fmt.Errorf("failed to get RPC client for computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
 		}
-		return nil, fmt.Errorf("failed to get RPC client for computer-use plugin: %w", err)
+		return nil, nil, fmt.Errorf("failed to get RPC client for computer-use plugin: %w", err)
 	}
 
 	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to dispense computer-use plugin: %w", err)
+		return nil, nil, fmt.Errorf("failed to dispense computer-use plugin: %w", err)
 	}
 
 	impl, ok := raw.(computeruse.IComputerUse)
 	if !ok {
-		return nil, fmt.Errorf("unexpected type from computer-use plugin")
+		return nil, nil, fmt.Errorf("unexpected type from computer-use plugin")
 	}
 
 	_, err = impl.Initialize()
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize computer-use plugin: %w", err)
+		return nil, nil, fmt.Errorf("failed to initialize computer-use plugin: %w", err)
 	}
 
 	success = true
 	logger.Info("Computer-use plugin initialized successfully")
-	computerUse.client = client
-	computerUse.impl = impl
-	computerUse.path = pluginBasePath
-
-	return impl, nil
+	return client, impl, nil
 }

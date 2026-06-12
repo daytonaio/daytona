@@ -6,12 +6,12 @@
 package common
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
 	"syscall"
+	"time"
 )
 
 // GetShell returns the path to the preferred shell on Windows.
@@ -65,23 +65,38 @@ func GetShell() string {
 	return "powershell.exe"
 }
 
-// ShellCommand builds an exec.Cmd that runs commandLine through shell.
+// NewShellCommand returns an exec.Cmd that runs command through shell.
+// An empty command yields an interactive shell invocation.
 //
-// For cmd.exe the command line must bypass Go's default per-argument
-// quoting: os/exec escapes embedded quotes as \" (MSVCRT rules), which
-// cmd.exe does not understand, so quoted arguments would reach the child
-// program with literal quote characters. Instead the raw line is passed
-// via SysProcAttr.CmdLine using `cmd /S /C "<commandLine>"` — with /S,
-// cmd strips only the outer quote pair and runs the command verbatim.
-// PowerShell parses \" natively, so the default quoting is correct there.
-func ShellCommand(shell, commandLine string) *exec.Cmd {
-	if IsPowerShell(shell) {
-		return exec.Command(shell, "-NoProfile", "-NonInteractive", "-Command", commandLine)
+// PowerShell parses the CommandLineToArgvW-style quoting Go produces for
+// argv elements (embedded quotes escaped as \"), so the command is passed
+// as a regular argument. cmd.exe does NOT understand that escaping
+// (golang/go#17149): any command containing a double quote would arrive
+// mangled. For cmd.exe the raw command line is therefore set verbatim via
+// SysProcAttr.CmdLine, as the os/exec documentation prescribes for
+// cmd.exe-style parsers.
+func NewShellCommand(shell, command string) *exec.Cmd {
+	var cmd *exec.Cmd
+	switch {
+	case command == "":
+		cmd = exec.Command(shell)
+	case IsPowerShell(shell):
+		cmd = exec.Command(shell, "-NoProfile", "-NonInteractive", "-Command", command)
+	default:
+		// cmd.Args is bypassed when SysProcAttr.CmdLine is set; keep it
+		// populated anyway so logs and debuggers show the intended invocation.
+		cmd = exec.Command(shell, "/C", command)
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			CmdLine: `"` + shell + `" /C ` + command,
+		}
 	}
-	cmd := exec.Command(shell)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		CmdLine: fmt.Sprintf(`"%s" /S /C "%s"`, shell, commandLine),
-	}
+	// I/O-drain backstop: cmd.Wait blocks until the internal pipe-copy
+	// goroutines hit EOF when Stdout/Stderr are not *os.File, so an orphaned
+	// descendant that inherited the handles (e.g. `start /B server`) would
+	// wedge the caller forever (golang/go#23019). Bound that drain phase the
+	// way childreap.Wait's hangTimeout does on Linux. childreap.Wait
+	// recovers the real exit code when the backstop fires (exec.ErrWaitDelay).
+	cmd.WaitDelay = 30 * time.Second
 	return cmd
 }
 

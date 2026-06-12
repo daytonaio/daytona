@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 
@@ -17,6 +18,10 @@ import (
 )
 
 func (s *SessionService) Create(sessionId string, isLegacy bool) error {
+	if !SupportedOnPlatform {
+		return common_errors.NewCustomError(http.StatusNotImplemented, "sessions are not supported on this platform", "NOT_IMPLEMENTED")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	cmd := exec.CommandContext(ctx, common.GetShell())

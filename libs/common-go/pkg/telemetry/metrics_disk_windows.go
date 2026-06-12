@@ -7,8 +7,8 @@ package telemetry
 
 import (
 	"os"
-	"syscall"
-	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
 func getDiskStats(path string) (*DiskStats, error) {
@@ -23,29 +23,14 @@ func getDiskStats(path string) (*DiskStats, error) {
 		path = drive + `\`
 	}
 
-	kernel32, err := syscall.LoadDLL("kernel32.dll")
-	if err != nil {
-		return nil, err
-	}
-	proc, err := kernel32.FindProc("GetDiskFreeSpaceExW")
-	if err != nil {
-		return nil, err
-	}
-
-	pathPtr, err := syscall.UTF16PtrFromString(path)
+	pathPtr, err := windows.UTF16PtrFromString(path)
 	if err != nil {
 		return nil, err
 	}
 
 	var freeBytesAvailable, totalBytes, totalFreeBytes uint64
-	r1, _, callErr := proc.Call(
-		uintptr(unsafe.Pointer(pathPtr)),
-		uintptr(unsafe.Pointer(&freeBytesAvailable)),
-		uintptr(unsafe.Pointer(&totalBytes)),
-		uintptr(unsafe.Pointer(&totalFreeBytes)),
-	)
-	if r1 == 0 {
-		return nil, callErr
+	if err := windows.GetDiskFreeSpaceEx(pathPtr, &freeBytesAvailable, &totalBytes, &totalFreeBytes); err != nil {
+		return nil, err
 	}
 
 	return &DiskStats{
