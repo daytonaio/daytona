@@ -34,15 +34,14 @@ type channelPair struct {
 	server ssh.Channel
 	// client is the channel as seen by the SSH client (OpenChannel()-returned).
 	client ssh.Channel
-	// serverConn is the server's view of the SSH connection. Its Wait() returns
-	// when the client connection dies — the signal the production watcher
-	// goroutine uses to hard-close the upstream channel.
-	serverConn *ssh.ServerConn
+	// connClosed is closed when the client connection dies — the signal the
+	// production watcher goroutine selects on to hard-close the upstream channel.
+	connClosed chan struct{}
 	// closeConns tears down both sides of the underlying TCP connection.
 	closeConns func()
 	// closeClient closes only the client-side TCP connection, simulating an
-	// abrupt SSH client disconnect (SIGKILL / network drop). This makes
-	// serverConn.Wait() return.
+	// abrupt SSH client disconnect (SIGKILL / network drop). This closes
+	// connClosed.
 	closeClient func()
 }
 
@@ -136,10 +135,19 @@ func newChannelPair(t *testing.T) *channelPair {
 		t.Fatal("timeout waiting for server to accept channel")
 	}
 
+	// Mirror handleConnection: one Wait() goroutine per connection closes
+	// connClosed for all per-channel watchers.
+	connClosed := make(chan struct{})
+	go func() {
+		serverConn := <-serverConnCh
+		_ = serverConn.Wait()
+		close(connClosed)
+	}()
+
 	return &channelPair{
 		server:     serverCh,
 		client:     clientCh,
-		serverConn: <-serverConnCh,
+		connClosed: connClosed,
 		closeConns: func() {
 			cliConn.Close() //nolint:errcheck
 			srvConn.Close() //nolint:errcheck
@@ -168,7 +176,7 @@ func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 	// clientPair simulates the gateway receiving a channel from the external SSH client.
 	// clientPair.server == clientChannel in handleChannel (gateway's server-side view).
 	// clientPair.closeClient() simulates SIGKILL: drops the TCP connection so
-	// clientPair.serverConn.Wait() returns, after which runnerChannel.Close() is called
+	// clientPair.connClosed fires, after which runnerChannel.Close() is called
 	// in the production code.
 	clientPair := newChannelPair(t)
 	defer clientPair.closeConns()
@@ -194,9 +202,14 @@ func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 		_, _ = io.Copy(runnerChannel, clientChannel)
 		runnerChannel.CloseWrite() //nolint:errcheck
 	}()
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		_ = clientPair.serverConn.Wait()
-		runnerChannel.Close() //nolint:errcheck
+		select {
+		case <-clientPair.connClosed:
+			runnerChannel.Close() //nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 
 	// Main blocking copy: runner→client.
@@ -207,8 +220,8 @@ func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 	}()
 
 	// Simulate abrupt SSH client disconnect (kill -9 / VS Code tab closed / network drop)
-	// by closing the underlying TCP connection. This makes serverConn.Wait() return,
-	// which triggers runnerChannel.Close().
+	// by closing the underlying TCP connection. This fires connClosed, which triggers
+	// runnerChannel.Close().
 	clientPair.closeClient()
 
 	select {
@@ -240,9 +253,14 @@ func TestRunnerChannelClosedAfterClientDisconnect(t *testing.T) {
 		_, _ = io.Copy(runnerChannel, clientChannel)
 		runnerChannel.CloseWrite() //nolint:errcheck
 	}()
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		_ = clientPair.serverConn.Wait()
-		runnerChannel.Close() //nolint:errcheck
+		select {
+		case <-clientPair.connClosed:
+			runnerChannel.Close() //nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 	go func() {
 		_, _ = io.Copy(clientChannel, runnerChannel)
@@ -292,9 +310,14 @@ func TestStdinEOFPreservesHalfClose(t *testing.T) {
 		_, _ = io.Copy(runnerChannel, clientChannel)
 		runnerChannel.CloseWrite() //nolint:errcheck
 	}()
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		_ = clientPair.serverConn.Wait()
-		runnerChannel.Close() //nolint:errcheck
+		select {
+		case <-clientPair.connClosed:
+			runnerChannel.Close() //nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 	go func() {
 		_, _ = io.Copy(clientChannel, runnerChannel)

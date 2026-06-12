@@ -136,14 +136,23 @@ func (s *Service) handleConnection(conn net.Conn, serverConfig *ssh.ServerConfig
 		}
 	}()
 
+	// connClosed signals per-channel watchers when the client connection dies.
+	// A single Wait() goroutine per connection lets every channel select on it
+	// instead of each blocking its own Wait() call.
+	connClosed := make(chan struct{})
+	go func() {
+		serverConn.Wait() // nolint:errcheck
+		close(connClosed)
+	}()
+
 	// Handle channels
 	for newChannel := range chans {
-		go s.handleChannel(newChannel, serverConn, sandboxId)
+		go s.handleChannel(newChannel, connClosed, sandboxId)
 	}
 }
 
 // handleChannel handles an individual SSH channel
-func (s *Service) handleChannel(newChannel ssh.NewChannel, clientConn *ssh.ServerConn, sandboxId string) {
+func (s *Service) handleChannel(newChannel ssh.NewChannel, connClosed <-chan struct{}, sandboxId string) {
 	s.log.Debug("New channel", "channelType", newChannel.ChannelType(), "sandboxID", sandboxId)
 
 	// Accept the channel from the client
@@ -230,10 +239,17 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, clientConn *ssh.Serve
 	// MSG_CHANNEL_EOF. Watch the client connection itself instead: when it dies,
 	// hard-close the sandbox channel — MSG_CHANNEL_CLOSE forces a reply, which unblocks
 	// io.Copy(clientChannel, sandboxChannel) below and lets the sandbox shell receive
-	// a hangup signal so orphaned processes exit cleanly.
+	// a hangup signal so orphaned processes exit cleanly. The watcher exits with the
+	// session (sessionDone) so goroutines don't accumulate on long-lived connections
+	// that open many channels.
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		clientConn.Wait()      // nolint:errcheck
-		sandboxChannel.Close() // nolint:errcheck
+		select {
+		case <-connClosed:
+			sandboxChannel.Close() // nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 
 	_, err = io.Copy(clientChannel, sandboxChannel)

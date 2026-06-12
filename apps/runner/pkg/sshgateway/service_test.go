@@ -36,15 +36,14 @@ type channelPair struct {
 	server ssh.Channel
 	// client is the channel as seen by the SSH client (OpenChannel()-returned).
 	client ssh.Channel
-	// serverConn is the server's view of the SSH connection. Its Wait() returns
-	// when the client connection dies — the signal the production watcher
-	// goroutine uses to hard-close the upstream channel.
-	serverConn *ssh.ServerConn
+	// connClosed is closed when the client connection dies — the signal the
+	// production watcher goroutine selects on to hard-close the upstream channel.
+	connClosed chan struct{}
 	// closeConns tears down both sides of the underlying TCP connection.
 	closeConns func()
 	// closeClient closes only the client-side TCP connection, simulating an
-	// abrupt SSH client disconnect (SIGKILL / network drop). This makes
-	// serverConn.Wait() return.
+	// abrupt SSH client disconnect (SIGKILL / network drop). This closes
+	// connClosed.
 	closeClient func()
 }
 
@@ -138,10 +137,19 @@ func newChannelPair(t *testing.T) *channelPair {
 		t.Fatal("timeout waiting for server to accept channel")
 	}
 
+	// Mirror handleConnection: one Wait() goroutine per connection closes
+	// connClosed for all per-channel watchers.
+	connClosed := make(chan struct{})
+	go func() {
+		serverConn := <-serverConnCh
+		_ = serverConn.Wait()
+		close(connClosed)
+	}()
+
 	return &channelPair{
 		server:     serverCh,
 		client:     clientCh,
-		serverConn: <-serverConnCh,
+		connClosed: connClosed,
 		closeConns: func() {
 			cliConn.Close() //nolint:errcheck
 			srvConn.Close() //nolint:errcheck
@@ -171,7 +179,7 @@ func TestClientDisconnectClosesSandboxChannel(t *testing.T) {
 	// clientPair simulates the runner receiving a channel from the gateway.
 	// clientPair.server == clientChannel in Service.handleChannel (runner's server-side view).
 	// clientPair.closeClient() simulates the gateway dropping (external client died):
-	// closes the TCP connection so clientPair.serverConn.Wait() returns, after which
+	// closes the TCP connection so clientPair.connClosed fires, after which
 	// sandboxChannel.Close() is called in the production code.
 	clientPair := newChannelPair(t)
 	defer clientPair.closeConns()
@@ -197,9 +205,14 @@ func TestClientDisconnectClosesSandboxChannel(t *testing.T) {
 		_, _ = io.Copy(sandboxChannel, clientChannel)
 		sandboxChannel.CloseWrite() //nolint:errcheck
 	}()
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		_ = clientPair.serverConn.Wait()
-		sandboxChannel.Close() //nolint:errcheck
+		select {
+		case <-clientPair.connClosed:
+			sandboxChannel.Close() //nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 
 	// Main blocking copy: sandbox→client.
@@ -240,9 +253,14 @@ func TestSandboxChannelReceivesCloseOnClientDisconnect(t *testing.T) {
 		_, _ = io.Copy(sandboxChannel, clientChannel)
 		sandboxChannel.CloseWrite() //nolint:errcheck
 	}()
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		_ = clientPair.serverConn.Wait()
-		sandboxChannel.Close() //nolint:errcheck
+		select {
+		case <-clientPair.connClosed:
+			sandboxChannel.Close() //nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 	go func() {
 		_, _ = io.Copy(clientChannel, sandboxChannel)
@@ -292,9 +310,14 @@ func TestStdinEOFPreservesHalfClose(t *testing.T) {
 		_, _ = io.Copy(sandboxChannel, clientChannel)
 		sandboxChannel.CloseWrite() //nolint:errcheck
 	}()
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		_ = clientPair.serverConn.Wait()
-		sandboxChannel.Close() //nolint:errcheck
+		select {
+		case <-clientPair.connClosed:
+			sandboxChannel.Close() //nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 	go func() {
 		_, _ = io.Copy(clientChannel, sandboxChannel)

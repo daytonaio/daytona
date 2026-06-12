@@ -248,13 +248,22 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 		}
 	}()
 
+	// connClosed signals per-channel watchers when the client connection dies.
+	// A single Wait() goroutine per connection lets every channel select on it
+	// instead of each blocking its own Wait() call.
+	connClosed := make(chan struct{})
+	go func() {
+		serverConn.Wait() // nolint:errcheck
+		close(connClosed)
+	}()
+
 	// Handle channels
 	for newChannel := range chans {
-		go g.handleChannel(newChannel, serverConn, runnerID, runnerDomain, token, sandboxId)
+		go g.handleChannel(newChannel, connClosed, runnerID, runnerDomain, token, sandboxId)
 	}
 }
 
-func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, clientConn *ssh.ServerConn, runnerID string, runnerDomain string, token string, sandboxId string) {
+func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, connClosed <-chan struct{}, runnerID string, runnerDomain string, token string, sandboxId string) {
 	log.Printf("New channel: %s for runner: %s", newChannel.ChannelType(), runnerID)
 
 	// Accept the channel from the client
@@ -343,10 +352,16 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, clientConn *ssh.Se
 	// ignore MSG_CHANNEL_EOF. Watch the client connection itself instead: when it dies,
 	// hard-close the runner channel — MSG_CHANNEL_CLOSE forces a reply from the runner,
 	// which unblocks io.Copy(clientChannel, runnerChannel) below and lets defer cancel()
-	// stop the keepalive ticker.
+	// stop the keepalive ticker. The watcher exits with the session (sessionDone) so
+	// goroutines don't accumulate on long-lived connections that open many channels.
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
 	go func() {
-		clientConn.Wait()     // nolint:errcheck
-		runnerChannel.Close() // nolint:errcheck
+		select {
+		case <-connClosed:
+			runnerChannel.Close() // nolint:errcheck
+		case <-sessionDone:
+		}
 	}()
 
 	keepAliveContext, cancel := context.WithCancel(context.Background())
