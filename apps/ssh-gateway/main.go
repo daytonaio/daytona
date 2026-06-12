@@ -248,13 +248,22 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 		}
 	}()
 
+	// connClosed signals per-channel watchers when the client connection dies.
+	// A single Wait() goroutine per connection lets every channel select on it
+	// instead of each blocking its own Wait() call.
+	connClosed := make(chan struct{})
+	go func() {
+		serverConn.Wait() // nolint:errcheck
+		close(connClosed)
+	}()
+
 	// Handle channels
 	for newChannel := range chans {
-		go g.handleChannel(newChannel, runnerID, runnerDomain, token, sandboxId)
+		go g.handleChannel(newChannel, connClosed, runnerID, runnerDomain, token, sandboxId)
 	}
 }
 
-func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, runnerDomain string, token string, sandboxId string) {
+func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, connClosed <-chan struct{}, runnerID string, runnerDomain string, token string, sandboxId string) {
 	log.Printf("New channel: %s for runner: %s", newChannel.ChannelType(), runnerID)
 
 	// Accept the channel from the client
@@ -325,11 +334,33 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 		}
 	}()
 
-	// Bidirectional data forwarding
+	// Bidirectional data forwarding.
+	// On client EOF, half-close the runner channel (MSG_CHANNEL_EOF via CloseWrite)
+	// so the remote command can keep writing output and deliver its exit-status
+	// (RFC 4254 half-close, e.g. `cat file | ssh host cmd`).
 	go func() {
 		_, err := io.Copy(runnerChannel, clientChannel)
 		if err != nil {
 			log.Printf("Client to runner copy error: %v", err)
+		}
+		runnerChannel.CloseWrite() // nolint:errcheck
+	}()
+
+	// The SSH library surfaces client transport failures as io.EOF on channel reads,
+	// so the copy above cannot tell a clean stdin EOF from a SIGKILL/network drop, and
+	// long-lived remote processes (VS Code Remote Server, JetBrains Gateway) silently
+	// ignore MSG_CHANNEL_EOF. Watch the client connection itself instead: when it dies,
+	// hard-close the runner channel — MSG_CHANNEL_CLOSE forces a reply from the runner,
+	// which unblocks io.Copy(clientChannel, runnerChannel) below and lets defer cancel()
+	// stop the keepalive ticker. The watcher exits with the session (sessionDone) so
+	// goroutines don't accumulate on long-lived connections that open many channels.
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
+	go func() {
+		select {
+		case <-connClosed:
+			runnerChannel.Close() // nolint:errcheck
+		case <-sessionDone:
 		}
 	}()
 
