@@ -412,6 +412,7 @@ staticClients:
   - id: daytona
     redirectURIs:
       - 'https://DOMAIN_PH'
+      - 'https://DOMAIN_PH/dashboard'
       - 'https://DOMAIN_PH/api/oauth2-redirect.html'
       - 'https://DOMAIN_PH/callback'
       - 'https://proxy.DOMAIN_PH/callback'
