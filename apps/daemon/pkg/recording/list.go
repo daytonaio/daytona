@@ -16,9 +16,10 @@ import (
 func (s *RecordingService) ListRecordings() ([]Recording, error) {
 	recordings := []Recording{}
 
-	// Add active recordings
+	// Add in-memory recordings (live and failed); snapshot to avoid racing
+	// the wait goroutine's failure transition.
 	for item := range s.activeRecordings.IterBuffered() {
-		recordings = append(recordings, *item.Val.recording)
+		recordings = append(recordings, item.Val.snapshot())
 	}
 
 	// Scan recordings directory for completed recordings

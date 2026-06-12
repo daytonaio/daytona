@@ -104,34 +104,42 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 	done := make(chan error, 1)
 
 	// Store active recording
-	s.activeRecordings.Set(id, &activeRecording{
+	active := &activeRecording{
 		recording: recording,
 		cmd:       cmd,
 		stdinPipe: stdinPipe,
 		done:      done,
-	})
+	}
+	s.activeRecordings.Set(id, active)
 
 	// Start a goroutine to wait for the process and handle unexpected exits.
 	// Reap (not Wait): we don't read stdout/stderr; ffmpeg output goes to a
 	// file via -y target, so no Go I/O goroutines to drain.
 	go func() {
 		exitCode, err := childreap.Reap(cmd)
-		done <- err // Signal the done channel with the result
 
-		// Atomically remove from active recordings if still there
-		if active, exists := s.activeRecordings.Pop(id); exists {
-			// childreap.Reap returns (exitCode, nil) for *exec.ExitError
-			// cases — unlike the original cmd.Wait, where non-zero exits
-			// surfaced as err != nil. We have to check both here so a
-			// crashed/killed ffmpeg (OOM, SIGKILL, corrupt input, etc.)
-			// still gets marked failed instead of silently retaining
-			// whatever status it had.
-			if err != nil || exitCode != 0 {
+		// childreap.Reap returns (exitCode, nil) for *exec.ExitError cases —
+		// unlike cmd.Wait, where non-zero exits surface as err != nil — so
+		// check both to catch a crashed/killed ffmpeg (OOM, SIGKILL, corrupt
+		// input, etc.).
+		if err != nil || exitCode != 0 {
+			// Unexpected exit (a graceful 'q' stop yields exit code 0 and the
+			// entry is already popped by StopRecording). Keep the entry
+			// visible as "failed" so list/stop/delete can report and clean it
+			// up instead of having it silently vanish. markFailed must happen
+			// before the done send so StopRecording observes the failure.
+			if active, exists := s.activeRecordings.Get(id); exists {
 				s.logger.Warn("Recording ffmpeg process exited unexpectedly",
 					"id", id, "exitCode", exitCode, "error", err)
-				active.recording.Status = "failed"
+				active.markFailed(time.Now())
 			}
+		} else {
+			// Clean exit outside StopRecording (e.g. external quit): drop the
+			// active entry; the finalized file on disk represents it.
+			s.activeRecordings.Pop(id)
 		}
+
+		done <- err // Signal the done channel with the result
 	}()
 
 	return recording, nil
