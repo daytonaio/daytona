@@ -444,6 +444,19 @@ export const CreateSandboxSheet = ({
     () => snapshotsData?.items.filter((snapshot) => snapshot.state === SnapshotState.ACTIVE) ?? DEFAULT_SNAPSHOTS,
     [snapshotsData?.items],
   )
+  const defaultSnapshotFromList = useMemo(
+    () => snapshots.find((snapshot) => snapshot.name === config.defaultSnapshot),
+    [config.defaultSnapshot, snapshots],
+  )
+  const shouldFetchDefaultSnapshot = Boolean(snapshotsData && !defaultSnapshotFromList)
+  const { data: defaultSnapshotData, isFetching: defaultSnapshotFetching } = useSnapshotsQuery(
+    {
+      page: 1,
+      pageSize: 10,
+      filters: { name: config.defaultSnapshot },
+    },
+    { enabled: shouldFetchDefaultSnapshot },
+  )
 
   const snapshotsSearchPending = snapshotSearchValue !== debouncedSnapshotSearchValue
   const snapshotsSearchActive = snapshotsFetching || snapshotsSearchPending
@@ -558,10 +571,26 @@ export const CreateSandboxSheet = ({
 
     return snapshots.find((snapshot) => snapshot.name === selectedSnapshotName) ?? selectedSnapshotOption
   }, [selectedSnapshotName, selectedSnapshotOption, snapshots])
+  const defaultSnapshot =
+    defaultSnapshotFromList ??
+    defaultSnapshotData?.items.find(
+      (snapshot) => snapshot.state === SnapshotState.ACTIVE && snapshot.name === config.defaultSnapshot,
+    )
+  const effectiveSnapshot = useMemo(() => {
+    if (selectedSnapshot) {
+      return selectedSnapshot
+    }
+
+    if (!selectedSnapshotName || selectedSnapshotName === config.defaultSnapshot) {
+      return defaultSnapshot
+    }
+
+    return undefined
+  }, [config.defaultSnapshot, defaultSnapshot, selectedSnapshot, selectedSnapshotName])
   const getRegionsForSnapshot = useCallback(
     (snapshot?: SnapshotDto) => {
       if (!snapshot) {
-        return regions
+        return []
       }
 
       if (!snapshot.regionIds?.length) {
@@ -578,9 +607,12 @@ export const CreateSandboxSheet = ({
       return regions
     }
 
-    return getRegionsForSnapshot(selectedSnapshot)
-  }, [getRegionsForSnapshot, regions, selectedSnapshot, selectedSource])
-  const regionsDisabled = loadingRegions || (selectedSource === Source.SNAPSHOT && snapshotsSearchActive)
+    return getRegionsForSnapshot(effectiveSnapshot)
+  }, [effectiveSnapshot, getRegionsForSnapshot, regions, selectedSource])
+  const defaultSnapshotNeeded = !selectedSnapshotName || selectedSnapshotName === config.defaultSnapshot
+  const defaultSnapshotLoading = defaultSnapshotNeeded && !defaultSnapshot && defaultSnapshotFetching
+  const regionsDisabled =
+    loadingRegions || (selectedSource === Source.SNAPSHOT && (snapshotsSearchActive || defaultSnapshotLoading))
 
   const setRegionFromAvailableRegions = useCallback(
     (nextRegions: Region[]) => {
@@ -643,7 +675,6 @@ export const CreateSandboxSheet = ({
   }, [formDefaultValues, resetForm, resetCreateSandboxMutation])
 
   const handleDefaultSnapshotSelect = useCallback(() => {
-    const defaultSnapshot = snapshots.find((snapshot) => snapshot.name === config.defaultSnapshot)
     if (defaultSnapshot) {
       handleSnapshotChange(defaultSnapshot)
     } else {
@@ -652,7 +683,7 @@ export const CreateSandboxSheet = ({
       setSnapshotSearchValue(config.defaultSnapshot)
     }
     setSnapshotSelectOpen(false)
-  }, [config.defaultSnapshot, form, handleSnapshotChange, snapshots])
+  }, [config.defaultSnapshot, defaultSnapshot, form, handleSnapshotChange])
 
   const handleEnvFileImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1055,7 +1086,7 @@ export const CreateSandboxSheet = ({
                           placeholder={
                             loadingRegions
                               ? 'Loading regions...'
-                              : selectedSource === Source.SNAPSHOT && snapshotsSearchActive
+                              : selectedSource === Source.SNAPSHOT && (snapshotsSearchActive || defaultSnapshotLoading)
                                 ? 'Loading snapshot regions...'
                                 : snapshotFilteredRegions.length === 0
                                   ? 'No regions available'
@@ -1072,9 +1103,9 @@ export const CreateSandboxSheet = ({
                       </SelectContent>
                     </Select>
                     <FieldDescription>
-                      {selectedSource === Source.SNAPSHOT && selectedSnapshot && snapshotFilteredRegions.length === 0
+                      {selectedSource === Source.SNAPSHOT && effectiveSnapshot && snapshotFilteredRegions.length === 0
                         ? 'The selected snapshot is not available in any selectable region.'
-                        : selectedSource === Source.SNAPSHOT && selectedSnapshot?.regionIds?.length
+                        : selectedSource === Source.SNAPSHOT && effectiveSnapshot?.regionIds?.length
                           ? 'Only regions where the selected snapshot is available are shown.'
                           : 'The region where the sandbox will be created.'}
                     </FieldDescription>
