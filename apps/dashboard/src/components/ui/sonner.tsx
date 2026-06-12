@@ -36,12 +36,15 @@ const Toaster = ({ className, toastOptions, ...props }: ToasterProps) => {
                 toastOptions?.classNames?.toast,
               ),
               icon: cn('mt-0.5', toastOptions?.classNames?.icon),
-              content: cn('gap-1', toastOptions?.classNames?.content),
+              content: cn('gap-1 select-text cursor-text', toastOptions?.classNames?.content),
               title: cn(
-                'font-medium group-data-[type=error]:text-destructive group-data-[type=success]:text-success group-data-[type=warning]:text-warning group-data-[type=info]:text-foreground',
+                'select-text cursor-text font-medium group-data-[type=error]:text-destructive group-data-[type=success]:text-success group-data-[type=warning]:text-warning group-data-[type=info]:text-foreground',
                 toastOptions?.classNames?.title,
               ),
-              description: cn('whitespace-pre-line !text-muted-foreground', toastOptions?.classNames?.description),
+              description: cn(
+                'select-text cursor-text whitespace-pre-line !text-muted-foreground',
+                toastOptions?.classNames?.description,
+              ),
               actionButton: cn(
                 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
                 toastOptions?.classNames?.actionButton,
