@@ -1,0 +1,34 @@
+apps/ssh-gateway/main.go
+  s_812d7b9fffdd1e::t_2ecc717457bdf4 251-259,262,266
+  s_812d7b9fffdd1e::t_1e54fe2d8783ad 355-358,360-364
+apps/runner/pkg/sshgateway/service_test.go
+  s_812d7b9fffdd1e::t_f78fc8d2d1af4b 182
+  s_812d7b9fffdd1e::t_84bd1e28e4e585 39-41,45-46
+  s_812d7b9fffdd1e::t_68c4a410e7a361 208-209,211-215,256-257,259-263,313-314,316-320
+  s_812d7b9fffdd1e::t_fb291a564540ab 140-148,152
+apps/runner/pkg/sshgateway/service.go
+  s_812d7b9fffdd1e::t_1737222a48314b 242-246,248-252
+  s_812d7b9fffdd1e::t_9941496a50d6e0 139-147,150,155
+apps/ssh-gateway/teardown_test.go
+  s_812d7b9fffdd1e::t_9fd36ec38c0a88 138-146,150
+  s_812d7b9fffdd1e::t_e97edfb3edd681 205-206,208-212,256-257,259-263,313-314,316-320
+  s_812d7b9fffdd1e::t_47d12c8d712840 223-224
+  s_812d7b9fffdd1e::t_604cce2e172af2 37-39,43-44
+  s_812d7b9fffdd1e::t_89f8f99d048095 179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c10a646cb00455134f699cea4f73b033eed3d25b",
+  "prompts": {},
+  "sessions": {
+    "s_812d7b9fffdd1e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca9a8bf8-3b8e-453a-a0de-16f5d1f922ab",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
