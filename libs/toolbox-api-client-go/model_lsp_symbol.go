@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -24,6 +23,7 @@ type LspSymbol struct {
 	Kind int32 `json:"kind"`
 	Location LspLocation `json:"location"`
 	Name string `json:"name"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _LspSymbol LspSymbol
@@ -133,6 +133,11 @@ func (o LspSymbol) ToMap() (map[string]interface{}, error) {
 	toSerialize["kind"] = o.Kind
 	toSerialize["location"] = o.Location
 	toSerialize["name"] = o.Name
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -162,15 +167,22 @@ func (o *LspSymbol) UnmarshalJSON(data []byte) (err error) {
 
 	varLspSymbol := _LspSymbol{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varLspSymbol)
+	err = json.Unmarshal(data, &varLspSymbol)
 
 	if err != nil {
 		return err
 	}
 
 	*o = LspSymbol(varLspSymbol)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "kind")
+		delete(additionalProperties, "location")
+		delete(additionalProperties, "name")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

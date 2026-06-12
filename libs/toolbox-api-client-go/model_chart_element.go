@@ -36,7 +36,10 @@ type ChartElement struct {
 	Value *string `json:"value,omitempty"`
 	XLabel *string `json:"x_label,omitempty"`
 	YLabel *string `json:"y_label,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ChartElement ChartElement
 
 // NewChartElement instantiates a new ChartElement object
 // This constructor will assign default values to properties that have it defined,
@@ -660,7 +663,49 @@ func (o ChartElement) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.YLabel) {
 		toSerialize["y_label"] = o.YLabel
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ChartElement) UnmarshalJSON(data []byte) (err error) {
+	varChartElement := _ChartElement{}
+
+	err = json.Unmarshal(data, &varChartElement)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ChartElement(varChartElement)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "angle")
+		delete(additionalProperties, "first_quartile")
+		delete(additionalProperties, "group")
+		delete(additionalProperties, "label")
+		delete(additionalProperties, "max")
+		delete(additionalProperties, "median")
+		delete(additionalProperties, "min")
+		delete(additionalProperties, "outliers")
+		delete(additionalProperties, "png")
+		delete(additionalProperties, "points")
+		delete(additionalProperties, "radius")
+		delete(additionalProperties, "third_quartile")
+		delete(additionalProperties, "title")
+		delete(additionalProperties, "type")
+		delete(additionalProperties, "value")
+		delete(additionalProperties, "x_label")
+		delete(additionalProperties, "y_label")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableChartElement struct {

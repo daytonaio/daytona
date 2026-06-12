@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -26,6 +25,7 @@ type LspCompletionParams struct {
 	PathToProject string `json:"pathToProject"`
 	Position LspPosition `json:"position"`
 	Uri string `json:"uri"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _LspCompletionParams LspCompletionParams
@@ -196,6 +196,11 @@ func (o LspCompletionParams) ToMap() (map[string]interface{}, error) {
 	toSerialize["pathToProject"] = o.PathToProject
 	toSerialize["position"] = o.Position
 	toSerialize["uri"] = o.Uri
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -226,15 +231,24 @@ func (o *LspCompletionParams) UnmarshalJSON(data []byte) (err error) {
 
 	varLspCompletionParams := _LspCompletionParams{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varLspCompletionParams)
+	err = json.Unmarshal(data, &varLspCompletionParams)
 
 	if err != nil {
 		return err
 	}
 
 	*o = LspCompletionParams(varLspCompletionParams)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "context")
+		delete(additionalProperties, "languageId")
+		delete(additionalProperties, "pathToProject")
+		delete(additionalProperties, "position")
+		delete(additionalProperties, "uri")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

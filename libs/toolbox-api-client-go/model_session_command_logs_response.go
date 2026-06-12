@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -24,6 +23,7 @@ type SessionCommandLogsResponse struct {
 	Output string `json:"output"`
 	Stderr string `json:"stderr"`
 	Stdout string `json:"stdout"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SessionCommandLogsResponse SessionCommandLogsResponse
@@ -133,6 +133,11 @@ func (o SessionCommandLogsResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize["output"] = o.Output
 	toSerialize["stderr"] = o.Stderr
 	toSerialize["stdout"] = o.Stdout
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -162,15 +167,22 @@ func (o *SessionCommandLogsResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varSessionCommandLogsResponse := _SessionCommandLogsResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSessionCommandLogsResponse)
+	err = json.Unmarshal(data, &varSessionCommandLogsResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SessionCommandLogsResponse(varSessionCommandLogsResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "output")
+		delete(additionalProperties, "stderr")
+		delete(additionalProperties, "stdout")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

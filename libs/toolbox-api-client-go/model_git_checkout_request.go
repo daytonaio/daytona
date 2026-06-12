@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &GitCheckoutRequest{}
 type GitCheckoutRequest struct {
 	Branch string `json:"branch"`
 	Path string `json:"path"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitCheckoutRequest GitCheckoutRequest
@@ -106,6 +106,11 @@ func (o GitCheckoutRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["branch"] = o.Branch
 	toSerialize["path"] = o.Path
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -134,15 +139,21 @@ func (o *GitCheckoutRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitCheckoutRequest := _GitCheckoutRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitCheckoutRequest)
+	err = json.Unmarshal(data, &varGitCheckoutRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitCheckoutRequest(varGitCheckoutRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "branch")
+		delete(additionalProperties, "path")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -21,7 +21,10 @@ var _ MappedNullable = &ProcessErrorsResponse{}
 type ProcessErrorsResponse struct {
 	Errors *string `json:"errors,omitempty"`
 	ProcessName *string `json:"processName,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ProcessErrorsResponse ProcessErrorsResponse
 
 // NewProcessErrorsResponse instantiates a new ProcessErrorsResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -120,7 +123,34 @@ func (o ProcessErrorsResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ProcessName) {
 		toSerialize["processName"] = o.ProcessName
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ProcessErrorsResponse) UnmarshalJSON(data []byte) (err error) {
+	varProcessErrorsResponse := _ProcessErrorsResponse{}
+
+	err = json.Unmarshal(data, &varProcessErrorsResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ProcessErrorsResponse(varProcessErrorsResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "errors")
+		delete(additionalProperties, "processName")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableProcessErrorsResponse struct {

@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -26,6 +25,7 @@ type GitCommitInfo struct {
 	Hash string `json:"hash"`
 	Message string `json:"message"`
 	Timestamp string `json:"timestamp"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitCommitInfo GitCommitInfo
@@ -187,6 +187,11 @@ func (o GitCommitInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["hash"] = o.Hash
 	toSerialize["message"] = o.Message
 	toSerialize["timestamp"] = o.Timestamp
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -218,15 +223,24 @@ func (o *GitCommitInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varGitCommitInfo := _GitCommitInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitCommitInfo)
+	err = json.Unmarshal(data, &varGitCommitInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitCommitInfo(varGitCommitInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "author")
+		delete(additionalProperties, "email")
+		delete(additionalProperties, "hash")
+		delete(additionalProperties, "message")
+		delete(additionalProperties, "timestamp")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

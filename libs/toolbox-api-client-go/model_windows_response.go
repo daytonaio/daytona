@@ -20,7 +20,10 @@ var _ MappedNullable = &WindowsResponse{}
 // WindowsResponse struct for WindowsResponse
 type WindowsResponse struct {
 	Windows []WindowInfo `json:"windows,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _WindowsResponse WindowsResponse
 
 // NewWindowsResponse instantiates a new WindowsResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -84,7 +87,33 @@ func (o WindowsResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Windows) {
 		toSerialize["windows"] = o.Windows
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *WindowsResponse) UnmarshalJSON(data []byte) (err error) {
+	varWindowsResponse := _WindowsResponse{}
+
+	err = json.Unmarshal(data, &varWindowsResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = WindowsResponse(varWindowsResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "windows")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableWindowsResponse struct {

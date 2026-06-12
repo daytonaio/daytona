@@ -20,7 +20,10 @@ var _ MappedNullable = &PortList{}
 // PortList struct for PortList
 type PortList struct {
 	Ports []int32 `json:"ports,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _PortList PortList
 
 // NewPortList instantiates a new PortList object
 // This constructor will assign default values to properties that have it defined,
@@ -84,7 +87,33 @@ func (o PortList) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Ports) {
 		toSerialize["ports"] = o.Ports
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *PortList) UnmarshalJSON(data []byte) (err error) {
+	varPortList := _PortList{}
+
+	err = json.Unmarshal(data, &varPortList)
+
+	if err != nil {
+		return err
+	}
+
+	*o = PortList(varPortList)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "ports")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullablePortList struct {

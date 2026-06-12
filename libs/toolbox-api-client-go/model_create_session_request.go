@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &CreateSessionRequest{}
 // CreateSessionRequest struct for CreateSessionRequest
 type CreateSessionRequest struct {
 	SessionId string `json:"sessionId"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateSessionRequest CreateSessionRequest
@@ -79,6 +79,11 @@ func (o CreateSessionRequest) MarshalJSON() ([]byte, error) {
 func (o CreateSessionRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["sessionId"] = o.SessionId
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *CreateSessionRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateSessionRequest := _CreateSessionRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateSessionRequest)
+	err = json.Unmarshal(data, &varCreateSessionRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateSessionRequest(varCreateSessionRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "sessionId")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -24,6 +23,7 @@ type GitAddRequest struct {
 	// files to add (use . for all files)
 	Files []string `json:"files"`
 	Path string `json:"path"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitAddRequest GitAddRequest
@@ -107,6 +107,11 @@ func (o GitAddRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["files"] = o.Files
 	toSerialize["path"] = o.Path
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -135,15 +140,21 @@ func (o *GitAddRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitAddRequest := _GitAddRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitAddRequest)
+	err = json.Unmarshal(data, &varGitAddRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitAddRequest(varGitAddRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "files")
+		delete(additionalProperties, "path")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

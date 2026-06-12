@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -30,6 +29,7 @@ type PtySessionInfo struct {
 	// Whether this session uses lazy start
 	LazyStart bool `json:"lazyStart"`
 	Rows int32 `json:"rows"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PtySessionInfo PtySessionInfo
@@ -269,6 +269,11 @@ func (o PtySessionInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["lazyStart"] = o.LazyStart
 	toSerialize["rows"] = o.Rows
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -303,15 +308,27 @@ func (o *PtySessionInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varPtySessionInfo := _PtySessionInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPtySessionInfo)
+	err = json.Unmarshal(data, &varPtySessionInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PtySessionInfo(varPtySessionInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "active")
+		delete(additionalProperties, "cols")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "cwd")
+		delete(additionalProperties, "envs")
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "lazyStart")
+		delete(additionalProperties, "rows")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

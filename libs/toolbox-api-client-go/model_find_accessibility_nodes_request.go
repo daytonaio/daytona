@@ -27,7 +27,10 @@ type FindAccessibilityNodesRequest struct {
 	Role *string `json:"role,omitempty"`
 	Scope *string `json:"scope,omitempty"`
 	States []string `json:"states,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _FindAccessibilityNodesRequest FindAccessibilityNodesRequest
 
 // NewFindAccessibilityNodesRequest instantiates a new FindAccessibilityNodesRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -301,7 +304,39 @@ func (o FindAccessibilityNodesRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.States) {
 		toSerialize["states"] = o.States
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *FindAccessibilityNodesRequest) UnmarshalJSON(data []byte) (err error) {
+	varFindAccessibilityNodesRequest := _FindAccessibilityNodesRequest{}
+
+	err = json.Unmarshal(data, &varFindAccessibilityNodesRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = FindAccessibilityNodesRequest(varFindAccessibilityNodesRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "limit")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "nameMatch")
+		delete(additionalProperties, "pid")
+		delete(additionalProperties, "role")
+		delete(additionalProperties, "scope")
+		delete(additionalProperties, "states")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableFindAccessibilityNodesRequest struct {

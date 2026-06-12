@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &PtyCreateResponse{}
 // PtyCreateResponse struct for PtyCreateResponse
 type PtyCreateResponse struct {
 	SessionId string `json:"sessionId"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PtyCreateResponse PtyCreateResponse
@@ -79,6 +79,11 @@ func (o PtyCreateResponse) MarshalJSON() ([]byte, error) {
 func (o PtyCreateResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["sessionId"] = o.SessionId
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *PtyCreateResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varPtyCreateResponse := _PtyCreateResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPtyCreateResponse)
+	err = json.Unmarshal(data, &varPtyCreateResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PtyCreateResponse(varPtyCreateResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "sessionId")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

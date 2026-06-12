@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &ExecuteResponse{}
 type ExecuteResponse struct {
 	ExitCode *int32 `json:"exitCode,omitempty"`
 	Result string `json:"result"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ExecuteResponse ExecuteResponse
@@ -115,6 +115,11 @@ func (o ExecuteResponse) ToMap() (map[string]interface{}, error) {
 		toSerialize["exitCode"] = o.ExitCode
 	}
 	toSerialize["result"] = o.Result
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -142,15 +147,21 @@ func (o *ExecuteResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varExecuteResponse := _ExecuteResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varExecuteResponse)
+	err = json.Unmarshal(data, &varExecuteResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ExecuteResponse(varExecuteResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "exitCode")
+		delete(additionalProperties, "result")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &ListBranchResponse{}
 // ListBranchResponse struct for ListBranchResponse
 type ListBranchResponse struct {
 	Branches []string `json:"branches"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ListBranchResponse ListBranchResponse
@@ -79,6 +79,11 @@ func (o ListBranchResponse) MarshalJSON() ([]byte, error) {
 func (o ListBranchResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["branches"] = o.Branches
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *ListBranchResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varListBranchResponse := _ListBranchResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varListBranchResponse)
+	err = json.Unmarshal(data, &varListBranchResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ListBranchResponse(varListBranchResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "branches")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

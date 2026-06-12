@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &Session{}
 type Session struct {
 	Commands []Command `json:"commands"`
 	SessionId string `json:"sessionId"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Session Session
@@ -106,6 +106,11 @@ func (o Session) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["commands"] = o.Commands
 	toSerialize["sessionId"] = o.SessionId
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -134,15 +139,21 @@ func (o *Session) UnmarshalJSON(data []byte) (err error) {
 
 	varSession := _Session{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSession)
+	err = json.Unmarshal(data, &varSession)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Session(varSession)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "commands")
+		delete(additionalProperties, "sessionId")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -22,7 +22,10 @@ type KeyboardPressRequest struct {
 	Key *string `json:"key,omitempty"`
 	// ctrl, alt, shift, cmd
 	Modifiers []string `json:"modifiers,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _KeyboardPressRequest KeyboardPressRequest
 
 // NewKeyboardPressRequest instantiates a new KeyboardPressRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -121,7 +124,34 @@ func (o KeyboardPressRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Modifiers) {
 		toSerialize["modifiers"] = o.Modifiers
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *KeyboardPressRequest) UnmarshalJSON(data []byte) (err error) {
+	varKeyboardPressRequest := _KeyboardPressRequest{}
+
+	err = json.Unmarshal(data, &varKeyboardPressRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = KeyboardPressRequest(varKeyboardPressRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "key")
+		delete(additionalProperties, "modifiers")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableKeyboardPressRequest struct {

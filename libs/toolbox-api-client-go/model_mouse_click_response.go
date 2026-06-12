@@ -21,7 +21,10 @@ var _ MappedNullable = &MouseClickResponse{}
 type MouseClickResponse struct {
 	X *int32 `json:"x,omitempty"`
 	Y *int32 `json:"y,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _MouseClickResponse MouseClickResponse
 
 // NewMouseClickResponse instantiates a new MouseClickResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -120,7 +123,34 @@ func (o MouseClickResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Y) {
 		toSerialize["y"] = o.Y
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *MouseClickResponse) UnmarshalJSON(data []byte) (err error) {
+	varMouseClickResponse := _MouseClickResponse{}
+
+	err = json.Unmarshal(data, &varMouseClickResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = MouseClickResponse(varMouseClickResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableMouseClickResponse struct {

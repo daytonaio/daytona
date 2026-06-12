@@ -24,7 +24,10 @@ type MouseClickRequest struct {
 	Double *bool `json:"double,omitempty"`
 	X *int32 `json:"x,omitempty"`
 	Y *int32 `json:"y,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _MouseClickRequest MouseClickRequest
 
 // NewMouseClickRequest instantiates a new MouseClickRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -193,7 +196,36 @@ func (o MouseClickRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Y) {
 		toSerialize["y"] = o.Y
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *MouseClickRequest) UnmarshalJSON(data []byte) (err error) {
+	varMouseClickRequest := _MouseClickRequest{}
+
+	err = json.Unmarshal(data, &varMouseClickRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = MouseClickRequest(varMouseClickRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "button")
+		delete(additionalProperties, "double")
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableMouseClickRequest struct {

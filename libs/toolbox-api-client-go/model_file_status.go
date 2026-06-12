@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -25,6 +24,7 @@ type FileStatus struct {
 	Name string `json:"name"`
 	Staging Status `json:"staging"`
 	Worktree Status `json:"worktree"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _FileStatus FileStatus
@@ -160,6 +160,11 @@ func (o FileStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize["name"] = o.Name
 	toSerialize["staging"] = o.Staging
 	toSerialize["worktree"] = o.Worktree
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -190,15 +195,23 @@ func (o *FileStatus) UnmarshalJSON(data []byte) (err error) {
 
 	varFileStatus := _FileStatus{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varFileStatus)
+	err = json.Unmarshal(data, &varFileStatus)
 
 	if err != nil {
 		return err
 	}
 
 	*o = FileStatus(varFileStatus)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "extra")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "staging")
+		delete(additionalProperties, "worktree")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

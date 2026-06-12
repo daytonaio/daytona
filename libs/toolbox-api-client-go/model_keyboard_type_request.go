@@ -22,7 +22,10 @@ type KeyboardTypeRequest struct {
 	// milliseconds between keystrokes
 	Delay *int32 `json:"delay,omitempty"`
 	Text *string `json:"text,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _KeyboardTypeRequest KeyboardTypeRequest
 
 // NewKeyboardTypeRequest instantiates a new KeyboardTypeRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -121,7 +124,34 @@ func (o KeyboardTypeRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Text) {
 		toSerialize["text"] = o.Text
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *KeyboardTypeRequest) UnmarshalJSON(data []byte) (err error) {
+	varKeyboardTypeRequest := _KeyboardTypeRequest{}
+
+	err = json.Unmarshal(data, &varKeyboardTypeRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = KeyboardTypeRequest(varKeyboardTypeRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "delay")
+		delete(additionalProperties, "text")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableKeyboardTypeRequest struct {

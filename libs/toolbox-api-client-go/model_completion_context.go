@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &CompletionContext{}
 type CompletionContext struct {
 	TriggerCharacter *string `json:"triggerCharacter,omitempty"`
 	TriggerKind int32 `json:"triggerKind"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CompletionContext CompletionContext
@@ -115,6 +115,11 @@ func (o CompletionContext) ToMap() (map[string]interface{}, error) {
 		toSerialize["triggerCharacter"] = o.TriggerCharacter
 	}
 	toSerialize["triggerKind"] = o.TriggerKind
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -142,15 +147,21 @@ func (o *CompletionContext) UnmarshalJSON(data []byte) (err error) {
 
 	varCompletionContext := _CompletionContext{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCompletionContext)
+	err = json.Unmarshal(data, &varCompletionContext)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CompletionContext(varCompletionContext)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "triggerCharacter")
+		delete(additionalProperties, "triggerKind")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

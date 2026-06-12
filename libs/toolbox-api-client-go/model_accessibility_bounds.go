@@ -23,7 +23,10 @@ type AccessibilityBounds struct {
 	Width *int32 `json:"width,omitempty"`
 	X *int32 `json:"x,omitempty"`
 	Y *int32 `json:"y,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _AccessibilityBounds AccessibilityBounds
 
 // NewAccessibilityBounds instantiates a new AccessibilityBounds object
 // This constructor will assign default values to properties that have it defined,
@@ -192,7 +195,36 @@ func (o AccessibilityBounds) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Y) {
 		toSerialize["y"] = o.Y
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *AccessibilityBounds) UnmarshalJSON(data []byte) (err error) {
+	varAccessibilityBounds := _AccessibilityBounds{}
+
+	err = json.Unmarshal(data, &varAccessibilityBounds)
+
+	if err != nil {
+		return err
+	}
+
+	*o = AccessibilityBounds(varAccessibilityBounds)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "height")
+		delete(additionalProperties, "width")
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableAccessibilityBounds struct {
