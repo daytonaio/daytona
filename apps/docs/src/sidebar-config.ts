@@ -738,6 +738,18 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath(
+            '/docs/guides/model-serving/vllm-gpu-model-serving',
+            locale
+          ),
+          label: t('sidebarconfig.vllm'),
+          disablePagination: true,
+          attrs: {
+            icon: 'vllm.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/rlm', locale),
           label: t('sidebarconfig.rlm'),
           disablePagination: true,
