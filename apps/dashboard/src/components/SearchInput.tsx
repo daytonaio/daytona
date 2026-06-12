@@ -27,7 +27,7 @@ function SearchInput({
   containerClassName,
   clearButtonAriaLabel = 'Clear search',
   debounced = false,
-  debounceMs = 500,
+  debounceMs = 300,
   onClear,
   onValueChange,
   value,

@@ -11,11 +11,12 @@ import {
   useRegisterPage,
   type CommandConfig,
 } from '@/components/CommandPalette'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { cn } from '@/lib/utils'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import { BookOpen, Code2, Container, Layers, Terminal } from 'lucide-react'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo } from 'react'
 
 const ALGOLIA_APP_ID = import.meta.env.VITE_ALGOLIA_APP_ID
 const ALGOLIA_API_KEY = import.meta.env.VITE_ALGOLIA_API_KEY
@@ -73,15 +74,6 @@ export const searchDocumentation = async (query: string): Promise<SearchResults>
     cli: getHits(1),
     sdk: getHits(2),
   }
-}
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value)
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay)
-    return () => clearTimeout(handler)
-  }, [value, delay])
-  return debouncedValue
 }
 
 export const useDocsSearchQuery = ({ search, enabled }: { search: string; enabled: boolean }) => {
@@ -156,7 +148,7 @@ export function useDocsSearchCommands() {
 
   const { setShouldFilter, setIsLoading } = useCommandPaletteActions()
   const enabled = activePageId === 'search-docs' && docSearchEnabled
-  const debouncedQuery = useDebounce(search, 300)
+  const debouncedQuery = useDebouncedValue(search, 300)
 
   const { data, isError, isFetching } = useDocsSearchQuery({
     search: debouncedQuery,
