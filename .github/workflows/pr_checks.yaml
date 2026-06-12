@@ -144,6 +144,28 @@ jobs:
           go build ./...
           go vet ./...
 
+  test-windows:
+    if: github.repository == 'daytonaio/daytona'
+    name: Go test (Windows)
+    runs-on: blacksmith-4vcpu-windows-2025
+    env:
+      CGO_ENABLED: '0'
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: go.work
+          cache: true
+          cache-dependency-path: '**/go.sum'
+      - name: Test computer-use
+        working-directory: libs/computer-use
+        run: go test -count=1 -v ./pkg/computeruse/...
+      - name: Test daemon (recording + computeruse manager)
+        working-directory: apps/daemon
+        run: go test -count=1 -v ./pkg/recording/... ./pkg/toolbox/computeruse/manager/...
+
   lint-python:
     if: github.repository == 'daytonaio/daytona'
     name: Python lint
