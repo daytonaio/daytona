@@ -14003,6 +14003,7 @@ components:
       - building
       - pending
       - pulling
+      - snapshotting
       - active
       - inactive
       - error

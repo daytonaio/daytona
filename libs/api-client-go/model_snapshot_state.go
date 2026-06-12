@@ -23,6 +23,7 @@ const (
 	SNAPSHOTSTATE_BUILDING SnapshotState = "building"
 	SNAPSHOTSTATE_PENDING SnapshotState = "pending"
 	SNAPSHOTSTATE_PULLING SnapshotState = "pulling"
+	SNAPSHOTSTATE_SNAPSHOTTING SnapshotState = "snapshotting"
 	SNAPSHOTSTATE_ACTIVE SnapshotState = "active"
 	SNAPSHOTSTATE_INACTIVE SnapshotState = "inactive"
 	SNAPSHOTSTATE_ERROR SnapshotState = "error"
@@ -36,6 +37,7 @@ var AllowedSnapshotStateEnumValues = []SnapshotState{
 	"building",
 	"pending",
 	"pulling",
+	"snapshotting",
 	"active",
 	"inactive",
 	"error",

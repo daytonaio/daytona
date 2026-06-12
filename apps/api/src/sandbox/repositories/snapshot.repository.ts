@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DataSource } from 'typeorm'
+import { DataSource, FindOptionsWhere } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotRegion } from '../entities/snapshot-region.entity'
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
@@ -84,6 +84,54 @@ export class SnapshotRepository extends BaseRepository<Snapshot> {
         throw new SnapshotConflictError()
       }
       snapshot.updatedAt = new Date()
+    })
+
+    await this.emitUpdateEvents(snapshot, previousSnapshot)
+
+    return snapshot
+  }
+
+  /**
+   * Updates a snapshot only if it still matches the given condition,
+   * locking the row for the duration of the transaction so concurrent
+   * state transitions can't overwrite each other.
+   *
+   * @param id - The ID of the snapshot to update.
+   * @param params.updateData - The partial data to update.
+   * @param params.whereCondition - The condition the snapshot must still satisfy for the update to be applied.
+   *
+   * @returns The updated snapshot.
+   * @throws {SnapshotConflictError} If the snapshot doesn't satisfy the condition.
+   */
+  async updateWhere(
+    id: string,
+    params: { updateData: Partial<Snapshot>; whereCondition: FindOptionsWhere<Snapshot> },
+  ): Promise<Snapshot> {
+    const { updateData, whereCondition } = params
+
+    let previousSnapshot: Snapshot
+
+    const snapshot = await this.dataSource.transaction(async (entityManager) => {
+      // buildInfo is an eager relation; skip it as FOR UPDATE can't be applied
+      // to the nullable side of an outer join
+      const existing = await entityManager.findOne(Snapshot, {
+        where: { ...whereCondition, id },
+        lock: { mode: 'pessimistic_write' },
+        relations: [],
+        loadEagerRelations: false,
+      })
+
+      if (!existing) {
+        throw new SnapshotConflictError()
+      }
+
+      previousSnapshot = { ...existing }
+      Object.assign(existing, updateData)
+
+      await entityManager.update(Snapshot, id, updateData)
+      existing.updatedAt = new Date()
+
+      return existing
     })
 
     await this.emitUpdateEvents(snapshot, previousSnapshot)
