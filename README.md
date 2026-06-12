@@ -1,3 +1,5 @@
+> Daytona open source is no longer supported or maintained. Daytona resources now live at [github.com/daytona](https://github.com/daytona). [Read more]().
+
 &nbsp;
 
 <div align="center">
