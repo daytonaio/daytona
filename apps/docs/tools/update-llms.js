@@ -262,7 +262,7 @@ const generateLlmsTxtFile = docsData => {
     '',
     '# Daytona',
     '',
-    'Daytona is an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](https://daytona.io/docs/en/sandboxes.md) — with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.',
+    'Daytona is a secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](https://daytona.io/docs/en/sandboxes.md) — with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.',
     '',
     'Sandboxes are the core component of the Daytona platform, spinning up in under 90ms from code to execution and running any code in Python, TypeScript, and JavaScript. Built on OCI/Docker compatibility, massive parallelization, and unlimited persistence, sandboxes deliver consistent, predictable environments for agent workflows.',
     '',
