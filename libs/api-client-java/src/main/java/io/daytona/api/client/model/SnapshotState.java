@@ -35,6 +35,8 @@ public enum SnapshotState {
   
   PULLING("pulling"),
   
+  SNAPSHOTTING("snapshotting"),
+  
   ACTIVE("active"),
   
   INACTIVE("inactive"),

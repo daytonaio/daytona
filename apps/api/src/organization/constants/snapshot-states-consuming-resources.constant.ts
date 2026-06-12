@@ -9,5 +9,6 @@ export const SNAPSHOT_STATES_CONSUMING_RESOURCES: SnapshotState[] = [
   SnapshotState.BUILDING,
   SnapshotState.PENDING,
   SnapshotState.PULLING,
+  SnapshotState.SNAPSHOTTING,
   SnapshotState.ACTIVE,
 ]

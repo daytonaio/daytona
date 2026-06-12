@@ -27,7 +27,7 @@ import { ResourceType } from '../enums/resource-type.enum'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
-import { persistSnapshotFromSandbox } from '../utils/persist-snapshot-from-sandbox.util'
+import { completeSnapshotFromSandbox, failSnapshotFromSandbox } from '../utils/persist-snapshot-from-sandbox.util'
 import { Runner } from '../entities/runner.entity'
 
 /**
@@ -802,78 +802,103 @@ export class JobStateHandlerService {
         entity: sandbox,
       })
 
-      if (job.status === JobStatus.COMPLETED) {
-        const payload = job.getPayload<{ name?: string; registry?: { url?: string; project?: string } }>()
+      const payload = job.getPayload<{ name?: string; registry?: { url?: string; project?: string } }>()
+      const snapshotName = payload?.name
+
+      if (!snapshotName) {
+        this.logger.error(`SNAPSHOT_SANDBOX job ${job.id} payload missing snapshot name`)
+        return
+      }
+
+      if (job.status === JobStatus.FAILED) {
+        try {
+          await failSnapshotFromSandbox(
+            {
+              snapshotRepository: this.snapshotRepository,
+              snapshotRunnerRepository: this.snapshotRunnerRepository,
+              eventEmitter: this.eventEmitter,
+            },
+            {
+              organizationId: sandbox.organizationId,
+              name: snapshotName,
+              errorReason: job.errorMessage || 'Failed to create snapshot from sandbox',
+            },
+          )
+        } catch (error) {
+          this.logger.error(`Failed to mark snapshot as errored for SNAPSHOT_SANDBOX job ${job.id}:`, error)
+        }
+      } else if (job.status === JobStatus.COMPLETED) {
         const metadata = job.getResultMetadata()
-        const snapshotName = payload?.name
         const hash =
           (typeof metadata?.hash === 'string' && metadata.hash) ||
           (typeof metadata?.Hash === 'string' && metadata.Hash) ||
           undefined
 
-        if (!snapshotName) {
-          this.logger.error(`SNAPSHOT_SANDBOX job ${job.id} payload missing snapshot name`)
-        } else {
-          // Prefer the ref the runner actually pushed. Otherwise reconstruct
-          // from `hash`, matching the runner-side canonical form
-          // (apps/runner/cmd/runner/config/config.go): registry-based VM /
-          // container snapshots use `<registry>/<project>/daytona-<hash>:daytona`,
-          // Windows VM snapshots have no registry and use bare `daytona-<hash>`.
-          const refFromRunner =
-            (typeof metadata?.ref === 'string' && metadata.ref) ||
-            (typeof metadata?.Ref === 'string' && metadata.Ref) ||
-            undefined
+        // Prefer the ref the runner actually pushed. Otherwise reconstruct
+        // from `hash`, matching the runner-side canonical form
+        // (apps/runner/cmd/runner/config/config.go): registry-based VM /
+        // container snapshots use `<registry>/<project>/daytona-<hash>:daytona`,
+        // Windows VM snapshots have no registry and use bare `daytona-<hash>`.
+        const refFromRunner =
+          (typeof metadata?.ref === 'string' && metadata.ref) ||
+          (typeof metadata?.Ref === 'string' && metadata.Ref) ||
+          undefined
 
-          let snapshotRef = refFromRunner
-          if (!snapshotRef && hash) {
-            const cleanHash = hash.replace(/^sha256:/, '')
-            if (payload?.registry?.url) {
-              const project = payload.registry.project || 'daytona'
-              snapshotRef = `${payload.registry.url}/${project}/daytona-${cleanHash}:daytona`
-            } else {
-              snapshotRef = `daytona-${cleanHash}`
-            }
+        let snapshotRef = refFromRunner
+        if (!snapshotRef && hash) {
+          const cleanHash = hash.replace(/^sha256:/, '')
+          if (payload?.registry?.url) {
+            const project = payload.registry.project || 'daytona'
+            snapshotRef = `${payload.registry.url}/${project}/daytona-${cleanHash}:daytona`
+          } else {
+            snapshotRef = `daytona-${cleanHash}`
           }
-          if (!snapshotRef) {
-            this.logger.error(
-              `SNAPSHOT_SANDBOX job ${job.id} returned neither ref nor hash; falling back to snapshot name`,
+        }
+        if (!snapshotRef) {
+          this.logger.error(
+            `SNAPSHOT_SANDBOX job ${job.id} returned neither ref nor hash; falling back to snapshot name`,
+          )
+          snapshotRef = snapshotName
+        }
+
+        const rawSnapshotSizeGB = metadata?.sizeGB ?? metadata?.size_gb
+        const snapshotSizeGB =
+          typeof rawSnapshotSizeGB === 'number' && Number.isFinite(rawSnapshotSizeGB)
+            ? rawSnapshotSizeGB
+            : typeof rawSnapshotSizeGB === 'string' && Number.isFinite(Number(rawSnapshotSizeGB))
+              ? Number(rawSnapshotSizeGB)
+              : undefined
+
+        try {
+          const completed = await completeSnapshotFromSandbox(
+            {
+              snapshotRepository: this.snapshotRepository,
+              snapshotRunnerRepository: this.snapshotRunnerRepository,
+              eventEmitter: this.eventEmitter,
+            },
+            {
+              organizationId: sandbox.organizationId,
+              name: snapshotName,
+              ref: snapshotRef,
+              runnerId: job.runnerId,
+              regionId: sandbox.region,
+              sandboxClass: sandbox.sandboxClass,
+              cpu: sandbox.cpu,
+              gpu: sandbox.gpu,
+              gpuType: sandbox.gpuType ?? null,
+              mem: sandbox.mem,
+              disk: sandbox.disk,
+              sizeGB: snapshotSizeGB,
+            },
+          )
+
+          if (!completed) {
+            this.logger.warn(
+              `Snapshot "${snapshotName}" for SNAPSHOT_SANDBOX job ${job.id} is no longer in the snapshotting state; skipping activation`,
             )
-            snapshotRef = snapshotName
           }
-
-          const rawSnapshotSizeGB = metadata?.sizeGB ?? metadata?.size_gb
-          const snapshotSizeGB =
-            typeof rawSnapshotSizeGB === 'number' && Number.isFinite(rawSnapshotSizeGB)
-              ? rawSnapshotSizeGB
-              : typeof rawSnapshotSizeGB === 'string' && Number.isFinite(Number(rawSnapshotSizeGB))
-                ? Number(rawSnapshotSizeGB)
-                : undefined
-
-          try {
-            await persistSnapshotFromSandbox(
-              {
-                snapshotRepository: this.snapshotRepository,
-                snapshotRunnerRepository: this.snapshotRunnerRepository,
-                eventEmitter: this.eventEmitter,
-              },
-              {
-                organizationId: sandbox.organizationId,
-                name: snapshotName,
-                ref: snapshotRef,
-                runnerId: job.runnerId,
-                regionId: sandbox.region,
-                sandboxClass: sandbox.sandboxClass,
-                cpu: sandbox.cpu,
-                gpu: sandbox.gpu,
-                gpuType: sandbox.gpuType ?? null,
-                mem: sandbox.mem,
-                disk: sandbox.disk,
-                sizeGB: snapshotSizeGB,
-              },
-            )
-          } catch (error) {
-            this.logger.error(`Failed to persist snapshot from SNAPSHOT_SANDBOX job ${job.id}:`, error)
-          }
+        } catch (error) {
+          this.logger.error(`Failed to persist snapshot from SNAPSHOT_SANDBOX job ${job.id}:`, error)
         }
       }
     } catch (error) {

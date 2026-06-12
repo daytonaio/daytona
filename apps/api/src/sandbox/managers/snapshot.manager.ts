@@ -889,6 +889,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         case SnapshotState.BUILDING:
           syncState = await this.handleCheckInitialRunnerSnapshot(snapshot)
           break
+        case SnapshotState.SNAPSHOTTING:
+          syncState = await this.handleSnapshotStateSnapshotting(snapshot)
+          break
         case SnapshotState.REMOVING:
           syncState = await this.handleSnapshotStateRemoving(snapshot)
           break
@@ -947,6 +950,24 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         this.logger.warn(errorMessage)
       })
     }
+  }
+
+  /**
+   * Snapshot-from-sandbox entries are driven to ACTIVE/ERROR by the runner
+   * job state handler (v2) or by the API background driver (v0), not by this
+   * manager. This handler is only a backstop that errors out entries left
+   * behind by an API crash or a lost runner job.
+   */
+  async handleSnapshotStateSnapshotting(snapshot: Snapshot): Promise<SyncState> {
+    // Slightly longer than the SNAPSHOT_SANDBOX job timeout (120 minutes) so
+    // the job state handler always gets the first chance to resolve the entry
+    const timeoutMinutes = 180
+    const timeoutMs = timeoutMinutes * 60 * 1000
+    if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
+      await this.updateSnapshotState(snapshot, SnapshotState.ERROR, 'Timeout while creating snapshot from sandbox')
+    }
+
+    return DONT_SYNC_AGAIN
   }
 
   async handleSnapshotStateRemoving(snapshot: Snapshot): Promise<SyncState> {

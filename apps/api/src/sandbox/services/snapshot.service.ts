@@ -59,8 +59,12 @@ import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import {
-  persistSnapshotFromSandbox,
-  PersistSnapshotFromSandboxParams,
+  createSnapshotFromSandboxEntry,
+  CreateSnapshotFromSandboxEntryParams,
+  completeSnapshotFromSandbox,
+  CompleteSnapshotFromSandboxParams,
+  failSnapshotFromSandbox,
+  FailSnapshotFromSandboxParams,
 } from '../utils/persist-snapshot-from-sandbox.util'
 import { getRunnerSandboxClass } from '../utils/sandbox-class.util'
 import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
@@ -405,8 +409,30 @@ export class SnapshotService {
     }
   }
 
-  async persistSnapshotFromSandbox(params: PersistSnapshotFromSandboxParams): Promise<Snapshot> {
-    return persistSnapshotFromSandbox(
+  async createSnapshotFromSandboxEntry(params: CreateSnapshotFromSandboxEntryParams): Promise<Snapshot> {
+    return createSnapshotFromSandboxEntry(
+      {
+        snapshotRepository: this.snapshotRepository,
+        snapshotRunnerRepository: this.snapshotRunnerRepository,
+        eventEmitter: this.eventEmitter,
+      },
+      params,
+    )
+  }
+
+  async completeSnapshotFromSandbox(params: CompleteSnapshotFromSandboxParams): Promise<Snapshot | null> {
+    return completeSnapshotFromSandbox(
+      {
+        snapshotRepository: this.snapshotRepository,
+        snapshotRunnerRepository: this.snapshotRunnerRepository,
+        eventEmitter: this.eventEmitter,
+      },
+      params,
+    )
+  }
+
+  async failSnapshotFromSandbox(params: FailSnapshotFromSandboxParams): Promise<Snapshot | null> {
+    return failSnapshotFromSandbox(
       {
         snapshotRepository: this.snapshotRepository,
         snapshotRunnerRepository: this.snapshotRunnerRepository,
