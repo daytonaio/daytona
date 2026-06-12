@@ -52,29 +52,15 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 	if err != nil {
 		return nil, common_errors.NewBadRequestError(fmt.Errorf("failed to create log file: %w", err))
 	}
+	// Close immediately: the handle exists only to create/truncate the file.
+	// Holding it across the poll loop blocks Windows writers (sharing violation)
+	// and Delete's RemoveAll.
+	logFile.Close()
 
-	defer logFile.Close()
-
-	cmdFilePath := filepath.Join(logDir, "cmd.sh")
-	if err := os.WriteFile(cmdFilePath, []byte(cmd), 0600); err != nil {
-		return nil, common_errors.NewBadRequestError(fmt.Errorf("failed to write command file: %w", err))
+	cmdToExec, err := buildCommandInvocation(logDir, logFilePath, exitCodeFilePath, command.InputFilePath(session.Dir(s.configDir)), cmd, async)
+	if err != nil {
+		return nil, common_errors.NewBadRequestError(err)
 	}
-
-	inputPipeCommand := `cat /dev/null > "$ip" &`
-	if async {
-		inputPipeCommand = `while :; do sleep 3600; done > "$ip" &`
-	}
-
-	cmdToExec := fmt.Sprintf(cmdWrapperFormat+"\n",
-		logFilePath, // %q  -> log
-		logDir,      // %q  -> dir
-		command.InputFilePath(session.Dir(s.configDir)), // %q  -> input
-		toOctalEscapes(log.STDOUT_PREFIX),               // %s  -> stdout prefix
-		toOctalEscapes(log.STDERR_PREFIX),               // %s  -> stderr prefix
-		inputPipeCommand,                                // %s  -> stdin behavior
-		cmdFilePath,                                     // %q  -> command file path
-		exitCodeFilePath,                                // %q
-	)
 
 	_, err = session.stdinWriter.Write([]byte(cmdToExec))
 	if err != nil {
@@ -108,7 +94,13 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 				return nil, common_errors.NewBadRequestError(fmt.Errorf("failed to read exit code file: %w", err))
 			}
 
-			exitCodeInt, err := strconv.Atoi(strings.TrimRight(string(exitCode), "\n"))
+			// The writer creates the exit-code file before flushing its content;
+			// an empty read means the write is still in flight, not a result.
+			if strings.TrimSpace(string(exitCode)) == "" {
+				time.Sleep(50 * time.Millisecond)
+				continue
+			}
+			exitCodeInt, err := strconv.Atoi(strings.TrimSpace(string(exitCode)))
 			if err != nil {
 				return nil, common_errors.NewBadRequestError(fmt.Errorf("failed to convert exit code to int: %w", err))
 			}
@@ -184,54 +176,3 @@ func findNextMarker(data []byte, from int, prefixLen int) int {
 	}
 	return len(data)
 }
-
-func toOctalEscapes(b []byte) string {
-	out := ""
-	for _, c := range b {
-		out += fmt.Sprintf("\\%03o", c) // e.g. 0x01 → \001
-	}
-	return out
-}
-
-var cmdWrapperFormat string = `
-{
-	log=%q
-	dir=%q
-
-	# per-command FIFOs
-	sp="$dir/stdout.pipe"
-	ep="$dir/stderr.pipe"
-	ip=%q
-	
-	rm -f "$sp" "$ep" "$ip" && mkfifo "$sp" "$ep" "$ip" || exit 1
-
-	cleanup() { rm -f "$sp" "$ep" "$ip"; }
-	trap 'cleanup' EXIT HUP INT TERM
-
-  # prefix each stream and append to shared log
-	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$sp" ) >> "$log" & r1=$!
-	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$ep" ) >> "$log" & r2=$!
-
-	# Sync commands should see EOF immediately; async commands keep stdin open for SendInput.
-	%s
-	ip_pid=$!
-
-	# Run your command from file (avoids heredoc parsing issues with pipe-fed shells)
-	{ . %q; } < "$ip" > "$sp" 2> "$ep"
-	_ec=$?
-
-	# Stop the stdin holder so it doesn't outlive the command
-	kill "$ip_pid" 2>/dev/null; wait "$ip_pid" 2>/dev/null
-
-	# drain labelers (cleanup via trap)
-	wait "$r1" "$r2"
-
-	# Write exit code only after labelers have flushed all output to the log file.
-	# Previously echo "$?" ran before wait, creating a race where clients polling
-	# the exit-code file would read an empty/incomplete log.
-	echo "$_ec" >> %q
-
-	# Ensure unlink even if the waits failed
-	cleanup
-}
-`

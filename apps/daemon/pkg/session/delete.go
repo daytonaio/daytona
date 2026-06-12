@@ -50,7 +50,7 @@ func (s *SessionService) terminateSession(ctx context.Context, session *session)
 
 	// Signal the whole process group (negative pid). Falls back to the tree
 	// walker for any descendants that escaped the group via setpgid/setsid.
-	_ = syscall.Kill(-pid, syscall.SIGTERM)
+	killProcessGroup(pid, syscall.SIGTERM)
 	_ = s.signalProcessTree(pid, syscall.SIGTERM)
 
 	// Wait for graceful termination
@@ -61,7 +61,7 @@ func (s *SessionService) terminateSession(ctx context.Context, session *session)
 	}
 
 	s.logger.DebugContext(ctx, "Session timeout, sending SIGKILL to process group", "sessionId", session.id)
-	_ = syscall.Kill(-pid, syscall.SIGKILL)
+	killProcessGroup(pid, syscall.SIGKILL)
 	_ = s.signalProcessTree(pid, syscall.SIGKILL)
 	err := session.cmd.Process.Kill()
 	s.reapSession(session)

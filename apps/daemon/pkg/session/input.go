@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -16,6 +17,10 @@ import (
 // SendInput sends data to the session's stdin for a specific running command
 // This enables interactive command input for sessions
 func (s *SessionService) SendInput(sessionId, commandId string, data string) error {
+	if runtime.GOOS == "windows" {
+		return common_errors.NewBadRequestError(errors.New("interactive session input is not supported on Windows: session commands run with stdin attached to NUL"))
+	}
+
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
 		return common_errors.NewNotFoundError(errors.New("session not found"))

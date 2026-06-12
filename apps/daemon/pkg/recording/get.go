@@ -7,7 +7,7 @@ package recording
 func (s *RecordingService) GetRecording(id string) (*Recording, error) {
 	// First check active recordings
 	if active, exists := s.activeRecordings.Get(id); exists {
-		recording := *active.recording
+		recording := active.snapshot()
 		return &recording, nil
 	}
 

@@ -16,7 +16,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"path"
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -25,18 +24,12 @@ import (
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/recording"
 	session_svc "github.com/daytonaio/daemon/pkg/session"
-	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/daytonaio/daemon/pkg/toolbox/computeruse/manager"
-	recordingcontroller "github.com/daytonaio/daemon/pkg/toolbox/computeruse/recording"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
-	"github.com/daytonaio/daemon/pkg/toolbox/lsp"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/coderun"
-	"github.com/daytonaio/daemon/pkg/toolbox/process/interpreter"
-	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
 	sloggin "github.com/samber/slog-gin"
@@ -56,7 +49,6 @@ type ServerConfig struct {
 	Logger                *slog.Logger
 	WorkDir               string
 	ConfigDir             string
-	ComputerUse           computeruse.IComputerUse
 	SandboxId             string
 	OtelEndpoint          *string
 	SessionService        *session_svc.SessionService
@@ -86,7 +78,6 @@ func NewServer(config ServerConfig) *server {
 
 type server struct {
 	WorkDir               string
-	ComputerUse           computeruse.IComputerUse
 	SandboxId             string
 	logger                *slog.Logger
 	otelEndpoint          *string
@@ -209,29 +200,9 @@ func (s *server) Start() error {
 			sessionGroup.POST("/:sessionId/command/:commandId/input", sessionController.SendInput)
 			sessionGroup.GET("/:sessionId/command/:commandId/logs", sessionController.GetSessionCommandLogs)
 		}
-
-		// PTY endpoints
-		ptyController := pty.NewPTYController(s.logger, s.WorkDir)
-		ptyGroup := processController.Group("/pty")
-		{
-			ptyGroup.GET("", ptyController.ListPTYSessions)
-			ptyGroup.POST("", ptyController.CreatePTYSession)
-			ptyGroup.GET("/:sessionId", ptyController.GetPTYSession)
-			ptyGroup.DELETE("/:sessionId", ptyController.DeletePTYSession)
-			ptyGroup.GET("/:sessionId/connect", ptyController.ConnectPTYSession)
-			ptyGroup.POST("/:sessionId/resize", ptyController.ResizePTYSession)
-		}
-
-		// Interpreter endpoints
-		interpreterController := interpreter.NewInterpreterController(s.logger, s.WorkDir)
-		interpreterGroup := processController.Group("/interpreter")
-		{
-			interpreterGroup.POST("/context", interpreterController.CreateContext)
-			interpreterGroup.GET("/context", interpreterController.ListContexts)
-			interpreterGroup.DELETE("/context/:id", interpreterController.DeleteContext)
-			interpreterGroup.GET("/execute", interpreterController.Execute)
-		}
 	}
+
+	s.registerPlatformRoutes(r)
 
 	gitController := r.Group("/git")
 	{
@@ -247,106 +218,6 @@ func (s *server) Start() error {
 		gitController.POST("/commit", git.CommitChanges)
 		gitController.POST("/pull", git.PullChanges)
 		gitController.POST("/push", git.PushChanges)
-	}
-
-	lspLogger := s.logger.With(slog.String("component", "lsp_service"))
-	lspController := r.Group("/lsp")
-	{
-		//	server process
-		lspController.POST("/start", lsp.Start(lspLogger))
-		lspController.POST("/stop", lsp.Stop(lspLogger))
-
-		//	lsp operations
-		lspController.POST("/completions", lsp.Completions(lspLogger))
-		lspController.POST("/did-open", lsp.DidOpen(lspLogger))
-		lspController.POST("/did-close", lsp.DidClose(lspLogger))
-
-		lspController.GET("/document-symbols", lsp.DocumentSymbols(lspLogger))
-		lspController.GET("/workspacesymbols", lsp.WorkspaceSymbols(lspLogger))
-	}
-
-	lazyCU := computeruse.NewLazyComputerUse()
-	s.ComputerUse = lazyCU
-
-	go func() {
-		// Initialize plugin-based computer use lazily in a background goroutine
-		pluginPath := "/usr/local/lib/daytona-computer-use"
-		// Fallback to local config directory for development
-		if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
-			pluginPath = path.Join(s.configDir, "daytona-computer-use")
-		}
-
-		impl, err := manager.GetComputerUse(s.logger, pluginPath)
-		if err != nil {
-			s.logger.Error("Computer-Use error", "error", err)
-			s.logger.Info("Continuing without computer-use functionality...")
-			return
-		}
-		lazyCU.Set(impl)
-		s.logger.Info("Computer-use plugin loaded successfully")
-	}()
-
-	// Register computer-use endpoints with lazy check middleware
-	computerUseController := r.Group("/computeruse")
-	{
-		computerUseHandler := computeruse.Handler{
-			ComputerUse: lazyCU,
-		}
-
-		cuRoutes := computerUseController.Group("/", computeruse.LazyCheckMiddleware(lazyCU))
-
-		// Computer use status endpoint
-		cuRoutes.GET("/status", computeruse.WrapStatusHandler(lazyCU.GetStatus))
-
-		// Computer use management endpoints
-		cuRoutes.POST("/start", computerUseHandler.StartComputerUse)
-		cuRoutes.POST("/stop", computerUseHandler.StopComputerUse)
-		cuRoutes.GET("/process-status", computerUseHandler.GetComputerUseStatus)
-		cuRoutes.GET("/process/:processName/status", computerUseHandler.GetProcessStatus)
-		cuRoutes.POST("/process/:processName/restart", computerUseHandler.RestartProcess)
-		cuRoutes.GET("/process/:processName/logs", computerUseHandler.GetProcessLogs)
-		cuRoutes.GET("/process/:processName/errors", computerUseHandler.GetProcessErrors)
-
-		// Screenshot endpoints
-		cuRoutes.GET("/screenshot", computeruse.WrapScreenshotHandler(lazyCU.TakeScreenshot))
-		cuRoutes.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(lazyCU.TakeRegionScreenshot))
-		cuRoutes.GET("/screenshot/compressed", computeruse.WrapCompressedScreenshotHandler(lazyCU.TakeCompressedScreenshot))
-		cuRoutes.GET("/screenshot/region/compressed", computeruse.WrapCompressedRegionScreenshotHandler(lazyCU.TakeCompressedRegionScreenshot))
-
-		// Mouse control endpoints
-		cuRoutes.GET("/mouse/position", computeruse.WrapMousePositionHandler(lazyCU.GetMousePosition))
-		cuRoutes.POST("/mouse/move", computeruse.WrapMoveMouseHandler(lazyCU.MoveMouse))
-		cuRoutes.POST("/mouse/click", computeruse.WrapClickHandler(lazyCU.Click))
-		cuRoutes.POST("/mouse/drag", computeruse.WrapDragHandler(lazyCU.Drag))
-		cuRoutes.POST("/mouse/scroll", computeruse.WrapScrollHandler(lazyCU.Scroll))
-
-		// Keyboard control endpoints
-		cuRoutes.POST("/keyboard/type", computeruse.WrapTypeTextHandler(lazyCU.TypeText))
-		cuRoutes.POST("/keyboard/key", computeruse.WrapPressKeyHandler(lazyCU.PressKey))
-		cuRoutes.POST("/keyboard/hotkey", computeruse.WrapPressHotkeyHandler(lazyCU.PressHotkey))
-
-		// Display info endpoints
-		cuRoutes.GET("/display/info", computeruse.WrapDisplayInfoHandler(lazyCU.GetDisplayInfo))
-		cuRoutes.GET("/display/windows", computeruse.WrapWindowsHandler(lazyCU.GetWindows))
-
-		// Accessibility (AT-SPI) endpoints
-		cuRoutes.GET("/a11y/tree", computeruse.WrapGetAccessibilityTreeHandler(lazyCU.GetAccessibilityTree))
-		cuRoutes.POST("/a11y/find", computeruse.WrapFindAccessibilityNodesHandler(lazyCU.FindAccessibilityNodes))
-		cuRoutes.POST("/a11y/node/focus", computeruse.WrapFocusAccessibilityNodeHandler(lazyCU.FocusAccessibilityNode))
-		cuRoutes.POST("/a11y/node/invoke", computeruse.WrapInvokeAccessibilityNodeHandler(lazyCU.InvokeAccessibilityNode))
-		cuRoutes.POST("/a11y/node/value", computeruse.WrapSetAccessibilityNodeValueHandler(lazyCU.SetAccessibilityNodeValue))
-	}
-
-	// Recording endpoints - always registered, independent of computer-use plugin
-	recordingController := recordingcontroller.NewRecordingController(s.recordingService)
-	recordingsGroup := computerUseController.Group("/recordings")
-	{
-		recordingsGroup.POST("/start", recordingController.StartRecording)
-		recordingsGroup.POST("/stop", recordingController.StopRecording)
-		recordingsGroup.GET("", recordingController.ListRecordings)
-		recordingsGroup.GET("/:id", recordingController.GetRecording)
-		recordingsGroup.GET("/:id/download", recordingController.DownloadRecording)
-		recordingsGroup.DELETE("/:id", recordingController.DeleteRecording)
 	}
 
 	portDetector := port.NewPortsDetector()
@@ -392,14 +263,7 @@ func (s *server) Shutdown() {
 		}
 	}
 
-	// Stop computer use if running
-	if s.ComputerUse != nil {
-		s.logger.Info("Stopping computer use...")
-		_, err := s.ComputerUse.Stop()
-		if err != nil {
-			s.logger.Error("Failed to stop computer use", "error", err)
-		}
-	}
+	s.shutdownPlatform()
 
 	// Flush telemetry
 	if s.telemetry.TracerProvider != nil {
