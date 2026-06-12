@@ -14,16 +14,44 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
+import { SnapshotConflictError } from '../errors/snapshot-conflict.error'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { GpuType } from '../enums/gpu-type.enum'
 
-export interface PersistSnapshotFromSandboxDeps {
+/*
+ * Snapshot-from-sandbox lifecycle helpers.
+ *
+ * A snapshot created from a sandbox gets its Snapshot row inserted in the
+ * SNAPSHOTTING state as soon as the operation starts (createSnapshotFromSandboxEntry),
+ * is transitioned to ACTIVE once the runner has produced and pushed the image
+ * (completeSnapshotFromSandbox), or to ERROR if the operation fails
+ * (failSnapshotFromSandbox).
+ *
+ * Extracted to free functions to avoid a NestJS DI cycle between
+ * SnapshotService and JobStateHandlerService: both can call these without
+ * importing each other.
+ */
+
+export interface SnapshotFromSandboxDeps {
   snapshotRepository: SnapshotRepository
   snapshotRunnerRepository: Repository<SnapshotRunner>
   eventEmitter: EventEmitter2
 }
 
-export interface PersistSnapshotFromSandboxParams {
+export interface CreateSnapshotFromSandboxEntryParams {
+  organizationId: string
+  name: string
+  regionId: string
+  sandboxClass: SandboxClass
+  cpu: number
+  gpu: number
+  gpuType?: GpuType | null
+  mem: number
+  disk: number
+  initialRunnerId?: string
+}
+
+export interface CompleteSnapshotFromSandboxParams {
   organizationId: string
   name: string
   ref: string
@@ -38,41 +66,40 @@ export interface PersistSnapshotFromSandboxParams {
   sizeGB?: number
 }
 
-/**
- * Inserts a Snapshot row in the ACTIVE state for an image that a runner has
- * already produced (snapshot-from-sandbox), wires up the matching
- * SnapshotRunner record, and emits the CREATED event.
- *
- * Extracted to a free function to avoid a NestJS DI cycle between
- * SnapshotService and JobStateHandlerService: both can call this without
- * importing each other.
- */
-export async function persistSnapshotFromSandbox(
-  deps: PersistSnapshotFromSandboxDeps,
-  params: PersistSnapshotFromSandboxParams,
-): Promise<Snapshot> {
-  const { snapshotRepository, snapshotRunnerRepository, eventEmitter } = deps
+export interface FailSnapshotFromSandboxParams {
+  organizationId: string
+  name: string
+  errorReason: string
+}
 
-  const size = typeof params.sizeGB === 'number' && Number.isFinite(params.sizeGB) ? params.sizeGB : undefined
-  const runnerId = params.runnerId || undefined
+/**
+ * Inserts a Snapshot row in the SNAPSHOTTING state before the runner starts
+ * producing the image, so the user can track the operation from the start.
+ * Emits the CREATED event.
+ *
+ * @throws {ConflictException} If a snapshot with the same name already exists
+ * for the organization.
+ */
+export async function createSnapshotFromSandboxEntry(
+  deps: SnapshotFromSandboxDeps,
+  params: CreateSnapshotFromSandboxEntryParams,
+): Promise<Snapshot> {
+  const { snapshotRepository, eventEmitter } = deps
+
   const snapshotId = uuidv4()
 
-  // We should set to active only after a number of snapshot runners had been propagated, leaving as is for now
   const snapshot = snapshotRepository.create({
     id: snapshotId,
     organizationId: params.organizationId,
     name: params.name,
-    ref: params.ref,
-    state: SnapshotState.ACTIVE,
+    state: SnapshotState.SNAPSHOTTING,
     sandboxClass: params.sandboxClass,
     cpu: params.cpu,
     gpu: params.gpu,
     gpuType: params.gpuType ?? null,
     mem: params.mem,
     disk: params.disk,
-    size,
-    initialRunnerId: runnerId,
-    lastUsedAt: new Date(),
+    initialRunnerId: params.initialRunnerId,
     snapshotRegions: [{ snapshotId, regionId: params.regionId }],
   })
 
@@ -86,18 +113,159 @@ export async function persistSnapshotFromSandbox(
     throw error
   }
 
-  // SnapshotRunner is created only after the Snapshot row is committed so a
-  // unique-name conflict above doesn't leave an orphan SnapshotRunner record
-  // pointing at a ref no Snapshot owns.
-  if (runnerId) {
-    const snapshotRunner = snapshotRunnerRepository.create({
-      snapshotRef: params.ref,
-      runnerId,
-      state: SnapshotRunnerState.READY,
-    })
-    await snapshotRunnerRepository.save(snapshotRunner)
-  }
-
   eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(inserted))
   return inserted
+}
+
+/**
+ * Transitions a SNAPSHOTTING Snapshot row to ACTIVE once the runner has
+ * produced the image, filling in the ref/size, and wires up the matching
+ * SnapshotRunner record.
+ *
+ * Returns `null` without touching the row if it exists but is no longer in
+ * the SNAPSHOTTING state (e.g. removed or timed out while the runner was
+ * working).
+ *
+ * If no row exists at all, falls back to inserting one directly in the
+ * ACTIVE state — this covers operations that were started before the
+ * entry-first flow was deployed.
+ */
+export async function completeSnapshotFromSandbox(
+  deps: SnapshotFromSandboxDeps,
+  params: CompleteSnapshotFromSandboxParams,
+): Promise<Snapshot | null> {
+  const { snapshotRepository, snapshotRunnerRepository, eventEmitter } = deps
+
+  const size = typeof params.sizeGB === 'number' && Number.isFinite(params.sizeGB) ? params.sizeGB : undefined
+  const runnerId = params.runnerId || undefined
+
+  const existing = await snapshotRepository.findOne({
+    where: { organizationId: params.organizationId, name: params.name },
+  })
+
+  let snapshot: Snapshot
+  if (existing) {
+    if (existing.state !== SnapshotState.SNAPSHOTTING) {
+      return null
+    }
+
+    const updateData: Partial<Snapshot> = {
+      state: SnapshotState.ACTIVE,
+      ref: params.ref,
+      lastUsedAt: new Date(),
+    }
+    if (size !== undefined) {
+      updateData.size = size
+    }
+    if (runnerId && existing.initialRunnerId !== runnerId) {
+      updateData.initialRunnerId = runnerId
+    }
+
+    try {
+      // Guard on the state at write time so a concurrent transition (failure,
+      // timeout, removal) between the read above and this update isn't overwritten
+      snapshot = await snapshotRepository.updateWhere(existing.id, {
+        updateData,
+        whereCondition: { state: SnapshotState.SNAPSHOTTING },
+      })
+    } catch (error) {
+      if (error instanceof SnapshotConflictError) {
+        return null
+      }
+      throw error
+    }
+  } else {
+    const snapshotId = uuidv4()
+
+    const newSnapshot = snapshotRepository.create({
+      id: snapshotId,
+      organizationId: params.organizationId,
+      name: params.name,
+      ref: params.ref,
+      state: SnapshotState.ACTIVE,
+      sandboxClass: params.sandboxClass,
+      cpu: params.cpu,
+      gpu: params.gpu,
+      gpuType: params.gpuType ?? null,
+      mem: params.mem,
+      disk: params.disk,
+      size,
+      initialRunnerId: runnerId,
+      lastUsedAt: new Date(),
+      snapshotRegions: [{ snapshotId, regionId: params.regionId }],
+    })
+
+    try {
+      snapshot = await snapshotRepository.insert(newSnapshot)
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') {
+        throw new ConflictException(`Snapshot with name "${params.name}" already exists for this organization`)
+      }
+      throw error
+    }
+
+    eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(snapshot))
+  }
+
+  // SnapshotRunner is wired up only after the Snapshot row is committed so a
+  // failure above doesn't leave an orphan SnapshotRunner record pointing at a
+  // ref no Snapshot owns. Snapshotting the same sandbox twice can produce the
+  // same content-addressed ref, so reuse an existing record if there is one.
+  if (runnerId) {
+    const existingSnapshotRunner = await snapshotRunnerRepository.findOne({
+      where: { snapshotRef: params.ref, runnerId },
+    })
+    if (existingSnapshotRunner) {
+      if (existingSnapshotRunner.state !== SnapshotRunnerState.READY) {
+        existingSnapshotRunner.state = SnapshotRunnerState.READY
+        existingSnapshotRunner.errorReason = null
+        await snapshotRunnerRepository.save(existingSnapshotRunner)
+      }
+    } else {
+      const snapshotRunner = snapshotRunnerRepository.create({
+        snapshotRef: params.ref,
+        runnerId,
+        state: SnapshotRunnerState.READY,
+      })
+      await snapshotRunnerRepository.save(snapshotRunner)
+    }
+  }
+
+  return snapshot
+}
+
+/**
+ * Transitions a SNAPSHOTTING Snapshot row to ERROR. Returns `null` if the
+ * row doesn't exist or is no longer in the SNAPSHOTTING state.
+ */
+export async function failSnapshotFromSandbox(
+  deps: SnapshotFromSandboxDeps,
+  params: FailSnapshotFromSandboxParams,
+): Promise<Snapshot | null> {
+  const { snapshotRepository } = deps
+
+  const existing = await snapshotRepository.findOne({
+    where: { organizationId: params.organizationId, name: params.name, state: SnapshotState.SNAPSHOTTING },
+  })
+
+  if (!existing) {
+    return null
+  }
+
+  try {
+    // Guard on the state at write time so a concurrent completion between the
+    // read above and this update isn't overwritten
+    return await snapshotRepository.updateWhere(existing.id, {
+      updateData: {
+        state: SnapshotState.ERROR,
+        errorReason: params.errorReason,
+      },
+      whereCondition: { state: SnapshotState.SNAPSHOTTING },
+    })
+  } catch (error) {
+    if (error instanceof SnapshotConflictError) {
+      return null
+    }
+    throw error
+  }
 }
