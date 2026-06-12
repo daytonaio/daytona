@@ -138,12 +138,12 @@ func (s *Service) handleConnection(conn net.Conn, serverConfig *ssh.ServerConfig
 
 	// Handle channels
 	for newChannel := range chans {
-		go s.handleChannel(newChannel, sandboxId)
+		go s.handleChannel(newChannel, serverConn, sandboxId)
 	}
 }
 
 // handleChannel handles an individual SSH channel
-func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
+func (s *Service) handleChannel(newChannel ssh.NewChannel, clientConn *ssh.ServerConn, sandboxId string) {
 	s.log.Debug("New channel", "channelType", newChannel.ChannelType(), "sandboxID", sandboxId)
 
 	// Accept the channel from the client
@@ -212,21 +212,27 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
 		}
 	}()
 
-	// Bidirectional data forwarding
+	// Bidirectional data forwarding.
+	// On client EOF, half-close the sandbox channel (MSG_CHANNEL_EOF via CloseWrite)
+	// so the command in the sandbox can keep writing output and deliver its
+	// exit-status (RFC 4254 half-close, e.g. `cat file | ssh host cmd`).
 	go func() {
 		_, err := io.Copy(sandboxChannel, clientChannel)
 		if err != nil {
 			s.log.Debug("Client to sandbox copy error", "error", err)
 		}
-		// Always send MSG_CHANNEL_CLOSE (not just MSG_CHANNEL_EOF via CloseWrite).
-		// The SSH library surfaces transport errors as io.EOF on channel reads, so
-		// io.Copy returns nil even after an abrupt SIGKILL/network-drop — meaning
-		// CloseWrite would be taken in all cases.  More importantly, MSG_CHANNEL_EOF
-		// is silently ignored by long-lived processes such as VS Code Remote Server
-		// and JetBrains Gateway, leaving io.Copy(clientChannel, sandboxChannel)
-		// blocked and orphaned sandbox processes alive indefinitely.
-		// MSG_CHANNEL_CLOSE forces a reply, which unblocks the read and lets the
-		// sandbox shell receive a hangup signal so it can exit cleanly.
+		sandboxChannel.CloseWrite() // nolint:errcheck
+	}()
+
+	// The SSH library surfaces client transport failures as io.EOF on channel reads,
+	// so the copy above cannot tell a clean stdin EOF from a SIGKILL/network drop, and
+	// long-lived processes (VS Code Remote Server, JetBrains Gateway) silently ignore
+	// MSG_CHANNEL_EOF. Watch the client connection itself instead: when it dies,
+	// hard-close the sandbox channel — MSG_CHANNEL_CLOSE forces a reply, which unblocks
+	// io.Copy(clientChannel, sandboxChannel) below and lets the sandbox shell receive
+	// a hangup signal so orphaned processes exit cleanly.
+	go func() {
+		clientConn.Wait()      // nolint:errcheck
 		sandboxChannel.Close() // nolint:errcheck
 	}()
 

@@ -36,11 +36,15 @@ type channelPair struct {
 	server ssh.Channel
 	// client is the channel as seen by the SSH client (OpenChannel()-returned).
 	client ssh.Channel
+	// serverConn is the server's view of the SSH connection. Its Wait() returns
+	// when the client connection dies — the signal the production watcher
+	// goroutine uses to hard-close the upstream channel.
+	serverConn *ssh.ServerConn
 	// closeConns tears down both sides of the underlying TCP connection.
 	closeConns func()
 	// closeClient closes only the client-side TCP connection, simulating an
-	// abrupt SSH client disconnect (SIGKILL / network drop). This causes any
-	// in-progress Read on server to return a non-nil error.
+	// abrupt SSH client disconnect (SIGKILL / network drop). This makes
+	// serverConn.Wait() return.
 	closeClient func()
 }
 
@@ -84,11 +88,13 @@ func newChannelPair(t *testing.T) *channelPair {
 	serverCfg.AddHostKey(testSigner(t))
 
 	serverChanCh := make(chan ssh.Channel, 1)
+	serverConnCh := make(chan *ssh.ServerConn, 1)
 	go func() {
-		_, chans, reqs, err := ssh.NewServerConn(srvConn, serverCfg)
+		sconn, chans, reqs, err := ssh.NewServerConn(srvConn, serverCfg)
 		if err != nil {
 			return
 		}
+		serverConnCh <- sconn
 		go ssh.DiscardRequests(reqs)
 		newCh, ok := <-chans
 		if !ok {
@@ -133,8 +139,9 @@ func newChannelPair(t *testing.T) *channelPair {
 	}
 
 	return &channelPair{
-		server: serverCh,
-		client: clientCh,
+		server:     serverCh,
+		client:     clientCh,
+		serverConn: <-serverConnCh,
 		closeConns: func() {
 			cliConn.Close() //nolint:errcheck
 			srvConn.Close() //nolint:errcheck
@@ -154,15 +161,18 @@ func newChannelPair(t *testing.T) *channelPair {
 // JetBrains remote server processes) stays alive, and the gateway's keepalive ticker
 // keeps refreshing lastActivityAt every 45 s.
 //
-// The fix always calls sandboxChannel.Close() (MSG_CHANNEL_CLOSE), which forces the sandbox
-// to send its own MSG_CHANNEL_CLOSE in reply, unblocking the reverse io.Copy.
+// The fix watches the client connection itself: when it dies, sandboxChannel.Close()
+// (MSG_CHANNEL_CLOSE) forces the sandbox to send its own MSG_CHANNEL_CLOSE in reply,
+// unblocking the reverse io.Copy. A clean stdin EOF only half-closes (CloseWrite),
+// preserving remaining output and exit-status.
 func TestClientDisconnectClosesSandboxChannel(t *testing.T) {
 	t.Parallel()
 
 	// clientPair simulates the runner receiving a channel from the gateway.
 	// clientPair.server == clientChannel in Service.handleChannel (runner's server-side view).
 	// clientPair.closeClient() simulates the gateway dropping (external client died):
-	// closes the TCP connection so io.Copy returns a non-nil error, triggering Close().
+	// closes the TCP connection so clientPair.serverConn.Wait() returns, after which
+	// sandboxChannel.Close() is called in the production code.
 	clientPair := newChannelPair(t)
 	defer clientPair.closeConns()
 
@@ -178,12 +188,17 @@ func TestClientDisconnectClosesSandboxChannel(t *testing.T) {
 	// done is closed when the main blocking io.Copy (sandbox→client) returns.
 	done := make(chan struct{})
 
-	// Mirror the goroutine from apps/runner/pkg/sshgateway/service.go rather than calling
+	// Mirror the goroutines from apps/runner/pkg/sshgateway/service.go rather than calling
 	// Service.handleChannel directly: handleChannel requires a running toolbox API and live
-	// SSH connections. The mechanism being tested (Close unblocks the reverse io.Copy) is
-	// fully captured here without those dependencies.
+	// SSH connections. The mechanism being tested (a dead client connection hard-closes the
+	// sandbox channel, unblocking the reverse io.Copy) is fully captured here without those
+	// dependencies.
 	go func() {
 		_, _ = io.Copy(sandboxChannel, clientChannel)
+		sandboxChannel.CloseWrite() //nolint:errcheck
+	}()
+	go func() {
+		_ = clientPair.serverConn.Wait()
 		sandboxChannel.Close() //nolint:errcheck
 	}()
 
@@ -223,6 +238,10 @@ func TestSandboxChannelReceivesCloseOnClientDisconnect(t *testing.T) {
 
 	go func() {
 		_, _ = io.Copy(sandboxChannel, clientChannel)
+		sandboxChannel.CloseWrite() //nolint:errcheck
+	}()
+	go func() {
+		_ = clientPair.serverConn.Wait()
 		sandboxChannel.Close() //nolint:errcheck
 	}()
 	go func() {
@@ -249,5 +268,81 @@ func TestSandboxChannelReceivesCloseOnClientDisconnect(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("sandbox channel was not closed after client disconnect; " +
 			"orphaned shell processes would not receive hangup signal")
+	}
+}
+
+// TestStdinEOFPreservesHalfClose verifies that a clean stdin EOF from the client
+// (e.g. `cat file | ssh host cmd`) only half-closes the sandbox channel: the command
+// in the sandbox can still send output and exit-status afterwards. A hard Close() here
+// would truncate them — the regression flagged in the PR review of the keepalive fix.
+func TestStdinEOFPreservesHalfClose(t *testing.T) {
+	t.Parallel()
+
+	clientPair := newChannelPair(t)
+	defer clientPair.closeConns()
+
+	sandboxPair := newChannelPair(t)
+	defer sandboxPair.closeConns()
+
+	clientChannel := clientPair.server
+	sandboxChannel := sandboxPair.client
+
+	// Mirror the production goroutines from Service.handleChannel.
+	go func() {
+		_, _ = io.Copy(sandboxChannel, clientChannel)
+		sandboxChannel.CloseWrite() //nolint:errcheck
+	}()
+	go func() {
+		_ = clientPair.serverConn.Wait()
+		sandboxChannel.Close() //nolint:errcheck
+	}()
+	go func() {
+		_, _ = io.Copy(clientChannel, sandboxChannel)
+	}()
+
+	// Clean stdin EOF: the client half-closes its channel while the SSH
+	// connection stays alive.
+	if err := clientPair.client.CloseWrite(); err != nil {
+		t.Fatalf("client CloseWrite: %v", err)
+	}
+
+	// The sandbox side must observe EOF on its read...
+	eofErr := make(chan error, 1)
+	go func() {
+		_, err := sandboxPair.server.Read(make([]byte, 1))
+		eofErr <- err
+	}()
+	select {
+	case err := <-eofErr:
+		if err != io.EOF {
+			t.Fatalf("expected io.EOF on sandbox side after stdin EOF, got %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("sandbox side did not observe stdin EOF")
+	}
+
+	// ...and must still be able to send output, which the client receives.
+	// With a hard Close() this write fails because the channel is torn down.
+	want := "late output"
+	if _, err := sandboxPair.server.Write([]byte(want)); err != nil {
+		t.Fatalf("sandbox write after stdin EOF failed (half-close broken): %v", err)
+	}
+
+	got := make([]byte, len(want))
+	readDone := make(chan error, 1)
+	go func() {
+		_, err := io.ReadFull(clientPair.client, got)
+		readDone <- err
+	}()
+	select {
+	case err := <-readDone:
+		if err != nil {
+			t.Fatalf("client read after stdin EOF failed: %v", err)
+		}
+		if string(got) != want {
+			t.Fatalf("client got %q, want %q", got, want)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("client did not receive output sent after stdin EOF; half-close broken")
 	}
 }

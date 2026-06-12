@@ -34,11 +34,15 @@ type channelPair struct {
 	server ssh.Channel
 	// client is the channel as seen by the SSH client (OpenChannel()-returned).
 	client ssh.Channel
+	// serverConn is the server's view of the SSH connection. Its Wait() returns
+	// when the client connection dies — the signal the production watcher
+	// goroutine uses to hard-close the upstream channel.
+	serverConn *ssh.ServerConn
 	// closeConns tears down both sides of the underlying TCP connection.
 	closeConns func()
 	// closeClient closes only the client-side TCP connection, simulating an
-	// abrupt SSH client disconnect (SIGKILL / network drop). This causes any
-	// in-progress Read on server to return a non-nil error.
+	// abrupt SSH client disconnect (SIGKILL / network drop). This makes
+	// serverConn.Wait() return.
 	closeClient func()
 }
 
@@ -82,11 +86,13 @@ func newChannelPair(t *testing.T) *channelPair {
 	serverCfg.AddHostKey(testSigner(t))
 
 	serverChanCh := make(chan ssh.Channel, 1)
+	serverConnCh := make(chan *ssh.ServerConn, 1)
 	go func() {
-		_, chans, reqs, err := ssh.NewServerConn(srvConn, serverCfg)
+		sconn, chans, reqs, err := ssh.NewServerConn(srvConn, serverCfg)
 		if err != nil {
 			return
 		}
+		serverConnCh <- sconn
 		go ssh.DiscardRequests(reqs)
 		newCh, ok := <-chans
 		if !ok {
@@ -131,8 +137,9 @@ func newChannelPair(t *testing.T) *channelPair {
 	}
 
 	return &channelPair{
-		server: serverCh,
-		client: clientCh,
+		server:     serverCh,
+		client:     clientCh,
+		serverConn: <-serverConnCh,
 		closeConns: func() {
 			cliConn.Close() //nolint:errcheck
 			srvConn.Close() //nolint:errcheck
@@ -151,15 +158,18 @@ func newChannelPair(t *testing.T) *channelPair {
 // keepalive goroutine's context was never cancelled, lastActivityAt kept refreshing every
 // 45 s, and auto-stop never triggered.
 //
-// The fix always calls runnerChannel.Close() (MSG_CHANNEL_CLOSE), which forces the runner
-// to send its own MSG_CHANNEL_CLOSE in reply, unblocking the reverse io.Copy.
+// The fix watches the client connection itself: when it dies, runnerChannel.Close()
+// (MSG_CHANNEL_CLOSE) forces the runner to send its own MSG_CHANNEL_CLOSE in reply,
+// unblocking the reverse io.Copy. A clean stdin EOF only half-closes (CloseWrite),
+// preserving remaining output and exit-status.
 func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 	t.Parallel()
 
 	// clientPair simulates the gateway receiving a channel from the external SSH client.
 	// clientPair.server == clientChannel in handleChannel (gateway's server-side view).
-	// clientPair.closeClient() simulates SIGKILL: drops the TCP connection so io.Copy
-	// returns, after which runnerChannel.Close() is called in the production code.
+	// clientPair.closeClient() simulates SIGKILL: drops the TCP connection so
+	// clientPair.serverConn.Wait() returns, after which runnerChannel.Close() is called
+	// in the production code.
 	clientPair := newChannelPair(t)
 	defer clientPair.closeConns()
 
@@ -175,12 +185,17 @@ func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 	// proving that the keepalive context would be cancelled via defer cancel().
 	done := make(chan struct{})
 
-	// Mirror the goroutine from apps/ssh-gateway/main.go rather than calling handleChannel
+	// Mirror the goroutines from apps/ssh-gateway/main.go rather than calling handleChannel
 	// directly: handleChannel requires a live SSH server listener and API client, making it
-	// unsuitable for a unit test. The mechanism being tested (Close unblocks the reverse
-	// io.Copy) is fully captured here without those dependencies.
+	// unsuitable for a unit test. The mechanism being tested (a dead client connection
+	// hard-closes the runner channel, unblocking the reverse io.Copy) is fully captured
+	// here without those dependencies.
 	go func() {
 		_, _ = io.Copy(runnerChannel, clientChannel)
+		runnerChannel.CloseWrite() //nolint:errcheck
+	}()
+	go func() {
+		_ = clientPair.serverConn.Wait()
 		runnerChannel.Close() //nolint:errcheck
 	}()
 
@@ -192,8 +207,8 @@ func TestClientDisconnectTeardownPropagatesUpstream(t *testing.T) {
 	}()
 
 	// Simulate abrupt SSH client disconnect (kill -9 / VS Code tab closed / network drop)
-	// by closing the underlying TCP connection. This causes io.Copy reading from
-	// clientChannel to return a non-nil error, which triggers runnerChannel.Close().
+	// by closing the underlying TCP connection. This makes serverConn.Wait() return,
+	// which triggers runnerChannel.Close().
 	clientPair.closeClient()
 
 	select {
@@ -223,6 +238,10 @@ func TestRunnerChannelClosedAfterClientDisconnect(t *testing.T) {
 
 	go func() {
 		_, _ = io.Copy(runnerChannel, clientChannel)
+		runnerChannel.CloseWrite() //nolint:errcheck
+	}()
+	go func() {
+		_ = clientPair.serverConn.Wait()
 		runnerChannel.Close() //nolint:errcheck
 	}()
 	go func() {
@@ -249,5 +268,81 @@ func TestRunnerChannelClosedAfterClientDisconnect(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("runner-side channel was not closed after client disconnect; " +
 			"orphaned sandbox processes would not receive a hangup signal")
+	}
+}
+
+// TestStdinEOFPreservesHalfClose verifies that a clean stdin EOF from the client
+// (e.g. `cat file | ssh host cmd`) only half-closes the runner channel: the remote
+// command can still send output and exit-status afterwards. A hard Close() here would
+// truncate them — the regression flagged in the PR review of the keepalive fix.
+func TestStdinEOFPreservesHalfClose(t *testing.T) {
+	t.Parallel()
+
+	clientPair := newChannelPair(t)
+	defer clientPair.closeConns()
+
+	runnerPair := newChannelPair(t)
+	defer runnerPair.closeConns()
+
+	clientChannel := clientPair.server
+	runnerChannel := runnerPair.client
+
+	// Mirror the production goroutines from handleChannel.
+	go func() {
+		_, _ = io.Copy(runnerChannel, clientChannel)
+		runnerChannel.CloseWrite() //nolint:errcheck
+	}()
+	go func() {
+		_ = clientPair.serverConn.Wait()
+		runnerChannel.Close() //nolint:errcheck
+	}()
+	go func() {
+		_, _ = io.Copy(clientChannel, runnerChannel)
+	}()
+
+	// Clean stdin EOF: the client half-closes its channel while the SSH
+	// connection stays alive.
+	if err := clientPair.client.CloseWrite(); err != nil {
+		t.Fatalf("client CloseWrite: %v", err)
+	}
+
+	// The runner side must observe EOF on its read...
+	eofErr := make(chan error, 1)
+	go func() {
+		_, err := runnerPair.server.Read(make([]byte, 1))
+		eofErr <- err
+	}()
+	select {
+	case err := <-eofErr:
+		if err != io.EOF {
+			t.Fatalf("expected io.EOF on runner side after stdin EOF, got %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("runner side did not observe stdin EOF")
+	}
+
+	// ...and must still be able to send output, which the client receives.
+	// With a hard Close() this write fails because the channel is torn down.
+	want := "late output"
+	if _, err := runnerPair.server.Write([]byte(want)); err != nil {
+		t.Fatalf("runner write after stdin EOF failed (half-close broken): %v", err)
+	}
+
+	got := make([]byte, len(want))
+	readDone := make(chan error, 1)
+	go func() {
+		_, err := io.ReadFull(clientPair.client, got)
+		readDone <- err
+	}()
+	select {
+	case err := <-readDone:
+		if err != nil {
+			t.Fatalf("client read after stdin EOF failed: %v", err)
+		}
+		if string(got) != want {
+			t.Fatalf("client got %q, want %q", got, want)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("client did not receive output sent after stdin EOF; half-close broken")
 	}
 }
