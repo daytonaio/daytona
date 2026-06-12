@@ -26,7 +26,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     data-size={size}
     className={cn(
-      'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground disabled:opacity-50 [&>span]:line-clamp-1 data-[size=sm]:h-8 data-[size=xs]:h-7 outline-none',
+      'flex h-10 w-full items-center justify-between rounded-md border border-input dark:bg-input/30 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground disabled:opacity-50 [&>span]:line-clamp-1 data-[size=sm]:h-8 data-[size=xs]:h-7 outline-none',
       'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
       loading ? 'disabled:cursor-progress' : 'disabled:cursor-not-allowed',
       className,
