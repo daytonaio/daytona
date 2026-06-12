@@ -27,7 +27,7 @@ import { ResourceType } from '../enums/resource-type.enum'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
-import { persistSnapshotFromSandbox } from '../utils/persist-snapshot-from-sandbox.util'
+import { activateSnapshotFromSandbox, failSnapshotFromSandbox } from '../utils/persist-snapshot-from-sandbox.util'
 import { Runner } from '../entities/runner.entity'
 
 /**
@@ -802,8 +802,9 @@ export class JobStateHandlerService {
         entity: sandbox,
       })
 
+      const payload = job.getPayload<{ name?: string; registry?: { url?: string; project?: string } }>()
+
       if (job.status === JobStatus.COMPLETED) {
-        const payload = job.getPayload<{ name?: string; registry?: { url?: string; project?: string } }>()
         const metadata = job.getResultMetadata()
         const snapshotName = payload?.name
         const hash =
@@ -850,7 +851,7 @@ export class JobStateHandlerService {
                 : undefined
 
           try {
-            await persistSnapshotFromSandbox(
+            await activateSnapshotFromSandbox(
               {
                 snapshotRepository: this.snapshotRepository,
                 snapshotRunnerRepository: this.snapshotRunnerRepository,
@@ -873,6 +874,25 @@ export class JobStateHandlerService {
             )
           } catch (error) {
             this.logger.error(`Failed to persist snapshot from SNAPSHOT_SANDBOX job ${job.id}:`, error)
+          }
+        }
+      } else if (job.status === JobStatus.FAILED) {
+        if (payload?.name) {
+          try {
+            await failSnapshotFromSandbox(
+              {
+                snapshotRepository: this.snapshotRepository,
+                snapshotRunnerRepository: this.snapshotRunnerRepository,
+                eventEmitter: this.eventEmitter,
+              },
+              {
+                organizationId: sandbox.organizationId,
+                name: payload.name,
+                errorReason: job.errorMessage || 'Failed to create snapshot from sandbox',
+              },
+            )
+          } catch (error) {
+            this.logger.error(`Failed to mark snapshot as errored for SNAPSHOT_SANDBOX job ${job.id}:`, error)
           }
         }
       }
