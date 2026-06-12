@@ -161,6 +161,22 @@ RSpec.describe Daytona::FileSystem do
 
       expect { fs.list_files('/x') }.to raise_error(Daytona::Sdk::Error, /Failed to list files: err/)
     end
+
+    it 'passes depth to the toolbox api' do
+      allow(toolbox_api).to receive(:list_files).with({ path: '/workspace', depth: 2 }).and_return([])
+
+      expect(fs.list_files('/workspace', depth: 2)).to eq([])
+    end
+
+    it 'rejects depth below 1' do
+      expect { fs.list_files('/workspace', depth: 0) }
+        .to raise_error(Daytona::Sdk::Error, /depth must be an integer of at least 1/)
+    end
+
+    it 'rejects non-integer depth' do
+      expect { fs.list_files('/workspace', depth: 1.5) }
+        .to raise_error(Daytona::Sdk::Error, /depth must be an integer of at least 1/)
+    end
   end
 
   describe '#download_file' do

@@ -48,6 +48,14 @@ def add_frontmatter(content, class_name)
   frontmatter + content
 end
 
+def format_signature_params(parameters)
+  parameters.map do |name, default|
+    next name if default.nil?
+
+    name.end_with?(':') ? "#{name} #{default}" : "#{name} = #{default}"
+  end.join(', ')
+end
+
 def format_type(types)
   return 'Object' if types.nil? || types.empty?
 
@@ -174,8 +182,7 @@ def generate_markdown_for_object(obj)
 
       # Method signature
       content << '```ruby'
-      params_str = constructor.parameters.map { |p| p[0] }.join(', ')
-      content << "def initialize(#{params_str})"
+      content << "def initialize(#{format_signature_params(constructor.parameters)})"
       content << '```'
       content << ''
 
@@ -243,8 +250,7 @@ def generate_markdown_for_object(obj)
 
         # Method signature
         content << '```ruby'
-        params_str = method.parameters.map { |p| p[0] }.join(', ')
-        content << "def #{method.name}(#{params_str})"
+        content << "def #{method.name}(#{format_signature_params(method.parameters)})"
         content << '```'
         content << ''
 

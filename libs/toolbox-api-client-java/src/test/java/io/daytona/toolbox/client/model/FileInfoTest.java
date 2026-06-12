@@ -94,6 +94,14 @@ public class FileInfoTest {
     }
 
     /**
+     * Test the property 'path'
+     */
+    @Test
+    public void pathTest() {
+        // TODO: test path
+    }
+
+    /**
      * Test the property 'permissions'
      */
     @Test

@@ -10,6 +10,7 @@ public class FileInfo extends io.daytona.toolbox.client.model.FileInfo {
         super();
         if (source != null) {
             setName(source.getName());
+            setPath(source.getPath());
             setSize(source.getSize());
             setMode(source.getMode());
             setModTime(source.getModTime());

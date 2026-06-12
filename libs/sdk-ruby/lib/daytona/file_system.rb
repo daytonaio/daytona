@@ -97,6 +97,9 @@ module Daytona
     #
     # @param path [String] Path to the directory to list contents from. Relative paths are resolved
     #   based on the sandbox working directory.
+    # @param depth [Integer, nil] How many levels deep to list. depth=1 (default) lists the
+    #   directory's entries, depth=2 also includes their children, and so on. Must be >= 1.
+    #   Each returned FileInfo carries a full path field.
     # @return [Array<DaytonaApiClient::FileInfo>] List of file and directory information
     # @raise [Daytona::Sdk::Error] If the operation fails
     #
@@ -112,8 +115,14 @@ module Daytona
     #   # List only directories
     #   dirs = files.select(&:is_dir)
     #   puts "Subdirectories: #{dirs.map(&:name).join(', ')}"
-    def list_files(path)
-      toolbox_api.list_files({ path: })
+    def list_files(path, depth: nil)
+      if !depth.nil? && (!depth.is_a?(Integer) || depth < 1)
+        raise Sdk::Error, 'Failed to list files: depth must be an integer of at least 1'
+      end
+
+      toolbox_api.list_files({ path:, depth: }.compact)
+    rescue Sdk::Error
+      raise
     rescue StandardError => e
       raise Sdk::Error, "Failed to list files: #{e.message}"
     end

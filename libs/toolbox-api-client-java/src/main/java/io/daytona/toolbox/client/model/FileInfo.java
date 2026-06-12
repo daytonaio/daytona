@@ -85,6 +85,11 @@ public class FileInfo {
   @javax.annotation.Nonnull
   private String owner;
 
+  public static final String SERIALIZED_NAME_PATH = "path";
+  @SerializedName(SERIALIZED_NAME_PATH)
+  @javax.annotation.Nullable
+  private String path;
+
   public static final String SERIALIZED_NAME_PERMISSIONS = "permissions";
   @SerializedName(SERIALIZED_NAME_PERMISSIONS)
   @javax.annotation.Nonnull
@@ -231,6 +236,25 @@ public class FileInfo {
   }
 
 
+  public FileInfo path(@javax.annotation.Nullable String path) {
+    this.path = path;
+    return this;
+  }
+
+  /**
+   * Full path of the entry
+   * @return path
+   */
+  @javax.annotation.Nullable
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(@javax.annotation.Nullable String path) {
+    this.path = path;
+  }
+
+
   public FileInfo permissions(@javax.annotation.Nonnull String permissions) {
     this.permissions = permissions;
     return this;
@@ -330,6 +354,7 @@ public class FileInfo {
         Objects.equals(this.modifiedAt, fileInfo.modifiedAt) &&
         Objects.equals(this.name, fileInfo.name) &&
         Objects.equals(this.owner, fileInfo.owner) &&
+        Objects.equals(this.path, fileInfo.path) &&
         Objects.equals(this.permissions, fileInfo.permissions) &&
         Objects.equals(this.size, fileInfo.size)&&
         Objects.equals(this.additionalProperties, fileInfo.additionalProperties);
@@ -337,7 +362,7 @@ public class FileInfo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(group, isDir, modTime, mode, modifiedAt, name, owner, permissions, size, additionalProperties);
+    return Objects.hash(group, isDir, modTime, mode, modifiedAt, name, owner, path, permissions, size, additionalProperties);
   }
 
   @Override
@@ -351,6 +376,7 @@ public class FileInfo {
     sb.append("    modifiedAt: ").append(toIndentedString(modifiedAt)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
+    sb.append("    path: ").append(toIndentedString(path)).append("\n");
     sb.append("    permissions: ").append(toIndentedString(permissions)).append("\n");
     sb.append("    size: ").append(toIndentedString(size)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
@@ -372,7 +398,7 @@ public class FileInfo {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "permissions", "size"));
+    openapiFields = new HashSet<String>(Arrays.asList("group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "path", "permissions", "size"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "permissions", "size"));
@@ -415,6 +441,9 @@ public class FileInfo {
       }
       if (!jsonObj.get("owner").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `owner` to be a primitive type in the JSON string but got `%s`", jsonObj.get("owner").toString()));
+      }
+      if ((jsonObj.get("path") != null && !jsonObj.get("path").isJsonNull()) && !jsonObj.get("path").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `path` to be a primitive type in the JSON string but got `%s`", jsonObj.get("path").toString()));
       }
       if (!jsonObj.get("permissions").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `permissions` to be a primitive type in the JSON string but got `%s`", jsonObj.get("permissions").toString()));

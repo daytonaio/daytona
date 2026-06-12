@@ -7,6 +7,8 @@ import "time"
 
 type FileInfo struct {
 	Name string `json:"name" validate:"required"`
+	// Full path of the entry
+	Path string `json:"path,omitempty"`
 	Size int64  `json:"size" validate:"required"`
 	Mode string `json:"mode" validate:"required"`
 	// Deprecated: ModTime uses Go's time.String() layout which is not a standard format.

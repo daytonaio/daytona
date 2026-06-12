@@ -1382,7 +1382,7 @@ const docTemplate = `{
         },
         "/files": {
             "get": {
-                "description": "List files and directories in the specified path",
+                "description": "List files and directories in the specified path. Use the optional depth\nparameter to list recursively: depth=1 (default) lists the directory's\nentries, depth=2 also includes their children, and so on.",
                 "produces": [
                     "application/json"
                 ],
@@ -1396,6 +1396,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Directory path to list (defaults to working directory)",
                         "name": "path",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "How many levels deep to list (default: 1, must be \u003e= 1)",
+                        "name": "depth",
                         "in": "query"
                     }
                 ],
@@ -3809,6 +3815,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "owner": {
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Full path of the entry",
                     "type": "string"
                 },
                 "permissions": {

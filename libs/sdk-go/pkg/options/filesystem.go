@@ -24,6 +24,25 @@ func WithMode(mode string) func(*CreateFolder) {
 	}
 }
 
+// ListFiles holds optional parameters for [daytona.FileSystemService.ListFiles].
+type ListFiles struct {
+	Depth *int32 // How many levels deep to list (default: 1, must be >= 1)
+}
+
+// WithDepth sets how many levels deep to list. Depth 1 (the default) lists
+// the directory's entries, depth 2 also includes their children, and so on.
+//
+// Example:
+//
+//	files, err := sandbox.FileSystem.ListFiles(ctx, "/home/user",
+//	    options.WithDepth(3),
+//	)
+func WithDepth(depth int32) func(*ListFiles) {
+	return func(opts *ListFiles) {
+		opts.Depth = &depth
+	}
+}
+
 // SetFilePermissions holds optional parameters for [daytona.FileSystemService.SetFilePermissions].
 type SetFilePermissions struct {
 	Mode  *string // Unix file permissions (e.g., "0644")
