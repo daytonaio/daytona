@@ -16,3 +16,16 @@ const (
 func (s BackupState) String() string {
 	return string(s)
 }
+
+type SnapshotFromSandboxState string
+
+const (
+	SnapshotFromSandboxStateNone       SnapshotFromSandboxState = "NONE"
+	SnapshotFromSandboxStateInProgress SnapshotFromSandboxState = "IN_PROGRESS"
+	SnapshotFromSandboxStateCompleted  SnapshotFromSandboxState = "COMPLETED"
+	SnapshotFromSandboxStateFailed     SnapshotFromSandboxState = "FAILED"
+)
+
+func (s SnapshotFromSandboxState) String() string {
+	return string(s)
+}

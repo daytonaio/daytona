@@ -25,11 +25,13 @@ import {
   EnumsSandboxState,
   SnapshotsApi,
   EnumsBackupState,
+  EnumsSnapshotFromSandboxState,
   DefaultApi,
   CreateSandboxDTO,
   BuildSnapshotRequestDTO,
   CreateBackupDTO,
   PullSnapshotRequestDTO,
+  SnapshotFromSandboxStatusResponse,
   ToolboxApi,
   UpdateNetworkSettingsDTO,
   RecoverSandboxDTO,
@@ -40,11 +42,17 @@ import { DockerRegistry } from '../../docker-registry/entities/docker-registry.e
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { RunnerApiError } from '../errors/runner-api-error'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 const isDebugEnabled = process.env.DEBUG === 'true'
 
 // Network error codes that should trigger a retry
 const RETRYABLE_NETWORK_ERROR_CODES = ['ECONNRESET', 'ETIMEDOUT']
+
+// Per-request timeout for snapshot capture status polls; keeps one hung
+// connection from eating the whole poll budget (the instance-wide axios
+// timeout is 15 minutes).
+const SNAPSHOT_STATUS_POLL_TIMEOUT_MS = 30 * 1_000
 
 @Injectable()
 export class RunnerAdapterV0 implements RunnerAdapter {
@@ -53,6 +61,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   private snapshotApiClient: SnapshotsApi
   private runnerApiClient: DefaultApi
   private toolboxApiClient: ToolboxApi
+
+  constructor(private readonly configService: TypedConfigService) {}
 
   private convertSandboxState(state: EnumsSandboxState): SandboxState {
     switch (state) {
@@ -439,6 +449,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     const response = await this.sandboxApiClient.snapshotFromSandbox(sandboxId, {
       name: snapshotName,
       organizationId,
+      async: true,
       registry: {
         project: registry.project,
         url: registry.url.replace(/^(https?:\/\/)/, ''),
@@ -447,18 +458,100 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       },
     })
 
-    const data = response.data
-    if (!data?.name || !data?.hash) {
-      throw new Error('runner returned invalid snapshot-from-sandbox response')
+    if (response.status === 200) {
+      // Old runner (deploy window): the capture ran synchronously and the
+      // payload is in the response. Still bounded by the instance timeout.
+      const data = response.data
+      if (!data?.name || !data?.hash) {
+        throw new Error('runner returned invalid snapshot-from-sandbox response')
+      }
+
+      return {
+        ref: data.name,
+        hash: data.hash,
+        sizeGB: data.sizeGB,
+        entrypoint: data.entrypoint,
+        cmd: data.cmd,
+      }
     }
 
-    return {
-      ref: data.name,
-      hash: data.hash,
-      sizeGB: data.sizeGB,
-      entrypoint: data.entrypoint,
-      cmd: data.cmd,
+    // 202 Accepted: the capture runs in the background on the runner; poll the
+    // status endpoint until it reaches a terminal state.
+    return this.pollSnapshotFromSandbox(sandboxId, snapshotName)
+  }
+
+  private async pollSnapshotFromSandbox(sandboxId: string, snapshotName: string): Promise<CreateSandboxSnapshotResult> {
+    const pollTimeoutMin = this.configService.getOrThrow('sandboxSnapshottingTimeoutMin')
+    const pollTimeoutMs = pollTimeoutMin * 60 * 1_000
+    const pollIntervalMs = 5 * 1_000 // 5 seconds
+    const deadline = Date.now() + pollTimeoutMs
+
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
+
+      // Clamp the per-request timeout to the remaining poll budget so a
+      // request fired near the deadline cannot overshoot it (floored at 1s).
+      const timeout = Math.max(1_000, Math.min(SNAPSHOT_STATUS_POLL_TIMEOUT_MS, deadline - Date.now()))
+
+      let status: SnapshotFromSandboxStatusResponse
+      try {
+        const response = await this.sandboxApiClient.snapshotFromSandboxStatus(sandboxId, { timeout })
+        status = response.data
+      } catch (err) {
+        const reason = err instanceof Error ? err.message : String(err)
+        const statusCode =
+          err instanceof RunnerApiError ? err.statusCode : axios.isAxiosError(err) ? err.response?.status : undefined
+
+        if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
+          // Permanent client errors will not heal with more polling. A 404 may
+          // also be a route miss: the runner restarted into an older version
+          // that lacks the status endpoint, indistinguishable from a missing
+          // capture record here.
+          if (statusCode === 404) {
+            throw new Error(
+              `runner no longer exposes the snapshot capture status (runner restarted or downgraded?): ${reason}`,
+            )
+          }
+          throw new Error(`snapshot capture status poll failed with HTTP ${statusCode}: ${reason}`)
+        }
+
+        // Transient poll failures (network blips, per-request timeouts, runner
+        // 5xx) are tolerated; the poll budget bounds them.
+        this.logger.warn(`Failed to poll snapshot capture status for sandbox ${sandboxId}: ${reason}`)
+        continue
+      }
+
+      if (status?.name && status.name !== snapshotName) {
+        throw new Error('snapshot capture state on runner does not match this capture (superseded or stale)')
+      }
+
+      switch (status?.state) {
+        case EnumsSnapshotFromSandboxState.SnapshotFromSandboxStateCompleted: {
+          const snapshot = status.snapshot
+          if (!snapshot?.name || !snapshot?.hash) {
+            throw new Error('runner returned invalid snapshot-from-sandbox capture result')
+          }
+
+          return {
+            ref: snapshot.name,
+            hash: snapshot.hash,
+            sizeGB: snapshot.sizeGB,
+            entrypoint: snapshot.entrypoint,
+            cmd: snapshot.cmd,
+          }
+        }
+        case EnumsSnapshotFromSandboxState.SnapshotFromSandboxStateFailed:
+          throw new Error(status.error || 'snapshot capture failed on runner')
+        case EnumsSnapshotFromSandboxState.SnapshotFromSandboxStateNone:
+          // The runner writes IN_PROGRESS before answering 202, so NONE means
+          // the in-memory capture record is gone (runner restarted).
+          throw new Error('runner is no longer tracking the snapshot capture (runner restarted?)')
+        default:
+          continue
+      }
     }
+
+    throw new Error(`Timed out waiting for snapshot capture after ${pollTimeoutMin} minutes`)
   }
 
   // skipStart is a v2-only signal (carried in the job payload); v0's sync API has no equivalent.

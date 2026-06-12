@@ -22,6 +22,7 @@ import (
 type DockerClientConfig struct {
 	ApiClient                    client.APIClient
 	BackupInfoCache              *cache.BackupInfoCache
+	SnapshotFromSandboxInfoCache *cache.SnapshotFromSandboxInfoCache
 	Logger                       *slog.Logger
 	AWSRegion                    string
 	AWSEndpointUrl               string
@@ -138,6 +139,7 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 	return &DockerClient{
 		apiClient:                    config.ApiClient,
 		backupInfoCache:              config.BackupInfoCache,
+		snapshotFromSandboxInfoCache: config.SnapshotFromSandboxInfoCache,
 		pullTracker:                  &common.Tracker[string]{},
 		logger:                       logger,
 		awsRegion:                    config.AWSRegion,
@@ -194,6 +196,7 @@ const RUNNER_BRIDGE_NETWORK_NAME = "runner-bridge"
 type DockerClient struct {
 	apiClient                    client.APIClient
 	backupInfoCache              *cache.BackupInfoCache
+	snapshotFromSandboxInfoCache *cache.SnapshotFromSandboxInfoCache
 	pullTracker                  *common.Tracker[string]
 	logger                       *slog.Logger
 	awsRegion                    string

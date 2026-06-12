@@ -18,6 +18,10 @@
 import type { RegistryDTO } from './registry-dto';
 
 export interface CreateSnapshotFromSandboxRequest {
+    /**
+     * Async, when true, makes the runner return 202 immediately and run the capture in the background; progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox. When false or omitted the runner captures synchronously and responds 200 with the image metadata (legacy behavior).
+     */
+    'async'?: boolean;
     'name': string;
     'organizationId'?: string;
     'registry': RegistryDTO;

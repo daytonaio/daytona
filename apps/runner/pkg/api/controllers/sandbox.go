@@ -153,11 +153,12 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 //
 //	@Tags			sandbox
 //	@Summary		Snapshot a running sandbox
-//	@Description	Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag.
+//	@Description	Commit the sandbox container filesystem and push the image to the supplied registry under the canonical daytona-{hash}:daytona tag. When the request body sets async=true the capture runs in the background, the endpoint responds 202 immediately, and progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox.
 //	@Produce		json
 //	@Param			sandboxId	path		string									true	"Sandbox ID"
 //	@Param			body		body		dto.CreateSnapshotFromSandboxRequestDTO	true	"Snapshot from sandbox"
 //	@Success		200			{object}	dto.SnapshotInfoResponse
+//	@Success		202			{string}	string	"Snapshot capture started (async=true)"
 //	@Failure		400			{object}	common_errors.ErrorResponse
 //	@Failure		401			{object}	common_errors.ErrorResponse
 //	@Failure		404			{object}	common_errors.ErrorResponse
@@ -186,6 +187,16 @@ func SnapshotFromSandbox(ctx *gin.Context) {
 		return
 	}
 
+	if request.Async {
+		if err := r.Docker.CreateSnapshotFromSandboxAsync(ctx.Request.Context(), sandboxId, request); err != nil {
+			ctx.Error(err)
+			return
+		}
+
+		ctx.JSON(http.StatusAccepted, "Snapshot capture started")
+		return
+	}
+
 	info, err := r.Docker.CreateSnapshotFromSandbox(ctx.Request.Context(), sandboxId, request.Registry)
 	if err != nil {
 		ctx.Error(err)
@@ -194,6 +205,56 @@ func SnapshotFromSandbox(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, info)
 }
+
+// SnapshotFromSandboxStatus godoc
+//
+//	@Tags			sandbox
+//	@Summary		Get snapshot-from-sandbox capture status
+//	@Description	Report the state of the asynchronous snapshot capture for the sandbox. Returns state NONE when the runner is not tracking a capture for the sandbox (none was started, it was started on another runner, or the runner restarted).
+//	@Produce		json
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		200			{object}	SnapshotFromSandboxStatusResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/snapshot-from-sandbox [get]
+//
+//	@id				SnapshotFromSandboxStatus
+func SnapshotFromSandboxStatus(ctx *gin.Context) {
+	sandboxId := ctx.Param("sandboxId")
+
+	r, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	info, err := r.SnapshotFromSandboxInfoCache.Get(ctx.Request.Context(), sandboxId)
+	if err != nil || info == nil {
+		ctx.JSON(http.StatusOK, SnapshotFromSandboxStatusResponse{State: enums.SnapshotFromSandboxStateNone})
+		return
+	}
+
+	response := SnapshotFromSandboxStatusResponse{
+		State:    info.State,
+		Name:     info.Name,
+		Snapshot: info.Info,
+	}
+	if info.Error != nil {
+		errMsg := info.Error.Error()
+		response.Error = &errMsg
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
+type SnapshotFromSandboxStatusResponse struct {
+	State    enums.SnapshotFromSandboxState `json:"state"`
+	Name     string                         `json:"name,omitempty"`
+	Snapshot *dto.SnapshotInfoResponse      `json:"snapshot,omitempty"`
+	Error    *string                        `json:"error,omitempty"`
+} //	@name	SnapshotFromSandboxStatusResponse
 
 // Resize 			godoc
 //

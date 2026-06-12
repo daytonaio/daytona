@@ -114,6 +114,14 @@ definitions:
     type: object
   CreateSnapshotFromSandboxRequest:
     properties:
+      async:
+        description: |-
+          Async, when true, makes the runner return 202 immediately and run the
+          capture in the background; progress is queried via
+          GET /sandboxes/{sandboxId}/snapshot-from-sandbox. When false or omitted
+          the runner captures synchronously and responds 200 with the image
+          metadata (legacy behavior).
+        type: boolean
       name:
         example: my-snapshot:latest
         type: string
@@ -341,6 +349,17 @@ definitions:
         example: true
         type: boolean
     type: object
+  SnapshotFromSandboxStatusResponse:
+    properties:
+      error:
+        type: string
+      name:
+        type: string
+      snapshot:
+        $ref: '#/definitions/SnapshotInfoResponse'
+      state:
+        $ref: '#/definitions/enums.SnapshotFromSandboxState'
+    type: object
   SnapshotInfoResponse:
     properties:
       cmd:
@@ -449,6 +468,18 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
+  enums.SnapshotFromSandboxState:
+    enum:
+      - NONE
+      - IN_PROGRESS
+      - COMPLETED
+      - FAILED
+    type: string
+    x-enum-varnames:
+      - SnapshotFromSandboxStateNone
+      - SnapshotFromSandboxStateInProgress
+      - SnapshotFromSandboxStateCompleted
+      - SnapshotFromSandboxStateFailed
 info:
   contact: {}
   description: Daytona Runner API
@@ -863,9 +894,48 @@ paths:
       tags:
         - sandbox
   /sandboxes/{sandboxId}/snapshot-from-sandbox:
+    get:
+      description: Report the state of the asynchronous snapshot capture for the sandbox.
+        Returns state NONE when the runner is not tracking a capture for the sandbox
+        (none was started, it was started on another runner, or the runner restarted).
+      operationId: SnapshotFromSandboxStatus
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SnapshotFromSandboxStatusResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get snapshot-from-sandbox capture status
+      tags:
+        - sandbox
     post:
       description: Commit the sandbox container filesystem and push the image to the
-        supplied registry under the canonical daytona-{hash}:daytona tag.
+        supplied registry under the canonical daytona-{hash}:daytona tag. When the
+        request body sets async=true the capture runs in the background, the endpoint
+        responds 202 immediately, and progress is queried via GET /sandboxes/{sandboxId}/snapshot-from-sandbox.
       operationId: SnapshotFromSandbox
       parameters:
         - description: Sandbox ID
@@ -886,6 +956,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/SnapshotInfoResponse'
+        '202':
+          description: Snapshot capture started (async=true)
+          schema:
+            type: string
         '400':
           description: Bad Request
           schema:
