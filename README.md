@@ -1,7 +1,9 @@
 > [!IMPORTANT]
 > **This repository is no longer maintained.**
 >
-> As of June 11, 2026, Daytona's core development has moved to a private codebase. <br /> This repo will receive no further updates, fixes, or releases. <br /> It remains public and free to use, fork, and build on under the [GNU Affero General Public License](LICENSE), as is and without support or warranty.
+> As of June 11, 2026, Daytona's core development has moved to a private codebase. This repo will receive no further updates, fixes, or releases.
+>
+> It remains public and free to use, fork, and build on under the [GNU Affero General Public License](LICENSE), as is and without support or warranty.
 >
 > Current SDKs, docs, and integrations: [github.com/daytona](https://github.com/daytona)
 
