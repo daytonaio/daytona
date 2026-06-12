@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { SearchInput } from '../SearchInput'
+import { SearchInput } from '../../SearchInput'
 import { InvoicesTableHeaderProps } from './types'
 
 export function InvoicesTableHeader({ table }: InvoicesTableHeaderProps) {

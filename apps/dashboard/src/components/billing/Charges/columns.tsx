@@ -7,8 +7,8 @@ import { formatAmount } from '@/lib/utils'
 import { Charge } from '@daytona/billing-api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import React from 'react'
-import { SortOrderIcon } from '../SortIcon'
-import { Badge } from '../ui/badge'
+import { SortOrderIcon } from '../../SortIcon'
+import { Badge } from '../../ui/badge'
 import { ChargesTableActions } from './ChargesTableActions'
 
 interface SortableHeaderProps {

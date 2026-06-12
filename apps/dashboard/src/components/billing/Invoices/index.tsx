@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils'
 import { getColumnSizeStyles } from '@/lib/utils/table'
 import { flexRender } from '@tanstack/react-table'
 import { FileText } from 'lucide-react'
-import { Pagination } from '../Pagination'
-import { Skeleton } from '../ui/skeleton'
+import { Pagination } from '../../Pagination'
+import { Skeleton } from '../../ui/skeleton'
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table'
+} from '../../ui/table'
 import { InvoicesTableHeader } from './InvoicesTableHeader'
 import { InvoicesTableProps } from './types'
 import { useInvoicesTable } from './useInvoicesTable'

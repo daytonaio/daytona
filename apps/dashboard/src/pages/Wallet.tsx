@@ -4,51 +4,59 @@
  */
 
 import { BillingInfoCard } from '@/components/BillingInfoCard'
-import { ChargesTable } from '@/components/Charges'
-import { InvoicesTable } from '@/components/Invoices'
 import { PageContent, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
-import { PaymentMethodsCard } from '@/components/PaymentMethodsCard'
+import { AutomaticTopUpCard } from '@/components/billing/AutomaticTopUpCard'
+import { ChargesTable } from '@/components/billing/Charges'
+import { InvoicesTable } from '@/components/billing/Invoices'
+import { OneTimeTopUpCard } from '@/components/billing/OneTimeTopUpCard'
+import { PaymentMethodsCard } from '@/components/billing/PaymentMethodsCard'
+import { WalletOverviewCard } from '@/components/billing/WalletOverviewCard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { RoutePath } from '@/enums/RoutePath'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
-import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
-import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
-import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
 import { useOwnerInvoicesQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useChargesQuery } from '@/hooks/queries/useChargesQuery'
 import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { formatAmount } from '@/lib/utils'
-import { AutomaticTopUp, BillingType, Invoice } from '@daytona/billing-api-client'
-import { CreditCardIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { NumericFormat } from 'react-number-format'
+import { BillingType, type Invoice, type OrganizationWallet } from '@daytona/billing-api-client'
+import { SparklesIcon, TriangleAlertIcon } from 'lucide-react'
+import { type ReactNode, useCallback, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 
 const DEFAULT_PAGE_SIZE = 10
+const WALLET_PAGE_GENERAL = 'general'
+const WALLET_PAGE_HISTORY = 'history'
+
+type WalletPage = typeof WALLET_PAGE_GENERAL | typeof WALLET_PAGE_HISTORY
+
+const WALLET_TABS: { value: WalletPage; label: string }[] = [
+  { value: WALLET_PAGE_GENERAL, label: 'General' },
+  { value: WALLET_PAGE_HISTORY, label: 'History' },
+]
+
+function isWalletPage(page: string | undefined): page is WalletPage {
+  return page === WALLET_PAGE_GENERAL || page === WALLET_PAGE_HISTORY
+}
 
 const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { user } = useAuth()
-  const [automaticTopUp, setAutomaticTopUp] = useState<AutomaticTopUp | undefined>(undefined)
-  const [couponCode, setCouponCode] = useState<string>('')
-  const [redeemCouponError, setRedeemCouponError] = useState<string | null>(null)
-  const [redeemCouponSuccess, setRedeemCouponSuccess] = useState<string | null>(null)
-  const [oneTimeTopUpAmount, setOneTimeTopUpAmount] = useState<number | undefined>(undefined)
-  const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
+  const { page } = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [invoicesPagination, setInvoicesPagination] = useState({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   })
+
   const walletQuery = useOwnerWalletQuery({ refetchOnMount: 'always' })
   const invoicesQuery = useOwnerInvoicesQuery(invoicesPagination.pageIndex + 1, invoicesPagination.pageSize)
   const chargesQuery = useChargesQuery({
@@ -62,114 +70,8 @@ const Wallet = () => {
 
   const wallet = walletQuery.data
   const paymentMethods = paymentMethodsQuery.data
-  const paymentMethodsLoading = paymentMethodsQuery.isLoading
   const hasNoPaymentMethod = (paymentMethods?.length ?? 0) === 0
-  const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
-  const redeemCouponMutation = useRedeemCouponMutation()
-  const topUpWalletMutation = useTopUpWalletMutation()
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
-
-  useEffect(() => {
-    if (wallet?.automaticTopUp) {
-      setAutomaticTopUp(wallet.automaticTopUp)
-    }
-  }, [wallet])
-
-  const handleSetAutomaticTopUp = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-
-    try {
-      await setAutomaticTopUpMutation.mutateAsync({
-        organizationId: selectedOrganization.id,
-        automaticTopUp,
-      })
-      toast.success('Automatic top up set successfully')
-    } catch (error) {
-      toast.error('Failed to set automatic top up', {
-        description: String(error),
-      })
-    }
-  }, [selectedOrganization, automaticTopUp, setAutomaticTopUpMutation])
-
-  const handleRedeemCoupon = useCallback(async () => {
-    if (!selectedOrganization || !couponCode) {
-      return
-    }
-
-    setRedeemCouponError(null)
-    setRedeemCouponSuccess(null)
-
-    try {
-      const message = await redeemCouponMutation.mutateAsync({
-        organizationId: selectedOrganization.id,
-        couponCode,
-      })
-      setRedeemCouponSuccess(message)
-      setTimeout(() => {
-        setRedeemCouponSuccess(null)
-      }, 3000)
-      setCouponCode('')
-    } catch (error) {
-      setRedeemCouponError(String(error))
-      console.error('Failed to redeem coupon:', error)
-    }
-  }, [selectedOrganization, couponCode, redeemCouponMutation])
-
-  const automaticTopUpHasChanges = useMemo(() => {
-    if (wallet?.automaticTopUp?.disabled && (automaticTopUp?.thresholdAmount || 0) > 0) {
-      return true
-    }
-
-    if (automaticTopUp?.thresholdAmount !== wallet?.automaticTopUp?.thresholdAmount) {
-      if (!wallet?.automaticTopUp) {
-        if ((automaticTopUp?.thresholdAmount || 0) !== 0) {
-          return true
-        }
-      } else {
-        return true
-      }
-    }
-
-    if (automaticTopUp?.targetAmount !== wallet?.automaticTopUp?.targetAmount) {
-      if (!wallet?.automaticTopUp) {
-        if ((automaticTopUp?.targetAmount || 0) !== 0) {
-          return true
-        }
-      } else {
-        return true
-      }
-    }
-
-    return false
-  }, [wallet, automaticTopUp])
-
-  const handleTopUpWallet = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    const amount = selectedPreset ?? oneTimeTopUpAmount
-    if (!amount) {
-      return
-    }
-
-    const newWindow = window.open('', '_blank')
-    try {
-      const result = await topUpWalletMutation.mutateAsync({
-        organizationId: selectedOrganization.id,
-        amountCents: amount * 100,
-      })
-      if (newWindow) {
-        newWindow.location.href = result.url ?? ''
-      }
-    } catch (error) {
-      newWindow?.close()
-      toast.error('Failed to initiate top-up', {
-        description: String(error),
-      })
-    }
-  }, [selectedOrganization, selectedPreset, oneTimeTopUpAmount, topUpWalletMutation])
 
   const handlePayInvoice = useCallback(
     async (invoice: Invoice) => {
@@ -207,411 +109,140 @@ const Wallet = () => {
     [selectedOrganization],
   )
 
+  const isBillingLoading = walletQuery.isLoading
   const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
   const showCreditCardBonusPrompt = Boolean(
     hasNoPaymentMethod && user?.profile.email_verified && selectedOrganization?.personal,
   )
-  const showMissingPaymentMethodTopUpMessage = Boolean(wallet && hasNoPaymentMethod)
-  const automaticTopUpSaveDisabled =
-    !automaticTopUpHasChanges ||
-    setAutomaticTopUpMutation.isPending ||
-    walletQuery.isLoading ||
-    !wallet ||
-    paymentMethodsLoading ||
-    hasNoPaymentMethod
-  const topUpEnabled = Boolean(
-    !paymentMethodsLoading &&
-      !hasNoPaymentMethod &&
-      !topUpWalletMutation.isPending &&
-      (selectedPreset || oneTimeTopUpAmount),
+  const activePage = isWalletPage(page) ? page : null
+
+  const handleChangePage = useCallback(
+    (value: string) => {
+      if (!isWalletPage(value)) {
+        return
+      }
+
+      navigate(`${RoutePath.BILLING_WALLET}/${value}${location.search}`)
+    },
+    [location.search, navigate],
   )
+
+  if (!activePage) {
+    return <Navigate to={`${RoutePath.BILLING_WALLET}/${WALLET_PAGE_GENERAL}${location.search}`} replace />
+  }
 
   return (
     <PageLayout>
       <PageHeader />
 
-      <PageContent>
-        <PageIntro title="Wallet" />
-        {walletQuery.isLoading && (
-          <div className="flex flex-col gap-6">
-            <Card className="flex flex-col gap-4">
-              <CardContent className="flex flex-col gap-4">
-                <Skeleton className="h-5 w-full max-w-sm" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
-                </div>
-                <Skeleton className=" h-10" />
-                <Skeleton className=" h-10" />
-              </CardContent>
-            </Card>
-            <Card className="flex flex-col gap-4">
-              <CardContent className="flex flex-col gap-4">
-                <Skeleton className="h-5 w-full max-w-sm" />
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
-                </div>
-                <Skeleton className=" h-10" />
-              </CardContent>
-            </Card>
-          </div>
-        )}
-        {walletQuery.isError && !wallet && (
-          <WalletErrorState onRetry={() => walletQuery.refetch()} retrying={walletQuery.isFetching} />
-        )}
+      <PageContent size="full" className="gap-0 p-0">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4 pb-0">
+          <PageIntro title="Wallet" className="mb-4" />
+          {isBillingLoading && <WalletSkeleton />}
+          {walletQuery.isError && !wallet && (
+            <WalletErrorState onRetry={() => walletQuery.refetch()} retrying={walletQuery.isFetching} />
+          )}
+          {wallet && (
+            <>
+              <WalletAlerts wallet={wallet} showCreditCardBonusPrompt={showCreditCardBonusPrompt} user={user} />
+              <WalletOverviewCard
+                organizationId={selectedOrganization?.id}
+                wallet={wallet}
+                isPostPaid={isPostPaid}
+                user={user}
+              />
+            </>
+          )}
+        </div>
+
         {wallet && (
-          <>
-            {user && (
-              <>
-                {!user.profile.email_verified && (
-                  <Alert variant="info">
-                    <TriangleAlertIcon />
-                    <AlertTitle>Verify your email</AlertTitle>
-                    <AlertDescription>
-                      {(wallet.balanceCents ?? 0) > 0 ? (
-                        <>
-                          Please verify your email address to complete your account setup.
-                          <br />A verification email was sent to you.
-                        </>
-                      ) : (
-                        <>
-                          Verify your email address to recieve $100 of credits.
-                          <br />A verification email was sent to you.
-                        </>
-                      )}
-                    </AlertDescription>
-                  </Alert>
+          <WalletTabs activePage={activePage} onValueChange={handleChangePage}>
+            <div className="mx-auto w-full max-w-5xl p-4">
+              <TabsContent value={WALLET_PAGE_GENERAL} className="flex flex-col gap-4">
+                {selectedOrganization && (
+                  <>
+                    <BillingInfoCard organizationId={selectedOrganization.id} />
+                    <PaymentMethodsCard organizationId={selectedOrganization.id} />
+                  </>
                 )}
-                {showCreditCardBonusPrompt && (
-                  <Alert variant="neutral">
-                    <SparklesIcon />
-                    <AlertDescription>Connect a credit card to receive an additional $100 of credits.</AlertDescription>
-                  </Alert>
+
+                {selectedOrganization && !isPostPaid && (
+                  <AutomaticTopUpCard organizationId={selectedOrganization.id} wallet={wallet} />
                 )}
-              </>
-            )}
-            {wallet.hasFailedOrPendingInvoice && (
-              <Alert variant="destructive">
-                <TriangleAlertIcon />
-                <AlertTitle>Outstanding invoices</AlertTitle>
-                <AlertDescription>
-                  You have failed or pending invoices that need to be resolved before adding new funds. Please review
-                  your invoices below and complete or void any outstanding payments.
-                </AlertDescription>
-              </Alert>
-            )}
-            {wallet.automaticTopUp?.disabled && (
-              <Alert variant="destructive">
-                <TriangleAlertIcon />
-                <AlertTitle>Automatic top-up disabled</AlertTitle>
-                <AlertDescription>
-                  Your automatic top-up was disabled because of a failed payment. Please update your payment method and
-                  enable it again manually below.
-                </AlertDescription>
-              </Alert>
-            )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Overview
-                  {isPostPaid && <Badge variant="secondary">Post-paid</Badge>}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="">
-                <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-end justify-between">
-                  <div className="flex gap-4 sm:gap-12 sm:flex-row flex-col">
-                    <div className="flex flex-col gap-1">
-                      <div className="">Current balance</div>
-                      <div className="text-xl text-foreground font-semibold">
-                        {formatAmount(wallet.ongoingBalanceCents ?? 0)}
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div className="">Spent this month</div>
-                      <div className="text-xl font-semibold">
-                        {formatAmount((wallet.balanceCents ?? 0) - (wallet.ongoingBalanceCents ?? 0))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
+                {selectedOrganization && <OneTimeTopUpCard organizationId={selectedOrganization.id} />}
+              </TabsContent>
 
-              {user?.profile.email_verified && (
-                <CardContent className="border-t border-border">
-                  <div className="flex gap-4 md:items-center justify-between md:flex-row flex-col">
-                    <div className="flex flex-col gap-1 items-start flex-1">
-                      <div className="text-sm font-medium">Redeem coupon</div>
-                      {redeemCouponError ? (
-                        <div className="text-sm text-destructive">{redeemCouponError}</div>
-                      ) : redeemCouponSuccess ? (
-                        <div className="text-sm text-success">{redeemCouponSuccess}</div>
-                      ) : (
-                        <div className="text-sm text-muted-foreground">Enter a coupon code to redeem your credits.</div>
-                      )}
-                    </div>
+              <TabsContent value={WALLET_PAGE_HISTORY} className="flex flex-col gap-4 pb-[80px]">
+                <WalletTableSection
+                  title="Invoices"
+                  description="View and download your billing invoices. All invoices are automatically generated and sent to your billing emails."
+                >
+                  <InvoicesTable
+                    data={invoicesQuery.data?.items ?? []}
+                    pagination={invoicesPagination}
+                    pageCount={invoicesQuery.data?.totalPages ?? 0}
+                    totalItems={invoicesQuery.data?.totalItems ?? 0}
+                    onPaginationChange={setInvoicesPagination}
+                    loading={invoicesQuery.isLoading}
+                    onViewInvoice={handleViewInvoice}
+                    onPayInvoice={handlePayInvoice}
+                  />
+                </WalletTableSection>
 
-                    <div className="flex gap-2 items-center">
-                      <Input
-                        placeholder="Enter coupon code"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                      />
-                      <Button
-                        variant="secondary"
-                        onClick={handleRedeemCoupon}
-                        disabled={redeemCouponMutation.isPending}
-                      >
-                        {redeemCouponMutation.isPending && <Spinner />} Redeem
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-
-            {selectedOrganization && (
-              <>
-                <BillingInfoCard organizationId={selectedOrganization.id} />
-                <PaymentMethodsCard organizationId={selectedOrganization.id} />
-              </>
-            )}
-
-            {!isPostPaid && (
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle>Automatic top-up</CardTitle>
-                  <CardDescription>
-                    Set automatic top-up rules for your wallet.
-                    <br />
-                    The target amount must be at least $10 higher than the threshold amount.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex sm:flex-row flex-col gap-6">
-                    <div className="flex flex-col gap-2 flex-1">
-                      <Label htmlFor="thresholdAmount">When balance is below</Label>
-                      <InputGroup>
-                        <InputGroupAddon>
-                          <InputGroupText>$</InputGroupText>
-                        </InputGroupAddon>
-                        <NumericFormat
-                          customInput={InputGroupInput}
-                          placeholder="0.00"
-                          id="thresholdAmount"
-                          inputMode="decimal"
-                          thousandSeparator
-                          decimalScale={2}
-                          value={automaticTopUp?.thresholdAmount ?? ''}
-                          onValueChange={({ floatValue }) => {
-                            const value = floatValue ?? 0
-
-                            let targetAmount = automaticTopUp?.targetAmount ?? 0
-                            if (value > targetAmount - 10) {
-                              targetAmount = value + 10
-                            }
-
-                            setAutomaticTopUp({
-                              thresholdAmount: value,
-                              targetAmount,
-                            })
-                          }}
-                        />
-                        <InputGroupAddon align="inline-end">
-                          <InputGroupText>USD</InputGroupText>
-                        </InputGroupAddon>
-                      </InputGroup>
-                    </div>
-
-                    <div className="flex flex-col gap-2 flex-1">
-                      <Label htmlFor="targetAmount">Bring balance to</Label>
-                      <InputGroup>
-                        <InputGroupAddon>
-                          <InputGroupText>$</InputGroupText>
-                        </InputGroupAddon>
-                        <NumericFormat
-                          placeholder="0.00"
-                          customInput={InputGroupInput}
-                          id="targetAmount"
-                          inputMode="decimal"
-                          thousandSeparator
-                          decimalScale={2}
-                          value={automaticTopUp?.targetAmount ?? ''}
-                          onValueChange={({ floatValue }) => {
-                            const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                            setAutomaticTopUp({
-                              thresholdAmount,
-                              targetAmount: floatValue ?? 0,
-                            })
-                          }}
-                          onBlur={() => {
-                            const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                            const currentTarget = automaticTopUp?.targetAmount ?? 0
-
-                            if (currentTarget < thresholdAmount) {
-                              setAutomaticTopUp({
-                                thresholdAmount,
-                                targetAmount: thresholdAmount,
-                              })
-                            }
-                          }}
-                        />
-                        <InputGroupAddon align="inline-end">
-                          <InputGroupText>USD</InputGroupText>
-                        </InputGroupAddon>
-                      </InputGroup>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between gap-2">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <InfoIcon className="w-4 h-4 shrink-0" />{' '}
-                    <span className="text-sm ">Setting both values to 0 will disable automatic top-ups.</span>
-                  </div>
-                  <div className="flex gap-2 items-center ml-auto">
-                    <Button onClick={handleSetAutomaticTopUp} disabled={automaticTopUpSaveDisabled}>
-                      {setAutomaticTopUpMutation.isPending && <Spinner />} Save
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            )}
-
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle>One time top-up</CardTitle>
-                <CardDescription>
-                  Add funds to your wallet instantly. Select a preset amount or enter a custom value.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-10 items-center lg:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-sm font-medium">Select amount</Label>
-                    <div className="grid grid-cols-1 xxs:grid-cols-4 overflow-hidden rounded-md border border-input">
-                      {[25, 500, 1000, 2000].map((amount) => (
-                        <Button
-                          key={amount}
-                          type="button"
-                          variant={selectedPreset === amount ? 'default' : 'ghost'}
-                          size="default"
-                          className="flex h-9 min-w-0 rounded-none border-t border-border px-2 text-[13px] first:border-t-0 xxs:border-l xxs:border-t-0 xxs:first:border-l-0"
-                          onClick={() => {
-                            setSelectedPreset((currentPreset) => (currentPreset === amount ? null : amount))
-                            setOneTimeTopUpAmount(undefined)
-                          }}
-                        >
-                          <span className="font-semibold">${amount.toLocaleString()}</span>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 lg:hidden">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-sm text-muted-foreground">or</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="customTopUpAmount" className="text-sm font-medium">
-                      Enter custom amount
-                    </Label>
-                    <InputGroup>
-                      <InputGroupAddon>
-                        <InputGroupText>$</InputGroupText>
-                      </InputGroupAddon>
-                      <NumericFormat
-                        placeholder="0.00"
-                        customInput={InputGroupInput}
-                        id="customTopUpAmount"
-                        inputMode="decimal"
-                        thousandSeparator
-                        decimalScale={2}
-                        value={oneTimeTopUpAmount ?? ''}
-                        onValueChange={({ floatValue }) => {
-                          const value = floatValue ?? undefined
-                          setOneTimeTopUpAmount(value)
-                          setSelectedPreset(null)
-                        }}
-                        onFocus={() => {
-                          setSelectedPreset(null)
-                        }}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupText>USD</InputGroupText>
-                      </InputGroupAddon>
-                    </InputGroup>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between gap-2">
-                {paymentMethodsLoading ? (
-                  <Skeleton className="h-4 w-64 max-w-full" />
-                ) : showMissingPaymentMethodTopUpMessage ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CreditCardIcon className="w-4 h-4 shrink-0" />
-                    <span>Add a payment method to top up.</span>
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    You will be redirected to Stripe to complete the payment.
-                  </div>
+                {selectedOrganization && (
+                  <WalletTableSection
+                    title="Charges"
+                    description="All payment attempts on your organization, including failed ones."
+                  >
+                    <ChargesTable data={chargesQuery.charges} loading={chargesQuery.isLoading} />
+                  </WalletTableSection>
                 )}
-                <Button onClick={handleTopUpWallet} disabled={!topUpEnabled} size="sm">
-                  {topUpWalletMutation.isPending && <Spinner />}
-                  Top up
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle>Invoices</CardTitle>
-                <CardDescription>
-                  View and download your billing invoices. All invoices are automatically generated and sent to your
-                  billing emails.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <InvoicesTable
-                  data={invoicesQuery.data?.items ?? []}
-                  pagination={invoicesPagination}
-                  pageCount={invoicesQuery.data?.totalPages ?? 0}
-                  totalItems={invoicesQuery.data?.totalItems ?? 0}
-                  onPaginationChange={setInvoicesPagination}
-                  loading={invoicesQuery.isLoading}
-                  onViewInvoice={handleViewInvoice}
-                  onPayInvoice={handlePayInvoice}
-                />
-              </CardContent>
-            </Card>
-
-            {selectedOrganization && (
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle>Charges</CardTitle>
-                  <CardDescription>All payment attempts on your organization, including failed ones.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChargesTable data={chargesQuery.charges} loading={chargesQuery.isLoading} />
-                </CardContent>
-              </Card>
-            )}
-          </>
+              </TabsContent>
+            </div>
+          </WalletTabs>
         )}
       </PageContent>
     </PageLayout>
   )
 }
 
+function WalletSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Card className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4">
+          <Skeleton className="h-5 w-full max-w-sm" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 flex-1" />
+          </div>
+          <Skeleton className="h-10" />
+          <Skeleton className="h-10" />
+        </CardContent>
+      </Card>
+      <Card className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4">
+          <Skeleton className="h-5 w-full max-w-sm" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 flex-1" />
+          </div>
+          <Skeleton className="h-10" />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 function WalletErrorState({ onRetry, retrying }: { onRetry: () => void; retrying: boolean }) {
   return (
-    <Empty className="flex-none rounded-md border py-12">
+    <Empty className="flex-none rounded-md border py-12" variant="destructive">
       <EmptyHeader>
-        <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+        <EmptyMedia variant="icon">
           <TriangleAlertIcon />
         </EmptyMedia>
-        <EmptyTitle className="text-destructive">Failed to load wallet</EmptyTitle>
+        <EmptyTitle>Failed to load wallet</EmptyTitle>
         <EmptyDescription>Something went wrong while fetching your wallet. Please try again.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -621,6 +252,117 @@ function WalletErrorState({ onRetry, retrying }: { onRetry: () => void; retrying
         </Button>
       </EmptyContent>
     </Empty>
+  )
+}
+
+function WalletAlerts({
+  wallet,
+  showCreditCardBonusPrompt,
+  user,
+}: {
+  wallet: OrganizationWallet
+  showCreditCardBonusPrompt: boolean
+  user: ReturnType<typeof useAuth>['user']
+}) {
+  return (
+    <>
+      {user && (
+        <>
+          {!user.profile.email_verified && (
+            <Alert variant="info">
+              <TriangleAlertIcon />
+              <AlertTitle>Verify your email</AlertTitle>
+              <AlertDescription>
+                {(wallet.balanceCents ?? 0) > 0 ? (
+                  <>
+                    Please verify your email address to complete your account setup.
+                    <br />A verification email was sent to you.
+                  </>
+                ) : (
+                  <>
+                    Verify your email address to receive $100 of credits.
+                    <br />A verification email was sent to you.
+                  </>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+          {showCreditCardBonusPrompt && (
+            <Alert variant="neutral">
+              <SparklesIcon />
+              <AlertDescription>Connect a credit card to receive an additional $100 of credits.</AlertDescription>
+            </Alert>
+          )}
+        </>
+      )}
+      {wallet.hasFailedOrPendingInvoice && (
+        <Alert variant="destructive">
+          <TriangleAlertIcon />
+          <AlertTitle>Outstanding invoices</AlertTitle>
+          <AlertDescription>
+            You have failed or pending invoices that need to be resolved before adding new funds. Please review your
+            invoices below and complete or void any outstanding payments.
+          </AlertDescription>
+        </Alert>
+      )}
+      {wallet.automaticTopUp?.disabled && (
+        <Alert variant="destructive">
+          <TriangleAlertIcon />
+          <AlertTitle>Automatic top-up disabled</AlertTitle>
+          <AlertDescription>
+            Your automatic top-up was disabled because of a failed payment. Please update your payment method and enable
+            it again manually below.
+          </AlertDescription>
+        </Alert>
+      )}
+    </>
+  )
+}
+
+function WalletTabs({
+  activePage,
+  onValueChange,
+  children,
+}: {
+  activePage: WalletPage
+  onValueChange: (value: string) => void
+  children: ReactNode
+}) {
+  return (
+    <Tabs value={activePage} onValueChange={onValueChange} className="mt-10 w-full gap-0">
+      <div className="border-b border-border">
+        <div className="mx-auto max-w-5xl px-4">
+          <TabsList variant="underline" className="border-b-0">
+            {WALLET_TABS.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+      </div>
+      {children}
+    </Tabs>
+  )
+}
+
+function WalletTableSection({
+  title,
+  description,
+  children,
+}: {
+  title: ReactNode
+  description: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   )
 }
 
