@@ -436,7 +436,7 @@ class FileSystemTest {
         source.setMode("644");
         source.setModTime("now");
         source.setIsDir(false);
-        when(fileSystemApi.listFiles("/workspace")).thenReturn(Collections.singletonList(source));
+        when(fileSystemApi.listFiles("/workspace", null)).thenReturn(Collections.singletonList(source));
         when(fileSystemApi.getFileInfo("/workspace/a.txt")).thenReturn(source);
 
         List<FileInfo> files = fileSystem.listFiles("/workspace");
@@ -448,7 +448,7 @@ class FileSystemTest {
 
     @Test
     void listAndDetailsHandleNullResponses() {
-        when(fileSystemApi.listFiles("/workspace")).thenReturn(null);
+        when(fileSystemApi.listFiles("/workspace", null)).thenReturn(null);
         when(fileSystemApi.getFileInfo("/workspace/missing.txt")).thenReturn(null);
 
         assertThat(fileSystem.listFiles("/workspace")).isEmpty();

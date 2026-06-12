@@ -107,7 +107,9 @@ type FileSystemAPI interface {
 	/*
 	ListFiles List files and directories
 
-	List files and directories in the specified path
+	List files and directories in the specified path. Use the optional depth
+parameter to list recursively: depth=1 (default) lists the directory's
+entries, depth=2 also includes their children, and so on.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return FileSystemAPIListFilesRequest
@@ -878,11 +880,18 @@ type FileSystemAPIListFilesRequest struct {
 	ctx context.Context
 	ApiService FileSystemAPI
 	path *string
+	depth *int32
 }
 
 // Directory path to list (defaults to working directory)
 func (r FileSystemAPIListFilesRequest) Path(path string) FileSystemAPIListFilesRequest {
 	r.path = &path
+	return r
+}
+
+// How many levels deep to list (default: 1, must be &gt;&#x3D; 1)
+func (r FileSystemAPIListFilesRequest) Depth(depth int32) FileSystemAPIListFilesRequest {
+	r.depth = &depth
 	return r
 }
 
@@ -893,7 +902,9 @@ func (r FileSystemAPIListFilesRequest) Execute() ([]FileInfo, *http.Response, er
 /*
 ListFiles List files and directories
 
-List files and directories in the specified path
+List files and directories in the specified path. Use the optional depth
+parameter to list recursively: depth=1 (default) lists the directory's
+entries, depth=2 also includes their children, and so on.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return FileSystemAPIListFilesRequest
@@ -928,6 +939,9 @@ func (a *FileSystemAPIService) ListFilesExecute(r FileSystemAPIListFilesRequest)
 
 	if r.path != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "path", r.path, "", "")
+	}
+	if r.depth != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "depth", r.depth, "", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

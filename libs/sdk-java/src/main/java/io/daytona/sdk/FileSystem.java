@@ -158,7 +158,24 @@ public class FileSystem {
      * @throws io.daytona.sdk.exception.DaytonaException if listing fails
      */
     public List<FileInfo> listFiles(String path) {
-        List<io.daytona.toolbox.client.model.FileInfo> files = ExceptionMapper.callToolbox(() -> fileSystemApi.listFiles(path));
+        return listFiles(path, null);
+    }
+
+    /**
+     * Lists files and directories under a path, optionally recursing into subdirectories.
+     *
+     * @param path directory path
+     * @param depth how many levels deep to list: depth=1 (default) lists the directory's
+     *     entries, depth=2 also includes their children, and so on; must be >= 1.
+     *     Each returned entry carries a full path field.
+     * @return file metadata entries
+     * @throws io.daytona.sdk.exception.DaytonaException if listing fails
+     */
+    public List<FileInfo> listFiles(String path, Integer depth) {
+        if (depth != null && depth < 1) {
+            throw new io.daytona.sdk.exception.DaytonaException("depth must be at least 1");
+        }
+        List<io.daytona.toolbox.client.model.FileInfo> files = ExceptionMapper.callToolbox(() -> fileSystemApi.listFiles(path, depth));
         List<FileInfo> result = new ArrayList<FileInfo>();
         if (files != null) {
             for (io.daytona.toolbox.client.model.FileInfo file : files) {

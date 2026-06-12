@@ -666,12 +666,15 @@ class AsyncFileSystem:
 
     @intercept_errors(message_prefix="Failed to list files: ")
     @with_instrumentation()
-    async def list_files(self, path: str) -> list[FileInfo]:
+    async def list_files(self, path: str, depth: int | None = None) -> list[FileInfo]:
         """Lists files and directories in a given path and returns their information, similar to the ls -l command.
 
         Args:
             path (str): Path to the directory to list contents from. Relative paths are resolved
             based on the sandbox working directory.
+            depth (int | None): How many levels deep to list. depth=1 (default) lists the
+            directory's entries, depth=2 also includes their children, and so on. Must be >= 1.
+            Each returned FileInfo carries a full `path` field.
 
         Returns:
             list[FileInfo]: List of file and directory information. Each FileInfo
@@ -687,12 +690,14 @@ class AsyncFileSystem:
                 if not file.is_dir:
                     print(f"{file.name}: {file.size} bytes")
 
-            # List only directories
-            dirs = [f for f in files if f.is_dir]
-            print("Subdirectories:", ", ".join(d.name for d in dirs))
+            # List recursively two levels deep
+            tree = await sandbox.fs.list_files("workspace/data", depth=2)
+            print("Paths:", ", ".join(f.path for f in tree))
             ```
         """
-        return await self._api_client.list_files(path=path)
+        if depth is not None and depth < 1:
+            raise DaytonaError("depth must be at least 1")
+        return await self._api_client.list_files(path=path, depth=depth)
 
     @intercept_errors(message_prefix="Failed to move files: ")
     @with_instrumentation()

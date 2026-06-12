@@ -127,14 +127,15 @@ public class FileSystemApiTest {
     /**
      * List files and directories
      *
-     * List files and directories in the specified path
+     * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth&#x3D;1 (default) lists the directory&#39;s entries, depth&#x3D;2 also includes their children, and so on.
      *
      * @throws ApiException if the Api call fails
      */
     @Test
     public void listFilesTest() throws ApiException {
         String path = null;
-        List<FileInfo> response = api.listFiles(path);
+        Integer depth = null;
+        List<FileInfo> response = api.listFiles(path, depth);
         // TODO: test validations
     }
 

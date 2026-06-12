@@ -52,6 +52,7 @@ opts := options.Apply(
 - [func WithCreatePtySize\(ptySize types.PtySize\) func\(\*CreatePty\)](<#WithCreatePtySize>)
 - [func WithCustomContext\(contextID string\) func\(\*RunCode\)](<#WithCustomContext>)
 - [func WithCwd\(cwd string\) func\(\*ExecuteCommand\)](<#WithCwd>)
+- [func WithDepth\(depth int32\) func\(\*ListFiles\)](<#WithDepth>)
 - [func WithEnv\(env map\[string\]string\) func\(\*RunCode\)](<#WithEnv>)
 - [func WithExecuteTimeout\(timeout time.Duration\) func\(\*ExecuteCommand\)](<#WithExecuteTimeout>)
 - [func WithExtraIndexURLs\(urls ...string\) func\(\*PipInstall\)](<#WithExtraIndexURLs>)
@@ -87,6 +88,7 @@ opts := options.Apply(
 - [type GitDeleteBranch](<#GitDeleteBranch>)
 - [type GitPull](<#GitPull>)
 - [type GitPush](<#GitPush>)
+- [type ListFiles](<#ListFiles>)
 - [type PipInstall](<#PipInstall>)
 - [type PtySession](<#PtySession>)
 - [type RunCode](<#RunCode>)
@@ -286,6 +288,23 @@ Example:
 ```
 result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la",
     options.WithCwd("/home/user/project"),
+)
+```
+
+<a name="WithDepth"></a>
+## func WithDepth
+
+```go
+func WithDepth(depth int32) func(*ListFiles)
+```
+
+WithDepth sets how many levels deep to list. Depth 1 \(the default\) lists the directory's entries, depth 2 also includes their children, and so on.
+
+Example:
+
+```
+files, err := sandbox.FileSystem.ListFiles(ctx, "/home/user",
+    options.WithDepth(3),
 )
 ```
 
@@ -888,6 +907,17 @@ GitPush holds optional parameters for \[daytona.GitService.Push\].
 type GitPush struct {
     Username *string // Username for HTTPS authentication
     Password *string // Password or token for HTTPS authentication
+}
+```
+
+<a name="ListFiles"></a>
+## type ListFiles
+
+ListFiles holds optional parameters for \[daytona.FileSystemService.ListFiles\].
+
+```go
+type ListFiles struct {
+    Depth *int32 // How many levels deep to list (default: 1, must be >= 1)
 }
 ```
 

@@ -194,6 +194,26 @@ Lists files and directories under a path.
 
 - `io.daytona.sdk.exception.DaytonaException` - if listing fails
 
+#### listFiles()
+```java
+public List<FileInfo> listFiles(String path, Integer depth)
+```
+
+Lists files and directories under a path, optionally recursing into subdirectories.
+
+**Parameters**:
+
+- `path` _String_ - directory path
+- `depth` _Integer_ - how many levels deep to list: depth=1 (default) lists the directory's entries, depth=2 also includes their children, and so on; must be >= 1. Each returned entry carries a full path field.
+
+**Returns**:
+
+- `List\<FileInfo\>` - file metadata entries
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if listing fails
+
 #### getFileDetails()
 ```java
 public FileInfo getFileDetails(String path)

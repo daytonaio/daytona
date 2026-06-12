@@ -166,6 +166,7 @@ type Snapshot struct {
 // FileInfo represents file metadata
 type FileInfo struct {
 	Name         string
+	Path         string
 	Size         int64
 	Mode         string
 	ModifiedTime time.Time

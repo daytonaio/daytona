@@ -55,3 +55,37 @@ describe('FileSystem.downloadFile', () => {
     })
   })
 })
+
+describe('FileSystem.listFiles', () => {
+  function newFileSystem(listFilesMock: jest.Mock) {
+    const fileSystem = Object.create(FileSystem.prototype) as FileSystem
+    Object.defineProperty(fileSystem, 'apiClient', { value: { listFiles: listFilesMock } })
+    return fileSystem
+  }
+
+  it.each([0, -1, 1.5, Number.NaN])('rejects invalid depth %p before calling the api', async (depth) => {
+    const listFilesMock = jest.fn()
+    const fileSystem = newFileSystem(listFilesMock)
+
+    await expect(FileSystem.prototype.listFiles.call(fileSystem, '/workspace', { depth })).rejects.toThrow(
+      'depth must be an integer of at least 1',
+    )
+    expect(listFilesMock).not.toHaveBeenCalled()
+  })
+
+  it('passes depth to the api client', async () => {
+    const listFilesMock = jest.fn().mockResolvedValue({ data: [] })
+    const fileSystem = newFileSystem(listFilesMock)
+
+    await expect(FileSystem.prototype.listFiles.call(fileSystem, '/workspace', { depth: 2 })).resolves.toEqual([])
+    expect(listFilesMock).toHaveBeenCalledWith('/workspace', 2)
+  })
+
+  it('omits depth when not provided', async () => {
+    const listFilesMock = jest.fn().mockResolvedValue({ data: [] })
+    const fileSystem = newFileSystem(listFilesMock)
+
+    await expect(FileSystem.prototype.listFiles.call(fileSystem, '/workspace')).resolves.toEqual([])
+    expect(listFilesMock).toHaveBeenCalledWith('/workspace', undefined)
+  })
+})
