@@ -14,6 +14,7 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
+import { SnapshotConflictError } from '../errors/snapshot-conflict.error'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { GpuType } from '../enums/gpu-type.enum'
 
@@ -160,7 +161,19 @@ export async function completeSnapshotFromSandbox(
       updateData.initialRunnerId = runnerId
     }
 
-    snapshot = await snapshotRepository.update(existing.id, { updateData, entity: existing })
+    try {
+      // Guard on the state at write time so a concurrent transition (failure,
+      // timeout, removal) between the read above and this update isn't overwritten
+      snapshot = await snapshotRepository.updateWhere(existing.id, {
+        updateData,
+        whereCondition: { state: SnapshotState.SNAPSHOTTING },
+      })
+    } catch (error) {
+      if (error instanceof SnapshotConflictError) {
+        return null
+      }
+      throw error
+    }
   } else {
     const snapshotId = uuidv4()
 
@@ -239,11 +252,20 @@ export async function failSnapshotFromSandbox(
     return null
   }
 
-  return snapshotRepository.update(existing.id, {
-    updateData: {
-      state: SnapshotState.ERROR,
-      errorReason: params.errorReason,
-    },
-    entity: existing,
-  })
+  try {
+    // Guard on the state at write time so a concurrent completion between the
+    // read above and this update isn't overwritten
+    return await snapshotRepository.updateWhere(existing.id, {
+      updateData: {
+        state: SnapshotState.ERROR,
+        errorReason: params.errorReason,
+      },
+      whereCondition: { state: SnapshotState.SNAPSHOTTING },
+    })
+  } catch (error) {
+    if (error instanceof SnapshotConflictError) {
+      return null
+    }
+    throw error
+  }
 }
