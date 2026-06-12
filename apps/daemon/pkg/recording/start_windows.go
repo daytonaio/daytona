@@ -13,8 +13,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/daytonaio/daemon/pkg/winsession"
 	"github.com/google/uuid"
 )
+
+// consoleSessionTimeout is short: the daemon runs as a service in session 0,
+// and gdigrab can only capture the interactive desktop, so by the time a
+// recording is requested AutoLogon must already have produced the console
+// session. If it hasn't, fail fast instead of stalling the API call.
+const consoleSessionTimeout = 5 * time.Second
 
 func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 	if err := os.MkdirAll(s.recordingsDir, 0755); err != nil {
@@ -64,7 +71,21 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		filePath,
 	)
 
+	// The daemon runs as SYSTEM in session 0, whose desktop has nothing to
+	// capture; spawn ffmpeg with the interactive console user's token so
+	// gdigrab sees the real desktop (same mechanism as the computer-use
+	// plugin spawn).
+	token, err := winsession.ActiveConsoleUserToken(consoleSessionTimeout)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve console session for recording: %w", err)
+	}
+	// CreateProcessAsUser references the token into the child during Start();
+	// our duplicated handle stays ours and must outlive cmd.Start(), so close
+	// it at function exit on every path.
+	defer token.Close()
+
 	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Token:         syscall.Token(token),
 		HideWindow:    true,
 		CreationFlags: 0x08000000,
 	}

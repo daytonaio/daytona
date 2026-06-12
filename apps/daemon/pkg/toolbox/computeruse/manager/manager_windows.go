@@ -6,7 +6,6 @@
 package manager
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -17,55 +16,14 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
+	"github.com/daytonaio/daemon/pkg/winsession"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-	"golang.org/x/sys/windows"
 )
 
-const (
-	consoleSessionPollInterval = 500 * time.Millisecond
-	consoleSessionPollTimeout  = 60 * time.Second
-)
-
-// ErrNoActiveConsoleSession is returned when no interactive user is logged on
-// within consoleSessionPollTimeout. In Daytona's Windows sandbox image this
-// should never fire after AutoLogon completes.
-var ErrNoActiveConsoleSession = errors.New("no active console session available; ensure a user is logged on (AutoLogon)")
-
-// activeConsoleUserToken polls WTSGetActiveConsoleSessionId until a non-sentinel
-// session id appears, then queries and duplicates the user's token to a primary
-// token suitable for exec.Cmd.SysProcAttr.Token. Caller owns the returned handle
-// and MUST ensure it lives until exec.Cmd.Start() returns; do NOT Close it
-// immediately after attaching it to SysProcAttr, since Windows duplicates the
-// handle during CreateProcessAsUser.
-func activeConsoleUserToken() (windows.Token, error) {
-	deadline := time.Now().Add(consoleSessionPollTimeout)
-	for {
-		sid := windows.WTSGetActiveConsoleSessionId()
-		if sid != 0xFFFFFFFF {
-			var raw windows.Token
-			if err := windows.WTSQueryUserToken(sid, &raw); err == nil {
-				var primary windows.Token
-				err := windows.DuplicateTokenEx(
-					raw,
-					windows.MAXIMUM_ALLOWED,
-					nil,
-					windows.SecurityImpersonation,
-					windows.TokenPrimary,
-					&primary,
-				)
-				raw.Close()
-				if err == nil {
-					return primary, nil
-				}
-			}
-		}
-		if time.Now().After(deadline) {
-			return 0, ErrNoActiveConsoleSession
-		}
-		time.Sleep(consoleSessionPollInterval)
-	}
-}
+// consoleSessionPollTimeout bounds how long a plugin spawn waits for AutoLogon
+// to produce an interactive console session before failing.
+const consoleSessionPollTimeout = 60 * time.Second
 
 // GetComputerUse returns the cached IComputerUse client, or spawns the plugin
 // binary into the active console session. Concurrent callers are serialized by
@@ -99,7 +57,7 @@ func spawnInConsoleSession(logger *slog.Logger, path string) (*plugin.Client, co
 		return nil, nil, fmt.Errorf("computer-use plugin not found at path: %s", path)
 	}
 
-	token, err := activeConsoleUserToken()
+	token, err := winsession.ActiveConsoleUserToken(consoleSessionPollTimeout)
 	if err != nil {
 		return nil, nil, err
 	}
