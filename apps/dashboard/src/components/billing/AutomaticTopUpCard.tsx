@@ -16,6 +16,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { toast } from 'sonner'
 
+const AUTOMATIC_TOP_UP_MIN_GAP = 10
+
 interface AutomaticTopUpCardProps {
   organizationId: string
   wallet: OrganizationWallet
@@ -28,6 +30,10 @@ export function AutomaticTopUpCard({ organizationId, wallet }: AutomaticTopUpCar
   const paymentMethods = paymentMethodsQuery.data
   const paymentMethodsLoading = paymentMethodsQuery.isLoading
   const hasNoPaymentMethod = (paymentMethods?.length ?? 0) === 0
+  const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
+  const targetAmount = automaticTopUp?.targetAmount ?? 0
+  const automaticTopUpWillBeDisabled = thresholdAmount === 0 && targetAmount === 0
+  const automaticTopUpRequiresPaymentMethod = !automaticTopUpWillBeDisabled
 
   useEffect(() => {
     setAutomaticTopUp(wallet.automaticTopUp)
@@ -76,7 +82,9 @@ export function AutomaticTopUpCard({ organizationId, wallet }: AutomaticTopUpCar
   }, [organizationId, automaticTopUp, setAutomaticTopUpMutation])
 
   const saveDisabled =
-    !automaticTopUpHasChanges || setAutomaticTopUpMutation.isPending || paymentMethodsLoading || hasNoPaymentMethod
+    !automaticTopUpHasChanges ||
+    setAutomaticTopUpMutation.isPending ||
+    (automaticTopUpRequiresPaymentMethod && (paymentMethodsLoading || hasNoPaymentMethod))
 
   return (
     <Card className="w-full">
@@ -103,13 +111,16 @@ export function AutomaticTopUpCard({ organizationId, wallet }: AutomaticTopUpCar
                 inputMode="decimal"
                 thousandSeparator
                 decimalScale={2}
+                allowNegative={false}
                 value={automaticTopUp?.thresholdAmount ?? ''}
                 onValueChange={({ floatValue }) => {
                   const value = floatValue ?? 0
 
                   let targetAmount = automaticTopUp?.targetAmount ?? 0
-                  if (value > targetAmount - 10) {
-                    targetAmount = value + 10
+                  const willDisableAutomaticTopUp = value === 0 && targetAmount === 0
+                  const minimumTargetAmount = value + AUTOMATIC_TOP_UP_MIN_GAP
+                  if (!willDisableAutomaticTopUp && targetAmount < minimumTargetAmount) {
+                    targetAmount = minimumTargetAmount
                   }
 
                   setAutomaticTopUp({
@@ -137,6 +148,7 @@ export function AutomaticTopUpCard({ organizationId, wallet }: AutomaticTopUpCar
                 inputMode="decimal"
                 thousandSeparator
                 decimalScale={2}
+                allowNegative={false}
                 value={automaticTopUp?.targetAmount ?? ''}
                 onValueChange={({ floatValue }) => {
                   const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
@@ -148,11 +160,13 @@ export function AutomaticTopUpCard({ organizationId, wallet }: AutomaticTopUpCar
                 onBlur={() => {
                   const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
                   const currentTarget = automaticTopUp?.targetAmount ?? 0
+                  const willDisableAutomaticTopUp = thresholdAmount === 0 && currentTarget === 0
+                  const minimumTargetAmount = thresholdAmount + AUTOMATIC_TOP_UP_MIN_GAP
 
-                  if (currentTarget < thresholdAmount) {
+                  if (!willDisableAutomaticTopUp && currentTarget < minimumTargetAmount) {
                     setAutomaticTopUp({
                       thresholdAmount,
-                      targetAmount: thresholdAmount,
+                      targetAmount: minimumTargetAmount,
                     })
                   }
                 }}

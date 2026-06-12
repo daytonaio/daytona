@@ -34,11 +34,11 @@ export function OneTimeTopUpCard({ organizationId }: OneTimeTopUpCardProps) {
   const showMissingPaymentMethodTopUpMessage = hasNoPaymentMethod
   const amount = selectedPreset ?? oneTimeTopUpAmount
   const topUpEnabled = Boolean(
-    !paymentMethodsLoading && !hasNoPaymentMethod && !topUpWalletMutation.isPending && amount,
+    !paymentMethodsLoading && !hasNoPaymentMethod && !topUpWalletMutation.isPending && (amount ?? 0) > 0,
   )
 
   const handleTopUpWallet = useCallback(async () => {
-    if (!amount) {
+    if (amount === undefined || amount <= 0) {
       return
     }
 
@@ -46,7 +46,7 @@ export function OneTimeTopUpCard({ organizationId }: OneTimeTopUpCardProps) {
     try {
       const result = await topUpWalletMutation.mutateAsync({
         organizationId,
-        amountCents: amount * 100,
+        amountCents: Math.round(amount * 100),
       })
       if (newWindow) {
         newWindow.location.href = result.url ?? ''
@@ -109,6 +109,7 @@ export function OneTimeTopUpCard({ organizationId }: OneTimeTopUpCardProps) {
                 inputMode="decimal"
                 thousandSeparator
                 decimalScale={2}
+                allowNegative={false}
                 value={oneTimeTopUpAmount ?? ''}
                 onValueChange={({ floatValue }) => {
                   const value = floatValue ?? undefined
