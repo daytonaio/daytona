@@ -142,5 +142,13 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		done <- err // Signal the done channel with the result
 	}()
 
+	// Don't acknowledge the recording until ffmpeg has survived a short
+	// startup window: x11grab failures (no display, bad screen) kill ffmpeg
+	// within milliseconds, and returning success for a process that already
+	// died would hand the caller a recording that never captured a frame.
+	if err := s.confirmStartup(id, active, startupConfirmation); err != nil {
+		return nil, err
+	}
+
 	return recording, nil
 }

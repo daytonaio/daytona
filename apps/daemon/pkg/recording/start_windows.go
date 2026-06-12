@@ -133,5 +133,14 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		done <- err
 	}()
 
+	// Don't acknowledge the recording until ffmpeg has survived a short
+	// startup window: gdigrab failures (no interactive desktop, session
+	// without a visible surface) kill ffmpeg within milliseconds, and
+	// returning success for a process that already died would hand the
+	// caller a recording that never captured a frame.
+	if err := s.confirmStartup(id, active, startupConfirmation); err != nil {
+		return nil, err
+	}
+
 	return recording, nil
 }
