@@ -181,11 +181,11 @@ openssl rand -hex 16
 The script updates `docker/dex/config.yaml` to set:
 
 - `issuer` to `https://YOUR_DOMAIN/dex`
-- `redirectURIs` to use `https://YOUR_DOMAIN` instead of `localhost`
+- `redirectURIs` to use `https://YOUR_DOMAIN` and `https://YOUR_DOMAIN/dashboard` instead of `localhost`
 - `staticPasswords` with your chosen email and bcrypt-hashed password
 
 :::caution
-The `redirectURIs` must use `https://` and your actual domain. If these still reference `localhost`, OIDC callbacks will fail after login.
+The `redirectURIs` must use `https://`, your actual domain, and include the `/dashboard` callback URI. If these still reference `localhost` or omit `/dashboard`, OIDC callbacks will fail after login.
 :::
 
 To generate a bcrypt password hash manually:
@@ -551,7 +551,7 @@ Navigate to `Applications` > `Applications` in the left sidebar and select the a
 In the `Allowed Callback URIs` field, add the following URLs:
 
 ```
-http://localhost:3000
+http://localhost:3000/dashboard
 http://localhost:3000/api/oauth2-redirect.html
 http://localhost:4000/callback
 http://proxy.localhost:4000/callback
@@ -560,7 +560,7 @@ http://proxy.localhost:4000/callback
 For `Allowed Logout URIs`, add:
 
 ```
-http://localhost:3000
+http://localhost:3000/dashboard
 ```
 
 And for `Allowed Web Origins`, add:
