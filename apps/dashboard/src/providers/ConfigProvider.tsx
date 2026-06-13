@@ -7,7 +7,7 @@ import { RoutePath } from '@/enums/RoutePath'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import { DaytonaConfiguration } from '@daytona/api-client'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { InMemoryWebStorage, WebStorageStateStore } from 'oidc-client-ts'
+import { WebStorageStateStore } from 'oidc-client-ts'
 import { ReactNode, useMemo } from 'react'
 import { AuthProvider, AuthProviderProps } from 'react-oidc-context'
 import { ConfigContext } from '../contexts/ConfigContext'
@@ -31,9 +31,6 @@ export function ConfigProvider(props: Props) {
   })
 
   const oidcConfig: AuthProviderProps = useMemo(() => {
-    const isLocalhost = window.location.hostname === 'localhost'
-    const stateStore = isLocalhost ? window.sessionStorage : new InMemoryWebStorage()
-
     return {
       authority: config.oidc.issuer,
       client_id: config.oidc.clientId,
@@ -44,7 +41,7 @@ export function ConfigProvider(props: Props) {
       redirect_uri: window.location.origin + '/dashboard',
       staleStateAgeInSeconds: 60,
       accessTokenExpiringNotificationTimeInSeconds: 290,
-      userStore: new WebStorageStateStore({ store: stateStore }),
+      userStore: new WebStorageStateStore({ store: window.sessionStorage }),
       onSigninCallback: (user) => {
         const state = user?.state as { returnTo?: string } | undefined
         const targetUrl = state?.returnTo || RoutePath.DASHBOARD
