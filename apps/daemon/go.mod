@@ -21,8 +21,8 @@ require (
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.3
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/lmittmann/tint v1.1.2
-	github.com/mattn/go-isatty v0.0.20
+	github.com/lmittmann/tint v1.1.3
+	github.com/mattn/go-isatty v0.0.22
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/pkg/sftp v1.13.6
 	github.com/ramr/go-reaper v0.3.1

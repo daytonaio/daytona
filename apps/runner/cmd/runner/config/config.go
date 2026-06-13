@@ -26,6 +26,7 @@ type Config struct {
 	EnableTLS                          bool          `envconfig:"ENABLE_TLS"`
 	OtelLoggingEnabled                 bool          `envconfig:"OTEL_LOGGING_ENABLED"`
 	OtelTracingEnabled                 bool          `envconfig:"OTEL_TRACING_ENABLED"`
+	OtelMetricsEnabled                 bool          `envconfig:"OTEL_METRICS_ENABLED"`
 	OtelEndpoint                       string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
 	OtelHeaders                        string        `envconfig:"OTEL_EXPORTER_OTLP_HEADERS"`
 	BackupInfoCacheRetention           time.Duration `envconfig:"BACKUP_INFO_CACHE_RETENTION" default:"168h" validate:"min=5m"`

@@ -54,8 +54,8 @@ func (d *DockerClient) PullSnapshot(ctx context.Context, req dto.PullSnapshotReq
 			return err
 		}
 
-		// Push the tagged image
-		err = d.PushImage(ctx, targetRef, req.DestinationRegistry)
+		// Push the tagged image (no sandbox context in the snapshot pull-through path)
+		err = d.PushImage(ctx, targetRef, req.DestinationRegistry, nil)
 		if err != nil {
 			return err
 		}

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/common-go/pkg/timer"
@@ -17,10 +18,23 @@ import (
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/pkg/jsonmessage"
+	"go.opentelemetry.io/otel/codes"
 )
 
-func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO, sandboxId *string) (*image.InspectResponse, error) {
+func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO, sandboxId *string) (_ *image.InspectResponse, retErr error) {
 	defer timer.Timer()()
+
+	ctx, span := StartRegistrySpan(ctx, "docker.PullImage", RegistryOpPull, sandboxId, imageName)
+	defer span.End()
+
+	start := time.Now()
+	defer func() {
+		RecordRegistryOp(ctx, RegistryOpPull, sandboxId, imageName, start, retErr)
+		if retErr != nil {
+			span.RecordError(retErr)
+			span.SetStatus(codes.Error, retErr.Error())
+		}
+	}()
 
 	tag := "latest"
 	lastColonIndex := strings.LastIndex(imageName, ":")
