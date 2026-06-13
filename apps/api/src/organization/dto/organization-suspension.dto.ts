@@ -4,19 +4,23 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsNumber, IsOptional, Min } from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsDate, IsNumber, IsOptional, IsString, Min } from 'class-validator'
 
 @ApiSchema({ name: 'OrganizationSuspension' })
 export class OrganizationSuspensionDto {
   @ApiProperty({
     description: 'Suspension reason',
   })
+  @IsString()
   reason: string
 
   @ApiProperty({
     description: 'Suspension until',
   })
   @IsOptional()
+  @Type(() => Date)
+  @IsDate()
   until?: Date
 
   @ApiPropertyOptional({

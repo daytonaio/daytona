@@ -4,6 +4,7 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { IsOptional, IsString } from 'class-validator'
 
 @ApiSchema({ name: 'UpdateRegion' })
 export class UpdateRegionDto {
@@ -13,6 +14,8 @@ export class UpdateRegionDto {
     nullable: true,
     required: false,
   })
+  @IsString()
+  @IsOptional()
   proxyUrl?: string
 
   @ApiProperty({
@@ -21,6 +24,8 @@ export class UpdateRegionDto {
     nullable: true,
     required: false,
   })
+  @IsString()
+  @IsOptional()
   sshGatewayUrl?: string
 
   @ApiProperty({
@@ -29,5 +34,7 @@ export class UpdateRegionDto {
     nullable: true,
     required: false,
   })
+  @IsString()
+  @IsOptional()
   snapshotManagerUrl?: string
 }

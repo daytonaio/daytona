@@ -4,12 +4,14 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { IsObject, IsOptional, IsString } from 'class-validator'
 
 @ApiSchema({ name: 'OtelConfig' })
 export class OtelConfigDto {
   @ApiProperty({
     description: 'Endpoint',
   })
+  @IsString()
   endpoint: string
 
   @ApiProperty({
@@ -21,5 +23,7 @@ export class OtelConfigDto {
     required: false,
     additionalProperties: { type: 'string' },
   })
+  @IsObject()
+  @IsOptional()
   headers?: Record<string, string>
 }
