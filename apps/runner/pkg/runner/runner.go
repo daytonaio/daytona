@@ -25,6 +25,7 @@ type RunnerInstanceConfig struct {
 	Docker             *docker.DockerClient
 	MetricsCollector   *metrics.Collector
 	SandboxService     *services.SandboxService
+	SandboxDegraded    *services.SandboxDegradedService
 	NetRulesManager    *netrules.NetRulesManager
 	SSHGatewayService  *sshgateway.Service
 }
@@ -36,6 +37,7 @@ type Runner struct {
 	Docker             *docker.DockerClient
 	MetricsCollector   *metrics.Collector
 	SandboxService     *services.SandboxService
+	SandboxDegraded    *services.SandboxDegradedService
 	NetRulesManager    *netrules.NetRulesManager
 	SSHGatewayService  *sshgateway.Service
 }
@@ -63,6 +65,7 @@ func GetInstance(config *RunnerInstanceConfig) (*Runner, error) {
 			SnapshotErrorCache: config.SnapshotErrorCache,
 			Docker:             config.Docker,
 			SandboxService:     config.SandboxService,
+			SandboxDegraded:    config.SandboxDegraded,
 			MetricsCollector:   config.MetricsCollector,
 			NetRulesManager:    config.NetRulesManager,
 			SSHGatewayService:  config.SSHGatewayService,

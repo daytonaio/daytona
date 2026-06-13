@@ -202,6 +202,13 @@ func run() int {
 	})
 	sandboxSyncService.StartSyncProcess(ctx)
 
+	// Initialize degraded-condition tracking (fd exhaustion surfacing)
+	sandboxDegradedService := services.NewSandboxDegradedService(services.SandboxDegradedServiceConfig{
+		Logger: logger,
+		Docker: dockerClient,
+	})
+	sandboxDegradedService.Start(ctx)
+
 	// Initialize SSH Gateway if enabled
 	var sshGatewayService *sshgateway.Service
 	if sshgateway.IsSSHGatewayEnabled() {
@@ -233,6 +240,7 @@ func run() int {
 		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
 		Docker:             dockerClient,
 		SandboxService:     sandboxService,
+		SandboxDegraded:    sandboxDegradedService,
 		MetricsCollector:   metricsCollector,
 		NetRulesManager:    netRulesManager,
 		SSHGatewayService:  sshGatewayService,

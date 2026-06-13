@@ -12,6 +12,10 @@ import (
 )
 
 // Patterns that indicate recoverable errors mapped to their recovery types
+// NOTE: fd-exhaustion signatures (EMFILE/ENFILE, "too many open files", loader
+// failures) are deliberately excluded — they are surfacing-only (see degraded.go)
+// and must NEVER trigger automated recovery (restart/recreate/disk-resize).
+// Enforced by TestDeduceRecoveryType_FdExhaustionNotActionable.
 var recoverableErrorPatterns = map[models.RecoveryType][]string{
 	models.RecoveryTypeStorageExpansion: {
 		"no space left on device",

@@ -37,6 +37,7 @@ import {
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
 import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
+import { UpdateSandboxDegradedReasonDto } from '../dto/update-sandbox-degraded-reason.dto'
 import { PaginatedSandboxesDtoDeprecated } from '../dto/paginated-sandboxes.deprecated.dto'
 import { RunnerService } from '../services/runner.service'
 import { RunnerAuthContextGuard } from '../guards/runner-auth-context.guard'
@@ -675,6 +676,33 @@ export class SandboxController {
       updateStateDto.recoverable,
       updateStateDto.errorReason,
     )
+  }
+
+  @Put(':sandboxId/degraded-reason')
+  @ApiOperation({
+    summary: 'Update sandbox degraded reason',
+    operationId: 'updateSandboxDegradedReason',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox degraded reason has been successfully updated',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Sandbox is not started; a degraded reason can only be set on a started sandbox',
+  })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(RunnerAuthContextGuard, SandboxAccessGuard)
+  async updateSandboxDegradedReason(
+    @Param('sandboxId') sandboxId: string,
+    @Body() updateDegradedReasonDto: UpdateSandboxDegradedReasonDto,
+  ): Promise<void> {
+    await this.sandboxService.updateDegradedReason(sandboxId, updateDegradedReasonDto.degradedReason ?? null)
   }
 
   @Post(':sandboxIdOrName/backup')

@@ -188,6 +188,15 @@ export class SandboxDto {
   recoverable?: boolean
 
   @ApiPropertyOptional({
+    description:
+      'Reason the sandbox is currently degraded (e.g. file-descriptor exhaustion). Set by the runner while the condition persists and cleared automatically when it resolves.',
+    example: 'fd-exhaustion: fork/exec /bin/sh: too many open files',
+    required: false,
+  })
+  @IsOptional()
+  degradedReason?: string
+
+  @ApiPropertyOptional({
     description: 'The state of the backup',
     enum: BackupState,
     example: Object.values(BackupState)[0],
@@ -334,6 +343,7 @@ export class SandboxDto {
       desiredState: sandbox.desiredState,
       errorReason: sandbox.errorReason,
       recoverable: sandbox.recoverable,
+      degradedReason: sandbox.degradedReason ?? undefined,
       backupState: sandbox.backupState,
       backupCreatedAt: sandbox.lastBackupAt ? new Date(sandbox.lastBackupAt).toISOString() : undefined,
       autoStopInterval: sandbox.autoStopInterval,

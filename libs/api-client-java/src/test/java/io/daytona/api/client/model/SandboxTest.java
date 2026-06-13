@@ -208,6 +208,14 @@ public class SandboxTest {
     }
 
     /**
+     * Test the property 'degradedReason'
+     */
+    @Test
+    public void degradedReasonTest() {
+        // TODO: test degradedReason
+    }
+
+    /**
      * Test the property 'backupState'
      */
     @Test

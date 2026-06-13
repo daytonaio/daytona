@@ -2470,6 +2470,47 @@ paths:
       summary: Update sandbox state
       tags:
       - sandbox
+  /sandbox/{sandboxId}/degraded-reason:
+    put:
+      operationId: updateSandboxDegradedReason
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID of the sandbox
+        explode: false
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSandboxDegradedReasonDto"
+        required: true
+      responses:
+        "200":
+          description: Sandbox degraded reason has been successfully updated
+        "409":
+          description: Sandbox is not started; a degraded reason can only be set on
+            a started sandbox
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Update sandbox degraded reason
+      tags:
+      - sandbox
   /sandbox/{sandboxIdOrName}/backup:
     post:
       operationId: createBackup
@@ -11100,6 +11141,7 @@ components:
           daytona.io/public: "true"
         target: local
         disk: 10
+        degradedReason: "fd-exhaustion: fork/exec /bin/sh: too many open files"
         name: MySandbox
         backupState: None
         user: daytona
@@ -11196,6 +11238,12 @@ components:
           description: Whether the sandbox error is recoverable.
           example: true
           type: boolean
+        degradedReason:
+          description: Reason the sandbox is currently degraded (e.g. file-descriptor
+            exhaustion). Set by the runner while the condition persists and cleared
+            automatically when it resolves.
+          example: "fd-exhaustion: fork/exec /bin/sh: too many open files"
+          type: string
         backupState:
           description: The state of the backup
           enum:
@@ -11335,6 +11383,7 @@ components:
             daytona.io/public: "true"
           target: local
           disk: 10
+          degradedReason: "fd-exhaustion: fork/exec /bin/sh: too many open files"
           name: MySandbox
           backupState: None
           user: daytona
@@ -11378,6 +11427,7 @@ components:
             daytona.io/public: "true"
           target: local
           disk: 10
+          degradedReason: "fd-exhaustion: fork/exec /bin/sh: too many open files"
           name: MySandbox
           backupState: None
           user: daytona
@@ -11634,6 +11684,16 @@ components:
           type: boolean
       required:
       - state
+      type: object
+    UpdateSandboxDegradedReasonDto:
+      example:
+        degradedReason: "fd-exhaustion: too many open files"
+      properties:
+        degradedReason:
+          description: Degraded reason; omit or send null to clear
+          example: "fd-exhaustion: too many open files"
+          nullable: true
+          type: string
       type: object
     CreateSandboxSnapshot:
       example:
