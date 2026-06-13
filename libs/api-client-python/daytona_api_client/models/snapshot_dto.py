@@ -37,6 +37,7 @@ class SnapshotDto(BaseModel):
     id: StrictStr
     organization_id: Optional[StrictStr] = Field(default=None, serialization_alias="organizationId")
     general: StrictBool
+    cold: StrictBool = Field(description="Whether the snapshot is cold (never auto-propagated to runners; pulled on demand).")
     name: StrictStr
     image_name: Optional[StrictStr] = Field(default=None, serialization_alias="imageName")
     state: SnapshotState
@@ -57,7 +58,7 @@ class SnapshotDto(BaseModel):
     ref: Optional[StrictStr] = Field(default=None, description="The snapshot reference")
     sandbox_class: Optional[StrictStr] = Field(default=None, description="The sandbox class of the snapshot", serialization_alias="sandboxClass")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "gpuType", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "cold", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "gpuType", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -142,6 +143,7 @@ class SnapshotDto(BaseModel):
             "id": obj.get("id"),
             "organization_id": obj.get("organizationId"),
             "general": obj.get("general"),
+            "cold": obj.get("cold"),
             "name": obj.get("name"),
             "image_name": obj.get("imageName"),
             "state": obj.get("state"),

@@ -194,6 +194,7 @@ const configuration = {
   runnerScore: {
     thresholds: {
       declarativeBuild: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),
+      snapshotPull: parseInt(process.env.RUNNER_SNAPSHOT_PULL_SCORE_THRESHOLD || '10', 10),
       availability: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '10', 10),
       start: parseInt(process.env.RUNNER_START_SCORE_THRESHOLD || '3', 10),
       initialRunnerScoreAddon: parseInt(process.env.RUNNER_INITIAL_RUNNER_SCORE_ADDON || '20', 10),

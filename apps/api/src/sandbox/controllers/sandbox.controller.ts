@@ -304,6 +304,12 @@ export class SandboxController {
         return sandbox
       }
 
+      // A cold/on-demand snapshot pull can take minutes — return immediately (like declarative
+      // builds do) instead of holding the request; clients poll the sandbox state.
+      if (sandbox.state === SandboxState.PULLING_SNAPSHOT) {
+        return sandbox
+      }
+
       await this.waitForSandboxStarted(sandbox, 30)
     }
 

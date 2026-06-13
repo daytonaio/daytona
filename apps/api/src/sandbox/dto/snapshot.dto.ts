@@ -10,6 +10,7 @@ import { BuildInfoDto } from './build-info.dto'
 import { IsEnum, IsOptional } from 'class-validator'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { GpuType } from '../enums/gpu-type.enum'
+import { isColdSnapshot } from '../utils/snapshot.util'
 
 export class SnapshotDto {
   @ApiProperty()
@@ -20,6 +21,11 @@ export class SnapshotDto {
 
   @ApiProperty()
   general: boolean
+
+  @ApiProperty({
+    description: 'Whether the snapshot is cold (never auto-propagated to runners; pulled on demand).',
+  })
+  cold: boolean
 
   @ApiProperty()
   name: string
@@ -116,6 +122,7 @@ export class SnapshotDto {
       id: snapshot.id,
       organizationId: snapshot.organizationId,
       general: snapshot.general,
+      cold: isColdSnapshot(snapshot),
       name: snapshot.name,
       imageName: snapshot.imageName,
       state: snapshot.state,

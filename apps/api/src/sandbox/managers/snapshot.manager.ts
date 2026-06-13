@@ -48,6 +48,8 @@ import { SnapshotInfoResponse } from '@daytona/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { BASE_PROPAGATION_FACTOR } from '../constants/snapshot.constants'
+import { isColdSnapshot } from '../utils/snapshot.util'
 
 /** Fisher-Yates shuffle — uniform random permutation in O(n). */
 function shuffleArray<T>(array: T[]): T[] {
@@ -63,7 +65,6 @@ const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
 const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES = 14 * 24 * 60 // 14 days
 type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
-const BASE_PROPAGATION_FACTOR = 1 / 3
 
 @Injectable()
 export class SnapshotManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -141,7 +142,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           .filter((r) => r.organizationId === null && r.regionType === RegionType.SHARED)
           .map((r) => r.id)
 
-        return this.scaleDownSnapshotFromRunners(snapshot, sharedRegionIds)
+        return this.scaleDownSnapshotFromRunners(snapshot, sharedRegionIds, snapshot.propagationFactor)
       }),
     )
 
@@ -335,6 +336,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async propagateSnapshotToRunners(snapshot: Snapshot, sharedRegionIds: string[], organizationRegionIds: string[]) {
+    // Cold snapshots are never auto-propagated; sandboxes pull them on demand.
+    if (isColdSnapshot(snapshot)) {
+      return
+    }
+
     //  todo: remove try catch block and implement error handling
     try {
       //  get all runners in the regions to propagate to
@@ -395,7 +401,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       // respect the propagation limit for shared runners
       const sharedRunnersPropagateLimit = Math.max(
         0,
-        Math.ceil(sharedRunners.length * BASE_PROPAGATION_FACTOR) - sharedSnapshotRunnersDistinctRunnersIds.size,
+        Math.ceil(sharedRunners.length * snapshot.propagationFactor) - sharedSnapshotRunnersDistinctRunnersIds.size,
       )
       runnersToPropagateTo.push(...shuffleArray(unallocatedSharedRunners).slice(0, sharedRunnersPropagateLimit))
 
@@ -1358,6 +1364,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         .leftJoin('organization', 'org', `org."id" = snapshot."organizationId"`)
         .where('snapshot.general = false')
         .andWhere('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
+        // Never auto-deactivate cold snapshots: they keep no warm copies, so deactivation reclaims
+        // nothing and would only route their on-demand copies through the grace-less cleanup path.
+        .andWhere('snapshot."propagationFactor" > 0')
         .andWhere(`(snapshot."lastUsedAt" IS NULL OR snapshot."lastUsedAt" < ${cutoff})`)
         .andWhere(`snapshot."createdAt" < ${cutoff}`)
         .andWhere(

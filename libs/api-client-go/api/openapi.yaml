@@ -13939,6 +13939,7 @@ components:
         entrypoint: sleep infinity
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
+        cold: false
         gpu: 0
         gpuType:
         - H100
@@ -13995,6 +13996,13 @@ components:
           description: Target sandbox class. Determines which runners can host sandboxes
             created from this snapshot.
           example: linux-vm
+        cold:
+          default: false
+          description: "When true, the snapshot is \"cold\": it is never auto-propagated\
+            \ to runners. Sandboxes can still be created from it via an on-demand\
+            \ pull (they briefly enter the pulling_snapshot state). Defaults to false\
+            \ (warm)."
+          type: boolean
       required:
       - name
       type: object
@@ -14014,6 +14022,7 @@ components:
         imageName: imageName
         buildInfo: ""
         cpu: 6.027456183070403
+        cold: true
         regionIds:
         - regionIds
         - regionIds
@@ -14043,6 +14052,10 @@ components:
         organizationId:
           type: string
         general:
+          type: boolean
+        cold:
+          description: Whether the snapshot is cold (never auto-propagated to runners;
+            pulled on demand).
           type: boolean
         name:
           type: string
@@ -14117,6 +14130,7 @@ components:
           - ANDROID
           - WINDOWS
       required:
+      - cold
       - cpu
       - createdAt
       - disk
@@ -14141,6 +14155,7 @@ components:
         - imageName: imageName
           buildInfo: ""
           cpu: 6.027456183070403
+          cold: true
           regionIds:
           - regionIds
           - regionIds
@@ -14167,6 +14182,7 @@ components:
         - imageName: imageName
           buildInfo: ""
           cpu: 6.027456183070403
+          cold: true
           regionIds:
           - regionIds
           - regionIds

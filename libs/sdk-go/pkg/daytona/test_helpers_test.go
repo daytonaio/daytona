@@ -50,6 +50,7 @@ func testSnapshotPayload(id, name string, state apiclient.SnapshotState) map[str
 		"id":             id,
 		"organizationId": "org-1",
 		"general":        false,
+		"cold":           false,
 		"name":           name,
 		"imageName":      "python:3.12",
 		"state":          state,

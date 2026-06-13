@@ -160,6 +160,32 @@ func TestSnapshotSuccessOperations(t *testing.T) {
 		}
 		assert.NotEmpty(t, logs)
 	})
+
+	t.Run("create cold snapshot sends cold and maps it back", func(t *testing.T) {
+		var requestBody map[string]any
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost {
+				require.NoError(t, json.NewDecoder(r.Body).Decode(&requestBody))
+			}
+			payload := testSnapshotPayload("snap-cold", "cold-snapshot", apiclient.SNAPSHOTSTATE_ACTIVE)
+			payload["cold"] = true
+			writeJSONResponse(t, w, http.StatusOK, payload)
+		}))
+		defer server.Close()
+
+		client := createTestClientWithServer(t, server)
+		cold := true
+		snapshot, logChan, err := client.Snapshot.Create(context.Background(), &types.CreateSnapshotParams{
+			Name:  "cold-snapshot",
+			Image: "python:3.12",
+			Cold:  &cold,
+		})
+		require.NoError(t, err)
+		for range logChan {
+		}
+		assert.Equal(t, true, requestBody["cold"])
+		assert.True(t, snapshot.Cold)
+	})
 }
 
 func TestSnapshotLogStreamingHelpers(t *testing.T) {
@@ -192,7 +218,7 @@ func TestSnapshotLogStreamingHelpers(t *testing.T) {
 		size := *apiclient.NewNullableFloat32(&sizeVal)
 		errorReason := *apiclient.NewNullableString(nil)
 		lastUsedAt := *apiclient.NewNullableTime(nil)
-		apiSnapshot := apiclient.NewSnapshotDto("snap-3", false, "mapped", apiclient.SNAPSHOTSTATE_ACTIVE, size, []string{"python"}, 1, 0, 1024, 10, errorReason, now, now, lastUsedAt)
+		apiSnapshot := apiclient.NewSnapshotDto("snap-3", false, false, "mapped", apiclient.SNAPSHOTSTATE_ACTIVE, size, []string{"python"}, 1, 0, 1024, 10, errorReason, now, now, lastUsedAt)
 		apiSnapshot.SetOrganizationId("org-9")
 		apiSnapshot.SetImageName("python:3.12")
 		mapped := mapSnapshotFromAPI(apiSnapshot)

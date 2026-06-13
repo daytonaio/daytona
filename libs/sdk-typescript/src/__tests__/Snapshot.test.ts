@@ -87,6 +87,21 @@ describe('SnapshotService', () => {
     expect(snapshotsApi.createSnapshot).toHaveBeenCalled()
   })
 
+  it('passes cold through to snapshot creation and returns it on the snapshot', async () => {
+    snapshotsApi.createSnapshot.mockResolvedValue(
+      createApiResponse({ id: 's2', name: 'snap2', state: 'active', cold: true }),
+    )
+
+    const snapshot = await service.create({ name: 'snap2', image: 'python:3.12', cold: true })
+
+    expect(snapshotsApi.createSnapshot).toHaveBeenCalledWith(
+      expect.objectContaining({ cold: true }),
+      undefined,
+      expect.any(Object),
+    )
+    expect(snapshot.cold).toBe(true)
+  })
+
   it('passes timeout values in milliseconds to snapshot creation', async () => {
     snapshotsApi.createSnapshot.mockResolvedValue(createApiResponse({ id: 's2', name: 'snap2', state: 'active' }))
 

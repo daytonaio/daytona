@@ -27,6 +27,10 @@ export interface SnapshotDto {
     'id': string;
     'organizationId'?: string;
     'general': boolean;
+    /**
+     * Whether the snapshot is cold (never auto-propagated to runners; pulled on demand).
+     */
+    'cold': boolean;
     'name': string;
     'imageName'?: string;
     'state': SnapshotState;

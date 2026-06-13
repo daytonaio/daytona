@@ -56,6 +56,7 @@ export interface PaginatedSnapshots extends Omit<PaginatedSnapshotsDto, 'items'>
  * @property {string[]} entrypoint - Entrypoint of the snapshot.
  * @property {string} regionId - ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
  * @property {SandboxClass} sandboxClass - Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
+ * @property {boolean} cold - When true, the snapshot is not auto-propagated to runners; sandboxes pull it on demand. Defaults to false (warm).
  */
 export type CreateSnapshotParams = {
   name: string
@@ -64,6 +65,7 @@ export type CreateSnapshotParams = {
   entrypoint?: string[]
   regionId?: string
   sandboxClass?: SandboxClass
+  cold?: boolean
 }
 
 /**
@@ -188,6 +190,7 @@ export class SnapshotService {
 
     createSnapshotReq.regionId = params.regionId || this.defaultRegionId
     createSnapshotReq.sandboxClass = params.sandboxClass
+    createSnapshotReq.cold = params.cold
 
     let createdSnapshot = (
       await this.snapshotsApi.createSnapshot(createSnapshotReq, undefined, {
