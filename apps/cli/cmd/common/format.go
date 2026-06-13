@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -74,10 +75,16 @@ func (f YAMLFormatter) Format(data interface{}) (string, error) {
 }
 
 func (f *outputFormatter) Print() {
+	// No --format means no formatter; printing structured output is a no-op.
+	if f.formatter == nil {
+		return
+	}
 
 	formattedOutput, err := f.formatter.Format(f.data)
 	if err != nil {
-		fmt.Printf("Error formatting output: %v\n", err)
+		// Stdout is blocked while a structured format is active, so report
+		// the formatting failure on stderr.
+		fmt.Fprintf(os.Stderr, "Error formatting output: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -102,15 +109,44 @@ func UnblockStdOut() {
 
 func RegisterFormatFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&FormatFlag, formatFlagName, formatFlagShortHand, FormatFlag, formatFlagDescription)
-	cmd.PreRun = func(cmd *cobra.Command, args []string) {
-		if FormatFlag != "" {
-			BlockStdOut()
-			// When a structured output format is requested, suppress
-			// noisy warnings such as version mismatch so scripts
-			// consuming json/yaml aren't broken.
-			internal.SuppressVersionMismatchWarning = true
-		} else {
-			internal.SuppressVersionMismatchWarning = false
+	chainFormatPreRunE(cmd)
+}
+
+// RegisterFormatFlagNoShorthand registers --format without the -f shorthand,
+// for commands where -f is already taken (e.g. --force, --dockerfile).
+func RegisterFormatFlagNoShorthand(cmd *cobra.Command) {
+	cmd.Flags().StringVar(&FormatFlag, formatFlagName, FormatFlag, formatFlagDescription)
+	chainFormatPreRunE(cmd)
+}
+
+// chainFormatPreRunE installs the --format validation as the command's
+// PreRunE, calling any pre-existing PreRunE after validation succeeds instead
+// of clobbering it.
+func chainFormatPreRunE(cmd *cobra.Command) {
+	original := cmd.PreRunE
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		if err := formatFlagPreRunE(cmd, args); err != nil {
+			return err
 		}
+		if original != nil {
+			return original(cmd, args)
+		}
+		return nil
 	}
+}
+
+func formatFlagPreRunE(cmd *cobra.Command, args []string) error {
+	switch FormatFlag {
+	case "":
+		internal.SuppressVersionMismatchWarning = false
+	case "json", "yaml":
+		BlockStdOut()
+		// When a structured output format is requested, suppress
+		// noisy warnings such as version mismatch so scripts
+		// consuming json/yaml aren't broken.
+		internal.SuppressVersionMismatchWarning = true
+	default:
+		return clierr.Newf(clierr.CategoryUsage, "invalid --format value %q: must be one of json, yaml", FormatFlag)
+	}
+	return nil
 }

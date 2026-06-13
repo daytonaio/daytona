@@ -20,8 +20,11 @@ var (
 )
 
 var ListCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List sandboxes",
+	Use:   "list",
+	Short: "List sandboxes",
+	Example: `  daytona list
+  daytona list --limit 50
+  daytona list --format json`,
 	Args:    cobra.NoArgs,
 	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {

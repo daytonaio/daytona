@@ -31,13 +31,25 @@ options:
     shorthand: e
     default_value: '[]'
     usage: 'Environment variables (format: KEY=VALUE)'
+  - name: env-file
+    usage: |
+      Read environment variables from a dotenv-style file (entries from --env override file values)
+  - name: format
+    usage: Output format. Must be one of (yaml, json)
   - name: gpu
     default_value: '0'
     usage: GPU units allocated to the sandbox
+  - name: if-exists
+    default_value: error
+    usage: |
+      Behavior when a sandbox with the same name already exists (error, reuse; reuse requires --name)
   - name: label
     shorthand: l
     default_value: '[]'
     usage: 'Labels (format: KEY=VALUE)'
+  - name: label-file
+    usage: |
+      Read labels from a dotenv-style file (entries from --label override file values)
   - name: memory
     default_value: '0'
     usage: Memory allocated to the sandbox in MB
@@ -56,6 +68,10 @@ options:
     usage: Snapshot to use for the sandbox
   - name: target
     usage: Target region (eu, us)
+  - name: timeout
+    default_value: 0s
+    usage: |
+      Maximum time to wait for the sandbox to start (0 means wait indefinitely)
   - name: user
     usage: User associated with the sandbox
   - name: volume
@@ -66,5 +82,13 @@ inherited_options:
   - name: help
     default_value: 'false'
     usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
+example: |4-
+      daytona create --snapshot my-snapshot:1.0 --name my-sandbox
+      daytona create --name my-sandbox --env-file .env --if-exists reuse
+      daytona create --snapshot my-snapshot:1.0 --name my-sandbox --format json
 see_also:
   - daytona - Daytona CLI

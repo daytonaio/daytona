@@ -28,4 +28,6 @@ func init() {
 	SandboxCmd.AddCommand(SSHCmd)
 	SandboxCmd.AddCommand(ExecCmd)
 	SandboxCmd.AddCommand(PreviewUrlCmd)
+	SandboxCmd.AddCommand(CpCmd)
+	SandboxCmd.AddCommand(LogsCmd)
 }

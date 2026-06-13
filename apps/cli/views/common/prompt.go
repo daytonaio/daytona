@@ -10,6 +10,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 )
 
 type promptModel struct {
@@ -65,6 +67,10 @@ func (m promptModel) View() string {
 }
 
 func PromptForInput(prompt, title, desc string) (string, error) {
+	if !internal.Interactive() {
+		return "", clierr.New(clierr.CategoryUsage, "cannot prompt for input in non-interactive mode").WithHint("re-run interactively or provide the value via flags")
+	}
+
 	ti := textinput.New()
 	ti.Focus()
 	ti.CharLimit = 156

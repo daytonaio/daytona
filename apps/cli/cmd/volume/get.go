@@ -13,8 +13,10 @@ import (
 )
 
 var GetCmd = &cobra.Command{
-	Use:     "get [VOLUME_ID_OR_NAME]",
-	Short:   "Get volume details",
+	Use:   "get [VOLUME_ID_OR_NAME]",
+	Short: "Get volume details",
+	Example: `  daytona volume get my-volume
+  daytona volume get my-volume --format json`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("get"),
 	RunE: func(cmd *cobra.Command, args []string) error {

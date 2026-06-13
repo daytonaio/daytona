@@ -5,11 +5,17 @@ package organization
 
 import (
 	"github.com/charmbracelet/huh"
+	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	"github.com/daytonaio/daytona/cli/views/common"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 )
 
 func GetOrganizationIdFromPrompt(organizationList []apiclient.Organization) (*apiclient.Organization, error) {
+	if !internal.Interactive() {
+		return nil, clierr.New(clierr.CategoryUsage, "cannot prompt for input in non-interactive mode").WithHint("pass the organization ID or name as an argument")
+	}
+
 	var chosenOrganizationId string
 	var organizationOptions []huh.Option[string]
 

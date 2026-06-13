@@ -4,12 +4,14 @@
 package apiclient_test
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 )
 
 func response(statusCode int, body string) *http.Response {
@@ -115,10 +117,17 @@ func TestHandleErrorResponse_UnchangedBehavior(t *testing.T) {
 		}
 	})
 
-	t.Run("nil response returns the original request error", func(t *testing.T) {
+	t.Run("nil response returns a network clierr preserving the request error message", func(t *testing.T) {
 		err := apiclient.HandleErrorResponse(nil, io.ErrUnexpectedEOF)
-		if err != io.ErrUnexpectedEOF {
-			t.Errorf("expected original error, got: %v", err)
+		var cliErr *clierr.Error
+		if !errors.As(err, &cliErr) {
+			t.Fatalf("expected *clierr.Error, got %T: %v", err, err)
+		}
+		if cliErr.Category != clierr.CategoryNetwork {
+			t.Errorf("expected category %q, got %q", clierr.CategoryNetwork, cliErr.Category)
+		}
+		if cliErr.Message != io.ErrUnexpectedEOF.Error() {
+			t.Errorf("expected message %q, got %q", io.ErrUnexpectedEOF.Error(), cliErr.Message)
 		}
 	})
 

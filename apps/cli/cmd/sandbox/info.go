@@ -13,8 +13,10 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:     "info [SANDBOX_ID] | [SANDBOX_NAME]",
-	Short:   "Get sandbox info",
+	Use:   "info [SANDBOX_ID | SANDBOX_NAME]",
+	Short: "Get sandbox info",
+	Example: `  daytona info my-sandbox
+  daytona info my-sandbox --format json`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {

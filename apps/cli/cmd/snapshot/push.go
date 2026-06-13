@@ -15,6 +15,7 @@ import (
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/docker"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	views_common "github.com/daytonaio/daytona/cli/views/common"
 	views_util "github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -29,7 +30,9 @@ var PushCmd = &cobra.Command{
 	Use:   "push [SNAPSHOT]",
 	Short: "Push local snapshot",
 	Long:  "Push a local Docker image to Daytona. To securely build it on our infrastructure, use 'daytona snapshot build'",
-	Args:  cobra.ExactArgs(1),
+	Example: `  daytona snapshot push my-image:latest --name my-snapshot:1.0
+  daytona snapshot push my-image:latest --name my-snapshot:1.0 --cpu 2 --memory 4`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		sourceImage := args[0]
@@ -126,11 +129,18 @@ var PushCmd = &cobra.Command{
 
 		// Poll until the image is really available on the registry
 		// This is a workaround for harbor's delay in making newly created images available
+		registryDeadline := time.Time{}
+		if pushTimeoutFlag > 0 {
+			registryDeadline = time.Now().Add(pushTimeoutFlag)
+		}
 		for {
 			_, err := dockerClient.DistributionInspect(ctx, targetImage,
 				base64.URLEncoding.EncodeToString(encodedAuthConfig))
 			if err == nil {
 				break
+			}
+			if !registryDeadline.IsZero() && time.Now().After(registryDeadline) {
+				return clierr.Newf(clierr.CategoryTimeout, "timed out after %s waiting for image %q to become available on the registry", pushTimeoutFlag, targetImage)
 			}
 			time.Sleep(time.Second)
 		}
@@ -156,7 +166,7 @@ var PushCmd = &cobra.Command{
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, pushTimeoutFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
@@ -168,7 +178,8 @@ var PushCmd = &cobra.Command{
 }
 
 var (
-	nameFlag string
+	nameFlag        string
+	pushTimeoutFlag time.Duration
 )
 
 func init() {
@@ -178,6 +189,7 @@ func init() {
 	PushCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	PushCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
 	PushCmd.Flags().StringVar(&regionIdFlag, "region", "", "ID of the region where the snapshot will be available (defaults to organization default region)")
+	PushCmd.Flags().DurationVar(&pushTimeoutFlag, "timeout", 0, "Maximum time to wait for the snapshot to be validated (0 means wait indefinitely)")
 
 	_ = PushCmd.MarkFlagRequired("name")
 }

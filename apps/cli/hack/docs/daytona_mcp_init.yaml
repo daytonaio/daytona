@@ -6,5 +6,12 @@ inherited_options:
   - name: help
     default_value: 'false'
     usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
+example: |4-
+      daytona mcp init claude
+      daytona mcp init cursor
 see_also:
   - daytona mcp - Manage Daytona MCP Server

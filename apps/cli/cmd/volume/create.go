@@ -15,8 +15,11 @@ import (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:     "create [NAME]",
-	Short:   "Create a volume",
+	Use:   "create [NAME]",
+	Short: "Create a volume",
+	Example: `  daytona volume create my-volume
+  # Mount it when creating a sandbox
+  daytona create --snapshot my-snapshot:1.0 --volume my-volume:/data`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -37,10 +40,4 @@ var CreateCmd = &cobra.Command{
 		view_common.RenderInfoMessageBold(fmt.Sprintf("Volume %s successfully created", volume.Name))
 		return nil
 	},
-}
-
-var sizeFlag int32
-
-func init() {
-	CreateCmd.Flags().Int32VarP(&sizeFlag, "size", "s", 10, "Size of the volume in GB")
 }

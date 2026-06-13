@@ -6,12 +6,16 @@ package auth
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/daytonaio/daytona/cli/auth"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
@@ -19,15 +23,27 @@ import (
 )
 
 var LoginCmd = &cobra.Command{
-	Use:     "login",
-	Short:   "Log in to Daytona",
+	Use:   "login",
+	Short: "Log in to Daytona",
+	Example: `  daytona login
+  daytona login --api-key $DAYTONA_API_KEY
+  daytona login --api-key-stdin < ~/.daytona-api-key`,
 	Args:    cobra.NoArgs,
 	GroupID: internal.USER_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		if apiKeyFlag != "" {
-			return updateProfileWithLogin(nil, &apiKeyFlag)
+		key, err := resolveAPIKey(apiKeyFlag, loginApiKeyStdinFlag, loginApiKeyFileFlag, os.Stdin)
+		if err != nil {
+			return err
+		}
+		if key != "" {
+			return updateProfileWithLogin(nil, &key)
+		}
+
+		if !internal.Interactive() {
+			return clierr.New(clierr.CategoryUsage, "cannot prompt for login method in non-interactive mode").
+				WithHint("provide --api-key, --api-key-stdin, or --api-key-file (or set DAYTONA_API_KEY and DAYTONA_API_URL)")
 		}
 
 		items := []view_common.SelectItem{
@@ -72,11 +88,52 @@ var LoginCmd = &cobra.Command{
 }
 
 var (
-	apiKeyFlag string
+	apiKeyFlag           string
+	loginApiKeyStdinFlag bool
+	loginApiKeyFileFlag  string
 )
 
 func init() {
 	LoginCmd.Flags().StringVar(&apiKeyFlag, "api-key", "", "API key to use for authentication")
+	LoginCmd.Flags().BoolVar(&loginApiKeyStdinFlag, "api-key-stdin", false, "Read the API key from stdin")
+	LoginCmd.Flags().StringVar(&loginApiKeyFileFlag, "api-key-file", "", "Read the API key from a file")
+	LoginCmd.MarkFlagsMutuallyExclusive("api-key", "api-key-stdin", "api-key-file")
+}
+
+// resolveAPIKey resolves the API key from the non-interactive sources, in
+// precedence order: --api-key value, stdin (--api-key-stdin), then a file
+// (--api-key-file). It returns "" with a nil error when no source was given,
+// in which case the caller falls back to the interactive flow.
+func resolveAPIKey(flagVal string, stdinFlag bool, fileFlag string, stdin io.Reader) (string, error) {
+	if flagVal != "" {
+		return flagVal, nil
+	}
+
+	if stdinFlag {
+		data, err := io.ReadAll(stdin)
+		if err != nil {
+			return "", fmt.Errorf("error reading API key from stdin: %w", err)
+		}
+		key := strings.TrimSpace(string(data))
+		if key == "" {
+			return "", clierr.New(clierr.CategoryUsage, "empty API key on stdin")
+		}
+		return key, nil
+	}
+
+	if fileFlag != "" {
+		data, err := os.ReadFile(fileFlag)
+		if err != nil {
+			return "", fmt.Errorf("error reading API key file: %w", err)
+		}
+		key := strings.TrimSpace(string(data))
+		if key == "" {
+			return "", clierr.Newf(clierr.CategoryUsage, "empty API key in file %s", fileFlag)
+		}
+		return key, nil
+	}
+
+	return "", nil
 }
 
 func updateProfileWithLogin(tokenConfig *config.Token, apiKey *string) error {

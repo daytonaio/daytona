@@ -10,6 +10,14 @@ List all available Daytona snapshots
 daytona snapshot list [flags]
 ```
 
+### Examples
+
+```
+  daytona snapshot list
+  daytona snapshot list --limit 50
+  daytona snapshot list --format json
+```
+
 ### Options
 
 ```
@@ -21,7 +29,8 @@ daytona snapshot list [flags]
 ### Options inherited from parent commands
 
 ```
-      --help   help for daytona
+      --help       help for daytona
+      --no-input   Never prompt for input; fail instead when input would be required
 ```
 
 ### SEE ALSO

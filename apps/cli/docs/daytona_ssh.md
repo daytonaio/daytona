@@ -7,7 +7,14 @@ SSH into a sandbox
 Establish an SSH connection to a running sandbox
 
 ```
-daytona ssh [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona ssh [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```
+  daytona ssh my-sandbox
+  daytona ssh my-sandbox --expires 60
 ```
 
 ### Options
@@ -19,7 +26,8 @@ daytona ssh [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ### Options inherited from parent commands
 
 ```
-      --help   help for daytona
+      --help       help for daytona
+      --no-input   Never prompt for input; fail instead when input would be required
 ```
 
 ### SEE ALSO

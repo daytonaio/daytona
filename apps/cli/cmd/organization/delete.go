@@ -10,6 +10,8 @@ import (
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/organization"
 	"github.com/daytonaio/daytona/cli/views/util"
@@ -18,8 +20,11 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [ORGANIZATION]",
-	Short:   "Delete an organization",
+	Use:   "delete [ORGANIZATION]",
+	Short: "Delete an organization",
+	Example: `  daytona organization delete my-org
+  # With no argument, pick from a list interactively
+  daytona organization delete`,
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -42,6 +47,9 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
+			if !internal.Interactive() {
+				return clierr.New(clierr.CategoryUsage, "organization ID or name required in non-interactive mode").WithHint("pass the organization as an argument")
+			}
 			chosenOrganization, err = organization.GetOrganizationIdFromPrompt(orgList)
 			if err != nil {
 				return err

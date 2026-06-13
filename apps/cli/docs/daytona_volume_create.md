@@ -6,16 +6,19 @@ Create a volume
 daytona volume create [NAME] [flags]
 ```
 
-### Options
+### Examples
 
 ```
-  -s, --size int32   Size of the volume in GB (default 10)
+  daytona volume create my-volume
+  # Mount it when creating a sandbox
+  daytona create --snapshot my-snapshot:1.0 --volume my-volume:/data
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --help   help for daytona
+      --help       help for daytona
+      --no-input   Never prompt for input; fail instead when input would be required
 ```
 
 ### SEE ALSO

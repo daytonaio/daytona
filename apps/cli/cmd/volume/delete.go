@@ -14,8 +14,10 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [VOLUME_ID_OR_NAME]",
-	Short:   "Delete a volume",
+	Use:   "delete [VOLUME_ID_OR_NAME]",
+	Short: "Delete a volume",
+	Example: `  # Delete a volume by name or ID
+  daytona volume delete my-volume`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
