@@ -65,6 +65,54 @@ export type ProjectSessionData = {
 
 export type SessionSandboxMap = Map<string, Sandbox | SandboxInfo>
 
+export type SandboxCreationParams =
+  | {
+      image: string
+    }
+  | {
+      snapshot: string
+    }
+
+export type DaytonaPluginOptions = Record<string, unknown> & {
+  image?: unknown
+  snapshot?: unknown
+}
+
+function normalizeOptionalString(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  return trimmed ? trimmed : undefined
+}
+
+export function resolveSandboxCreationParams(options?: DaytonaPluginOptions): SandboxCreationParams | undefined {
+  const pluginOptions = (options ?? {}) as DaytonaPluginOptions
+  const configuredImage = normalizeOptionalString(pluginOptions.image)
+  const configuredSnapshot = normalizeOptionalString(pluginOptions.snapshot)
+  const envImage = normalizeOptionalString(process.env.DAYTONA_SANDBOX_IMAGE)
+  const envSnapshot = normalizeOptionalString(process.env.DAYTONA_SANDBOX_SNAPSHOT)
+  const image = envImage ?? configuredImage
+  const snapshot = envSnapshot ?? configuredSnapshot
+
+  if (image && snapshot) {
+    throw new Error(
+      'Configure only one of image or snapshot for the Daytona OpenCode plugin. DAYTONA_SANDBOX_IMAGE and DAYTONA_SANDBOX_SNAPSHOT are mutually exclusive.',
+    )
+  }
+
+  if (image) {
+    return { image }
+  }
+
+  if (snapshot) {
+    return { snapshot }
+  }
+
+  return undefined
+}
+
 // Daytona plugin constants
 
 export const LOG_LEVEL_INFO: LogLevel = 'INFO'

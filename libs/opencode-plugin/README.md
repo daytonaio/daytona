@@ -18,7 +18,14 @@ To add the plugin to a project, edit `opencode.json` in the project directory:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@daytona/opencode"]
+  "plugin": [
+    [
+      "@daytona/opencode",
+      {
+        "image": "debian:12.9"
+      }
+    ]
+  ]
 }
 ```
 
@@ -30,10 +37,35 @@ To install the plugin globally, edit `~/.config/opencode/opencode.json`.
 
 This plugin requires a [Daytona account](https://www.daytona.io/) and [Daytona API key](https://app.daytona.io/dashboard/keys) to create sandboxes.
 
-Set your Daytona API key and URL as environment variables:
+Set your Daytona API key as an environment variable:
 
 ```bash
 export DAYTONA_API_KEY="your-api-key"
+```
+
+To create sandboxes from a custom base image or a snapshot, set one of these optional environment variables:
+
+```bash
+export DAYTONA_SANDBOX_IMAGE="debian:12.9"
+export DAYTONA_SANDBOX_SNAPSHOT="my-snapshot"
+```
+
+Only set one of `DAYTONA_SANDBOX_IMAGE` or `DAYTONA_SANDBOX_SNAPSHOT` at a time. If either env var is set, it overrides the plugin options in `opencode.json`.
+
+You can also configure the plugin directly in `opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    [
+      "@daytona/opencode",
+      {
+        "snapshot": "my-snapshot"
+      }
+    ]
+  ]
+}
 ```
 
 Or create a `.env` file in your project root:

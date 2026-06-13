@@ -29,6 +29,7 @@ import type { PluginInput } from '@opencode-ai/plugin'
 import { setLogFilePath } from './core/logger'
 import { DaytonaSessionManager } from './core/session-manager'
 import { toast } from './core/toast'
+import { resolveSandboxCreationParams, type DaytonaPluginOptions } from './core/types'
 import { customTools } from './plugins/custom-tools'
 import { eventHandlers } from './plugins/session-events'
 import { systemPromptTransform } from './plugins/system-transform'
@@ -40,10 +41,15 @@ const STORAGE_DIR = join(xdgData, 'opencode', 'storage', 'daytona')
 const REPO_PATH = '/home/daytona/project'
 
 setLogFilePath(LOG_FILE)
-const sessionManager = new DaytonaSessionManager(process.env.DAYTONA_API_KEY || '', STORAGE_DIR, REPO_PATH)
 
-async function daytonaPlugin(ctx: PluginInput) {
+async function daytonaPlugin(ctx: PluginInput, options?: DaytonaPluginOptions) {
   toast.initialize(ctx.client?.tui)
+  const sessionManager = new DaytonaSessionManager(
+    process.env.DAYTONA_API_KEY || '',
+    STORAGE_DIR,
+    REPO_PATH,
+    resolveSandboxCreationParams(options),
+  )
   return {
     tool: await customTools(ctx, sessionManager),
     event: await eventHandlers(ctx, sessionManager, REPO_PATH),
