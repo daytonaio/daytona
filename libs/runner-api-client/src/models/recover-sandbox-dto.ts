@@ -34,7 +34,7 @@ export interface RecoverSandboxDTO {
     'networkAllowList'?: string;
     'networkBlockAll'?: boolean;
     'osUser': string;
-    'registry'?: RegistryDTO;
+    'registries'?: Array<RegistryDTO>;
     'snapshot'?: string;
     'storageQuota'?: number;
     'userId': string;

@@ -462,7 +462,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   }
 
   // skipStart is a v2-only signal (carried in the job payload); v0's sync API has no equivalent.
-  async recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, _skipStart?: boolean): Promise<void> {
+  async recoverSandbox(sandbox: Sandbox, registries?: DockerRegistry[], _skipStart?: boolean): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -481,14 +481,12 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       networkAllowList: sandbox.networkAllowList,
       errorReason: sandbox.errorReason,
       backupErrorReason: sandbox.backupErrorReason,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url.replace(/^(https?:\/\/)/, ''),
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
+      registries: registries?.map((registry) => ({
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      })),
     }
     await this.sandboxApiClient.recover(sandbox.id, recoverSandboxDTO)
   }
@@ -498,20 +496,18 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     cpu?: number,
     memory?: number,
     disk?: number,
-    registry?: DockerRegistry,
+    registries?: DockerRegistry[],
   ): Promise<void> {
     await this.sandboxApiClient.resize(sandboxId, {
       cpu,
       memory,
       disk,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url.replace(/^(https?:\/\/)/, ''),
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
+      registries: registries?.map((registry) => ({
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      })),
     })
   }
 }

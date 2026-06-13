@@ -134,14 +134,14 @@ export interface RunnerAdapter {
     includeMemory?: boolean,
   ): Promise<CreateSandboxSnapshotResult | undefined>
 
-  recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart?: boolean): Promise<void>
+  recoverSandbox(sandbox: Sandbox, registries?: DockerRegistry[], skipStart?: boolean): Promise<void>
 
   resizeSandbox(
     sandboxId: string,
     cpu?: number,
     memory?: number,
     disk?: number,
-    registry?: DockerRegistry,
+    registries?: DockerRegistry[],
   ): Promise<void>
 }
 
