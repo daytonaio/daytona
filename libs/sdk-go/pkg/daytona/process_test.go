@@ -366,6 +366,27 @@ func TestProcessExecuteCommandRequestMapping(t *testing.T) {
 	assert.Equal(t, "hello", result.Artifacts.Stdout)
 }
 
+func TestProcessExecuteCommandExtendsHTTPTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(30 * time.Millisecond)
+		writeJSONResponse(t, w, http.StatusOK, map[string]any{"result": "done", "exitCode": 0})
+	}))
+	defer server.Close()
+
+	client := createTestToolboxClient(server)
+	client.GetConfig().HTTPClient = &http.Client{Timeout: 10 * time.Millisecond}
+
+	service := NewProcessService(client, nil, types.CodeLanguagePython)
+	result, err := service.ExecuteCommand(
+		context.Background(),
+		"sleep 0.03",
+		options.WithExecuteTimeout(100*time.Millisecond),
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "done", result.Result)
+	assert.Equal(t, 10*time.Millisecond, client.GetConfig().HTTPClient.Timeout)
+}
+
 func TestProcessCodeRunAndSessionOperations(t *testing.T) {
 	t.Run("code run maps charts and explicit language", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
