@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/git"
 	"github.com/gin-gonic/gin"
 )
@@ -34,13 +35,18 @@ func ListBranches(c *gin.Context) {
 		WorkDir: path,
 	}
 
-	branchList, err := gitService.ListBranches()
+	branchList, current, err := gitService.ListBranches()
 	if err != nil {
 		abortWithGitError(c, err)
 		return
 	}
 
+	if util.ClientRejectsUnknownResponseFields(c.Request.Header) {
+		current = ""
+	}
+
 	c.JSON(http.StatusOK, ListBranchResponse{
 		Branches: branchList,
+		Current:  current,
 	})
 }

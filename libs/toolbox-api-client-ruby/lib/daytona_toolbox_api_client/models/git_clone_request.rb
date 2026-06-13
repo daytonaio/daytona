@@ -19,6 +19,9 @@ module DaytonaToolboxApiClient
 
     attr_accessor :commit_id
 
+    # Depth creates a shallow clone truncated to the given number of commits.
+    attr_accessor :depth
+
     # Skip TLS certificate verification for this clone. Defaults to false (verify). Set to true ONLY for trusted internal Git servers with self-signed or private-CA certs; credentials, if supplied, will be transmitted over an unverified TLS connection and are exposed to any MITM on the route.
     attr_accessor :insecure_skip_tls
 
@@ -35,6 +38,7 @@ module DaytonaToolboxApiClient
       {
         :'branch' => :'branch',
         :'commit_id' => :'commit_id',
+        :'depth' => :'depth',
         :'insecure_skip_tls' => :'insecure_skip_tls',
         :'password' => :'password',
         :'path' => :'path',
@@ -58,6 +62,7 @@ module DaytonaToolboxApiClient
       {
         :'branch' => :'String',
         :'commit_id' => :'String',
+        :'depth' => :'Integer',
         :'insecure_skip_tls' => :'Boolean',
         :'password' => :'String',
         :'path' => :'String',
@@ -94,6 +99,10 @@ module DaytonaToolboxApiClient
 
       if attributes.key?(:'commit_id')
         self.commit_id = attributes[:'commit_id']
+      end
+
+      if attributes.key?(:'depth')
+        self.depth = attributes[:'depth']
       end
 
       if attributes.key?(:'insecure_skip_tls')
@@ -173,6 +182,7 @@ module DaytonaToolboxApiClient
       self.class == o.class &&
           branch == o.branch &&
           commit_id == o.commit_id &&
+          depth == o.depth &&
           insecure_skip_tls == o.insecure_skip_tls &&
           password == o.password &&
           path == o.path &&
@@ -189,7 +199,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [branch, commit_id, insecure_skip_tls, password, path, url, username].hash
+      [branch, commit_id, depth, insecure_skip_tls, password, path, url, username].hash
     end
 
     # Builds the object from hash

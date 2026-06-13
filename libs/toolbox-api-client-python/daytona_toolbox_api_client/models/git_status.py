@@ -34,9 +34,11 @@ class GitStatus(BaseModel):
     behind: Optional[StrictInt] = None
     branch_published: Optional[StrictBool] = Field(default=None, serialization_alias="branchPublished")
     current_branch: StrictStr = Field(serialization_alias="currentBranch")
+    detached: Optional[StrictBool] = Field(default=None, description="Detached is true when HEAD is not on a branch (detached HEAD state).")
     file_status: List[FileStatus] = Field(serialization_alias="fileStatus")
+    upstream: Optional[StrictStr] = Field(default=None, description="Upstream is the upstream tracking branch (e.g. \"origin/main\"), empty when unset.")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["ahead", "behind", "branchPublished", "currentBranch", "fileStatus"]
+    __properties: ClassVar[List[str]] = ["ahead", "behind", "branchPublished", "currentBranch", "detached", "fileStatus", "upstream"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -106,7 +108,9 @@ class GitStatus(BaseModel):
             "behind": obj.get("behind"),
             "branch_published": obj.get("branchPublished"),
             "current_branch": obj.get("currentBranch"),
-            "file_status": [FileStatus.from_dict(_item) for _item in obj["fileStatus"]] if obj.get("fileStatus") is not None else None
+            "detached": obj.get("detached"),
+            "file_status": [FileStatus.from_dict(_item) for _item in obj["fileStatus"]] if obj.get("fileStatus") is not None else None,
+            "upstream": obj.get("upstream")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

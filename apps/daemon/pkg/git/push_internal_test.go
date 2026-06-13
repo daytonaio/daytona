@@ -20,7 +20,7 @@ var pushTestCreds = &http.BasicAuth{
 }
 
 func TestBuildPushArgs(t *testing.T) {
-	got := buildPushArgs("/work-dir", "refs/heads/main")
+	got := buildPushArgs("/work-dir", "origin", "refs/heads/main", false)
 	require.Equal(t, []string{
 		"-C", "/work-dir",
 		"-c", "credential.helper=",
@@ -32,8 +32,22 @@ func TestBuildPushArgs(t *testing.T) {
 	}, got)
 }
 
+func TestBuildPushArgs_SetUpstream(t *testing.T) {
+	got := buildPushArgs("/work-dir", "upstream", "refs/heads/main", true)
+	require.Equal(t, []string{
+		"-C", "/work-dir",
+		"-c", "credential.helper=",
+		"-c", "core.hooksPath=/dev/null",
+		"push",
+		"--set-upstream",
+		"upstream",
+		"refs/heads/main:refs/heads/main",
+		"--progress",
+	}, got)
+}
+
 func TestBuildPushArgs_NeverEmbedsCredsInArgs(t *testing.T) {
-	args := buildPushArgs("/work-dir", "refs/heads/main")
+	args := buildPushArgs("/work-dir", "origin", "refs/heads/main", false)
 
 	for _, arg := range args {
 		require.NotContains(t, arg, pushTestCreds.Username,
@@ -44,7 +58,7 @@ func TestBuildPushArgs_NeverEmbedsCredsInArgs(t *testing.T) {
 }
 
 func TestBuildPushArgs_DisablesHooks(t *testing.T) {
-	args := buildPushArgs("/work-dir", "refs/heads/main")
+	args := buildPushArgs("/work-dir", "origin", "refs/heads/main", false)
 
 	found := false
 	for i, arg := range args {
@@ -60,7 +74,7 @@ func TestBuildPushArgs_VerifiesTLS(t *testing.T) {
 	// Push must NOT skip TLS verification (parity with go-git PushOptions,
 	// which does not set InsecureSkipTLS). Skipping verify would be a MITM
 	// risk for the basic-auth token.
-	args := buildPushArgs("/work-dir", "refs/heads/main")
+	args := buildPushArgs("/work-dir", "origin", "refs/heads/main", false)
 	for _, arg := range args {
 		require.NotEqual(t, "http.sslVerify=false", arg,
 			"push args must NOT disable TLS verification")
@@ -68,7 +82,7 @@ func TestBuildPushArgs_VerifiesTLS(t *testing.T) {
 }
 
 func TestPushCLI_EnvContainsAskpassAndCreds(t *testing.T) {
-	env := buildCloneEnv(nil, "/tmp/askpass.sh", pushTestCreds)
+	env := buildGitCLIEnv(nil, "/tmp/askpass.sh", pushTestCreds)
 
 	require.Contains(t, env, "GIT_ASKPASS=/tmp/askpass.sh")
 	require.Contains(t, env, "GIT_TERMINAL_PROMPT=0")
@@ -77,7 +91,7 @@ func TestPushCLI_EnvContainsAskpassAndCreds(t *testing.T) {
 }
 
 func TestPushCLI_EnvOmitsCredsWhenNil(t *testing.T) {
-	env := buildCloneEnv(nil, "/tmp/askpass.sh", nil)
+	env := buildGitCLIEnv(nil, "/tmp/askpass.sh", nil)
 
 	require.Contains(t, env, "GIT_ASKPASS=/tmp/askpass.sh")
 	require.Contains(t, env, "GIT_TERMINAL_PROMPT=0")

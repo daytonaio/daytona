@@ -22,7 +22,11 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { GitAddRemoteRequest } from '../models';
+// @ts-ignore
 import type { GitAddRequest } from '../models';
+// @ts-ignore
+import type { GitAuthenticateRequest } from '../models';
 // @ts-ignore
 import type { GitBranchRequest } from '../models';
 // @ts-ignore
@@ -36,13 +40,29 @@ import type { GitCommitRequest } from '../models';
 // @ts-ignore
 import type { GitCommitResponse } from '../models';
 // @ts-ignore
+import type { GitConfigResponse } from '../models';
+// @ts-ignore
+import type { GitConfigureUserRequest } from '../models';
+// @ts-ignore
 import type { GitDeleteBranchRequest } from '../models';
 // @ts-ignore
-import type { GitRepoRequest } from '../models';
+import type { GitInitRequest } from '../models';
+// @ts-ignore
+import type { GitPullRequest } from '../models';
+// @ts-ignore
+import type { GitPushRequest } from '../models';
+// @ts-ignore
+import type { GitResetRequest } from '../models';
+// @ts-ignore
+import type { GitRestoreRequest } from '../models';
+// @ts-ignore
+import type { GitSetConfigRequest } from '../models';
 // @ts-ignore
 import type { GitStatus } from '../models';
 // @ts-ignore
 import type { ListBranchResponse } from '../models';
+// @ts-ignore
+import type { ListRemotesResponse } from '../models';
 /**
  * GitApi - axios parameter creator
  */
@@ -59,6 +79,74 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             // verify required parameter 'request' is not null or undefined
             assertParamExists('addFiles', 'request', request)
             const localVarPath = `/git/add`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Add (or overwrite) a remote in the Git repository
+         * @summary Add a remote
+         * @param {GitAddRemoteRequest} request Add remote request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addRemote: async (request: GitAddRemoteRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('addRemote', 'request', request)
+            const localVarPath = `/git/remotes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+         * @summary Authenticate Git
+         * @param {GitAuthenticateRequest} request Authenticate request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authenticate: async (request: GitAuthenticateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('authenticate', 'request', request)
+            const localVarPath = `/git/credentials`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -186,6 +274,40 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             };
         },
         /**
+         * Configure the Git user name and email at the given scope
+         * @summary Configure Git user
+         * @param {GitConfigureUserRequest} request Configure user request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        configureUser: async (request: GitConfigureUserRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('configureUser', 'request', request)
+            const localVarPath = `/git/config/user`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new branch in the Git repository
          * @summary Create a new branch
          * @param {GitBranchRequest} request Create branch request
@@ -291,6 +413,53 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             };
         },
         /**
+         * Get a Git config value at the given scope (null when unset)
+         * @summary Get a Git config value
+         * @param {string} key Config key (e.g. user.name)
+         * @param {string} [path] Repository path (required for local scope)
+         * @param {string} [scope] Config scope: global (default), local or system
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGitConfig: async (key: string, path?: string, scope?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'key' is not null or undefined
+            assertParamExists('getGitConfig', 'key', key)
+            const localVarPath = `/git/config`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (key !== undefined) {
+                localVarQueryParameter['key'] = key;
+            }
+
+            if (path !== undefined) {
+                localVarQueryParameter['path'] = path;
+            }
+
+            if (scope !== undefined) {
+                localVarQueryParameter['scope'] = scope;
+            }
+
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get the Git status of the repository at the specified path
          * @summary Get Git status
          * @param {string} path Repository path
@@ -321,6 +490,40 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Initialize a new Git repository at the specified path
+         * @summary Initialize a Git repository
+         * @param {GitInitRequest} request Init repository request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        initRepository: async (request: GitInitRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('initRepository', 'request', request)
+            const localVarPath = `/git/init`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -365,13 +568,50 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
             };
         },
         /**
-         * Pull changes from the remote Git repository
-         * @summary Pull changes from remote
-         * @param {GitRepoRequest} request Pull request
+         * List the remotes configured in the Git repository
+         * @summary List remotes
+         * @param {string} path Repository path
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        pullChanges: async (request: GitRepoRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listRemotes: async (path: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'path' is not null or undefined
+            assertParamExists('listRemotes', 'path', path)
+            const localVarPath = `/git/remotes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (path !== undefined) {
+                localVarQueryParameter['path'] = path;
+            }
+
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Pull changes from the remote Git repository
+         * @summary Pull changes from remote
+         * @param {GitPullRequest} request Pull request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pullChanges: async (request: GitPullRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'request' is not null or undefined
             assertParamExists('pullChanges', 'request', request)
             const localVarPath = `/git/pull`;
@@ -401,14 +641,116 @@ export const GitApiAxiosParamCreator = function (configuration?: Configuration) 
         /**
          * Push local changes to the remote Git repository
          * @summary Push changes to remote
-         * @param {GitRepoRequest} request Push request
+         * @param {GitPushRequest} request Push request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        pushChanges: async (request: GitRepoRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        pushChanges: async (request: GitPushRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'request' is not null or undefined
             assertParamExists('pushChanges', 'request', request)
             const localVarPath = `/git/push`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Reset the current HEAD to the specified state
+         * @summary Reset repository
+         * @param {GitResetRequest} request Reset request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        resetChanges: async (request: GitResetRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('resetChanges', 'request', request)
+            const localVarPath = `/git/reset`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Restore working tree files or unstage changes
+         * @summary Restore files
+         * @param {GitRestoreRequest} request Restore request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        restoreFiles: async (request: GitRestoreRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('restoreFiles', 'request', request)
+            const localVarPath = `/git/restore`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Set a Git config key/value at the given scope
+         * @summary Set a Git config value
+         * @param {GitSetConfigRequest} request Set config request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setGitConfig: async (request: GitSetConfigRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('setGitConfig', 'request', request)
+            const localVarPath = `/git/config`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -455,6 +797,32 @@ export const GitApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Add (or overwrite) a remote in the Git repository
+         * @summary Add a remote
+         * @param {GitAddRemoteRequest} request Add remote request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async addRemote(request: GitAddRemoteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.addRemote(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.addRemote']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+         * @summary Authenticate Git
+         * @param {GitAuthenticateRequest} request Authenticate request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async authenticate(request: GitAuthenticateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.authenticate(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.authenticate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Switch to a different branch or commit in the Git repository
          * @summary Checkout branch or commit
          * @param {GitCheckoutRequest} request Checkout request
@@ -491,6 +859,19 @@ export const GitApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.commitChanges(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GitApi.commitChanges']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Configure the Git user name and email at the given scope
+         * @summary Configure Git user
+         * @param {GitConfigureUserRequest} request Configure user request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async configureUser(request: GitConfigureUserRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.configureUser(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.configureUser']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -533,6 +914,21 @@ export const GitApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Get a Git config value at the given scope (null when unset)
+         * @summary Get a Git config value
+         * @param {string} key Config key (e.g. user.name)
+         * @param {string} [path] Repository path (required for local scope)
+         * @param {string} [scope] Config scope: global (default), local or system
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGitConfig(key: string, path?: string, scope?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GitConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGitConfig(key, path, scope, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.getGitConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get the Git status of the repository at the specified path
          * @summary Get Git status
          * @param {string} path Repository path
@@ -543,6 +939,19 @@ export const GitApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getStatus(path, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GitApi.getStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Initialize a new Git repository at the specified path
+         * @summary Initialize a Git repository
+         * @param {GitInitRequest} request Init repository request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async initRepository(request: GitInitRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.initRepository(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.initRepository']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -559,13 +968,26 @@ export const GitApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Pull changes from the remote Git repository
-         * @summary Pull changes from remote
-         * @param {GitRepoRequest} request Pull request
+         * List the remotes configured in the Git repository
+         * @summary List remotes
+         * @param {string} path Repository path
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async pullChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async listRemotes(path: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListRemotesResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRemotes(path, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.listRemotes']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Pull changes from the remote Git repository
+         * @summary Pull changes from remote
+         * @param {GitPullRequest} request Pull request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async pullChanges(request: GitPullRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.pullChanges(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GitApi.pullChanges']?.[localVarOperationServerIndex]?.url;
@@ -574,14 +996,53 @@ export const GitApiFp = function(configuration?: Configuration) {
         /**
          * Push local changes to the remote Git repository
          * @summary Push changes to remote
-         * @param {GitRepoRequest} request Push request
+         * @param {GitPushRequest} request Push request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async pushChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async pushChanges(request: GitPushRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.pushChanges(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GitApi.pushChanges']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Reset the current HEAD to the specified state
+         * @summary Reset repository
+         * @param {GitResetRequest} request Reset request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async resetChanges(request: GitResetRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.resetChanges(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.resetChanges']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Restore working tree files or unstage changes
+         * @summary Restore files
+         * @param {GitRestoreRequest} request Restore request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async restoreFiles(request: GitRestoreRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.restoreFiles(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.restoreFiles']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Set a Git config key/value at the given scope
+         * @summary Set a Git config value
+         * @param {GitSetConfigRequest} request Set config request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async setGitConfig(request: GitSetConfigRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.setGitConfig(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GitApi.setGitConfig']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -602,6 +1063,26 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
          */
         addFiles(request: GitAddRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.addFiles(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Add (or overwrite) a remote in the Git repository
+         * @summary Add a remote
+         * @param {GitAddRemoteRequest} request Add remote request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        addRemote(request: GitAddRemoteRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.addRemote(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+         * @summary Authenticate Git
+         * @param {GitAuthenticateRequest} request Authenticate request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authenticate(request: GitAuthenticateRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.authenticate(request, options).then((request) => request(axios, basePath));
         },
         /**
          * Switch to a different branch or commit in the Git repository
@@ -634,6 +1115,16 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
             return localVarFp.commitChanges(request, options).then((request) => request(axios, basePath));
         },
         /**
+         * Configure the Git user name and email at the given scope
+         * @summary Configure Git user
+         * @param {GitConfigureUserRequest} request Configure user request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        configureUser(request: GitConfigureUserRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.configureUser(request, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Create a new branch in the Git repository
          * @summary Create a new branch
          * @param {GitBranchRequest} request Create branch request
@@ -664,6 +1155,18 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
             return localVarFp.getCommitHistory(path, options).then((request) => request(axios, basePath));
         },
         /**
+         * Get a Git config value at the given scope (null when unset)
+         * @summary Get a Git config value
+         * @param {string} key Config key (e.g. user.name)
+         * @param {string} [path] Repository path (required for local scope)
+         * @param {string} [scope] Config scope: global (default), local or system
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGitConfig(key: string, path?: string, scope?: string, options?: RawAxiosRequestConfig): AxiosPromise<GitConfigResponse> {
+            return localVarFp.getGitConfig(key, path, scope, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get the Git status of the repository at the specified path
          * @summary Get Git status
          * @param {string} path Repository path
@@ -672,6 +1175,16 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
          */
         getStatus(path: string, options?: RawAxiosRequestConfig): AxiosPromise<GitStatus> {
             return localVarFp.getStatus(path, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Initialize a new Git repository at the specified path
+         * @summary Initialize a Git repository
+         * @param {GitInitRequest} request Init repository request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        initRepository(request: GitInitRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.initRepository(request, options).then((request) => request(axios, basePath));
         },
         /**
          * Get a list of all branches in the Git repository
@@ -684,24 +1197,64 @@ export const GitApiFactory = function (configuration?: Configuration, basePath?:
             return localVarFp.listBranches(path, options).then((request) => request(axios, basePath));
         },
         /**
-         * Pull changes from the remote Git repository
-         * @summary Pull changes from remote
-         * @param {GitRepoRequest} request Pull request
+         * List the remotes configured in the Git repository
+         * @summary List remotes
+         * @param {string} path Repository path
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        pullChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        listRemotes(path: string, options?: RawAxiosRequestConfig): AxiosPromise<ListRemotesResponse> {
+            return localVarFp.listRemotes(path, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Pull changes from the remote Git repository
+         * @summary Pull changes from remote
+         * @param {GitPullRequest} request Pull request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pullChanges(request: GitPullRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.pullChanges(request, options).then((request) => request(axios, basePath));
         },
         /**
          * Push local changes to the remote Git repository
          * @summary Push changes to remote
-         * @param {GitRepoRequest} request Push request
+         * @param {GitPushRequest} request Push request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        pushChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        pushChanges(request: GitPushRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.pushChanges(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Reset the current HEAD to the specified state
+         * @summary Reset repository
+         * @param {GitResetRequest} request Reset request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        resetChanges(request: GitResetRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.resetChanges(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Restore working tree files or unstage changes
+         * @summary Restore files
+         * @param {GitRestoreRequest} request Restore request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        restoreFiles(request: GitRestoreRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.restoreFiles(request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Set a Git config key/value at the given scope
+         * @summary Set a Git config value
+         * @param {GitSetConfigRequest} request Set config request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setGitConfig(request: GitSetConfigRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.setGitConfig(request, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -719,6 +1272,28 @@ export class GitApi extends BaseAPI {
      */
     public addFiles(request: GitAddRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).addFiles(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Add (or overwrite) a remote in the Git repository
+     * @summary Add a remote
+     * @param {GitAddRemoteRequest} request Add remote request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public addRemote(request: GitAddRemoteRequest, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).addRemote(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+     * @summary Authenticate Git
+     * @param {GitAuthenticateRequest} request Authenticate request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public authenticate(request: GitAuthenticateRequest, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).authenticate(request, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -755,6 +1330,17 @@ export class GitApi extends BaseAPI {
     }
 
     /**
+     * Configure the Git user name and email at the given scope
+     * @summary Configure Git user
+     * @param {GitConfigureUserRequest} request Configure user request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public configureUser(request: GitConfigureUserRequest, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).configureUser(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Create a new branch in the Git repository
      * @summary Create a new branch
      * @param {GitBranchRequest} request Create branch request
@@ -788,6 +1374,19 @@ export class GitApi extends BaseAPI {
     }
 
     /**
+     * Get a Git config value at the given scope (null when unset)
+     * @summary Get a Git config value
+     * @param {string} key Config key (e.g. user.name)
+     * @param {string} [path] Repository path (required for local scope)
+     * @param {string} [scope] Config scope: global (default), local or system
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getGitConfig(key: string, path?: string, scope?: string, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).getGitConfig(key, path, scope, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Get the Git status of the repository at the specified path
      * @summary Get Git status
      * @param {string} path Repository path
@@ -796,6 +1395,17 @@ export class GitApi extends BaseAPI {
      */
     public getStatus(path: string, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).getStatus(path, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Initialize a new Git repository at the specified path
+     * @summary Initialize a Git repository
+     * @param {GitInitRequest} request Init repository request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public initRepository(request: GitInitRequest, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).initRepository(request, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -810,25 +1420,69 @@ export class GitApi extends BaseAPI {
     }
 
     /**
-     * Pull changes from the remote Git repository
-     * @summary Pull changes from remote
-     * @param {GitRepoRequest} request Pull request
+     * List the remotes configured in the Git repository
+     * @summary List remotes
+     * @param {string} path Repository path
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public pullChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig) {
+    public listRemotes(path: string, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).listRemotes(path, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Pull changes from the remote Git repository
+     * @summary Pull changes from remote
+     * @param {GitPullRequest} request Pull request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public pullChanges(request: GitPullRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).pullChanges(request, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Push local changes to the remote Git repository
      * @summary Push changes to remote
-     * @param {GitRepoRequest} request Push request
+     * @param {GitPushRequest} request Push request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public pushChanges(request: GitRepoRequest, options?: RawAxiosRequestConfig) {
+    public pushChanges(request: GitPushRequest, options?: RawAxiosRequestConfig) {
         return GitApiFp(this.configuration).pushChanges(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Reset the current HEAD to the specified state
+     * @summary Reset repository
+     * @param {GitResetRequest} request Reset request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public resetChanges(request: GitResetRequest, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).resetChanges(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Restore working tree files or unstage changes
+     * @summary Restore files
+     * @param {GitRestoreRequest} request Restore request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public restoreFiles(request: GitRestoreRequest, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).restoreFiles(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Set a Git config key/value at the given scope
+     * @summary Set a Git config value
+     * @param {GitSetConfigRequest} request Set config request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public setGitConfig(request: GitSetConfigRequest, options?: RawAxiosRequestConfig) {
+        return GitApiFp(this.configuration).setGitConfig(request, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

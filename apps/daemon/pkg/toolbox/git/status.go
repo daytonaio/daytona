@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/git"
 	"github.com/gin-gonic/gin"
 )
@@ -38,6 +39,11 @@ func GetStatus(c *gin.Context) {
 	if err != nil {
 		abortWithGitError(c, err)
 		return
+	}
+
+	if util.ClientRejectsUnknownResponseFields(c.Request.Header) {
+		status.Detached = false
+		status.Upstream = ""
 	}
 
 	c.JSON(http.StatusOK, status)

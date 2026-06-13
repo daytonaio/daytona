@@ -64,7 +64,16 @@ func CloneRepository(c *gin.Context) {
 
 	insecureSkipTLS := req.InsecureSkipTLS != nil && *req.InsecureSkipTLS
 
-	err := gitService.CloneRepository(&repo, auth, insecureSkipTLS)
+	depth := 0
+	if req.Depth != nil {
+		if *req.Depth < 0 {
+			_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("depth must be non-negative, got %d", *req.Depth)))
+			return
+		}
+		depth = int(*req.Depth)
+	}
+
+	err := gitService.CloneRepository(&repo, auth, insecureSkipTLS, depth)
 	if err != nil {
 		abortWithGitError(c, err)
 		return

@@ -24,25 +24,33 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Model tests for GitRepoRequest
+ * Model tests for GitInitRequest
  */
-public class GitRepoRequestTest {
-    private final GitRepoRequest model = new GitRepoRequest();
+public class GitInitRequestTest {
+    private final GitInitRequest model = new GitInitRequest();
 
     /**
-     * Model tests for GitRepoRequest
+     * Model tests for GitInitRequest
      */
     @Test
-    public void testGitRepoRequest() {
-        // TODO: test GitRepoRequest
+    public void testGitInitRequest() {
+        // TODO: test GitInitRequest
     }
 
     /**
-     * Test the property 'password'
+     * Test the property 'bare'
      */
     @Test
-    public void passwordTest() {
-        // TODO: test password
+    public void bareTest() {
+        // TODO: test bare
+    }
+
+    /**
+     * Test the property 'initialBranch'
+     */
+    @Test
+    public void initialBranchTest() {
+        // TODO: test initialBranch
     }
 
     /**
@@ -51,14 +59,6 @@ public class GitRepoRequestTest {
     @Test
     public void pathTest() {
         // TODO: test path
-    }
-
-    /**
-     * Test the property 'username'
-     */
-    @Test
-    public void usernameTest() {
-        // TODO: test username
     }
 
 }

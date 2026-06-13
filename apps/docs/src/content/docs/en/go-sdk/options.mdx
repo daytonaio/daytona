@@ -42,16 +42,22 @@ opts := options.Apply(
 
 - [func Apply\[T any\]\(opts ...func\(\*T\)\) \*T](<#Apply>)
 - [func WithAllowEmpty\(allowEmpty bool\) func\(\*GitCommit\)](<#WithAllowEmpty>)
+- [func WithAuthHost\(host string\) func\(\*GitAuthenticate\)](<#WithAuthHost>)
+- [func WithAuthProtocol\(protocol string\) func\(\*GitAuthenticate\)](<#WithAuthProtocol>)
+- [func WithBare\(bare bool\) func\(\*GitInit\)](<#WithBare>)
 - [func WithBranch\(branch string\) func\(\*GitClone\)](<#WithBranch>)
 - [func WithCodeRunLanguage\(language types.CodeLanguage\) func\(\*CodeRun\)](<#WithCodeRunLanguage>)
 - [func WithCodeRunParams\(params types.CodeRunParams\) func\(\*CodeRun\)](<#WithCodeRunParams>)
 - [func WithCodeRunTimeout\(timeout time.Duration\) func\(\*CodeRun\)](<#WithCodeRunTimeout>)
 - [func WithCommandEnv\(env map\[string\]string\) func\(\*ExecuteCommand\)](<#WithCommandEnv>)
 - [func WithCommitId\(commitID string\) func\(\*GitClone\)](<#WithCommitId>)
+- [func WithConfigPath\(path string\) func\(\*GitConfig\)](<#WithConfigPath>)
+- [func WithConfigScope\(scope string\) func\(\*GitConfig\)](<#WithConfigScope>)
 - [func WithCreatePtyEnv\(env map\[string\]string\) func\(\*CreatePty\)](<#WithCreatePtyEnv>)
 - [func WithCreatePtySize\(ptySize types.PtySize\) func\(\*CreatePty\)](<#WithCreatePtySize>)
 - [func WithCustomContext\(contextID string\) func\(\*RunCode\)](<#WithCustomContext>)
 - [func WithCwd\(cwd string\) func\(\*ExecuteCommand\)](<#WithCwd>)
+- [func WithDepth\(depth int32\) func\(\*GitClone\)](<#WithDepth>)
 - [func WithEnv\(env map\[string\]string\) func\(\*RunCode\)](<#WithEnv>)
 - [func WithExecuteTimeout\(timeout time.Duration\) func\(\*ExecuteCommand\)](<#WithExecuteTimeout>)
 - [func WithExtraIndexURLs\(urls ...string\) func\(\*PipInstall\)](<#WithExtraIndexURLs>)
@@ -60,6 +66,7 @@ opts := options.Apply(
 - [func WithForce\(force bool\) func\(\*GitDeleteBranch\)](<#WithForce>)
 - [func WithGroup\(group string\) func\(\*SetFilePermissions\)](<#WithGroup>)
 - [func WithIndexURL\(url string\) func\(\*PipInstall\)](<#WithIndexURL>)
+- [func WithInitialBranch\(initialBranch string\) func\(\*GitInit\)](<#WithInitialBranch>)
 - [func WithInsecureSkipTLS\(insecureSkipTLS bool\) func\(\*GitClone\)](<#WithInsecureSkipTLS>)
 - [func WithInterpreterTimeout\(timeout time.Duration\) func\(\*RunCode\)](<#WithInterpreterTimeout>)
 - [func WithLogChannel\(logChannel chan string\) func\(\*CreateSandbox\)](<#WithLogChannel>)
@@ -70,10 +77,23 @@ opts := options.Apply(
 - [func WithPre\(\) func\(\*PipInstall\)](<#WithPre>)
 - [func WithPtyEnv\(env map\[string\]string\) func\(\*PtySession\)](<#WithPtyEnv>)
 - [func WithPtySize\(size types.PtySize\) func\(\*PtySession\)](<#WithPtySize>)
+- [func WithPullBranch\(branch string\) func\(\*GitPull\)](<#WithPullBranch>)
 - [func WithPullPassword\(password string\) func\(\*GitPull\)](<#WithPullPassword>)
+- [func WithPullRemote\(remote string\) func\(\*GitPull\)](<#WithPullRemote>)
 - [func WithPullUsername\(username string\) func\(\*GitPull\)](<#WithPullUsername>)
+- [func WithPushBranch\(branch string\) func\(\*GitPush\)](<#WithPushBranch>)
 - [func WithPushPassword\(password string\) func\(\*GitPush\)](<#WithPushPassword>)
+- [func WithPushRemote\(remote string\) func\(\*GitPush\)](<#WithPushRemote>)
 - [func WithPushUsername\(username string\) func\(\*GitPush\)](<#WithPushUsername>)
+- [func WithRemoteFetch\(fetch bool\) func\(\*GitRemoteAdd\)](<#WithRemoteFetch>)
+- [func WithRemoteOverwrite\(overwrite bool\) func\(\*GitRemoteAdd\)](<#WithRemoteOverwrite>)
+- [func WithResetFiles\(files \[\]string\) func\(\*GitReset\)](<#WithResetFiles>)
+- [func WithResetMode\(mode string\) func\(\*GitReset\)](<#WithResetMode>)
+- [func WithResetTarget\(target string\) func\(\*GitReset\)](<#WithResetTarget>)
+- [func WithRestoreSource\(source string\) func\(\*GitRestore\)](<#WithRestoreSource>)
+- [func WithRestoreStaged\(staged bool\) func\(\*GitRestore\)](<#WithRestoreStaged>)
+- [func WithRestoreWorktree\(worktree bool\) func\(\*GitRestore\)](<#WithRestoreWorktree>)
+- [func WithSetUpstream\(setUpstream bool\) func\(\*GitPush\)](<#WithSetUpstream>)
 - [func WithTimeout\(timeout time.Duration\) func\(\*CreateSandbox\)](<#WithTimeout>)
 - [func WithUsername\(username string\) func\(\*GitClone\)](<#WithUsername>)
 - [func WithWaitForStart\(waitForStart bool\) func\(\*CreateSandbox\)](<#WithWaitForStart>)
@@ -82,11 +102,17 @@ opts := options.Apply(
 - [type CreatePty](<#CreatePty>)
 - [type CreateSandbox](<#CreateSandbox>)
 - [type ExecuteCommand](<#ExecuteCommand>)
+- [type GitAuthenticate](<#GitAuthenticate>)
 - [type GitClone](<#GitClone>)
 - [type GitCommit](<#GitCommit>)
+- [type GitConfig](<#GitConfig>)
 - [type GitDeleteBranch](<#GitDeleteBranch>)
+- [type GitInit](<#GitInit>)
 - [type GitPull](<#GitPull>)
 - [type GitPush](<#GitPush>)
+- [type GitRemoteAdd](<#GitRemoteAdd>)
+- [type GitReset](<#GitReset>)
+- [type GitRestore](<#GitRestore>)
 - [type PipInstall](<#PipInstall>)
 - [type PtySession](<#PtySession>)
 - [type RunCode](<#RunCode>)
@@ -131,6 +157,33 @@ resp, err := sandbox.Git.Commit(ctx, path, "Trigger rebuild", author, email,
     options.WithAllowEmpty(true),
 )
 ```
+
+<a name="WithAuthHost"></a>
+## func WithAuthHost
+
+```go
+func WithAuthHost(host string) func(*GitAuthenticate)
+```
+
+WithAuthHost sets the host to authenticate against.
+
+<a name="WithAuthProtocol"></a>
+## func WithAuthProtocol
+
+```go
+func WithAuthProtocol(protocol string) func(*GitAuthenticate)
+```
+
+WithAuthProtocol sets the protocol to authenticate against.
+
+<a name="WithBare"></a>
+## func WithBare
+
+```go
+func WithBare(bare bool) func(*GitInit)
+```
+
+WithBare creates a bare repository without a working tree.
 
 <a name="WithBranch"></a>
 ## func WithBranch
@@ -218,6 +271,24 @@ Example:
 err := sandbox.Git.Clone(ctx, url, path, options.WithCommitId("abc123def"))
 ```
 
+<a name="WithConfigPath"></a>
+## func WithConfigPath
+
+```go
+func WithConfigPath(path string) func(*GitConfig)
+```
+
+WithConfigPath sets the repository path \(required for the "local" scope\).
+
+<a name="WithConfigScope"></a>
+## func WithConfigScope
+
+```go
+func WithConfigScope(scope string) func(*GitConfig)
+```
+
+WithConfigScope sets the config scope \("global", "local" or "system"\).
+
 <a name="WithCreatePtyEnv"></a>
 ## func WithCreatePtyEnv
 
@@ -287,6 +358,21 @@ Example:
 result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la",
     options.WithCwd("/home/user/project"),
 )
+```
+
+<a name="WithDepth"></a>
+## func WithDepth
+
+```go
+func WithDepth(depth int32) func(*GitClone)
+```
+
+WithDepth creates a shallow clone truncated to the given number of commits.
+
+Example:
+
+```
+err := sandbox.Git.Clone(ctx, url, path, options.WithDepth(1))
 ```
 
 <a name="WithEnv"></a>
@@ -444,6 +530,15 @@ image := daytona.Base("python:3.11").PipInstall(
     options.WithIndexURL("https://my-pypi.example.com/simple/"),
 )
 ```
+
+<a name="WithInitialBranch"></a>
+## func WithInitialBranch
+
+```go
+func WithInitialBranch(initialBranch string) func(*GitInit)
+```
+
+WithInitialBranch sets the name of the initial branch.
 
 <a name="WithInsecureSkipTLS"></a>
 ## func WithInsecureSkipTLS
@@ -635,6 +730,15 @@ session, err := sandbox.Process.CreatePtySession(ctx, "my-session",
 )
 ```
 
+<a name="WithPullBranch"></a>
+## func WithPullBranch
+
+```go
+func WithPullBranch(branch string) func(*GitPull)
+```
+
+WithPullBranch sets the branch to pull instead of the current branch's upstream.
+
 <a name="WithPullPassword"></a>
 ## func WithPullPassword
 
@@ -652,6 +756,15 @@ err := sandbox.Git.Pull(ctx, path,
     options.WithPullPassword("ghp_xxxxxxxxxxxx"),
 )
 ```
+
+<a name="WithPullRemote"></a>
+## func WithPullRemote
+
+```go
+func WithPullRemote(remote string) func(*GitPull)
+```
+
+WithPullRemote sets the remote to pull from instead of "origin".
 
 <a name="WithPullUsername"></a>
 ## func WithPullUsername
@@ -671,6 +784,15 @@ err := sandbox.Git.Pull(ctx, path,
 )
 ```
 
+<a name="WithPushBranch"></a>
+## func WithPushBranch
+
+```go
+func WithPushBranch(branch string) func(*GitPush)
+```
+
+WithPushBranch sets the branch to push instead of the current branch.
+
 <a name="WithPushPassword"></a>
 ## func WithPushPassword
 
@@ -689,6 +811,15 @@ err := sandbox.Git.Push(ctx, path,
 )
 ```
 
+<a name="WithPushRemote"></a>
+## func WithPushRemote
+
+```go
+func WithPushRemote(remote string) func(*GitPush)
+```
+
+WithPushRemote sets the remote to push to instead of "origin".
+
 <a name="WithPushUsername"></a>
 ## func WithPushUsername
 
@@ -706,6 +837,87 @@ err := sandbox.Git.Push(ctx, path,
     options.WithPushPassword("github_token"),
 )
 ```
+
+<a name="WithRemoteFetch"></a>
+## func WithRemoteFetch
+
+```go
+func WithRemoteFetch(fetch bool) func(*GitRemoteAdd)
+```
+
+WithRemoteFetch fetches from the remote immediately after adding it.
+
+<a name="WithRemoteOverwrite"></a>
+## func WithRemoteOverwrite
+
+```go
+func WithRemoteOverwrite(overwrite bool) func(*GitRemoteAdd)
+```
+
+WithRemoteOverwrite replaces an existing remote with the same name.
+
+<a name="WithResetFiles"></a>
+## func WithResetFiles
+
+```go
+func WithResetFiles(files []string) func(*GitReset)
+```
+
+WithResetFiles constrains the reset to the given paths.
+
+<a name="WithResetMode"></a>
+## func WithResetMode
+
+```go
+func WithResetMode(mode string) func(*GitReset)
+```
+
+WithResetMode sets the reset mode \("soft", "mixed", "hard", "merge" or "keep"\).
+
+<a name="WithResetTarget"></a>
+## func WithResetTarget
+
+```go
+func WithResetTarget(target string) func(*GitReset)
+```
+
+WithResetTarget sets the revision to reset to.
+
+<a name="WithRestoreSource"></a>
+## func WithRestoreSource
+
+```go
+func WithRestoreSource(source string) func(*GitRestore)
+```
+
+WithRestoreSource restores file contents from the given revision instead of the index.
+
+<a name="WithRestoreStaged"></a>
+## func WithRestoreStaged
+
+```go
+func WithRestoreStaged(staged bool) func(*GitRestore)
+```
+
+WithRestoreStaged restores the staging index for the given files.
+
+<a name="WithRestoreWorktree"></a>
+## func WithRestoreWorktree
+
+```go
+func WithRestoreWorktree(worktree bool) func(*GitRestore)
+```
+
+WithRestoreWorktree restores the working tree for the given files.
+
+<a name="WithSetUpstream"></a>
+## func WithSetUpstream
+
+```go
+func WithSetUpstream(setUpstream bool) func(*GitPush)
+```
+
+WithSetUpstream records the pushed branch as the upstream tracking branch \(git push \-\-set\-upstream\).
 
 <a name="WithTimeout"></a>
 ## func WithTimeout
@@ -828,6 +1040,18 @@ type ExecuteCommand struct {
 }
 ```
 
+<a name="GitAuthenticate"></a>
+## type GitAuthenticate
+
+GitAuthenticate holds optional parameters for \[daytona.GitService.DangerouslyAuthenticate\].
+
+```go
+type GitAuthenticate struct {
+    Host     *string // Host to authenticate against (defaults to "github.com")
+    Protocol *string // Protocol to authenticate against (defaults to "https")
+}
+```
+
 <a name="GitClone"></a>
 ## type GitClone
 
@@ -842,6 +1066,7 @@ type GitClone struct {
     Username        *string // Username for HTTPS authentication
     Password        *string // Password or token for HTTPS authentication
     InsecureSkipTLS *bool   // Skip TLS certificate verification (insecure). Use only for trusted internal Git servers with self-signed or private-CA certs.
+    Depth           *int32  // Create a shallow clone truncated to the given number of commits
 }
 ```
 
@@ -856,6 +1081,18 @@ type GitCommit struct {
 }
 ```
 
+<a name="GitConfig"></a>
+## type GitConfig
+
+GitConfig holds optional parameters for the git config operations \(\[daytona.GitService.SetConfig\], \[daytona.GitService.GetConfig\] and \[daytona.GitService.ConfigureUser\]\).
+
+```go
+type GitConfig struct {
+    Scope *string // Config scope: "global" (default), "local" or "system"
+    Path  *string // Repository path, required when scope is "local"
+}
+```
+
 <a name="GitDeleteBranch"></a>
 ## type GitDeleteBranch
 
@@ -864,6 +1101,18 @@ GitDeleteBranch holds optional parameters for \[daytona.GitService.DeleteBranch\
 ```go
 type GitDeleteBranch struct {
     Force *bool // Force delete even if branch is not fully merged
+}
+```
+
+<a name="GitInit"></a>
+## type GitInit
+
+GitInit holds optional parameters for \[daytona.GitService.Init\].
+
+```go
+type GitInit struct {
+    Bare          *bool   // Create a bare repository without a working tree
+    InitialBranch *string // Name of the initial branch (defaults to the Git default)
 }
 ```
 
@@ -876,6 +1125,8 @@ GitPull holds optional parameters for \[daytona.GitService.Pull\].
 type GitPull struct {
     Username *string // Username for HTTPS authentication
     Password *string // Password or token for HTTPS authentication
+    Branch   *string // Branch to pull (defaults to the current branch's upstream)
+    Remote   *string // Remote to pull from (defaults to "origin")
 }
 ```
 
@@ -886,8 +1137,49 @@ GitPush holds optional parameters for \[daytona.GitService.Push\].
 
 ```go
 type GitPush struct {
-    Username *string // Username for HTTPS authentication
-    Password *string // Password or token for HTTPS authentication
+    Username    *string // Username for HTTPS authentication
+    Password    *string // Password or token for HTTPS authentication
+    Branch      *string // Branch to push (defaults to the current branch)
+    Remote      *string // Remote to push to (defaults to "origin")
+    SetUpstream *bool   // Record the pushed branch as the upstream tracking branch
+}
+```
+
+<a name="GitRemoteAdd"></a>
+## type GitRemoteAdd
+
+GitRemoteAdd holds optional parameters for \[daytona.GitService.RemoteAdd\].
+
+```go
+type GitRemoteAdd struct {
+    Fetch     *bool // Fetch from the remote immediately after adding it
+    Overwrite *bool // Replace an existing remote with the same name
+}
+```
+
+<a name="GitReset"></a>
+## type GitReset
+
+GitReset holds optional parameters for \[daytona.GitService.Reset\].
+
+```go
+type GitReset struct {
+    Mode   *string  // Reset mode: "soft", "mixed" (default), "hard", "merge" or "keep"
+    Target *string  // Revision to reset to (defaults to HEAD)
+    Files  []string // Constrain the reset to the given paths
+}
+```
+
+<a name="GitRestore"></a>
+## type GitRestore
+
+GitRestore holds optional parameters for \[daytona.GitService.Restore\].
+
+```go
+type GitRestore struct {
+    Staged   *bool   // Restore the staging index for the given files
+    Worktree *bool   // Restore the working tree for the given files (default when neither is set)
+    Source   *string // Restore file contents from the given revision instead of the index
 }
 ```
 

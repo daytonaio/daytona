@@ -15,39 +15,75 @@ import (
 	"fmt"
 )
 
-// checks if the GitRepoRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GitRepoRequest{}
+// checks if the GitPullRequest type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &GitPullRequest{}
 
-// GitRepoRequest struct for GitRepoRequest
-type GitRepoRequest struct {
+// GitPullRequest struct for GitPullRequest
+type GitPullRequest struct {
+	// Branch to pull (defaults to the current branch's upstream).
+	Branch *string `json:"branch,omitempty"`
 	Password *string `json:"password,omitempty"`
 	Path string `json:"path"`
+	// Remote to pull from (defaults to \"origin\").
+	Remote *string `json:"remote,omitempty"`
 	Username *string `json:"username,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
-type _GitRepoRequest GitRepoRequest
+type _GitPullRequest GitPullRequest
 
-// NewGitRepoRequest instantiates a new GitRepoRequest object
+// NewGitPullRequest instantiates a new GitPullRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGitRepoRequest(path string) *GitRepoRequest {
-	this := GitRepoRequest{}
+func NewGitPullRequest(path string) *GitPullRequest {
+	this := GitPullRequest{}
 	this.Path = path
 	return &this
 }
 
-// NewGitRepoRequestWithDefaults instantiates a new GitRepoRequest object
+// NewGitPullRequestWithDefaults instantiates a new GitPullRequest object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewGitRepoRequestWithDefaults() *GitRepoRequest {
-	this := GitRepoRequest{}
+func NewGitPullRequestWithDefaults() *GitPullRequest {
+	this := GitPullRequest{}
 	return &this
 }
 
+// GetBranch returns the Branch field value if set, zero value otherwise.
+func (o *GitPullRequest) GetBranch() string {
+	if o == nil || IsNil(o.Branch) {
+		var ret string
+		return ret
+	}
+	return *o.Branch
+}
+
+// GetBranchOk returns a tuple with the Branch field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitPullRequest) GetBranchOk() (*string, bool) {
+	if o == nil || IsNil(o.Branch) {
+		return nil, false
+	}
+	return o.Branch, true
+}
+
+// HasBranch returns a boolean if a field has been set.
+func (o *GitPullRequest) HasBranch() bool {
+	if o != nil && !IsNil(o.Branch) {
+		return true
+	}
+
+	return false
+}
+
+// SetBranch gets a reference to the given string and assigns it to the Branch field.
+func (o *GitPullRequest) SetBranch(v string) {
+	o.Branch = &v
+}
+
 // GetPassword returns the Password field value if set, zero value otherwise.
-func (o *GitRepoRequest) GetPassword() string {
+func (o *GitPullRequest) GetPassword() string {
 	if o == nil || IsNil(o.Password) {
 		var ret string
 		return ret
@@ -57,7 +93,7 @@ func (o *GitRepoRequest) GetPassword() string {
 
 // GetPasswordOk returns a tuple with the Password field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GitRepoRequest) GetPasswordOk() (*string, bool) {
+func (o *GitPullRequest) GetPasswordOk() (*string, bool) {
 	if o == nil || IsNil(o.Password) {
 		return nil, false
 	}
@@ -65,7 +101,7 @@ func (o *GitRepoRequest) GetPasswordOk() (*string, bool) {
 }
 
 // HasPassword returns a boolean if a field has been set.
-func (o *GitRepoRequest) HasPassword() bool {
+func (o *GitPullRequest) HasPassword() bool {
 	if o != nil && !IsNil(o.Password) {
 		return true
 	}
@@ -74,12 +110,12 @@ func (o *GitRepoRequest) HasPassword() bool {
 }
 
 // SetPassword gets a reference to the given string and assigns it to the Password field.
-func (o *GitRepoRequest) SetPassword(v string) {
+func (o *GitPullRequest) SetPassword(v string) {
 	o.Password = &v
 }
 
 // GetPath returns the Path field value
-func (o *GitRepoRequest) GetPath() string {
+func (o *GitPullRequest) GetPath() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -90,7 +126,7 @@ func (o *GitRepoRequest) GetPath() string {
 
 // GetPathOk returns a tuple with the Path field value
 // and a boolean to check if the value has been set.
-func (o *GitRepoRequest) GetPathOk() (*string, bool) {
+func (o *GitPullRequest) GetPathOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -98,12 +134,44 @@ func (o *GitRepoRequest) GetPathOk() (*string, bool) {
 }
 
 // SetPath sets field value
-func (o *GitRepoRequest) SetPath(v string) {
+func (o *GitPullRequest) SetPath(v string) {
 	o.Path = v
 }
 
+// GetRemote returns the Remote field value if set, zero value otherwise.
+func (o *GitPullRequest) GetRemote() string {
+	if o == nil || IsNil(o.Remote) {
+		var ret string
+		return ret
+	}
+	return *o.Remote
+}
+
+// GetRemoteOk returns a tuple with the Remote field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitPullRequest) GetRemoteOk() (*string, bool) {
+	if o == nil || IsNil(o.Remote) {
+		return nil, false
+	}
+	return o.Remote, true
+}
+
+// HasRemote returns a boolean if a field has been set.
+func (o *GitPullRequest) HasRemote() bool {
+	if o != nil && !IsNil(o.Remote) {
+		return true
+	}
+
+	return false
+}
+
+// SetRemote gets a reference to the given string and assigns it to the Remote field.
+func (o *GitPullRequest) SetRemote(v string) {
+	o.Remote = &v
+}
+
 // GetUsername returns the Username field value if set, zero value otherwise.
-func (o *GitRepoRequest) GetUsername() string {
+func (o *GitPullRequest) GetUsername() string {
 	if o == nil || IsNil(o.Username) {
 		var ret string
 		return ret
@@ -113,7 +181,7 @@ func (o *GitRepoRequest) GetUsername() string {
 
 // GetUsernameOk returns a tuple with the Username field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GitRepoRequest) GetUsernameOk() (*string, bool) {
+func (o *GitPullRequest) GetUsernameOk() (*string, bool) {
 	if o == nil || IsNil(o.Username) {
 		return nil, false
 	}
@@ -121,7 +189,7 @@ func (o *GitRepoRequest) GetUsernameOk() (*string, bool) {
 }
 
 // HasUsername returns a boolean if a field has been set.
-func (o *GitRepoRequest) HasUsername() bool {
+func (o *GitPullRequest) HasUsername() bool {
 	if o != nil && !IsNil(o.Username) {
 		return true
 	}
@@ -130,11 +198,11 @@ func (o *GitRepoRequest) HasUsername() bool {
 }
 
 // SetUsername gets a reference to the given string and assigns it to the Username field.
-func (o *GitRepoRequest) SetUsername(v string) {
+func (o *GitPullRequest) SetUsername(v string) {
 	o.Username = &v
 }
 
-func (o GitRepoRequest) MarshalJSON() ([]byte, error) {
+func (o GitPullRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -142,12 +210,18 @@ func (o GitRepoRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o GitRepoRequest) ToMap() (map[string]interface{}, error) {
+func (o GitPullRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Branch) {
+		toSerialize["branch"] = o.Branch
+	}
 	if !IsNil(o.Password) {
 		toSerialize["password"] = o.Password
 	}
 	toSerialize["path"] = o.Path
+	if !IsNil(o.Remote) {
+		toSerialize["remote"] = o.Remote
+	}
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username
 	}
@@ -159,7 +233,7 @@ func (o GitRepoRequest) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *GitRepoRequest) UnmarshalJSON(data []byte) (err error) {
+func (o *GitPullRequest) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -181,21 +255,23 @@ func (o *GitRepoRequest) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varGitRepoRequest := _GitRepoRequest{}
+	varGitPullRequest := _GitPullRequest{}
 
-	err = json.Unmarshal(data, &varGitRepoRequest)
+	err = json.Unmarshal(data, &varGitPullRequest)
 
 	if err != nil {
 		return err
 	}
 
-	*o = GitRepoRequest(varGitRepoRequest)
+	*o = GitPullRequest(varGitPullRequest)
 
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "branch")
 		delete(additionalProperties, "password")
 		delete(additionalProperties, "path")
+		delete(additionalProperties, "remote")
 		delete(additionalProperties, "username")
 		o.AdditionalProperties = additionalProperties
 	}
@@ -203,38 +279,38 @@ func (o *GitRepoRequest) UnmarshalJSON(data []byte) (err error) {
 	return err
 }
 
-type NullableGitRepoRequest struct {
-	value *GitRepoRequest
+type NullableGitPullRequest struct {
+	value *GitPullRequest
 	isSet bool
 }
 
-func (v NullableGitRepoRequest) Get() *GitRepoRequest {
+func (v NullableGitPullRequest) Get() *GitPullRequest {
 	return v.value
 }
 
-func (v *NullableGitRepoRequest) Set(val *GitRepoRequest) {
+func (v *NullableGitPullRequest) Set(val *GitPullRequest) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableGitRepoRequest) IsSet() bool {
+func (v NullableGitPullRequest) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableGitRepoRequest) Unset() {
+func (v *NullableGitPullRequest) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableGitRepoRequest(val *GitRepoRequest) *NullableGitRepoRequest {
-	return &NullableGitRepoRequest{value: val, isSet: true}
+func NewNullableGitPullRequest(val *GitPullRequest) *NullableGitPullRequest {
+	return &NullableGitPullRequest{value: val, isSet: true}
 }
 
-func (v NullableGitRepoRequest) MarshalJSON() ([]byte, error) {
+func (v NullableGitPullRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableGitRepoRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableGitPullRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

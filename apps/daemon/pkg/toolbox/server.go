@@ -238,6 +238,8 @@ func (s *server) Start() error {
 		gitController.GET("/branches", git.ListBranches)
 		gitController.GET("/history", git.GetCommitHistory)
 		gitController.GET("/status", git.GetStatus)
+		gitController.GET("/remotes", git.ListRemotes)
+		gitController.GET("/config", git.GetGitConfig)
 
 		gitController.POST("/add", git.AddFiles)
 		gitController.POST("/branches", git.CreateBranch)
@@ -247,6 +249,13 @@ func (s *server) Start() error {
 		gitController.POST("/commit", git.CommitChanges)
 		gitController.POST("/pull", git.PullChanges)
 		gitController.POST("/push", git.PushChanges)
+		gitController.POST("/init", git.InitRepository)
+		gitController.POST("/reset", git.ResetChanges)
+		gitController.POST("/restore", git.RestoreFiles)
+		gitController.POST("/remotes", git.AddRemote)
+		gitController.POST("/config", git.SetGitConfig)
+		gitController.POST("/config/user", git.ConfigureUser)
+		gitController.POST("/credentials", git.Authenticate)
 	}
 
 	lspLogger := s.logger.With(slog.String("component", "lsp_service"))

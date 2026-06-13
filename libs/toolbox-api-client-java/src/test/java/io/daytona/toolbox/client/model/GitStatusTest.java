@@ -73,11 +73,27 @@ public class GitStatusTest {
     }
 
     /**
+     * Test the property 'detached'
+     */
+    @Test
+    public void detachedTest() {
+        // TODO: test detached
+    }
+
+    /**
      * Test the property 'fileStatus'
      */
     @Test
     public void fileStatusTest() {
         // TODO: test fileStatus
+    }
+
+    /**
+     * Test the property 'upstream'
+     */
+    @Test
+    public void upstreamTest() {
+        // TODO: test upstream
     }
 
 }

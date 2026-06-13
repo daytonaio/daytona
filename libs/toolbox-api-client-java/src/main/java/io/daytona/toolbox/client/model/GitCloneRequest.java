@@ -60,6 +60,11 @@ public class GitCloneRequest {
   @javax.annotation.Nullable
   private String commitId;
 
+  public static final String SERIALIZED_NAME_DEPTH = "depth";
+  @SerializedName(SERIALIZED_NAME_DEPTH)
+  @javax.annotation.Nullable
+  private Integer depth;
+
   public static final String SERIALIZED_NAME_INSECURE_SKIP_TLS = "insecure_skip_tls";
   @SerializedName(SERIALIZED_NAME_INSECURE_SKIP_TLS)
   @javax.annotation.Nullable
@@ -123,6 +128,25 @@ public class GitCloneRequest {
 
   public void setCommitId(@javax.annotation.Nullable String commitId) {
     this.commitId = commitId;
+  }
+
+
+  public GitCloneRequest depth(@javax.annotation.Nullable Integer depth) {
+    this.depth = depth;
+    return this;
+  }
+
+  /**
+   * Depth creates a shallow clone truncated to the given number of commits.
+   * @return depth
+   */
+  @javax.annotation.Nullable
+  public Integer getDepth() {
+    return depth;
+  }
+
+  public void setDepth(@javax.annotation.Nullable Integer depth) {
+    this.depth = depth;
   }
 
 
@@ -277,6 +301,7 @@ public class GitCloneRequest {
     GitCloneRequest gitCloneRequest = (GitCloneRequest) o;
     return Objects.equals(this.branch, gitCloneRequest.branch) &&
         Objects.equals(this.commitId, gitCloneRequest.commitId) &&
+        Objects.equals(this.depth, gitCloneRequest.depth) &&
         Objects.equals(this.insecureSkipTls, gitCloneRequest.insecureSkipTls) &&
         Objects.equals(this.password, gitCloneRequest.password) &&
         Objects.equals(this.path, gitCloneRequest.path) &&
@@ -287,7 +312,7 @@ public class GitCloneRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(branch, commitId, insecureSkipTls, password, path, url, username, additionalProperties);
+    return Objects.hash(branch, commitId, depth, insecureSkipTls, password, path, url, username, additionalProperties);
   }
 
   @Override
@@ -296,6 +321,7 @@ public class GitCloneRequest {
     sb.append("class GitCloneRequest {\n");
     sb.append("    branch: ").append(toIndentedString(branch)).append("\n");
     sb.append("    commitId: ").append(toIndentedString(commitId)).append("\n");
+    sb.append("    depth: ").append(toIndentedString(depth)).append("\n");
     sb.append("    insecureSkipTls: ").append(toIndentedString(insecureSkipTls)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
@@ -320,7 +346,7 @@ public class GitCloneRequest {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("branch", "commit_id", "insecure_skip_tls", "password", "path", "url", "username"));
+    openapiFields = new HashSet<String>(Arrays.asList("branch", "commit_id", "depth", "insecure_skip_tls", "password", "path", "url", "username"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("path", "url"));

@@ -85,6 +85,7 @@ module Daytona
     # @param insecure_skip_tls [Boolean, nil] Skip TLS certificate verification (insecure).
     #   Use only for trusted internal Git servers with self-signed or private-CA certs;
     #   credentials, if supplied, are transmitted over an unverified TLS connection.
+    # @param depth [Integer, nil] Create a shallow clone truncated to the given number of commits.
     # @return [void]
     # @raise [Daytona::Sdk::Error] if cloning repository fails
     #
@@ -110,7 +111,7 @@ module Daytona
     #     path: "workspace/repo-old",
     #     commit_id: "abc123"
     #   )
-    def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil, insecure_skip_tls: nil) # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
+    def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil, insecure_skip_tls: nil, depth: nil) # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists, Layout/LineLength
       toolbox_api.clone_repository(
         DaytonaToolboxApiClient::GitCloneRequest.new(
           url: url,
@@ -119,7 +120,8 @@ module Daytona
           username: username,
           password: password,
           commit_id: commit_id,
-          insecure_skip_tls: insecure_skip_tls
+          insecure_skip_tls: insecure_skip_tls,
+          depth: depth
         )
       )
     rescue DaytonaToolboxApiClient::ApiError => e
@@ -170,6 +172,9 @@ module Daytona
     #   the sandbox working directory.
     # @param username [String, nil] Git username for authentication.
     # @param password [String, nil] Git password or token for authentication.
+    # @param branch [String, nil] Branch to push. Defaults to the current branch.
+    # @param remote [String, nil] Remote to push to. Defaults to "origin".
+    # @param set_upstream [Boolean] Record the pushed branch as the upstream tracking branch. Defaults to false.
     # @return [void]
     # @raise [Daytona::Sdk::Error] if pushing changes fails
     #
@@ -183,9 +188,12 @@ module Daytona
     #     username: "user",
     #     password: "github_token"
     #   )
-    def push(path:, username: nil, password: nil)
+    #
+    #   # Push a new branch and set its upstream
+    #   sandbox.git.push(path: "workspace/repo", branch: "feature", set_upstream: true)
+    def push(path:, username: nil, password: nil, branch: nil, remote: nil, set_upstream: false) # rubocop:disable Metrics/ParameterLists
       toolbox_api.push_changes(
-        DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
+        DaytonaToolboxApiClient::GitPushRequest.new(path:, username:, password:, branch:, remote:, set_upstream:)
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to push changes')
@@ -200,6 +208,8 @@ module Daytona
     #   the sandbox working directory.
     # @param username [String, nil] Git username for authentication.
     # @param password [String, nil] Git password or token for authentication.
+    # @param branch [String, nil] Branch to pull. Defaults to the current branch's upstream.
+    # @param remote [String, nil] Remote to pull from. Defaults to "origin".
     # @return [void]
     # @raise [Daytona::Sdk::Error] if pulling changes fails
     #
@@ -214,9 +224,11 @@ module Daytona
     #     password: "github_token"
     #   )
     #
-    def pull(path:, username: nil, password: nil)
+    #   # Pull a specific branch from a specific remote
+    #   sandbox.git.pull(path: "workspace/repo", remote: "upstream", branch: "main")
+    def pull(path:, username: nil, password: nil, branch: nil, remote: nil)
       toolbox_api.pull_changes(
-        DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
+        DaytonaToolboxApiClient::GitPullRequest.new(path:, username:, password:, branch:, remote:)
       )
     rescue DaytonaToolboxApiClient::ApiError => e
       raise map_api_error(e, 'Failed to pull changes')
@@ -308,8 +320,222 @@ module Daytona
       raise Sdk::Error, "Failed to delete branch: #{e.message}"
     end
 
+    # Initializes a new Git repository at the specified path.
+    #
+    # @param path [String] Path where the repository should be initialized.
+    # @param bare [Boolean] Create a bare repository without a working tree. Defaults to false.
+    # @param initial_branch [String, nil] Name of the initial branch. If not specified, uses the Git default.
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] if initializing repository fails
+    #
+    # @example
+    #   sandbox.git.init("workspace/repo", initial_branch: "main")
+    def init(path, bare: false, initial_branch: nil)
+      toolbox_api.init_repository(
+        DaytonaToolboxApiClient::GitInitRequest.new(path:, bare:, initial_branch:)
+      )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to initialize repository')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to initialize repository: #{e.message}"
+    end
+
+    # Resets the current HEAD to the specified state.
+    #
+    # @param path [String] Path to the Git repository root.
+    # @param mode [String, nil] Reset mode, one of "soft", "mixed" (default), "hard", "merge" or "keep".
+    # @param target [String, nil] Revision to reset to. Defaults to HEAD.
+    # @param files [Array<String>, nil] Constrain the reset to the given paths.
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] if resetting fails
+    #
+    # @example
+    #   # Unstage all changes (mixed reset to HEAD)
+    #   sandbox.git.reset("workspace/repo")
+    #
+    #   # Hard reset to a previous commit
+    #   sandbox.git.reset("workspace/repo", mode: "hard", target: "HEAD~1")
+    def reset(path, mode: nil, target: nil, files: nil)
+      toolbox_api.reset_changes(
+        DaytonaToolboxApiClient::GitResetRequest.new(path:, mode:, target:, files:)
+      )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to reset')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to reset: #{e.message}"
+    end
+
+    # Restores working tree files or unstages changes.
+    #
+    # @param path [String] Path to the Git repository root.
+    # @param files [Array<String>] File paths to restore.
+    # @param staged [Boolean, nil] Restore the staging index for the given files.
+    # @param worktree [Boolean, nil] Restore the working tree for the given files. Defaults to true
+    #   when neither staged nor worktree is provided.
+    # @param source [String, nil] Restore file contents from the given revision instead of the index.
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] if restoring fails
+    #
+    # @example
+    #   # Discard working tree changes
+    #   sandbox.git.restore("workspace/repo", ["file.txt"])
+    #
+    #   # Unstage changes
+    #   sandbox.git.restore("workspace/repo", ["file.txt"], staged: true)
+    def restore(path, files, staged: nil, worktree: nil, source: nil)
+      toolbox_api.restore_files(
+        DaytonaToolboxApiClient::GitRestoreRequest.new(path:, files:, staged:, worktree:, source:)
+      )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to restore files')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to restore files: #{e.message}"
+    end
+
+    # Adds (or overwrites) a remote in the repository.
+    #
+    # @param path [String] Path to the Git repository root.
+    # @param name [String] Name of the remote.
+    # @param url [String] URL of the remote.
+    # @param fetch [Boolean] Fetch from the remote immediately after adding it. Defaults to false.
+    # @param overwrite [Boolean] Replace an existing remote with the same name. Defaults to false.
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] if adding the remote fails
+    #
+    # @example
+    #   sandbox.git.remote_add("workspace/repo", "origin", "https://github.com/user/repo.git")
+    def remote_add(path, name, url, fetch: false, overwrite: false)
+      toolbox_api.add_remote(
+        DaytonaToolboxApiClient::GitAddRemoteRequest.new(path:, name:, url:, fetch:, overwrite:)
+      )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to add remote')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to add remote: #{e.message}"
+    end
+
+    # Lists the remotes configured in the repository.
+    #
+    # @param path [String] Path to the Git repository root.
+    # @return [DaytonaToolboxApiClient::ListRemotesResponse] The configured remotes (name + URL).
+    # @raise [Daytona::Sdk::Error] if listing remotes fails
+    #
+    # @example
+    #   response = sandbox.git.remotes("workspace/repo")
+    #   response.remotes.each { |r| puts "#{r.name}: #{r.url}" }
+    def remotes(path)
+      toolbox_api.list_remotes(path)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to list remotes')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to list remotes: #{e.message}"
+    end
+
+    # Gets the URL of a remote, or nil when it does not exist.
+    #
+    # @param path [String] Path to the Git repository root.
+    # @param name [String] Name of the remote.
+    # @return [String, nil] The remote URL, or nil when the remote does not exist.
+    # @raise [Daytona::Sdk::Error] if getting the remote fails
+    #
+    # @example
+    #   url = sandbox.git.remote_get("workspace/repo", "origin")
+    def remote_get(path, name)
+      toolbox_api.list_remotes(path).remotes.find { |r| r.name == name }&.url
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to get remote')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to get remote: #{e.message}"
+    end
+
+    # Sets a Git config value at the given scope.
+    #
+    # @param key [String] Config key in dotted form (e.g. "user.name").
+    # @param value [String] Config value.
+    # @param scope [String] Config scope, one of "global" (default), "local" or "system".
+    # @param path [String, nil] Repository path, required when scope is "local".
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] if setting config fails
+    #
+    # @example
+    #   sandbox.git.set_config("user.name", "John Doe")
+    def set_config(key, value, scope: 'global', path: nil)
+      toolbox_api.set_git_config(
+        DaytonaToolboxApiClient::GitSetConfigRequest.new(key:, value:, scope:, path:)
+      )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to set config')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to set config: #{e.message}"
+    end
+
+    # Gets a Git config value at the given scope, or nil when unset.
+    #
+    # @param key [String] Config key in dotted form (e.g. "user.name").
+    # @param scope [String] Config scope, one of "global" (default), "local" or "system".
+    # @param path [String, nil] Repository path, required when scope is "local".
+    # @return [String, nil] The config value, or nil when the key is not set.
+    # @raise [Daytona::Sdk::Error] if getting config fails
+    #
+    # @example
+    #   name = sandbox.git.get_config("user.name")
+    def get_config(key, scope: 'global', path: nil)
+      toolbox_api.get_git_config(key, scope: scope, path: path).value
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to get config')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to get config: #{e.message}"
+    end
+
+    # Configures the Git user name and email at the given scope.
+    #
+    # @param name [String] User name (user.name).
+    # @param email [String] User email (user.email).
+    # @param scope [String] Config scope, one of "global" (default), "local" or "system".
+    # @param path [String, nil] Repository path, required when scope is "local".
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] if configuring user fails
+    #
+    # @example
+    #   sandbox.git.configure_user("John Doe", "john@example.com")
+    def configure_user(name, email, scope: 'global', path: nil)
+      toolbox_api.configure_user(
+        DaytonaToolboxApiClient::GitConfigureUserRequest.new(name:, email:, scope:, path:)
+      )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to configure user')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to configure user: #{e.message}"
+    end
+
+    # Persists Git credentials globally so that subsequent operations against the
+    # given host authenticate automatically.
+    #
+    # WARNING: This stores the password in plaintext on disk via the Git credential store.
+    #
+    # @param username [String] Git username.
+    # @param password [String] Git password or token.
+    # @param host [String, nil] Host to authenticate against. Defaults to "github.com".
+    # @param protocol [String, nil] Protocol to authenticate against. Defaults to "https".
+    # @return [void]
+    # @raise [Daytona::Sdk::Error] if authenticating fails
+    #
+    # @example
+    #   sandbox.git.dangerously_authenticate("user", "github_token")
+    def dangerously_authenticate(username, password, host: nil, protocol: nil)
+      toolbox_api.authenticate(
+        DaytonaToolboxApiClient::GitAuthenticateRequest.new(username:, password:, host:, protocol:)
+      )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise map_api_error(e, 'Failed to authenticate')
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to authenticate: #{e.message}"
+    end
+
     instrument :add, :branches, :clone, :commit, :push, :pull, :status,
                :checkout_branch, :create_branch, :delete_branch,
+               :init, :reset, :restore, :remote_add, :remotes, :remote_get,
+               :set_config, :get_config, :configure_user, :dangerously_authenticate,
                component: 'Git'
 
     private
