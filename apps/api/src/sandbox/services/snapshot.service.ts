@@ -226,7 +226,13 @@ export class SnapshotService {
         const snapshot = this.snapshotRepository.create({
           id: snapshotId,
           organizationId: organization.id,
-          ...createSnapshotDto,
+          // Map only client-settable fields explicitly; the raw DTO is never spread, so
+          // request input cannot assign server-owned columns (e.g. organizationId, initialRunnerId).
+          name: createSnapshotDto.name,
+          imageName: createSnapshotDto.imageName,
+          cpu: createSnapshotDto.cpu,
+          gpu: createSnapshotDto.gpu,
+          disk: createSnapshotDto.disk,
           gpuType: resolvedGpuType,
           entrypoint: this.processEntrypoint(entrypoint),
           mem: createSnapshotDto.memory, // Map memory to mem
@@ -323,7 +329,13 @@ export class SnapshotService {
       const snapshot = this.snapshotRepository.create({
         id: snapshotId,
         organizationId: organization.id,
-        ...createSnapshotDto,
+        // Map only client-settable fields explicitly; the raw DTO is never spread, so
+        // request input cannot assign server-owned columns (e.g. organizationId, initialRunnerId).
+        // imageName is intentionally omitted: it is rejected for the build-info path.
+        name: createSnapshotDto.name,
+        cpu: createSnapshotDto.cpu,
+        gpu: createSnapshotDto.gpu,
+        disk: createSnapshotDto.disk,
         gpuType: resolvedGpuType,
         entrypoint: this.processEntrypoint(entrypoint),
         mem: createSnapshotDto.memory, // Map memory to mem

@@ -101,7 +101,11 @@ export class OrganizationRegionController {
   ): Promise<CreateRegionResponseDto> {
     return await this.regionService.create(
       {
-        ...createRegionDto,
+        // Map only client-supplied fields; never propagate the internal-only `id`.
+        name: createRegionDto.name,
+        proxyUrl: createRegionDto.proxyUrl,
+        sshGatewayUrl: createRegionDto.sshGatewayUrl,
+        snapshotManagerUrl: createRegionDto.snapshotManagerUrl,
         enforceQuotas: false,
         regionType: RegionType.CUSTOM,
       },
