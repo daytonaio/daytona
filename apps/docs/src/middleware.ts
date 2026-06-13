@@ -1,5 +1,6 @@
 import { defineMiddleware } from 'astro:middleware'
 
+import { rewrite404ForMarkdownAccept } from './utils/content-negotiation'
 import { redirects } from './utils/redirects'
 
 function filterProxyHeaders(headers: Headers): Headers {
@@ -31,14 +32,17 @@ export const onRequest = defineMiddleware(
               : request.body,
         })
 
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: filterProxyHeaders(response.headers),
-        })
+        return rewrite404ForMarkdownAccept(
+          new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: filterProxyHeaders(response.headers),
+          }),
+          request
+        )
       } catch {
         // During prerender the target server doesn't exist yet; fall through
-        return next()
+        return rewrite404ForMarkdownAccept(await next(), request)
       }
     }
 
@@ -81,6 +85,7 @@ export const onRequest = defineMiddleware(
       }
     }
 
-    return next()
+    const response = await next()
+    return rewrite404ForMarkdownAccept(response, request)
   }
 )

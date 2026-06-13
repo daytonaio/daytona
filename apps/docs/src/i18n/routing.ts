@@ -14,6 +14,7 @@
  * This approach preserves static generation benefits while enabling dynamic language routing.
  */
 import config from '../../gt.config.json'
+import { rewrite404ForMarkdownAccept } from '../utils/content-negotiation'
 
 const defaultLocale = config.defaultLocale
 const allLocales = [defaultLocale, ...config.locales]
@@ -163,11 +164,12 @@ export async function handleLanguageRouting(
 
   const serveCustom404 = async (): Promise<Response> => {
     const response = await proxyLocalizedContent('/docs/404', request)
-    return new Response(response.body, {
+    const notFound = new Response(response.body, {
       status: 404,
       statusText: 'Not Found',
       headers: response.headers,
     })
+    return rewrite404ForMarkdownAccept(notFound, request)
   }
 
   if (isLocalizedPath(normalizedSlug)) return await serveCustom404()
@@ -175,8 +177,6 @@ export async function handleLanguageRouting(
   const preferredLanguage = getPreferredLanguage(request)
 
   if (normalizedSlug) {
-    // For unprefixed docs paths, use the default locale canonical URL.
-    // This avoids SSR self-fetch loops that can incorrectly produce 404.
     return redirectFn(`/docs/${defaultLocale}/${normalizedSlug}`)
   }
 

@@ -1,8 +1,6 @@
 /**
- * Redirect map for pages that changed URLs during the content architecture refactor.
+ * Redirect map for documentation pages.
  *
- * The single source of truth used by the Express production server (server/index.mjs)
- * and the Astro middleware (src/middleware.ts).
  */
 export const redirects = {
   'inngest-agentkit-coding-agent': 'guides/agentkit/inngest-agentkit-coding-agent',
@@ -26,4 +24,28 @@ export const redirects = {
   'computer-use-macos': 'computer-use',
   'computer-use-windows': 'computer-use',
   'computer-use-linux': 'computer-use',
+  'api': 'tools/api#daytona',
+  'api-reference': 'tools/api#daytona',
+  'rest-api': 'tools/api#daytona',
+  'reference/api': 'tools/api#daytona',
+  'tools/api/daytona': 'tools/api#daytona',
+  'tools/api/sandbox-api': 'tools/api#daytona',
+  'sdk': 'getting-started',
+  'sdk/node': 'typescript-sdk',
+  'sdk/typescript': 'typescript-sdk',
+  'sdk/typescript-sdk': 'typescript-sdk',
+  'sdk/python': 'python-sdk',
+  'sdk/python-sdk': 'python-sdk',
+  'sdk-reference/typescript-sdk-reference': 'typescript-sdk',
+  'tools/typescript-sdk': 'typescript-sdk',
+  'tools/python-sdk': 'python-sdk',
+  'tools/python-sdk/overview': 'python-sdk',
+  'typescript-sdk/sandbox-process': 'typescript-sdk/process',
+  'tools/process-code-execution': 'process-code-execution',
+  'quick-start': 'getting-started',
+  'getting-started/quick-start': 'getting-started',
+  'getting-started/quickstart-python': 'python-sdk',
+  'miscellaneous/create-api-key': 'api-keys',
+  'guides/claude/coding-agent': 'guides/claude',
+  'agent-tools/log-streaming': 'log-streaming',
 }
