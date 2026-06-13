@@ -46,6 +46,31 @@ export interface PaginatedSnapshots extends Omit<PaginatedSnapshotsDto, 'items'>
   items: Snapshot[]
 }
 
+type SnapshotWithWireDates = Omit<SnapshotDto, 'createdAt' | 'updatedAt' | 'lastUsedAt'> & {
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastUsedAt?: Date | string | null
+}
+
+const deserializeSnapshotDate = (value: Date | string): Date => (value instanceof Date ? value : new Date(value))
+
+const deserializeSnapshot = (snapshot: SnapshotDto): Snapshot => {
+  const wireSnapshot = snapshot as SnapshotWithWireDates
+  const deserialized = { ...wireSnapshot }
+
+  if (wireSnapshot.createdAt !== undefined) {
+    deserialized.createdAt = deserializeSnapshotDate(wireSnapshot.createdAt)
+  }
+  if (wireSnapshot.updatedAt !== undefined) {
+    deserialized.updatedAt = deserializeSnapshotDate(wireSnapshot.updatedAt)
+  }
+  if (wireSnapshot.lastUsedAt !== undefined) {
+    deserialized.lastUsedAt = wireSnapshot.lastUsedAt === null ? null : deserializeSnapshotDate(wireSnapshot.lastUsedAt)
+  }
+
+  return deserialized as Snapshot
+}
+
 /**
  * Parameters for creating a new snapshot.
  *
@@ -96,7 +121,7 @@ export class SnapshotService {
   async list(page?: number, limit?: number): Promise<PaginatedSnapshots> {
     const response = await this.snapshotsApi.getAllSnapshots(undefined, page, limit)
     return {
-      items: response.data.items.map((snapshot) => snapshot as Snapshot),
+      items: response.data.items.map(deserializeSnapshot),
       total: response.data.total,
       page: response.data.page,
       totalPages: response.data.totalPages,
@@ -118,7 +143,7 @@ export class SnapshotService {
   @WithInstrumentation()
   async get(name: string): Promise<Snapshot> {
     const response = await this.snapshotsApi.getSnapshot(name)
-    return response.data as Snapshot
+    return deserializeSnapshot(response.data)
   }
 
   /**
@@ -257,7 +282,7 @@ export class SnapshotService {
       throw new DaytonaError(errMsg)
     }
 
-    return createdSnapshot as Snapshot
+    return deserializeSnapshot(createdSnapshot)
   }
 
   /**
@@ -268,7 +293,7 @@ export class SnapshotService {
    */
   @WithInstrumentation()
   async activate(snapshot: Snapshot): Promise<Snapshot> {
-    return (await this.snapshotsApi.activateSnapshot(snapshot.id)).data as Snapshot
+    return deserializeSnapshot((await this.snapshotsApi.activateSnapshot(snapshot.id)).data)
   }
 
   /**
