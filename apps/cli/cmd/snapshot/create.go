@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var forceFlag bool
+
 var CreateCmd = &cobra.Command{
 	Use:     "create [SNAPSHOT]",
 	Short:   "Create a snapshot",
@@ -76,6 +78,19 @@ var CreateCmd = &cobra.Command{
 
 		// Send create request
 		snapshot, res, err := apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(*createSnapshot).Execute()
+		if err != nil && forceFlag {
+			existingSnapshot, _, getErr := apiClient.SnapshotsAPI.GetSnapshot(ctx, snapshotName).Execute()
+			if getErr != nil {
+				return apiclient_cli.HandleErrorResponse(res, err)
+			}
+
+			deleteRes, deleteErr := apiClient.SnapshotsAPI.RemoveSnapshot(ctx, existingSnapshot.Id).Execute()
+			if deleteErr != nil {
+				return apiclient_cli.HandleErrorResponse(deleteRes, deleteErr)
+			}
+
+			snapshot, res, err = apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(*createSnapshot).Execute()
+		}
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
@@ -153,6 +168,7 @@ func init() {
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
 	CreateCmd.Flags().StringVar(&regionIdFlag, "region", "", "ID of the region where the snapshot will be available (defaults to organization default region)")
+	CreateCmd.Flags().BoolVar(&forceFlag, "force", false, "Replace an existing snapshot with the same name")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "context")
