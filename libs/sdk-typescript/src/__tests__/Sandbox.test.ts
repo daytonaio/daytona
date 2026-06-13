@@ -1,7 +1,12 @@
 // Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Configuration, Sandbox as SandboxDto } from '@daytona/api-client'
+import {
+  Configuration as MockedConfiguration,
+  SnapshotsApi as MockedSnapshotsApi,
+  type Configuration,
+  type Sandbox as SandboxDto,
+} from '@daytona/api-client'
 import { createApiResponse } from './helpers'
 import { DaytonaNotFoundError } from '../errors/DaytonaError'
 
@@ -13,7 +18,17 @@ jest.mock(
       ERROR: 'error',
       BUILD_FAILED: 'build_failed',
       DESTROYED: 'destroyed',
+      SNAPSHOTTING: 'snapshotting',
+      STARTED: 'started',
     },
+    SnapshotState: {
+      PENDING: 'pending',
+      ACTIVE: 'active',
+      ERROR: 'error',
+      BUILD_FAILED: 'build_failed',
+    },
+    Configuration: jest.fn((params: Record<string, unknown> = {}) => ({ ...params })),
+    SnapshotsApi: jest.fn(() => ({ getSnapshot: jest.fn() })),
   }),
   { virtual: true },
 )
@@ -52,7 +67,11 @@ const baseDto: SandboxDto = {
 
 const makeSandbox = (
   overrides: Partial<SandboxDto> = {},
-): { sandbox: import('../Sandbox').Sandbox; sandboxApi: Record<string, jest.Mock> } => {
+): {
+  sandbox: import('../Sandbox').Sandbox
+  sandboxApi: Record<string, jest.Mock>
+  snapshotsApi: Record<string, jest.Mock>
+} => {
   const { Sandbox } = require('../Sandbox') as typeof import('../Sandbox')
   const sandboxApi = {
     startSandbox: jest.fn(),
@@ -76,6 +95,10 @@ const makeSandbox = (
     validateSshAccess: jest.fn(),
   }
 
+  const snapshotsApi = {
+    getSnapshot: jest.fn(),
+  }
+
   const cfg: Configuration = {
     basePath: 'http://proxy',
     baseOptions: { headers: {} },
@@ -90,9 +113,10 @@ const makeSandbox = (
     cfg,
     axiosInstance as unknown as never,
     sandboxApi as unknown as never,
+    snapshotsApi as unknown as never,
   )
 
-  return { sandbox, sandboxApi }
+  return { sandbox, sandboxApi, snapshotsApi }
 }
 
 describe('Sandbox', () => {
@@ -242,15 +266,135 @@ describe('Sandbox', () => {
   })
 
   it('creates sandbox snapshots and waits for completion', async () => {
-    const { sandbox, sandboxApi } = makeSandbox({ state: 'snapshotting' })
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
     sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
-    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    sandboxApi.getSandbox
+      .mockResolvedValueOnce(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+      .mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    snapshotsApi.getSnapshot
+      .mockResolvedValueOnce(createApiResponse({ state: 'pending' }))
+      .mockResolvedValueOnce(createApiResponse({ state: 'active' }))
 
     await sandbox._experimental_createSnapshot('snap-1', 1)
 
     expect(sandboxApi.createSandboxSnapshot).toHaveBeenCalledWith('sb-1', { name: 'snap-1' }, undefined, {
       timeout: 1000,
     })
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledWith('snap-1')
+    expect(snapshotsApi.getSnapshot.mock.calls.length).toBeGreaterThanOrEqual(2)
+    // The success path refreshes local sandbox data once the record turns active.
+    expect(sandbox.state).toBe('started')
+  })
+
+  it('resolves a successful capture even when the success-path refresh fails', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox
+      .mockResolvedValueOnce(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+      .mockRejectedValue(new Error('transient network failure'))
+    snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    // The refresh failure is swallowed; local state simply stays stale.
+    expect(sandbox.state).toBe('snapshotting')
+  })
+
+  it('throws when snapshot record reports a failed capture', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox
+      .mockResolvedValueOnce(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+      .mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse({ state: 'error', errorReason: 'capture failed' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).rejects.toThrow(
+      'Snapshot snap-1 failed with state: error, error reason: capture failed',
+    )
+    // The failure path refreshes local sandbox data before throwing.
+    expect(sandbox.state).toBe('started')
+  })
+
+  it('throws when snapshot record reports a failed build', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    snapshotsApi.getSnapshot.mockResolvedValue(
+      createApiResponse({ state: 'build_failed', errorReason: 'build failed' }),
+    )
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).rejects.toThrow(
+      'Snapshot snap-1 failed with state: build_failed, error reason: build failed',
+    )
+  })
+
+  it('tolerates missing snapshot record while sandbox is still snapshotting (legacy API)', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'snapshotting' }))
+    snapshotsApi.getSnapshot
+      .mockRejectedValueOnce(new DaytonaNotFoundError('not found'))
+      .mockResolvedValueOnce(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    expect(snapshotsApi.getSnapshot.mock.calls.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('recovers when the snapshot record appears on the grace re-read after the sandbox reverted', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    snapshotsApi.getSnapshot
+      .mockRejectedValueOnce(new DaytonaNotFoundError('not found'))
+      .mockResolvedValueOnce(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledTimes(2)
+  })
+
+  it('fails when sandbox reverted and no snapshot record exists (legacy failure)', async () => {
+    const { sandbox, sandboxApi, snapshotsApi } = makeSandbox({ state: 'snapshotting' })
+    sandboxApi.createSandboxSnapshot.mockResolvedValue(createApiResponse(undefined))
+    sandboxApi.getSandbox.mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' }))
+    snapshotsApi.getSnapshot.mockRejectedValue(new DaytonaNotFoundError('not found'))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).rejects.toThrow(
+      "Sandbox sb-1 snapshot 'snap-1' failed: no snapshot record exists and sandbox is no longer snapshotting (state: started",
+    )
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledTimes(2)
+  })
+
+  it('defaults snapshotsApi to an API-targeted client when omitted', async () => {
+    const { Sandbox } = require('../Sandbox') as typeof import('../Sandbox')
+    const apiClient = {
+      SnapshotsApi: MockedSnapshotsApi as unknown as jest.Mock,
+      Configuration: MockedConfiguration as unknown as jest.Mock,
+    }
+    apiClient.SnapshotsApi.mockClear()
+    apiClient.Configuration.mockClear()
+
+    const cfg = { basePath: 'http://api', baseOptions: { headers: {} } } as unknown as Configuration
+    const sandboxApi = {
+      createSandboxSnapshot: jest.fn().mockResolvedValue(createApiResponse(undefined)),
+      getSandbox: jest.fn().mockResolvedValue(createApiResponse({ ...baseDto, state: 'started' })),
+    }
+
+    const sandbox = new Sandbox(
+      { ...baseDto, state: 'snapshotting' },
+      cfg,
+      { defaults: { baseURL: '' } } as unknown as never,
+      sandboxApi as unknown as never,
+    )
+
+    // The default SnapshotsApi must be built from the API base path captured
+    // before the constructor repoints clientConfig at the toolbox proxy.
+    expect(apiClient.Configuration).toHaveBeenCalledWith(expect.objectContaining({ basePath: 'http://api' }))
+    expect(cfg.basePath).toBe('http://proxy/sb-1')
+
+    const snapshotsApi = apiClient.SnapshotsApi.mock.results[0].value as { getSnapshot: jest.Mock }
+    snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse({ state: 'active' }))
+
+    await expect(sandbox._experimental_createSnapshot('snap-1', 1)).resolves.toBeUndefined()
+    expect(snapshotsApi.getSnapshot).toHaveBeenCalledWith('snap-1')
   })
 
   it('waitUntilStarted throws when sandbox enters an error state', async () => {

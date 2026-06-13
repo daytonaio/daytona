@@ -67,7 +67,8 @@ new Sandbox(
    sandboxDto: SandboxListItem | Sandbox, 
    clientConfig: Configuration, 
    axiosInstance: AxiosInstance, 
-   sandboxApi: SandboxApi): Sandbox
+   sandboxApi: SandboxApi, 
+   snapshotsApi?: SnapshotsApi): Sandbox
 ```
 
 Creates a new Sandbox instance
@@ -78,6 +79,7 @@ Creates a new Sandbox instance
 - `clientConfig` _Configuration_
 - `axiosInstance` _AxiosInstance_
 - `sandboxApi` _SandboxApi_
+- `snapshotsApi?` _SnapshotsApi_
 
 
 **Returns**:
@@ -96,7 +98,9 @@ Creates a snapshot from the current state of the Sandbox.
 
 This captures the Sandbox's filesystem into a reusable snapshot that can be
 used to create new Sandboxes. The Sandbox will temporarily enter a
-'snapshotting' state and return to its previous state when complete.
+'snapshotting' state and return to its previous state when complete. The
+method waits until the snapshot record reaches the 'active' state and throws
+a DaytonaError carrying the snapshot's error reason if the capture fails.
 
 **Parameters**:
 
