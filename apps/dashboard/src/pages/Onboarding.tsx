@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import pythonIcon from '@/assets/python.svg'
-import typescriptIcon from '@/assets/typescript.svg'
 import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +26,7 @@ const Onboarding: React.FC = () => {
   const { selectedOrganization, onSelectOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
   const navigate = useNavigate()
 
-  const [language, setLanguage] = useState<'typescript' | 'python'>('python')
+  const [language, setLanguage] = useState<'typescript' | 'python' | 'ruby' | 'go'>('python')
   const [apiKeyName, setApiKeyName] = useState('')
   const [apiKeyPermissions, setApiKeyPermissions] = useState<CreateApiKeyPermissionsEnum[]>([])
   const [createdApiKey, setCreatedApiKey] = useState<ApiKeyResponse | null>(null)
@@ -123,19 +121,31 @@ const Onboarding: React.FC = () => {
               <p className="text-muted-foreground">Install and get your Sandboxes running.</p>
             </div>
             <div className="flex items-center space-x-2">
-              <Tabs value={language} onValueChange={(value) => setLanguage(value as 'typescript' | 'python')}>
+              <Tabs value={language} onValueChange={(value) => setLanguage(value as 'typescript' | 'python' | 'ruby' | 'go')}>
                 <TabsList className="bg-foreground/10 p-0 rounded-none">
                   <TabsTrigger
                     value="python"
                     className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
                   >
-                    <img src={pythonIcon} alt="Python" className="w-4 h-4" />
+                    Python
                   </TabsTrigger>
                   <TabsTrigger
                     value="typescript"
                     className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
                   >
-                    <img src={typescriptIcon} alt="TypeScript" className="w-4 h-4" />
+                    TypeScript
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="ruby"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
+                  >
+                    Ruby
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="go"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
+                  >
+                    Go
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -359,6 +369,67 @@ if response.exit_code != 0:
   print(f"Error: {response.exit_code} {response.result}")
 else:
     print(response.result)
+  `,
+  },
+  ruby: {
+    install: `gem install daytona`,
+    run: `ruby main.rb`,
+    example: `require 'daytona'
+
+# Define the configuration
+config = Daytona::Config.new(api_key: 'your-api-key')
+
+# Initialize the Daytona client
+daytona = Daytona::Daytona.new(config)
+
+# Create the Sandbox instance
+sandbox = daytona.create
+
+# Run the code securely inside the Sandbox
+response = sandbox.process.code_run(code: 'print("Hello World from code!")')
+if response.exit_code != 0
+  puts "Error: #{response.exit_code} #{response.result}"
+else
+  puts response.result
+end
+  `,
+  },
+  go: {
+    install: `go get github.com/daytonaio/daytona/libs/sdk-go`,
+    run: `go run main.go`,
+    example: `package main
+
+import (
+  "context"
+  "fmt"
+  "log"
+
+  "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+  "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+  config := &types.DaytonaConfig{
+    APIKey: "your-api-key",
+  }
+
+  client, err := daytona.NewClientWithConfig(config)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  sandbox, err := client.Create(context.Background(), nil)
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  response, err := sandbox.Process.ExecuteCommand(context.Background(), "echo 'Hello World from code!'")
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  fmt.Println(response.Result)
+}
   `,
   },
 }
