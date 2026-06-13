@@ -37,6 +37,7 @@ export enum AuditAction {
   ARCHIVE = 'archive',
   SNAPSHOT = 'snapshot',
   FORK = 'fork',
+  PAUSE = 'pause',
   GET_PORT_PREVIEW_URL = 'get_port_preview_url',
   SET_GENERAL_STATUS = 'set_general_status',
   ACTIVATE = 'activate',

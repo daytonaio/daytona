@@ -25,6 +25,7 @@ const (
 	SANDBOXDESIREDSTATE_STOPPED SandboxDesiredState = "stopped"
 	SANDBOXDESIREDSTATE_RESIZED SandboxDesiredState = "resized"
 	SANDBOXDESIREDSTATE_ARCHIVED SandboxDesiredState = "archived"
+	SANDBOXDESIREDSTATE_PAUSED SandboxDesiredState = "paused"
 	SANDBOXDESIREDSTATE_UNKNOWN_DEFAULT_OPEN_API SandboxDesiredState = "11184809"
 )
 
@@ -35,6 +36,7 @@ var AllowedSandboxDesiredStateEnumValues = []SandboxDesiredState{
 	"stopped",
 	"resized",
 	"archived",
+	"paused",
 	"11184809",
 }
 

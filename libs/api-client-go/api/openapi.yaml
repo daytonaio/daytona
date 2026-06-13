@@ -1954,6 +1954,9 @@ paths:
             - resizing
             - snapshotting
             - forking
+            - pausing
+            - paused
+            - resuming
             type: string
           type: array
         style: form
@@ -2269,6 +2272,8 @@ paths:
       - sandbox
   /sandbox/{sandboxIdOrName}/start:
     post:
+      description: "Starts a stopped or archived sandbox, or resumes a paused sandbox.\
+        \ The transition taken depends on the current sandbox state."
       operationId: startSandbox
       parameters:
       - description: Use with JWT to specify the organization ID
@@ -2293,15 +2298,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Sandbox"
-          description: Sandbox has been started or is being restored from archived
-            state
+          description: "Sandbox has been started, is being restored from archived\
+            \ state, or is being resumed from paused"
       security:
       - bearer: []
       - oauth2:
         - openid
         - profile
         - email
-      summary: Start sandbox
+      summary: Start or resume sandbox
       tags:
       - sandbox
   /sandbox/{sandboxIdOrName}/stop:
@@ -2346,6 +2351,42 @@ paths:
         - profile
         - email
       summary: Stop sandbox
+      tags:
+      - sandbox
+  /sandbox/{sandboxIdOrName}/pause:
+    post:
+      operationId: pauseSandbox
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID or name of the sandbox
+        explode: false
+        in: path
+        name: sandboxIdOrName
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sandbox"
+          description: Sandbox pause has been initiated
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Pause sandbox
       tags:
       - sandbox
   /sandbox/{sandboxIdOrName}/resize:
@@ -10727,6 +10768,9 @@ components:
       - resizing
       - snapshotting
       - forking
+      - pausing
+      - paused
+      - resuming
       type: string
     SandboxListSortField:
       enum:
@@ -10750,6 +10794,7 @@ components:
       - stopped
       - resized
       - archived
+      - paused
       type: string
     SandboxListItem:
       example:
@@ -11622,6 +11667,9 @@ components:
           - resizing
           - snapshotting
           - forking
+          - pausing
+          - paused
+          - resuming
           example: started
           type: string
         errorReason:
@@ -14306,6 +14354,7 @@ components:
       - UPDATE_SANDBOX_NETWORK_SETTINGS
       - SNAPSHOT_SANDBOX
       - FORK_SANDBOX
+      - PAUSE_SANDBOX
       type: string
     Job:
       example:

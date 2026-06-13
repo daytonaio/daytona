@@ -102,6 +102,10 @@ func (e *Executor) recoverSandbox(ctx context.Context, job *apiclient.Job) (any,
 	return nil, nil
 }
 
+func (e *Executor) pauseSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
+	return nil, fmt.Errorf("pause is not supported for sandbox type")
+}
+
 func (e *Executor) resizeSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
 	var resizeSandboxDto dto.ResizeSandboxDTO
 	err := e.parsePayload(job.Payload, &resizeSandboxDto)

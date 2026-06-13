@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
@@ -789,6 +790,45 @@ class AsyncSandbox(SandboxDto):
         )
         await self.refresh_data()
         await self.__wait_for_snapshot_complete()
+
+    @intercept_errors(message_prefix="Failed to pause sandbox")
+    @with_instrumentation()
+    async def pause(self, timeout: float = 60) -> None:
+        """Pauses the Sandbox, freezing all running processes.
+
+        The Sandbox will enter a 'pausing' state and transition to 'paused' when
+        complete. While paused, the Sandbox retains its state in memory but does
+        not consume CPU cycles.
+
+        Args:
+            timeout: Maximum time to wait in seconds. 0 means no timeout.
+                    Defaults to 60-second timeout.
+
+        Raises:
+            DaytonaError: If timeout is negative or the operation fails/times out.
+        """
+        if timeout < 0:
+            raise DaytonaError("Timeout must be a non-negative number")
+
+        start_time = time.time()
+        _ = await self._sandbox_api.pause_sandbox(self.id, _request_timeout=timeout if timeout > 0 else None)
+        await self.refresh_data()
+
+        elapsed = time.time() - start_time
+        remaining = max(0.001, timeout - elapsed) if timeout > 0 else 0
+
+        check_interval = 0.1
+        wait_start = time.time()
+        while self.state == "pausing":
+            await self.refresh_data()
+            if self.state == "error":
+                raise DaytonaError(
+                    f"Sandbox {self.id} pause failed with state: {self.state}, error reason: {self.error_reason}"
+                )
+            if 0 < remaining <= time.time() - wait_start:
+                raise DaytonaError(f"Sandbox {self.id} failed to pause within {timeout} seconds")
+            await asyncio.sleep(check_interval)
+            check_interval = min(check_interval * 1.5, 1.0)
 
     async def __wait_for_snapshot_complete(self) -> None:
         check_interval = 0.1

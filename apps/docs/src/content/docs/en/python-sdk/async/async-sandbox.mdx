@@ -679,6 +679,30 @@ It is useful for keeping long-running sessions alive while there is still user a
 await sandbox.refresh_activity()
 ```
 
+#### AsyncSandbox.pause
+
+```python
+@intercept_errors(message_prefix="Failed to pause sandbox")
+@with_instrumentation()
+async def pause(timeout: float = 60) -> None
+```
+
+Pauses the Sandbox, freezing all running processes.
+
+The Sandbox will enter a 'pausing' state and transition to 'paused' when
+complete. While paused, the Sandbox retains its state in memory but does
+not consume CPU cycles.
+
+**Arguments**:
+
+- `timeout` - Maximum time to wait in seconds. 0 means no timeout.
+  Defaults to 60-second timeout.
+  
+
+**Raises**:
+
+- `DaytonaError` - If timeout is negative or the operation fails/times out.
+
 
 ## Resources
 

@@ -19,9 +19,10 @@ def _make_async_daytona(config=None):
     from daytona._async.daytona import AsyncDaytona
     from daytona_api_client_async import Configuration
 
-    with patch(f"{ASYNC_MODULE}.ApiClient") as mock_api_cls, patch(
-        f"{ASYNC_MODULE}.ToolboxApiClient"
-    ) as mock_toolbox_cls:
+    with (
+        patch(f"{ASYNC_MODULE}.ApiClient") as mock_api_cls,
+        patch(f"{ASYNC_MODULE}.ToolboxApiClient") as mock_toolbox_cls,
+    ):
         mock_api_instance = MagicMock()
         mock_api_instance.configuration = Configuration(host="https://test.daytona.io/api")
         mock_api_instance.default_headers = {}
@@ -84,9 +85,10 @@ class TestAsyncDaytonaContextManager:
         from daytona._async.daytona import AsyncDaytona
         from daytona_api_client_async import Configuration
 
-        with patch(f"{ASYNC_MODULE}.ApiClient") as mock_api_cls, patch(
-            f"{ASYNC_MODULE}.ToolboxApiClient"
-        ) as mock_toolbox_cls:
+        with (
+            patch(f"{ASYNC_MODULE}.ApiClient") as mock_api_cls,
+            patch(f"{ASYNC_MODULE}.ToolboxApiClient") as mock_toolbox_cls,
+        ):
             mock_api_instance = MagicMock()
             mock_api_instance.configuration = Configuration(host="https://test.daytona.io/api")
             mock_api_instance.default_headers = {}
