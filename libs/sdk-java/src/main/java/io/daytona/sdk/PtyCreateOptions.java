@@ -3,6 +3,7 @@
 
 package io.daytona.sdk;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -13,6 +14,8 @@ public class PtyCreateOptions {
     private int cols = 120;
     private int rows = 30;
     private Consumer<byte[]> onData;
+    private String cwd;
+    private Map<String, String> envs;
 
     /**
      * Creates PTY options with default dimensions ({@code 120x30}).
@@ -112,6 +115,46 @@ public class PtyCreateOptions {
      */
     public PtyCreateOptions setOnData(Consumer<byte[]> onData) {
         this.onData = onData;
+        return this;
+    }
+
+    /**
+     * Returns the working directory for the PTY session.
+     *
+     * @return working directory, or {@code null} to use the sandbox default
+     */
+    public String getCwd() {
+        return cwd;
+    }
+
+    /**
+     * Sets the working directory for the PTY session.
+     *
+     * @param cwd working directory
+     * @return this options instance
+     */
+    public PtyCreateOptions setCwd(String cwd) {
+        this.cwd = cwd;
+        return this;
+    }
+
+    /**
+     * Returns environment variables for the PTY session.
+     *
+     * @return environment variables, or {@code null} when none configured
+     */
+    public Map<String, String> getEnvs() {
+        return envs;
+    }
+
+    /**
+     * Sets environment variables for the PTY session.
+     *
+     * @param envs environment variables
+     * @return this options instance
+     */
+    public PtyCreateOptions setEnvs(Map<String, String> envs) {
+        this.envs = envs;
         return this;
     }
 }

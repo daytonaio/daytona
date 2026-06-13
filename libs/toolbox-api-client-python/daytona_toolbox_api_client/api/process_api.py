@@ -15,7 +15,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictStr
+from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing import Any, Dict, List, Optional
 from typing_extensions import Annotated
 from daytona_toolbox_api_client.models.code_run_request import CodeRunRequest
@@ -564,6 +564,327 @@ class ProcessApi:
         return self.api_client.param_serialize(
             method='GET',
             resource_path='/process/pty/{sessionId}/connect',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def create_and_connect_pty_session(
+        self,
+        id: Annotated[StrictStr, Field(description="PTY session ID")],
+        cwd: Annotated[Optional[StrictStr], Field(description="Working directory")] = None,
+        cols: Annotated[Optional[StrictInt], Field(description="Terminal columns (default: 80)")] = None,
+        rows: Annotated[Optional[StrictInt], Field(description="Terminal rows (default: 24)")] = None,
+        sec_web_socket_protocol: Annotated[Optional[StrictStr], Field(description="WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~<base64url-no-padding JSON object>")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> None:
+        """Create and connect to a PTY session in a single WebSocket upgrade
+
+        Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+
+        :param id: PTY session ID (required)
+        :type id: str
+        :param cwd: Working directory
+        :type cwd: str
+        :param cols: Terminal columns (default: 80)
+        :type cols: int
+        :param rows: Terminal rows (default: 24)
+        :type rows: int
+        :param sec_web_socket_protocol: WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~<base64url-no-padding JSON object>
+        :type sec_web_socket_protocol: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_and_connect_pty_session_serialize(
+            id=id,
+            cwd=cwd,
+            cols=cols,
+            rows=rows,
+            sec_web_socket_protocol=sec_web_socket_protocol,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '101': None,
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def create_and_connect_pty_session_with_http_info(
+        self,
+        id: Annotated[StrictStr, Field(description="PTY session ID")],
+        cwd: Annotated[Optional[StrictStr], Field(description="Working directory")] = None,
+        cols: Annotated[Optional[StrictInt], Field(description="Terminal columns (default: 80)")] = None,
+        rows: Annotated[Optional[StrictInt], Field(description="Terminal rows (default: 24)")] = None,
+        sec_web_socket_protocol: Annotated[Optional[StrictStr], Field(description="WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~<base64url-no-padding JSON object>")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[None]:
+        """Create and connect to a PTY session in a single WebSocket upgrade
+
+        Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+
+        :param id: PTY session ID (required)
+        :type id: str
+        :param cwd: Working directory
+        :type cwd: str
+        :param cols: Terminal columns (default: 80)
+        :type cols: int
+        :param rows: Terminal rows (default: 24)
+        :type rows: int
+        :param sec_web_socket_protocol: WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~<base64url-no-padding JSON object>
+        :type sec_web_socket_protocol: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_and_connect_pty_session_serialize(
+            id=id,
+            cwd=cwd,
+            cols=cols,
+            rows=rows,
+            sec_web_socket_protocol=sec_web_socket_protocol,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '101': None,
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def create_and_connect_pty_session_without_preload_content(
+        self,
+        id: Annotated[StrictStr, Field(description="PTY session ID")],
+        cwd: Annotated[Optional[StrictStr], Field(description="Working directory")] = None,
+        cols: Annotated[Optional[StrictInt], Field(description="Terminal columns (default: 80)")] = None,
+        rows: Annotated[Optional[StrictInt], Field(description="Terminal rows (default: 24)")] = None,
+        sec_web_socket_protocol: Annotated[Optional[StrictStr], Field(description="WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~<base64url-no-padding JSON object>")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Create and connect to a PTY session in a single WebSocket upgrade
+
+        Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+
+        :param id: PTY session ID (required)
+        :type id: str
+        :param cwd: Working directory
+        :type cwd: str
+        :param cols: Terminal columns (default: 80)
+        :type cols: int
+        :param rows: Terminal rows (default: 24)
+        :type rows: int
+        :param sec_web_socket_protocol: WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~<base64url-no-padding JSON object>
+        :type sec_web_socket_protocol: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_and_connect_pty_session_serialize(
+            id=id,
+            cwd=cwd,
+            cols=cols,
+            rows=rows,
+            sec_web_socket_protocol=sec_web_socket_protocol,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '101': None,
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _create_and_connect_pty_session_serialize(
+        self,
+        id,
+        cwd,
+        cols,
+        rows,
+        sec_web_socket_protocol,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if id is not None:
+            
+            _query_params.append(('id', id))
+            
+        if cwd is not None:
+            
+            _query_params.append(('cwd', cwd))
+            
+        if cols is not None:
+            
+            _query_params.append(('cols', cols))
+            
+        if rows is not None:
+            
+            _query_params.append(('rows', rows))
+            
+        # process the header parameters
+        if sec_web_socket_protocol is not None:
+            _header_params['Sec-WebSocket-Protocol'] = sec_web_socket_protocol
+        # process the form parameters
+        # process the body parameter
+
+
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/process/pty/create-connect',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

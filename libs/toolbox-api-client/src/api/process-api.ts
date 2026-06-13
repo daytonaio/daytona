@@ -127,6 +127,61 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+         * @summary Create and connect to a PTY session in a single WebSocket upgrade
+         * @param {string} id PTY session ID
+         * @param {string} [cwd] Working directory
+         * @param {number} [cols] Terminal columns (default: 80)
+         * @param {number} [rows] Terminal rows (default: 24)
+         * @param {string} [secWebSocketProtocol] WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt;
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAndConnectPtySession: async (id: string, cwd?: string, cols?: number, rows?: number, secWebSocketProtocol?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('createAndConnectPtySession', 'id', id)
+            const localVarPath = `/process/pty/create-connect`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (id !== undefined) {
+                localVarQueryParameter['id'] = id;
+            }
+
+            if (cwd !== undefined) {
+                localVarQueryParameter['cwd'] = cwd;
+            }
+
+            if (cols !== undefined) {
+                localVarQueryParameter['cols'] = cols;
+            }
+
+            if (rows !== undefined) {
+                localVarQueryParameter['rows'] = rows;
+            }
+
+
+            if (secWebSocketProtocol != null) {
+                localVarHeaderParameter['Sec-WebSocket-Protocol'] = String(secWebSocketProtocol);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new pseudo-terminal session with specified configuration
          * @summary Create a new PTY session
          * @param {PtyCreateRequest} request PTY session creation request
@@ -727,6 +782,23 @@ export const ProcessApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+         * @summary Create and connect to a PTY session in a single WebSocket upgrade
+         * @param {string} id PTY session ID
+         * @param {string} [cwd] Working directory
+         * @param {number} [cols] Terminal columns (default: 80)
+         * @param {number} [rows] Terminal rows (default: 24)
+         * @param {string} [secWebSocketProtocol] WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt;
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createAndConnectPtySession(id: string, cwd?: string, cols?: number, rows?: number, secWebSocketProtocol?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createAndConnectPtySession(id, cwd, cols, rows, secWebSocketProtocol, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ProcessApi.createAndConnectPtySession']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create a new pseudo-terminal session with specified configuration
          * @summary Create a new PTY session
          * @param {PtyCreateRequest} request PTY session creation request
@@ -968,6 +1040,20 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.connectPtySession(sessionId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+         * @summary Create and connect to a PTY session in a single WebSocket upgrade
+         * @param {string} id PTY session ID
+         * @param {string} [cwd] Working directory
+         * @param {number} [cols] Terminal columns (default: 80)
+         * @param {number} [rows] Terminal rows (default: 24)
+         * @param {string} [secWebSocketProtocol] WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt;
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAndConnectPtySession(id: string, cwd?: string, cols?: number, rows?: number, secWebSocketProtocol?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.createAndConnectPtySession(id, cwd, cols, rows, secWebSocketProtocol, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Create a new pseudo-terminal session with specified configuration
          * @summary Create a new PTY session
          * @param {PtyCreateRequest} request PTY session creation request
@@ -1158,6 +1244,21 @@ export class ProcessApi extends BaseAPI {
      */
     public connectPtySession(sessionId: string, options?: RawAxiosRequestConfig) {
         return ProcessApiFp(this.configuration).connectPtySession(sessionId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+     * @summary Create and connect to a PTY session in a single WebSocket upgrade
+     * @param {string} id PTY session ID
+     * @param {string} [cwd] Working directory
+     * @param {number} [cols] Terminal columns (default: 80)
+     * @param {number} [rows] Terminal rows (default: 24)
+     * @param {string} [secWebSocketProtocol] WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt;
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public createAndConnectPtySession(id: string, cwd?: string, cols?: number, rows?: number, secWebSocketProtocol?: string, options?: RawAxiosRequestConfig) {
+        return ProcessApiFp(this.configuration).createAndConnectPtySession(id, cwd, cols, rows, secWebSocketProtocol, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

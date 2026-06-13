@@ -116,6 +116,15 @@ func (s *PTYSession) broadcast(b []byte) {
 	s.clientsMu.RUnlock()
 }
 
+// broadcastText sends a text message directly to all connected WebSocket clients.
+// Used for control messages (JSON) that must be delivered as TextMessage, not BinaryMessage.
+// Uses writeMessage directly (bypassing the send channel) so the message is sent immediately.
+func (s *PTYSession) broadcastText(data []byte) {
+	for _, cl := range s.clients.Items() {
+		_ = cl.writeMessage(websocket.TextMessage, data)
+	}
+}
+
 // closeClientsWithExitCode closes all WebSocket connections with structured exit data
 func (s *PTYSession) closeClientsWithExitCode(exitCode int, exitReason string) {
 	var wsCloseCode int

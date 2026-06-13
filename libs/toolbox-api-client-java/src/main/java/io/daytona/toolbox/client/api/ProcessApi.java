@@ -337,6 +337,164 @@ public class ProcessApi {
         return localVarCall;
     }
     /**
+     * Build call for createAndConnectPtySession
+     * @param id PTY session ID (required)
+     * @param cwd Working directory (optional)
+     * @param cols Terminal columns (default: 80) (optional)
+     * @param rows Terminal rows (default: 24) (optional)
+     * @param secWebSocketProtocol WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt; (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createAndConnectPtySessionCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String cwd, @javax.annotation.Nullable Integer cols, @javax.annotation.Nullable Integer rows, @javax.annotation.Nullable String secWebSocketProtocol, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/process/pty/create-connect";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (id != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("id", id));
+        }
+
+        if (cwd != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("cwd", cwd));
+        }
+
+        if (cols != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("cols", cols));
+        }
+
+        if (rows != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("rows", rows));
+        }
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (secWebSocketProtocol != null) {
+            localVarHeaderParams.put("Sec-WebSocket-Protocol", localVarApiClient.parameterToString(secWebSocketProtocol));
+        }
+
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call createAndConnectPtySessionValidateBeforeCall(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String cwd, @javax.annotation.Nullable Integer cols, @javax.annotation.Nullable Integer rows, @javax.annotation.Nullable String secWebSocketProtocol, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling createAndConnectPtySession(Async)");
+        }
+
+        return createAndConnectPtySessionCall(id, cwd, cols, rows, secWebSocketProtocol, _callback);
+
+    }
+
+    /**
+     * Create and connect to a PTY session in a single WebSocket upgrade
+     * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+     * @param id PTY session ID (required)
+     * @param cwd Working directory (optional)
+     * @param cols Terminal columns (default: 80) (optional)
+     * @param rows Terminal rows (default: 24) (optional)
+     * @param secWebSocketProtocol WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt; (optional)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+     </table>
+     */
+    public void createAndConnectPtySession(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String cwd, @javax.annotation.Nullable Integer cols, @javax.annotation.Nullable Integer rows, @javax.annotation.Nullable String secWebSocketProtocol) throws ApiException {
+        createAndConnectPtySessionWithHttpInfo(id, cwd, cols, rows, secWebSocketProtocol);
+    }
+
+    /**
+     * Create and connect to a PTY session in a single WebSocket upgrade
+     * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+     * @param id PTY session ID (required)
+     * @param cwd Working directory (optional)
+     * @param cols Terminal columns (default: 80) (optional)
+     * @param rows Terminal rows (default: 24) (optional)
+     * @param secWebSocketProtocol WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt; (optional)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> createAndConnectPtySessionWithHttpInfo(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String cwd, @javax.annotation.Nullable Integer cols, @javax.annotation.Nullable Integer rows, @javax.annotation.Nullable String secWebSocketProtocol) throws ApiException {
+        okhttp3.Call localVarCall = createAndConnectPtySessionValidateBeforeCall(id, cwd, cols, rows, secWebSocketProtocol, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Create and connect to a PTY session in a single WebSocket upgrade (asynchronously)
+     * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+     * @param id PTY session ID (required)
+     * @param cwd Working directory (optional)
+     * @param cols Terminal columns (default: 80) (optional)
+     * @param rows Terminal rows (default: 24) (optional)
+     * @param secWebSocketProtocol WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt; (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 101 </td><td> Switching Protocols - WebSocket connection established </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createAndConnectPtySessionAsync(@javax.annotation.Nonnull String id, @javax.annotation.Nullable String cwd, @javax.annotation.Nullable Integer cols, @javax.annotation.Nullable Integer rows, @javax.annotation.Nullable String secWebSocketProtocol, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = createAndConnectPtySessionValidateBeforeCall(id, cwd, cols, rows, secWebSocketProtocol, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for createPtySession
      * @param request PTY session creation request (required)
      * @param _callback Callback for upload/download progress

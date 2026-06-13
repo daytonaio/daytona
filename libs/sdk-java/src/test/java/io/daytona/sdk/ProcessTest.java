@@ -19,13 +19,12 @@ import io.daytona.toolbox.client.model.CodeRunArtifacts;
 import io.daytona.toolbox.client.model.CodeRunResponse;
 import io.daytona.toolbox.client.model.Command;
 import io.daytona.toolbox.client.model.ExecuteRequest;
-import io.daytona.toolbox.client.model.PtyCreateRequest;
 import io.daytona.toolbox.client.model.PtySessionInfo;
-import io.daytona.toolbox.client.model.PtyCreateResponse;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import okio.ByteString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -256,27 +256,123 @@ class ProcessTest {
     }
 
     @Test
-    void createPtyBuildsRequestAndRequiresSessionId() {
-        PtyCreateOptions options = new PtyCreateOptions().setId("pty-1").setCols(80).setRows(24);
-        when(processApi.createPtySession(any())).thenReturn(new PtyCreateResponse().sessionId("pty-1"));
+    void createPtyCreatesAndConnects() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
+                @Override
+                public void onOpen(WebSocket webSocket, okhttp3.Response response) {
+                    webSocket.send("{\"type\":\"control\",\"status\":\"connected\"}");
+                }
 
-        PtyHandle handle = process.createPty(options);
+                @Override
+                public void onClosing(WebSocket webSocket, int code, String reason) {
+                    // Complete the close handshake so MockWebServer can shut down
+                    // promptly instead of blocking on its teardown timeout.
+                    webSocket.close(code, reason);
+                }
+            }));
+            Process ptyProcess = new Process(processApi, TestSupport.mockSandbox(server.url("/toolbox").toString()));
+            PtyCreateOptions options = new PtyCreateOptions().setId("pty-1").setCols(80).setRows(24);
 
-        assertThat(handle.getSessionId()).isEqualTo("pty-1");
-        ArgumentCaptor<PtyCreateRequest> captor = ArgumentCaptor.forClass(PtyCreateRequest.class);
-        verify(processApi).createPtySession(captor.capture());
-        assertThat(captor.getValue().getId()).isEqualTo("pty-1");
-        assertThat(captor.getValue().getCols()).isEqualTo(80);
-        assertThat(captor.getValue().getRows()).isEqualTo(24);
-        handle.disconnect();
+            PtyHandle handle = ptyProcess.createPty(options);
+
+            assertThat(handle.getSessionId()).isEqualTo("pty-1");
+            verify(processApi, never()).createPtySession(any());
+            handle.disconnect();
+        }
     }
 
     @Test
-    void createPtyRejectsMissingSessionId() {
-        when(processApi.createPtySession(any())).thenReturn(new PtyCreateResponse());
+    void createPtyGeneratesIdWhenMissing() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
+                @Override
+                public void onOpen(WebSocket webSocket, okhttp3.Response response) {
+                    webSocket.send("{\"type\":\"control\",\"status\":\"connected\"}");
+                }
 
-        assertThatThrownBy(() -> process.createPty(new PtyCreateOptions()))
-                .hasMessageContaining("Failed to create PTY session");
+                @Override
+                public void onClosing(WebSocket webSocket, int code, String reason) {
+                    // Complete the close handshake so MockWebServer can shut down
+                    // promptly instead of blocking on its teardown timeout.
+                    webSocket.close(code, reason);
+                }
+            }));
+            Process ptyProcess = new Process(processApi, TestSupport.mockSandbox(server.url("/toolbox").toString()));
+
+            PtyHandle handle = ptyProcess.createPty(new PtyCreateOptions());
+
+            assertThat(handle.getSessionId()).startsWith("pty-");
+            RecordedRequest recorded = server.takeRequest();
+            assertThat(recorded.getPath())
+                    .contains("/process/pty/create-connect")
+                    .contains("id=" + handle.getSessionId());
+            handle.disconnect();
+        }
+    }
+
+    @Test
+    void createPtyPassesEnvsViaSubprotocolAndKeepsThemOutOfUrl() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
+                @Override
+                public void onOpen(WebSocket webSocket, okhttp3.Response response) {
+                    webSocket.send("{\"type\":\"control\",\"status\":\"connected\"}");
+                }
+
+                @Override
+                public void onClosing(WebSocket webSocket, int code, String reason) {
+                    // Complete the close handshake so MockWebServer can shut down
+                    // promptly instead of blocking on its teardown timeout.
+                    webSocket.close(code, reason);
+                }
+            }));
+            Process ptyProcess = new Process(processApi, TestSupport.mockSandbox(server.url("/toolbox").toString()));
+            PtyCreateOptions options = new PtyCreateOptions()
+                    .setId("pty-1")
+                    .setCols(80)
+                    .setRows(24)
+                    .setCwd("/work dir")
+                    .setEnvs(Collections.singletonMap("FOO", "bar"));
+
+            PtyHandle handle = ptyProcess.createPty(options);
+
+            RecordedRequest recorded = server.takeRequest();
+            assertThat(recorded.getPath())
+                    .doesNotContain("FOO")
+                    .doesNotContain("envs")
+                    .contains("cwd=%2Fwork+dir");
+            String expectedToken = "X-Daytona-Pty-Envs~" + java.util.Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString("{\"FOO\":\"bar\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            assertThat(recorded.getHeader("Sec-WebSocket-Protocol")).contains(expectedToken);
+            handle.disconnect();
+        }
+    }
+
+    @Test
+    void createPtyOmitsEnvsHeaderWhenEmpty() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
+                @Override
+                public void onOpen(WebSocket webSocket, okhttp3.Response response) {
+                    webSocket.send("{\"type\":\"control\",\"status\":\"connected\"}");
+                }
+
+                @Override
+                public void onClosing(WebSocket webSocket, int code, String reason) {
+                    // Complete the close handshake so MockWebServer can shut down
+                    // promptly instead of blocking on its teardown timeout.
+                    webSocket.close(code, reason);
+                }
+            }));
+            Process ptyProcess = new Process(processApi, TestSupport.mockSandbox(server.url("/toolbox").toString()));
+
+            PtyHandle handle = ptyProcess.createPty(new PtyCreateOptions().setId("pty-1"));
+
+            RecordedRequest recorded = server.takeRequest();
+            assertThat(recorded.getHeader("Sec-WebSocket-Protocol")).isNull();
+            handle.disconnect();
+        }
     }
 
     @Test

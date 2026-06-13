@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
+import base64
+import json
 import re
 from collections.abc import Awaitable, Callable
+from urllib.parse import urlencode
 
 import aiohttp
 
@@ -13,7 +16,6 @@ from daytona_toolbox_api_client_async import (
     CreateSessionRequest,
     ExecuteRequest,
     ProcessApi,
-    PtyCreateRequest,
     PtyResizeRequest,
     PtySessionInfo,
     Session,
@@ -25,6 +27,7 @@ from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import std_demux_stream_aio
 from .._utils.timeout import http_timeout
 from ..common.charts import parse_chart
+from ..common.errors import create_daytona_error
 from ..common.process import (
     CodeRunParams,
     ExecuteResponse,
@@ -59,8 +62,11 @@ class AsyncProcess:
         self,
         url: str,
         headers: dict[str, str],
+        subprotocols: list[str] | None = None,
     ) -> aiohttp.ClientWebSocketResponse:
-        return await http_session_of(self._api_client.api_client).ws_connect(url, headers=headers)
+        return await http_session_of(self._api_client.api_client).ws_connect(
+            url, headers=headers, protocols=subprotocols or ()
+        )
 
     async def _consume_log_websocket(
         self,
@@ -588,21 +594,70 @@ class AsyncProcess:
         Raises:
             DaytonaError: If the PTY session creation fails or the session ID is already in use.
         """
-        response = await self._api_client.create_pty_session(
-            request=PtyCreateRequest(
-                id=id,
-                cwd=cwd,
-                envs=envs,
-                cols=pty_size.cols if pty_size else None,
-                rows=pty_size.rows if pty_size else None,
-                lazy_start=True,
-            ),
-        )
+        cols = pty_size.cols if pty_size else 80
+        rows = pty_size.rows if pty_size else 24
 
-        return await self.connect_pty_session(
-            response.session_id,
-            on_data,
+        # Build query params for the combined create-connect endpoint (single round-trip)
+        params: dict[str, str] = {
+            "id": id,
+            "cols": str(cols),
+            "rows": str(rows),
+        }
+        if cwd:
+            params["cwd"] = cwd
+
+        # Derive the WS URL from the API client's base configuration
+        _, base_url, headers, *_ = self._api_client._connect_pty_session_serialize(
+            session_id="__placeholder__",
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
         )
+        url = base_url.replace("/process/pty/__placeholder__/connect", "/process/pty/create-connect")
+        url = re.sub(r"^http", "ws", url)
+        url = f"{url}?{urlencode(params)}"
+
+        # Envs travel as a WebSocket subprotocol token (base64url-no-pad of the JSON object)
+        # rather than the query string or a header, keeping the transport uniform across
+        # runtimes and potentially-large/secret values out of URLs and access logs.
+        subprotocols: list[str] | None = None
+        if envs:
+            encoded = base64.urlsafe_b64encode(json.dumps(envs).encode()).rstrip(b"=").decode()
+            subprotocols = [f"X-Daytona-Pty-Envs~{encoded}"]
+
+        try:
+            ws = await self._open_ws(url, headers, subprotocols)
+        except aiohttp.WSServerHandshakeError as e:
+            # A failed WS upgrade carries the HTTP response status; surface it as the matching
+            # typed Daytona exception (e.g. 404 -> DaytonaNotFoundError, 409 ->
+            # DaytonaConflictError) so callers can branch on it like any REST error.
+            status_code = e.status
+            raise create_daytona_error(
+                f"WebSocket upgrade failed with HTTP {status_code}",
+                status_code=status_code,
+                headers=e.headers,
+            ) from e
+
+        async def resize_handler(pty_size_arg: PtySize) -> PtySessionInfo:
+            return await self.resize_pty_session(id, pty_size_arg)
+
+        async def kill_handler() -> None:
+            await self.kill_pty_session(id)
+
+        handle = AsyncPtyHandle(
+            ws,
+            on_data,
+            session_id=id,
+            handle_resize=resize_handler,
+            handle_kill=kill_handler,
+        )
+        try:
+            await handle.wait_for_connection()
+        except BaseException:
+            await handle.disconnect()
+            raise
+        return handle
 
     @intercept_errors(message_prefix="Failed to connect PTY session: ")
     @with_instrumentation()

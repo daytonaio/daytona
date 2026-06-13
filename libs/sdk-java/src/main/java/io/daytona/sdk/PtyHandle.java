@@ -226,6 +226,20 @@ public class PtyHandle {
                         connectionLatch.countDown();
                         return;
                     }
+                    if ("exited".equals(status)) {
+                        if (node.has("exitCode") && !node.get("exitCode").isNull()) {
+                            exitCode = node.get("exitCode").asInt();
+                        }
+                        if (node.has("exitReason") && !node.get("exitReason").isNull()) {
+                            error = node.get("exitReason").asText();
+                        }
+                        // An instantly-exiting PTY may never emit "connected"; unblock
+                        // waitForConnection so it doesn't time out.
+                        connectionEstablished = true;
+                        connectionLatch.countDown();
+                        exitLatch.countDown();
+                        return;
+                    }
                     if ("error".equals(status)) {
                         error = node.path("error").asText("PTY control error");
                         connectionLatch.countDown();
