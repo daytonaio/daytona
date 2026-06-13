@@ -225,7 +225,7 @@ public class ComputerUse {
     /**
      * Captures a compressed full-screen screenshot.
      *
-     * @param format output image format (for example: {@code png}, {@code jpeg}, {@code webp})
+     * @param format output image format (for example: {@code png}, {@code jpeg})
      * @param quality compression quality (typically 1-100, format dependent)
      * @param scale screenshot scale factor (for example: {@code 0.5} for 50%)
      * @return compressed screenshot payload

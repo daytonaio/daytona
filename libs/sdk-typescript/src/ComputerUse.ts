@@ -418,7 +418,7 @@ export class Screenshot {
    * ```typescript
    * const region = { x: 0, y: 0, width: 800, height: 600 };
    * const screenshot = await sandbox.computerUse.screenshot.takeCompressedRegion(region, {
-   *   format: 'webp',
+   *   format: 'jpeg',
    *   quality: 80,
    *   showCursor: true
    * });
