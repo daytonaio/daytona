@@ -25,6 +25,13 @@
 
 &nbsp;
 
+<div align="center">
+
+[![HVTrust](https://hvtracker.net/badge/daytona.svg)](https://hvtracker.net/agents/daytona/)
+[![Evidence Grade](https://hvtracker.net/badge/daytona-grade.svg)](https://hvtracker.net/agents/daytona/)
+
+</div>
+
 Daytona is a secure and elastic infrastructure runtime for AI-generated code execution and agent workflows. Our open-source platform provides [sandboxes](https://www.daytona.io/docs/sandboxes/), full composable computers with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.
 
 Sandboxes are the core component of the Daytona platform, spinning up in under 90ms from code to execution and running any code in Python, TypeScript, and JavaScript. Built on OCI/Docker compatibility, massive parallelization, and unlimited persistence, sandboxes deliver consistent, predictable environments for agent workflows.
