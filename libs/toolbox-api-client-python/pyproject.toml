@@ -11,10 +11,10 @@ keywords = ["OpenAPI", "OpenAPI-Generator", "Daytona Toolbox API"]
 requires-python = ">=3.9"
 
 dependencies = [
-  "urllib3 (>=2.1.0,<3.0.0)",
-  "python-dateutil (>=2.8.2)",
-  "pydantic (>=2.11)",
-  "typing-extensions (>=4.7.1)",
+  "urllib3 (>=2.6.3,<3.0.0)",
+  "python-dateutil (>=2.9.0.post0)",
+  "pydantic (>=2.13.4)",
+  "typing-extensions (>=4.15.0)",
 ]
 
 [project.urls]
@@ -24,12 +24,12 @@ Repository = "https://github.com/daytonaio/daytona"
 requires-poetry = ">=2.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = ">= 7.2.1"
-pytest-cov = ">= 2.8.1"
-tox = ">= 3.9.0"
-flake8 = ">= 4.0.0"
-types-python-dateutil = ">= 2.8.19.14"
-mypy = ">= 1.5"
+pytest = ">=8.4.2"
+pytest-cov = ">=7.1.0"
+tox = ">=4.30.3"
+flake8 = ">=7.3.0"
+types-python-dateutil = ">=2.9.0.20260124"
+mypy = ">=1.19.1"
 
 
 [build-system]
