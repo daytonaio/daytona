@@ -21,6 +21,8 @@ import globalAxios from 'axios';
 import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
+// @ts-ignore
+import type { PreviewWarning } from '../models';
 /**
  * PreviewApi - axios parameter creator
  */
@@ -98,6 +100,51 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             // authentication oauth2 required
+
+            localVarHeaderParameter['Accept'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Check if the preview warning page is enabled for the sandbox
+         * @param {string} sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param)
+         * @param {number} [port] Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        isPreviewWarningEnabled: async (sandboxId: string, port?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxId' is not null or undefined
+            assertParamExists('isPreviewWarningEnabled', 'sandboxId', sandboxId)
+            const localVarPath = `/preview/{sandboxId}/preview-warning`
+                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            if (port !== undefined) {
+                localVarQueryParameter['port'] = port;
+            }
 
             localVarHeaderParameter['Accept'] = 'application/json';
 
@@ -232,6 +279,20 @@ export const PreviewApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Check if the preview warning page is enabled for the sandbox
+         * @param {string} sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param)
+         * @param {number} [port] Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async isPreviewWarningEnabled(sandboxId: string, port?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PreviewWarning>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.isPreviewWarningEnabled(sandboxId, port, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PreviewApi.isPreviewWarningEnabled']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Check if sandbox is public
          * @param {string} sandboxId ID of the sandbox
          * @param {*} [options] Override http request option.
@@ -289,6 +350,17 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
+         * @summary Check if the preview warning page is enabled for the sandbox
+         * @param {string} sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param)
+         * @param {number} [port] Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        isPreviewWarningEnabled(sandboxId: string, port?: number, options?: RawAxiosRequestConfig): AxiosPromise<PreviewWarning> {
+            return localVarFp.isPreviewWarningEnabled(sandboxId, port, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Check if sandbox is public
          * @param {string} sandboxId ID of the sandbox
          * @param {*} [options] Override http request option.
@@ -336,6 +408,18 @@ export class PreviewApi extends BaseAPI {
      */
     public hasSandboxAccess(sandboxId: string, options?: RawAxiosRequestConfig) {
         return PreviewApiFp(this.configuration).hasSandboxAccess(sandboxId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Check if the preview warning page is enabled for the sandbox
+     * @param {string} sandboxId ID of the sandbox, or a signed preview URL token (requires the port query param)
+     * @param {number} [port] Port the signed preview URL token was issued for. Required when sandboxId is a signed token.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public isPreviewWarningEnabled(sandboxId: string, port?: number, options?: RawAxiosRequestConfig) {
+        return PreviewApiFp(this.configuration).isPreviewWarningEnabled(sandboxId, port, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -169,6 +169,14 @@ public class OrganizationTest {
     }
 
     /**
+     * Test the property 'previewWarningEnabled'
+     */
+    @Test
+    public void previewWarningEnabledTest() {
+        // TODO: test previewWarningEnabled
+    }
+
+    /**
      * Test the property 'defaultRegionId'
      */
     @Test

@@ -35,6 +35,7 @@ import io.daytona.api.client.model.CreateRunnerResponse;
 import io.daytona.api.client.model.CreateUser;
 import io.daytona.api.client.model.DockerRegistry;
 import java.time.OffsetDateTime;
+import io.daytona.api.client.model.OrganizationPreviewWarning;
 import io.daytona.api.client.model.PaginatedAuditLogs;
 import io.daytona.api.client.model.RegionQuota;
 import io.daytona.api.client.model.RunnerFull;
@@ -2697,6 +2698,138 @@ public class AdminApi {
         okhttp3.Call localVarCall = adminSetSnapshotGeneralStatusValidateBeforeCall(id, setSnapshotGeneralStatusDto, _callback);
         Type localVarReturnType = new TypeToken<SnapshotDto>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for adminUpdateOrganizationPreviewWarning
+     * @param organizationId Organization ID (required)
+     * @param organizationPreviewWarning  (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Preview warning updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminUpdateOrganizationPreviewWarningCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OrganizationPreviewWarning organizationPreviewWarning, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = organizationPreviewWarning;
+
+        // create path and map variables
+        String localVarPath = "/admin/organizations/{organizationId}/preview-warning"
+            .replace("{" + "organizationId" + "}", localVarApiClient.escapeString(organizationId.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "bearer", "oauth2" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call adminUpdateOrganizationPreviewWarningValidateBeforeCall(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OrganizationPreviewWarning organizationPreviewWarning, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'organizationId' is set
+        if (organizationId == null) {
+            throw new ApiException("Missing the required parameter 'organizationId' when calling adminUpdateOrganizationPreviewWarning(Async)");
+        }
+
+        // verify the required parameter 'organizationPreviewWarning' is set
+        if (organizationPreviewWarning == null) {
+            throw new ApiException("Missing the required parameter 'organizationPreviewWarning' when calling adminUpdateOrganizationPreviewWarning(Async)");
+        }
+
+        return adminUpdateOrganizationPreviewWarningCall(organizationId, organizationPreviewWarning, _callback);
+
+    }
+
+    /**
+     * Update organization preview warning
+     * 
+     * @param organizationId Organization ID (required)
+     * @param organizationPreviewWarning  (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Preview warning updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public void adminUpdateOrganizationPreviewWarning(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OrganizationPreviewWarning organizationPreviewWarning) throws ApiException {
+        adminUpdateOrganizationPreviewWarningWithHttpInfo(organizationId, organizationPreviewWarning);
+    }
+
+    /**
+     * Update organization preview warning
+     * 
+     * @param organizationId Organization ID (required)
+     * @param organizationPreviewWarning  (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Preview warning updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> adminUpdateOrganizationPreviewWarningWithHttpInfo(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OrganizationPreviewWarning organizationPreviewWarning) throws ApiException {
+        okhttp3.Call localVarCall = adminUpdateOrganizationPreviewWarningValidateBeforeCall(organizationId, organizationPreviewWarning, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Update organization preview warning (asynchronously)
+     * 
+     * @param organizationId Organization ID (required)
+     * @param organizationPreviewWarning  (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 204 </td><td> Preview warning updated successfully </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call adminUpdateOrganizationPreviewWarningAsync(@javax.annotation.Nonnull String organizationId, @javax.annotation.Nonnull OrganizationPreviewWarning organizationPreviewWarning, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = adminUpdateOrganizationPreviewWarningValidateBeforeCall(organizationId, organizationPreviewWarning, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**
