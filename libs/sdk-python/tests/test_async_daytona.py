@@ -123,23 +123,34 @@ class TestAsyncDaytonaSharedSession:
     rest_clients regardless of which one fires first."""
 
     @pytest.mark.asyncio
-    async def test_first_request_propagates_session_to_other_rest_client(self):
-        """The first lazy-created session is propagated to every attached rest_client."""
+    async def test_first_request_propagates_session_to_other_rest_client(self, monkeypatch):
+        """The coordinator pre-creates one shared session and propagates it to every
+        attached rest_client before their lazy-create branch ever runs.  This is what
+        lets the SDK's runtime ``happy_eyeballs_delay`` decision win over the value
+        baked into the generated ``rest.py``.
+        """
         import aiohttp
 
+        from daytona.internal import shared_session as ss
         from daytona.internal.shared_session import SharedAiohttpSession
 
         fake_session = MagicMock(spec=aiohttp.ClientSession)
         fake_session.closed = False
+
+        def fake_ensure(self: SharedAiohttpSession, rest_client: object) -> None:
+            if self._session is None:
+                self._session = fake_session
+                for client in self._rest_clients:
+                    client.pool_manager = fake_session
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", fake_ensure)
 
         rc_main = MagicMock(spec=["request", "pool_manager"])
         rc_main.pool_manager = None
         rc_tb = MagicMock(spec=["request", "pool_manager"])
         rc_tb.pool_manager = None
 
-        # Stub mimics generated rest_client.request: assigns pool_manager then returns.
         async def stub_request(*_args, **_kwargs):
-            rc_main.pool_manager = fake_session
             return None
 
         rc_main.request = stub_request
@@ -232,6 +243,193 @@ class TestAsyncDaytonaSharedSession:
         coordinator = SharedAiohttpSession()
         with pytest.raises(RuntimeError, match="rest_client API surface changed"):
             coordinator.attach(object())
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["GET", "HEAD", "OPTIONS", "TRACE", "PUT", "DELETE"])
+    async def test_idempotent_methods_retry_on_server_disconnect(self, method, monkeypatch):
+        """ServerDisconnectedError on an idempotent method is retried."""
+        import aiohttp
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        calls = 0
+        sentinel = object()
+
+        async def stub_request(*_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise aiohttp.ServerDisconnectedError("simulated stale keep-alive")
+            return sentinel
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        result = await rc.request(method, "/anything")
+
+        assert result is sentinel
+        assert calls == 2
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["POST", "PATCH"])
+    async def test_non_idempotent_methods_do_not_retry_on_server_disconnect(self, method, monkeypatch):
+        """ServerDisconnectedError on a non-idempotent method propagates immediately."""
+        import aiohttp
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        calls = 0
+
+        async def stub_request(*_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            raise aiohttp.ServerDisconnectedError("simulated stale keep-alive")
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        with pytest.raises(aiohttp.ServerDisconnectedError):
+            await rc.request(method, "/anything")
+
+        assert calls == 1  # no retries
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("method", ["POST", "PATCH", "PUT", "DELETE", "GET"])
+    async def test_connector_error_retries_on_any_method(self, method, monkeypatch):
+        """ClientConnectorError (TCP connect() failed) is safe to retry on any
+        method since the request was never sent."""
+        import aiohttp
+        from aiohttp.client_reqrep import ConnectionKey
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        conn_key = ConnectionKey(
+            host="example.invalid",
+            port=443,
+            is_ssl=True,
+            ssl=True,
+            proxy=None,
+            proxy_auth=None,
+            proxy_headers_hash=None,
+        )
+
+        calls = 0
+        sentinel = object()
+
+        async def stub_request(*_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise aiohttp.ClientConnectorError(conn_key, OSError("simulated connect failure"))
+            return sentinel
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        result = await rc.request(method, "/anything")
+
+        assert result is sentinel
+        assert calls == 2
+
+    @pytest.mark.asyncio
+    async def test_retry_does_not_observe_first_attempt_header_mutation(self, monkeypatch):
+        """Mutable kwargs are shallow-copied before each attempt so a retry
+        cannot see headers the first attempt added or deleted.
+
+        The generated rest_client mutates ``headers`` in place (adds
+        ``Content-Type`` for JSON, deletes it for multipart).  Without a
+        per-attempt copy, attempt 2 would re-use the mutated dict.
+        """
+        import aiohttp
+
+        from daytona.internal import shared_session as ss
+        from daytona.internal.shared_session import SharedAiohttpSession
+
+        monkeypatch.setattr(ss.SharedAiohttpSession, "_ensure_session", lambda self, rc: None)
+
+        rc = MagicMock(spec=["request", "pool_manager"])
+        rc.pool_manager = MagicMock()
+        rc.pool_manager.closed = False
+
+        calls = 0
+        seen_headers: list[dict[str, str]] = []
+        sentinel = object()
+
+        async def stub_request(*_args, **kwargs):
+            nonlocal calls
+            calls += 1
+            headers = kwargs.get("headers")
+            # Snapshot the headers dict we received this attempt.
+            seen_headers.append(dict(headers) if isinstance(headers, dict) else {})
+            # Mutate the dict in place, mirroring the generated client's behavior.
+            if isinstance(headers, dict):
+                headers["Content-Type"] = "application/json"
+            if calls == 1:
+                raise aiohttp.ServerDisconnectedError("simulated")
+            return sentinel
+
+        rc.request = stub_request
+
+        coordinator = SharedAiohttpSession()
+        coordinator.attach(rc)
+
+        caller_headers = {"Authorization": "Bearer xxx"}
+        result = await rc.request("GET", "/anything", headers=caller_headers)
+
+        assert result is sentinel
+        assert calls == 2
+        # Second attempt must NOT see the Content-Type that the first attempt set.
+        assert "Content-Type" not in seen_headers[1]
+        # The caller's original dict must NOT have been mutated either.
+        assert "Content-Type" not in caller_headers
+
+    def test_retry_backoff_has_jitter_and_grows_with_attempt(self):
+        """Backoff is ``base * attempt + uniform(0, jitter)`` — must not be
+        a constant (we'd lock-step concurrent retries) and must grow with
+        attempt within the jitter window."""
+        from daytona.internal.shared_session import (
+            _RETRY_BACKOFF_BASE_S,
+            _RETRY_BACKOFF_JITTER_S,
+            _retry_backoff_seconds,
+        )
+
+        # Bounds for any given attempt.
+        for attempt in (1, 2):
+            samples = [_retry_backoff_seconds(attempt) for _ in range(200)]
+            lo = _RETRY_BACKOFF_BASE_S * attempt
+            hi = lo + _RETRY_BACKOFF_JITTER_S
+            assert all(
+                lo <= s <= hi for s in samples
+            ), f"attempt {attempt}: samples out of [{lo}, {hi}] -> {min(samples)}..{max(samples)}"
+            # Jitter must actually vary — refuse identical samples.
+            assert len(set(samples)) > 1, f"attempt {attempt}: backoff is constant"
 
 
 class TestAsyncDaytonaCreateValidation:
@@ -386,3 +584,57 @@ class TestAsyncDaytonaValidateLanguageLabel:
         daytona = _make_async_daytona()
         with pytest.raises(DaytonaValidationError, match=f"Invalid {CODE_TOOLBOX_LANGUAGE_LABEL}"):
             daytona._validate_language_label("ruby")
+
+
+class TestResolveHappyEyeballsDelay:
+    @pytest.mark.parametrize("raw", [None, "", "   "])
+    def test_unset_returns_missing_sentinel(self, raw):
+        from daytona._async.daytona import _MISSING_HAPPY_EYEBALLS_DELAY, _resolve_happy_eyeballs_delay
+
+        assert _resolve_happy_eyeballs_delay(raw) is _MISSING_HAPPY_EYEBALLS_DELAY
+
+    @pytest.mark.parametrize("raw", ["none", "None", "NONE", "  none  "])
+    def test_none_disables(self, raw):
+        from daytona._async.daytona import _resolve_happy_eyeballs_delay
+
+        assert _resolve_happy_eyeballs_delay(raw) is None
+
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            ("0", 0.0),
+            ("0.5", 0.5),
+            ("1", 1.0),
+            ("10.5", 10.5),
+        ],
+    )
+    def test_valid_floats(self, raw, expected):
+        from daytona._async.daytona import _resolve_happy_eyeballs_delay
+
+        assert _resolve_happy_eyeballs_delay(raw) == expected
+
+    @pytest.mark.parametrize(
+        "raw",
+        [
+            "abc",
+            "-1",
+            "-0.5",
+            "1.0.0",
+            "true",
+            "false",
+            # float() accepts these without raising; the resolver must catch them.
+            "nan",
+            "NaN",
+            "inf",
+            "Infinity",
+            "-inf",
+        ],
+    )
+    def test_invalid_values_raise(self, raw):
+        from daytona._async.daytona import _resolve_happy_eyeballs_delay
+
+        with pytest.raises(
+            DaytonaValidationError,
+            match="DAYTONA_HAPPY_EYEBALLS_DELAY must be a finite non-negative float or 'none'",
+        ):
+            _resolve_happy_eyeballs_delay(raw)

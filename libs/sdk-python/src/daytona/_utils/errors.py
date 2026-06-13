@@ -8,6 +8,7 @@ import json
 from collections.abc import AsyncIterator, Awaitable, Callable, Iterator, Mapping
 from typing import Any, NoReturn, TypeVar, Union, cast
 
+import aiohttp
 import httpx
 
 from daytona_api_client.exceptions import (
@@ -93,6 +94,9 @@ CONFLICT_EXCEPTIONS = (
     ConflictExceptionToolboxAsync,
 )
 TRANSPORT_ERROR_TO_DAYTONA_ERROR: tuple[tuple[type[BaseException], type[DaytonaError]], ...] = (
+    (aiohttp.ServerDisconnectedError, DaytonaConnectionError),
+    (aiohttp.ClientConnectorError, DaytonaConnectionError),
+    (aiohttp.ClientOSError, DaytonaConnectionError),
     (httpx.TimeoutException, DaytonaTimeoutError),
     (httpx.NetworkError, DaytonaConnectionError),
     (TimeoutError, DaytonaTimeoutError),
