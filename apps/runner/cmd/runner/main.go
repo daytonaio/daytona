@@ -224,6 +224,7 @@ func run() int {
 		WindowSize:                         cfg.CollectorWindowSize,
 		CPUUsageSnapshotInterval:           cfg.CPUUsageSnapshotInterval,
 		AllocatedResourcesSnapshotInterval: cfg.AllocatedResourcesSnapshotInterval,
+		DockerDataRoot:                     cfg.DockerDataRoot,
 	})
 	metricsCollector.Start(ctx)
 
