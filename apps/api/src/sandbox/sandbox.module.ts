@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { Sandbox } from './entities/sandbox.entity'
 import { UserModule } from '../user/user.module'
 import { RunnerService } from './services/runner.service'
+import { RunnerUsageService } from './services/runner-usage.service'
 import { Runner } from './entities/runner.entity'
 import { RunnerController } from './controllers/runner.controller'
 import { ToolboxService } from './services/toolbox.deprecated.service'
@@ -107,6 +108,7 @@ import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provide
     BackupManager,
     SandboxWarmPoolService,
     RunnerService,
+    RunnerUsageService,
     ToolboxService,
     SnapshotService,
     ProxyCacheInvalidationService,

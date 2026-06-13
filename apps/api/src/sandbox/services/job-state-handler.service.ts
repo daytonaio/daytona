@@ -20,6 +20,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { RunnerUsageService } from './runner-usage.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { Sandbox } from '../entities/sandbox.entity'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -46,6 +47,7 @@ export class JobStateHandlerService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly eventEmitter: EventEmitter2,
+    private readonly runnerUsageService: RunnerUsageService,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
   ) {}
@@ -607,84 +609,90 @@ export class JobStateHandlerService {
     if (!sandboxId) return
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-      if (!sandbox) {
-        this.logger.warn(`Sandbox ${sandboxId} not found for RESIZE_SANDBOX job ${job.id}`)
-        return
+      try {
+        const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+        if (!sandbox) {
+          this.logger.warn(`Sandbox ${sandboxId} not found for RESIZE_SANDBOX job ${job.id}`)
+          return
+        }
+
+        if (sandbox.state !== SandboxState.RESIZING) {
+          this.logger.warn(
+            `Sandbox ${sandboxId} is not in RESIZING state for RESIZE_SANDBOX job ${job.id}. State: ${sandbox.state}`,
+          )
+          return
+        }
+
+        // Determine the previous state (STARTED or STOPPED based on desiredState)
+        const previousState =
+          sandbox.desiredState === SandboxDesiredState.STARTED
+            ? SandboxState.STARTED
+            : sandbox.desiredState === SandboxDesiredState.STOPPED
+              ? SandboxState.STOPPED
+              : null
+
+        if (!previousState) {
+          this.logger.error(
+            `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.desiredState} for RESIZE_SANDBOX job ${job.id}`,
+          )
+          return
+        }
+
+        // Calculate deltas before updating sandbox
+        const payload = job.getPayload<{ cpu?: number; memory?: number; disk?: number }>() ?? {}
+
+        // For cold resize (previousState === STOPPED), cpu/memory don't affect org quota.
+        const isHotResize = previousState === SandboxState.STARTED
+        const cpuDeltaForQuota = isHotResize ? (payload.cpu ?? sandbox.cpu) - sandbox.cpu : 0
+        const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
+        const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
+
+        const updateData: Partial<Sandbox> = {}
+
+        if (job.status === JobStatus.COMPLETED) {
+          this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
+
+          // Update sandbox resources
+          updateData.cpu = payload.cpu ?? sandbox.cpu
+          updateData.mem = payload.memory ?? sandbox.mem
+          updateData.disk = payload.disk ?? sandbox.disk
+          updateData.state = previousState
+
+          // Apply usage change (handles both positive and negative deltas).
+          // Resize never changes GPU allocation — always pass 0.
+          await this.organizationUsageService.applyResizeUsageChange(
+            sandbox.organizationId,
+            sandbox.region,
+            sandbox.sandboxClass,
+            cpuDeltaForQuota,
+            memDeltaForQuota,
+            diskDeltaForQuota,
+            0,
+          )
+        } else if (job.status === JobStatus.FAILED) {
+          this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+
+          // Rollback pending usage (all deltas were tracked, including negative).
+          // Resize never changes GPU allocation — always pass undefined for gpu.
+          await this.organizationUsageService.decrementPendingSandboxUsage(
+            sandbox.organizationId,
+            sandbox.region,
+            sandbox.sandboxClass,
+            cpuDeltaForQuota !== 0 ? cpuDeltaForQuota : undefined,
+            memDeltaForQuota !== 0 ? memDeltaForQuota : undefined,
+            diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
+            undefined,
+          )
+
+          updateData.state = previousState
+        }
+
+        await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      } finally {
+        // Release runs on every exit path including the early returns above; the
+        // reservation amount is keyed by sandboxId in Redis, no sandbox row needed.
+        await this.runnerUsageService.safeReleasePendingRunnerUsageForResize(job.runnerId, sandboxId)
       }
-
-      if (sandbox.state !== SandboxState.RESIZING) {
-        this.logger.warn(
-          `Sandbox ${sandboxId} is not in RESIZING state for RESIZE_SANDBOX job ${job.id}. State: ${sandbox.state}`,
-        )
-        return
-      }
-
-      // Determine the previous state (STARTED or STOPPED based on desiredState)
-      const previousState =
-        sandbox.desiredState === SandboxDesiredState.STARTED
-          ? SandboxState.STARTED
-          : sandbox.desiredState === SandboxDesiredState.STOPPED
-            ? SandboxState.STOPPED
-            : null
-
-      if (!previousState) {
-        this.logger.error(
-          `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.desiredState} for RESIZE_SANDBOX job ${job.id}`,
-        )
-        return
-      }
-
-      // Calculate deltas before updating sandbox
-      const payload = job.getPayload<{ cpu?: number; memory?: number; disk?: number }>() ?? {}
-
-      // For cold resize (previousState === STOPPED), cpu/memory don't affect org quota.
-      const isHotResize = previousState === SandboxState.STARTED
-      const cpuDeltaForQuota = isHotResize ? (payload.cpu ?? sandbox.cpu) - sandbox.cpu : 0
-      const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
-      const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
-
-      const updateData: Partial<Sandbox> = {}
-
-      if (job.status === JobStatus.COMPLETED) {
-        this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
-
-        // Update sandbox resources
-        updateData.cpu = payload.cpu ?? sandbox.cpu
-        updateData.mem = payload.memory ?? sandbox.mem
-        updateData.disk = payload.disk ?? sandbox.disk
-        updateData.state = previousState
-
-        // Apply usage change (handles both positive and negative deltas).
-        // Resize never changes GPU allocation — always pass 0.
-        await this.organizationUsageService.applyResizeUsageChange(
-          sandbox.organizationId,
-          sandbox.region,
-          sandbox.sandboxClass,
-          cpuDeltaForQuota,
-          memDeltaForQuota,
-          diskDeltaForQuota,
-          0,
-        )
-      } else if (job.status === JobStatus.FAILED) {
-        this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-
-        // Rollback pending usage (all deltas were tracked, including negative).
-        // Resize never changes GPU allocation — always pass undefined for gpu.
-        await this.organizationUsageService.decrementPendingSandboxUsage(
-          sandbox.organizationId,
-          sandbox.region,
-          sandbox.sandboxClass,
-          cpuDeltaForQuota !== 0 ? cpuDeltaForQuota : undefined,
-          memDeltaForQuota !== 0 ? memDeltaForQuota : undefined,
-          diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
-          undefined,
-        )
-
-        updateData.state = previousState
-      }
-
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
