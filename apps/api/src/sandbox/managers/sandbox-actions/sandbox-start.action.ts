@@ -877,7 +877,7 @@ export class SandboxStartAction extends SandboxAction {
       undefined,
       undefined,
       undefined,
-      excludedRunnerId || undefined,
+      excludedRunnerId,
     )
 
     const metadata = {
