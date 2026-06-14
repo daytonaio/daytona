@@ -39,6 +39,7 @@ export abstract class SandboxAction {
     daemonVersion?: string,
     backupState?: BackupState,
     recoverable?: boolean,
+    prevRunnerId?: string | null | undefined,
   ) {
     //  check if the lock code is still valid
     const lockKey = getStateChangeLockKey(sandbox.id)
@@ -70,6 +71,10 @@ export abstract class SandboxAction {
 
     if (runnerId !== undefined) {
       updateData.runnerId = runnerId
+    }
+
+    if (prevRunnerId !== undefined) {
+      updateData.prevRunnerId = prevRunnerId
     }
 
     if (errorReason !== undefined) {
