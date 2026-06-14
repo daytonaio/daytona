@@ -102,5 +102,6 @@
   "sidebarconfig.verl": "veRL",
   "sidebarconfig.pty": "擬似ターミナル (PTY)",
   "sidebarconfig.ptyDescription": "DaytonaのTS SDK / Python SDKを使用して、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）でPTYセッションを管理する方法を学びます。",
-  "sidebarconfig.amp": "Amp Code"
+  "sidebarconfig.amp": "Amp Code",
+  "sidebarconfig.tealtiger": "TealTiger"
 }

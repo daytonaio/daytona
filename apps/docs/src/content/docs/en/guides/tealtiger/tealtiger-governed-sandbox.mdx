@@ -1,0 +1,106 @@
+---
+title: Govern AI-Generated Code With TealTiger and Daytona
+description: Add a pre-execution governance check before running AI-generated code in Daytona sandboxes.
+---
+
+This guide demonstrates how to place a TealTiger governance step before `sandbox.process.code_run()`. TealTiger evaluates LLM output for logic-layer policy concerns such as secrets, prompt injection, and session budget before the generated code is passed to Daytona. Daytona then provides the isolated runtime for code that passes governance.
+
+Use this pattern when an agent creates code dynamically and your application needs to decide whether the code should run before it enters the sandbox environment.
+
+### 1. Workflow Overview
+
+The application calls TealTiger's OpenAI wrapper to generate code with guardrails enabled. If that governed generation call succeeds, the application creates a Daytona sandbox and runs the generated code. If the governance step raises an error, the application records a blocked receipt and never creates the sandbox. The example prints an execution receipt that links the governance provider, the sandbox ID, the exit code, and a preview of the result.
+
+The important boundary is simple: the application does not call `sandbox.process.code_run()` until the governed code generation step has completed successfully.
+
+### 2. Project Setup
+
+Clone the Daytona repository and navigate to the example directory:
+
+```bash
+git clone https://github.com/daytonaio/daytona
+cd daytona/guides/python/tealtiger/governed-sandbox
+```
+
+Install the dependencies:
+
+```bash
+python3.10 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -e .
+```
+
+Create a `.env` file with your API keys:
+
+```bash
+DAYTONA_API_KEY=dtn_***
+OPENAI_API_KEY=sk-***
+```
+
+### 3. Run the Example
+
+```bash
+python governed_sandbox.py
+```
+
+The script will:
+
+1. Ask TealTiger-wrapped OpenAI generation for a short Python script
+2. Print the approved code
+3. Create a Daytona Python sandbox
+4. Execute the approved code with `sandbox.process.code_run(code)`
+5. Print an execution receipt
+6. Delete the sandbox
+
+### 4. Core Pattern
+
+```python
+import os
+
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+from tealtiger import TealOpenAI
+
+try:
+    client = TealOpenAI(
+        api_key=os.environ["OPENAI_API_KEY"],
+        guardrails={
+            "secret_detection": True,
+            "prompt_injection": True,
+        },
+        budget={
+            "max_cost_per_session": 2.00,
+        },
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Return only executable Python code."},
+            {"role": "user", "content": "Print the first 10 Fibonacci numbers."},
+        ],
+    )
+except Exception as exc:
+    print(f"Governance blocked code before Daytona execution: {exc}")
+else:
+    code = response.choices[0].message.content or ""
+
+    daytona = Daytona()
+    sandbox = None
+
+    try:
+        sandbox = daytona.create(CreateSandboxFromSnapshotParams(language="python"))
+        result = sandbox.process.code_run(code)
+        print(result.result)
+    finally:
+        if sandbox is not None:
+            daytona.delete(sandbox)
+```
+
+### 5. Complete Code
+
+See the complete runnable example in [`guides/python/tealtiger/governed-sandbox`](https://github.com/daytonaio/daytona/tree/main/guides/python/tealtiger/governed-sandbox).
+
+### 6. References
+
+- [TealTiger](https://github.com/agentguard-ai/tealtiger)
+- [Daytona Documentation](https://www.daytona.io/docs)
