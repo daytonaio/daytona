@@ -29,6 +29,7 @@ interface UseInvoicesTableProps {
   onViewInvoice?: (invoice: Invoice) => void
   onVoidInvoice?: (invoice: Invoice) => void
   onPayInvoice?: (invoice: Invoice) => void
+  onDownloadInvoice?: (invoice: Invoice) => void
 }
 
 export function useInvoicesTable({
@@ -39,6 +40,7 @@ export function useInvoicesTable({
   onViewInvoice,
   onVoidInvoice,
   onPayInvoice,
+  onDownloadInvoice,
 }: UseInvoicesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     {
@@ -56,6 +58,7 @@ export function useInvoicesTable({
         onViewInvoice,
         onVoidInvoice,
         onPayInvoice,
+        onDownloadInvoice,
       },
     },
     onColumnFiltersChange: setColumnFilters,

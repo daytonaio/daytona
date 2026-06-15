@@ -35,6 +35,7 @@ export function InvoicesTable({
   onVoidInvoice,
   onRowClick,
   onPayInvoice,
+  onDownloadInvoice,
 }: InvoicesTableProps) {
   const { table } = useInvoicesTable({
     data,
@@ -44,6 +45,7 @@ export function InvoicesTable({
     onViewInvoice,
     onVoidInvoice,
     onPayInvoice,
+    onDownloadInvoice,
   })
 
   const isEmpty = !loading && table.getRowModel().rows.length === 0

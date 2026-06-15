@@ -15,6 +15,7 @@ export type InvoicesTableMeta = {
   onViewInvoice?: (invoice: Invoice) => void
   onVoidInvoice?: (invoice: Invoice) => void
   onPayInvoice?: (invoice: Invoice) => void
+  onDownloadInvoice?: (invoice: Invoice) => void
 }
 
 declare module '@tanstack/react-table' {
@@ -203,8 +204,9 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
     maxSize: 48,
     enableHiding: false,
     cell: ({ row, table }) => {
-      const { onViewInvoice, onVoidInvoice, onPayInvoice } = getMeta(table)
+      const { onViewInvoice, onVoidInvoice, onPayInvoice, onDownloadInvoice } = getMeta(table)
       const isViewable = Boolean(row.original.fileUrl)
+      const isDownloadable = !row.original.fileUrl
       const isVoidable =
         row.original.status === 'finalized' &&
         ['pending', 'failed'].includes(row.original.paymentStatus ?? '') &&
@@ -219,6 +221,7 @@ export const invoiceColumns: ColumnDef<Invoice>[] = [
             onView={isViewable ? onViewInvoice : undefined}
             onVoid={isVoidable ? onVoidInvoice : undefined}
             onPay={isPayable ? onPayInvoice : undefined}
+            onDownload={isDownloadable ? onDownloadInvoice : undefined}
           />
         </div>
       )

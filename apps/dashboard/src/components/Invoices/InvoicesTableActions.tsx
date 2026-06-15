@@ -25,8 +25,8 @@ import {
 } from '../ui/dropdown-menu'
 import { InvoicesTableActionsProps } from './types'
 
-export function InvoicesTableActions({ invoice, onView, onVoid, onPay }: InvoicesTableActionsProps) {
-  if (!onView && !onVoid && !onPay) {
+export function InvoicesTableActions({ invoice, onView, onVoid, onPay, onDownload }: InvoicesTableActionsProps) {
+  if (!onView && !onVoid && !onPay && !onDownload) {
     return null
   }
 
@@ -40,6 +40,7 @@ export function InvoicesTableActions({ invoice, onView, onVoid, onPay }: Invoice
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {onView && <DropdownMenuItem onSelect={() => onView?.(invoice)}>View</DropdownMenuItem>}
+          {onDownload && <DropdownMenuItem onSelect={() => onDownload?.(invoice)}>Download invoice</DropdownMenuItem>}
           {onPay && <DropdownMenuItem onSelect={() => onPay?.(invoice)}>Pay</DropdownMenuItem>}
           {onVoid && (
             <>

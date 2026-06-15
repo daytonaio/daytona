@@ -24,7 +24,7 @@ export interface OrganizationWallet {
     'automaticTopUp'?: AutomaticTopUp;
     'balanceCents'?: number;
     'billingType'?: BillingType;
-    'creditCardConnected'?: boolean;
+    'creditCardConnectedCreditsGranted'?: boolean;
     'hasFailedOrPendingInvoice'?: boolean;
     'name'?: string;
     'ongoingBalanceCents'?: number;

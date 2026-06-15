@@ -1,32 +1,32 @@
-# PortalUrlApi
+# BalanceNotificationApi
 
 All URIs are relative to _http://localhost:6100_
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**getPortalUrl**](#getportalurl) | **GET** /organization/{organizationId}/portal-url | Get organization billing portal url|
-|[**getV2PortalURL**](#getv2portalurl) | **GET** /v2/organization/{organizationId}/portal-url | Get organization billing portal url|
+|[**getV2BalanceNotification**](#getv2balancenotification) | **GET** /v2/organization/{organizationId}/balance-notification | Get balance notification|
+|[**setV2BalanceNotification**](#setv2balancenotification) | **PUT** /v2/organization/{organizationId}/balance-notification | Set balance notification|
 
-# **getPortalUrl**
+# **getV2BalanceNotification**
 >
-> string getPortalUrl()
+> BalanceNotification getV2BalanceNotification()
 
-Get organization billing portal url
+Get the organization\'s wallet balance notification settings
 
 ### Example
 
 ```typescript
 import {
-    PortalUrlApi,
+    BalanceNotificationApi,
     Configuration
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new PortalUrlApi(configuration);
+const apiInstance = new BalanceNotificationApi(configuration);
 
 let organizationId: string; //Organization ID (default to undefined)
 
-const { status, data } = await apiInstance.getPortalUrl(
+const { status, data } = await apiInstance.getV2BalanceNotification(
     organizationId
 );
 ```
@@ -39,7 +39,7 @@ const { status, data } = await apiInstance.getPortalUrl(
 
 ### Return type
 
-**string**
+**BalanceNotification**
 
 ### Authorization
 
@@ -58,27 +58,30 @@ const { status, data } = await apiInstance.getPortalUrl(
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **getV2PortalURL**
+# **setV2BalanceNotification**
 >
-> string getV2PortalURL()
+> BalanceNotification setV2BalanceNotification(balanceNotification)
 
-Get organization billing portal url from v2 billing
+Create, update, or disable the organization\'s wallet balance notification
 
 ### Example
 
 ```typescript
 import {
-    PortalUrlApi,
-    Configuration
+    BalanceNotificationApi,
+    Configuration,
+    BalanceNotification
 } from './api';
 
 const configuration = new Configuration();
-const apiInstance = new PortalUrlApi(configuration);
+const apiInstance = new BalanceNotificationApi(configuration);
 
 let organizationId: string; //Organization ID (default to undefined)
+let balanceNotification: BalanceNotification; //Balance notification
 
-const { status, data } = await apiInstance.getV2PortalURL(
-    organizationId
+const { status, data } = await apiInstance.setV2BalanceNotification(
+    organizationId,
+    balanceNotification
 );
 ```
 
@@ -86,11 +89,12 @@ const { status, data } = await apiInstance.getV2PortalURL(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
+| **balanceNotification** | **BalanceNotification**| Balance notification | |
 | **organizationId** | [**string**] | Organization ID | defaults to undefined|
 
 ### Return type
 
-**string**
+**BalanceNotification**
 
 ### Authorization
 
@@ -99,7 +103,7 @@ const { status, data } = await apiInstance.getV2PortalURL(
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: text/plain
+- **Accept**: application/json
 
 ### HTTP response details
 

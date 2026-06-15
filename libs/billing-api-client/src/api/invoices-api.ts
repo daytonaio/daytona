@@ -113,6 +113,47 @@ export const InvoicesApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Download a specific invoice as a PDF from v2 billing
+         * @summary Download invoice PDF
+         * @param {string} organizationId Organization ID
+         * @param {string} invoiceId Invoice ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        downloadV2Invoice: async (organizationId: string, invoiceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('downloadV2Invoice', 'organizationId', organizationId)
+            // verify required parameter 'invoiceId' is not null or undefined
+            assertParamExists('downloadV2Invoice', 'invoiceId', invoiceId)
+            const localVarPath = `/v2/organization/{organizationId}/invoices/{invoiceId}/pdf`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"invoiceId"}}`, encodeURIComponent(String(invoiceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication JwtAuth required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/pdf';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get organization invoices
          * @summary Get organization invoices
          * @param {string} organizationId Organization ID
@@ -284,6 +325,20 @@ export const InvoicesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Download a specific invoice as a PDF from v2 billing
+         * @summary Download invoice PDF
+         * @param {string} organizationId Organization ID
+         * @param {string} invoiceId Invoice ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async downloadV2Invoice(organizationId: string, invoiceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.downloadV2Invoice(organizationId, invoiceId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['InvoicesApi.downloadV2Invoice']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get organization invoices
          * @summary Get organization invoices
          * @param {string} organizationId Organization ID
@@ -359,6 +414,17 @@ export const InvoicesApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.createV2PaymentURL(organizationId, invoiceId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Download a specific invoice as a PDF from v2 billing
+         * @summary Download invoice PDF
+         * @param {string} organizationId Organization ID
+         * @param {string} invoiceId Invoice ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        downloadV2Invoice(organizationId: string, invoiceId: string, options?: RawAxiosRequestConfig): AxiosPromise<File> {
+            return localVarFp.downloadV2Invoice(organizationId, invoiceId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get organization invoices
          * @summary Get organization invoices
          * @param {string} organizationId Organization ID
@@ -422,6 +488,18 @@ export class InvoicesApi extends BaseAPI {
      */
     public createV2PaymentURL(organizationId: string, invoiceId: string, options?: RawAxiosRequestConfig) {
         return InvoicesApiFp(this.configuration).createV2PaymentURL(organizationId, invoiceId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Download a specific invoice as a PDF from v2 billing
+     * @summary Download invoice PDF
+     * @param {string} organizationId Organization ID
+     * @param {string} invoiceId Invoice ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public downloadV2Invoice(organizationId: string, invoiceId: string, options?: RawAxiosRequestConfig) {
+        return InvoicesApiFp(this.configuration).downloadV2Invoice(organizationId, invoiceId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

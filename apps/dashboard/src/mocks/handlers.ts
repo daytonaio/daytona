@@ -103,7 +103,6 @@ export const handlers = [
       balanceCents: 1000,
       ongoingBalanceCents: 1000,
       name: 'Wallet',
-      creditCardConnected: false,
       automaticTopUp: undefined,
       hasFailedOrPendingInvoice: true,
     })

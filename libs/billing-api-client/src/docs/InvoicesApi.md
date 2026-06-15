@@ -6,6 +6,7 @@ All URIs are relative to _http://localhost:6100_
 |------------- | ------------- | -------------|
 |[**createPaymentUrl**](#createpaymenturl) | **POST** /organization/{organizationId}/invoices/{invoiceId}/payment-url | Create payment URL for invoice|
 |[**createV2PaymentURL**](#createv2paymenturl) | **POST** /v2/organization/{organizationId}/invoices/{invoiceId}/payment-url | Create payment URL for invoice|
+|[**downloadV2Invoice**](#downloadv2invoice) | **GET** /v2/organization/{organizationId}/invoices/{invoiceId}/pdf | Download invoice PDF|
 |[**listInvoices**](#listinvoices) | **GET** /organization/{organizationId}/invoices | Get organization invoices|
 |[**listV2Invoices**](#listv2invoices) | **GET** /v2/organization/{organizationId}/invoices | Get organization invoices|
 |[**voidInvoice**](#voidinvoice) | **POST** /organization/{organizationId}/invoices/{invoiceId}/void | Void an invoice|
@@ -109,6 +110,60 @@ const { status, data } = await apiInstance.createV2PaymentURL(
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **downloadV2Invoice**
+>
+> File downloadV2Invoice()
+
+Download a specific invoice as a PDF from v2 billing
+
+### Example
+
+```typescript
+import {
+    InvoicesApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new InvoicesApi(configuration);
+
+let organizationId: string; //Organization ID (default to undefined)
+let invoiceId: string; //Invoice ID (default to undefined)
+
+const { status, data } = await apiInstance.downloadV2Invoice(
+    organizationId,
+    invoiceId
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **organizationId** | [**string**] | Organization ID | defaults to undefined|
+| **invoiceId** | [**string**] | Invoice ID | defaults to undefined|
+
+### Return type
+
+**File**
+
+### Authorization
+
+[JwtAuth](../README.md#JwtAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/pdf
 
 ### HTTP response details
 

@@ -2,11 +2,13 @@
 .npmignore
 .openapi-generator-ignore
 api.ts
+api/balance-notification-api.ts
 api/billing-info-api.ts
 api/checkout-url-api.ts
 api/invoices-api.ts
 api/organization-api.ts
 api/portal-url-api.ts
+api/setup-checkout-url-api.ts
 api/tier-api.ts
 api/usage-api.ts
 api/wallet-api.ts
@@ -14,6 +16,8 @@ base.ts
 common.ts
 configuration.ts
 docs/AutomaticTopUp.md
+docs/BalanceNotification.md
+docs/BalanceNotificationApi.md
 docs/BillableMetricCode.md
 docs/BillingAddress.md
 docs/BillingInfo.md
@@ -39,6 +43,7 @@ docs/Paginated[T]Invoice.md
 docs/PaymentMethod.md
 docs/PaymentUrl.md
 docs/PortalUrlApi.md
+docs/SetupCheckoutUrlApi.md
 docs/Tier.md
 docs/TierApi.md
 docs/TierLimit.md
@@ -53,6 +58,7 @@ docs/WalletTopUpRequest.md
 git_push.sh
 index.ts
 models/automatic-top-up.ts
+models/balance-notification.ts
 models/billable-metric-code.ts
 models/billing-address.ts
 models/billing-info.ts

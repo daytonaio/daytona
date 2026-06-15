@@ -14,11 +14,13 @@
 
 
 
+export * from './api/balance-notification-api';
 export * from './api/billing-info-api';
 export * from './api/checkout-url-api';
 export * from './api/invoices-api';
 export * from './api/organization-api';
 export * from './api/portal-url-api';
+export * from './api/setup-checkout-url-api';
 export * from './api/tier-api';
 export * from './api/usage-api';
 export * from './api/wallet-api';

@@ -20,6 +20,7 @@ export interface InvoicesTableProps {
   onVoidInvoice?: (invoice: Invoice) => void
   onRowClick?: (invoice: Invoice) => void
   onPayInvoice?: (invoice: Invoice) => void
+  onDownloadInvoice?: (invoice: Invoice) => void
 }
 
 export interface InvoicesTableActionsProps {
@@ -27,6 +28,7 @@ export interface InvoicesTableActionsProps {
   onView?: (invoice: Invoice) => void
   onVoid?: (invoice: Invoice) => void
   onPay?: (invoice: Invoice) => void
+  onDownload?: (invoice: Invoice) => void
 }
 
 export interface InvoicesTableHeaderProps {

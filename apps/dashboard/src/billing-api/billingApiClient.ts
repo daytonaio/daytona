@@ -84,6 +84,11 @@ export class BillingApiClient {
     return response.data
   }
 
+  public async downloadInvoice(organizationId: string, invoiceId: string): Promise<Blob> {
+    const response = await this.invoicesApi.downloadV2Invoice(organizationId, invoiceId, { responseType: 'blob' })
+    return response.data as Blob
+  }
+
   public async topUpWallet(organizationId: string, amountCents: number): Promise<PaymentUrl> {
     const response = await this.walletApi.topUpV2Wallet(organizationId, { amountCents })
     return response.data

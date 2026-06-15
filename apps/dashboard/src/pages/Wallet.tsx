@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
+import { useDownloadInvoiceMutation } from '@/hooks/mutations/useDownloadInvoiceMutation'
 import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
 import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
 import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
@@ -68,6 +69,7 @@ const Wallet = () => {
   const redeemCouponMutation = useRedeemCouponMutation()
   const topUpWalletMutation = useTopUpWalletMutation()
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
+  const downloadInvoiceMutation = useDownloadInvoiceMutation()
 
   useEffect(() => {
     if (wallet?.automaticTopUp) {
@@ -205,6 +207,34 @@ const Wallet = () => {
       window.open(invoice.fileUrl ?? '', '_blank')
     },
     [selectedOrganization],
+  )
+
+  const handleDownloadInvoice = useCallback(
+    async (invoice: Invoice) => {
+      if (!selectedOrganization) {
+        return
+      }
+
+      try {
+        const blob = await downloadInvoiceMutation.mutateAsync({
+          organizationId: selectedOrganization.id,
+          invoiceId: invoice.id ?? '',
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `invoice-${invoice.number ?? invoice.id}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        toast.error('Failed to download invoice', {
+          description: String(error),
+        })
+      }
+    },
+    [selectedOrganization, downloadInvoiceMutation],
   )
 
   const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
@@ -582,6 +612,7 @@ const Wallet = () => {
                   loading={invoicesQuery.isLoading}
                   onViewInvoice={handleViewInvoice}
                   onPayInvoice={handlePayInvoice}
+                  onDownloadInvoice={handleDownloadInvoice}
                 />
               </CardContent>
             </Card>

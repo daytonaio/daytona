@@ -1,4 +1,5 @@
 export * from './automatic-top-up';
+export * from './balance-notification';
 export * from './billable-metric-code';
 export * from './billing-address';
 export * from './billing-info';

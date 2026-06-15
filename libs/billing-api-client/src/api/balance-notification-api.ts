@@ -21,22 +21,24 @@ import globalAxios from 'axios';
 import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction, replaceWithSerializableTypeIfNeeded } from '../common';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
+// @ts-ignore
+import type { BalanceNotification } from '../models';
 /**
- * PortalUrlApi - axios parameter creator
+ * BalanceNotificationApi - axios parameter creator
  */
-export const PortalUrlApiAxiosParamCreator = function (configuration?: Configuration) {
+export const BalanceNotificationApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get organization billing portal url
-         * @summary Get organization billing portal url
+         * Get the organization\'s wallet balance notification settings
+         * @summary Get balance notification
          * @param {string} organizationId Organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPortalUrl: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getV2BalanceNotification: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'organizationId' is not null or undefined
-            assertParamExists('getPortalUrl', 'organizationId', organizationId)
-            const localVarPath = `/organization/{organizationId}/portal-url`
+            assertParamExists('getV2BalanceNotification', 'organizationId', organizationId)
+            const localVarPath = `/v2/organization/{organizationId}/balance-notification`
                 .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -64,16 +66,19 @@ export const PortalUrlApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
-         * Get organization billing portal url from v2 billing
-         * @summary Get organization billing portal url
+         * Create, update, or disable the organization\'s wallet balance notification
+         * @summary Set balance notification
          * @param {string} organizationId Organization ID
+         * @param {BalanceNotification} balanceNotification Balance notification
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getV2PortalURL: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        setV2BalanceNotification: async (organizationId: string, balanceNotification: BalanceNotification, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'organizationId' is not null or undefined
-            assertParamExists('getV2PortalURL', 'organizationId', organizationId)
-            const localVarPath = `/v2/organization/{organizationId}/portal-url`
+            assertParamExists('setV2BalanceNotification', 'organizationId', organizationId)
+            // verify required parameter 'balanceNotification' is not null or undefined
+            assertParamExists('setV2BalanceNotification', 'balanceNotification', balanceNotification)
+            const localVarPath = `/v2/organization/{organizationId}/balance-notification`
                 .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -82,18 +87,20 @@ export const PortalUrlApiAxiosParamCreator = function (configuration?: Configura
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
             // authentication JwtAuth required
             await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
 
-            localVarHeaderParameter['Accept'] = 'text/plain';
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(balanceNotification, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -104,93 +111,96 @@ export const PortalUrlApiAxiosParamCreator = function (configuration?: Configura
 };
 
 /**
- * PortalUrlApi - functional programming interface
+ * BalanceNotificationApi - functional programming interface
  */
-export const PortalUrlApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = PortalUrlApiAxiosParamCreator(configuration)
+export const BalanceNotificationApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = BalanceNotificationApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get organization billing portal url
-         * @summary Get organization billing portal url
+         * Get the organization\'s wallet balance notification settings
+         * @summary Get balance notification
          * @param {string} organizationId Organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getPortalUrl(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getPortalUrl(organizationId, options);
+        async getV2BalanceNotification(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BalanceNotification>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getV2BalanceNotification(organizationId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PortalUrlApi.getPortalUrl']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['BalanceNotificationApi.getV2BalanceNotification']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get organization billing portal url from v2 billing
-         * @summary Get organization billing portal url
+         * Create, update, or disable the organization\'s wallet balance notification
+         * @summary Set balance notification
          * @param {string} organizationId Organization ID
+         * @param {BalanceNotification} balanceNotification Balance notification
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getV2PortalURL(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getV2PortalURL(organizationId, options);
+        async setV2BalanceNotification(organizationId: string, balanceNotification: BalanceNotification, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BalanceNotification>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.setV2BalanceNotification(organizationId, balanceNotification, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PortalUrlApi.getV2PortalURL']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['BalanceNotificationApi.setV2BalanceNotification']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
 };
 
 /**
- * PortalUrlApi - factory interface
+ * BalanceNotificationApi - factory interface
  */
-export const PortalUrlApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = PortalUrlApiFp(configuration)
+export const BalanceNotificationApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = BalanceNotificationApiFp(configuration)
     return {
         /**
-         * Get organization billing portal url
-         * @summary Get organization billing portal url
+         * Get the organization\'s wallet balance notification settings
+         * @summary Get balance notification
          * @param {string} organizationId Organization ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPortalUrl(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-            return localVarFp.getPortalUrl(organizationId, options).then((request) => request(axios, basePath));
+        getV2BalanceNotification(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<BalanceNotification> {
+            return localVarFp.getV2BalanceNotification(organizationId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get organization billing portal url from v2 billing
-         * @summary Get organization billing portal url
+         * Create, update, or disable the organization\'s wallet balance notification
+         * @summary Set balance notification
          * @param {string} organizationId Organization ID
+         * @param {BalanceNotification} balanceNotification Balance notification
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getV2PortalURL(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-            return localVarFp.getV2PortalURL(organizationId, options).then((request) => request(axios, basePath));
+        setV2BalanceNotification(organizationId: string, balanceNotification: BalanceNotification, options?: RawAxiosRequestConfig): AxiosPromise<BalanceNotification> {
+            return localVarFp.setV2BalanceNotification(organizationId, balanceNotification, options).then((request) => request(axios, basePath));
         },
     };
 };
 
 /**
- * PortalUrlApi - object-oriented interface
+ * BalanceNotificationApi - object-oriented interface
  */
-export class PortalUrlApi extends BaseAPI {
+export class BalanceNotificationApi extends BaseAPI {
     /**
-     * Get organization billing portal url
-     * @summary Get organization billing portal url
+     * Get the organization\'s wallet balance notification settings
+     * @summary Get balance notification
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public getPortalUrl(organizationId: string, options?: RawAxiosRequestConfig) {
-        return PortalUrlApiFp(this.configuration).getPortalUrl(organizationId, options).then((request) => request(this.axios, this.basePath));
+    public getV2BalanceNotification(organizationId: string, options?: RawAxiosRequestConfig) {
+        return BalanceNotificationApiFp(this.configuration).getV2BalanceNotification(organizationId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Get organization billing portal url from v2 billing
-     * @summary Get organization billing portal url
+     * Create, update, or disable the organization\'s wallet balance notification
+     * @summary Set balance notification
      * @param {string} organizationId Organization ID
+     * @param {BalanceNotification} balanceNotification Balance notification
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public getV2PortalURL(organizationId: string, options?: RawAxiosRequestConfig) {
-        return PortalUrlApiFp(this.configuration).getV2PortalURL(organizationId, options).then((request) => request(this.axios, this.basePath));
+    public setV2BalanceNotification(organizationId: string, balanceNotification: BalanceNotification, options?: RawAxiosRequestConfig) {
+        return BalanceNotificationApiFp(this.configuration).setV2BalanceNotification(organizationId, balanceNotification, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
