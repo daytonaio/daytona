@@ -6,13 +6,32 @@
 package computeruse
 
 import (
+	"time"
+
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 )
 
 // TypeText types text with optional delay between keystrokes
 func (c *ComputerUse) TypeText(req *computeruse.KeyboardTypeRequest) (*computeruse.Empty, error) {
-	if err := typeString(req.Text, req.Delay); err != nil {
+	actions, err := buildTypingActions(req.Text)
+	if err != nil {
 		return nil, err
+	}
+
+	for _, action := range actions {
+		switch action.kind {
+		case typingActionText:
+			if err := typeString(action.text, req.Delay); err != nil {
+				return nil, err
+			}
+		case typingActionEnter:
+			if err := keyTap("enter", nil); err != nil {
+				return nil, err
+			}
+			if req.Delay > 0 {
+				time.Sleep(time.Duration(req.Delay) * time.Millisecond)
+			}
+		}
 	}
 	return new(computeruse.Empty), nil
 }

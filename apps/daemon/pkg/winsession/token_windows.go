@@ -10,6 +10,7 @@ package winsession
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"golang.org/x/sys/windows"
@@ -30,11 +31,14 @@ var ErrNoActiveConsoleSession = errors.New("no active console session available;
 // SysProcAttr, since Windows duplicates the handle during CreateProcessAsUser.
 func ActiveConsoleUserToken(timeout time.Duration) (windows.Token, error) {
 	deadline := time.Now().Add(timeout)
+	var lastErr error
 	for {
 		sid := windows.WTSGetActiveConsoleSessionId()
 		if sid != 0xFFFFFFFF {
 			var raw windows.Token
-			if err := windows.WTSQueryUserToken(sid, &raw); err == nil {
+			if err := windows.WTSQueryUserToken(sid, &raw); err != nil {
+				lastErr = fmt.Errorf("WTSQueryUserToken(sid=%d): %w", sid, err)
+			} else {
 				var primary windows.Token
 				err := windows.DuplicateTokenEx(
 					raw,
@@ -48,9 +52,16 @@ func ActiveConsoleUserToken(timeout time.Duration) (windows.Token, error) {
 				if err == nil {
 					return primary, nil
 				}
+				lastErr = fmt.Errorf("DuplicateTokenEx(sid=%d): %w", sid, err)
 			}
 		}
 		if time.Now().After(deadline) {
+			// Distinguish "no session ever appeared" from "token acquisition
+			// kept failing" (e.g. ERROR_PRIVILEGE_NOT_HELD when the daemon is
+			// not running as SYSTEM); the sentinel stays errors.Is-able.
+			if lastErr != nil {
+				return 0, fmt.Errorf("%w (last attempt: %v)", ErrNoActiveConsoleSession, lastErr)
+			}
 			return 0, ErrNoActiveConsoleSession
 		}
 		time.Sleep(consoleSessionPollInterval)

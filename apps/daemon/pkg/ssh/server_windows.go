@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"maps"
 	"os"
 	"os/exec"
+	"slices"
 
 	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
@@ -118,7 +120,6 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	}()
 
 	err := common.SpawnTTY(common.SpawnTTYOptions{
-		Ctx:      session.Context(),
 		Dir:      dir,
 		StdIn:    session,
 		StdOut:   session,
@@ -135,22 +136,26 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 func (s *Server) handleNonPty(session ssh.Session) {
 	shell := common.GetShell()
 
-	var cmd *exec.Cmd
+	finalCommand := ""
+	envVars := map[string]string{}
 	if len(session.Command()) > 0 {
 		rawCmd := session.RawCommand()
 
-		parsedCommand, envVars := common.ParseShellWrapper(rawCmd)
+		var parsedCommand string
+		parsedCommand, envVars = common.ParseShellWrapper(rawCmd)
 		if parsedCommand != rawCmd {
-			s.logger.Debug("Parsed shell wrapper", "raw", rawCmd, "parsed", parsedCommand, "env", envVars)
+			// Log env var names only: the decoded values are the secrets the
+			// SDK wrapper base64-encodes (API keys, tokens) and must never
+			// reach the persisted daemon log. The raw command is omitted for
+			// the same reason — it embeds those values base64-encoded.
+			s.logger.Debug("Parsed shell wrapper", "parsed", parsedCommand, "envKeys", slices.Sorted(maps.Keys(envVars)))
 		}
 
-		finalCommand := common.BuildWindowsCommandForShell(parsedCommand, envVars, common.IsPowerShell(shell))
-
-		cmd = common.ShellCommand(shell, finalCommand)
-	} else {
-		cmd = exec.Command(shell)
+		finalCommand = parsedCommand
 	}
-	cmd.Env = append(cmd.Env, os.Environ()...)
+
+	cmd := common.NewShellCommand(shell, finalCommand)
+	common.ApplyEnvs(cmd, envVars)
 	cmd.Dir = s.workDir
 
 	if _, err := os.Stat(s.workDir); os.IsNotExist(err) {
@@ -193,13 +198,14 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	}()
 
 	exitCode, waitErr := childreap.Wait(cmd)
-
 	if waitErr != nil || exitCode != 0 {
-		s.logger.Info("Command exited", "command", session.RawCommand(), "exitCode", exitCode, "error", waitErr)
-		// childreap.Wait returns -1 when no exit status could be recovered.
+		// RawCommand is omitted: it embeds the SDK wrapper's base64-encoded
+		// secrets (see the parse log policy above).
+		s.logger.Info("Command exited", "exitCode", exitCode, "error", waitErr)
+		// childreap.Wait returns -1 when no real status could be recovered.
 		// The SSH protocol carries exit status as uint32, so a negative
-		// value gets serialized as 4294967295 — confusing to clients.
-		// Normalize any negative to a generic non-zero exit.
+		// value would serialize as 4294967295 — normalize to a generic
+		// non-zero exit, mirroring the Linux handler.
 		exitStatus := exitCode
 		if exitStatus < 0 {
 			exitStatus = 1
@@ -213,21 +219,16 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	}
 }
 
+// handleSignal terminates the process for any SSH signal: Windows has no
+// POSIX signal delivery, so Kill is the only portable response.
 func (s *Server) handleSignal(cmd *exec.Cmd, sig ssh.Signal) {
 	if cmd.Process == nil {
 		return
 	}
 
-	switch sig {
-	case ssh.SIGKILL, ssh.SIGTERM, ssh.SIGINT, ssh.SIGQUIT:
-		if err := cmd.Process.Kill(); err != nil {
-			s.logger.Warn("Unable to kill process", "error", err)
-		}
-	default:
-		s.logger.Debug("Signal received, killing process on Windows", "signal", sig)
-		if err := cmd.Process.Kill(); err != nil {
-			s.logger.Warn("Unable to kill process for signal", "signal", sig, "error", err)
-		}
+	s.logger.Debug("Signal received, killing process on Windows", "signal", sig)
+	if err := cmd.Process.Kill(); err != nil {
+		s.logger.Warn("Unable to kill process", "signal", sig, "error", err)
 	}
 }
 

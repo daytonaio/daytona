@@ -60,32 +60,3 @@ func ParseShellWrapper(command string) (parsedCommand string, envVars map[string
 	// Couldn't parse, return original
 	return command, envVars
 }
-
-// BuildWindowsCommandForShell creates a command with environment variables for the specified shell type.
-func BuildWindowsCommandForShell(command string, envVars map[string]string, isPowerShell bool) string {
-	if len(envVars) == 0 {
-		return command
-	}
-
-	if isPowerShell {
-		// PowerShell: $env:KEY='value'
-		// Single-quoted literals do NOT expand $var or $(...) so user values
-		// cannot execute arbitrary expressions. Embedded single quotes are
-		// escaped by doubling them, per PowerShell quoting rules.
-		var envSetters []string
-		for key, value := range envVars {
-			escaped := strings.ReplaceAll(value, "'", "''")
-			envSetters = append(envSetters, "$env:"+key+"='"+escaped+"'")
-		}
-		return strings.Join(envSetters, "; ") + "; " + command
-	}
-
-	// cmd.exe: set "KEY=value" && command
-	var envSetters []string
-	for key, value := range envVars {
-		// Escape special characters for cmd.exe
-		escaped := strings.ReplaceAll(value, `"`, `""`)
-		envSetters = append(envSetters, `set "`+key+"="+escaped+`"`)
-	}
-	return strings.Join(envSetters, " && ") + " && " + command
-}

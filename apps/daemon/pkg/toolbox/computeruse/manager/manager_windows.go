@@ -26,19 +26,22 @@ import (
 const consoleSessionPollTimeout = 60 * time.Second
 
 // GetComputerUse returns the cached IComputerUse client, or spawns the plugin
-// binary into the active console session. Concurrent callers are serialized by
-// the manager lock (getOrSpawn): exactly one spawn is ever in flight and every
-// caller receives its result. KillComputerUse takes the same lock, so a stop
-// racing an in-flight spawn waits for it to finish and then kills the fresh
-// instance — nothing leaks.
-func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse, error) {
-	return getOrSpawn(func() (*plugin.Client, computeruse.IComputerUse, string, error) {
+// binary into the active console session, publishing the fresh impl via
+// publish under the manager lock (see getOrSpawn). Concurrent callers are
+// serialized by the manager lock: exactly one spawn is ever in flight and
+// every caller receives its result. KillComputerUse takes the same lock, so a
+// stop racing an in-flight spawn waits for it to finish and then kills the
+// fresh instance — nothing leaks.
+func GetComputerUse(logger *slog.Logger, path string, publish func(computeruse.IComputerUse)) (computeruse.IComputerUse, error) {
+	return getOrSpawn(func() (pluginClient, computeruse.IComputerUse, error) {
 		client, impl, err := spawnInConsoleSession(logger, path)
 		if err != nil {
-			return nil, nil, "", err
+			// Return an untyped nil: wrapping a nil *plugin.Client in the
+			// pluginClient interface would make it compare non-nil.
+			return nil, nil, err
 		}
-		return client, impl, filepath.Dir(path), nil
-	})
+		return client, impl, nil
+	}, publish)
 }
 
 // spawnInConsoleSession spawns the plugin binary into the active console

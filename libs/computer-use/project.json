@@ -35,6 +35,10 @@
         "{projectRoot}/**/*.go",
         "{projectRoot}/go.mod",
         "{projectRoot}/go.sum",
+        "{workspaceRoot}/apps/daemon/pkg/toolbox/computeruse/**/*.go",
+        "{workspaceRoot}/apps/daemon/go.mod",
+        "{workspaceRoot}/go.work",
+        "{workspaceRoot}/go.work.sum",
         "{workspaceRoot}/hack/computer-use/build-computer-use-amd64.sh",
         "{workspaceRoot}/hack/computer-use/Dockerfile",
         "sharedGlobals"
@@ -46,7 +50,7 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/main.go",
-        "outputPath": "dist/libs/computer-use-amd64.exe",
+        "outputPath": "dist/libs/computer-use-windows-amd64.exe",
         "env": {
           "GOARCH": "amd64",
           "GOOS": "windows",
@@ -57,9 +61,13 @@
         "{projectRoot}/**/*.go",
         "{projectRoot}/go.mod",
         "{projectRoot}/go.sum",
+        "{workspaceRoot}/apps/daemon/pkg/toolbox/computeruse/**/*.go",
+        "{workspaceRoot}/apps/daemon/go.mod",
+        "{workspaceRoot}/go.work",
+        "{workspaceRoot}/go.work.sum",
         "sharedGlobals"
       ],
-      "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64.exe"],
+      "outputs": ["{workspaceRoot}/dist/libs/computer-use-windows-amd64.exe"],
       "cache": true
     },
     "format": {

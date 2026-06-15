@@ -4,7 +4,6 @@
 package terminal
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -52,24 +51,25 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Cancelled when the websocket read loop exits (client gone). On Windows
-	// SpawnTTY tears down the ConPTY session on cancellation; on Linux the
-	// Ctx is not yet honored (see SpawnTTYOptions).
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
-
 	decoder := NewUTF8Decoder()
 
 	sizeCh := make(chan common.TTYSize)
 	stdInReader, stdInWriter := io.Pipe()
 	stdOutReader, stdOutWriter := io.Pipe()
+	// Unblock SpawnTTY's internal stdin copier and the stdout pump below
+	// when the handler returns; otherwise both stay blocked in Read forever
+	// (two goroutines + two pipes leaked per terminal session).
+	defer stdInWriter.Close()
 	defer stdOutWriter.Close()
 
 	go func() {
-		// Unblock SpawnTTY's stdin copy and resize consumer when the client
-		// goes away, in addition to cancelling the session ctx.
-		defer cancel()
 		defer close(sizeCh)
+		// The client is gone when this loop exits: close the stdin feed so
+		// SpawnTTY's stdin copier sees EOF and tears the shell down even
+		// when it is idle (an idle shell produces no output, so the stdout
+		// pump cannot be the one to notice the disconnect). The handler's
+		// own deferred Close is unreachable until SpawnTTY returns, which
+		// is exactly what this unblocks.
 		defer stdInWriter.Close()
 		for {
 			messageType, p, err := conn.ReadMessage()
@@ -96,6 +96,10 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	go func() {
+		// On websocket write failure the pump exits; close the read side so
+		// SpawnTTY's pending pipe writes fail instead of blocking forever,
+		// letting it tear down the shell and return.
+		defer stdOutReader.Close()
 		buf := make([]byte, 1024)
 		for {
 			n, err := stdOutReader.Read(buf)
@@ -126,7 +130,6 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = common.SpawnTTY(common.SpawnTTYOptions{
-		Ctx:    ctx,
 		Dir:    dir,
 		StdIn:  stdInReader,
 		StdOut: stdOutWriter,

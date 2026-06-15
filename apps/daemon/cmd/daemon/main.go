@@ -1,5 +1,3 @@
-//go:build linux
-
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
@@ -128,7 +126,17 @@ func run() int {
 
 	sessionService := session.NewSessionService(logger, configDir, c.TerminationGracePeriod, c.TerminationCheckInterval)
 
-	// Execute passed arguments as command in entrypoint session
+	// Execute passed arguments as command in entrypoint session. On
+	// platforms without session support (Windows: the POSIX session wrapper
+	// cannot run under cmd.exe) the entrypoint is skipped: the arguments
+	// are logged and dropped so the daemon keeps running and the sandbox
+	// stays reachable via the toolbox API. Failing fast instead would let
+	// sessionService.Create's NOT_IMPLEMENTED error hit the `return 2`
+	// below and take the whole sandbox down.
+	if len(args) > 0 && !session.SupportedOnPlatform {
+		logger.Error("Entrypoint execution is not supported on this platform; ignoring entrypoint arguments", "args", args)
+		args = nil
+	}
 	if len(args) > 0 {
 		// Create entrypoint session
 		err = sessionService.Create(util.EntrypointSessionID, false)

@@ -7,11 +7,14 @@ package computeruse
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
+	"github.com/go-ole/go-ole"
 	uia "github.com/uandersonricardo/uiautomation"
 )
 
@@ -206,67 +209,170 @@ func TestPlanWindowsFindConditions(t *testing.T) {
 	})
 }
 
-func TestWindowsDepthSemantics(t *testing.T) {
-	if windowsDepthAllowsDescent(0) {
-		t.Error("maxDepth 0 must visit the root only")
-	}
-	for _, depth := range []int{-1, -5, 1, 3} {
-		if !windowsDepthAllowsDescent(depth) {
-			t.Errorf("maxDepth %d must allow descent", depth)
+// Depth, find-limit, and wire-scope semantics moved to
+// accessibility_common.go and are pinned by the Linux test suite
+// (accessibility_test.go), which runs in CI.
+
+func TestInvokeWindowsElementSetValueRedirectsToValueEndpoint(t *testing.T) {
+	// The set_value branch must short-circuit before any COM call (nil
+	// element) since the invoke request cannot carry a value.
+	for _, action := range []string{"set_value", " SET_VALUE "} {
+		err := invokeWindowsElement("handle", nil, action)
+		if !errors.Is(err, ErrActionNotSupported) {
+			t.Fatalf("invokeWindowsElement(%q) = %v, want ErrActionNotSupported", action, err)
 		}
-	}
-	next := map[int]int{-5: -5, -1: -1, 1: 0, 3: 2}
-	for depth, want := range next {
-		if got := windowsNextDepth(depth); got != want {
-			t.Errorf("windowsNextDepth(%d) = %d, want %d", depth, got, want)
+		if !strings.HasPrefix(err.Error(), ErrActionNotSupported.Error()+":") {
+			t.Errorf("error %q must keep the sentinel prefix the daemon matches on", err.Error())
+		}
+		if !strings.Contains(err.Error(), "value endpoint") {
+			t.Errorf("error %q must point the caller at the value endpoint", err.Error())
 		}
 	}
 }
 
-func TestNormalizeWindowsFindLimit(t *testing.T) {
-	tests := map[int]int{
-		-1:                          windowsFindDefaultLimit,
-		0:                           windowsFindDefaultLimit,
-		1:                           1,
-		windowsFindDefaultLimit:     windowsFindDefaultLimit,
-		windowsFindCeilingLimit:     windowsFindCeilingLimit,
-		windowsFindCeilingLimit + 1: windowsFindCeilingLimit,
+func TestClassifyWindowsActionError(t *testing.T) {
+	dead := ole.NewError(uiaErrElementNotAvailable)
+	elementMap.put("stale-handle", nil)
+
+	err := classifyWindowsActionError("stale-handle", "SetFocus", dead)
+	if !errors.Is(err, ErrNodeNotFound) {
+		t.Fatalf("element-not-available error = %v, want ErrNodeNotFound", err)
 	}
-	for in, want := range tests {
-		if got := normalizeWindowsFindLimit(in); got != want {
-			t.Errorf("normalizeWindowsFindLimit(%d) = %d, want %d", in, got, want)
+	if !strings.HasPrefix(err.Error(), ErrNodeNotFound.Error()+":") {
+		t.Errorf("error %q must keep the sentinel prefix the daemon matches on", err.Error())
+	}
+	if _, ok := elementMap.get("stale-handle"); ok {
+		t.Error("dead handle must be evicted from the element cache")
+	}
+
+	// HRESULTs that unambiguously mean "the element refuses this action"
+	// map to the 400 sentinel.
+	for _, code := range []uintptr{
+		uiaErrElementNotEnabled,
+		uiaErrNotSupported,
+		uiaErrInvalidOperation,
+		hresultNoInterface,
+		hresultNotImplemented,
+	} {
+		err := classifyWindowsActionError("h", "Invoke", ole.NewError(code))
+		if !errors.Is(err, ErrActionNotSupported) {
+			t.Errorf("refusal HRESULT %#x = %v, want ErrActionNotSupported", code, err)
 		}
+		if !strings.HasPrefix(err.Error(), ErrActionNotSupported.Error()+":") {
+			t.Errorf("error %q must keep the sentinel prefix the daemon matches on", err.Error())
+		}
+	}
+
+	// Everything else — transient COM faults and non-COM errors — passes
+	// through untranslated so the daemon reports a retryable internal
+	// error instead of a permanent refusal (Linux classifyDbusError
+	// contract: unknown errors are returned as-is).
+	transient := ole.NewError(0x80004005) // E_FAIL
+	err = classifyWindowsActionError("h", "Invoke", transient)
+	if errors.Is(err, ErrActionNotSupported) || errors.Is(err, ErrNodeNotFound) {
+		t.Fatalf("generic COM error = %v, must not map to a sentinel", err)
+	}
+	if !errors.Is(err, transient) {
+		t.Errorf("generic COM error %v must wrap the original error", err)
+	}
+
+	plain := errors.New("rpc fault")
+	err = classifyWindowsActionError("h", "SetValue", plain)
+	if errors.Is(err, ErrActionNotSupported) || errors.Is(err, ErrNodeNotFound) {
+		t.Fatalf("non-COM error = %v, must not map to a sentinel", err)
+	}
+	if !errors.Is(err, plain) {
+		t.Errorf("non-COM error %v must wrap the original error", err)
 	}
 }
 
-func TestParseWindowsWireScope(t *testing.T) {
-	tests := []struct {
-		in   string
-		want windowsA11yScope
-	}{
-		{"", windowsA11yScopeFocused},
-		{"focused", windowsA11yScopeFocused},
-		{" FOCUSED ", windowsA11yScopeFocused},
-		{"all", windowsA11yScopeAll},
-		{" All", windowsA11yScopeAll},
-		{"pid", windowsA11yScopePID},
-		{"PID", windowsA11yScopePID},
+func TestAccessibilityValidationRunsBeforeSTA(t *testing.T) {
+	// Malformed requests must be rejected by pure validation before any
+	// COM/STA work: the 400 must win even on hosts where CoInitializeEx
+	// fails, and must never queue behind in-flight UIA walks.
+	staStarted := staCh != nil
+	c := &ComputerUse{}
+
+	if _, err := c.GetAccessibilityTree(&computeruse.GetAccessibilityTreeRequest{Scope: "bogus"}); !errors.Is(err, ErrInvalidScope) {
+		t.Fatalf("GetAccessibilityTree(bogus scope) = %v, want ErrInvalidScope", err)
 	}
-	for _, tc := range tests {
-		got, err := parseWindowsWireScope(tc.in)
-		if err != nil {
-			t.Errorf("parseWindowsWireScope(%q) error: %v", tc.in, err)
-			continue
-		}
-		if got != tc.want {
-			t.Errorf("parseWindowsWireScope(%q) = %q, want %q", tc.in, got, tc.want)
-		}
+	if _, err := c.FindAccessibilityNodes(&computeruse.FindAccessibilityNodesRequest{Scope: "bogus"}); !errors.Is(err, ErrInvalidScope) {
+		t.Fatalf("FindAccessibilityNodes(bogus scope) = %v, want ErrInvalidScope", err)
+	}
+	if _, err := c.FindAccessibilityNodes(&computeruse.FindAccessibilityNodesRequest{Name: "(", NameMatch: "regex"}); !errors.Is(err, ErrInvalidRequest) {
+		t.Fatalf("FindAccessibilityNodes(invalid regex) = %v, want ErrInvalidRequest", err)
 	}
 
-	for _, in := range []string{"windows", "focus", "0"} {
-		if _, err := parseWindowsWireScope(in); !errors.Is(err, errA11yInvalidScope) {
-			t.Errorf("parseWindowsWireScope(%q) = %v, want errA11yInvalidScope", in, err)
-		}
+	if !staStarted && staCh != nil {
+		t.Error("pure request validation must not start the STA thread")
+	}
+}
+
+func TestRunOnSTAReentrantCallPanics(t *testing.T) {
+	// A nested runOnSTA call from the STA thread can never be serviced —
+	// the single consumer goroutine is busy executing the outer closure —
+	// so it must panic loudly instead of hanging every a11y request. If
+	// the guard regresses this test deadlocks and fails via the go test
+	// timeout rather than asserting.
+	var recovered any
+	err := runOnSTA(func() error {
+		defer func() { recovered = recover() }()
+		_ = runOnSTA(func() error { return nil })
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("outer runOnSTA returned %v, want nil", err)
+	}
+	if recovered == nil {
+		t.Fatal("re-entrant runOnSTA on the STA thread must panic, not deadlock")
+	}
+}
+
+func TestElementCachePutAmortizesGC(t *testing.T) {
+	c := &elementCache{elts: map[string]*cachedElement{
+		"expired": {expiry: time.Now().Add(-time.Minute)},
+	}}
+
+	c.nextGC = time.Now().Add(time.Hour) // sweep not due yet
+	c.put("fresh", nil)
+	if _, ok := c.elts["expired"]; !ok {
+		t.Fatal("expired entry must survive puts until the GC interval elapses")
+	}
+
+	c.nextGC = time.Time{} // sweep due
+	c.put("fresh2", nil)
+	if _, ok := c.elts["expired"]; ok {
+		t.Fatal("due sweep must drop expired entries")
+	}
+	if len(c.elts) != 2 {
+		t.Fatalf("cache has %d entries, want the 2 fresh ones", len(c.elts))
+	}
+}
+
+func TestElementCachePutEvictsOldestOnOverflow(t *testing.T) {
+	c := &elementCache{
+		elts:   make(map[string]*cachedElement, elementCacheMaxEntries),
+		nextGC: time.Now().Add(time.Hour),
+	}
+	base := time.Now().Add(time.Hour) // nothing expired; only the cap acts
+	for i := 0; i < elementCacheMaxEntries; i++ {
+		c.elts[fmt.Sprintf("h%05d", i)] = &cachedElement{expiry: base.Add(time.Duration(i) * time.Second)}
+	}
+
+	c.put("newest", nil)
+
+	if len(c.elts) > elementCacheMaxEntries {
+		t.Fatalf("cache size %d exceeds cap %d", len(c.elts), elementCacheMaxEntries)
+	}
+	if _, ok := c.elts["newest"]; !ok {
+		t.Fatal("triggering insert must be present")
+	}
+	batch := elementCacheMaxEntries / 10
+	if _, ok := c.elts[fmt.Sprintf("h%05d", batch-1)]; ok {
+		t.Errorf("entry inside the oldest-expiry batch (%d) must be evicted", batch-1)
+	}
+	if _, ok := c.elts[fmt.Sprintf("h%05d", batch)]; !ok {
+		t.Errorf("entry just outside the oldest-expiry batch (%d) must survive", batch)
 	}
 }
 
@@ -317,11 +423,11 @@ func TestBuildWindowsFilterMatcher(t *testing.T) {
 		t.Error("missing state must not match")
 	}
 
-	if _, err := buildWindowsFilterMatcher(&computeruse.FindAccessibilityNodesRequest{Name: "(", NameMatch: "regex"}); !errors.Is(err, errA11yInvalidRequest) {
-		t.Errorf("invalid regex error = %v, want errA11yInvalidRequest", err)
+	if _, err := buildWindowsFilterMatcher(&computeruse.FindAccessibilityNodesRequest{Name: "(", NameMatch: "regex"}); !errors.Is(err, ErrInvalidRequest) {
+		t.Errorf("invalid regex error = %v, want ErrInvalidRequest", err)
 	}
-	if _, err := buildWindowsFilterMatcher(&computeruse.FindAccessibilityNodesRequest{NameMatch: "fuzzy"}); !errors.Is(err, errA11yInvalidRequest) {
-		t.Errorf("invalid nameMatch error = %v, want errA11yInvalidRequest", err)
+	if _, err := buildWindowsFilterMatcher(&computeruse.FindAccessibilityNodesRequest{NameMatch: "fuzzy"}); !errors.Is(err, ErrInvalidRequest) {
+		t.Errorf("invalid nameMatch error = %v, want ErrInvalidRequest", err)
 	}
 }
 

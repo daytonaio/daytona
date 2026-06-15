@@ -132,6 +132,7 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	sizeCh := make(chan common.TTYSize)
 
 	go func() {
+		defer close(sizeCh)
 		for win := range winCh {
 			sizeCh <- common.TTYSize{
 				Height: win.Height,
@@ -141,12 +142,14 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	}()
 
 	err := common.SpawnTTY(common.SpawnTTYOptions{
-		Dir:    dir,
-		StdIn:  session,
-		StdOut: session,
-		Term:   ptyReq.Term,
-		Env:    env,
-		SizeCh: sizeCh,
+		Dir:      dir,
+		StdIn:    session,
+		StdOut:   session,
+		Term:     ptyReq.Term,
+		Env:      env,
+		InitCols: ptyReq.Window.Width,
+		InitRows: ptyReq.Window.Height,
+		SizeCh:   sizeCh,
 	})
 
 	if err != nil {
@@ -222,7 +225,10 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	exitCode, waitErr := childreap.Wait(cmd)
 
 	if waitErr != nil || exitCode != 0 {
-		s.logger.Info("Command exited", "command", session.RawCommand(), "exitCode", exitCode, "error", waitErr)
+		// RawCommand is omitted: the SDK wrapper embeds base64-encoded env
+		// secrets (API keys, tokens) that must not reach the persisted
+		// daemon log.
+		s.logger.Info("Command exited", "exitCode", exitCode, "error", waitErr)
 		// childreap.Wait can return -1 (signal-terminated or unrecoverable
 		// status). The SSH protocol carries exit status as uint32, so a
 		// negative value gets serialized as 4294967295 — confusing to

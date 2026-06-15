@@ -468,3 +468,60 @@ func pressContext(key string, modifiers []string) string {
 	builder.WriteString("])")
 	return builder.String()
 }
+
+type typingActionType int
+
+const (
+	typingActionText typingActionType = iota
+	typingActionEnter
+)
+
+type typingAction struct {
+	kind typingActionType
+	text string
+}
+
+// buildTypingActions normalizes text for keyboard.type into a sequence of
+// platform-neutral actions: printable runs are typed literally and newlines
+// (CRLF/LF/CR) become real Enter key taps. Tabs, Unicode line separators, and
+// other control characters are rejected so every platform enforces the same
+// contract.
+func buildTypingActions(text string) ([]typingAction, error) {
+	text = strings.ReplaceAll(text, "\r\n", "\n")
+
+	actions := make([]typingAction, 0)
+	var currentText strings.Builder
+
+	flushText := func() {
+		if currentText.Len() == 0 {
+			return
+		}
+		actions = append(actions, typingAction{
+			kind: typingActionText,
+			text: currentText.String(),
+		})
+		currentText.Reset()
+	}
+
+	for _, r := range text {
+		switch r {
+		case '\n', '\r':
+			flushText()
+			actions = append(actions, typingAction{kind: typingActionEnter})
+		case '\t':
+			return nil, fmt.Errorf(
+				"keyboard.type does not translate '\\t' to Tab; use keyboard.press(\"tab\") for Tab key events",
+			)
+		case '\u2028', '\u2029':
+			return nil, fmt.Errorf("unsupported separator character in keyboard.type: U+%04X", r)
+		default:
+			if unicode.IsControl(r) {
+				return nil, fmt.Errorf("unsupported control character in keyboard.type: U+%04X", r)
+			}
+			currentText.WriteRune(r)
+		}
+	}
+
+	flushText()
+	return actions, nil
+}

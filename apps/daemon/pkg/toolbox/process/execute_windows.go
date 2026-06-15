@@ -6,136 +6,60 @@
 package process
 
 import (
-	"errors"
-	"fmt"
-	"log/slog"
-	"net/http"
+	"os"
 	"os/exec"
-	"strings"
-	"sync/atomic"
+	"strconv"
 	"time"
 
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
-
 	"github.com/daytonaio/daemon/pkg/common"
-
-	"github.com/gin-gonic/gin"
 )
 
-// ExecuteCommand godoc
+// buildExecCmd runs the command through the configured shell (cmd.exe or
+// PowerShell). Legacy `sh -c "... | base64 -d | sh"` wrappers sent by older
+// SDKs are translated into a native shell command first, with extracted env
+// vars applied to the process environment — same convention as the SSH
+// non-PTY handler (ssh/server_windows.go).
 //
-//	@Summary		Execute a command
-//	@Description	Execute a shell command and return the output and exit code
-//	@Tags			process
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		ExecuteRequest	true	"Command execution request"
-//	@Success		200		{object}	ExecuteResponse
-//	@Router			/process/execute [post]
-//
-//	@id				ExecuteCommand
-func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		startTime := time.Now()
+// Unlike the Linux build, which pipes the command to the shell via stdin to
+// avoid ARG_MAX, the command here is passed on the command line
+// (`<shell> /C <command>`), so Windows length limits apply: cmd.exe rejects
+// lines longer than 8191 characters ("The input line is too long") and
+// CreateProcess caps the full command line at 32767. Oversized commands fail
+// loudly with a non-zero exit. The divergence is deliberate: the obvious
+// workaround — writing the command to a temp .cmd and running that — is not
+// semantically transparent (batch files echo commands and expand % args
+// differently than `/C`), which would turn today's loud failure into silent
+// mangling. A semantics-preserving large-command path is future work.
+func buildExecCmd(command string) *exec.Cmd {
+	parsedCommand, envVars := common.ParseShellWrapper(command)
+	cmd := common.NewShellCommand(common.GetShell(), parsedCommand)
+	common.ApplyEnvs(cmd, envVars)
+	// I/O-drain backstop: if the shell dies but an orphaned descendant still
+	// holds the inherited output pipe, stop waiting for EOF after this delay
+	// instead of wedging the handler forever (golang/go#23019). The Linux
+	// build gets the equivalent from childreap.Wait's hangTimeout.
+	cmd.WaitDelay = 30 * time.Second
+	return cmd
+}
 
-		var request ExecuteRequest
-		if err := c.ShouldBindJSON(&request); err != nil {
-			c.Error(common_errors.NewBadRequestError(fmt.Errorf("invalid request body: %w", err)))
-			return
-		}
-
-		if strings.TrimSpace(request.Command) == "" {
-			c.Error(common_errors.NewBadRequestError(errors.New("command cannot be empty or whitespace-only")))
-			return
-		}
-
-		if err := common.ValidateEnvKeys(request.Envs); err != nil {
-			c.Error(common_errors.NewBadRequestError(err))
-			return
-		}
-
-		parsedCommand, envVars := common.ParseShellWrapper(request.Command)
-		if parsedCommand != request.Command {
-			logger.Debug("Parsed shell wrapper", "raw", request.Command, "parsed", parsedCommand, "env", envVars)
-		}
-
-		shell := common.GetShell()
-
-		isPowerShell := common.IsPowerShell(shell)
-		finalCommand := common.BuildWindowsCommandForShell(parsedCommand, envVars, isPowerShell)
-
-		logger.Debug("ExecuteCommand: prepared",
-			"shell", shell,
-			"is_powershell", isPowerShell,
-			"command", finalCommand,
-			"setup_duration", time.Since(startTime),
-		)
-
-		execStartTime := time.Now()
-
-		cmd := common.ShellCommand(shell, finalCommand)
-
-		if request.Cwd != nil {
-			cmd.Dir = *request.Cwd
-		}
-		common.ApplyEnvs(cmd, request.Envs)
-
-		timeout := 360 * time.Second
-		if request.Timeout != nil && *request.Timeout > 0 {
-			timeout = time.Duration(*request.Timeout) * time.Second
-		}
-
-		var timeoutReached atomic.Bool
-		timer := time.AfterFunc(timeout, func() {
-			timeoutReached.Store(true)
-			if cmd.Process != nil {
-				if err := common.KillProcessTree(cmd.Process.Pid); err != nil {
-					logger.Error("Failed to kill process tree on timeout", "error", err)
-					return
-				}
-			}
-		})
-		defer timer.Stop()
-
-		output, err := cmd.CombinedOutput()
-		execDuration := time.Since(execStartTime)
-		logger.Debug("ExecuteCommand: completed",
-			"execution_duration", execDuration,
-			"total_duration", time.Since(startTime),
-		)
-
-		if err != nil {
-			if timeoutReached.Load() {
-				c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
-				return
-			}
-			if exitError, ok := err.(*exec.ExitError); ok {
-				exitCode := exitError.ExitCode()
-				c.JSON(http.StatusOK, ExecuteResponse{
-					ExitCode: exitCode,
-					Result:   string(output),
-				})
-				return
-			}
-			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: -1,
-				Result:   string(output),
-			})
-			return
-		}
-
-		if cmd.ProcessState == nil {
-			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: -1,
-				Result:   string(output),
-			})
-			return
-		}
-
-		exitCode := cmd.ProcessState.ExitCode()
-		c.JSON(http.StatusOK, ExecuteResponse{
-			ExitCode: exitCode,
-			Result:   string(output),
-		})
+// killExecProcessGroup kills the shell and its descendants via taskkill /T,
+// which walks the live parent-PID chain — the closest Windows equivalent of
+// the process-group SIGKILL in execute_linux.go, with one known gap: Windows
+// does not reparent orphans, so a grandchild whose intermediate parent has
+// already exited is unreachable from the root and survives (the Linux pgid
+// kill still catches that case). Such a survivor holding the inherited output
+// pipe is exactly what cmd.WaitDelay above bounds. The faithful primitive is
+// a Job Object created at spawn (JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE +
+// TerminateJobObject on timeout) — tracked as follow-up work. Mirrors
+// coderun.killProcessGroupHard.
+func killExecProcessGroup(cmd *exec.Cmd) error {
+	if err := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(cmd.Process.Pid)).Run(); err == nil {
+		return nil
 	}
+	// Fall back to killing the immediate process (e.g. taskkill unavailable).
+	p, err := os.FindProcess(cmd.Process.Pid)
+	if err != nil {
+		return err
+	}
+	return p.Kill()
 }

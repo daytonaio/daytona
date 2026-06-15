@@ -8,6 +8,7 @@ package computeruse
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 	"unicode/utf16"
@@ -30,7 +31,6 @@ var (
 	procGetCursorPos      = user32.NewProc("GetCursorPos")
 	procSetCursorPos      = user32.NewProc("SetCursorPos")
 	procSendInput         = user32.NewProc("SendInput")
-	procGetSystemMetrics  = user32.NewProc("GetSystemMetrics")
 	procVkKeyScanW        = user32.NewProc("VkKeyScanW")
 	procEnumWindows       = user32.NewProc("EnumWindows")
 	procGetWindowTextW    = user32.NewProc("GetWindowTextW")
@@ -38,12 +38,7 @@ var (
 	procIsWindowVisible   = user32.NewProc("IsWindowVisible")
 	procGetWindowRect     = user32.NewProc("GetWindowRect")
 	procMapVirtualKeyW    = user32.NewProc("MapVirtualKeyW")
-)
-
-// SystemMetric indices used with GetSystemMetrics.
-const (
-	smCxScreen = 0
-	smCyScreen = 1
+	procGetForegroundWnd  = user32.NewProc("GetForegroundWindow")
 )
 
 // SendInput type field.
@@ -192,12 +187,14 @@ type keybdInput struct {
 	ExtraInfo uintptr
 }
 
-// inputUnion is large enough to hold any INPUT.U variant.
-//
-// MOUSEINPUT is the largest at 32 bytes on 64-bit Windows (5 * 4-byte fields
-// plus an 8-byte ExtraInfo pointer). KEYBDINPUT is smaller, padding makes the
-// union 32 bytes total. We allocate 32 bytes to be safe across architectures.
-type inputUnion [32]byte
+// inputUnion is large enough to hold any INPUT.U variant on 64-bit Windows:
+// MOUSEINPUT is the largest at 32 bytes (five 4-byte fields plus an 8-byte
+// ExtraInfo pointer). It is [4]uint64 rather than [32]byte so the union —
+// and therefore inputStruct — carries 8-byte alignment, which the unsafe
+// casts in asMouse/asKeyboard require (both structs hold a pointer-sized
+// ExtraInfo field). This mirrors the 64-bit (amd64/arm64) INPUT layout only;
+// 32-bit Windows uses a 28-byte INPUT and is not supported.
+type inputUnion [4]uint64
 
 // inputStruct mirrors the Win32 INPUT tagged-union.
 type inputStruct struct {
@@ -229,19 +226,47 @@ func sendInputs(inputs []inputStruct) error {
 		unsafe.Sizeof(inputs[0]),
 	)
 	if int(ret) != len(inputs) {
-		return fmt.Errorf("SendInput sent %d/%d events: %v", ret, len(inputs), err)
+		return sendInputError(int(ret), len(inputs), err)
 	}
 	return nil
+}
+
+// sendInputError formats a partial-send failure from SendInput. When input
+// is blocked by UIPI or the calling desktop is inaccessible, SendInput
+// returns 0 *without* setting a last error, so the raw errno would read
+// "The operation completed successfully." — actively misleading on the
+// documented dominant failure mode. Report that case explicitly; keep the
+// errno for genuine failures.
+func sendInputError(sent, total int, err error) error {
+	if errno, ok := err.(syscall.Errno); ok && errno == 0 {
+		return fmt.Errorf("SendInput sent %d/%d events: no error code set (input likely blocked by UIPI or an inaccessible desktop)", sent, total)
+	}
+	return fmt.Errorf("SendInput sent %d/%d events: %v", sent, total, err)
 }
 
 // ---------------------------------------------------------------------------
 // Mouse
 // ---------------------------------------------------------------------------
 
-func getMousePosition() (int, int) {
+// getMousePositionChecked reads the cursor position, reporting failure
+// instead of fabricating (0,0). GetCursorPos fails with ERROR_ACCESS_DENIED
+// when the calling desktop is unavailable (locked session, secure desktop),
+// so API handlers must surface the error rather than return zero values.
+func getMousePositionChecked() (int, int, error) {
 	var pt pointStruct
-	procGetCursorPos.Call(uintptr(unsafe.Pointer(&pt)))
-	return int(pt.X), int(pt.Y)
+	ret, _, err := procGetCursorPos.Call(uintptr(unsafe.Pointer(&pt)))
+	if ret == 0 {
+		return 0, 0, fmt.Errorf("GetCursorPos failed: %v", err)
+	}
+	return int(pt.X), int(pt.Y), nil
+}
+
+// getMousePosition is the Windows side of the per-OS mouse-position seam
+// used by the shared screenshot pipeline in screenshot.go, where cursor
+// drawing is best-effort. Mouse API handlers use getMousePositionChecked.
+func getMousePosition() (int, int) {
+	x, y, _ := getMousePositionChecked()
+	return x, y
 }
 
 func setMousePosition(x, y int) error {
@@ -252,37 +277,53 @@ func setMousePosition(x, y int) error {
 	return nil
 }
 
-// buttonFlags maps a logical button name to (downFlag, upFlag).
+// buttonFlags maps a canonical button name (as produced by
+// normalizeMouseButton) to (downFlag, upFlag).
 func buttonFlags(button string) (uint32, uint32, error) {
-	switch strings.ToLower(button) {
-	case "", "left":
+	switch button {
+	case "left":
 		return mouseEventF_LEFTDOWN, mouseEventF_LEFTUP, nil
 	case "right":
 		return mouseEventF_RIGHTDOWN, mouseEventF_RIGHTUP, nil
 	case "middle":
 		return mouseEventF_MIDDLEDOWN, mouseEventF_MIDDLEUP, nil
 	default:
-		return 0, 0, fmt.Errorf("unknown mouse button: %q", button)
+		return 0, 0, fmt.Errorf("unsupported mouse button %q: expected one of left, right, middle", button)
 	}
 }
 
 func mouseClick(button string, double bool) error {
+	// Mirror keyTap below: a button successfully pressed must be released
+	// even when a later SendInput fails (UIPI, secure desktop, locked
+	// session), or it stays logically held system-wide and turns every
+	// subsequent move into a drag. The release here is best-effort; the
+	// success path clears held as it releases with error propagation.
+	held := false
+	defer func() {
+		if held {
+			_ = mouseUp(button)
+		}
+	}()
 	if err := mouseDown(button); err != nil {
 		return err
 	}
+	held = true
 	time.Sleep(20 * time.Millisecond)
 	if err := mouseUp(button); err != nil {
 		return err
 	}
+	held = false
 	if double {
 		time.Sleep(50 * time.Millisecond)
 		if err := mouseDown(button); err != nil {
 			return err
 		}
+		held = true
 		time.Sleep(20 * time.Millisecond)
 		if err := mouseUp(button); err != nil {
 			return err
 		}
+		held = false
 	}
 	return nil
 }
@@ -307,20 +348,51 @@ func mouseUp(button string) error {
 	return sendInputs(inputs)
 }
 
+// maxScrollAmount bounds a single scroll request. Each notch becomes one
+// SendInput event below, so the bound caps how large an input batch a single
+// request can synthesize; anything remotely near it is garbage input. Keep in
+// sync with the identical bound in mouse.go (linux).
+const maxScrollAmount = 10000
+
+// scrollInputs builds one MOUSEEVENTF_WHEEL event per notch, each carrying
+// exactly ±wheelDelta. Windows delivers a wheel event's delta to consumers as
+// a signed 16-bit value (WM_MOUSEWHEEL reads (short)HIWORD(wParam); raw input
+// reads RAWMOUSE.usButtonData as a short), so a single event whose delta
+// exceeds ±32767 is truncated mod 2^16 and can silently flip the scroll
+// direction: 120*274 = 32880 reads back as -32656, ~272 notches the wrong
+// way. Per-notch events stay far below that ceiling, match real-wheel
+// semantics, and mirror the linux path (one notch per ScrollSmooth
+// iteration).
+func scrollInputs(amount int, direction string) ([]inputStruct, error) {
+	if amount < 0 || amount > maxScrollAmount {
+		return nil, fmt.Errorf("scroll amount %d exceeds maximum of %d", amount, maxScrollAmount)
+	}
+	var delta int32
+	switch direction {
+	case scrollDirectionUp:
+		delta = wheelDelta // Positive delta scrolls up.
+	case scrollDirectionDown:
+		delta = -wheelDelta
+	default:
+		return nil, fmt.Errorf("unsupported scroll direction %q: expected up or down", direction)
+	}
+	inputs := make([]inputStruct, amount)
+	for i := range inputs {
+		inputs[i].asMouse(mouseInput{
+			MouseData: uint32(delta),
+			DwFlags:   mouseEventF_WHEEL,
+		})
+	}
+	return inputs, nil
+}
+
+// mouseScroll scrolls by `amount` wheel notches in canonical `direction`
+// ("up" or "down", as produced by normalizeScrollDirection).
 func mouseScroll(amount int, direction string) error {
-	if amount <= 0 {
-		amount = 1
+	inputs, err := scrollInputs(amount, direction)
+	if err != nil {
+		return err
 	}
-	delta := int32(wheelDelta * amount)
-	dir := strings.ToLower(direction)
-	if dir == "down" {
-		delta = -delta
-	}
-	inputs := []inputStruct{{}}
-	inputs[0].asMouse(mouseInput{
-		MouseData: uint32(delta),
-		DwFlags:   mouseEventF_WHEEL,
-	})
 	return sendInputs(inputs)
 }
 
@@ -338,9 +410,13 @@ func resolveKey(name string) (uint16, bool, bool) {
 	if vk, ok := virtualKeyCodes[lower]; ok {
 		return vk, extendedVirtualKeys[lower], true
 	}
-	// Single printable character — use VkKeyScanW to translate.
+	// Single printable character — use VkKeyScanW to translate. VkKeyScanW
+	// takes a WCHAR, so only BMP runes are eligible; a non-BMP rune must
+	// return ok=false so the caller takes the Unicode fallback (typed as a
+	// surrogate pair) instead of silently truncating to a colliding BMP
+	// code unit (e.g. U+10030 -> 0x0030, the '0' key).
 	runes := []rune(name)
-	if len(runes) == 1 {
+	if len(runes) == 1 && runes[0] <= 0xFFFF {
 		ret, _, _ := procVkKeyScanW.Call(uintptr(uint16(runes[0])))
 		// Low byte = VK code. -1 means no translation.
 		if int16(ret) != -1 {
@@ -387,11 +463,24 @@ func keyTap(key string, modifiers []string) error {
 		mods = append(mods, resolved{vk, ext})
 	}
 
+	// Every key successfully pressed must be released even when a later
+	// SendInput fails (UIPI, secure desktop, locked session), or it stays
+	// logically held system-wide and corrupts all subsequent input. Releases
+	// here are best-effort; the success path below pops keys as it releases
+	// them with error propagation.
+	var pressed []resolved
+	defer func() {
+		for i := len(pressed) - 1; i >= 0; i-- {
+			_ = keyPress(pressed[i].vk, pressed[i].extended, true)
+		}
+	}()
+
 	// Press modifiers down.
 	for _, mod := range mods {
 		if err := keyPress(mod.vk, mod.extended, false); err != nil {
 			return err
 		}
+		pressed = append(pressed, mod)
 	}
 
 	// Tap the main key.
@@ -399,10 +488,12 @@ func keyTap(key string, modifiers []string) error {
 		if err := keyPress(vk, ext, false); err != nil {
 			return err
 		}
+		pressed = append(pressed, resolved{vk, ext})
 		time.Sleep(10 * time.Millisecond)
 		if err := keyPress(vk, ext, true); err != nil {
 			return err
 		}
+		pressed = pressed[:len(pressed)-1]
 	} else {
 		// Last-ditch fallback: type as a single unicode rune.
 		if err := typeString(key, 0); err != nil {
@@ -411,10 +502,11 @@ func keyTap(key string, modifiers []string) error {
 	}
 
 	// Release modifiers in reverse order.
-	for i := len(mods) - 1; i >= 0; i-- {
-		if err := keyPress(mods[i].vk, mods[i].extended, true); err != nil {
+	for i := len(pressed) - 1; i >= 0; i-- {
+		if err := keyPress(pressed[i].vk, pressed[i].extended, true); err != nil {
 			return err
 		}
+		pressed = pressed[:i]
 	}
 	return nil
 }
@@ -425,20 +517,14 @@ func typeString(text string, delay int) error {
 	if text == "" {
 		return nil
 	}
-	// utf16-encode so we send a surrogate pair where needed.
-	utf16Text := utf16.Encode([]rune(text))
-	for _, r := range utf16Text {
-		down := inputStruct{}
-		down.asKeyboard(keybdInput{
-			WScan:   r,
-			DwFlags: keyEventF_UNICODE,
-		})
-		up := inputStruct{}
-		up.asKeyboard(keybdInput{
-			WScan:   r,
-			DwFlags: keyEventF_UNICODE | keyEventF_KEYUP,
-		})
-		if err := sendInputs([]inputStruct{down, up}); err != nil {
+	// Each rune's UTF-16 code units go out in a single SendInput call:
+	// within one call the events cannot interleave with other synthesized
+	// input, so a non-BMP rune's surrogate halves always arrive paired and
+	// the delay applies once per character, not per code unit.
+	inputs := make([]inputStruct, 0, 4)
+	for _, r := range text {
+		inputs = appendRuneInputs(inputs[:0], r)
+		if err := sendInputs(inputs); err != nil {
 			return err
 		}
 		if delay > 0 {
@@ -448,19 +534,33 @@ func typeString(text string, delay int) error {
 	return nil
 }
 
+// appendRuneInputs appends the KEYEVENTF_UNICODE down/up events that type r:
+// one down/up pair per UTF-16 code unit, so a non-BMP rune contributes four
+// events (its high then low surrogate).
+func appendRuneInputs(inputs []inputStruct, r rune) []inputStruct {
+	var units [2]uint16
+	for _, cu := range utf16.AppendRune(units[:0], r) {
+		var down, up inputStruct
+		down.asKeyboard(keybdInput{
+			WScan:   cu,
+			DwFlags: keyEventF_UNICODE,
+		})
+		up.asKeyboard(keybdInput{
+			WScan:   cu,
+			DwFlags: keyEventF_UNICODE | keyEventF_KEYUP,
+		})
+		inputs = append(inputs, down, up)
+	}
+	return inputs
+}
+
 // ---------------------------------------------------------------------------
 // Display / windows enumeration
 // ---------------------------------------------------------------------------
 
-func getScreenSize() (int, int) {
-	w, _, _ := procGetSystemMetrics.Call(smCxScreen)
-	h, _, _ := procGetSystemMetrics.Call(smCyScreen)
-	return int(int32(w)), int(int32(h))
-}
-
 // windowInfo describes a top-level window enumerated by getWindowsList.
 type windowInfo struct {
-	Handle  uintptr
+	HWND    uintptr
 	Title   string
 	Visible bool
 	X       int
@@ -469,13 +569,14 @@ type windowInfo struct {
 	Height  int
 }
 
-// getWindowsList enumerates all top-level windows.
-func getWindowsList() []windowInfo {
-	var collected []windowInfo
-
-	// Keep the callback alive for the duration of the call by allocating it
-	// here and referencing it directly via syscall.NewCallback.
-	cb := syscall.NewCallback(func(hwnd uintptr, _ uintptr) uintptr {
+// EnumWindows invokes its callback synchronously on the calling thread, and
+// syscall.NewCallback allocations are permanent (the runtime caps a process
+// at ~2000 callbacks), so a single package-level callback feeds a
+// mutex-guarded accumulator instead of compiling a fresh closure per call.
+var (
+	enumWindowsMu        sync.Mutex
+	enumWindowsCollected []windowInfo
+	enumWindowsCallback  = syscall.NewCallback(func(hwnd uintptr, _ uintptr) uintptr {
 		visibleRet, _, _ := procIsWindowVisible.Call(hwnd)
 		visible := visibleRet != 0
 
@@ -502,8 +603,8 @@ func getWindowsList() []windowInfo {
 		// Skip windows with empty titles and that are invisible — they're
 		// usually internal Win32 helpers that pollute the listing.
 		if title != "" || visible {
-			collected = append(collected, windowInfo{
-				Handle:  hwnd,
+			enumWindowsCollected = append(enumWindowsCollected, windowInfo{
+				HWND:    hwnd,
 				Title:   title,
 				Visible: visible,
 				X:       x,
@@ -514,6 +615,29 @@ func getWindowsList() []windowInfo {
 		}
 		return 1 // continue enumeration
 	})
-	procEnumWindows.Call(cb, 0)
-	return collected
+)
+
+// getWindowsList enumerates all top-level windows. The enumeration callback
+// always returns 1, so a zero return from EnumWindows is a real failure
+// (e.g. inaccessible desktop), not an aborted walk — report it instead of
+// passing off an empty desktop.
+func getWindowsList() ([]windowInfo, error) {
+	enumWindowsMu.Lock()
+	defer enumWindowsMu.Unlock()
+
+	enumWindowsCollected = nil
+	ret, _, err := procEnumWindows.Call(enumWindowsCallback, 0)
+	collected := enumWindowsCollected
+	enumWindowsCollected = nil
+	if ret == 0 {
+		return nil, fmt.Errorf("EnumWindows failed: %v", err)
+	}
+	return collected, nil
+}
+
+// getForegroundWindow returns the HWND of the current foreground window, or
+// 0 when no window has focus (e.g. a screensaver or secure desktop is up).
+func getForegroundWindow() uintptr {
+	hwnd, _, _ := procGetForegroundWnd.Call()
+	return hwnd
 }
