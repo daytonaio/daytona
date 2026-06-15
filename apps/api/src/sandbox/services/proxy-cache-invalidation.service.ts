@@ -10,6 +10,7 @@ import Redis from 'ioredis'
 
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
+import { SandboxAuthTokenRotatedEvent } from '../events/sandbox-auth-token-rotated.event'
 import { SandboxPublicStatusUpdatedEvent } from '../events/sandbox-public-status-updated.event'
 
 @Injectable()
@@ -17,6 +18,7 @@ export class ProxyCacheInvalidationService {
   private readonly logger = new Logger(ProxyCacheInvalidationService.name)
   private static readonly RUNNER_INFO_CACHE_PREFIX = 'proxy:sandbox-runner-info:'
   private static readonly PUBLIC_CACHE_PREFIX = 'proxy:sandbox-public:'
+  private static readonly AUTH_KEY_VALID_CACHE_PREFIX = 'proxy:sandbox-auth-key-valid:'
 
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
@@ -28,6 +30,11 @@ export class ProxyCacheInvalidationService {
   @OnEvent(SandboxEvents.PUBLIC_STATUS_UPDATED)
   async handleSandboxPublicStatusUpdated(event: SandboxPublicStatusUpdatedEvent): Promise<void> {
     await this.invalidatePublicCache(event.sandbox.id)
+  }
+
+  @OnEvent(SandboxEvents.AUTH_TOKEN_ROTATED)
+  async handleSandboxAuthTokenRotated(event: SandboxAuthTokenRotatedEvent): Promise<void> {
+    await this.invalidateAuthKeyValidCache(event.sandbox.id, event.previousAuthToken)
   }
 
   private async invalidateRunnerCache(sandboxId: string): Promise<void> {
@@ -45,6 +52,23 @@ export class ProxyCacheInvalidationService {
       this.logger.debug(`Invalidated sandbox public cache for ${sandboxId}`)
     } catch (error) {
       this.logger.warn(`Failed to invalidate public cache for sandbox ${sandboxId}: ${error.message}`)
+    }
+  }
+
+  // The proxy caches a positive (sandboxId, authKey) validation decision for up to two minutes.
+  // When the auth token rotates, evict the stale decision for the previous token so it stops
+  // authorizing immediately instead of remaining valid until the cache entry expires.
+  private async invalidateAuthKeyValidCache(sandboxId: string, previousAuthToken: string): Promise<void> {
+    if (!previousAuthToken) {
+      return
+    }
+    try {
+      await this.redis.del(
+        `${ProxyCacheInvalidationService.AUTH_KEY_VALID_CACHE_PREFIX}${sandboxId}:${previousAuthToken}`,
+      )
+      this.logger.debug(`Invalidated sandbox auth key valid cache for ${sandboxId}`)
+    } catch (error) {
+      this.logger.warn(`Failed to invalidate auth key valid cache for sandbox ${sandboxId}: ${error.message}`)
     }
   }
 }

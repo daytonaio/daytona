@@ -15,6 +15,7 @@ import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { SandboxDesiredStateUpdatedEvent } from '../events/sandbox-desired-state-updated.event'
 import { SandboxPublicStatusUpdatedEvent } from '../events/sandbox-public-status-updated.event'
+import { SandboxAuthTokenRotatedEvent } from '../events/sandbox-auth-token-rotated.event'
 import { SandboxOrganizationUpdatedEvent } from '../events/sandbox-organization-updated.event'
 import { SandboxLookupCacheInvalidationService } from '../services/sandbox-lookup-cache-invalidation.service'
 import { SandboxFork } from '../entities/sandbox-fork.entity'
@@ -253,7 +254,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
    */
   private emitUpdateEvents(
     updatedSandbox: Sandbox,
-    previousSandbox: Pick<Sandbox, 'state' | 'desiredState' | 'public' | 'organizationId'>,
+    previousSandbox: Pick<Sandbox, 'state' | 'desiredState' | 'public' | 'organizationId' | 'authToken'>,
   ): void {
     if (previousSandbox.state !== updatedSandbox.state) {
       this.eventEmitter.emit(
@@ -273,6 +274,13 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       this.eventEmitter.emit(
         SandboxEvents.PUBLIC_STATUS_UPDATED,
         new SandboxPublicStatusUpdatedEvent(updatedSandbox, previousSandbox.public, updatedSandbox.public),
+      )
+    }
+
+    if (previousSandbox.authToken !== updatedSandbox.authToken) {
+      this.eventEmitter.emit(
+        SandboxEvents.AUTH_TOKEN_ROTATED,
+        new SandboxAuthTokenRotatedEvent(updatedSandbox, previousSandbox.authToken, updatedSandbox.authToken),
       )
     }
 
