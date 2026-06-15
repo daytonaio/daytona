@@ -148,9 +148,20 @@ export class SandboxStartAction extends SandboxAction {
     const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, snapshot.ref)
 
     if (!snapshotRunner) {
-      // No pull is tracked for this runner — the sandbox may already exist on the runner and be
-      // pulling the image inline during create; let the runner report its state.
-      return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
+      // Tracker row was dropped (e.g. runner left READY → snapshot-state cron deletes it). Re-pull so
+      // the cron drives it to READY again; skip if the runner is down — the 60-min timeout above fails it.
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner?.state === RunnerState.READY) {
+        await this.runnerService.createSnapshotRunnerEntry(
+          runner.id,
+          snapshot.ref,
+          SnapshotRunnerState.PULLING_SNAPSHOT,
+        )
+        this.pullSnapshotToRunner(snapshot, runner).catch((err) =>
+          this.logger.error(`Failed to re-pull snapshot to runner ${runner.id}: ${err?.message ?? err}`),
+        )
+      }
+      return SYNC_AGAIN
     }
 
     switch (snapshotRunner.state) {
@@ -220,6 +231,28 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   private async handleUnassignedRunnerSandbox(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+    isBuild = false,
+  ): Promise<SyncState> {
+    // Serialize GPU assignment per region with the same lock the synchronous create path uses, so
+    // concurrent assignments can't pick the same runner before one persists.
+    if (sandbox.gpu > 0) {
+      const key = `gpu-runner-assignment:${sandbox.region}`
+      await this.redisLockProvider.waitForLock(key, 60, 30000)
+      try {
+        return await this.assignUnassignedRunnerSandbox(sandbox, lockCode, isBuild)
+      } finally {
+        await this.redisLockProvider
+          .unlock(key)
+          .catch((err) => this.logger.error('Failed to release GPU runner assignment lock', err))
+      }
+    }
+    return this.assignUnassignedRunnerSandbox(sandbox, lockCode, isBuild)
+  }
+
+  // Picks a runner for an unassigned sandbox and starts the pull/build. GPU locking is the caller's job.
+  private async assignUnassignedRunnerSandbox(
     sandbox: Sandbox,
     lockCode: LockCode,
     isBuild = false,
