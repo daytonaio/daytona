@@ -38,6 +38,13 @@ type RunnerInfo struct {
 const SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
 const SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
 const SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
+
+// SANDBOX_AUTH_COOKIE_MAX_AGE_SECONDS bounds both the auth cookie's browser
+// Max-Age and the shared securecookie signer's server-side acceptance window.
+// Without an explicit signer MaxAge, gorilla/securecookie accepts a copied
+// cookie value for its 30-day default, well past the 1h the browser is told.
+const SANDBOX_AUTH_COOKIE_MAX_AGE_SECONDS = 3600
+
 const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Daytona-Skip-Last-Activity-Update"
 const ACTIVITY_POLL_STOP_KEY = "daytona-activity-poll-stop"
 const TERMINAL_PORT = "22222"
@@ -74,6 +81,10 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 	}
 
 	proxy.secureCookie = securecookie.New([]byte(config.ProxyApiKey), nil)
+	// Reject signed cookies older than their advertised lifetime instead of the
+	// gorilla/securecookie 30-day default, so a captured cookie cannot be replayed
+	// out-of-browser long after it should have expired.
+	proxy.secureCookie.MaxAge(SANDBOX_AUTH_COOKIE_MAX_AGE_SECONDS)
 	if config.CookieDomain != nil {
 		cookieDomain := GetCookieDomainFromHost(*config.CookieDomain)
 		proxy.cookieDomain = &cookieDomain

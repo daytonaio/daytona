@@ -124,7 +124,7 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxId, encoded, 3600, "/", cookieDomain, p.config.EnableTLS, true)
+	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxId, encoded, SANDBOX_AUTH_COOKIE_MAX_AGE_SECONDS, "/", cookieDomain, p.config.EnableTLS, true)
 
 	// Redirect back to the original URL
 	ctx.Redirect(http.StatusFound, returnTo)

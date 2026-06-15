@@ -134,7 +134,7 @@ func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxI
 		return "", fmt.Errorf("failed to encode cookie: %w", err)
 	}
 
-	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxIdOrSignedToken, encoded, 3600, "/", cookieDomain, p.config.EnableTLS, true)
+	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxIdOrSignedToken, encoded, SANDBOX_AUTH_COOKIE_MAX_AGE_SECONDS, "/", cookieDomain, p.config.EnableTLS, true)
 
 	return sandboxId, nil
 }
