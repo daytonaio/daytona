@@ -69,8 +69,8 @@ updates:
   # npm: scope to production manifests only.
   # NOTE: This config controls Dependabot PR creation, NOT GitHub Advisory
   # Database alert recurrence. Alerts in guides/ and runtime-tests/ paths
-  # are dismissed in GitHub directly (see scripts/dependabot-dismiss.sh
-  # for the auditable dismissal manifest and rationale).
+  # are dismissed in GitHub directly, with the rationale recorded on each
+  # dismissal in the Dependabot alerts UI.
   - package-ecosystem: npm
     directories:
       - "/"
@@ -99,5 +99,38 @@ updates:
       pip-prod:
         patterns:
           - "*"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # gomod: Go workspace modules (go.work). Without this they get
+  # security-only updates and never version updates, so they drift.
+  - package-ecosystem: gomod
+    directories:
+      - "/apps/cli"
+      - "/apps/daemon"
+      - "/apps/daytona-e2e"
+      - "/apps/otel-collector/exporter"
+      - "/apps/proxy"
+      - "/apps/runner"
+      - "/apps/snapshot-manager"
+      - "/apps/ssh-gateway"
+      - "/libs/api-client-go"
+      - "/libs/common-go"
+      - "/libs/computer-use"
+      - "/libs/sdk-go"
+      - "/libs/toolbox-api-client-go"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      gomod-prod:
+        patterns:
+          - "*"
+    ignore:
+      # Go module majors are import-path changes (/v2, /v3) and always
+      # breaking; land them manually after review.
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
     commit-message:
       prefix: "chore(deps)"
