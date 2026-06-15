@@ -14,7 +14,6 @@ import (
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/go-vgo/robotgo"
-	"github.com/kbinani/screenshot"
 )
 
 // ImageCompressionParams holds parameters for image compression
@@ -103,20 +102,43 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 		Scale:   req.Scale,
 	}
 
-	bounds := screenshot.GetDisplayBounds(0)
-	img, err := screenshot.CaptureRect(bounds)
+	img, mouseX, mouseY, err := captureWithCursor(req.ShowCursor, 0, 0, capturePrimaryDisplay)
 	if err != nil {
 		return nil, err
 	}
 
+	return encodeCompressedScreenshot(img, params, req.ShowCursor, mouseX, mouseY, 0, 0)
+}
+
+// TakeCompressedRegionScreenshot takes a region screenshot with compression options
+func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.CompressedRegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	params := ImageCompressionParams{
+		Format:  req.Format,
+		Quality: req.Quality,
+		Scale:   req.Scale,
+	}
+
+	if err := validateScreenshotRegion(req.Width, req.Height); err != nil {
+		return nil, err
+	}
+
+	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
+	img, mouseX, mouseY, err := captureWithCursor(req.ShowCursor, req.X, req.Y, func() (*image.RGBA, error) {
+		return captureRect(rect)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to capture screenshot region x=%d y=%d width=%d height=%d: %w", req.X, req.Y, req.Width, req.Height, err)
+	}
+
+	return encodeCompressedScreenshot(img, params, req.ShowCursor, mouseX, mouseY, req.X, req.Y)
+}
+
+func encodeCompressedScreenshot(img image.Image, params ImageCompressionParams, showCursor bool, mouseX, mouseY, offsetX, offsetY int) (*computeruse.ScreenshotResponse, error) {
 	// Convert to RGBA for drawing
 	rgbaImg := image.NewRGBA(img.Bounds())
 	draw.Draw(rgbaImg, rgbaImg.Bounds(), img, image.Point{}, draw.Src)
 
-	// Draw cursor if requested
-	mouseX, mouseY := 0, 0
-	if req.ShowCursor {
-		mouseX, mouseY = robotgo.Location()
+	if showCursor && mouseX >= 0 && mouseX < img.Bounds().Dx() && mouseY >= 0 && mouseY < img.Bounds().Dy() {
 		drawCursor(rgbaImg, mouseX, mouseY)
 	}
 
@@ -133,67 +155,10 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 		SizeBytes:  len(imageData),
 	}
 
-	if req.ShowCursor {
+	if showCursor {
 		response.CursorPosition = &computeruse.Position{
-			X: int(float64(mouseX) * params.Scale),
-			Y: int(float64(mouseY) * params.Scale),
-		}
-	}
-
-	return response, nil
-}
-
-// TakeCompressedRegionScreenshot takes a region screenshot with compression options
-func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.CompressedRegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
-	params := ImageCompressionParams{
-		Format:  req.Format,
-		Quality: req.Quality,
-		Scale:   req.Scale,
-	}
-
-	if err := validateScreenshotRegion(req.Width, req.Height); err != nil {
-		return nil, err
-	}
-
-	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
-	img, err := screenshot.CaptureRect(rect)
-	if err != nil {
-		return nil, fmt.Errorf("failed to capture screenshot region x=%d y=%d width=%d height=%d: %w", req.X, req.Y, req.Width, req.Height, err)
-	}
-
-	// Convert to RGBA for drawing
-	rgbaImg := image.NewRGBA(img.Bounds())
-	draw.Draw(rgbaImg, rgbaImg.Bounds(), img, image.Point{}, draw.Src)
-
-	// Draw cursor if requested and it's within the region
-	mouseX, mouseY := 0, 0
-	if req.ShowCursor {
-		absoluteMouseX, absoluteMouseY := robotgo.Location()
-		mouseX = absoluteMouseX - req.X
-		mouseY = absoluteMouseY - req.Y
-
-		if mouseX >= 0 && mouseX < req.Width && mouseY >= 0 && mouseY < req.Height {
-			drawCursor(rgbaImg, mouseX, mouseY)
-		}
-	}
-
-	// Encode with compression
-	imageData, err := encodeImageWithCompression(rgbaImg, params)
-	if err != nil {
-		return nil, err
-	}
-
-	base64Str := base64.StdEncoding.EncodeToString(imageData)
-
-	response := &computeruse.ScreenshotResponse{
-		Screenshot: base64Str,
-		SizeBytes:  len(imageData),
-	}
-
-	if req.ShowCursor {
-		response.CursorPosition = &computeruse.Position{
-			X: req.X + int(float64(mouseX)*params.Scale),
-			Y: req.Y + int(float64(mouseY)*params.Scale),
+			X: offsetX + int(float64(mouseX)*params.Scale),
+			Y: offsetY + int(float64(mouseY)*params.Scale),
 		}
 	}
 
@@ -201,23 +166,14 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 }
 
 func (u *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error) {
-	n := screenshot.NumActiveDisplays()
-	displays := make([]computeruse.DisplayInfo, n)
-
-	for i := 0; i < n; i++ {
-		bounds := screenshot.GetDisplayBounds(i)
-		displays[i] = computeruse.DisplayInfo{
-			ID: i,
-			Position: computeruse.Position{
-				X: bounds.Min.X,
-				Y: bounds.Min.Y,
-			},
-			Size: computeruse.Size{
-				Width:  bounds.Dx(),
-				Height: bounds.Dy(),
-			},
-			IsActive: true, // Assuming all detected displays are active
-		}
+	var displays []computeruse.DisplayInfo
+	err := withX11Client(func() error {
+		var err error
+		displays, err = getDisplayInfos()
+		return err
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return &computeruse.DisplayInfoResponse{
@@ -229,31 +185,37 @@ func (u *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
 	// This is a simplified version - robotgo's window functions
 	// might need additional setup depending on the platform
 
-	titles, err := robotgo.FindIds("")
+	windows := make([]computeruse.WindowInfo, 0)
+	err := withX11Client(func() error {
+		titles, err := robotgo.FindIds("")
+		if err != nil {
+			return err
+		}
+
+		for _, id := range titles {
+			title := robotgo.GetTitle(id)
+			if title != "" {
+				// Get window position and size (this might need platform-specific implementation)
+				// For now, we'll use placeholder values
+				windows = append(windows, computeruse.WindowInfo{
+					ID:    id,
+					Title: title,
+					Position: computeruse.Position{
+						X: 0, // Would need platform-specific implementation
+						Y: 0, // Would need platform-specific implementation
+					},
+					Size: computeruse.Size{
+						Width:  0, // Would need platform-specific implementation
+						Height: 0, // Would need platform-specific implementation
+					},
+					IsActive: false, // Would need platform-specific implementation
+				})
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	windows := make([]computeruse.WindowInfo, 0)
-	for _, id := range titles {
-		title := robotgo.GetTitle(id)
-		if title != "" {
-			// Get window position and size (this might need platform-specific implementation)
-			// For now, we'll use placeholder values
-			windows = append(windows, computeruse.WindowInfo{
-				ID:    id,
-				Title: title,
-				Position: computeruse.Position{
-					X: 0, // Would need platform-specific implementation
-					Y: 0, // Would need platform-specific implementation
-				},
-				Size: computeruse.Size{
-					Width:  0, // Would need platform-specific implementation
-					Height: 0, // Would need platform-specific implementation
-				},
-				IsActive: false, // Would need platform-specific implementation
-			})
-		}
 	}
 
 	return &computeruse.WindowsResponse{

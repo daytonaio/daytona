@@ -14,8 +14,6 @@ import (
 	"os"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/go-vgo/robotgo"
-	"github.com/kbinani/screenshot"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -88,81 +86,42 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 	display := os.Getenv("DISPLAY")
 	log.Infof("TakeScreenshot: DISPLAY=%s", display)
 
-	bounds := screenshot.GetDisplayBounds(0)
-	img, err := screenshot.CaptureRect(bounds)
+	img, mouseX, mouseY, err := captureWithCursor(req.ShowCursor, 0, 0, capturePrimaryDisplay)
 	if err != nil {
 		log.Errorf("TakeScreenshot error: %v", err)
 		return nil, err
 	}
 
-	// Convert to RGBA for drawing
-	rgbaImg := image.NewRGBA(img.Bounds())
-	draw.Draw(rgbaImg, rgbaImg.Bounds(), img, image.Point{}, draw.Src)
-
-	// Draw cursor if requested
-	mouseX, mouseY := 0, 0
-	if req.ShowCursor {
-		mouseX, mouseY = robotgo.Location()
-		drawCursor(rgbaImg, mouseX, mouseY)
-	}
-
-	// Convert to base64
-	var buf bytes.Buffer
-	if err := png.Encode(&buf, rgbaImg); err != nil {
-		return nil, err
-	}
-
-	base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
-
-	response := &computeruse.ScreenshotResponse{
-		Screenshot: base64Str,
-		CursorPosition: &computeruse.Position{
-			X: mouseX,
-			Y: mouseY,
-		},
-	}
-
-	if req.ShowCursor {
-		response.CursorPosition = &computeruse.Position{
-			X: mouseX,
-			Y: mouseY,
-		}
-	}
-
-	return response, nil
+	return encodeScreenshot(img, req.ShowCursor, mouseX, mouseY, 0, 0)
 }
 
 func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
-	// Debug: Check DISPLAY environment variable
-	display := os.Getenv("DISPLAY")
-	log.Infof("TakeRegionScreenshot: DISPLAY=%s", display)
-
 	if err := validateScreenshotRegion(req.Width, req.Height); err != nil {
 		return nil, err
 	}
 
+	// Debug: Check DISPLAY environment variable
+	display := os.Getenv("DISPLAY")
+	log.Infof("TakeRegionScreenshot: DISPLAY=%s", display)
+
 	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
-	img, err := screenshot.CaptureRect(rect)
+	img, mouseX, mouseY, err := captureWithCursor(req.ShowCursor, req.X, req.Y, func() (*image.RGBA, error) {
+		return captureRect(rect)
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to capture screenshot region x=%d y=%d width=%d height=%d: %w", req.X, req.Y, req.Width, req.Height, err)
 	}
 
+	return encodeScreenshot(img, req.ShowCursor, mouseX, mouseY, req.X, req.Y)
+}
+
+func encodeScreenshot(img image.Image, showCursor bool, mouseX, mouseY, offsetX, offsetY int) (*computeruse.ScreenshotResponse, error) {
 	// Convert to RGBA for drawing
 	rgbaImg := image.NewRGBA(img.Bounds())
 	draw.Draw(rgbaImg, rgbaImg.Bounds(), img, image.Point{}, draw.Src)
 
-	// Draw cursor if requested and it's within the region
-	mouseX, mouseY := 0, 0
-	if req.ShowCursor {
-		absoluteMouseX, absoluteMouseY := robotgo.Location()
-		// Convert to relative coordinates within the region
-		mouseX = absoluteMouseX - req.X
-		mouseY = absoluteMouseY - req.Y
-
-		// Only draw if cursor is within the region
-		if mouseX >= 0 && mouseX < req.Width && mouseY >= 0 && mouseY < req.Height {
-			drawCursor(rgbaImg, mouseX, mouseY)
-		}
+	if showCursor && mouseX >= 0 && mouseX < img.Bounds().Dx() && mouseY >= 0 && mouseY < img.Bounds().Dy() {
+		drawCursor(rgbaImg, mouseX, mouseY)
 	}
 
 	var buf bytes.Buffer
@@ -174,16 +133,12 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		CursorPosition: &computeruse.Position{
-			X: mouseX + req.X,
-			Y: mouseY + req.Y,
-		},
 	}
 
-	if req.ShowCursor {
+	if showCursor {
 		response.CursorPosition = &computeruse.Position{
-			X: mouseX + req.X,
-			Y: mouseY + req.Y,
+			X: mouseX + offsetX,
+			Y: mouseY + offsetY,
 		}
 	}
 
