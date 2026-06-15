@@ -406,17 +406,22 @@ export const CreateSandboxSheet = ({
     },
     [form, getRegionsForSnapshot, setRegionFromAvailableRegions],
   )
+  const handleSnapshotValueChange = useCallback(
+    (snapshotName: string | undefined) => {
+      form.setFieldValue('snapshot', snapshotName)
+
+      if (!snapshotName) {
+        setSelectedSnapshotOption(undefined)
+      }
+    },
+    [form],
+  )
 
   const resetState = useCallback(() => {
     resetForm(formDefaultValues)
     resetCreateSandboxMutation()
     setSelectedSnapshotOption(undefined)
   }, [formDefaultValues, resetForm, resetCreateSandboxMutation])
-
-  const handleDefaultSnapshotSelect = useCallback(() => {
-    form.setFieldValue('snapshot', config.defaultSnapshot)
-    setSelectedSnapshotOption(undefined)
-  }, [config.defaultSnapshot, form])
 
   const handleEnvFileImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -565,18 +570,12 @@ export const CreateSandboxSheet = ({
                             value={field.state.value}
                             placeholder="Default snapshot"
                             popoverContainer={popoverContainer}
-                            onValueChange={handleSnapshotChange}
+                            onSnapshotChange={handleSnapshotChange}
+                            onValueChange={handleSnapshotValueChange}
                           />
                           <FieldDescription>
                             If unspecified,{' '}
-                            <button
-                              type="button"
-                              className="font-medium text-foreground underline underline-offset-2"
-                              onClick={handleDefaultSnapshotSelect}
-                            >
-                              {config.defaultSnapshot}
-                            </button>{' '}
-                            will be used.
+                            <span className="font-medium text-foreground">{config.defaultSnapshot}</span> will be used.
                           </FieldDescription>
                         </Field>
                       )}

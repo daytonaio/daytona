@@ -14,8 +14,8 @@ import { useRegions } from '@/hooks/useRegions'
 import { cn } from '@/lib/utils'
 import { SnapshotState, type SnapshotDto } from '@daytona/api-client'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, ChevronDownIcon, SearchIcon } from 'lucide-react'
-import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { Check, ChevronDownIcon, SearchIcon, X } from 'lucide-react'
+import { MouseEvent, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Tooltip } from '../Tooltip'
 
 const EMPTY_SNAPSHOTS: SnapshotDto[] = []
@@ -116,7 +116,8 @@ export interface SnapshotSelectProps {
   className?: string
   popoverContainer?: HTMLElement | null
   onOpenChange?: (open: boolean) => void
-  onValueChange?: (snapshot: SnapshotDto) => void
+  onSnapshotChange?: (snapshot: SnapshotDto) => void
+  onValueChange?: (value: string | undefined) => void
 }
 
 export interface SnapshotSelectRef {
@@ -134,6 +135,7 @@ export function SnapshotSelect({
   className,
   popoverContainer,
   onOpenChange,
+  onSnapshotChange,
   onValueChange,
 }: SnapshotSelectProps) {
   const [open, setOpen] = useState(false)
@@ -205,8 +207,18 @@ export function SnapshotSelect({
   )
 
   const handleChange = (snapshot: SnapshotDto) => {
-    onValueChange?.(snapshot)
+    onValueChange?.(snapshot.name)
+    onSnapshotChange?.(snapshot)
     setSearchValue(snapshot.name)
+    handleOpenChange(false)
+  }
+
+  const handleClear = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    onValueChange?.(undefined)
+    setSearchValue('')
     handleOpenChange(false)
   }
 
@@ -216,7 +228,7 @@ export function SnapshotSelect({
       <PopoverAnchor asChild>
         <InputGroup
           className={cn(
-            'h-8 overflow-hidden',
+            'h-8 overflow-hidden data-[disabled]:opacity-50',
             {
               'opacity-50': loading,
             },
@@ -242,8 +254,21 @@ export function SnapshotSelect({
           >
             {loading ? 'Loading snapshots...' : selectedLabel}
           </span>
-          <InputGroupAddon align="inline-end">
-            <ChevronDownIcon aria-hidden="true" className="size-4 text-muted-foreground" />
+          <InputGroupAddon align="inline-end" className="text-foreground">
+            <span className="flex size-5 items-center justify-center">
+              {value && (
+                <button
+                  type="button"
+                  aria-label="Clear snapshot"
+                  disabled={loading || disabled}
+                  className="relative z-20 rounded-sm p-0.5 text-current opacity-50 hover:text-foreground disabled:cursor-not-allowed"
+                  onClick={handleClear}
+                >
+                  <X aria-hidden="true" className="size-3.5" />
+                </button>
+              )}
+            </span>
+            <ChevronDownIcon aria-hidden="true" className="size-4 text-current opacity-50" />
           </InputGroupAddon>
         </InputGroup>
       </PopoverAnchor>
