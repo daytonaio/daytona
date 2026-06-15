@@ -1,10 +1,12 @@
+FROM golang:1.25.11-alpine AS go-toolchain
+
 FROM node:22-alpine AS build
 
 ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.7-alpine /usr/local/go/ /usr/local/go/
+COPY --from=go-toolchain /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
