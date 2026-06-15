@@ -1062,13 +1062,20 @@ Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. Organizati
 
 ##### Pre-built snapshots
 
-Daytona provides pre-built [default snapshots](/docs/en/snapshots#default-snapshots) with fixed resource sizes for creating sandboxes.
+Daytona provides [pre-built snapshots](/docs/en/snapshots#default-snapshots) with fixed resource sizes for creating sandboxes.
 
-| **Snapshot**         | **vCPU** | **Memory** | **Storage** |
-| -------------------- | -------- | ---------- | ----------- |
-| **`daytona-small`**  | 1        | 1GiB       | 3GiB        |
-| **`daytona-medium`** | 2        | 4GiB       | 8GiB        |
-| **`daytona-large`**  | 4        | 8GiB       | 10GiB       |
+| **Snapshot**         | **vCPU** | **Memory** | **Storage** | **GPU** |
+| -------------------- | -------- | ---------- | ----------- | ------- |
+| **`daytona-small`**  | 1        | 1GiB       | 3GiB        |         |
+| **`daytona-medium`** | 2        | 4GiB       | 8GiB        |         |
+| **`daytona-large`**  | 4        | 8GiB       | 10GiB       |         |
+| **`daytona-gpu`**    | 1        | 1GiB       | 1GiB        | 1       |
+| **`windows`**        | 2        | 8GiB       | 30GiB       |         |
+| **`android-12`**     | 4        | 8GiB       | 30GiB       |         |
+| **`android-13`**     | 4        | 8GiB       | 30GiB       |         |
+| **`android-14`**     | 4        | 8GiB       | 30GiB       |         |
+| **`android-15`**     | 4        | 8GiB       | 30GiB       |         |
+| **`android-16`**     | 4        | 8GiB       | 30GiB       |         |
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
