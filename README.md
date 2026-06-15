@@ -1,12 +1,3 @@
-> [!IMPORTANT]
-> **This repository is no longer maintained.**
->
-> As of June 11, 2026, Daytona's core development has moved to a private codebase. This repo will receive no further updates, fixes, or releases.
->
-> It remains public and free to use, fork, and build on under the [GNU Affero General Public License](LICENSE), as is and without support or warranty.
->
-> Current SDKs, docs, and integrations: [github.com/daytona](https://github.com/daytona)
-
 &nbsp;
 
 <div align="center">
@@ -34,7 +25,7 @@
 
 &nbsp;
 
-Daytona is a secure and elastic infrastructure runtime for AI-generated code execution and agent workflows. Our platform provides [sandboxes](https://www.daytona.io/docs/sandboxes/), full composable computers with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.
+Daytona is a secure and elastic infrastructure runtime for AI-generated code execution and agent workflows. Our open-source platform provides [sandboxes](https://www.daytona.io/docs/sandboxes/), full composable computers with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.
 
 Sandboxes are the core component of the Daytona platform, spinning up in under 90ms from code to execution and running any code in Python, TypeScript, and JavaScript. Built on OCI/Docker compatibility, massive parallelization, and unlimited persistence, sandboxes deliver consistent, predictable environments for agent workflows.
 
@@ -154,7 +145,10 @@ Standalone packages and libraries for interacting with Daytona using Java:
 
 ## Deployments
 
-Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona provides a [bring your own compute (BYOC)](https://www.daytona.io/docs/bring-your-own-compute/) model, where the execution of sandboxes happens on your own compute infrastructure while Daytona's control plane orchestrates the sandbox lifecycle.
+Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
+
+- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [`docker`](docker) directory using Docker Compose
+- [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
 
 ## Quick Start
 
@@ -292,3 +286,10 @@ Optional: Install [direnv](https://direnv.net/) + [nix-direnv](https://github.co
 See [`AGENTS.md`](AGENTS.md) for the full shell reference, project-to-shell mapping, and common commands.
 
 > **Note:** Supporting services (PostgreSQL, Redis, etc.) are still managed via `docker compose -f .devcontainer/docker-compose.yaml up`.
+
+---
+
+## Contributing
+
+> [!NOTE]
+> Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the [Developer Certificate of Origin Version 1.1](https://developercertificate.org/) and the [contributing guide](CONTRIBUTING.md) to get started.
