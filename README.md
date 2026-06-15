@@ -125,7 +125,7 @@ Gradle (`build.gradle.kts`):
 
 ```kotlin
 dependencies {
-    implementation("io.daytona:sdk:0.1.0")
+    implementation("io.daytona:sdk:x.y.z")
 }
 ```
 
@@ -135,7 +135,7 @@ Maven (`pom.xml`):
 <dependency>
   <groupId>io.daytona</groupId>
   <artifactId>sdk</artifactId>
-  <version>0.1.0</version>
+  <version>x.y.z</version>
 </dependency>
 ```
 
