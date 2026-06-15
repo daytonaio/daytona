@@ -161,6 +161,7 @@ export class SandboxStartAction extends SandboxAction {
           this.logger.error(`Failed to re-pull snapshot to runner ${runner.id}: ${err?.message ?? err}`),
         )
       }
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       return SYNC_AGAIN
     }
 
@@ -239,7 +240,12 @@ export class SandboxStartAction extends SandboxAction {
     // concurrent assignments can't pick the same runner before one persists.
     if (sandbox.gpu > 0) {
       const key = `gpu-runner-assignment:${sandbox.region}`
-      await this.redisLockProvider.waitForLock(key, 60, 30000)
+      try {
+        await this.redisLockProvider.waitForLock(key, 60, 30000)
+      } catch {
+        // Couldn't acquire under contention — retry next cycle instead of erroring the sandbox.
+        return SYNC_AGAIN
+      }
       try {
         return await this.assignUnassignedRunnerSandbox(sandbox, lockCode, isBuild)
       } finally {
