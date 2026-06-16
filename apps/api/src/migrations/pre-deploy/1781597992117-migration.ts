@@ -1,3 +1,7 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class Migration1781597992117 implements MigrationInterface {
@@ -13,9 +17,7 @@ export class Migration1781597992117 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "organization" ADD "preview_warning_enabled" boolean NOT NULL DEFAULT false`)
-    await queryRunner.query(
-      `CREATE INDEX "idx_sandbox_last_activity_at" ON "sandbox_last_activity" ("lastActivityAt") `,
-    )
+    await queryRunner.query(`ALTER TABLE "sandbox_usage_periods" DROP COLUMN "regionType"`)
+    await queryRunner.query(`ALTER TABLE "sandbox_usage_periods_archive" DROP COLUMN "regionType"`)
   }
 }

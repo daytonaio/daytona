@@ -275,17 +275,22 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
   }
 
   private async getRegionType(regionId: string): Promise<string> {
-    const region = await this.regionRepository.findOne({
-      select: ['regionType'],
-      where: {
-        id: regionId,
-      },
-      cache: {
-        id: `region-type-${regionId}`,
-        milliseconds: 1000 * 60 * 60, // 1 hour
-      },
-    })
+    try {
+      const region = await this.regionRepository.findOne({
+        select: ['regionType'],
+        where: {
+          id: regionId,
+        },
+        cache: {
+          id: `region-type-${regionId}`,
+          milliseconds: 1000 * 60 * 60, // 1 hour
+        },
+      })
 
-    return region?.regionType ?? RegionType.SHARED
+      return region?.regionType ?? RegionType.SHARED
+    } catch (error) {
+      this.logger.error(`Error fetching region type for region ${regionId}`, error)
+      return RegionType.SHARED
+    }
   }
 }
