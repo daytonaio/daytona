@@ -9,7 +9,7 @@ COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-RUN apk add --no-cache git python3 make g++
+RUN apk add --no-cache git python3 py3-setuptools make g++
 
 WORKDIR /daytona
 
