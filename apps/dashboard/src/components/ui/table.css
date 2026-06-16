@@ -1,4 +1,4 @@
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   [data-sticky-state='left'] {
     box-shadow: 6px 0 8px -2px rgba(0, 0, 0, 0);
     transition: box-shadow 0.2s ease;
@@ -30,7 +30,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   [data-slot='table-head'][data-sticky-state],
   [data-slot='table-cell'][data-sticky-state] {
     position: static !important;
