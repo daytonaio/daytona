@@ -1,0 +1,26 @@
+libs/common-go/go.mod
+  s_eee68c198161d9::t_69358ed48f3de4 7,75
+apps/daemon/go.mod
+  s_eee68c198161d9::t_e31f07450373ec 15
+apps/runner/go.mod
+  s_eee68c198161d9::t_69358ed48f3de4 12,164
+apps/proxy/go.mod
+  s_eee68c198161d9::t_7f409c14b11fcf 37
+  s_eee68c198161d9::t_69358ed48f3de4 9,58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "5cda8c9a19f82225e26ad5fc04dca3e7def45187",
+  "prompts": {},
+  "sessions": {
+    "s_eee68c198161d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a99fabc2-5625-46ca-b684-c3d9ea1cb35b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
