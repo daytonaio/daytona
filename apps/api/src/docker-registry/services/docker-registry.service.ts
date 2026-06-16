@@ -847,8 +847,20 @@ export class DockerRegistryService {
     // If so, include all user's registries (we can't reliably match specific registries)
     if (checkDockerfileHasRegistryPrefix(dockerfileContent)) {
       const userRegistries = await this.findAll(organizationId, RegistryType.ORGANIZATION)
-      const resolved = await Promise.all(userRegistries.map((r) => this.resolveCredentials(r)))
-      sourceRegistries.push(...resolved)
+      // Resolve each registry independently so one failing registry (e.g. an ECR
+      // role assumption that's misconfigured) can't break builds that don't depend
+      // on it. Registries that fail to resolve are skipped with a warning.
+      const settled = await Promise.allSettled(userRegistries.map((r) => this.resolveCredentials(r)))
+      settled.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          sourceRegistries.push(result.value)
+        } else {
+          const registry = userRegistries[index]
+          this.logger.warn(
+            `Skipping registry ${registry.url} (id=${registry.id}) for Dockerfile build: failed to resolve credentials: ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`,
+          )
+        }
+      })
     }
 
     // Add default Docker Hub registry only if user doesn't have their own Docker Hub credentials
