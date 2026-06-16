@@ -21,6 +21,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Spinner } from '@/components/ui/spinner'
 import { ORGANIZATION_ROLE_PERMISSIONS_GROUPS } from '@/constants/OrganizationPermissionsGroups'
+import { cn } from '@/lib/utils'
 import { OrganizationRolePermissionGroup } from '@/types/OrganizationRolePermissionGroup'
 import { OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
@@ -236,11 +237,13 @@ export const CreateOrganizationRoleSheet: React.FC<CreateOrganizationRoleSheetPr
                                     checked={field.state.value.includes(permission)}
                                     onCheckedChange={() => handlePermissionToggle(permission)}
                                     disabled={groupIsChecked}
-                                    className={groupIsChecked ? 'pointer-events-none' : ''}
+                                    className={cn({ 'pointer-events-none': groupIsChecked })}
                                   />
                                   <Label
                                     htmlFor={permission}
-                                    className={`font-normal${groupIsChecked ? ' opacity-70 pointer-events-none' : ''}`}
+                                    className={cn('font-normal', {
+                                      'opacity-70 pointer-events-none': groupIsChecked,
+                                    })}
                                   >
                                     {permission}
                                   </Label>

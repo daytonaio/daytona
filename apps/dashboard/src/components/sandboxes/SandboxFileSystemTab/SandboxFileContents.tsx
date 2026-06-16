@@ -527,9 +527,9 @@ export function SandboxFileContents({
       <div className="flex-1 min-h-0 overflow-hidden p-3">
         <div
           key={selectedNode?.path ?? 'empty'}
-          className={
-            isContentsRefreshing ? 'h-full min-h-0 opacity-60 transition-opacity' : 'h-full min-h-0 transition-opacity'
-          }
+          className={cn('h-full min-h-0 transition-opacity', {
+            'opacity-60': isContentsRefreshing,
+          })}
         >
           <SandboxFileContentsBody
             isWrapEnabled={isWrapEnabled}

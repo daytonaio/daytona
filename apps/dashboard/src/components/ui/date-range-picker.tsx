@@ -250,9 +250,9 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
             variant="outline"
             className={cn(
               'flex w-full justify-between text-left font-normal hover:bg-background',
-              !internalRange?.from && 'text-muted-foreground',
+              { 'text-muted-foreground': !internalRange?.from },
               className,
-              disabled && 'opacity-50 cursor-not-allowed',
+              { 'opacity-50 cursor-not-allowed': disabled },
             )}
             disabled={disabled}
           >
@@ -270,10 +270,10 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
                 <div className="text-sm font-medium mb-3 text-center">Quick ranges</div>
                 <div className="space-y-1 max-h-[400px] overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full">
                   <button
-                    className={cn(
-                      'w-full text-left px-3 py-2 text-sm rounded-md transition-colors',
-                      selectedQuickRange === 'All time' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
-                    )}
+                    className={cn('w-full text-left px-3 py-2 text-sm rounded-md transition-colors', {
+                      'bg-primary text-primary-foreground': selectedQuickRange === 'All time',
+                      'hover:bg-muted': selectedQuickRange !== 'All time',
+                    })}
                     onClick={() => handleQuickRangeSelect({ from: undefined, to: undefined }, 'All time')}
                   >
                     All time
@@ -281,12 +281,10 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
                   {createTimeRangesFromConfig(quickRanges || {}).map((timeRange) => (
                     <button
                       key={timeRange.label}
-                      className={cn(
-                        'w-full text-left px-3 py-2 text-sm rounded-md transition-colors',
-                        selectedQuickRange === timeRange.label
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-muted',
-                      )}
+                      className={cn('w-full text-left px-3 py-2 text-sm rounded-md transition-colors', {
+                        'bg-primary text-primary-foreground': selectedQuickRange === timeRange.label,
+                        'hover:bg-muted': selectedQuickRange !== timeRange.label,
+                      })}
                       onClick={() => handleQuickRangeSelect(timeRange.getRange(), timeRange.label)}
                     >
                       {timeRange.label}

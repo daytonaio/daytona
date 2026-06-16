@@ -25,7 +25,8 @@ import { useDocsSearchCommands } from '@/hooks/useDocsSearchCommands'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
-import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
+import { SlackLogoIcon } from '@phosphor-icons/react'
+import { BookOpen, BookSearchIcon, SunMoon } from 'lucide-react'
 
 function useDashboardCommands() {
   const { theme, setTheme } = useTheme()
@@ -35,7 +36,7 @@ function useDashboardCommands() {
       {
         id: 'open-slack',
         label: 'Open Slack',
-        icon: <SlackIcon className="w-4 h-4" />,
+        icon: <SlackLogoIcon className="w-4 h-4" />,
         onSelect: () => window.open(DAYTONA_SLACK_URL, '_blank'),
       },
       {
@@ -139,7 +140,11 @@ const Dashboard: React.FC<DashboardProps> = ({ children }) => {
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
         <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
         <SidebarInset className="overflow-y-auto">
-          <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
+          <div
+            className={cn('w-full min-h-screen overscroll-none', {
+              'md:pt-12': isBannerVisible,
+            })}
+          >
             {children}
             <CommandPalette />
           </div>

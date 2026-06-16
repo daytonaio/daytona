@@ -84,7 +84,7 @@ export function LastEventFilter({ onFilterChange, value }: LastEventFilterConten
       <div className="flex gap-2 items-center">
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className={cn('min-w-40', !fromDate && 'text-muted-foreground')}>
+            <Button variant="outline" className={cn('min-w-40', { 'text-muted-foreground': !fromDate })}>
               <CalendarIcon className=" h-4 w-4" />
               {fromDate ? format(fromDate, 'PPP') : <span>Pick a date</span>}
             </Button>
@@ -98,7 +98,7 @@ export function LastEventFilter({ onFilterChange, value }: LastEventFilterConten
 
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className={cn('min-w-40', !toDate && 'text-muted-foreground')}>
+            <Button variant="outline" className={cn('min-w-40', { 'text-muted-foreground': !toDate })}>
               <CalendarIcon className=" h-4 w-4" />
               {toDate ? format(toDate, 'PPP') : <span>Pick a date</span>}
             </Button>

@@ -340,7 +340,7 @@ function FileUploadDropzoneOutline({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeDasharray={`${dashLength} ${gapLength}`}
-        className={cn('stroke-current', isAnimating && 'animate-pulse')}
+        className={cn('stroke-current', { 'animate-pulse': isAnimating })}
       />
     </svg>
   )
@@ -375,9 +375,9 @@ function FileUploadDropzone({
       aria-disabled={disabled}
       className={cn(
         'relative flex flex-col items-center gap-2 rounded-2xl px-4 py-6 text-center transition-colors select-none',
-        'hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40',
+        'hover:bg-muted/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/40',
         'data-[state=over]:bg-muted/60',
-        disabled && 'cursor-not-allowed opacity-60 hover:bg-transparent',
+        { 'cursor-not-allowed opacity-60 hover:bg-transparent': disabled },
         className,
       )}
       onClick={(event) => {

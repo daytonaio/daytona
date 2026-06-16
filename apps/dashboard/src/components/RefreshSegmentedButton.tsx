@@ -272,7 +272,9 @@ export function RefreshSegmentedButton({
         disabled={disabled || isRefreshing}
         onClick={onRefresh}
         aria-label="Refresh now"
-        className={cn('rounded-r-none border-0 px-2.5 shadow-none hover:bg-accent/80', isRefreshing && 'opacity-70')}
+        className={cn('rounded-r-none border-0 px-2.5 shadow-none hover:bg-accent/80', {
+          'opacity-70': isRefreshing,
+        })}
       >
         <MotionRefreshIcon className="size-4" style={{ rotate: rotation }} />
       </Button>
@@ -290,11 +292,10 @@ export function RefreshSegmentedButton({
           className="min-w-[80px] justify-end gap-2 rounded-l-none border-0 border-l px-3 shadow-none focus-visible:ring-[3px]"
         >
           <span
-            className={cn(
-              'min-w-0 truncate text-right',
-              countdownSeconds !== null && '[font-variant-numeric:tabular-nums]',
-              isRefreshing && 'text-muted-foreground',
-            )}
+            className={cn('min-w-0 truncate text-right', {
+              '[font-variant-numeric:tabular-nums]': countdownSeconds !== null,
+              'text-muted-foreground': isRefreshing,
+            })}
           >
             {buttonLabel}
           </span>

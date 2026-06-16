@@ -391,7 +391,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
                       fade="mask"
                       fadeOrientation="vertical"
                       horizontal
-                      className="h-full overflow-auto bg-[hsl(var(--code-background))]"
+                      className="h-full overflow-auto bg-(--code-background)"
                       fadeOffset={35}
                     >
                       <CodeBlock

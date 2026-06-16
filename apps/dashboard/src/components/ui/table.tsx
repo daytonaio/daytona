@@ -150,9 +150,11 @@ function TableHead({ className, style, sticky, ...props }: React.ComponentProps<
       data-sticky-state={stickySide}
       className={cn(
         'text-muted-foreground border-b h-8 px-3 text-left align-middle !font-mono font-medium !uppercase whitespace-nowrap !text-xs [&_*]:!font-mono [&_*]:!uppercase [&_*]:!text-xs bg-table-header [&:has([data-sort])]:text-foreground',
-        sticky && 'sticky z-[2]',
-        stickySide === 'left' && 'left-0',
-        stickySide === 'right' && 'right-0',
+        {
+          'sticky z-[2]': sticky,
+          'left-0': stickySide === 'left',
+          'right-0': stickySide === 'right',
+        },
         className,
       )}
       style={style}
@@ -170,9 +172,11 @@ function TableCell({ className, style, sticky, ...props }: React.ComponentProps<
       data-sticky-state={stickySide}
       className={cn(
         'px-3 py-2.5 align-middle whitespace-nowrap border-b bg-table-cell group-hover/row:bg-table-cell-hover group-data-[state=selected]/row:bg-table-cell-active group-data-[selected=true]/row:bg-table-cell-active has-[[data-slot=empty]]:group-hover/row:bg-table-cell',
-        sticky && 'sticky z-[1]',
-        stickySide === 'left' && 'left-0',
-        stickySide === 'right' && 'right-0',
+        {
+          'sticky z-[1]': sticky,
+          'left-0': stickySide === 'left',
+          'right-0': stickySide === 'right',
+        },
         className,
       )}
       style={style}
