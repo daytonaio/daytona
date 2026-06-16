@@ -31,27 +31,10 @@ import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
 
 @Entity()
 @Unique(['organizationId', 'name'])
-@Index('sandbox_state_idx', ['state'])
-@Index('sandbox_desiredstate_idx', ['desiredState'])
 @Index('sandbox_snapshot_idx', ['snapshot'])
-@Index('sandbox_runnerid_idx', ['runnerId'])
-@Index('sandbox_runner_state_idx', ['runnerId', 'state'])
 @Index('sandbox_organizationid_idx', ['organizationId'])
 @Index('sandbox_region_idx', ['region'])
 @Index('sandbox_resources_idx', ['cpu', 'mem', 'disk', 'gpu'])
-@Index('sandbox_backupstate_idx', ['backupState'])
-@Index('sandbox_runner_state_desired_idx', ['runnerId', 'state', 'desiredState'], {
-  where: '"pending" = false',
-})
-@Index('sandbox_active_only_idx', ['id'], {
-  where: `"state" <> ALL (ARRAY['destroyed'::sandbox_state_enum, 'archived'::sandbox_state_enum])`,
-})
-@Index('sandbox_pending_idx', ['id'], {
-  where: `"pending" = true`,
-})
-@Index('idx_sandbox_recoverable', ['id'], {
-  where: '"recoverable" = true',
-})
 @Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_buildinfosnapshotref_idx', { synchronize: false })
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
@@ -72,18 +55,10 @@ export class Sandbox {
   @Column()
   region: string
 
-  @Column({
-    type: 'uuid',
-    nullable: true,
-  })
   runnerId?: string
 
   //  this is the runnerId of the runner that was previously assigned to the sandbox
   //  if something goes wrong with new runner assignment, we can revert to the previous runner
-  @Column({
-    type: 'uuid',
-    nullable: true,
-  })
   prevRunnerId?: string
 
   @Column({
@@ -92,18 +67,8 @@ export class Sandbox {
   })
   sandboxClass: SandboxClass = SandboxClass.CONTAINER
 
-  @Column({
-    type: 'enum',
-    enum: SandboxState,
-    default: SandboxState.UNKNOWN,
-  })
   state = SandboxState.UNKNOWN
 
-  @Column({
-    type: 'enum',
-    enum: SandboxDesiredState,
-    default: SandboxDesiredState.STARTED,
-  })
   desiredState = SandboxDesiredState.STARTED
 
   @Column({ nullable: true })
@@ -112,10 +77,8 @@ export class Sandbox {
   @Column()
   osUser: string
 
-  @Column({ nullable: true })
   errorReason?: string
 
-  @Column({ default: false, type: 'boolean' })
   recoverable = false
 
   @Column({
@@ -136,32 +99,16 @@ export class Sandbox {
   @Column('jsonb', { nullable: true })
   labels: { [key: string]: string }
 
-  @Column({ nullable: true })
   backupRegistryId: string | null
 
-  @Column({ nullable: true })
   backupSnapshot: string | null
 
-  @Column({ nullable: true, type: 'timestamp with time zone' })
   lastBackupAt: Date | null
 
-  @Column({
-    type: 'enum',
-    enum: BackupState,
-    default: BackupState.NONE,
-  })
   backupState = BackupState.NONE
 
-  @Column({
-    type: 'text',
-    nullable: true,
-  })
   backupErrorReason: string | null
 
-  @Column({
-    type: 'jsonb',
-    default: [],
-  })
   existingBackupSnapshots: Array<{
     snapshotName: string
     createdAt: Date
@@ -223,7 +170,6 @@ export class Sandbox {
   @Column({ default: -1, type: 'int' })
   autoDeleteInterval: number | undefined = -1
 
-  @Column({ default: false, type: 'boolean' })
   pending: boolean | undefined = false
 
   @Column({ type: 'character varying' })
@@ -235,7 +181,6 @@ export class Sandbox {
   @JoinColumn()
   buildInfo?: BuildInfo
 
-  @Column({ nullable: true })
   daemonVersion?: string
 
   // ID of another sandbox this sandbox is linked to. When set, this sandbox is

@@ -25,7 +25,6 @@ import { SandboxDesiredStateUpdatedEvent } from '../events/sandbox-desired-state
 import { SandboxPublicStatusUpdatedEvent } from '../events/sandbox-public-status-updated.event'
 import { SandboxOrganizationUpdatedEvent } from '../events/sandbox-organization-updated.event'
 import { SandboxLookupCacheInvalidationService } from '../services/sandbox-lookup-cache-invalidation.service'
-import { SandboxLifecycleMigrationService } from '../services/sandbox-lifecycle-migration.service'
 import { SandboxFork } from '../entities/sandbox-fork.entity'
 import { SandboxLifecycle } from '../entities/sandbox-lifecycle.entity'
 import {
@@ -43,7 +42,6 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     @InjectDataSource() dataSource: DataSource,
     eventEmitter: EventEmitter2,
     private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
-    private readonly lifecycleMigrationService: SandboxLifecycleMigrationService,
   ) {
     super(dataSource, eventEmitter, Sandbox)
   }
@@ -62,9 +60,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
 
     await this.dataSource.transaction(async (entityManager) => {
       await entityManager.insert(Sandbox, sandbox)
-      if (this.lifecycleMigrationService.useLifecycleTableForWrites()) {
-        await entityManager.insert(SandboxLifecycle, SandboxLifecycle.fromSandbox(sandbox))
-      }
+      await entityManager.insert(SandboxLifecycle, SandboxLifecycle.fromSandbox(sandbox))
       await this.upsertLastActivity(entityManager, sandbox.id, sandbox.createdAt)
       sandbox.lastActivityAt = { sandboxId: sandbox.id, lastActivityAt: sandbox.createdAt }
 
@@ -109,24 +105,17 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     const { updateData, entity } = params
 
     if (raw) {
-      if (this.lifecycleMigrationService.useLifecycleTableForWrites()) {
-        // Write to both tables in a single transaction.
-        const { configFields, lifecycleFields } = this.splitUpdateFields(updateData)
-        await this.dataSource.transaction(async (em) => {
-          if (Object.keys(configFields).length > 0) {
-            await em.update(Sandbox, id, configFields)
-          }
-          if (Object.keys(lifecycleFields).length > 0) {
-            lifecycleFields.updatedAt = new Date()
-            await em.update(SandboxLifecycle, { sandboxId: id }, lifecycleFields)
-          }
-        })
-        return
-      } else {
-        // Legacy write path - trigger keeps the lifecycle table in sync.
-        await this.repository.update(id, updateData)
-        return
-      }
+      const { configFields, lifecycleFields } = this.splitUpdateFields(updateData)
+      await this.dataSource.transaction(async (em) => {
+        if (Object.keys(configFields).length > 0) {
+          await em.update(Sandbox, id, configFields)
+        }
+        if (Object.keys(lifecycleFields).length > 0) {
+          lifecycleFields.updatedAt = new Date()
+          await em.update(SandboxLifecycle, { sandboxId: id }, lifecycleFields)
+        }
+      })
+      return
     }
 
     const sandbox = entity ?? (await this.findOneBy({ id }))
@@ -142,56 +131,37 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     const fullUpdate = { ...updateData, ...invariantChanges }
 
     await this.dataSource.transaction(async (entityManager) => {
-      if (this.lifecycleMigrationService.useLifecycleTableForWrites()) {
-        // Write to both tables in a single transaction.
-        const { configFields, lifecycleFields } = this.splitUpdateFields(fullUpdate)
-        const { configPredicate, lifecyclePredicate } = this.splitPredicateFields({
-          state: previousSandbox.state,
-          desiredState: previousSandbox.desiredState,
-          pending: previousSandbox.pending,
-          organizationId: previousSandbox.organizationId,
-        })
+      const { configFields, lifecycleFields } = this.splitUpdateFields(fullUpdate)
+      const { configPredicate, lifecyclePredicate } = this.splitPredicateFields({
+        state: previousSandbox.state,
+        desiredState: previousSandbox.desiredState,
+        pending: previousSandbox.pending,
+        organizationId: previousSandbox.organizationId,
+      })
 
-        // Lifecycle UPDATE must always run — it carries the OCC gate.
-        // Bumping "updatedAt" manually also keeps the SET clause non-empty when only config columns change.
-        lifecycleFields.updatedAt = new Date()
-        const lifecycleResult = await entityManager.update(
-          SandboxLifecycle,
-          {
-            sandboxId: previousSandbox.id,
-            lifecyclePhase: SandboxLifecycle.phaseFor(previousSandbox.state),
-            ...lifecyclePredicate,
-          },
-          lifecycleFields,
-        )
-        if (!lifecycleResult.affected) {
-          throw new SandboxConflictError()
-        }
+      // Lifecycle UPDATE must always run — it carries the OCC gate.
+      // Bumping "updatedAt" manually also keeps the SET clause non-empty when only config columns change.
+      lifecycleFields.updatedAt = new Date()
+      const lifecycleResult = await entityManager.update(
+        SandboxLifecycle,
+        {
+          sandboxId: previousSandbox.id,
+          lifecyclePhase: SandboxLifecycle.phaseFor(previousSandbox.state),
+          ...lifecyclePredicate,
+        },
+        lifecycleFields,
+      )
+      if (!lifecycleResult.affected) {
+        throw new SandboxConflictError()
+      }
 
-        if (Object.keys(configFields).length > 0) {
-          const configResult = await entityManager.update(
-            Sandbox,
-            { id: previousSandbox.id, ...configPredicate },
-            configFields,
-          )
-          if (!configResult.affected) {
-            throw new SandboxConflictError()
-          }
-        }
-      } else {
-        // Legacy write path - trigger keeps the lifecycle table in sync.
-        const result = await entityManager.update(
+      if (Object.keys(configFields).length > 0) {
+        const configResult = await entityManager.update(
           Sandbox,
-          {
-            id: previousSandbox.id,
-            state: previousSandbox.state,
-            desiredState: previousSandbox.desiredState,
-            pending: previousSandbox.pending,
-            organizationId: previousSandbox.organizationId,
-          },
-          fullUpdate,
+          { id: previousSandbox.id, ...configPredicate },
+          configFields,
         )
-        if (!result.affected) {
+        if (!configResult.affected) {
           throw new SandboxConflictError()
         }
       }
@@ -231,32 +201,20 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     const { updateData, whereCondition } = params
 
     return this.manager.transaction(async (entityManager) => {
-      const useLifecycleTableForWrites = this.lifecycleMigrationService.useLifecycleTableForWrites()
-
-      let sandbox: Sandbox | null
-      if (useLifecycleTableForWrites) {
-        // SELECT joins sandbox_lifecycle and routes the caller's state-machine
-        // predicate fields to `lifecycle.*` because writes route directly to
-        // `sandbox_lifecycle`, leaving `sandbox.*` stale.
-        const { configPredicate, lifecyclePredicate } = this.splitPredicateFields(whereCondition)
-        const result = await entityManager.findOne(Sandbox, {
-          where: {
-            ...configPredicate,
-            id,
-            lifecycle: lifecyclePredicate as FindOptionsWhere<SandboxLifecycle>,
-          },
-          relations: { lifecycle: true },
-          loadEagerRelations: false,
-        })
-        sandbox = result ? this.hydrate(result) : null
-      } else {
-        // Legacy read path — all writes still go to `sandbox`.
-        sandbox = await entityManager.findOne(Sandbox, {
-          where: { ...whereCondition, id },
-          relations: [],
-          loadEagerRelations: false,
-        })
-      }
+      // SELECT joins sandbox_lifecycle and routes the caller's state-machine
+      // predicate fields to `lifecycle.*` because writes route directly to
+      // `sandbox_lifecycle`, leaving `sandbox.*` stale.
+      const { configPredicate, lifecyclePredicate } = this.splitPredicateFields(whereCondition)
+      const result = await entityManager.findOne(Sandbox, {
+        where: {
+          ...configPredicate,
+          id,
+          lifecycle: lifecyclePredicate as FindOptionsWhere<SandboxLifecycle>,
+        },
+        relations: { lifecycle: true },
+        loadEagerRelations: false,
+      })
+      const sandbox = result ? this.hydrate(result) : null
 
       if (!sandbox) {
         throw new SandboxConflictError()
@@ -269,41 +227,31 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       const invariantChanges = sandbox.enforceInvariants()
       const fullUpdate = { ...updateData, ...invariantChanges }
 
-      if (useLifecycleTableForWrites) {
-        // Write to both tables in a single transaction.
-        const { configFields, lifecycleFields } = this.splitUpdateFields(fullUpdate)
-        const { configPredicate, lifecyclePredicate } = this.splitPredicateFields(whereCondition)
+      const { configFields, lifecycleFields } = this.splitUpdateFields(fullUpdate)
 
-        // Lifecycle UPDATE must always run — it carries the OCC gate.
-        // Bumping "updatedAt" manually also keeps the SET clause non-empty when only config columns change.
-        lifecycleFields.updatedAt = new Date()
-        const lifecycleResult = await entityManager.update(
-          SandboxLifecycle,
-          {
-            sandboxId: previousSandbox.id,
-            lifecyclePhase: SandboxLifecycle.phaseFor(previousSandbox.state),
-            ...lifecyclePredicate,
-          },
-          lifecycleFields,
+      // Lifecycle UPDATE must always run — it carries the OCC gate.
+      // Bumping "updatedAt" manually also keeps the SET clause non-empty when only config columns change.
+      lifecycleFields.updatedAt = new Date()
+      const lifecycleResult = await entityManager.update(
+        SandboxLifecycle,
+        {
+          sandboxId: previousSandbox.id,
+          lifecyclePhase: SandboxLifecycle.phaseFor(previousSandbox.state),
+          ...lifecyclePredicate,
+        },
+        lifecycleFields,
+      )
+      if (!lifecycleResult.affected) {
+        throw new SandboxConflictError()
+      }
+
+      if (Object.keys(configFields).length > 0) {
+        const configResult = await entityManager.update(
+          Sandbox,
+          { id: previousSandbox.id, ...configPredicate },
+          configFields,
         )
-        if (!lifecycleResult.affected) {
-          throw new SandboxConflictError()
-        }
-
-        if (Object.keys(configFields).length > 0) {
-          const configResult = await entityManager.update(
-            Sandbox,
-            { id: previousSandbox.id, ...configPredicate },
-            configFields,
-          )
-          if (!configResult.affected) {
-            throw new SandboxConflictError()
-          }
-        }
-      } else {
-        // Legacy write path - trigger keeps the lifecycle table in sync.
-        const result = await entityManager.update(Sandbox, { ...whereCondition, id }, fullUpdate)
-        if (!result.affected) {
+        if (!configResult.affected) {
           throw new SandboxConflictError()
         }
       }
@@ -426,16 +374,12 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
    * Augments `FindOptions` to eager-load the `sandbox_lifecycle` relation so
    * {@link hydrate} can overlay its columns onto the returned sandbox.
    *
-   * No-op when {@link SandboxLifecycleMigrationService.useLifecycleTableForReads}
-   * is off, or when the caller passed a narrow `select` (forcing the
-   * relation would widen the projection against caller intent).
+   * No-op when the caller passed a narrow `select` (forcing the relation
+   * would widen the projection against caller intent).
    */
   private withLifecycleRelation<T extends FindOneOptions<Sandbox> | FindManyOptions<Sandbox> | undefined>(
     options: T,
   ): T {
-    if (!this.lifecycleMigrationService.useLifecycleTableForReads()) {
-      return options
-    }
     if (options?.select) {
       return options
     }
@@ -456,13 +400,9 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
   }
 
   /**
-   * Batched {@link hydrate} for many-result reads. Short-circuits at the top
-   * to avoid a per-row flag check on large result sets.
+   * Batched {@link hydrate} for many-result reads.
    */
   hydrateAll(sandboxes: Sandbox[]): Sandbox[] {
-    if (!this.lifecycleMigrationService.useLifecycleTableForReads()) {
-      return sandboxes
-    }
     for (const sandbox of sandboxes) {
       this.hydrate(sandbox)
     }
@@ -472,15 +412,12 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
   /**
    * Overlays `sandbox_lifecycle` columns onto the in-memory sandbox so
    * callers reading `sandbox.state`/`sandbox.pending`/etc. see fresh values
-   * regardless of which table holds the source of truth.
+   * from the lifecycle table.
    *
-   * No-op when the read shim is off or the `lifecycle` relation is missing.
+   * No-op when the `sandbox_lifecycle` relation is missing.
    * Mutates in-place; returns the same instance.
    */
   hydrate(sandbox: Sandbox): Sandbox {
-    if (!this.lifecycleMigrationService.useLifecycleTableForReads()) {
-      return sandbox
-    }
     const lifecycle = sandbox.lifecycle
     if (!lifecycle) {
       return sandbox

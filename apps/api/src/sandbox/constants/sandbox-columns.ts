@@ -9,16 +9,16 @@ import type { SandboxLifecycle } from '../entities/sandbox-lifecycle.entity'
 /**
  * Column membership for the sandbox table split.
  *
- * The original wide `sandbox` table is split by write cadence:
+ * The original wide `sandbox` table was split by write cadence:
  * - `sandbox` (config, unpartitioned) — rare writes after creation. Bulk of
  *   the JSONB lives here and gets TOAST'd.
  * - `sandbox_lifecycle` (hot, LIST-partitioned by `lifecyclePhase`) — every
  *   state-machine UPDATE and every backup-poll UPDATE hits this table.
  *
- * These arrays are the single source of truth for routing writes when
- * `SANDBOX_LIFECYCLE_WRITE_TO_NEW_TABLE` is enabled. The repository's
- * `update()` / `updateWhere()` / `insert()` methods split `updateData` by
- * column membership and route each part to the correct table.
+ * These arrays are the single source of truth for routing writes. The
+ * repository's `update()` / `updateWhere()` / `insert()` methods split
+ * `updateData` by column membership and route each part to the correct
+ * table.
  *
  * IMPORTANT: `organizationId` appears in both arrays because it is
  * denormalized to `sandbox_lifecycle` so the optimistic-concurrency
@@ -90,8 +90,7 @@ export const SANDBOX_LIFECYCLE_COLUMNS = [
 ] as const satisfies ReadonlyArray<keyof SandboxLifecycle>
 
 /**
- * Columns whose updates must propagate to BOTH tables when
- * `SANDBOX_LIFECYCLE_WRITE_TO_NEW_TABLE` is enabled.
+ * Columns whose updates must propagate to BOTH tables.
  *
  * Currently only `organizationId` — denormalized to support multi-tenant
  * race detection in warm-pool assignment without crossing tables in the
@@ -100,17 +99,11 @@ export const SANDBOX_LIFECYCLE_COLUMNS = [
 export const SANDBOX_DUAL_WRITE_COLUMNS: readonly (keyof Sandbox & keyof SandboxLifecycle)[] = ['organizationId']
 
 /**
- * Columns that exist on the `Sandbox` entity today but logically belong to
- * `sandbox_lifecycle`. Once the app has switched to writing
- * `sandbox_lifecycle` directly, these columns on `sandbox` stop receiving
- * fresh writes and become stale. The repository's read shim uses this list
- * to overlay fresh `sandbox_lifecycle` values onto the in-memory entity so
- * caller code keeps reading `sandbox.state` etc. transparently.
- *
- * These columns will be dropped from `sandbox` entirely in a follow-up
- * cleanup PR (deferred from this PR for rollback safety — keeping the
- * columns around lets us un-flip the WRITE flag and resync to `sandbox`
- * if anything goes wrong).
+ * Columns declared on the `Sandbox` entity but stored exclusively on
+ * `sandbox_lifecycle` — they have been dropped from the `sandbox` table.
+ * The repository's read shim uses this list to overlay fresh
+ * `sandbox_lifecycle` values onto the in-memory entity so caller code
+ * keeps reading `sandbox.state` etc. transparently.
  */
 export const SANDBOX_INERT_AFTER_CUTOVER = [
   'state',

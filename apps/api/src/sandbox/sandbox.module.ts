@@ -63,7 +63,6 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
 import { OpensearchModule } from 'nestjs-opensearch'
 import { TypedConfigService } from '../config/typed-config.service'
 import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provider'
-import { SandboxLifecycleMigrationService } from './services/sandbox-lifecycle-migration.service'
 
 @Module({
   imports: [
@@ -128,25 +127,17 @@ import { SandboxLifecycleMigrationService } from './services/sandbox-lifecycle-m
     JobService,
     JobStateHandlerService,
     SandboxActivityService,
-    SandboxLifecycleMigrationService,
     ProxyAuthContextGuard,
     SshGatewayAuthContextGuard,
     SandboxSearchAdapterProvider,
     {
       provide: SandboxRepository,
-      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService, SandboxLifecycleMigrationService],
+      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService],
       useFactory: (
         dataSource: DataSource,
         eventEmitter: EventEmitter2,
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
-        sandboxLifecycleMigrationService: SandboxLifecycleMigrationService,
-      ) =>
-        new SandboxRepository(
-          dataSource,
-          eventEmitter,
-          sandboxLookupCacheInvalidationService,
-          sandboxLifecycleMigrationService,
-        ),
+      ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
     },
     {
       provide: SnapshotRepository,
