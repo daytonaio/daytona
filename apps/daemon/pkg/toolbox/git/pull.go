@@ -21,13 +21,13 @@ import (
 //	@Tags			git
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body	GitRepoRequest	true	"Pull request"
+//	@Param			request	body	GitPullRequest	true	"Pull request"
 //	@Success		200
 //	@Router			/git/pull [post]
 //
 //	@id				PullChanges
 func PullChanges(c *gin.Context) {
-	var req GitRepoRequest
+	var req GitPullRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
@@ -45,7 +45,16 @@ func PullChanges(c *gin.Context) {
 		WorkDir: req.Path,
 	}
 
-	err := gitService.Pull(auth)
+	remote := ""
+	if req.Remote != nil {
+		remote = *req.Remote
+	}
+	branch := ""
+	if req.Branch != nil {
+		branch = *req.Branch
+	}
+
+	err := gitService.Pull(auth, remote, branch)
 	if err != nil && err != go_git.NoErrAlreadyUpToDate {
 		abortWithGitError(c, err)
 		return

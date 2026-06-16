@@ -1448,6 +1448,94 @@ paths:
       tags:
       - git
       x-codegen-request-body-name: request
+  /git/config:
+    get:
+      description: Get a Git config value at the given scope (null when unset)
+      operationId: GetGitConfig
+      parameters:
+      - description: Config key (e.g. user.name)
+        in: query
+        name: key
+        required: true
+        schema:
+          type: string
+      - description: Repository path (required for local scope)
+        in: query
+        name: path
+        schema:
+          type: string
+      - description: "Config scope: global (default), local or system"
+        in: query
+        name: scope
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitConfigResponse"
+          description: OK
+      summary: Get a Git config value
+      tags:
+      - git
+    post:
+      description: Set a Git config key/value at the given scope
+      operationId: SetGitConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitSetConfigRequest"
+        description: Set config request
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set a Git config value
+      tags:
+      - git
+      x-codegen-request-body-name: request
+  /git/config/user:
+    post:
+      description: Configure the Git user name and email at the given scope
+      operationId: ConfigureUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitConfigureUserRequest"
+        description: Configure user request
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Configure Git user
+      tags:
+      - git
+      x-codegen-request-body-name: request
+  /git/credentials:
+    post:
+      description: Persist Git credentials globally via the credential store. Stores
+        the password in plaintext on disk.
+      operationId: Authenticate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitAuthenticateRequest"
+        description: Authenticate request
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Authenticate Git
+      tags:
+      - git
+      x-codegen-request-body-name: request
   /git/history:
     get:
       description: Get the commit history of the Git repository
@@ -1471,6 +1559,25 @@ paths:
       summary: Get commit history
       tags:
       - git
+  /git/init:
+    post:
+      description: Initialize a new Git repository at the specified path
+      operationId: InitRepository
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitInitRequest"
+        description: Init repository request
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Initialize a Git repository
+      tags:
+      - git
+      x-codegen-request-body-name: request
   /git/pull:
     post:
       description: Pull changes from the remote Git repository
@@ -1479,7 +1586,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitRepoRequest"
+              $ref: "#/components/schemas/GitPullRequest"
         description: Pull request
         required: true
       responses:
@@ -1498,7 +1605,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GitRepoRequest"
+              $ref: "#/components/schemas/GitPushRequest"
         description: Push request
         required: true
       responses:
@@ -1506,6 +1613,83 @@ paths:
           content: {}
           description: OK
       summary: Push changes to remote
+      tags:
+      - git
+      x-codegen-request-body-name: request
+  /git/remotes:
+    get:
+      description: List the remotes configured in the Git repository
+      operationId: ListRemotes
+      parameters:
+      - description: Repository path
+        in: query
+        name: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListRemotesResponse"
+          description: OK
+      summary: List remotes
+      tags:
+      - git
+    post:
+      description: Add (or overwrite) a remote in the Git repository
+      operationId: AddRemote
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitAddRemoteRequest"
+        description: Add remote request
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Add a remote
+      tags:
+      - git
+      x-codegen-request-body-name: request
+  /git/reset:
+    post:
+      description: Reset the current HEAD to the specified state
+      operationId: ResetChanges
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitResetRequest"
+        description: Reset request
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Reset repository
+      tags:
+      - git
+      x-codegen-request-body-name: request
+  /git/restore:
+    post:
+      description: Restore working tree files or unstage changes
+      operationId: RestoreFiles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitRestoreRequest"
+        description: Restore request
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Restore files
       tags:
       - git
       x-codegen-request-body-name: request
@@ -3278,6 +3462,31 @@ components:
             type: string
           type: array
       type: object
+    GitAddRemoteRequest:
+      example:
+        path: path
+        fetch: true
+        name: name
+        overwrite: true
+        url: url
+      properties:
+        fetch:
+          description: Fetch fetches from the remote immediately after adding it.
+          type: boolean
+        name:
+          type: string
+        overwrite:
+          description: Overwrite replaces an existing remote with the same name.
+          type: boolean
+        path:
+          type: string
+        url:
+          type: string
+      required:
+      - name
+      - path
+      - url
+      type: object
     GitAddRequest:
       example:
         path: path
@@ -3295,6 +3504,27 @@ components:
       required:
       - files
       - path
+      type: object
+    GitAuthenticateRequest:
+      example:
+        password: password
+        protocol: protocol
+        host: host
+        username: username
+      properties:
+        host:
+          description: Host defaults to github.com.
+          type: string
+        password:
+          type: string
+        protocol:
+          description: Protocol defaults to https.
+          type: string
+        username:
+          type: string
+      required:
+      - password
+      - username
       type: object
     GitBranchRequest:
       example:
@@ -3326,6 +3556,7 @@ components:
       example:
         path: path
         password: password
+        depth: 0
         branch: branch
         commit_id: commit_id
         insecure_skip_tls: true
@@ -3336,6 +3567,10 @@ components:
           type: string
         commit_id:
           type: string
+        depth:
+          description: Depth creates a shallow clone truncated to the given number
+            of commits.
+          type: integer
         insecure_skip_tls:
           description: |-
             Skip TLS certificate verification for this clone. Defaults to false (verify).
@@ -3413,6 +3648,36 @@ components:
       required:
       - hash
       type: object
+    GitConfigResponse:
+      example:
+        value: value
+      properties:
+        value:
+          description: "Value is the config value, null when the key is not set."
+          type: string
+      type: object
+    GitConfigureUserRequest:
+      example:
+        path: path
+        scope: scope
+        name: name
+        email: email
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        path:
+          description: "Path is the repository path, required when scope is \"local\"\
+            ."
+          type: string
+        scope:
+          description: "Scope is one of global (default), local or system."
+          type: string
+      required:
+      - email
+      - name
+      type: object
     GitDeleteBranchRequest:
       example:
         path: path
@@ -3426,24 +3691,169 @@ components:
       - name
       - path
       type: object
-    GitRepoRequest:
+    GitInitRequest:
+      example:
+        initial_branch: initial_branch
+        path: path
+        bare: true
+      properties:
+        bare:
+          description: Bare creates a repository without a working tree.
+          type: boolean
+        initial_branch:
+          description: InitialBranch sets the name of the initial branch.
+          type: string
+        path:
+          type: string
+      required:
+      - path
+      type: object
+    GitPullRequest:
       example:
         path: path
         password: password
+        remote: remote
+        branch: branch
         username: username
       properties:
+        branch:
+          description: Branch to pull (defaults to the current branch's upstream).
+          type: string
         password:
           type: string
         path:
+          type: string
+        remote:
+          description: Remote to pull from (defaults to "origin").
           type: string
         username:
           type: string
       required:
       - path
       type: object
+    GitPushRequest:
+      example:
+        path: path
+        password: password
+        set_upstream: true
+        remote: remote
+        branch: branch
+        username: username
+      properties:
+        branch:
+          description: Branch to push (defaults to the current branch).
+          type: string
+        password:
+          type: string
+        path:
+          type: string
+        remote:
+          description: Remote to push to (defaults to "origin").
+          type: string
+        set_upstream:
+          description: SetUpstream records the pushed branch as the upstream tracking
+            branch.
+          type: boolean
+        username:
+          type: string
+      required:
+      - path
+      type: object
+    GitRemote:
+      example:
+        name: name
+        url: url
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+      required:
+      - name
+      - url
+      type: object
+    GitResetRequest:
+      example:
+        mode: mode
+        path: path
+        files:
+        - files
+        - files
+        target: target
+      properties:
+        files:
+          description: Files constrains the reset to the given paths.
+          items:
+            type: string
+          type: array
+        mode:
+          description: "Mode is one of soft, mixed (default), hard, merge or keep."
+          type: string
+        path:
+          type: string
+        target:
+          description: Target is the revision to reset to (defaults to HEAD).
+          type: string
+      required:
+      - path
+      type: object
+    GitRestoreRequest:
+      example:
+        path: path
+        files:
+        - files
+        - files
+        source: source
+        staged: true
+        worktree: true
+      properties:
+        files:
+          items:
+            type: string
+          type: array
+        path:
+          type: string
+        source:
+          description: Source restores file contents from the given revision instead
+            of the index.
+          type: string
+        staged:
+          description: Staged restores the staging index for the given files.
+          type: boolean
+        worktree:
+          description: Worktree restores the working tree for the given files.
+          type: boolean
+      required:
+      - files
+      - path
+      type: object
+    GitSetConfigRequest:
+      example:
+        path: path
+        scope: scope
+        value: value
+        key: key
+      properties:
+        key:
+          type: string
+        path:
+          description: "Path is the repository path, required when scope is \"local\"\
+            ."
+          type: string
+        scope:
+          description: "Scope is one of global (default), local or system."
+          type: string
+        value:
+          type: string
+      required:
+      - key
+      - value
+      type: object
     GitStatus:
       example:
+        detached: true
         behind: 6
+        upstream: upstream
         fileStatus:
         - extra: extra
           name: name
@@ -3465,10 +3875,18 @@ components:
           type: boolean
         currentBranch:
           type: string
+        detached:
+          description: Detached is true when HEAD is not on a branch (detached HEAD
+            state).
+          type: boolean
         fileStatus:
           items:
             $ref: "#/components/schemas/FileStatus"
           type: array
+        upstream:
+          description: "Upstream is the upstream tracking branch (e.g. \"origin/main\"\
+            ), empty when unset."
+          type: string
       required:
       - currentBranch
       - fileStatus
@@ -3550,6 +3968,7 @@ components:
       type: object
     ListBranchResponse:
       example:
+        current: current
         branches:
         - branches
         - branches
@@ -3558,6 +3977,10 @@ components:
           items:
             type: string
           type: array
+        current:
+          description: Current is the name of the checked out branch (empty when HEAD
+            is detached).
+          type: string
       required:
       - branches
       type: object
@@ -3608,6 +4031,21 @@ components:
           type: array
       required:
       - recordings
+      type: object
+    ListRemotesResponse:
+      example:
+        remotes:
+        - name: name
+          url: url
+        - name: name
+          url: url
+      properties:
+        remotes:
+          items:
+            $ref: "#/components/schemas/GitRemote"
+          type: array
+      required:
+      - remotes
       type: object
     LspCompletionParams:
       example:

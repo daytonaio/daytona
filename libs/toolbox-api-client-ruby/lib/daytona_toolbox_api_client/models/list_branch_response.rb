@@ -17,10 +17,14 @@ module DaytonaToolboxApiClient
   class ListBranchResponse < ApiModelBase
     attr_accessor :branches
 
+    # Current is the name of the checked out branch (empty when HEAD is detached).
+    attr_accessor :current
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'branches' => :'branches'
+        :'branches' => :'branches',
+        :'current' => :'current'
       }
     end
 
@@ -37,7 +41,8 @@ module DaytonaToolboxApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'branches' => :'Array<String>'
+        :'branches' => :'Array<String>',
+        :'current' => :'String'
       }
     end
 
@@ -69,6 +74,10 @@ module DaytonaToolboxApiClient
         end
       else
         self.branches = nil
+      end
+
+      if attributes.key?(:'current')
+        self.current = attributes[:'current']
       end
     end
 
@@ -107,7 +116,8 @@ module DaytonaToolboxApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          branches == o.branches
+          branches == o.branches &&
+          current == o.current
     end
 
     # @see the `==` method
@@ -119,7 +129,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [branches].hash
+      [branches, current].hash
     end
 
     # Builds the object from hash

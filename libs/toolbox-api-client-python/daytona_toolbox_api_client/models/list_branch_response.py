@@ -17,8 +17,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,8 +30,9 @@ class ListBranchResponse(BaseModel):
     ListBranchResponse
     """ # noqa: E501
     branches: List[StrictStr]
+    current: Optional[StrictStr] = Field(default=None, description="Current is the name of the checked out branch (empty when HEAD is detached).")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["branches"]
+    __properties: ClassVar[List[str]] = ["branches", "current"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,7 +91,8 @@ class ListBranchResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "branches": obj.get("branches")
+            "branches": obj.get("branches"),
+            "current": obj.get("current")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

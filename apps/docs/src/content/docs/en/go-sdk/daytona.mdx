@@ -163,10 +163,20 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(g \*GitService\) Checkout\(ctx context.Context, path, name string\) error](<#GitService.Checkout>)
   - [func \(g \*GitService\) Clone\(ctx context.Context, url, path string, opts ...func\(\*options.GitClone\)\) error](<#GitService.Clone>)
   - [func \(g \*GitService\) Commit\(ctx context.Context, path, message, author, email string, opts ...func\(\*options.GitCommit\)\) \(\*types.GitCommitResponse, error\)](<#GitService.Commit>)
+  - [func \(g \*GitService\) ConfigureUser\(ctx context.Context, name, email string, opts ...func\(\*options.GitConfig\)\) error](<#GitService.ConfigureUser>)
   - [func \(g \*GitService\) CreateBranch\(ctx context.Context, path, name string\) error](<#GitService.CreateBranch>)
+  - [func \(g \*GitService\) DangerouslyAuthenticate\(ctx context.Context, username, password string, opts ...func\(\*options.GitAuthenticate\)\) error](<#GitService.DangerouslyAuthenticate>)
   - [func \(g \*GitService\) DeleteBranch\(ctx context.Context, path, name string, opts ...func\(\*options.GitDeleteBranch\)\) error](<#GitService.DeleteBranch>)
+  - [func \(g \*GitService\) GetConfig\(ctx context.Context, key string, opts ...func\(\*options.GitConfig\)\) \(string, error\)](<#GitService.GetConfig>)
+  - [func \(g \*GitService\) Init\(ctx context.Context, path string, opts ...func\(\*options.GitInit\)\) error](<#GitService.Init>)
   - [func \(g \*GitService\) Pull\(ctx context.Context, path string, opts ...func\(\*options.GitPull\)\) error](<#GitService.Pull>)
   - [func \(g \*GitService\) Push\(ctx context.Context, path string, opts ...func\(\*options.GitPush\)\) error](<#GitService.Push>)
+  - [func \(g \*GitService\) RemoteAdd\(ctx context.Context, path, name, url string, opts ...func\(\*options.GitRemoteAdd\)\) error](<#GitService.RemoteAdd>)
+  - [func \(g \*GitService\) RemoteGet\(ctx context.Context, path, name string\) \(string, error\)](<#GitService.RemoteGet>)
+  - [func \(g \*GitService\) Remotes\(ctx context.Context, path string\) \(\[\]types.GitRemote, error\)](<#GitService.Remotes>)
+  - [func \(g \*GitService\) Reset\(ctx context.Context, path string, opts ...func\(\*options.GitReset\)\) error](<#GitService.Reset>)
+  - [func \(g \*GitService\) Restore\(ctx context.Context, path string, files \[\]string, opts ...func\(\*options.GitRestore\)\) error](<#GitService.Restore>)
+  - [func \(g \*GitService\) SetConfig\(ctx context.Context, key, value string, opts ...func\(\*options.GitConfig\)\) error](<#GitService.SetConfig>)
   - [func \(g \*GitService\) Status\(ctx context.Context, path string\) \(\*types.GitStatus, error\)](<#GitService.Status>)
 - [type KeyboardService](<#KeyboardService>)
   - [func NewKeyboardService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*KeyboardService](<#NewKeyboardService>)
@@ -2148,6 +2158,26 @@ resp, err := sandbox.Git.Commit(ctx, "/home/user/repo",
 
 Returns the \[types.GitCommitResponse\] containing the commit SHA, or an error if the commit fails.
 
+<a name="GitService.ConfigureUser"></a>
+### func \(\*GitService\) ConfigureUser
+
+```go
+func (g *GitService) ConfigureUser(ctx context.Context, name, email string, opts ...func(*options.GitConfig)) error
+```
+
+ConfigureUser configures the git user name and email at the given scope.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithConfigScope\]: Config scope \("global" \(default\), "local" or "system"\)
+- \[options.WithConfigPath\]: Repository path, required when scope is "local"
+
+Example:
+
+```
+err := sandbox.Git.ConfigureUser(ctx, "John Doe", "john@example.com")
+```
+
 <a name="GitService.CreateBranch"></a>
 ### func \(\*GitService\) CreateBranch
 
@@ -2175,6 +2205,28 @@ err = sandbox.Git.Checkout(ctx, "/home/user/repo", "feature/new-feature")
 ```
 
 Returns an error if the branch creation fails \(e.g., branch already exists\).
+
+<a name="GitService.DangerouslyAuthenticate"></a>
+### func \(\*GitService\) DangerouslyAuthenticate
+
+```go
+func (g *GitService) DangerouslyAuthenticate(ctx context.Context, username, password string, opts ...func(*options.GitAuthenticate)) error
+```
+
+DangerouslyAuthenticate persists git credentials globally so that subsequent operations against the given host authenticate automatically.
+
+This stores the password in plaintext on disk via the git credential store.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithAuthHost\]: Host to authenticate against \(defaults to "github.com"\)
+- \[options.WithAuthProtocol\]: Protocol to authenticate against \(defaults to "https"\)
+
+Example:
+
+```
+err := sandbox.Git.DangerouslyAuthenticate(ctx, "user", "github_token")
+```
 
 <a name="GitService.DeleteBranch"></a>
 ### func \(\*GitService\) DeleteBranch
@@ -2206,6 +2258,46 @@ err := sandbox.Git.DeleteBranch(ctx, "/home/user/repo", "feature/abandoned",
 ```
 
 Returns an error if the deletion fails.
+
+<a name="GitService.GetConfig"></a>
+### func \(\*GitService\) GetConfig
+
+```go
+func (g *GitService) GetConfig(ctx context.Context, key string, opts ...func(*options.GitConfig)) (string, error)
+```
+
+GetConfig returns a git config value at the given scope, or an empty string when the key is not set.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithConfigScope\]: Config scope \("global" \(default\), "local" or "system"\)
+- \[options.WithConfigPath\]: Repository path, required when scope is "local"
+
+Example:
+
+```
+name, err := sandbox.Git.GetConfig(ctx, "user.name")
+```
+
+<a name="GitService.Init"></a>
+### func \(\*GitService\) Init
+
+```go
+func (g *GitService) Init(ctx context.Context, path string, opts ...func(*options.GitInit)) error
+```
+
+Init initializes a new Git repository at the specified path.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithBare\]: Create a bare repository without a working tree
+- \[options.WithInitialBranch\]: Name of the initial branch
+
+Example:
+
+```
+err := sandbox.Git.Init(ctx, "/home/user/repo", options.WithInitialBranch("main"))
+```
 
 <a name="GitService.Pull"></a>
 ### func \(\*GitService\) Pull
@@ -2268,6 +2360,134 @@ err := sandbox.Git.Push(ctx, "/home/user/repo",
 ```
 
 Returns an error if the push fails \(e.g., authentication failure, remote rejection\).
+
+<a name="GitService.RemoteAdd"></a>
+### func \(\*GitService\) RemoteAdd
+
+```go
+func (g *GitService) RemoteAdd(ctx context.Context, path, name, url string, opts ...func(*options.GitRemoteAdd)) error
+```
+
+RemoteAdd adds \(or overwrites\) a remote in the repository.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithRemoteFetch\]: Fetch from the remote immediately after adding it
+- \[options.WithRemoteOverwrite\]: Replace an existing remote with the same name
+
+Example:
+
+```
+err := sandbox.Git.RemoteAdd(ctx, "/home/user/repo", "origin", "https://github.com/user/repo.git")
+```
+
+<a name="GitService.RemoteGet"></a>
+### func \(\*GitService\) RemoteGet
+
+```go
+func (g *GitService) RemoteGet(ctx context.Context, path, name string) (string, error)
+```
+
+RemoteGet returns the URL of a remote, or an empty string when it does not exist.
+
+Example:
+
+```
+url, err := sandbox.Git.RemoteGet(ctx, "/home/user/repo", "origin")
+```
+
+<a name="GitService.Remotes"></a>
+### func \(\*GitService\) Remotes
+
+```go
+func (g *GitService) Remotes(ctx context.Context, path string) ([]types.GitRemote, error)
+```
+
+Remotes lists the remotes configured in the repository.
+
+Example:
+
+```
+remotes, err := sandbox.Git.Remotes(ctx, "/home/user/repo")
+for _, r := range remotes {
+    fmt.Printf("%s: %s\n", r.Name, r.URL)
+}
+```
+
+<a name="GitService.Reset"></a>
+### func \(\*GitService\) Reset
+
+```go
+func (g *GitService) Reset(ctx context.Context, path string, opts ...func(*options.GitReset)) error
+```
+
+Reset resets the current HEAD to the specified state.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithResetMode\]: Reset mode \("soft", "mixed", "hard", "merge" or "keep"\)
+- \[options.WithResetTarget\]: Revision to reset to \(defaults to HEAD\)
+- \[options.WithResetFiles\]: Constrain the reset to the given paths
+
+Example:
+
+```
+// Unstage all changes (mixed reset to HEAD)
+err := sandbox.Git.Reset(ctx, "/home/user/repo")
+
+// Hard reset to a previous commit
+err := sandbox.Git.Reset(ctx, "/home/user/repo",
+    options.WithResetMode("hard"),
+    options.WithResetTarget("HEAD~1"),
+)
+```
+
+<a name="GitService.Restore"></a>
+### func \(\*GitService\) Restore
+
+```go
+func (g *GitService) Restore(ctx context.Context, path string, files []string, opts ...func(*options.GitRestore)) error
+```
+
+Restore restores working tree files or unstages changes for the given paths.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithRestoreStaged\]: Restore the staging index for the given files
+- \[options.WithRestoreWorktree\]: Restore the working tree for the given files
+- \[options.WithRestoreSource\]: Restore from the given revision instead of the index
+
+Example:
+
+```
+// Discard working tree changes
+err := sandbox.Git.Restore(ctx, "/home/user/repo", []string{"file.txt"})
+
+// Unstage changes
+err := sandbox.Git.Restore(ctx, "/home/user/repo", []string{"file.txt"},
+    options.WithRestoreStaged(true),
+)
+```
+
+<a name="GitService.SetConfig"></a>
+### func \(\*GitService\) SetConfig
+
+```go
+func (g *GitService) SetConfig(ctx context.Context, key, value string, opts ...func(*options.GitConfig)) error
+```
+
+SetConfig sets a git config value at the given scope.
+
+Optional parameters can be configured using functional options:
+
+- \[options.WithConfigScope\]: Config scope \("global" \(default\), "local" or "system"\)
+- \[options.WithConfigPath\]: Repository path, required when scope is "local"
+
+Example:
+
+```
+err := sandbox.Git.SetConfig(ctx, "user.name", "John Doe")
+```
 
 <a name="GitService.Status"></a>
 ### func \(\*GitService\) Status

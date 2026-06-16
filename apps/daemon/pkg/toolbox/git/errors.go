@@ -40,6 +40,7 @@ func classifyGitError(err error) error {
 		errors.Is(err, go_git.ErrUnstagedChanges) ||
 		errors.Is(err, go_git.ErrRepositoryAlreadyExists) ||
 		errors.Is(err, go_git.ErrBranchExists) ||
+		errors.Is(err, go_git.ErrRemoteExists) ||
 		errors.Is(err, go_git.ErrFastForwardMergeNotPossible) {
 		return common_errors.NewConflictError(err)
 	}

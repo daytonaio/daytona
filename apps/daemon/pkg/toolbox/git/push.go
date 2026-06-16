@@ -21,13 +21,13 @@ import (
 //	@Tags			git
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body	GitRepoRequest	true	"Push request"
+//	@Param			request	body	GitPushRequest	true	"Push request"
 //	@Success		200
 //	@Router			/git/push [post]
 //
 //	@id				PushChanges
 func PushChanges(c *gin.Context) {
-	var req GitRepoRequest
+	var req GitPushRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		_ = c.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("invalid request body: %w", err)))
 		return
@@ -45,7 +45,17 @@ func PushChanges(c *gin.Context) {
 		WorkDir: req.Path,
 	}
 
-	err := gitService.Push(auth)
+	remote := ""
+	if req.Remote != nil {
+		remote = *req.Remote
+	}
+	branch := ""
+	if req.Branch != nil {
+		branch = *req.Branch
+	}
+	setUpstream := req.SetUpstream != nil && *req.SetUpstream
+
+	err := gitService.Push(auth, remote, branch, setUpstream)
 	if err != nil && err != go_git.NoErrAlreadyUpToDate {
 		abortWithGitError(c, err)
 		return

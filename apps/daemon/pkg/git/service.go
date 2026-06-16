@@ -19,6 +19,10 @@ type GitStatus struct {
 	BranchPublished bool          `json:"branchPublished" validate:"optional"`
 	Ahead           int           `json:"ahead" validate:"optional"`
 	Behind          int           `json:"behind" validate:"optional"`
+	// Detached is true when HEAD is not on a branch (detached HEAD state).
+	Detached bool `json:"detached,omitempty" validate:"optional"`
+	// Upstream is the upstream tracking branch (e.g. "origin/main"), empty when unset.
+	Upstream string `json:"upstream,omitempty" validate:"optional"`
 } // @name GitStatus
 
 type FileStatus struct {
@@ -54,8 +58,8 @@ var MapStatus map[git.StatusCode]Status = map[git.StatusCode]Status{
 }
 
 type IGitService interface {
-	CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error
-	CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool) error
+	CloneRepository(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool, depth int) error
+	CloneRepositoryCLI(repo *gitprovider.GitRepository, auth *http.BasicAuth, insecureSkipTLS bool, depth int) error
 	RepositoryExists() (bool, error)
 	SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error
 	GetGitStatus() (*GitStatus, error)

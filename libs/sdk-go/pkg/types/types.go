@@ -198,12 +198,22 @@ type GitStatus struct {
 	Behind          int
 	BranchPublished bool
 	FileStatus      []FileStatus
+	// Detached is true when HEAD is not on a branch (detached HEAD state).
+	Detached bool
+	// Upstream is the upstream tracking branch (e.g. "origin/main"), empty when unset.
+	Upstream string
 }
 
 // FileStatus represents the status of a file in git
 type FileStatus struct {
 	Path   string
 	Status string
+}
+
+// GitRemote describes a configured Git remote.
+type GitRemote struct {
+	Name string
+	URL  string
 }
 
 // GitCommitResponse

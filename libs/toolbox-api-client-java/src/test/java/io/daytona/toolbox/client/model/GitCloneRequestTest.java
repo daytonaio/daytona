@@ -54,6 +54,14 @@ public class GitCloneRequestTest {
     }
 
     /**
+     * Test the property 'depth'
+     */
+    @Test
+    public void depthTest() {
+        // TODO: test depth
+    }
+
+    /**
      * Test the property 'insecureSkipTls'
      */
     @Test

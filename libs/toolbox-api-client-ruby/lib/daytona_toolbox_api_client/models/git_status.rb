@@ -23,7 +23,13 @@ module DaytonaToolboxApiClient
 
     attr_accessor :current_branch
 
+    # Detached is true when HEAD is not on a branch (detached HEAD state).
+    attr_accessor :detached
+
     attr_accessor :file_status
+
+    # Upstream is the upstream tracking branch (e.g. \"origin/main\"), empty when unset.
+    attr_accessor :upstream
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
@@ -32,7 +38,9 @@ module DaytonaToolboxApiClient
         :'behind' => :'behind',
         :'branch_published' => :'branchPublished',
         :'current_branch' => :'currentBranch',
-        :'file_status' => :'fileStatus'
+        :'detached' => :'detached',
+        :'file_status' => :'fileStatus',
+        :'upstream' => :'upstream'
       }
     end
 
@@ -53,7 +61,9 @@ module DaytonaToolboxApiClient
         :'behind' => :'Integer',
         :'branch_published' => :'Boolean',
         :'current_branch' => :'String',
-        :'file_status' => :'Array<FileStatus>'
+        :'detached' => :'Boolean',
+        :'file_status' => :'Array<FileStatus>',
+        :'upstream' => :'String'
       }
     end
 
@@ -97,12 +107,20 @@ module DaytonaToolboxApiClient
         self.current_branch = nil
       end
 
+      if attributes.key?(:'detached')
+        self.detached = attributes[:'detached']
+      end
+
       if attributes.key?(:'file_status')
         if (value = attributes[:'file_status']).is_a?(Array)
           self.file_status = value
         end
       else
         self.file_status = nil
+      end
+
+      if attributes.key?(:'upstream')
+        self.upstream = attributes[:'upstream']
       end
     end
 
@@ -160,7 +178,9 @@ module DaytonaToolboxApiClient
           behind == o.behind &&
           branch_published == o.branch_published &&
           current_branch == o.current_branch &&
-          file_status == o.file_status
+          detached == o.detached &&
+          file_status == o.file_status &&
+          upstream == o.upstream
     end
 
     # @see the `==` method
@@ -172,7 +192,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [ahead, behind, branch_published, current_branch, file_status].hash
+      [ahead, behind, branch_published, current_branch, detached, file_status, upstream].hash
     end
 
     # Builds the object from hash

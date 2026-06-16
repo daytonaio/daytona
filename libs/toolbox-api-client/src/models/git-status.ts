@@ -22,6 +22,14 @@ export interface GitStatus {
     'behind'?: number;
     'branchPublished'?: boolean;
     'currentBranch': string;
+    /**
+     * Detached is true when HEAD is not on a branch (detached HEAD state).
+     */
+    'detached'?: boolean;
     'fileStatus': Array<FileStatus>;
+    /**
+     * Upstream is the upstream tracking branch (e.g. \"origin/main\"), empty when unset.
+     */
+    'upstream'?: string;
 }
 

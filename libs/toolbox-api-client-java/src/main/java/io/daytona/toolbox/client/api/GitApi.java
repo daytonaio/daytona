@@ -27,17 +27,27 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import io.daytona.toolbox.client.model.GitAddRemoteRequest;
 import io.daytona.toolbox.client.model.GitAddRequest;
+import io.daytona.toolbox.client.model.GitAuthenticateRequest;
 import io.daytona.toolbox.client.model.GitBranchRequest;
 import io.daytona.toolbox.client.model.GitCheckoutRequest;
 import io.daytona.toolbox.client.model.GitCloneRequest;
 import io.daytona.toolbox.client.model.GitCommitInfo;
 import io.daytona.toolbox.client.model.GitCommitRequest;
 import io.daytona.toolbox.client.model.GitCommitResponse;
+import io.daytona.toolbox.client.model.GitConfigResponse;
+import io.daytona.toolbox.client.model.GitConfigureUserRequest;
 import io.daytona.toolbox.client.model.GitDeleteBranchRequest;
-import io.daytona.toolbox.client.model.GitRepoRequest;
+import io.daytona.toolbox.client.model.GitInitRequest;
+import io.daytona.toolbox.client.model.GitPullRequest;
+import io.daytona.toolbox.client.model.GitPushRequest;
+import io.daytona.toolbox.client.model.GitResetRequest;
+import io.daytona.toolbox.client.model.GitRestoreRequest;
+import io.daytona.toolbox.client.model.GitSetConfigRequest;
 import io.daytona.toolbox.client.model.GitStatus;
 import io.daytona.toolbox.client.model.ListBranchResponse;
+import io.daytona.toolbox.client.model.ListRemotesResponse;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -201,6 +211,250 @@ public class GitApi {
     public okhttp3.Call addFilesAsync(@javax.annotation.Nonnull GitAddRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = addFilesValidateBeforeCall(request, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for addRemote
+     * @param request Add remote request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call addRemoteCall(@javax.annotation.Nonnull GitAddRemoteRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/git/remotes";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call addRemoteValidateBeforeCall(@javax.annotation.Nonnull GitAddRemoteRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling addRemote(Async)");
+        }
+
+        return addRemoteCall(request, _callback);
+
+    }
+
+    /**
+     * Add a remote
+     * Add (or overwrite) a remote in the Git repository
+     * @param request Add remote request (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public void addRemote(@javax.annotation.Nonnull GitAddRemoteRequest request) throws ApiException {
+        addRemoteWithHttpInfo(request);
+    }
+
+    /**
+     * Add a remote
+     * Add (or overwrite) a remote in the Git repository
+     * @param request Add remote request (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> addRemoteWithHttpInfo(@javax.annotation.Nonnull GitAddRemoteRequest request) throws ApiException {
+        okhttp3.Call localVarCall = addRemoteValidateBeforeCall(request, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Add a remote (asynchronously)
+     * Add (or overwrite) a remote in the Git repository
+     * @param request Add remote request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call addRemoteAsync(@javax.annotation.Nonnull GitAddRemoteRequest request, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = addRemoteValidateBeforeCall(request, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for authenticate
+     * @param request Authenticate request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call authenticateCall(@javax.annotation.Nonnull GitAuthenticateRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/git/credentials";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call authenticateValidateBeforeCall(@javax.annotation.Nonnull GitAuthenticateRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling authenticate(Async)");
+        }
+
+        return authenticateCall(request, _callback);
+
+    }
+
+    /**
+     * Authenticate Git
+     * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+     * @param request Authenticate request (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public void authenticate(@javax.annotation.Nonnull GitAuthenticateRequest request) throws ApiException {
+        authenticateWithHttpInfo(request);
+    }
+
+    /**
+     * Authenticate Git
+     * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+     * @param request Authenticate request (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> authenticateWithHttpInfo(@javax.annotation.Nonnull GitAuthenticateRequest request) throws ApiException {
+        okhttp3.Call localVarCall = authenticateValidateBeforeCall(request, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Authenticate Git (asynchronously)
+     * Persist Git credentials globally via the credential store. Stores the password in plaintext on disk.
+     * @param request Authenticate request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call authenticateAsync(@javax.annotation.Nonnull GitAuthenticateRequest request, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = authenticateValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
@@ -573,6 +827,128 @@ public class GitApi {
         okhttp3.Call localVarCall = commitChangesValidateBeforeCall(request, _callback);
         Type localVarReturnType = new TypeToken<GitCommitResponse>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for configureUser
+     * @param request Configure user request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call configureUserCall(@javax.annotation.Nonnull GitConfigureUserRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/git/config/user";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call configureUserValidateBeforeCall(@javax.annotation.Nonnull GitConfigureUserRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling configureUser(Async)");
+        }
+
+        return configureUserCall(request, _callback);
+
+    }
+
+    /**
+     * Configure Git user
+     * Configure the Git user name and email at the given scope
+     * @param request Configure user request (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public void configureUser(@javax.annotation.Nonnull GitConfigureUserRequest request) throws ApiException {
+        configureUserWithHttpInfo(request);
+    }
+
+    /**
+     * Configure Git user
+     * Configure the Git user name and email at the given scope
+     * @param request Configure user request (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> configureUserWithHttpInfo(@javax.annotation.Nonnull GitConfigureUserRequest request) throws ApiException {
+        okhttp3.Call localVarCall = configureUserValidateBeforeCall(request, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Configure Git user (asynchronously)
+     * Configure the Git user name and email at the given scope
+     * @param request Configure user request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call configureUserAsync(@javax.annotation.Nonnull GitConfigureUserRequest request, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = configureUserValidateBeforeCall(request, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**
@@ -950,6 +1326,152 @@ public class GitApi {
         return localVarCall;
     }
     /**
+     * Build call for getGitConfig
+     * @param key Config key (e.g. user.name) (required)
+     * @param path Repository path (required for local scope) (optional)
+     * @param scope Config scope: global (default), local or system (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getGitConfigCall(@javax.annotation.Nonnull String key, @javax.annotation.Nullable String path, @javax.annotation.Nullable String scope, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/git/config";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (key != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("key", key));
+        }
+
+        if (path != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("path", path));
+        }
+
+        if (scope != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("scope", scope));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getGitConfigValidateBeforeCall(@javax.annotation.Nonnull String key, @javax.annotation.Nullable String path, @javax.annotation.Nullable String scope, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'key' is set
+        if (key == null) {
+            throw new ApiException("Missing the required parameter 'key' when calling getGitConfig(Async)");
+        }
+
+        return getGitConfigCall(key, path, scope, _callback);
+
+    }
+
+    /**
+     * Get a Git config value
+     * Get a Git config value at the given scope (null when unset)
+     * @param key Config key (e.g. user.name) (required)
+     * @param path Repository path (required for local scope) (optional)
+     * @param scope Config scope: global (default), local or system (optional)
+     * @return GitConfigResponse
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public GitConfigResponse getGitConfig(@javax.annotation.Nonnull String key, @javax.annotation.Nullable String path, @javax.annotation.Nullable String scope) throws ApiException {
+        ApiResponse<GitConfigResponse> localVarResp = getGitConfigWithHttpInfo(key, path, scope);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Get a Git config value
+     * Get a Git config value at the given scope (null when unset)
+     * @param key Config key (e.g. user.name) (required)
+     * @param path Repository path (required for local scope) (optional)
+     * @param scope Config scope: global (default), local or system (optional)
+     * @return ApiResponse&lt;GitConfigResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<GitConfigResponse> getGitConfigWithHttpInfo(@javax.annotation.Nonnull String key, @javax.annotation.Nullable String path, @javax.annotation.Nullable String scope) throws ApiException {
+        okhttp3.Call localVarCall = getGitConfigValidateBeforeCall(key, path, scope, null);
+        Type localVarReturnType = new TypeToken<GitConfigResponse>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Get a Git config value (asynchronously)
+     * Get a Git config value at the given scope (null when unset)
+     * @param key Config key (e.g. user.name) (required)
+     * @param path Repository path (required for local scope) (optional)
+     * @param scope Config scope: global (default), local or system (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getGitConfigAsync(@javax.annotation.Nonnull String key, @javax.annotation.Nullable String path, @javax.annotation.Nullable String scope, final ApiCallback<GitConfigResponse> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getGitConfigValidateBeforeCall(key, path, scope, _callback);
+        Type localVarReturnType = new TypeToken<GitConfigResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for getStatus
      * @param path Repository path (required)
      * @param _callback Callback for upload/download progress
@@ -1077,6 +1599,128 @@ public class GitApi {
         okhttp3.Call localVarCall = getStatusValidateBeforeCall(path, _callback);
         Type localVarReturnType = new TypeToken<GitStatus>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for initRepository
+     * @param request Init repository request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call initRepositoryCall(@javax.annotation.Nonnull GitInitRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/git/init";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call initRepositoryValidateBeforeCall(@javax.annotation.Nonnull GitInitRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling initRepository(Async)");
+        }
+
+        return initRepositoryCall(request, _callback);
+
+    }
+
+    /**
+     * Initialize a Git repository
+     * Initialize a new Git repository at the specified path
+     * @param request Init repository request (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public void initRepository(@javax.annotation.Nonnull GitInitRequest request) throws ApiException {
+        initRepositoryWithHttpInfo(request);
+    }
+
+    /**
+     * Initialize a Git repository
+     * Initialize a new Git repository at the specified path
+     * @param request Init repository request (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> initRepositoryWithHttpInfo(@javax.annotation.Nonnull GitInitRequest request) throws ApiException {
+        okhttp3.Call localVarCall = initRepositoryValidateBeforeCall(request, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Initialize a Git repository (asynchronously)
+     * Initialize a new Git repository at the specified path
+     * @param request Init repository request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 201 </td><td> Created </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call initRepositoryAsync(@javax.annotation.Nonnull GitInitRequest request, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = initRepositoryValidateBeforeCall(request, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }
     /**
@@ -1210,6 +1854,136 @@ public class GitApi {
         return localVarCall;
     }
     /**
+     * Build call for listRemotes
+     * @param path Repository path (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listRemotesCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/git/remotes";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (path != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("path", path));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listRemotesValidateBeforeCall(@javax.annotation.Nonnull String path, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'path' is set
+        if (path == null) {
+            throw new ApiException("Missing the required parameter 'path' when calling listRemotes(Async)");
+        }
+
+        return listRemotesCall(path, _callback);
+
+    }
+
+    /**
+     * List remotes
+     * List the remotes configured in the Git repository
+     * @param path Repository path (required)
+     * @return ListRemotesResponse
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ListRemotesResponse listRemotes(@javax.annotation.Nonnull String path) throws ApiException {
+        ApiResponse<ListRemotesResponse> localVarResp = listRemotesWithHttpInfo(path);
+        return localVarResp.getData();
+    }
+
+    /**
+     * List remotes
+     * List the remotes configured in the Git repository
+     * @param path Repository path (required)
+     * @return ApiResponse&lt;ListRemotesResponse&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ListRemotesResponse> listRemotesWithHttpInfo(@javax.annotation.Nonnull String path) throws ApiException {
+        okhttp3.Call localVarCall = listRemotesValidateBeforeCall(path, null);
+        Type localVarReturnType = new TypeToken<ListRemotesResponse>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * List remotes (asynchronously)
+     * List the remotes configured in the Git repository
+     * @param path Repository path (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listRemotesAsync(@javax.annotation.Nonnull String path, final ApiCallback<ListRemotesResponse> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listRemotesValidateBeforeCall(path, _callback);
+        Type localVarReturnType = new TypeToken<ListRemotesResponse>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for pullChanges
      * @param request Pull request (required)
      * @param _callback Callback for upload/download progress
@@ -1222,7 +1996,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pullChangesCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pullChangesCall(@javax.annotation.Nonnull GitPullRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1267,7 +2041,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pullChangesValidateBeforeCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pullChangesValidateBeforeCall(@javax.annotation.Nonnull GitPullRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling pullChanges(Async)");
@@ -1289,7 +2063,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void pullChanges(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
+    public void pullChanges(@javax.annotation.Nonnull GitPullRequest request) throws ApiException {
         pullChangesWithHttpInfo(request);
     }
 
@@ -1306,7 +2080,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> pullChangesWithHttpInfo(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
+    public ApiResponse<Void> pullChangesWithHttpInfo(@javax.annotation.Nonnull GitPullRequest request) throws ApiException {
         okhttp3.Call localVarCall = pullChangesValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1325,7 +2099,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pullChangesAsync(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call pullChangesAsync(@javax.annotation.Nonnull GitPullRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pullChangesValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
@@ -1344,7 +2118,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pushChangesCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call pushChangesCall(@javax.annotation.Nonnull GitPushRequest request, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1389,7 +2163,7 @@ public class GitApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call pushChangesValidateBeforeCall(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call pushChangesValidateBeforeCall(@javax.annotation.Nonnull GitPushRequest request, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'request' is set
         if (request == null) {
             throw new ApiException("Missing the required parameter 'request' when calling pushChanges(Async)");
@@ -1411,7 +2185,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public void pushChanges(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
+    public void pushChanges(@javax.annotation.Nonnull GitPushRequest request) throws ApiException {
         pushChangesWithHttpInfo(request);
     }
 
@@ -1428,7 +2202,7 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Void> pushChangesWithHttpInfo(@javax.annotation.Nonnull GitRepoRequest request) throws ApiException {
+    public ApiResponse<Void> pushChangesWithHttpInfo(@javax.annotation.Nonnull GitPushRequest request) throws ApiException {
         okhttp3.Call localVarCall = pushChangesValidateBeforeCall(request, null);
         return localVarApiClient.execute(localVarCall);
     }
@@ -1447,9 +2221,375 @@ public class GitApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call pushChangesAsync(@javax.annotation.Nonnull GitRepoRequest request, final ApiCallback<Void> _callback) throws ApiException {
+    public okhttp3.Call pushChangesAsync(@javax.annotation.Nonnull GitPushRequest request, final ApiCallback<Void> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = pushChangesValidateBeforeCall(request, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for resetChanges
+     * @param request Reset request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call resetChangesCall(@javax.annotation.Nonnull GitResetRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/git/reset";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call resetChangesValidateBeforeCall(@javax.annotation.Nonnull GitResetRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling resetChanges(Async)");
+        }
+
+        return resetChangesCall(request, _callback);
+
+    }
+
+    /**
+     * Reset repository
+     * Reset the current HEAD to the specified state
+     * @param request Reset request (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public void resetChanges(@javax.annotation.Nonnull GitResetRequest request) throws ApiException {
+        resetChangesWithHttpInfo(request);
+    }
+
+    /**
+     * Reset repository
+     * Reset the current HEAD to the specified state
+     * @param request Reset request (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> resetChangesWithHttpInfo(@javax.annotation.Nonnull GitResetRequest request) throws ApiException {
+        okhttp3.Call localVarCall = resetChangesValidateBeforeCall(request, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Reset repository (asynchronously)
+     * Reset the current HEAD to the specified state
+     * @param request Reset request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call resetChangesAsync(@javax.annotation.Nonnull GitResetRequest request, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = resetChangesValidateBeforeCall(request, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for restoreFiles
+     * @param request Restore request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call restoreFilesCall(@javax.annotation.Nonnull GitRestoreRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/git/restore";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call restoreFilesValidateBeforeCall(@javax.annotation.Nonnull GitRestoreRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling restoreFiles(Async)");
+        }
+
+        return restoreFilesCall(request, _callback);
+
+    }
+
+    /**
+     * Restore files
+     * Restore working tree files or unstage changes
+     * @param request Restore request (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public void restoreFiles(@javax.annotation.Nonnull GitRestoreRequest request) throws ApiException {
+        restoreFilesWithHttpInfo(request);
+    }
+
+    /**
+     * Restore files
+     * Restore working tree files or unstage changes
+     * @param request Restore request (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> restoreFilesWithHttpInfo(@javax.annotation.Nonnull GitRestoreRequest request) throws ApiException {
+        okhttp3.Call localVarCall = restoreFilesValidateBeforeCall(request, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Restore files (asynchronously)
+     * Restore working tree files or unstage changes
+     * @param request Restore request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call restoreFilesAsync(@javax.annotation.Nonnull GitRestoreRequest request, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = restoreFilesValidateBeforeCall(request, _callback);
+        localVarApiClient.executeAsync(localVarCall, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for setGitConfig
+     * @param request Set config request (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setGitConfigCall(@javax.annotation.Nonnull GitSetConfigRequest request, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = request;
+
+        // create path and map variables
+        String localVarPath = "/git/config";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] {  };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call setGitConfigValidateBeforeCall(@javax.annotation.Nonnull GitSetConfigRequest request, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'request' is set
+        if (request == null) {
+            throw new ApiException("Missing the required parameter 'request' when calling setGitConfig(Async)");
+        }
+
+        return setGitConfigCall(request, _callback);
+
+    }
+
+    /**
+     * Set a Git config value
+     * Set a Git config key/value at the given scope
+     * @param request Set config request (required)
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public void setGitConfig(@javax.annotation.Nonnull GitSetConfigRequest request) throws ApiException {
+        setGitConfigWithHttpInfo(request);
+    }
+
+    /**
+     * Set a Git config value
+     * Set a Git config key/value at the given scope
+     * @param request Set config request (required)
+     * @return ApiResponse&lt;Void&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<Void> setGitConfigWithHttpInfo(@javax.annotation.Nonnull GitSetConfigRequest request) throws ApiException {
+        okhttp3.Call localVarCall = setGitConfigValidateBeforeCall(request, null);
+        return localVarApiClient.execute(localVarCall);
+    }
+
+    /**
+     * Set a Git config value (asynchronously)
+     * Set a Git config key/value at the given scope
+     * @param request Set config request (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call setGitConfigAsync(@javax.annotation.Nonnull GitSetConfigRequest request, final ApiCallback<Void> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = setGitConfigValidateBeforeCall(request, _callback);
         localVarApiClient.executeAsync(localVarCall, _callback);
         return localVarCall;
     }

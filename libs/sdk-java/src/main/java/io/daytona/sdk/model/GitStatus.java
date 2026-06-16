@@ -24,6 +24,10 @@ public class GitStatus {
     private Boolean branchPublished;
     @JsonProperty("fileStatus")
     private List<FileStatus> fileStatus;
+    @JsonProperty("detached")
+    private Boolean detached;
+    @JsonProperty("upstream")
+    private String upstream;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     /**
@@ -133,4 +137,32 @@ public class GitStatus {
      * @param fileStatus file status list
      */
     public void setFileStatus(List<FileStatus> fileStatus) { this.fileStatus = fileStatus; }
+
+    /**
+     * Returns whether HEAD is detached (not on a branch).
+     *
+     * @return {@code true} when HEAD is detached
+     */
+    public boolean isDetached() { return detached != null && detached; }
+
+    /**
+     * Sets whether HEAD is detached (not on a branch).
+     *
+     * @param detached detached flag
+     */
+    public void setDetached(Boolean detached) { this.detached = detached; }
+
+    /**
+     * Returns the upstream tracking branch (e.g. "origin/main"), or {@code null} when unset.
+     *
+     * @return upstream tracking branch
+     */
+    public String getUpstream() { return upstream; }
+
+    /**
+     * Sets the upstream tracking branch.
+     *
+     * @param upstream upstream tracking branch
+     */
+    public void setUpstream(String upstream) { this.upstream = upstream; }
 }

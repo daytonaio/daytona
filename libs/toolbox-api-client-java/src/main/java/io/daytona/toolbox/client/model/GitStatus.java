@@ -73,10 +73,20 @@ public class GitStatus {
   @javax.annotation.Nonnull
   private String currentBranch;
 
+  public static final String SERIALIZED_NAME_DETACHED = "detached";
+  @SerializedName(SERIALIZED_NAME_DETACHED)
+  @javax.annotation.Nullable
+  private Boolean detached;
+
   public static final String SERIALIZED_NAME_FILE_STATUS = "fileStatus";
   @SerializedName(SERIALIZED_NAME_FILE_STATUS)
   @javax.annotation.Nonnull
   private List<FileStatus> fileStatus = new ArrayList<>();
+
+  public static final String SERIALIZED_NAME_UPSTREAM = "upstream";
+  @SerializedName(SERIALIZED_NAME_UPSTREAM)
+  @javax.annotation.Nullable
+  private String upstream;
 
   public GitStatus() {
   }
@@ -157,6 +167,25 @@ public class GitStatus {
   }
 
 
+  public GitStatus detached(@javax.annotation.Nullable Boolean detached) {
+    this.detached = detached;
+    return this;
+  }
+
+  /**
+   * Detached is true when HEAD is not on a branch (detached HEAD state).
+   * @return detached
+   */
+  @javax.annotation.Nullable
+  public Boolean getDetached() {
+    return detached;
+  }
+
+  public void setDetached(@javax.annotation.Nullable Boolean detached) {
+    this.detached = detached;
+  }
+
+
   public GitStatus fileStatus(@javax.annotation.Nonnull List<FileStatus> fileStatus) {
     this.fileStatus = fileStatus;
     return this;
@@ -181,6 +210,25 @@ public class GitStatus {
 
   public void setFileStatus(@javax.annotation.Nonnull List<FileStatus> fileStatus) {
     this.fileStatus = fileStatus;
+  }
+
+
+  public GitStatus upstream(@javax.annotation.Nullable String upstream) {
+    this.upstream = upstream;
+    return this;
+  }
+
+  /**
+   * Upstream is the upstream tracking branch (e.g. \&quot;origin/main\&quot;), empty when unset.
+   * @return upstream
+   */
+  @javax.annotation.Nullable
+  public String getUpstream() {
+    return upstream;
+  }
+
+  public void setUpstream(@javax.annotation.Nullable String upstream) {
+    this.upstream = upstream;
   }
 
   /**
@@ -242,13 +290,15 @@ public class GitStatus {
         Objects.equals(this.behind, gitStatus.behind) &&
         Objects.equals(this.branchPublished, gitStatus.branchPublished) &&
         Objects.equals(this.currentBranch, gitStatus.currentBranch) &&
-        Objects.equals(this.fileStatus, gitStatus.fileStatus)&&
+        Objects.equals(this.detached, gitStatus.detached) &&
+        Objects.equals(this.fileStatus, gitStatus.fileStatus) &&
+        Objects.equals(this.upstream, gitStatus.upstream)&&
         Objects.equals(this.additionalProperties, gitStatus.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ahead, behind, branchPublished, currentBranch, fileStatus, additionalProperties);
+    return Objects.hash(ahead, behind, branchPublished, currentBranch, detached, fileStatus, upstream, additionalProperties);
   }
 
   @Override
@@ -259,7 +309,9 @@ public class GitStatus {
     sb.append("    behind: ").append(toIndentedString(behind)).append("\n");
     sb.append("    branchPublished: ").append(toIndentedString(branchPublished)).append("\n");
     sb.append("    currentBranch: ").append(toIndentedString(currentBranch)).append("\n");
+    sb.append("    detached: ").append(toIndentedString(detached)).append("\n");
     sb.append("    fileStatus: ").append(toIndentedString(fileStatus)).append("\n");
+    sb.append("    upstream: ").append(toIndentedString(upstream)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -279,7 +331,7 @@ public class GitStatus {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("ahead", "behind", "branchPublished", "currentBranch", "fileStatus"));
+    openapiFields = new HashSet<String>(Arrays.asList("ahead", "behind", "branchPublished", "currentBranch", "detached", "fileStatus", "upstream"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("currentBranch", "fileStatus"));
@@ -317,6 +369,9 @@ public class GitStatus {
         for (int i = 0; i < jsonArrayfileStatus.size(); i++) {
           FileStatus.validateJsonElement(jsonArrayfileStatus.get(i));
         }
+      }
+      if ((jsonObj.get("upstream") != null && !jsonObj.get("upstream").isJsonNull()) && !jsonObj.get("upstream").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `upstream` to be a primitive type in the JSON string but got `%s`", jsonObj.get("upstream").toString()));
       }
   }
 

@@ -47,4 +47,12 @@ public class ListBranchResponseTest {
         // TODO: test branches
     }
 
+    /**
+     * Test the property 'current'
+     */
+    @Test
+    public void currentTest() {
+        // TODO: test current
+    }
+
 }
