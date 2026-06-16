@@ -19,6 +19,19 @@ interface EcrAuth {
 const ECR_HOST_REGEX = /^\d+\.dkr\.ecr\.([a-z0-9-]+)\.amazonaws\.com$/
 // Refresh ahead of AWS-side expiry (12h) to absorb clock skew.
 const REFRESH_BUFFER_SEC = 30 * 60
+// Short-lived negative cache so a misconfigured registry isn't re-resolved
+// (incurring the full AWS SDK retry/timeout budget) on every build.
+const NEGATIVE_CACHE_SEC = 60
+// Sentinel marking a cached resolution failure.
+const NEGATIVE_CACHE_MARKER = '__error'
+
+interface NegativeCacheEntry {
+  [NEGATIVE_CACHE_MARKER]: string
+}
+
+function isNegativeCacheEntry(value: unknown): value is NegativeCacheEntry {
+  return typeof value === 'object' && value !== null && NEGATIVE_CACHE_MARKER in value
+}
 
 @Injectable()
 export class EcrCredentialsService {
@@ -61,60 +74,87 @@ export class EcrCredentialsService {
     const cached = await this.redis.get(cacheKey)
     if (cached) {
       try {
-        return JSON.parse(cached) as EcrAuth
-      } catch {
-        // corrupted cache entry — refetch
+        const parsed: unknown = JSON.parse(cached)
+        if (isNegativeCacheEntry(parsed)) {
+          // Recent failure for this registry — fail fast instead of re-hitting AWS.
+          throw new Error(`(cached) ${parsed[NEGATIVE_CACHE_MARKER]}`)
+        }
+        return parsed as EcrAuth
+      } catch (err) {
+        // Re-throw cached failures; only swallow JSON parse errors to refetch.
+        if (err instanceof SyntaxError) {
+          // corrupted cache entry — refetch
+        } else {
+          throw err
+        }
       }
     }
 
-    // When set, broker creds are used as the source identity for the customer AssumeRole below.
-    const baseCredentials = this.brokerRoleArn
-      ? fromTemporaryCredentials({
-          params: { RoleArn: this.brokerRoleArn, RoleSessionName: `daytona-${externalId}-broker` },
+    try {
+      // When set, broker creds are used as the source identity for the customer AssumeRole below.
+      const baseCredentials = this.brokerRoleArn
+        ? fromTemporaryCredentials({
+            params: { RoleArn: this.brokerRoleArn, RoleSessionName: `daytona-${externalId}-broker` },
+          })
+        : undefined
+
+      const ecr = new ECRClient({
+        region,
+        credentials: useApiIdentity
+          ? baseCredentials
+          : fromTemporaryCredentials({
+              params: {
+                RoleArn: normalizedArn,
+                RoleSessionName: `daytona-${externalId}-pull`,
+                ExternalId: externalId,
+              },
+              masterCredentials: baseCredentials,
+            }),
+      })
+
+      const resp = await ecr.send(new GetAuthorizationTokenCommand({}))
+      const data = resp.authorizationData?.[0]
+      if (!data?.authorizationToken) {
+        throw new Error('ECR returned no authorization data')
+      }
+
+      const decoded = Buffer.from(data.authorizationToken, 'base64').toString('utf-8')
+      const sep = decoded.indexOf(':')
+      if (sep < 0) {
+        throw new Error('Unexpected ECR token format')
+      }
+      const auth = {
+        username: decoded.slice(0, sep),
+        password: decoded.slice(sep + 1),
+      }
+
+      if (data.expiresAt) {
+        const ttl = Math.floor((data.expiresAt.getTime() - Date.now()) / 1000) - REFRESH_BUFFER_SEC
+        if (ttl > 0) {
+          await this.redis.setex(cacheKey, ttl, JSON.stringify(auth))
+        }
+      }
+
+      this.logger.log(
+        `Resolved ECR credentials for region=${region} role=${useApiIdentity ? '(API identity)' : normalizedArn}${this.brokerRoleArn ? ' via broker' : ''}`,
+      )
+      return auth
+    } catch (err) {
+      // Only negative-cache the per-role key, which is scoped to a single
+      // (misconfigured) registry. The API-identity key is shared across all
+      // tenants in the region, so caching a transient failure there would
+      // wrongly fail-fast everyone for the TTL window.
+      if (!useApiIdentity) {
+        const message = err instanceof Error ? err.message : String(err)
+        // Cache the failure briefly so subsequent builds don't each pay the full
+        // AWS SDK retry/timeout budget for a misconfigured registry.
+        const entry: NegativeCacheEntry = { [NEGATIVE_CACHE_MARKER]: message }
+        await this.redis.setex(cacheKey, NEGATIVE_CACHE_SEC, JSON.stringify(entry)).catch(() => {
+          // best-effort negative caching — ignore Redis write failures
         })
-      : undefined
-
-    const ecr = new ECRClient({
-      region,
-      credentials: useApiIdentity
-        ? baseCredentials
-        : fromTemporaryCredentials({
-            params: {
-              RoleArn: normalizedArn,
-              RoleSessionName: `daytona-${externalId}-pull`,
-              ExternalId: externalId,
-            },
-            masterCredentials: baseCredentials,
-          }),
-    })
-
-    const resp = await ecr.send(new GetAuthorizationTokenCommand({}))
-    const data = resp.authorizationData?.[0]
-    if (!data?.authorizationToken) {
-      throw new Error('ECR returned no authorization data')
-    }
-
-    const decoded = Buffer.from(data.authorizationToken, 'base64').toString('utf-8')
-    const sep = decoded.indexOf(':')
-    if (sep < 0) {
-      throw new Error('Unexpected ECR token format')
-    }
-    const auth = {
-      username: decoded.slice(0, sep),
-      password: decoded.slice(sep + 1),
-    }
-
-    if (data.expiresAt) {
-      const ttl = Math.floor((data.expiresAt.getTime() - Date.now()) / 1000) - REFRESH_BUFFER_SEC
-      if (ttl > 0) {
-        await this.redis.setex(cacheKey, ttl, JSON.stringify(auth))
       }
+      throw err
     }
-
-    this.logger.log(
-      `Resolved ECR credentials for region=${region} role=${useApiIdentity ? '(API identity)' : normalizedArn}${this.brokerRoleArn ? ' via broker' : ''}`,
-    )
-    return auth
   }
 
   // STS returns `arn:aws:sts::N:assumed-role/X/sess`; convert to the IAM role form `arn:aws:iam::N:role/X` so it can be compared against the user-supplied role ARN.
