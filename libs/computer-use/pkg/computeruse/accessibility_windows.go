@@ -440,8 +440,12 @@ func resolveWindowsScopeRoot(automation *uia.UIAutomation, scope windowsA11yScop
 func findWindowsRootByPID(automation *uia.UIAutomation, root *uia.Element, pid int) (*uia.Element, error) {
 	value := ole.NewVariant(ole.VT_I4, int64(pid))
 	condition, err := automation.CreatePropertyCondition(uia.ProcessIdPropertyId, &value)
-	ole.VariantClear(&value)
+	if clearErr := ole.VariantClear(&value); clearErr != nil {
+		releaseCondition(condition)
+		return nil, fmt.Errorf("%w: VariantClear: %v", errA11yUnavailable, clearErr)
+	}
 	if err != nil || condition == nil {
+		releaseCondition(condition)
 		return nil, fmt.Errorf("%w: CreatePropertyCondition: %v", errA11yUnavailable, err)
 	}
 	defer condition.Release()
@@ -810,8 +814,13 @@ func windowsRoleCondition(automation *uia.UIAutomation, controlTypes []uia.Contr
 	for _, controlType := range controlTypes {
 		value := ole.NewVariant(ole.VT_I4, int64(controlType))
 		condition, err := automation.CreatePropertyCondition(uia.ControlTypePropertyId, &value)
-		ole.VariantClear(&value)
+		if clearErr := ole.VariantClear(&value); clearErr != nil {
+			releaseCondition(condition)
+			releaseCondition(combined)
+			return nil
+		}
 		if err != nil || condition == nil {
+			releaseCondition(condition)
 			releaseCondition(combined)
 			return nil
 		}
@@ -845,8 +854,12 @@ func windowsNameCondition(automation *uia.UIAutomation, name string, flags uia.P
 	}
 	value := ole.NewVariant(ole.VT_BSTR, int64(uintptr(unsafe.Pointer(bstr))))
 	condition, err := automation.CreatePropertyConditionEx(uia.NamePropertyId, &value, flags)
-	ole.VariantClear(&value) // frees the BSTR; the condition keeps its own copy
+	if clearErr := ole.VariantClear(&value); clearErr != nil { // frees the BSTR; the condition keeps its own copy
+		releaseCondition(condition)
+		return nil
+	}
 	if err != nil || condition == nil {
+		releaseCondition(condition)
 		return nil
 	}
 	return condition

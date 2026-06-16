@@ -98,7 +98,6 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 					// Discard anything before the first recognized prefix.
 					if idx > 0 {
 						buf = buf[idx:]
-						idx = 0
 					}
 
 					// Consume the prefix and set the current stream.
@@ -116,13 +115,14 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 						if len(buf) > 0 {
 							out := make([]byte, len(buf))
 							copy(out, buf)
-							if currentStream == streamStdout {
+							switch currentStream {
+							case streamStdout:
 								select {
 								case <-ctx.Done():
 									return
 								case stdoutChan <- out:
 								}
-							} else if currentStream == streamStderr {
+							case streamStderr:
 								select {
 								case <-ctx.Done():
 									return
@@ -141,13 +141,14 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 				if idx > 0 {
 					chunkData := make([]byte, idx)
 					copy(chunkData, buf[:idx])
-					if currentStream == streamStdout {
+					switch currentStream {
+					case streamStdout:
 						select {
 						case <-ctx.Done():
 							return
 						case stdoutChan <- chunkData:
 						}
-					} else if currentStream == streamStderr {
+					case streamStderr:
 						select {
 						case <-ctx.Done():
 							return

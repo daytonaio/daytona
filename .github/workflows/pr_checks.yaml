@@ -120,7 +120,7 @@ jobs:
 
   go-windows:
     if: github.repository == 'daytonaio/daytona'
-    name: Go Windows build & vet
+    name: Go build, vet and lint (Windows)
     runs-on: blacksmith-4vcpu-ubuntu-2404
     strategy:
       matrix:
@@ -143,6 +143,25 @@ jobs:
         run: |
           go build ./...
           go vet ./...
+      - name: format
+        working-directory: ${{ matrix.working-directory }}
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: '0'
+        run: |
+          go fmt ./...
+          git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
+        with:
+          version: v2.6.2
+          working-directory: ${{ matrix.working-directory }}
+          args: --timeout=5m ./...
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: '0'
 
   test-windows:
     if: github.repository == 'daytonaio/daytona'
@@ -162,9 +181,9 @@ jobs:
       - name: Test computer-use
         working-directory: libs/computer-use
         run: go test -count=1 -v ./pkg/computeruse/...
-      - name: Test daemon (recording + computeruse manager)
+      - name: Test daemon (recording + toolbox + computeruse manager)
         working-directory: apps/daemon
-        run: go test -count=1 -v ./pkg/recording/... ./pkg/toolbox/computeruse/manager/...
+        run: go test -count=1 -v ./pkg/recording/... ./pkg/toolbox ./pkg/toolbox/computeruse/manager/...
 
   lint-python:
     if: github.repository == 'daytonaio/daytona'

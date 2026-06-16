@@ -158,7 +158,11 @@ func (c *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 	// Draw cursor if requested
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		mouseX, mouseY = getMousePosition()
+		var err error
+		mouseX, mouseY, err = getMousePosition()
+		if err != nil {
+			return nil, err
+		}
 		drawCursor(rgbaImg, mouseX, mouseY)
 	}
 
@@ -196,7 +200,10 @@ func (c *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 	// Draw cursor if requested and it's within the region
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		absoluteMouseX, absoluteMouseY := getMousePosition()
+		absoluteMouseX, absoluteMouseY, err := getMousePosition()
+		if err != nil {
+			return nil, err
+		}
 		// Convert to relative coordinates within the region
 		mouseX = absoluteMouseX - req.X
 		mouseY = absoluteMouseY - req.Y
@@ -246,7 +253,11 @@ func (c *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 	// Draw cursor if requested
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		mouseX, mouseY = getMousePosition()
+		var err error
+		mouseX, mouseY, err = getMousePosition()
+		if err != nil {
+			return nil, err
+		}
 		drawCursor(rgbaImg, mouseX, mouseY)
 	}
 
@@ -294,7 +305,10 @@ func (c *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 	// Draw cursor if requested and it's within the region
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		absoluteMouseX, absoluteMouseY := getMousePosition()
+		absoluteMouseX, absoluteMouseY, err := getMousePosition()
+		if err != nil {
+			return nil, err
+		}
 		mouseX = absoluteMouseX - req.X
 		mouseY = absoluteMouseY - req.Y
 

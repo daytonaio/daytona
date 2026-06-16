@@ -6,13 +6,18 @@
 package computeruse
 
 import (
-	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
+	"errors"
 	"time"
+
+	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 )
 
 // GetMousePosition returns the current mouse cursor position
 func (c *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, error) {
-	x, y := getMousePosition()
+	x, y, err := getMousePosition()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MousePositionResponse{
 		Position: computeruse.Position{
@@ -32,7 +37,10 @@ func (c *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse
 	time.Sleep(50 * time.Millisecond)
 
 	// Get the mouse position after move
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePosition()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MousePositionResponse{
 		Position: computeruse.Position{
@@ -61,7 +69,10 @@ func (c *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.Mo
 	}
 
 	// Get position after click
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePosition()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MouseClickResponse{
 		Position: computeruse.Position{
@@ -72,15 +83,18 @@ func (c *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.Mo
 }
 
 // moveMouseSmoothly moves the mouse smoothly in steps
-func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
+func moveMouseSmoothly(startX, startY, endX, endY, steps int) error {
 	dx := float64(endX-startX) / float64(steps)
 	dy := float64(endY-startY) / float64(steps)
 	for i := 1; i <= steps; i++ {
 		x := int(float64(startX) + dx*float64(i))
 		y := int(float64(startY) + dy*float64(i))
-		_ = setMousePosition(x, y)
+		if err := setMousePosition(x, y); err != nil {
+			return err
+		}
 		time.Sleep(2 * time.Millisecond)
 	}
+	return nil
 }
 
 // Drag performs a mouse drag from start to end coordinates
@@ -115,7 +129,9 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	time.Sleep(300 * time.Millisecond) // Increased delay
 
 	// Move to end position while holding (smoothly)
-	moveMouseSmoothly(req.StartX, req.StartY, req.EndX, req.EndY, 20)
+	if err := moveMouseSmoothly(req.StartX, req.StartY, req.EndX, req.EndY, 20); err != nil {
+		return nil, errors.Join(err, mouseUp(req.Button))
+	}
 	time.Sleep(100 * time.Millisecond)
 
 	// Release mouse button
@@ -125,7 +141,10 @@ func (c *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 	time.Sleep(50 * time.Millisecond)
 
 	// Get final position
-	actualX, actualY := getMousePosition()
+	actualX, actualY, err := getMousePosition()
+	if err != nil {
+		return nil, err
+	}
 
 	return &computeruse.MouseDragResponse{
 		Position: computeruse.Position{

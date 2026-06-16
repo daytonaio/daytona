@@ -30,7 +30,6 @@ var (
 	procGetCursorPos      = user32.NewProc("GetCursorPos")
 	procSetCursorPos      = user32.NewProc("SetCursorPos")
 	procSendInput         = user32.NewProc("SendInput")
-	procGetSystemMetrics  = user32.NewProc("GetSystemMetrics")
 	procVkKeyScanW        = user32.NewProc("VkKeyScanW")
 	procEnumWindows       = user32.NewProc("EnumWindows")
 	procGetWindowTextW    = user32.NewProc("GetWindowTextW")
@@ -38,12 +37,6 @@ var (
 	procIsWindowVisible   = user32.NewProc("IsWindowVisible")
 	procGetWindowRect     = user32.NewProc("GetWindowRect")
 	procMapVirtualKeyW    = user32.NewProc("MapVirtualKeyW")
-)
-
-// SystemMetric indices used with GetSystemMetrics.
-const (
-	smCxScreen = 0
-	smCyScreen = 1
 )
 
 // SendInput type field.
@@ -238,10 +231,13 @@ func sendInputs(inputs []inputStruct) error {
 // Mouse
 // ---------------------------------------------------------------------------
 
-func getMousePosition() (int, int) {
+func getMousePosition() (int, int, error) {
 	var pt pointStruct
-	procGetCursorPos.Call(uintptr(unsafe.Pointer(&pt)))
-	return int(pt.X), int(pt.Y)
+	ret, _, err := procGetCursorPos.Call(uintptr(unsafe.Pointer(&pt)))
+	if ret == 0 {
+		return 0, 0, fmt.Errorf("GetCursorPos failed: %v", err)
+	}
+	return int(pt.X), int(pt.Y), nil
 }
 
 func setMousePosition(x, y int) error {
@@ -452,12 +448,6 @@ func typeString(text string, delay int) error {
 // Display / windows enumeration
 // ---------------------------------------------------------------------------
 
-func getScreenSize() (int, int) {
-	w, _, _ := procGetSystemMetrics.Call(smCxScreen)
-	h, _, _ := procGetSystemMetrics.Call(smCyScreen)
-	return int(int32(w)), int(int32(h))
-}
-
 // windowInfo describes a top-level window enumerated by getWindowsList.
 type windowInfo struct {
 	Handle  uintptr
@@ -470,7 +460,7 @@ type windowInfo struct {
 }
 
 // getWindowsList enumerates all top-level windows.
-func getWindowsList() []windowInfo {
+func getWindowsList() ([]windowInfo, error) {
 	var collected []windowInfo
 
 	// Keep the callback alive for the duration of the call by allocating it
@@ -484,8 +474,14 @@ func getWindowsList() []windowInfo {
 		title := ""
 		if titleLen > 0 {
 			buf := make([]uint16, int(titleLen)+1)
-			procGetWindowTextW.Call(hwnd, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
-			title = windows.UTF16ToString(buf)
+			ret, _, err := procGetWindowTextW.Call(hwnd, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+			if ret == 0 {
+				if err != syscall.Errno(0) {
+					return 1
+				}
+			} else {
+				title = windows.UTF16ToString(buf)
+			}
 		}
 
 		// Position / size via GetWindowRect.
@@ -514,6 +510,9 @@ func getWindowsList() []windowInfo {
 		}
 		return 1 // continue enumeration
 	})
-	procEnumWindows.Call(cb, 0)
-	return collected
+	ret, _, err := procEnumWindows.Call(cb, 0)
+	if ret == 0 {
+		return nil, fmt.Errorf("EnumWindows failed: %v", err)
+	}
+	return collected, nil
 }

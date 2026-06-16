@@ -38,7 +38,10 @@ func (c *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error)
 
 // GetWindows returns information about all open windows
 func (c *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
-	windowsList := getWindowsList()
+	windowsList, err := getWindowsList()
+	if err != nil {
+		return nil, err
+	}
 
 	windows := make([]computeruse.WindowInfo, 0, len(windowsList))
 	for i, w := range windowsList {
