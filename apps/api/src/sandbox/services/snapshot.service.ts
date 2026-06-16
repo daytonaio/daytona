@@ -805,13 +805,17 @@ export class SnapshotService {
     const sandbox = await this.sandboxRepository.findOne({
       where: [
         {
-          existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"snapshotName":"${imageName}"}]'::jsonb`),
+          lifecycle: {
+            existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"snapshotName":"${imageName}"}]'::jsonb`),
+          },
         },
         {
-          existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"imageName":"${imageName}"}]'::jsonb`),
+          lifecycle: {
+            existingBackupSnapshots: Raw((alias) => `${alias} @> '[{"imageName":"${imageName}"}]'::jsonb`),
+          },
         },
         {
-          backupSnapshot: imageName,
+          lifecycle: { backupSnapshot: imageName },
         },
       ],
     })

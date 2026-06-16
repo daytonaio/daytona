@@ -27,6 +27,7 @@
     "migration:run:pre-deploy": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:run -d ./src/migrations/pre-deploy/data-source.ts",
     "migration:run:post-deploy": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:run -d ./src/migrations/post-deploy/data-source.ts",
     "migration:revert": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:revert -d ./src/migrations/data-source.ts",
+    "backfill:sandbox-lifecycle": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ./src/maintenance/sandbox-lifecycle-backfill.ts",
     "shadcn:add": "TS_NODE_PROJECT=apps/dashboard/tsconfig.app.json npx shadcn@latest add",
     "docs": "nx run-many --target=docs --all",
     "publish": "nx run-many --target=publish --exclude=sdk-go --all",

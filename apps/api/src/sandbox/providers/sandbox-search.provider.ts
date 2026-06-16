@@ -4,22 +4,20 @@
  */
 
 import { Provider } from '@nestjs/common'
-import { getRepositoryToken } from '@nestjs/typeorm'
 import { OpensearchClient } from 'nestjs-opensearch'
-import { Repository } from 'typeorm'
 import { SandboxOpenSearchSearchAdapter } from '../adapters/sandbox-opensearch-search.adapter'
 import { SandboxTypeormSearchAdapter } from '../adapters/sandbox-typeorm-search.adapter'
 import { SANDBOX_SEARCH_ADAPTER } from '../constants/sandbox-tokens'
-import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxSearchAdapter } from '../interfaces/sandbox-search.interface'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 export const SandboxSearchAdapterProvider: Provider = {
   provide: SANDBOX_SEARCH_ADAPTER,
   useFactory: (
     configService: TypedConfigService,
     opensearchClient: OpensearchClient,
-    sandboxRepository: Repository<Sandbox>,
+    sandboxRepository: SandboxRepository,
   ): SandboxSearchAdapter => {
     const sandboxSearchConfig = configService.get('sandboxSearch')
 
@@ -36,5 +34,5 @@ export const SandboxSearchAdapterProvider: Provider = {
       return new SandboxTypeormSearchAdapter(sandboxRepository)
     }
   },
-  inject: [TypedConfigService, OpensearchClient, getRepositoryToken(Sandbox)],
+  inject: [TypedConfigService, OpensearchClient, SandboxRepository],
 }

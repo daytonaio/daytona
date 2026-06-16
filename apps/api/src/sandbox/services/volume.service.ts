@@ -22,6 +22,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
 
 @Injectable()
 export class VolumeService {
@@ -145,13 +146,15 @@ export class VolumeService {
     // Check if any non-destroyed sandboxes are using this volume
     const sandboxUsingVolume = await this.sandboxRepository
       .createQueryBuilder('sandbox')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
       .where('sandbox.organizationId = :organizationId', {
         organizationId: volume.organizationId,
       })
       .andWhere('sandbox.volumes @> :volFilter::jsonb', {
         volFilter: JSON.stringify([{ volumeId }]),
       })
-      .andWhere('sandbox.desiredState != :destroyed', {
+      .andWhere('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+      .andWhere('lifecycle."desiredState" != :destroyed', {
         destroyed: SandboxDesiredState.DESTROYED,
       })
       .select(['sandbox.id', 'sandbox.name'])

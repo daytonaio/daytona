@@ -29,6 +29,7 @@ import { DataSource } from 'typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxRepository } from '../sandbox/repositories/sandbox.repository'
 import { SandboxLookupCacheInvalidationService } from '../sandbox/services/sandbox-lookup-cache-invalidation.service'
+import { SandboxLifecycleMigrationService } from '../sandbox/services/sandbox-lifecycle-migration.service'
 import { OrganizationAuthContextGuard } from './guards/organization-auth-context.guard'
 import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
@@ -69,14 +70,22 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrgMetricsExporterService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
+    SandboxLifecycleMigrationService,
     {
       provide: SandboxRepository,
-      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService],
+      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService, SandboxLifecycleMigrationService],
       useFactory: (
         dataSource: DataSource,
         eventEmitter: EventEmitter2,
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
-      ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
+        sandboxLifecycleMigrationService: SandboxLifecycleMigrationService,
+      ) =>
+        new SandboxRepository(
+          dataSource,
+          eventEmitter,
+          sandboxLookupCacheInvalidationService,
+          sandboxLifecycleMigrationService,
+        ),
     },
     {
       provide: SnapshotRepository,

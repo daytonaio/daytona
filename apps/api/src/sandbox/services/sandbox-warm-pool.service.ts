@@ -6,7 +6,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { FindOptionsWhere, In, MoreThan, Not, Repository } from 'typeorm'
+import { FindOptionsWhere, MoreThan, Repository } from 'typeorm'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -21,6 +21,7 @@ import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
 import { Runner } from '../entities/runner.entity'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
@@ -123,6 +124,7 @@ export class SandboxWarmPoolService {
 
       const queryBuilder = this.sandboxRepository
         .createQueryBuilder('sandbox')
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
         .where('sandbox.cpu = :cpu', { cpu: warmPoolItem.cpu })
         .andWhere('sandbox.mem = :mem', { mem: warmPoolItem.mem })
         .andWhere('sandbox.disk = :disk', { disk: warmPoolItem.disk })
@@ -133,15 +135,17 @@ export class SandboxWarmPoolService {
           organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
         })
         .andWhere('sandbox.region = :region', { region: warmPoolItem.target })
-        .andWhere('sandbox.state = :state', { state: SandboxState.STARTED })
-        .andWhere(`sandbox.runnerId NOT IN (${excludedRunnersSubquery.getQuery()})`)
+        .andWhere('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."state" = :state', { state: SandboxState.STARTED })
+        .andWhere(`lifecycle."runnerId" NOT IN (${excludedRunnersSubquery.getQuery()})`)
         .setParameters({
           region: warmPoolItem.target,
           scoreThreshold: availabilityScoreThreshold,
         })
 
       const candidateLimit = this.configService.getOrThrow<number>('warmPool.candidateLimit')
-      const warmPoolSandboxes = await queryBuilder.orderBy('RANDOM()').take(candidateLimit).getMany()
+      const warmPoolSandboxes = await queryBuilder.orderBy('RANDOM()').limit(candidateLimit).getMany()
+      this.sandboxRepository.hydrateAll(warmPoolSandboxes)
 
       //  make sure we only release warm pool sandbox once
       let warmPoolSandbox: Sandbox | null = null
@@ -178,21 +182,26 @@ export class SandboxWarmPoolService {
           return
         }
 
-        const sandboxCount = await this.sandboxRepository.count({
-          where: {
-            snapshot: warmPoolItem.snapshot,
+        const sandboxCount = await this.sandboxRepository
+          .createQueryBuilder('sandbox')
+          .innerJoin('sandbox.lifecycle', 'lifecycle')
+          .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+          .andWhere('sandbox."snapshot" = :snapshot', { snapshot: warmPoolItem.snapshot })
+          .andWhere('sandbox."organizationId" = :organizationId', {
             organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
-            osUser: warmPoolItem.osUser,
-            env: warmPoolItem.env,
-            region: warmPoolItem.target,
-            cpu: warmPoolItem.cpu,
-            gpu: warmPoolItem.gpu,
-            mem: warmPoolItem.mem,
-            disk: warmPoolItem.disk,
-            desiredState: SandboxDesiredState.STARTED,
-            state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
-          },
-        })
+          })
+          .andWhere('sandbox."osUser" = :osUser', { osUser: warmPoolItem.osUser })
+          .andWhere('sandbox."env" = :env', { env: warmPoolItem.env })
+          .andWhere('sandbox."region" = :region', { region: warmPoolItem.target })
+          .andWhere('sandbox."cpu" = :cpu', { cpu: warmPoolItem.cpu })
+          .andWhere('sandbox."gpu" = :gpu', { gpu: warmPoolItem.gpu })
+          .andWhere('sandbox."mem" = :mem', { mem: warmPoolItem.mem })
+          .andWhere('sandbox."disk" = :disk', { disk: warmPoolItem.disk })
+          .andWhere('lifecycle."desiredState" = :desiredState', { desiredState: SandboxDesiredState.STARTED })
+          .andWhere('lifecycle."state" NOT IN (:...excludedStates)', {
+            excludedStates: [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+          })
+          .getCount()
 
         const missingCount = warmPoolItem.pool - sandboxCount
         if (missingCount > 0) {
@@ -236,21 +245,26 @@ export class SandboxWarmPoolService {
       return
     }
 
-    const sandboxCount = await this.sandboxRepository.count({
-      where: {
-        snapshot: warmPoolItem.snapshot,
+    const sandboxCount = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+      .andWhere('sandbox."snapshot" = :snapshot', { snapshot: warmPoolItem.snapshot })
+      .andWhere('sandbox."organizationId" = :organizationId', {
         organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
-        osUser: warmPoolItem.osUser,
-        env: warmPoolItem.env,
-        region: warmPoolItem.target,
-        cpu: warmPoolItem.cpu,
-        gpu: warmPoolItem.gpu,
-        mem: warmPoolItem.mem,
-        disk: warmPoolItem.disk,
-        desiredState: SandboxDesiredState.STARTED,
-        state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
-      },
-    })
+      })
+      .andWhere('sandbox."osUser" = :osUser', { osUser: warmPoolItem.osUser })
+      .andWhere('sandbox."env" = :env', { env: warmPoolItem.env })
+      .andWhere('sandbox."region" = :region', { region: warmPoolItem.target })
+      .andWhere('sandbox."cpu" = :cpu', { cpu: warmPoolItem.cpu })
+      .andWhere('sandbox."gpu" = :gpu', { gpu: warmPoolItem.gpu })
+      .andWhere('sandbox."mem" = :mem', { mem: warmPoolItem.mem })
+      .andWhere('sandbox."disk" = :disk', { disk: warmPoolItem.disk })
+      .andWhere('lifecycle."desiredState" = :desiredState', { desiredState: SandboxDesiredState.STARTED })
+      .andWhere('lifecycle."state" NOT IN (:...excludedStates)', {
+        excludedStates: [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+      })
+      .getCount()
 
     if (warmPoolItem.pool <= sandboxCount) {
       return

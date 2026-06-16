@@ -14,7 +14,7 @@ import {
   ConflictException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, In, Not, Repository } from 'typeorm'
+import { EntityManager, Repository } from 'typeorm'
 import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { CreateOrganizationRegionQuotaDto } from '../dto/create-organization-region-quota.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
@@ -56,6 +56,7 @@ import { OtelConfigDto } from '../dto/otel-config.dto'
 import { sandboxLookupCacheKeyByAuthToken } from '../../sandbox/utils/sandbox-lookup-cache.util'
 import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 import { SnapshotRepository } from '../../sandbox/repositories/snapshot.repository'
+import { SandboxLifecyclePhase } from '../../sandbox/enums/sandbox-lifecycle-phase.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 
@@ -735,20 +736,28 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       return
     }
 
+    const sandboxExistsSubquery = this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .select('1')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .where('"sandbox"."organizationId" = "organization"."id"')
+      .andWhere('lifecycle."lifecyclePhase" = :suspendedLifecyclePhase', {
+        suspendedLifecyclePhase: SandboxLifecyclePhase.ACTIVE,
+      })
+      .andWhere('lifecycle."desiredState" = :suspendedDesiredState', {
+        suspendedDesiredState: SandboxDesiredState.STARTED,
+      })
+      .andWhere('lifecycle."state" NOT IN (:...suspendedExcludedStates)', {
+        suspendedExcludedStates: [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+      })
+
     const queryResult = await this.organizationRepository
       .createQueryBuilder('organization')
       .select('id')
       .where('suspended = true')
       .andWhere(`"suspendedAt" < NOW() - INTERVAL '1 hour' * "suspensionCleanupGracePeriodHours"`)
       .andWhere(`"suspendedAt" > NOW() - INTERVAL '7 day'`)
-      .andWhereExists(
-        this.sandboxRepository
-          .createQueryBuilder('sandbox')
-          .select('1')
-          .where(
-            `"sandbox"."organizationId" = "organization"."id" AND "sandbox"."desiredState" = '${SandboxDesiredState.STARTED}' and "sandbox"."state" NOT IN ('${SandboxState.ERROR}', '${SandboxState.BUILD_FAILED}')`,
-          ),
-      )
+      .andWhereExists(sandboxExistsSubquery)
       .take(100)
       .getRawMany()
 
@@ -760,13 +769,16 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       return
     }
 
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        organizationId: In(suspendedOrganizationIds),
-        desiredState: SandboxDesiredState.STARTED,
-        state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
-      },
-    })
+    const sandboxes = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+      .andWhere('sandbox."organizationId" IN (:...orgIds)', { orgIds: suspendedOrganizationIds })
+      .andWhere('lifecycle."desiredState" = :desiredState', { desiredState: SandboxDesiredState.STARTED })
+      .andWhere('lifecycle."state" NOT IN (:...excludedStates)', {
+        excludedStates: [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+      })
+      .getMany()
 
     sandboxes.map((sandbox) =>
       this.eventEmitter.emitAsync(

@@ -106,6 +106,16 @@ export abstract class BaseRepository<TEntity extends ObjectLiteral> {
   }
 
   /**
+   * Returns the TypeORM metadata for the entity. Use for column introspection
+   * (e.g. discovering JSONB columns for downstream processing).
+   *
+   * See reference for {@link Repository.metadata}
+   */
+  get metadata() {
+    return this.repository.metadata
+  }
+
+  /**
    * See reference for {@link Repository.createQueryBuilder}
    */
   createQueryBuilder(alias?: string): SelectQueryBuilder<TEntity> {

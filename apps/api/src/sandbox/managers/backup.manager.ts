@@ -5,10 +5,11 @@
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { Brackets, In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
+import { Brackets, LessThan, Not, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
 import { RunnerService } from '../services/runner.service'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
@@ -146,21 +147,29 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       // Process all runners in parallel
       await Promise.all(
         readyRunners.map(async (runner) => {
-          const sandboxes = await this.sandboxRepository.find({
-            where: {
-              runnerId: runner.id,
-              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-              state: SandboxState.STARTED,
-              desiredState: Not(SandboxDesiredState.DESTROYED),
-              backupState: In([BackupState.NONE, BackupState.COMPLETED]),
-              lastBackupAt: Or(IsNull(), LessThan(new Date(Date.now() - 1 * 60 * 60 * 1000))),
-              autoDeleteInterval: Not(0),
-            },
-            order: {
-              lastBackupAt: 'ASC',
-            },
-            take: 25,
-          })
+          const sandboxes = await this.sandboxRepository
+            .createQueryBuilder('sandbox')
+            .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+            .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+            .andWhere('lifecycle."runnerId" = :runnerId', { runnerId: runner.id })
+            .andWhere('sandbox."organizationId" != :warmPoolOrg', {
+              warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+            })
+            .andWhere('lifecycle."state" = :state', { state: SandboxState.STARTED })
+            .andWhere('lifecycle."desiredState" != :destroyed', {
+              destroyed: SandboxDesiredState.DESTROYED,
+            })
+            .andWhere('lifecycle."backupState" IN (:...backupStates)', {
+              backupStates: [BackupState.NONE, BackupState.COMPLETED],
+            })
+            .andWhere('(lifecycle."lastBackupAt" IS NULL OR lifecycle."lastBackupAt" < :backupCutoff)', {
+              backupCutoff: new Date(Date.now() - 60 * 60 * 1000),
+            })
+            .andWhere('sandbox."autoDeleteInterval" != 0')
+            .orderBy('lifecycle."lastBackupAt"', 'ASC')
+            .limit(25)
+            .getMany()
+          this.sandboxRepository.hydrateAll(sandboxes)
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
@@ -212,19 +221,21 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       // each runner to one PENDING sandbox per tick to spread load across the fleet.
       const sandboxes = await this.sandboxRepository
         .createQueryBuilder('sandbox')
-        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
-        .where('sandbox.state IN (:...states)', {
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+        .innerJoin('runner', 'r', 'r.id = lifecycle."runnerId"')
+        .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."state" IN (:...states)', {
           states: [SandboxState.ARCHIVING, SandboxState.STARTED, SandboxState.STOPPED],
         })
-        .andWhere('sandbox.backupState IN (:...backupStates)', {
+        .andWhere('lifecycle."backupState" IN (:...backupStates)', {
           backupStates: [BackupState.PENDING],
         })
-        .andWhere('sandbox.desiredState != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+        .andWhere('lifecycle."desiredState" != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
         // Prioritize manual archival action, then auto-archive poller, then ad-hoc backup poller
         .addSelect(
           `
-          CASE sandbox.state
+          CASE lifecycle."state"
             WHEN :archiving THEN 1
             WHEN :stopped   THEN 2
             WHEN :started   THEN 3
@@ -235,7 +246,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         )
         .addSelect(
           `
-          CASE sandbox."backupState"
+          CASE lifecycle."backupState"
             WHEN :in_progress THEN 1
             ELSE 999
           END
@@ -248,13 +259,14 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
           stopped: SandboxState.STOPPED,
           started: SandboxState.STARTED,
         })
-        .distinctOn(['sandbox.runnerId'])
-        .orderBy('sandbox.runnerId', 'ASC')
+        .distinctOn(['lifecycle."runnerId"'])
+        .orderBy('lifecycle."runnerId"', 'ASC')
         .addOrderBy('backup_state_priority', 'ASC')
         .addOrderBy('state_priority', 'ASC')
-        .addOrderBy('sandbox.lastBackupAt', 'ASC', 'NULLS FIRST') // Process sandboxes with no backups first
-        .take(250)
+        .addOrderBy('lifecycle."lastBackupAt"', 'ASC', 'NULLS FIRST') // Process sandboxes with no backups first
+        .limit(250)
         .getMany()
+      this.sandboxRepository.hydrateAll(sandboxes)
 
       await Promise.allSettled(
         sandboxes.map(async (s) => {
@@ -332,19 +344,22 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       // returning the same in-progress sandboxes.
       const sandboxes = await this.sandboxRepository
         .createQueryBuilder('sandbox')
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
         .addSelect('RANDOM()', 'rand')
-        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
-        .where('sandbox.state IN (:...states)', {
+        .innerJoin('runner', 'r', 'r.id = lifecycle."runnerId"')
+        .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."state" IN (:...states)', {
           states: [SandboxState.ARCHIVING, SandboxState.STARTED, SandboxState.STOPPED],
         })
-        .andWhere('sandbox.backupState IN (:...backupStates)', {
+        .andWhere('lifecycle."backupState" IN (:...backupStates)', {
           backupStates: [BackupState.IN_PROGRESS],
         })
-        .andWhere('sandbox.desiredState != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+        .andWhere('lifecycle."desiredState" != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
         .orderBy('rand')
-        .take(200)
+        .limit(200)
         .getMany()
+      this.sandboxRepository.hydrateAll(sandboxes)
 
       await Promise.allSettled(
         sandboxes.map(async (s) => {
@@ -419,17 +434,20 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     try {
       const sandboxes = await this.sandboxRepository
         .createQueryBuilder('sandbox')
-        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
-        .where('sandbox.state = :error', { error: SandboxState.ERROR })
-        .andWhere('sandbox.backupState IN (:...backupStates)', {
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+        .innerJoin('runner', 'r', 'r.id = lifecycle."runnerId"')
+        .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."state" = :error', { error: SandboxState.ERROR })
+        .andWhere('lifecycle."backupState" IN (:...backupStates)', {
           backupStates: [BackupState.PENDING, BackupState.IN_PROGRESS],
         })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
         .andWhere('r."draining" = true')
-        .addOrderBy('sandbox.lastBackupAt', 'ASC', 'NULLS FIRST')
-        .addOrderBy('sandbox.createdAt', 'ASC')
-        .take(100)
+        .orderBy('lifecycle."lastBackupAt"', 'ASC', 'NULLS FIRST')
+        .addOrderBy('sandbox."createdAt"', 'ASC')
+        .limit(100)
         .getMany()
+      this.sandboxRepository.hydrateAll(sandboxes)
 
       await Promise.allSettled(
         sandboxes.map(async (s) => {
@@ -509,13 +527,16 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     try {
       const sandboxes = await this.sandboxRepository
         .createQueryBuilder('sandbox')
-        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
-        .where('sandbox.state IN (:...states)', { states: [SandboxState.ARCHIVING, SandboxState.STOPPED] })
-        .andWhere('sandbox.backupState = :none', { none: BackupState.NONE })
-        .andWhere('sandbox.desiredState != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+        .innerJoin('runner', 'r', 'r.id = lifecycle."runnerId"')
+        .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."state" IN (:...states)', { states: [SandboxState.ARCHIVING, SandboxState.STOPPED] })
+        .andWhere('lifecycle."backupState" = :none', { none: BackupState.NONE })
+        .andWhere('lifecycle."desiredState" != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
         .take(100)
         .getMany()
+      this.sandboxRepository.hydrateAll(sandboxes)
 
       await Promise.allSettled(
         sandboxes
@@ -558,17 +579,17 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     try {
       const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
 
-      const staleSandboxes = await this.sandboxRepository.find({
-        where: {
-          backupState: BackupState.IN_PROGRESS,
-          desiredState: Not(SandboxDesiredState.DESTROYED),
-          updatedAt: LessThan(twoHoursAgo),
-        },
-        order: {
-          updatedAt: 'ASC',
-        },
-        take: 100,
-      })
+      const staleSandboxes = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+        .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."backupState" = :backupState', { backupState: BackupState.IN_PROGRESS })
+        .andWhere('lifecycle."desiredState" != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+        .andWhere('lifecycle."updatedAt" < :cutoff', { cutoff: twoHoursAgo })
+        .orderBy('lifecycle."updatedAt"', 'ASC')
+        .limit(100)
+        .getMany()
+      this.sandboxRepository.hydrateAll(staleSandboxes)
 
       for (const sandbox of staleSandboxes) {
         try {
@@ -808,12 +829,13 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     try {
       await this.redisLockProvider.waitForLock(lockKey, 10)
 
-      const backupsInProgress = await this.sandboxRepository.count({
-        where: {
-          runnerId: sandbox.runnerId,
-          backupState: BackupState.IN_PROGRESS,
-        },
-      })
+      const backupsInProgress = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+        .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."runnerId" = :runnerId', { runnerId: sandbox.runnerId })
+        .andWhere('lifecycle."backupState" = :backupState', { backupState: BackupState.IN_PROGRESS })
+        .getCount()
       if (backupsInProgress >= this.configService.getOrThrow('maxConcurrentBackupsPerRunner')) {
         return
       }
@@ -883,22 +905,25 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       // instead of pulling a random batch that might be mostly non-retryable.
       const sandboxes = await this.sandboxRepository
         .createQueryBuilder('sandbox')
+        .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
         .addSelect('RANDOM()', 'rand')
-        .where('sandbox.backupState = :error', { error: BackupState.ERROR })
-        .andWhere('sandbox.desiredState != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
-        .andWhere('sandbox.updatedAt < :cutoff', { cutoff })
+        .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+        .andWhere('lifecycle."backupState" = :error', { error: BackupState.ERROR })
+        .andWhere('lifecycle."desiredState" != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+        .andWhere('lifecycle."updatedAt" < :cutoff', { cutoff })
         .andWhere(
           new Brackets((qb) => {
             BACKUP_RETRY_ERROR_SUBSTRINGS.forEach((substring, index) => {
               const param = `retrySubstring${index}`
-              qb.orWhere(`sandbox.backupErrorReason ILIKE :${param}`, { [param]: `%${substring}%` })
+              qb.orWhere(`lifecycle."backupErrorReason" ILIKE :${param}`, { [param]: `%${substring}%` })
             })
           }),
         )
         // Random ordering avoids head-of-line blocking on the same sandboxes that keep failing.
         .orderBy('rand')
-        .take(100)
+        .limit(100)
         .getMany()
+      this.sandboxRepository.hydrateAll(sandboxes)
 
       const results = await Promise.allSettled(
         sandboxes.map(async (s) => {

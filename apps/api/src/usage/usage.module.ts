@@ -13,6 +13,7 @@ import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SandboxUsagePeriodArchive } from './entities/sandbox-usage-period-archive.entity'
 import { SandboxRepository } from '../sandbox/repositories/sandbox.repository'
 import { SandboxLookupCacheInvalidationService } from '../sandbox/services/sandbox-lookup-cache-invalidation.service'
+import { SandboxLifecycleMigrationService } from '../sandbox/services/sandbox-lifecycle-migration.service'
 import { Sandbox } from '../sandbox/entities/sandbox.entity'
 
 @Module({
@@ -21,14 +22,22 @@ import { Sandbox } from '../sandbox/entities/sandbox.entity'
     UsageService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
+    SandboxLifecycleMigrationService,
     {
       provide: SandboxRepository,
-      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService],
+      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService, SandboxLifecycleMigrationService],
       useFactory: (
         dataSource: DataSource,
         eventEmitter: EventEmitter2,
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
-      ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
+        sandboxLifecycleMigrationService: SandboxLifecycleMigrationService,
+      ) =>
+        new SandboxRepository(
+          dataSource,
+          eventEmitter,
+          sandboxLookupCacheInvalidationService,
+          sandboxLifecycleMigrationService,
+        ),
     },
   ],
   exports: [UsageService],

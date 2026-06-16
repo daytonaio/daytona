@@ -50,6 +50,7 @@ import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/r
 import { normalizeGpuType } from '../utils/gpu-type-normalizer.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
+import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
 import { RunnerServiceInfo } from '../common/runner-service-info'
 
 @Injectable()
@@ -265,8 +266,10 @@ export class RunnerService {
 
   async findBySandboxId(sandboxId: string): Promise<Runner | null> {
     const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId, state: Not(SandboxState.DESTROYED) },
-      select: ['runnerId'],
+      where: {
+        id: sandboxId,
+        lifecycle: { state: Not(SandboxState.DESTROYED) },
+      },
     })
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
@@ -376,9 +379,15 @@ export class RunnerService {
       throw new BadRequestError('Cannot delete runner which is available for scheduling sandboxes')
     }
 
-    const sandboxCount = await this.sandboxRepository.count({
-      where: { runnerId: id, state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED])) },
-    })
+    const sandboxCount = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+      .andWhere('lifecycle."runnerId" = :runnerId', { runnerId: id })
+      .andWhere('lifecycle."state" NOT IN (:...excludedStates)', {
+        excludedStates: [SandboxState.ARCHIVED, SandboxState.DESTROYED],
+      })
+      .getCount()
     if (sandboxCount > 0) {
       throw new BadRequestError('Cannot delete runner which has sandboxes associated with it')
     }
@@ -716,12 +725,13 @@ export class RunnerService {
         drainingRunners.map(async (runner) => {
           try {
             // Check if runner has any sandboxes with desiredState != DESTROYED
-            const nonDestroyedSandboxCount = await this.sandboxRepository.count({
-              where: {
-                runnerId: runner.id,
-                desiredState: Not(SandboxDesiredState.DESTROYED),
-              },
-            })
+            const nonDestroyedSandboxCount = await this.sandboxRepository
+              .createQueryBuilder('sandbox')
+              .innerJoin('sandbox.lifecycle', 'lifecycle')
+              .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+              .andWhere('lifecycle."runnerId" = :runnerId', { runnerId: runner.id })
+              .andWhere('lifecycle."desiredState" != :destroyed', { destroyed: SandboxDesiredState.DESTROYED })
+              .getCount()
 
             const redisKey = `runner:draining-check:${runner.id}`
 
@@ -877,10 +887,12 @@ export class RunnerService {
   async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 6): Promise<string[]> {
     const runners = await this.sandboxRepository
       .createQueryBuilder('sandbox')
-      .select('sandbox.runnerId', 'runnerId')
-      .where('sandbox.state = :state', { state: SandboxState.BUILDING_SNAPSHOT })
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .select('lifecycle."runnerId"', 'runnerId')
+      .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+      .andWhere('lifecycle."state" = :state', { state: SandboxState.BUILDING_SNAPSHOT })
       .andWhere('sandbox.buildInfoSnapshotRef IS NOT NULL')
-      .groupBy('sandbox.runnerId')
+      .groupBy('lifecycle."runnerId"')
       .having('COUNT(DISTINCT sandbox.buildInfoSnapshotRef) > :maxSnapshotCount', { maxSnapshotCount })
       .getRawMany()
 
@@ -936,11 +948,13 @@ export class RunnerService {
 
     const runners = await this.sandboxRepository
       .createQueryBuilder('sandbox')
-      .select('sandbox.runnerId', 'runnerId')
-      .where('sandbox.buildInfoSnapshotRef = :ref', { ref: buildInfoSnapshotRef })
-      .andWhere('sandbox.runnerId IS NOT NULL')
-      .andWhere('sandbox.state IN (:...states)', { states: activeStates })
-      .groupBy('sandbox.runnerId')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .select('lifecycle."runnerId"', 'runnerId')
+      .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+      .andWhere('sandbox.buildInfoSnapshotRef = :ref', { ref: buildInfoSnapshotRef })
+      .andWhere('lifecycle."runnerId" IS NOT NULL')
+      .andWhere('lifecycle."state" IN (:...states)', { states: activeStates })
+      .groupBy('lifecycle."runnerId"')
       .having('SUM(sandbox.cpu) + :requestedCpu > :maxCpu', {
         requestedCpu: normalizedRequestedCpu,
         maxCpu,
@@ -973,20 +987,22 @@ export class RunnerService {
   async getRunnersAtGpuCapacity(): Promise<string[]> {
     const rows = await this.sandboxRepository
       .createQueryBuilder('sandbox')
-      .innerJoin(Runner, 'runner', 'runner.id = sandbox.runnerId')
-      .select('sandbox.runnerId', 'runnerId')
-      .where('sandbox.runnerId IS NOT NULL')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .innerJoin(Runner, 'runner', 'runner.id = lifecycle."runnerId"')
+      .select('lifecycle."runnerId"', 'runnerId')
+      .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+      .andWhere('lifecycle."runnerId" IS NOT NULL')
       .andWhere('sandbox.gpu > 0')
       .andWhere('runner.gpu IS NOT NULL AND runner.gpu > 0')
-      .andWhere('sandbox.state NOT IN (:...freeStates)', {
+      .andWhere('lifecycle."state" NOT IN (:...freeStates)', {
         freeStates: [SandboxState.DESTROYED, SandboxState.ARCHIVED, SandboxState.BUILD_FAILED],
       })
-      .groupBy('sandbox.runnerId')
+      .groupBy('lifecycle."runnerId"')
       .addGroupBy('runner.gpu')
       .having('COUNT(*) >= runner.gpu')
       .getRawMany()
 
-    return rows.map((r) => r.runnerId).filter((id): id is string => !!id)
+    return rows.map((row) => row.runnerId)
   }
 
   async getRunnersBySnapshotRef(ref: string): Promise<RunnerSnapshotDto[]> {

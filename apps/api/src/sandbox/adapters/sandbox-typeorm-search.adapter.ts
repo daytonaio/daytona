@@ -4,10 +4,12 @@
  */
 
 import { BadRequestException, Logger } from '@nestjs/common'
-import { Repository, Brackets } from 'typeorm'
+import { Brackets } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 import {
   SandboxSearchAdapter,
   SandboxSearchFilters,
@@ -22,7 +24,7 @@ import { SandboxListItemDto } from '../dto/sandbox-list-item.dto'
 export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
   private readonly logger = new Logger(SandboxTypeormSearchAdapter.name)
 
-  constructor(private readonly sandboxRepository: Repository<Sandbox>) {}
+  constructor(private readonly sandboxRepository: SandboxRepository) {}
 
   async search(params: {
     filters: SandboxSearchFilters
@@ -36,6 +38,18 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
 
     const qb = this.sandboxRepository.createQueryBuilder('sandbox')
     qb.leftJoinAndSelect('sandbox.lastActivityAt', 'lastActivity')
+    qb.innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+
+    // Lifecycle partition pruning: only include the terminal partition when the
+    // caller actually wants archived sandboxes (the only non-destroyed terminal
+    // state in user-facing search). DESTROYED is filtered out unconditionally
+    // below, so the terminal partition is otherwise dead weight.
+    const userWantsArchived = !filters.states || filters.states.includes(SandboxState.ARCHIVED)
+    const lifecyclePhases: SandboxLifecyclePhase[] = [SandboxLifecyclePhase.ACTIVE]
+    if (userWantsArchived) {
+      lifecyclePhases.push(SandboxLifecyclePhase.TERMINAL)
+    }
+    qb.andWhere('lifecycle."lifecyclePhase" IN (:...lifecyclePhases)', { lifecyclePhases })
 
     // Base filters
     qb.andWhere('sandbox.organizationId = :organizationId', { organizationId: filters.organizationId })
@@ -62,7 +76,7 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
       qb.andWhere('sandbox.public = :isPublic', { isPublic: filters.isPublic })
     }
     if (filters.isRecoverable !== undefined) {
-      qb.andWhere('sandbox.recoverable = :isRecoverable', { isRecoverable: filters.isRecoverable })
+      qb.andWhere('lifecycle.recoverable = :isRecoverable', { isRecoverable: filters.isRecoverable })
     }
 
     // Range filters
@@ -109,17 +123,17 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
       qb.andWhere(
         new Brackets((stateQb) => {
           if (nonErrorStatesToInclude.length > 0) {
-            stateQb.orWhere('sandbox.state IN (:...nonErrorStates)', { nonErrorStates: nonErrorStatesToInclude })
+            stateQb.orWhere('lifecycle.state IN (:...nonErrorStates)', { nonErrorStates: nonErrorStatesToInclude })
           }
           if (errorStatesToInclude.length > 0) {
             if (filters.includeErroredDeleted) {
-              stateQb.orWhere('sandbox.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
+              stateQb.orWhere('lifecycle.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
             } else {
               stateQb.orWhere(
                 new Brackets((errorQb) => {
                   errorQb
-                    .where('sandbox.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
-                    .andWhere('sandbox.desiredState != :destroyedState', {
+                    .where('lifecycle.state IN (:...errorStates)', { errorStates: errorStatesToInclude })
+                    .andWhere('lifecycle.desiredState != :destroyedState', {
                       destroyedState: SandboxDesiredState.DESTROYED,
                     })
                 }),
@@ -178,14 +192,14 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
       organizationId: sandbox.organizationId,
       name: sandbox.name,
       target: sandbox.region,
-      runnerId: sandbox.runnerId,
+      runnerId: sandbox.lifecycle?.runnerId,
       sandboxClass: sandbox.sandboxClass,
-      state: sandbox.state,
-      desiredState: sandbox.desiredState,
+      state: sandbox.lifecycle?.state ?? sandbox.state,
+      desiredState: sandbox.lifecycle?.desiredState ?? sandbox.desiredState,
       snapshot: sandbox.snapshot,
       user: sandbox.osUser,
-      errorReason: sandbox.errorReason,
-      recoverable: sandbox.recoverable,
+      errorReason: sandbox.lifecycle?.errorReason,
+      recoverable: sandbox.lifecycle?.recoverable ?? false,
       public: sandbox.public,
       cpu: sandbox.cpu,
       gpu: sandbox.gpu,
@@ -193,7 +207,7 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
       memory: sandbox.mem,
       disk: sandbox.disk,
       labels: sandbox.labels,
-      backupState: sandbox.backupState,
+      backupState: sandbox.lifecycle?.backupState ?? sandbox.backupState,
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
       autoDeleteInterval: sandbox.autoDeleteInterval,
@@ -202,7 +216,7 @@ export class SandboxTypeormSearchAdapter implements SandboxSearchAdapter {
       lastActivityAt: sandbox.lastActivityAt?.lastActivityAt
         ? new Date(sandbox.lastActivityAt.lastActivityAt).toISOString()
         : undefined,
-      daemonVersion: sandbox.daemonVersion,
+      daemonVersion: sandbox.lifecycle?.daemonVersion,
     })
   }
 

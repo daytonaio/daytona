@@ -14,8 +14,9 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, FindOptionsOrder, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
+import { SandboxLifecycle } from '../entities/sandbox-lifecycle.entity'
 import { SandboxFork } from '../entities/sandbox-fork.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
@@ -1548,30 +1549,38 @@ export class SandboxService {
     if (nonErrorStatesToInclude.length > 0) {
       where.push({
         ...baseFindOptions,
-        state: In(nonErrorStatesToInclude),
+        lifecycle: { state: In(nonErrorStatesToInclude) },
       })
     }
 
     if (errorStatesToInclude.length > 0) {
       where.push({
         ...baseFindOptions,
-        state: In(errorStatesToInclude),
-        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+        lifecycle: {
+          state: In(errorStatesToInclude),
+          ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+        },
       })
+    }
+
+    const buildSortKey = (): FindOptionsOrder<Sandbox> => {
+      if (sortField === SandboxSortFieldDeprecated.LAST_ACTIVITY_AT) {
+        return { lastActivityAt: { lastActivityAt: { direction: sortDirection, nulls: 'LAST' } } }
+      }
+      if (sortField === SandboxSortFieldDeprecated.STATE) {
+        return { lifecycle: { state: { direction: sortDirection, nulls: 'LAST' } } }
+      }
+      if (sortField === SandboxSortFieldDeprecated.UPDATED_AT) {
+        return { lifecycle: { updatedAt: { direction: sortDirection, nulls: 'LAST' } } }
+      }
+      return { [sortField]: { direction: sortDirection, nulls: 'LAST' } }
     }
 
     const [items, total] = await this.sandboxRepository.findAndCount({
       where,
       relations: ['lastActivityAt'],
       order: {
-        ...(sortField === SandboxSortFieldDeprecated.LAST_ACTIVITY_AT
-          ? { lastActivityAt: { lastActivityAt: { direction: sortDirection, nulls: 'LAST' } } }
-          : {
-              [sortField]: {
-                direction: sortDirection,
-                nulls: 'LAST',
-              },
-            }),
+        ...buildSortKey(),
         ...(sortField !== SandboxSortFieldDeprecated.CREATED_AT && { createdAt: 'DESC' }),
       },
       skip: (pageNum - 1) * limitNum,
@@ -1677,7 +1686,7 @@ export class SandboxService {
     states?: SandboxState[],
     skipReconcilingSandboxes?: boolean,
   ): Promise<Sandbox[]> {
-    const where: FindOptionsWhere<Sandbox> = { runnerId }
+    const lifecycleFilter: FindOptionsWhere<SandboxLifecycle> = { runnerId }
     if (states && states.length > 0) {
       // Validate that all states have corresponding desired states
       states.forEach((state) => {
@@ -1685,10 +1694,13 @@ export class SandboxService {
           throw new BadRequestError(`State ${state} does not have a corresponding desired state`)
         }
       })
-      where.state = In(states)
+      lifecycleFilter.state = In(states)
     }
 
-    let sandboxes = await this.sandboxRepository.find({ where, relations: ['lastActivityAt'] })
+    let sandboxes = await this.sandboxRepository.find({
+      where: { lifecycle: lifecycleFilter },
+      relations: ['lastActivityAt'],
+    })
 
     if (skipReconcilingSandboxes) {
       sandboxes = sandboxes.filter((sandbox) => {
@@ -1705,7 +1717,9 @@ export class SandboxService {
     organizationId: string,
     returnDestroyed?: boolean,
   ): Promise<Sandbox> {
-    const stateFilter = returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }
+    const stateFilter: FindOptionsWhere<Sandbox> = returnDestroyed
+      ? {}
+      : { lifecycle: { state: Not(SandboxState.DESTROYED) } }
     const relations = ['buildInfo', 'lastActivityAt']
 
     // Try lookup by ID first
@@ -1754,7 +1768,7 @@ export class SandboxService {
     const sandbox = await this.sandboxRepository.findOne({
       where: {
         id: sandboxId,
-        ...(returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }),
+        ...(returnDestroyed ? {} : { lifecycle: { state: Not(SandboxState.DESTROYED) } }),
       },
       relations: ['lastActivityAt'],
     })
@@ -1847,7 +1861,7 @@ export class SandboxService {
 
     const where: FindOptionsWhere<Sandbox> = {
       organizationId: organizationId,
-      state: Not(SandboxState.DESTROYED),
+      lifecycle: { state: Not(SandboxState.DESTROYED) },
     }
 
     const sandbox = await this.sandboxRepository.findOne({
@@ -1905,7 +1919,7 @@ export class SandboxService {
 
     const where: FindOptionsWhere<Sandbox> = {
       organizationId: organizationId,
-      state: Not(SandboxState.DESTROYED),
+      lifecycle: { state: Not(SandboxState.DESTROYED) },
     }
 
     const sandbox = await this.sandboxRepository.findOne({
@@ -2874,9 +2888,11 @@ export class SandboxService {
 
       const staleSandboxes = await this.sandboxRepository.find({
         where: {
-          state: SandboxState.SNAPSHOTTING,
-          pending: true,
-          updatedAt: LessThan(cutoff),
+          lifecycle: {
+            state: SandboxState.SNAPSHOTTING,
+            pending: true,
+            updatedAt: LessThan(cutoff),
+          },
         },
         take: 100,
       })
@@ -3096,10 +3112,12 @@ export class SandboxService {
     //  find all sandboxes that are using the unschedulable runners and have organizationId = '00000000-0000-0000-0000-000000000000'
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        runnerId: In(runners.map((runner) => runner.id)),
         organizationId: '00000000-0000-0000-0000-000000000000',
-        state: SandboxState.STARTED,
-        desiredState: Not(SandboxDesiredState.DESTROYED),
+        lifecycle: {
+          runnerId: In(runners.map((runner) => runner.id)),
+          state: SandboxState.STARTED,
+          desiredState: Not(SandboxDesiredState.DESTROYED),
+        },
       },
     })
 
@@ -3153,7 +3171,7 @@ export class SandboxService {
     const followers = await this.sandboxRepository.find({
       where: {
         linkedSandboxId: event.sandbox.id,
-        desiredState: Not(SandboxDesiredState.DESTROYED),
+        lifecycle: { desiredState: Not(SandboxDesiredState.DESTROYED) },
       },
     })
 

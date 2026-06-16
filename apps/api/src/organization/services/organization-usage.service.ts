@@ -47,6 +47,7 @@ import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
+import { SandboxLifecyclePhase } from '../../sandbox/enums/sandbox-lifecycle-phase.enum'
 import { OrganizationService } from './organization.service'
 import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 import { SnapshotRepository } from '../../sandbox/repositories/snapshot.repository'
@@ -676,13 +677,15 @@ export class OrganizationUsageService {
         }
       | undefined = await this.sandboxRepository
       .createQueryBuilder('sandbox')
+      .innerJoin('sandbox.lifecycle', 'lifecycle')
+      .andWhere('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
       .select([
-        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
-        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
-        'SUM(CASE WHEN sandbox.state IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
-        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state IN (:...statesConditionallyConsumingCompute) AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.gpu ELSE 0 END) as used_gpu`,
+        `SUM(CASE WHEN lifecycle.state IN (:...statesConsumingCompute) OR (lifecycle.state IN (:...statesConditionallyConsumingCompute) AND lifecycle."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
+        `SUM(CASE WHEN lifecycle.state IN (:...statesConsumingCompute) OR (lifecycle.state IN (:...statesConditionallyConsumingCompute) AND lifecycle."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
+        'SUM(CASE WHEN lifecycle.state IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
+        `SUM(CASE WHEN lifecycle.state IN (:...statesConsumingCompute) OR (lifecycle.state IN (:...statesConditionallyConsumingCompute) AND lifecycle."desiredState" = :startedDesiredState) THEN sandbox.gpu ELSE 0 END) as used_gpu`,
       ])
-      .where('sandbox.organizationId = :organizationId', { organizationId })
+      .andWhere('sandbox.organizationId = :organizationId', { organizationId })
       .andWhere('sandbox.region = :regionId', { regionId })
       .andWhere('sandbox."sandboxClass" = :sandboxClass', { sandboxClass })
       .setParameter('statesConsumingCompute', SANDBOX_STATES_CONSUMING_COMPUTE)

@@ -49,6 +49,7 @@ import { RegionModule } from '../region/region.module'
 import { Region } from '../region/entities/region.entity'
 import { SnapshotRegion } from './entities/snapshot-region.entity'
 import { SandboxFork } from './entities/sandbox-fork.entity'
+import { SandboxLifecycle } from './entities/sandbox-lifecycle.entity'
 import { JobController } from './controllers/job.controller'
 import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
@@ -62,6 +63,7 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
 import { OpensearchModule } from 'nestjs-opensearch'
 import { TypedConfigService } from '../config/typed-config.service'
 import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provider'
+import { SandboxLifecycleMigrationService } from './services/sandbox-lifecycle-migration.service'
 
 @Module({
   imports: [
@@ -71,6 +73,7 @@ import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provide
     RegionModule,
     TypeOrmModule.forFeature([
       Sandbox,
+      SandboxLifecycle,
       Runner,
       Snapshot,
       BuildInfo,
@@ -125,17 +128,25 @@ import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provide
     JobService,
     JobStateHandlerService,
     SandboxActivityService,
+    SandboxLifecycleMigrationService,
     ProxyAuthContextGuard,
     SshGatewayAuthContextGuard,
     SandboxSearchAdapterProvider,
     {
       provide: SandboxRepository,
-      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService],
+      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService, SandboxLifecycleMigrationService],
       useFactory: (
         dataSource: DataSource,
         eventEmitter: EventEmitter2,
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
-      ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
+        sandboxLifecycleMigrationService: SandboxLifecycleMigrationService,
+      ) =>
+        new SandboxRepository(
+          dataSource,
+          eventEmitter,
+          sandboxLookupCacheInvalidationService,
+          sandboxLifecycleMigrationService,
+        ),
     },
     {
       provide: SnapshotRepository,

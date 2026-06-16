@@ -26,6 +26,8 @@ import { BuildInfo } from './build-info.entity'
 import { nanoid } from 'nanoid'
 import { SandboxLastActivity } from './sandbox-last-activity.entity'
 import { isApiRecoverableError } from '../constants/errors-for-recovery'
+import { SandboxLifecycle } from './sandbox-lifecycle.entity'
+import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -202,6 +204,9 @@ export class Sandbox {
 
   @OneToOne(() => SandboxLastActivity, (lastActivity) => lastActivity.sandbox)
   lastActivityAt?: SandboxLastActivity
+
+  @OneToOne(() => SandboxLifecycle, (lifecycle) => lifecycle.sandbox)
+  lifecycle?: SandboxLifecycle
 
   //  this is the interval in minutes after which the sandbox will be stopped if lastActivityAt is not updated
   //  if set to 0, auto stop will be disabled
@@ -449,5 +454,9 @@ export class Sandbox {
     }
 
     return changes
+  }
+
+  get lifecyclePhase(): SandboxLifecyclePhase {
+    return SandboxLifecycle.phaseFor(this.state)
   }
 }

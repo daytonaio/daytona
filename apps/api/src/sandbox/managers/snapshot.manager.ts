@@ -42,6 +42,7 @@ import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
+import { SandboxLifecyclePhase } from '../enums/sandbox-lifecycle-phase.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotInfoResponse } from '@daytona/runner-api-client'
@@ -592,7 +593,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       if (!sandboxClass) {
         // Backup-snapshot refs do not have a Snapshot row; fall back to the owning sandbox's class.
         const sandbox = await this.sandboxRepository.findOne({
-          where: { backupSnapshot: snapshotRunner.snapshotRef },
+          where: { lifecycle: { backupSnapshot: snapshotRunner.snapshotRef } },
         })
         sandboxClass = sandbox?.sandboxClass
       }
@@ -676,16 +677,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       await Promise.allSettled(
         drainingRunners.map(async (runner) => {
           try {
-            const sandboxes = await this.sandboxRepository.find({
-              where: {
-                runnerId: runner.id,
-                state: SandboxState.STOPPED,
-                desiredState: SandboxDesiredState.STOPPED,
-                backupState: BackupState.COMPLETED,
-                backupSnapshot: Not(IsNull()),
-              },
-              take: 100,
-            })
+            const sandboxes = await this.sandboxRepository
+              .createQueryBuilder('sandbox')
+              .innerJoinAndSelect('sandbox.lifecycle', 'lifecycle')
+              .where('lifecycle."lifecyclePhase" = :phase', { phase: SandboxLifecyclePhase.ACTIVE })
+              .andWhere('lifecycle."runnerId" = :runnerId', { runnerId: runner.id })
+              .andWhere('lifecycle."state" = :state', { state: SandboxState.STOPPED })
+              .andWhere('lifecycle."desiredState" = :desiredState', { desiredState: SandboxDesiredState.STOPPED })
+              .andWhere('lifecycle."backupState" = :backupState', { backupState: BackupState.COMPLETED })
+              .andWhere('lifecycle."backupSnapshot" IS NOT NULL')
+              .take(100)
+              .getMany()
+            this.sandboxRepository.hydrateAll(sandboxes)
 
             this.logger.debug(
               `Found ${sandboxes.length} eligible sandboxes on draining runner ${runner.id} for snapshot migration`,
