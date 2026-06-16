@@ -1,0 +1,21 @@
+package.json
+  s_eee68c198161d9::t_ce34d7dd684dfd 282
+yarn.lock
+  s_eee68c198161d9::t_ee3dd8ab0d5152 17132-17134,17136-17142,17144-17145,21431,24293,24559,37455-37457,37462
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "08dbf00baaea2ee09e30ffe7091269c4c80c2dcc",
+  "prompts": {},
+  "sessions": {
+    "s_eee68c198161d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a99fabc2-5625-46ca-b684-c3d9ea1cb35b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
