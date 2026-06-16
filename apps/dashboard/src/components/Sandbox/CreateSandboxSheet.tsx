@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Badge } from '@/components/ui/badge'
 import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -25,7 +24,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
-import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -34,9 +32,9 @@ import { handleApiError } from '@/lib/error-handling'
 import { GPU_TYPE_LABELS } from '@/lib/gpu-types'
 import { imageNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
-import { GpuType, OrganizationUserRoleEnum } from '@daytona/api-client'
+import { GpuType, OrganizationUserRoleEnum, RegionType, type Region, type SnapshotDto } from '@daytona/api-client'
 import { Sandbox } from '@daytona/sdk'
-import { useForm } from '@tanstack/react-form'
+import { useForm, useStore } from '@tanstack/react-form'
 import { isAxiosError } from 'axios'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
@@ -45,10 +43,9 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { Tooltip } from '../Tooltip'
 import { ScrollArea } from '../ui/scroll-area'
+import { SnapshotSelect } from './SnapshotSelect'
 
 const NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/
-
-const NONE_VALUE = '__none__'
 
 const SELECTABLE_GPU_TYPES = (Object.values(GpuType) as GpuType[]).filter((t) => t !== GpuType.UNKNOWN_DEFAULT_OPEN_API)
 
@@ -110,18 +107,28 @@ const buildBaseFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: numb
 
 const buildFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: number) => {
   const base = buildBaseFormSchema(maxCpu, maxMemory, maxDisk)
-  return z.discriminatedUnion('source', [
-    base.extend({
-      source: z.literal(Source.SNAPSHOT),
-      snapshot: z.string().optional(),
-      image: z.string().optional(),
-    }),
-    base.extend({
-      source: z.literal(Source.IMAGE),
-      snapshot: z.string().optional(),
-      image: imageNameSchema,
-    }),
-  ])
+  return z
+    .discriminatedUnion('source', [
+      base.extend({
+        source: z.literal(Source.SNAPSHOT),
+        snapshot: z.string().optional(),
+        image: z.string().optional(),
+      }),
+      base.extend({
+        source: z.literal(Source.IMAGE),
+        snapshot: z.string().optional(),
+        image: imageNameSchema,
+      }),
+    ])
+    .superRefine((val, ctx) => {
+      if (val.source === Source.SNAPSHOT && !val.regionId) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['regionId'],
+          message: 'Selected snapshot is not available in any region you can use.',
+        })
+      }
+    })
 }
 
 type FormValues = z.input<ReturnType<typeof buildBaseFormSchema>> & {
@@ -170,6 +177,7 @@ export const CreateSandboxSheet = ({
   onSandboxCreated?: (sandbox: Sandbox) => void
 }) => {
   const [open, setOpen] = useState(false)
+  const [selectedSnapshotOption, setSelectedSnapshotOption] = useState<SnapshotDto | undefined>(undefined)
 
   const config = useConfig()
   const { availableRegions: regions, loadingAvailableRegions: loadingRegions } = useRegions()
@@ -177,6 +185,10 @@ export const CreateSandboxSheet = ({
   const { reset: resetCreateSandboxMutation, ...createSandboxMutation } = useCreateSandboxMutation()
   const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
   const formRef = useRef<HTMLFormElement>(null)
+  const [popoverContainer, setPopoverContainer] = useState<HTMLDivElement | null>(null)
+  const handleSheetContentRef = useCallback((node: HTMLDivElement | null) => {
+    setPopoverContainer(node)
+  }, [])
   const formDefaultValues = useMemo<FormValues>(
     () => ({
       ...defaultValues,
@@ -201,11 +213,6 @@ export const CreateSandboxSheet = ({
   })
 
   const formSchema = useMemo(() => buildFormSchema(maxCpu, maxMemory, maxDisk), [maxCpu, maxMemory, maxDisk])
-
-  const { data: snapshotsData, isLoading: snapshotsLoading } = useSnapshotsQuery({
-    page: 1,
-    pageSize: 100,
-  })
 
   const form = useForm({
     defaultValues: formDefaultValues,
@@ -308,6 +315,71 @@ export const CreateSandboxSheet = ({
     },
   })
   const { reset: resetForm } = form
+  const selectedSource = useStore(form.store, (state) => state.values.source)
+  const selectedSnapshotName = useStore(form.store, (state) => state.values.snapshot)
+  const selectedSnapshot = useMemo(() => {
+    if (!selectedSnapshotName) {
+      return undefined
+    }
+
+    return selectedSnapshotOption?.name === selectedSnapshotName ? selectedSnapshotOption : undefined
+  }, [selectedSnapshotName, selectedSnapshotOption])
+  const getRegionsForSnapshot = useCallback(
+    (snapshot?: SnapshotDto) => {
+      if (!snapshot) {
+        return []
+      }
+
+      if (!snapshot.regionIds?.length) {
+        return []
+      }
+
+      const snapshotRegionIds = new Set(snapshot.regionIds)
+      return regions.filter((region) => snapshotRegionIds.has(region.id))
+    },
+    [regions],
+  )
+  const sharedAvailableRegions = useMemo(
+    () => regions.filter((region) => region.regionType === RegionType.SHARED),
+    [regions],
+  )
+  const snapshotFilteredRegions = useMemo(() => {
+    if (selectedSource !== Source.SNAPSHOT) {
+      return regions
+    }
+
+    if (!selectedSnapshot) {
+      return sharedAvailableRegions
+    }
+
+    return getRegionsForSnapshot(selectedSnapshot)
+  }, [getRegionsForSnapshot, regions, selectedSnapshot, selectedSource, sharedAvailableRegions])
+  const regionsDisabled = loadingRegions
+
+  const setRegionFromAvailableRegions = useCallback(
+    (nextRegions: Region[]) => {
+      const currentRegionId = form.getFieldValue('regionId')
+      const currentRegionAvailable = !!currentRegionId && nextRegions.some((region) => region.id === currentRegionId)
+
+      if (currentRegionAvailable) {
+        return
+      }
+
+      if (nextRegions.length === 0) {
+        if (currentRegionId) {
+          form.setFieldValue('regionId', undefined)
+        }
+        return
+      }
+
+      const defaultRegion = selectedOrganization?.defaultRegionId
+        ? nextRegions.find((region) => region.id === selectedOrganization.defaultRegionId)
+        : undefined
+
+      form.setFieldValue('regionId', defaultRegion?.id ?? nextRegions[0].id)
+    },
+    [form, selectedOrganization?.defaultRegionId],
+  )
 
   const handleSourceChange = useCallback(
     (val: string) => {
@@ -321,6 +393,25 @@ export const CreateSandboxSheet = ({
         form.setFieldValue('gpuType', undefined)
       } else {
         form.setFieldValue('snapshot', undefined)
+        setSelectedSnapshotOption(undefined)
+      }
+    },
+    [form],
+  )
+  const handleSnapshotChange = useCallback(
+    (snapshot: SnapshotDto) => {
+      form.setFieldValue('snapshot', snapshot.name)
+      setSelectedSnapshotOption(snapshot)
+      setRegionFromAvailableRegions(getRegionsForSnapshot(snapshot))
+    },
+    [form, getRegionsForSnapshot, setRegionFromAvailableRegions],
+  )
+  const handleSnapshotValueChange = useCallback(
+    (snapshotName: string | undefined) => {
+      form.setFieldValue('snapshot', snapshotName)
+
+      if (!snapshotName) {
+        setSelectedSnapshotOption(undefined)
       }
     },
     [form],
@@ -329,6 +420,7 @@ export const CreateSandboxSheet = ({
   const resetState = useCallback(() => {
     resetForm(formDefaultValues)
     resetCreateSandboxMutation()
+    setSelectedSnapshotOption(undefined)
   }, [formDefaultValues, resetForm, resetCreateSandboxMutation])
 
   const handleEnvFileImport = useCallback(
@@ -378,11 +470,26 @@ export const CreateSandboxSheet = ({
 
   useEffect(() => {
     if (!open || loadingRegions) return
+
+    if (selectedSource === Source.SNAPSHOT) {
+      setRegionFromAvailableRegions(snapshotFilteredRegions)
+      return
+    }
+
     if (regions.length !== 1) return
     if (selectedOrganization?.defaultRegionId) return
     if (form.getFieldValue('regionId')) return
     form.setFieldValue('regionId', regions[0].id)
-  }, [open, loadingRegions, regions, selectedOrganization?.defaultRegionId, form])
+  }, [
+    form,
+    loadingRegions,
+    open,
+    regions,
+    selectedOrganization?.defaultRegionId,
+    selectedSource,
+    setRegionFromAvailableRegions,
+    snapshotFilteredRegions,
+  ])
 
   return (
     <Sheet
@@ -394,7 +501,7 @@ export const CreateSandboxSheet = ({
       <SheetTrigger asChild>
         <CreateResourceButton resource="Sandbox" />
       </SheetTrigger>
-      <SheetContent className={`w-dvw sm:w-[500px] p-0 flex flex-col gap-0 ${className ?? ''}`}>
+      <SheetContent ref={handleSheetContentRef} className={cn('w-dvw sm:w-[500px] flex flex-col gap-0 p-0', className)}>
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
           <SheetTitle>Create Sandbox</SheetTitle>
           <SheetDescription className="sr-only">Create a new sandbox in your organization.</SheetDescription>
@@ -457,31 +564,19 @@ export const CreateSandboxSheet = ({
                       {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>Snapshot</FieldLabel>
-                          <Select
-                            value={field.state.value || NONE_VALUE}
-                            onValueChange={(val) => field.handleChange(val === NONE_VALUE ? '' : val)}
-                          >
-                            <SelectTrigger
-                              className="h-8"
-                              id={field.name}
-                              disabled={snapshotsLoading}
-                              loading={snapshotsLoading}
-                            >
-                              <SelectValue
-                                placeholder={snapshotsLoading ? 'Loading snapshots...' : 'Select a snapshot'}
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value={NONE_VALUE}>
-                                {config.defaultSnapshot} <Badge variant="secondary">default</Badge>
-                              </SelectItem>
-                              {snapshotsData?.items?.map((snapshot) => (
-                                <SelectItem key={snapshot.id} value={snapshot.name}>
-                                  {snapshot.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <SnapshotSelect
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            placeholder="Default snapshot"
+                            popoverContainer={popoverContainer}
+                            onSnapshotChange={handleSnapshotChange}
+                            onValueChange={handleSnapshotValueChange}
+                          />
+                          <FieldDescription>
+                            If unspecified,{' '}
+                            <span className="font-medium text-foreground">{config.defaultSnapshot}</span> will be used.
+                          </FieldDescription>
                         </Field>
                       )}
                     </form.Field>
@@ -697,24 +792,48 @@ export const CreateSandboxSheet = ({
             </form.Subscribe>
 
             <form.Field name="regionId">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Region</FieldLabel>
-                  <Select value={field.state.value} onValueChange={field.handleChange}>
-                    <SelectTrigger className="h-8" id={field.name} disabled={loadingRegions} loading={loadingRegions}>
-                      <SelectValue placeholder={loadingRegions ? 'Loading regions...' : 'Select a region'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {regions.map((region) => (
-                        <SelectItem key={region.id} value={region.id}>
-                          {getRegionFullDisplayName(region)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription>The region where the sandbox will be created.</FieldDescription>
-                </Field>
-              )}
+              {(field) => {
+                const hasErrors = field.state.meta.errors.length > 0
+                return (
+                  <Field data-invalid={hasErrors}>
+                    <FieldLabel htmlFor={field.name}>Region</FieldLabel>
+                    <Select value={field.state.value} onValueChange={field.handleChange}>
+                      <SelectTrigger
+                        aria-invalid={hasErrors}
+                        className="h-8"
+                        id={field.name}
+                        disabled={regionsDisabled || snapshotFilteredRegions.length === 0}
+                        loading={regionsDisabled}
+                      >
+                        <SelectValue
+                          placeholder={
+                            loadingRegions
+                              ? 'Loading regions...'
+                              : snapshotFilteredRegions.length === 0
+                                ? 'No regions available'
+                                : 'Select a region'
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {snapshotFilteredRegions.map((region) => (
+                          <SelectItem key={region.id} value={region.id}>
+                            {getRegionFullDisplayName(region)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>
+                      {selectedSource === Source.SNAPSHOT && selectedSnapshot && snapshotFilteredRegions.length === 0
+                        ? 'The selected snapshot is not available in any selectable region.'
+                        : selectedSource === Source.SNAPSHOT && selectedSnapshot?.regionIds?.length
+                          ? 'Only regions where the selected snapshot is available are shown.'
+                          : 'The region where the sandbox will be created.'}
+                    </FieldDescription>
+                    {hasErrors && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
             </form.Field>
             {canSetDefaultRegion && (
               <form.Field name="setAsDefaultRegion">
