@@ -6,6 +6,7 @@
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
+import { useAvailableSandboxClassesForOrganization } from '@/hooks/useAvailableSandboxClasses'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
@@ -118,8 +119,21 @@ export function SandboxTable({
     setLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility, JSON.stringify(columnVisibility))
   }, [columnVisibility])
 
+  const availableSandboxClasses = useAvailableSandboxClassesForOrganization()
+  const visibleColumns = useMemo(() => {
+    if (availableSandboxClasses.length > 1) {
+      return columns
+    }
+    return columns.filter((column) => column.id !== 'sandboxClass')
+  }, [availableSandboxClasses])
+
   const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
-  const tableFilters = useMemo(() => convertApiFiltersToTableFilters(filters), [filters])
+  const tableFilters = useMemo(() => {
+    const visibleColumnIds = new Set(
+      visibleColumns.map((column) => column.id).filter((id): id is string => Boolean(id)),
+    )
+    return convertApiFiltersToTableFilters(filters).filter((filter) => visibleColumnIds.has(filter.id))
+  }, [filters, visibleColumns])
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
     return regionsData.map((region) => ({
@@ -134,7 +148,7 @@ export function SandboxTable({
 
   const table = useReactTable({
     data,
-    columns,
+    columns: visibleColumns,
     manualFiltering: true,
     onColumnFiltersChange: (updater) => {
       const newTableFilters = typeof updater === 'function' ? updater(table.getState().columnFilters) : updater
