@@ -8,8 +8,7 @@ import { PageFooterPortal } from '@/components/PageLayout'
 import { SearchInput } from '@/components/SearchInput'
 import { SelectionToast } from '@/components/SelectionToast'
 import { Button } from '@/components/ui/button'
-import type { FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
-import { FacetFilter } from '@/components/ui/facet-filter'
+import { FacetedFilter, type FacetedFilterOption } from '@/components/ui/faceted-filter'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
@@ -295,12 +294,12 @@ export function SnapshotTable({
             placeholder="Search by Name"
             containerClassName="min-w-0 flex-1 sm:max-w-sm"
           />
-          <FacetFilter
+          <FacetedFilter
             title="State"
             className="h-8"
             options={SNAPSHOT_STATE_OPTIONS}
-            selectedValues={stateFilter}
-            setSelectedValues={onStateFilterChange}
+            values={stateFilter}
+            onValuesChange={onStateFilterChange}
           />
         </div>
       </div>

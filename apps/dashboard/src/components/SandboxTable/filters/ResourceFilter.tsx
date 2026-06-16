@@ -3,12 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useMemo } from 'react'
-
-import { X } from 'lucide-react'
+import { useMemo, type ReactNode } from 'react'
 
 export interface ResourceFilterValue {
   cpu?: { min?: number; max?: number }
@@ -22,20 +29,27 @@ interface ResourceFilterProps {
   resourceType?: 'cpu' | 'memory' | 'disk'
 }
 
+interface ResourceFilterIndicatorProps extends ResourceFilterProps {
+  icon?: ReactNode
+}
+
 const RESOURCE_CONFIG = {
   cpu: { label: 'vCPU', displayLabel: 'CPU' },
   memory: { label: 'Memory (GiB)', displayLabel: 'Memory' },
   disk: { label: 'Disk (GiB)', displayLabel: 'Disk' },
 } as const
 
-export function ResourceFilterIndicator({ value, onFilterChange, resourceType }: ResourceFilterProps) {
-  const { title, label } = useMemo(() => {
+export function ResourceFilterIndicator({ value, onFilterChange, resourceType, icon }: ResourceFilterIndicatorProps) {
+  const { title, label, hasValue } = useMemo(() => {
     let title = 'All'
     let label = 'Resources'
+    let hasValue = false
 
     if (resourceType) {
       const resourceValue = value[resourceType]
-      if (resourceValue?.min || resourceValue?.max) {
+      hasValue = Boolean(resourceValue)
+
+      if (resourceValue?.min !== undefined || resourceValue?.max !== undefined) {
         const config = RESOURCE_CONFIG[resourceType]
         const unit = resourceType === 'cpu' ? 'vCPU' : 'GiB'
         title = `${resourceValue.min ?? 'Any'} - ${resourceValue.max ?? 'Any'} ${unit}`
@@ -45,44 +59,49 @@ export function ResourceFilterIndicator({ value, onFilterChange, resourceType }:
       const filters: string[] = []
       Object.entries(RESOURCE_CONFIG).forEach(([type, config]) => {
         const resourceValue = value[type as keyof ResourceFilterValue]
-        if (resourceValue?.min || resourceValue?.max) {
+        if (resourceValue?.min !== undefined || resourceValue?.max !== undefined) {
           const unit = type === 'cpu' ? 'vCPU' : 'GiB'
           filters.push(`${config.displayLabel}: ${resourceValue.min ?? 'any'}-${resourceValue.max ?? 'any'} ${unit}`)
         }
       })
+      hasValue = filters.length > 0
       title = filters.length > 0 ? filters.join('; ') : 'All'
     }
 
-    return { title, label }
+    return { title, label, hasValue }
   }, [value, resourceType])
 
+  const handleClear = () => {
+    if (resourceType) {
+      const newFilterValue = { ...value }
+      delete newFilterValue[resourceType]
+      onFilterChange(Object.keys(newFilterValue).length > 0 ? newFilterValue : undefined)
+      return
+    }
+
+    onFilterChange(undefined)
+  }
+
   return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          {label}: <span className="text-primary font-medium">{title}</span>
-        </PopoverTrigger>
-
-        <PopoverContent className="w-72 p-4" align="start">
-          <ResourceFilter value={value} onFilterChange={onFilterChange} resourceType={resourceType} />
-        </PopoverContent>
-      </Popover>
-
-      <button
-        className="h-6 w-5 p-0 border-0 hover:text-muted-foreground"
-        onClick={() => {
-          if (resourceType) {
-            const newFilterValue = { ...value }
-            delete newFilterValue[resourceType]
-            onFilterChange(Object.keys(newFilterValue).length > 0 ? newFilterValue : undefined)
-          } else {
-            onFilterChange(undefined)
-          }
-        }}
-      >
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+    <FacetedFilterRoot title={label} hasValue={hasValue} onClear={handleClear}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={icon} aria-label={`Filter by ${label}`}>
+          {label}
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger className="px-1" aria-label={`Edit ${label} filter`}>
+          <FacetedFilterValues
+            title={label}
+            items={[{ value: resourceType ?? 'resources', label: title }]}
+            maxValues={1}
+          />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label={`Clear ${label} filter`} />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="w-72 p-4">
+        <ResourceFilter value={value} onFilterChange={onFilterChange} resourceType={resourceType} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 

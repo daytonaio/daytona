@@ -149,9 +149,9 @@ const eventTypeOptions: FacetedFilterOption[] = WEBHOOK_EVENTS.map((event) => ({
 }))
 
 const statusOptions: FacetedFilterOption[] = [
-  { label: 'Success', value: 'success', icon: CheckCircle },
-  { label: 'Pending', value: 'pending', icon: Clock },
-  { label: 'Failed', value: 'fail', icon: XCircle },
+  { label: 'Success', value: 'success', icon: <CheckCircle className="size-4" /> },
+  { label: 'Pending', value: 'pending', icon: <Clock className="size-4" /> },
+  { label: 'Failed', value: 'fail', icon: <XCircle className="size-4" /> },
 ]
 
 export { columns, eventTypeOptions, statusOptions }

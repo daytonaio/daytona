@@ -3,115 +3,51 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PlusCircle } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
-import { Badge } from './badge'
-import { Button } from './button'
-import {
-  Command,
-  CommandCheckboxItem,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from './command'
-import { FacetedFilterOption } from './data-table-faceted-filter'
-import { Popover, PopoverContent, PopoverTrigger } from './popover'
-import { Separator } from './separator'
+import { FacetedFilter, type FacetedFilterOperator, type FacetedFilterOption } from './faceted-filter'
 
 interface FacetFilterProps {
   title: string
-  options: FacetedFilterOption[]
-  selectedValues: Set<string>
+  options: readonly FacetedFilterOption[]
+  values: ReadonlySet<string>
+  onValuesChange: (values: Set<string>) => void
+  operator?: string
+  operators?: readonly FacetedFilterOperator[]
+  onOperatorChange?: (operator: string) => void
+  maxValues?: number
   className?: string
-  setSelectedValues: (values: Set<string>) => void
+  contentClassName?: string
+  icon?: ReactNode
 }
 
-export function FacetFilter({ title, options, selectedValues, setSelectedValues, className }: FacetFilterProps) {
+export function FacetFilter({
+  title,
+  options,
+  values,
+  onValuesChange,
+  operator,
+  operators,
+  onOperatorChange,
+  maxValues,
+  className,
+  contentClassName,
+  icon,
+}: FacetFilterProps) {
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            'h-10 border-dashed',
-            {
-              '!pr-1': selectedValues?.size,
-            },
-            className,
-          )}
-        >
-          <PlusCircle />
-          {title}
-          {selectedValues?.size > 0 && (
-            <>
-              <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
-                {selectedValues.size}
-              </Badge>
-              <div className="hidden lg:flex gap-1">
-                {selectedValues.size > 2 ? (
-                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                    {selectedValues.size} selected
-                  </Badge>
-                ) : (
-                  options
-                    .filter((option) => selectedValues.has(option.value))
-                    .map((option) => (
-                      <Badge variant="secondary" key={option.value} className="rounded-sm px-1 font-normal">
-                        {option.label}
-                      </Badge>
-                    ))
-                )}
-              </div>
-            </>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={title} />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => {
-                const isSelected = selectedValues.has(option.value)
-                return (
-                  <CommandCheckboxItem
-                    checked={isSelected}
-                    key={option.value}
-                    onSelect={() => {
-                      if (isSelected) {
-                        selectedValues.delete(option.value)
-                      } else {
-                        selectedValues.add(option.value)
-                      }
-                      setSelectedValues(new Set(selectedValues))
-                    }}
-                  >
-                    {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                    {option.label}
-                  </CommandCheckboxItem>
-                )
-              })}
-            </CommandGroup>
-            {selectedValues.size > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem onSelect={() => setSelectedValues(new Set())} className="justify-center text-center">
-                    Clear filters
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <FacetedFilter
+      title={title}
+      options={options}
+      values={values}
+      onValuesChange={onValuesChange}
+      operator={operator}
+      operators={operators}
+      onOperatorChange={onOperatorChange}
+      maxValues={maxValues}
+      className={cn('h-10', className)}
+      contentClassName={contentClassName}
+      icon={icon}
+    />
   )
 }

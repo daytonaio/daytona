@@ -4,13 +4,23 @@
  */
 
 import { Button } from '@/components/ui/button'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, X } from 'lucide-react'
+import { CalendarIcon, Calendar as LastEventIcon } from 'lucide-react'
 
 interface LastEventFilterProps {
   value: (Date | undefined)[]
@@ -18,29 +28,35 @@ interface LastEventFilterProps {
 }
 
 export function LastEventFilterIndicator({ value, onFilterChange }: LastEventFilterProps) {
-  return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          Last Event:{' '}
-          <span className="text-primary font-medium">
-            {value.some((d) => d !== undefined)
-              ? `${value
-                  .filter((d): d is Date => d !== undefined)
-                  .map((d) => format(d, 'PPP'))
-                  .join(' - ')}`
-              : ''}
-          </span>
-        </PopoverTrigger>
-        <PopoverContent className="p-3 w-auto" align="start">
-          <LastEventFilter onFilterChange={onFilterChange} value={value} />
-        </PopoverContent>
-      </Popover>
+  const selectedDateLabel = value
+    .filter((date): date is Date => date !== undefined)
+    .map((date) => format(date, 'PPP'))
+    .join(' - ')
+  const selectedDates = selectedDateLabel
+    ? [
+        {
+          value: selectedDateLabel,
+          label: selectedDateLabel,
+        },
+      ]
+    : []
 
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+  return (
+    <FacetedFilterRoot title="Last Event" hasValue={selectedDates.length > 0} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={<LastEventIcon />} aria-label="Filter by Last Event">
+          Last Event
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger className="px-1" aria-label="Edit Last Event filter">
+          <FacetedFilterValues title="Last Event" items={selectedDates} maxValues={1} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label="Clear Last Event filter" />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-3 w-auto">
+        <LastEventFilter onFilterChange={onFilterChange} value={value} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 

@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { cn } from '@/lib/utils'
 import { SandboxClass, SandboxState } from '@daytona/api-client'
 import { Loader2, MoreHorizontal, Play, Square, Terminal, Wrench } from 'lucide-react'
-import { useMemo } from 'react'
 import TooltipButton from '../TooltipButton'
 import { Button } from '../ui/button'
 import {
@@ -38,153 +36,42 @@ export function SandboxTableActions({
   onOpenTerminal,
 }: SandboxTableActionsProps) {
   const isVmSandbox = sandbox.sandboxClass === SandboxClass.LINUX_VM || sandbox.sandboxClass === SandboxClass.WINDOWS
-  const primaryActionTooltip =
-    sandbox.state === SandboxState.STARTING
-      ? 'Starting sandbox'
-      : sandbox.state === SandboxState.STOPPING
-        ? 'Stopping sandbox'
-        : sandbox.state === SandboxState.STARTED
-          ? 'Stop sandbox'
-          : sandbox.state === SandboxState.ERROR && sandbox.recoverable
-            ? 'Recover sandbox'
-            : 'Start sandbox'
+  const isStarted = sandbox.state === SandboxState.STARTED
+  const isStarting = sandbox.state === SandboxState.STARTING
+  const isStopping = sandbox.state === SandboxState.STOPPING
+  const isStopped = sandbox.state === SandboxState.STOPPED
+  const isArchived = sandbox.state === SandboxState.ARCHIVED
+  const isRecoverableError = sandbox.state === SandboxState.ERROR && sandbox.recoverable
 
-  const menuItems = useMemo(() => {
-    const items = []
+  const canStopSandbox = writePermitted && isStarted
+  const canStartSandbox = writePermitted && (isStopped || isArchived)
+  const canRecoverSandbox = writePermitted && isRecoverableError
+  const canArchiveSandbox = writePermitted && isStopped
+  const canOpenVnc = writePermitted && isStarted
+  const canViewScreenRecordings = writePermitted && isStarted
+  const canCreateSnapshot = writePermitted && sandbox.gpu === 0 && (isStarted || isStopped)
+  const canForkSandbox = writePermitted && isVmSandbox && isStarted
+  const canCreateSshAccess = writePermitted
+  const canRevokeSshAccess = writePermitted
+  const canViewForkTree = isVmSandbox
 
-    if (writePermitted) {
-      if (sandbox.state === SandboxState.STARTED) {
-        items.push({
-          key: 'stop',
-          label: 'Stop',
-          onClick: () => onStop(sandbox.id),
-          disabled: isLoading,
-        })
-      } else if (sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) {
-        items.push({
-          key: 'start',
-          label: 'Start',
-          onClick: () => onStart(sandbox.id),
-          disabled: isLoading,
-        })
-      } else if (sandbox.state === SandboxState.ERROR && sandbox.recoverable) {
-        items.push({
-          key: 'recover',
-          label: 'Recover',
-          onClick: () => onRecover(sandbox.id),
-          disabled: isLoading,
-        })
-      }
+  const hasLifecycleActions = canStopSandbox || canStartSandbox || canRecoverSandbox || canArchiveSandbox
+  const hasMenuItemsBeforeDelete = writePermitted || canViewForkTree
+  const hasMenuItems = hasMenuItemsBeforeDelete || deletePermitted
+  const showLifecycleSeparator = hasLifecycleActions
+  const showDeleteSeparator = deletePermitted && hasMenuItemsBeforeDelete
 
-      if (sandbox.state === SandboxState.STOPPED) {
-        items.push({
-          key: 'archive',
-          label: 'Archive',
-          onClick: () => onArchive(sandbox.id),
-          disabled: isLoading,
-        })
-      }
+  const primaryActionTooltip = isStarting
+    ? 'Starting sandbox'
+    : isStopping
+      ? 'Stopping sandbox'
+      : isStarted
+        ? 'Stop sandbox'
+        : isRecoverableError
+          ? 'Recover sandbox'
+          : 'Start sandbox'
 
-      if (items.length > 0) {
-        items.push({ key: 'lifecycle-separator', type: 'separator' })
-      }
-
-      if (sandbox.state === SandboxState.STARTED) {
-        items.push({
-          key: 'vnc',
-          label: 'VNC',
-          onClick: () => onVnc(sandbox.id),
-          disabled: isLoading,
-        })
-        items.push({
-          key: 'screen-recordings',
-          label: 'Screen Recordings',
-          onClick: () => onScreenRecordings(sandbox.id),
-          disabled: isLoading,
-        })
-      }
-
-      if (sandbox.gpu === 0 && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
-        items.push({
-          key: 'create-snapshot',
-          label: 'Create Snapshot',
-          onClick: () => onCreateSnapshot?.(),
-          disabled: isLoading,
-        })
-      }
-
-      if (isVmSandbox && sandbox.state === SandboxState.STARTED) {
-        items.push({
-          key: 'fork',
-          label: 'Fork',
-          onClick: () => onFork?.(),
-          disabled: isLoading,
-        })
-      }
-
-      // Add SSH access options
-      items.push({
-        key: 'create-ssh',
-        label: 'Create SSH Access',
-        onClick: () => onCreateSshAccess(sandbox.id),
-        disabled: isLoading,
-      })
-      items.push({
-        key: 'revoke-ssh',
-        label: 'Revoke SSH Access',
-        onClick: () => onRevokeSshAccess(sandbox.id),
-        disabled: isLoading,
-      })
-    }
-
-    // Viewing the fork tree is read-only, so it's available regardless of write permission.
-    if (isVmSandbox) {
-      items.push({
-        key: 'view-forks',
-        label: 'View Fork Tree',
-        onClick: () => onViewForks?.(),
-        disabled: isLoading,
-      })
-    }
-
-    if (deletePermitted) {
-      if (items.length > 0) {
-        items.push({ key: 'delete-separator', type: 'separator' })
-      }
-
-      items.push({
-        key: 'delete',
-        label: 'Delete',
-        onClick: () => onDelete(sandbox.id),
-        disabled: isLoading,
-        className: 'text-red-600 dark:text-red-400',
-      })
-    }
-
-    return items
-  }, [
-    writePermitted,
-    deletePermitted,
-    sandbox.state,
-    sandbox.id,
-    isLoading,
-    sandbox.recoverable,
-    onStart,
-    onStop,
-    onDelete,
-    onArchive,
-    onVnc,
-    onCreateSshAccess,
-    onRevokeSshAccess,
-    onCreateSnapshot,
-    onRecover,
-    onScreenRecordings,
-    onFork,
-    onViewForks,
-    isVmSandbox,
-  ])
-
-  if (menuItems.length === 0) {
+  if (!hasMenuItems) {
     return null
   }
 
@@ -203,9 +90,9 @@ export function SandboxTableActions({
             aria-label={primaryActionTooltip}
             onClick={(e) => {
               e.stopPropagation()
-              if (sandbox.state === SandboxState.STARTED) {
+              if (isStarted) {
                 onStop(sandbox.id)
-              } else if (sandbox.state === SandboxState.ERROR && sandbox.recoverable) {
+              } else if (isRecoverableError) {
                 onRecover(sandbox.id)
               } else {
                 onStart(sandbox.id)
@@ -213,11 +100,11 @@ export function SandboxTableActions({
             }}
             disabled={isLoading}
           >
-            {sandbox.state === SandboxState.STARTED ? (
+            {isStarted ? (
               <Square className="w-4 h-4" />
-            ) : sandbox.state === SandboxState.STOPPING || sandbox.state === SandboxState.STARTING ? (
+            ) : isStopping || isStarting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
-            ) : sandbox.state === SandboxState.ERROR && sandbox.recoverable ? (
+            ) : isRecoverableError ? (
               <Wrench className="w-4 h-4" />
             ) : (
               <Play className="w-4 h-4" />
@@ -246,25 +133,141 @@ export function SandboxTableActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {menuItems.map((item) => {
-            if (item.type === 'separator') {
-              return <DropdownMenuSeparator key={item.key} />
-            }
-
-            return (
-              <DropdownMenuItem
-                key={item.key}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  item.onClick?.()
-                }}
-                className={cn('cursor-pointer', item.className)}
-                disabled={item.disabled}
-              >
-                {item.label}
-              </DropdownMenuItem>
-            )
-          })}
+          {canStopSandbox && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onStop(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Stop
+            </DropdownMenuItem>
+          )}
+          {canStartSandbox && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onStart(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Start
+            </DropdownMenuItem>
+          )}
+          {canRecoverSandbox && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onRecover(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Recover
+            </DropdownMenuItem>
+          )}
+          {canArchiveSandbox && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onArchive(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Archive
+            </DropdownMenuItem>
+          )}
+          {showLifecycleSeparator && <DropdownMenuSeparator />}
+          {canOpenVnc && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onVnc(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              VNC
+            </DropdownMenuItem>
+          )}
+          {canViewScreenRecordings && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onScreenRecordings(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Screen Recordings
+            </DropdownMenuItem>
+          )}
+          {canCreateSnapshot && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onCreateSnapshot?.()
+              }}
+              disabled={isLoading}
+            >
+              Create Snapshot
+            </DropdownMenuItem>
+          )}
+          {canForkSandbox && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onFork?.()
+              }}
+              disabled={isLoading}
+            >
+              Fork
+            </DropdownMenuItem>
+          )}
+          {canCreateSshAccess && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onCreateSshAccess(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Create SSH Access
+            </DropdownMenuItem>
+          )}
+          {canRevokeSshAccess && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onRevokeSshAccess(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Revoke SSH Access
+            </DropdownMenuItem>
+          )}
+          {canViewForkTree && (
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                onViewForks?.()
+              }}
+              disabled={isLoading}
+            >
+              View Fork Tree
+            </DropdownMenuItem>
+          )}
+          {showDeleteSeparator && <DropdownMenuSeparator />}
+          {deletePermitted && (
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(sandbox.id)
+              }}
+              disabled={isLoading}
+            >
+              Delete
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

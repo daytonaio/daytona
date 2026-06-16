@@ -4,10 +4,20 @@
  */
 
 import { Button } from '@/components/ui/button'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Plus, Trash2, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Plus, Tag, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 interface LabelFilterProps {
@@ -16,22 +26,33 @@ interface LabelFilterProps {
 }
 
 export function LabelFilterIndicator({ value, onFilterChange }: Pick<LabelFilterProps, 'value' | 'onFilterChange'>) {
+  const selectedLabels = value.map((label) => ({
+    value: label,
+    label,
+  }))
+
   return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          Labels: <span className="text-primary font-medium">{value.length} selected</span>
-        </PopoverTrigger>
-
-        <PopoverContent className="p-0 w-[320px]" align="start">
-          <LabelFilter value={value} onFilterChange={onFilterChange} />
-        </PopoverContent>
-      </Popover>
-
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+    <FacetedFilterRoot title="Label" hasValue={value.length > 0} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={<Tag />} aria-label="Filter by Label">
+          Labels
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger
+          className={cn({
+            'px-1': value.length <= 1,
+            'px-2': value.length > 1,
+          })}
+          aria-label="Edit Label filter"
+        >
+          <FacetedFilterValues title="Label" items={selectedLabels} maxValues={1} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label="Clear Label filter" />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-0 w-[320px]">
+        <LabelFilter value={value} onFilterChange={onFilterChange} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 

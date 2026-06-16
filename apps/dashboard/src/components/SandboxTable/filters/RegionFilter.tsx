@@ -12,8 +12,18 @@ import {
   CommandInputButton,
   CommandList,
 } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Loader2, X } from 'lucide-react'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
+import { cn } from '@/lib/utils'
+import { Globe, Loader2 } from 'lucide-react'
 import { FacetedFilterOption } from '../types'
 
 interface RegionFilterProps {
@@ -24,30 +34,33 @@ interface RegionFilterProps {
 }
 
 export function RegionFilterIndicator({ value, onFilterChange, options, isLoading }: RegionFilterProps) {
-  const selectedRegionLabels = value
-    .map((v) => options?.find((r) => r.value === v)?.label)
-    .filter(Boolean)
-    .join(', ')
+  const selectedRegions = value.map((v) => ({
+    value: v,
+    label: options?.find((region) => region.value === v)?.label ?? v,
+  }))
 
   return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          Region:{' '}
-          <span className="text-primary font-medium">
-            {selectedRegionLabels.length > 0 ? selectedRegionLabels : 'All'}
-          </span>
-        </PopoverTrigger>
-
-        <PopoverContent className="p-0 w-72" align="start">
-          <RegionFilter value={value} onFilterChange={onFilterChange} options={options} isLoading={isLoading} />
-        </PopoverContent>
-      </Popover>
-
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+    <FacetedFilterRoot title="Region" hasValue={value.length > 0} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={<Globe />} aria-label="Filter by Region">
+          Region
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger
+          className={cn({
+            'px-1': value.length <= 1,
+            'px-2': value.length > 1,
+          })}
+          aria-label="Edit Region filter"
+        >
+          <FacetedFilterValues title="Region" items={selectedRegions} maxValues={1} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label="Clear Region filter" />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-0 w-72">
+        <RegionFilter value={value} onFilterChange={onFilterChange} options={options} isLoading={isLoading} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 

@@ -47,7 +47,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { AlertTriangle, CheckCircle, HardDrive, Loader2, MoreHorizontal, Timer } from 'lucide-react'
+import { HardDrive, Loader2, MoreHorizontal } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
 import { VolumeBulkAction, VolumeBulkActionAlertDialog } from './VolumeTable/BulkActionAlertDialog'
@@ -353,14 +353,44 @@ const getStateLabel = (state: VolumeState) => {
     .join(' ')
 }
 
+function VolumeStateFilterLabel({ colorClassName, label }: { colorClassName: string; label: string }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <span className={cn('size-2 shrink-0 rounded-full', colorClassName)} aria-hidden="true" />
+      <span className="truncate">{label}</span>
+    </span>
+  )
+}
+
+const getStateFilterColorClass = (state: VolumeState) => {
+  switch (state) {
+    case VolumeState.READY:
+      return 'bg-success-foreground'
+    case VolumeState.ERROR:
+      return 'bg-destructive'
+    case VolumeState.CREATING:
+    case VolumeState.PENDING_CREATE:
+    case VolumeState.PENDING_DELETE:
+    case VolumeState.DELETING:
+      return 'bg-warning-foreground'
+    case VolumeState.DELETED:
+    default:
+      return 'bg-muted-foreground'
+  }
+}
+
+const getStateFilterLabel = (state: VolumeState) => {
+  return <VolumeStateFilterLabel colorClassName={getStateFilterColorClass(state)} label={getStateLabel(state)} />
+}
+
 const statuses: FacetedFilterOption[] = [
-  { label: getStateLabel(VolumeState.CREATING), value: VolumeState.CREATING, icon: Timer },
-  { label: getStateLabel(VolumeState.READY), value: VolumeState.READY, icon: CheckCircle },
-  { label: getStateLabel(VolumeState.PENDING_CREATE), value: VolumeState.PENDING_CREATE, icon: Timer },
-  { label: getStateLabel(VolumeState.PENDING_DELETE), value: VolumeState.PENDING_DELETE, icon: Timer },
-  { label: getStateLabel(VolumeState.DELETING), value: VolumeState.DELETING, icon: Timer },
-  { label: getStateLabel(VolumeState.DELETED), value: VolumeState.DELETED, icon: Timer },
-  { label: getStateLabel(VolumeState.ERROR), value: VolumeState.ERROR, icon: AlertTriangle },
+  { label: getStateFilterLabel(VolumeState.CREATING), value: VolumeState.CREATING },
+  { label: getStateFilterLabel(VolumeState.READY), value: VolumeState.READY },
+  { label: getStateFilterLabel(VolumeState.PENDING_CREATE), value: VolumeState.PENDING_CREATE },
+  { label: getStateFilterLabel(VolumeState.PENDING_DELETE), value: VolumeState.PENDING_DELETE },
+  { label: getStateFilterLabel(VolumeState.DELETING), value: VolumeState.DELETING },
+  { label: getStateFilterLabel(VolumeState.DELETED), value: VolumeState.DELETED },
+  { label: getStateFilterLabel(VolumeState.ERROR), value: VolumeState.ERROR },
 ]
 
 const columns: ColumnDef<VolumeDto>[] = [

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { format, subDays, subHours, subMinutes } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
@@ -246,7 +247,7 @@ export function DateRangePicker({
         <Button
           variant="outline"
           className={cn(
-            'flex w-full justify-between text-left font-normal hover:bg-background',
+            'flex w-full justify-between bg-transparent text-left font-normal hover:bg-accent dark:bg-input/30 dark:hover:bg-accent',
             { 'text-muted-foreground': !internalRange?.from },
             className,
             { 'opacity-50 cursor-not-allowed': disabled },
@@ -263,36 +264,38 @@ export function DateRangePicker({
         <div className="flex">
           {/* Quick ranges panel */}
           {quickRangesEnabled && (
-            <div className="w-64 p-4 border-r">
+            <div className="w-64 p-2 py-4 border-r">
               <div className="text-sm font-medium mb-3 text-center">Quick ranges</div>
-              <div className="space-y-1 max-h-[400px] overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                <button
-                  className={cn('w-full text-left px-3 py-2 text-sm rounded-md transition-colors', {
-                    'bg-primary text-primary-foreground': selectedQuickRange === 'All time',
-                    'hover:bg-muted': selectedQuickRange !== 'All time',
-                  })}
-                  onClick={() => handleQuickRangeSelect({ from: undefined, to: undefined }, 'All time')}
-                >
-                  All time
-                </button>
-                {createTimeRangesFromConfig(quickRanges || {}).map((timeRange) => (
+              <ScrollArea type="auto" fade="mask" fadeOffset={18} className="h-[min(400px,calc(100vh-12rem))]">
+                <div className="pr-3">
                   <button
-                    key={timeRange.label}
-                    className={cn('w-full text-left px-3 py-2 text-sm rounded-md transition-colors', {
-                      'bg-primary text-primary-foreground': selectedQuickRange === timeRange.label,
-                      'hover:bg-muted': selectedQuickRange !== timeRange.label,
+                    className={cn('w-full text-left px-3 py-2 text-sm rounded-md', {
+                      'bg-primary text-primary-foreground': selectedQuickRange === 'All time',
+                      'hover:bg-muted': selectedQuickRange !== 'All time',
                     })}
-                    onClick={() => handleQuickRangeSelect(timeRange.getRange(), timeRange.label)}
+                    onClick={() => handleQuickRangeSelect({ from: undefined, to: undefined }, 'All time')}
                   >
-                    {timeRange.label}
+                    All time
                   </button>
-                ))}
-              </div>
+                  {createTimeRangesFromConfig(quickRanges || {}).map((timeRange) => (
+                    <button
+                      key={timeRange.label}
+                      className={cn('w-full text-left px-3 py-2 text-sm rounded-md', {
+                        'bg-primary text-primary-foreground': selectedQuickRange === timeRange.label,
+                        'hover:bg-muted': selectedQuickRange !== timeRange.label,
+                      })}
+                      onClick={() => handleQuickRangeSelect(timeRange.getRange(), timeRange.label)}
+                    >
+                      {timeRange.label}
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
           )}
 
           {/* Custom range panel */}
-          <div className="w-auto p-4">
+          <div className="w-auto py-4 p-2 pl-3">
             <h3 className="font-semibold text-sm mb-3 text-center">Custom range</h3>
             {/* <p className="text-xs text-muted-foreground mb-4">
               Click and drag to select a date range, or click two dates

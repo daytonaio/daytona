@@ -12,10 +12,20 @@ import {
   CommandInputButton,
   CommandList,
 } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import { SnapshotDto } from '@daytona/api-client'
-import { X } from 'lucide-react'
+import { Camera } from 'lucide-react'
 
 interface SnapshotFilterProps {
   value: string[]
@@ -34,29 +44,40 @@ export function SnapshotFilterIndicator({
   snapshotsDataHasMore,
   onChangeSnapshotSearchValue,
 }: SnapshotFilterProps) {
+  const selectedSnapshots = value.map((snapshotName) => ({
+    value: snapshotName,
+    label: snapshotName,
+  }))
+
   return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          Snapshot: <span className="text-primary font-medium">{value.length} selected</span>
-        </PopoverTrigger>
-
-        <PopoverContent className="p-0 w-[240px]" align="start">
-          <SnapshotFilter
-            value={value}
-            onFilterChange={onFilterChange}
-            snapshots={snapshots}
-            snapshotsDataIsLoading={snapshotsDataIsLoading}
-            snapshotsDataHasMore={snapshotsDataHasMore}
-            onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
-          />
-        </PopoverContent>
-      </Popover>
-
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+    <FacetedFilterRoot title="Snapshot" hasValue={value.length > 0} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={<Camera />} aria-label="Filter by Snapshot">
+          Snapshot
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger
+          className={cn({
+            'px-1': value.length <= 1,
+            'px-2': value.length > 1,
+          })}
+          aria-label="Edit Snapshot filter"
+        >
+          <FacetedFilterValues title="Snapshot" items={selectedSnapshots} maxValues={1} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label="Clear Snapshot filter" />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-0 w-[240px]">
+        <SnapshotFilter
+          value={value}
+          onFilterChange={onFilterChange}
+          snapshots={snapshots}
+          snapshotsDataIsLoading={snapshotsDataIsLoading}
+          snapshotsDataHasMore={snapshotsDataHasMore}
+          onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+        />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 

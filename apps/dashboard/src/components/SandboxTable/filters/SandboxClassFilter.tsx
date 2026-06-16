@@ -11,9 +11,19 @@ import {
   CommandInputButton,
   CommandList,
 } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
+import { cn } from '@/lib/utils'
 import { SandboxClass } from '@daytona/api-client'
-import { X } from 'lucide-react'
+import { Boxes } from 'lucide-react'
 import { SANDBOX_CLASS_OPTIONS, getSandboxClassLabel } from '../constants'
 
 interface SandboxClassFilterProps {
@@ -22,30 +32,33 @@ interface SandboxClassFilterProps {
 }
 
 export function SandboxClassFilterIndicator({ value, onFilterChange }: SandboxClassFilterProps) {
-  const selectedLabels = value.map((v) => getSandboxClassLabel(v as SandboxClass))
+  const selectedClasses = value.map((v) => ({
+    value: v,
+    label: getSandboxClassLabel(v as SandboxClass),
+  }))
+
   return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          Class:{' '}
-          <span className="text-primary font-medium">
-            {selectedLabels.length > 0
-              ? selectedLabels.length > 2
-                ? `${selectedLabels[0]}, ${selectedLabels[1]}, +${selectedLabels.length - 2}`
-                : `${selectedLabels.join(', ')}`
-              : ''}
-          </span>
-        </PopoverTrigger>
-
-        <PopoverContent className="p-0 w-64" align="start">
-          <SandboxClassFilter value={value} onFilterChange={onFilterChange} />
-        </PopoverContent>
-      </Popover>
-
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+    <FacetedFilterRoot title="Class" hasValue={value.length > 0} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={<Boxes />} aria-label="Filter by Class">
+          Class
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger
+          className={cn({
+            'px-1': value.length <= 2,
+            'px-2': value.length > 2,
+          })}
+          aria-label="Edit Class filter"
+        >
+          <FacetedFilterValues title="Class" items={selectedClasses} maxValues={2} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label="Clear Class filter" />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-0 w-64">
+        <SandboxClassFilter value={value} onFilterChange={onFilterChange} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 

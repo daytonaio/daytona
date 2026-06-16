@@ -14,8 +14,15 @@ function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
-function PopoverTrigger({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+function PopoverTrigger({ ref, className, ...props }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
+  return (
+    <PopoverPrimitive.Trigger
+      ref={ref}
+      data-slot="popover-trigger"
+      className={cn('rounded-md!', className)}
+      {...props}
+    />
+  )
 }
 
 function PopoverContent({

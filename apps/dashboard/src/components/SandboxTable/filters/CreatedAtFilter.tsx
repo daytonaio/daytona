@@ -4,13 +4,23 @@
  */
 
 import { Button } from '@/components/ui/button'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, X } from 'lucide-react'
+import { CalendarIcon, CalendarPlus } from 'lucide-react'
 
 interface CreatedAtFilterProps {
   value: (Date | undefined)[]
@@ -18,29 +28,35 @@ interface CreatedAtFilterProps {
 }
 
 export function CreatedAtFilterIndicator({ value, onFilterChange }: CreatedAtFilterProps) {
-  return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          Created:{' '}
-          <span className="text-primary font-medium">
-            {value.some((d) => d !== undefined)
-              ? `${value
-                  .filter((d): d is Date => d !== undefined)
-                  .map((d) => format(d, 'PPP'))
-                  .join(' - ')}`
-              : ''}
-          </span>
-        </PopoverTrigger>
-        <PopoverContent className="p-3 w-auto" align="start">
-          <CreatedAtFilter onFilterChange={onFilterChange} value={value} />
-        </PopoverContent>
-      </Popover>
+  const selectedDateLabel = value
+    .filter((date): date is Date => date !== undefined)
+    .map((date) => format(date, 'PPP'))
+    .join(' - ')
+  const selectedDates = selectedDateLabel
+    ? [
+        {
+          value: selectedDateLabel,
+          label: selectedDateLabel,
+        },
+      ]
+    : []
 
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+  return (
+    <FacetedFilterRoot title="Created" hasValue={selectedDates.length > 0} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={<CalendarPlus />} aria-label="Filter by Created">
+          Created
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger className="px-1" aria-label="Edit Created filter">
+          <FacetedFilterValues title="Created" items={selectedDates} maxValues={1} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label="Clear Created filter" />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-3 w-auto">
+        <CreatedAtFilter onFilterChange={onFilterChange} value={value} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 

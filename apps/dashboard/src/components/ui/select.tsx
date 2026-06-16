@@ -33,6 +33,7 @@ function SelectTrigger({
       className={cn(
         'flex h-10 w-full items-center justify-between rounded-md border border-input bg-transparent dark:bg-input/30 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground disabled:opacity-50 [&>span]:line-clamp-1 data-[size=sm]:h-8 data-[size=xs]:h-7 outline-hidden',
         'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+        'data-[slot=button]:!rounded-md',
         {
           'disabled:cursor-progress': loading,
           'disabled:cursor-not-allowed': !loading,

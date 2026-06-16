@@ -5,15 +5,15 @@
 
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import { FacetFilter } from '../facet-filter'
+import { FacetedFilter } from '../faceted-filter'
 
-const meta: Meta<typeof FacetFilter> = {
-  title: 'UI/FacetFilter',
-  component: FacetFilter,
+const meta: Meta<typeof FacetedFilter> = {
+  title: 'UI/FacetedFilter',
+  component: FacetedFilter,
 }
 
 export default meta
-type Story = StoryObj<typeof FacetFilter>
+type Story = StoryObj<typeof FacetedFilter>
 
 const options = [
   { label: 'Active', value: 'active' },
@@ -24,6 +24,6 @@ const options = [
 export const Default: Story = {
   render: () => {
     const [selected, setSelected] = useState<Set<string>>(new Set())
-    return <FacetFilter title="Status" options={options} selectedValues={selected} setSelectedValues={setSelected} />
+    return <FacetedFilter title="Status" options={options} values={selected} onValuesChange={setSelected} />
   },
 }

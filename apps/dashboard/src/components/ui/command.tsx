@@ -163,9 +163,9 @@ function CommandCheckboxItem({
 }: React.ComponentProps<typeof CommandPrimitive.Item> & { checked: boolean }) {
   return (
     <CommandItem {...props}>
-      <div className="flex items-center">
+      <div className="flex min-w-0 flex-1 items-center">
         <div
-          className={cn('mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary', {
+          className={cn('mr-2 flex h-4 w-4 items-center justify-center rounded-[4px] border border-primary', {
             'bg-primary text-primary-foreground': checked,
             'opacity-50 [&_svg]:invisible': !checked,
           })}

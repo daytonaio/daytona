@@ -3,43 +3,87 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Command, CommandList, CommandGroup, CommandCheckboxItem } from '@/components/ui/command'
-import { X } from 'lucide-react'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
 import { Label } from '@/components/ui/label'
+import type { ReactNode } from 'react'
+
+type BooleanValueLabels = Record<'true' | 'false', ReactNode>
 
 interface BooleanFilterProps {
   label: string
   value: boolean | undefined
   onFilterChange: (value: boolean | undefined) => void
+  valueLabels?: BooleanValueLabels
+}
+
+interface BooleanFilterIndicatorProps extends BooleanFilterProps {
+  icon?: ReactNode
 }
 
 const OPTIONS = [
-  { value: true, label: 'Yes' },
-  { value: false, label: 'No' },
-]
+  { value: true, labelKey: 'true' },
+  { value: false, labelKey: 'false' },
+] as const
 
-export function BooleanFilterIndicator({ label, value, onFilterChange }: BooleanFilterProps) {
+const DEFAULT_VALUE_LABELS = {
+  true: 'Yes',
+  false: 'No',
+} satisfies BooleanValueLabels
+
+function getBooleanLabel(value: boolean, valueLabels: BooleanValueLabels) {
+  return valueLabels[String(value) as keyof BooleanValueLabels]
+}
+
+export function BooleanFilterIndicator({
+  label,
+  value,
+  onFilterChange,
+  valueLabels = DEFAULT_VALUE_LABELS,
+  icon,
+}: BooleanFilterIndicatorProps) {
+  const selectedValue =
+    value === undefined
+      ? []
+      : [
+          {
+            value: String(value),
+            label: getBooleanLabel(value, valueLabels),
+          },
+        ]
+
   return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          {label}:{' '}
-          <span className="text-primary font-medium">{value === true ? 'Yes' : value === false ? 'No' : 'Any'}</span>
-        </PopoverTrigger>
-        <PopoverContent className="p-0 w-48" align="start">
-          <BooleanFilter label={label} onFilterChange={onFilterChange} value={value} />
-        </PopoverContent>
-      </Popover>
-
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+    <FacetedFilterRoot title={label} hasValue={value !== undefined} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={icon} aria-label={`Filter by ${label}`}>
+          {label}
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterValueTrigger className="px-1" aria-label={`Edit ${label} filter`}>
+          <FacetedFilterValues title={label} items={selectedValue} maxValues={1} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label={`Clear ${label} filter`} />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-2 w-48">
+        <BooleanFilter label={label} onFilterChange={onFilterChange} value={value} valueLabels={valueLabels} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 
-export function BooleanFilter({ label, onFilterChange, value }: BooleanFilterProps) {
+export function BooleanFilter({
+  label,
+  onFilterChange,
+  value,
+  valueLabels = DEFAULT_VALUE_LABELS,
+}: BooleanFilterProps) {
   return (
     <Command>
       <div className="flex items-center gap-2 justify-between mb-2">
@@ -61,7 +105,7 @@ export function BooleanFilter({ label, onFilterChange, value }: BooleanFilterPro
                 onFilterChange(value === option.value ? undefined : option.value)
               }}
             >
-              {option.label}
+              {valueLabels[option.labelKey]}
             </CommandCheckboxItem>
           ))}
         </CommandGroup>

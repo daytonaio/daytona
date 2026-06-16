@@ -11,9 +11,19 @@ import {
   CommandInputButton,
   CommandList,
 } from '@/components/ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  FacetedFilterAnchor,
+  FacetedFilterClear,
+  FacetedFilterContent,
+  FacetedFilterLabelTrigger,
+  FacetedFilterOperator,
+  FacetedFilterRoot,
+  FacetedFilterValueTrigger,
+  FacetedFilterValues,
+} from '@/components/ui/faceted-filter'
+import { cn } from '@/lib/utils'
 import { SandboxState } from '@daytona/api-client'
-import { X } from 'lucide-react'
+import { Square } from 'lucide-react'
 import { STATUSES, getStateLabel } from '../constants'
 
 interface StateFilterProps {
@@ -21,31 +31,67 @@ interface StateFilterProps {
   onFilterChange: (value: string[] | undefined) => void
 }
 
-export function StateFilterIndicator({ value, onFilterChange }: StateFilterProps) {
-  const selectedStates = value.map((v) => getStateLabel(v as SandboxState))
+function StateFilterLabel({ colorClassName, label }: { colorClassName: string; label: string }) {
   return (
-    <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
-      <Popover>
-        <PopoverTrigger className="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
-          States:{' '}
-          <span className="text-primary font-medium">
-            {selectedStates.length > 0
-              ? selectedStates.length > 2
-                ? `${selectedStates[0]}, ${selectedStates[1]}, +${selectedStates.length - 2}`
-                : `${selectedStates.join(', ')}`
-              : ''}
-          </span>
-        </PopoverTrigger>
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <span className={cn('size-2 shrink-0 rounded-full', colorClassName)} aria-hidden="true" />
+      <span className="truncate">{label}</span>
+    </span>
+  )
+}
 
-        <PopoverContent className="p-0 w-72" align="start">
-          <StateFilter value={value} onFilterChange={onFilterChange} />
-        </PopoverContent>
-      </Popover>
+function getStateFilterColorClass(state: SandboxState) {
+  switch (state) {
+    case SandboxState.STARTED:
+      return 'bg-success-foreground'
+    case SandboxState.ERROR:
+    case SandboxState.BUILD_FAILED:
+      return 'bg-destructive'
+    case SandboxState.STARTING:
+    case SandboxState.STOPPING:
+    case SandboxState.DESTROYING:
+    case SandboxState.ARCHIVING:
+      return 'bg-warning-foreground'
+    case SandboxState.STOPPED:
+    case SandboxState.ARCHIVED:
+    default:
+      return 'bg-muted-foreground'
+  }
+}
 
-      <button className="h-6 w-5 p-0 border-0 hover:text-muted-foreground" onClick={() => onFilterChange(undefined)}>
-        <X className="h-3 w-3" />
-      </button>
-    </div>
+export function StateFilterIndicator({ value, onFilterChange }: StateFilterProps) {
+  const selectedStates = value.map((v) => ({
+    value: v,
+    label: (
+      <StateFilterLabel
+        colorClassName={getStateFilterColorClass(v as SandboxState)}
+        label={getStateLabel(v as SandboxState)}
+      />
+    ),
+  }))
+
+  return (
+    <FacetedFilterRoot title="State" hasValue={value.length > 0} onClear={() => onFilterChange(undefined)}>
+      <FacetedFilterAnchor>
+        <FacetedFilterLabelTrigger icon={<Square />} aria-label="Filter by State">
+          State
+        </FacetedFilterLabelTrigger>
+        <FacetedFilterOperator />
+        <FacetedFilterValueTrigger
+          className={cn({
+            'px-1': value.length <= 2,
+            'px-2': value.length > 2,
+          })}
+          aria-label="Edit State filter"
+        >
+          <FacetedFilterValues title="State" items={selectedStates} maxValues={2} />
+        </FacetedFilterValueTrigger>
+        <FacetedFilterClear aria-label="Clear State filter" />
+      </FacetedFilterAnchor>
+      <FacetedFilterContent className="p-0 w-72">
+        <StateFilter value={value} onFilterChange={onFilterChange} />
+      </FacetedFilterContent>
+    </FacetedFilterRoot>
   )
 }
 
@@ -74,7 +120,10 @@ export function StateFilter({ value, onFilterChange }: StateFilterProps) {
                 onFilterChange(newValue.length > 0 ? newValue : undefined)
               }}
             >
-              {status.label}
+              <StateFilterLabel
+                colorClassName={getStateFilterColorClass(status.value as SandboxState)}
+                label={status.label}
+              />
             </CommandCheckboxItem>
           ))}
         </CommandGroup>

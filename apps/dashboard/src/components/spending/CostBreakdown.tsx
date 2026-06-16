@@ -12,7 +12,7 @@ import { subMonths } from 'date-fns'
 import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
 import * as React from 'react'
 import { useCallback, useMemo } from 'react'
-import { FacetFilter } from '../ui/facet-filter'
+import { FacetedFilter } from '../ui/faceted-filter'
 import { ResourceUsageChart, UsageChartData } from './ResourceUsageChart'
 
 type CostBreakdownProps = {
@@ -91,21 +91,22 @@ export function CostBreakdown({ usageData, showTotal, isLoading, isError, onRetr
 
   return (
     <Card>
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center gap-2 space-y-0 border-b p-4">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center gap-4 space-y-0 border-b p-4 flex-wrap ">
         <div className="flex-1">
-          <CardTitle>Monthly Cost Breakdown</CardTitle>
+          <CardTitle className="whitespace-nowrap">Monthly Cost Breakdown</CardTitle>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <FacetFilter
-            title="Filters"
-            className="h-8 pr-1"
+          <FacetedFilter
+            title="Filter"
+            className="h-8"
             options={[
               { label: 'CPU', value: 'cpu' },
               { label: 'RAM', value: 'ramGB' },
               { label: 'Disk', value: 'diskGB' },
             ]}
-            selectedValues={filters}
-            setSelectedValues={setFilters}
+            values={filters}
+            onValuesChange={setFilters}
+            maxValues={1}
           />
           <Select value={chartType} onValueChange={(value) => setChartType(value as 'bar' | 'area')}>
             <SelectTrigger size="sm" className="w-[80px] rounded-lg" aria-label="Select a chart type">
