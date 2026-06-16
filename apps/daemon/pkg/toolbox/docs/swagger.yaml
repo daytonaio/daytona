@@ -1137,7 +1137,9 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Daytona Toolbox API
+  description: "Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl`
+    field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`.
+    Default for Daytona SaaS: `https://proxy.app.daytona.io/toolbox/{sandboxId}`."
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -3349,4 +3351,12 @@ paths:
       summary: Get working directory
       tags:
         - info
+schemes:
+  - https
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and your API key.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: '2.0'

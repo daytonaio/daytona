@@ -92,7 +92,7 @@
       "executor": "nx:run-commands",
       "cache": true,
       "outputs": [
-        "{workspaceRoot}/apps/docs/src/content/docs/en/go-sdk/**/*"
+        "{workspaceRoot}/apps/docs/src/content/docs/en/go-sdk/**/!(index).mdx"
       ],
       "options": {
         "cwd": "{projectRoot}",

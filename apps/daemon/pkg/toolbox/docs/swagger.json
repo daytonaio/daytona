@@ -1,7 +1,8 @@
 {
+  "schemes": ["https"],
   "swagger": "2.0",
   "info": {
-    "description": "Daytona Toolbox API",
+    "description": "Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Daytona SaaS: `https://proxy.app.daytona.io/toolbox/{sandboxId}`.",
     "title": "Daytona Toolbox API",
     "contact": {},
     "license": {
@@ -4384,6 +4385,14 @@
     "gin.H": {
       "type": "object",
       "additionalProperties": {}
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "description": "Type \"Bearer\" followed by a space and your API key.",
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
     }
   }
 }

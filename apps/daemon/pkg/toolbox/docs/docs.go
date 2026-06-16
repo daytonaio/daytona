@@ -4997,6 +4997,14 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": {}
         }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" followed by a space and your API key.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -5005,9 +5013,9 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "v0.0.0-dev",
 	Host:             "",
 	BasePath:         "",
-	Schemes:          []string{},
+	Schemes:          []string{"https"},
 	Title:            "Daytona Toolbox API",
-	Description:      "Daytona Toolbox API",
+	Description:      "Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Daytona SaaS: `https://proxy.app.daytona.io/toolbox/{sandboxId}`.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

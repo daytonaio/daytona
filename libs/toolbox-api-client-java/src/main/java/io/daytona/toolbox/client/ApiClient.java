@@ -1,6 +1,6 @@
 /*
  * Daytona Toolbox API
- * Daytona Toolbox API
+ * Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Daytona SaaS: `https://proxy.app.daytona.io/toolbox/{sandboxId}`.
  *
  * The version of the OpenAPI document: v0.0.0-dev
  * 
@@ -101,6 +101,7 @@ public class ApiClient {
         initHttpClient();
 
         // Setup authentications (key: authentication name, value: authentication).
+        authentications.put("Bearer", new ApiKeyAuth("header", "Authorization"));
         // Prevent the authentications from being modified.
         authentications = Collections.unmodifiableMap(authentications);
     }
@@ -116,6 +117,7 @@ public class ApiClient {
         httpClient = client;
 
         // Setup authentications (key: authentication name, value: authentication).
+        authentications.put("Bearer", new ApiKeyAuth("header", "Authorization"));
         // Prevent the authentications from being modified.
         authentications = Collections.unmodifiableMap(authentications);
     }

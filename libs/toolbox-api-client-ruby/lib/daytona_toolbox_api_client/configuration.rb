@@ -1,7 +1,7 @@
 =begin
 #Daytona Toolbox API
 
-#Daytona Toolbox API
+#Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Daytona SaaS: `https://proxy.app.daytona.io/toolbox/{sandboxId}`.
 
 The version of the OpenAPI document: v0.0.0-dev
 
@@ -244,6 +244,13 @@ module DaytonaToolboxApiClient
     # Returns Auth Settings hash for api client.
     def auth_settings
       {
+        'Bearer' =>
+          {
+            type: 'api_key',
+            in: 'header',
+            key: 'Authorization',
+            value: api_key_with_prefix('Authorization')
+          },
       }
     end
 
