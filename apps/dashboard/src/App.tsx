@@ -19,11 +19,11 @@ import {
   Navigate,
   Outlet,
   redirect,
-  RouterProvider,
   useLocation,
   useNavigation,
   useRouteError,
-} from 'react-router-dom'
+} from 'react-router'
+import { RouterProvider } from 'react-router/dom'
 import { BannerProvider } from './components/Banner'
 import { CommandPaletteProvider } from './components/CommandPalette'
 import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
@@ -80,7 +80,7 @@ function AppRoot() {
   const location = useLocation()
   const posthog = usePostHog()
 
-  const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
+  const { error: authError, isAuthenticated, signoutRedirect, user } = useAuth()
 
   useEffect(() => {
     if (isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
@@ -136,7 +136,7 @@ function DashboardOutlet() {
   const isRouteLoading = navigation.state === 'loading' && navigation.location?.pathname !== location.pathname
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<LoadingFallback source="dashboard-suspense" />}>
       <ApiProvider>
         <OrganizationsProvider>
           <SelectedOrganizationProvider>
@@ -148,7 +148,7 @@ function DashboardOutlet() {
                       <Dashboard>
                         {isRouteLoading ? (
                           <div className="flex min-h-screen w-full items-center justify-center bg-background p-6">
-                            <LoadingFallbackContent />
+                            <LoadingFallbackContent source="route-navigation" />
                           </div>
                         ) : (
                           <Outlet />
@@ -326,6 +326,7 @@ const router = createBrowserRouter([
   {
     path: RoutePath.LANDING,
     element: <AppRoot />,
+    hydrateFallbackElement: <LoadingFallback source="app-root-hydrate" />,
     errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <LandingPage /> },
@@ -414,7 +415,7 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={router} fallbackElement={<LoadingFallback />} />
+  return <RouterProvider router={router} />
 }
 
 export default App

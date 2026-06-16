@@ -578,6 +578,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     snapshotName: string,
     organizationId: string,
     registry?: DockerRegistry,
+    includeMemory?: boolean,
   ): Promise<undefined> {
     const payload = toJson(
       SnapshotSandboxPayloadSchema,
@@ -585,6 +586,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
         sandboxId,
         name: snapshotName,
         organizationId,
+        includeMemory: includeMemory ?? false,
         registry: registry
           ? create(RegistrySchema, {
               url: registry.url.replace(/^(https?:\/\/)/, ''),

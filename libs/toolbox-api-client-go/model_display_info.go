@@ -25,7 +25,10 @@ type DisplayInfo struct {
 	Width *int32 `json:"width,omitempty"`
 	X *int32 `json:"x,omitempty"`
 	Y *int32 `json:"y,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _DisplayInfo DisplayInfo
 
 // NewDisplayInfo instantiates a new DisplayInfo object
 // This constructor will assign default values to properties that have it defined,
@@ -264,7 +267,38 @@ func (o DisplayInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Y) {
 		toSerialize["y"] = o.Y
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *DisplayInfo) UnmarshalJSON(data []byte) (err error) {
+	varDisplayInfo := _DisplayInfo{}
+
+	err = json.Unmarshal(data, &varDisplayInfo)
+
+	if err != nil {
+		return err
+	}
+
+	*o = DisplayInfo(varDisplayInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "height")
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "isActive")
+		delete(additionalProperties, "width")
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableDisplayInfo struct {

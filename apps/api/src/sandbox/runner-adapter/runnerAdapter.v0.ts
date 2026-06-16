@@ -430,6 +430,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     snapshotName: string,
     organizationId: string,
     registry?: DockerRegistry,
+    _includeMemory?: boolean,
   ): Promise<CreateSandboxSnapshotResult> {
     if (!registry) {
       throw new Error('registry is required to snapshot a Docker sandbox')

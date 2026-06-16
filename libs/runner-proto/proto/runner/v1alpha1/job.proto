@@ -25,6 +25,7 @@ message SnapshotSandboxPayload {
   string            name            = 2;
   string            organization_id = 3;
   optional Registry registry        = 4;
+  bool              include_memory  = 5;
 }
 
 message ForkSandboxPayload {

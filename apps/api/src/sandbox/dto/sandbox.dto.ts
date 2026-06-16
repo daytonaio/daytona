@@ -5,7 +5,7 @@
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { IsEnum, IsOptional } from 'class-validator'
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 import { BackupState } from '../enums/backup-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -16,15 +16,21 @@ import { GpuType } from '../enums/gpu-type.enum'
 @ApiSchema({ name: 'SandboxVolume' })
 export class SandboxVolume {
   @ApiProperty({
-    description: 'The ID of the volume',
-    example: 'volume123',
+    description: 'The ID or name of the volume. Resolved to the volume ID on sandbox create.',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   })
+  // Kept as volumeId (not volumeIdOrName): the schema is shared with responses/storage
+  // where it is always the UUID. SandboxService.resolveVolumes swaps names for UUIDs
+  // before storage/forwarding; the runner rejects non-UUIDs.
+  @IsString()
+  @IsNotEmpty()
   volumeId: string
 
   @ApiProperty({
     description: 'The mount path for the volume',
     example: '/data',
   })
+  @IsString()
   mountPath: string
 
   @ApiPropertyOptional({
@@ -32,6 +38,8 @@ export class SandboxVolume {
       'Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.',
     example: 'users/alice',
   })
+  @IsOptional()
+  @IsString()
   subpath?: string
 }
 

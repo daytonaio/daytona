@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &FilesDownloadRequest{}
 // FilesDownloadRequest struct for FilesDownloadRequest
 type FilesDownloadRequest struct {
 	Paths []string `json:"paths"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _FilesDownloadRequest FilesDownloadRequest
@@ -79,6 +79,11 @@ func (o FilesDownloadRequest) MarshalJSON() ([]byte, error) {
 func (o FilesDownloadRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["paths"] = o.Paths
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *FilesDownloadRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varFilesDownloadRequest := _FilesDownloadRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varFilesDownloadRequest)
+	err = json.Unmarshal(data, &varFilesDownloadRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = FilesDownloadRequest(varFilesDownloadRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "paths")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

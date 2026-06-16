@@ -23,6 +23,9 @@ import { ForkSandboxDto } from '../dto/fork-sandbox.dto'
 import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { isRegistryBasedSandboxClass } from '../utils/sandbox-class.util'
+import { OpenFeature } from '@openfeature/server-sdk'
+import { FeatureFlags } from '../../common/constants/feature-flags'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
 import { RunnerService } from './runner.service'
@@ -563,16 +566,14 @@ export class SandboxService {
         pendingGpuIncrement = gpu
       }
 
+      // Resolve volume names to UUIDs before runner assignment, so invalid references fail fast
+      const resolvedVolumes = await this.resolveVolumes(organization.id, createSandboxDto.volumes)
+
       // GPU sandboxes are always ephemeral: they get exclusive ownership of a
       // runner for their lifetime and are auto-deleted on first stop. Skip the
       // warm-pool path entirely so we always provision a fresh container on a
       // currently-unoccupied GPU runner.
-      if (gpu > 0) {
-        const volumeIdOrNames = (createSandboxDto.volumes ?? []).map((v) => v.volumeId)
-        if (volumeIdOrNames.length > 0) {
-          await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
-        }
-      } else if (!linkedSandbox && (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0)) {
+      if (gpu <= 0 && !linkedSandbox && (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0)) {
         const skipWarmPool = (await this.redis.exists(`warm-pool:skip:${snapshot.id}`)) === 1
 
         if (!skipWarmPool) {
@@ -593,9 +594,6 @@ export class SandboxService {
             return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
           }
         }
-      } else if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
-        const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
-        await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
       // Serialize GPU runner assignment per region: getRunnersAtGpuCapacity reads
@@ -670,8 +668,8 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
-      if (createSandboxDto.volumes !== undefined) {
-        sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
+      if (resolvedVolumes !== undefined) {
+        sandbox.volumes = resolvedVolumes
       }
 
       sandbox.runnerId = runner.id
@@ -893,10 +891,8 @@ export class SandboxService {
         pendingGpuIncrement = gpu
       }
 
-      if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
-        const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
-        await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
-      }
+      // Resolve volume names to UUIDs, failing fast on invalid references
+      const resolvedVolumes = await this.resolveVolumes(organization.id, createSandboxDto.volumes)
 
       const sandbox = new Sandbox({ region: region.id, name: createSandboxDto.name })
 
@@ -933,8 +929,8 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
-      if (createSandboxDto.volumes !== undefined) {
-        sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
+      if (resolvedVolumes !== undefined) {
+        sandbox.volumes = resolvedVolumes
       }
 
       if (sandbox.sandboxClass !== SandboxClass.CONTAINER) {
@@ -1293,9 +1289,7 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (![SandboxClass.LINUX_VM, SandboxClass.WINDOWS].includes(sandbox.sandboxClass)) {
-      throw new HttpException('Snapshotting is not supported for this sandbox', HttpStatus.UNPROCESSABLE_ENTITY)
-    }
+    const includeMemory = dto.includeMemory ?? false
 
     try {
       if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
@@ -1312,6 +1306,17 @@ export class SandboxService {
 
       const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
+      if (sandbox.sandboxClass === SandboxClass.WINDOWS) {
+        if (includeMemory && sandbox.state !== SandboxState.STARTED) {
+          throw new BadRequestError('Snapshots with memory require the Windows sandbox to be running (STARTED)')
+        }
+        if (!includeMemory && sandbox.state !== SandboxState.STOPPED) {
+          throw new BadRequestError('Filesystem-only snapshots require the Windows sandbox to be stopped (STOPPED)')
+        }
+      } else if (includeMemory) {
+        throw new BadRequestError('includeMemory is only supported for Windows sandboxes')
+      }
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const region = await this.regionService.findOne(sandbox.region)
@@ -1319,7 +1324,15 @@ export class SandboxService {
         throw new NotFoundException(`Region with ID ${sandbox.region} not found`)
       }
 
-      const registry = (await this.dockerRegistryService.getAvailableInternalRegistry(sandbox.region)) ?? undefined
+      let registry: DockerRegistry | undefined
+      if (isRegistryBasedSandboxClass(sandbox.sandboxClass)) {
+        registry = (await this.dockerRegistryService.getAvailableInternalRegistry(sandbox.region)) ?? undefined
+        if (sandbox.sandboxClass === SandboxClass.CONTAINER && !registry) {
+          throw new BadRequestError(
+            'No internal registry is available for this sandbox region; cannot snapshot a container sandbox',
+          )
+        }
+      }
 
       const { pendingSnapshotCountIncremented } = await this.snapshotService.validateOrganizationQuotas(
         organization,
@@ -1379,7 +1392,7 @@ export class SandboxService {
         })
       } else {
         try {
-          await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry)
+          await runnerAdapter.createSnapshotFromSandbox(sandbox.id, dto.name, organization.id, registry, includeMemory)
         } catch (error) {
           await this.sandboxRepository.updateWhere(sandbox.id, {
             updateData: {
@@ -3209,20 +3222,40 @@ export class SandboxService {
     return networkAllowList
   }
 
-  private resolveVolumes(volumes: SandboxVolume[]): SandboxVolume[] {
+  // Resolves each volumeId (which may be a volume name) to the volume's UUID — the
+  // runner builds a host mount path from this value, so only UUIDs may be stored.
+  private async resolveVolumes(
+    organizationId: string,
+    volumes?: SandboxVolume[],
+  ): Promise<SandboxVolume[] | undefined> {
+    if (volumes === undefined || volumes.length === 0) {
+      return volumes
+    }
+
+    const volumeIdOrNames = volumes.map((volume) => volume.volumeId)
+    const foundVolumes = await this.volumeService.getVolumesByIdOrName(organizationId, volumeIdOrNames)
+
+    const resolved = volumes.map((volume) => {
+      const matchedVolume = foundVolumes.get(volume.volumeId)
+      if (matchedVolume === undefined || !isValidUuid(matchedVolume.id)) {
+        throw new BadRequestError(`Volume '${volume.volumeId}' could not be resolved to a valid volume ID`)
+      }
+      return { ...volume, volumeId: matchedVolume.id }
+    })
+
     try {
-      validateMountPaths(volumes)
+      validateMountPaths(resolved)
     } catch (error) {
       throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume mount configuration')
     }
 
     try {
-      validateSubpaths(volumes)
+      validateSubpaths(resolved)
     } catch (error) {
       throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume subpath configuration')
     }
 
-    return volumes
+    return resolved
   }
 
   async createSshAccess(

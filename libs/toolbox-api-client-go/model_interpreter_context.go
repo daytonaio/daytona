@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -26,6 +25,7 @@ type InterpreterContext struct {
 	Cwd string `json:"cwd"`
 	Id string `json:"id"`
 	Language string `json:"language"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _InterpreterContext InterpreterContext
@@ -187,6 +187,11 @@ func (o InterpreterContext) ToMap() (map[string]interface{}, error) {
 	toSerialize["cwd"] = o.Cwd
 	toSerialize["id"] = o.Id
 	toSerialize["language"] = o.Language
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -218,15 +223,24 @@ func (o *InterpreterContext) UnmarshalJSON(data []byte) (err error) {
 
 	varInterpreterContext := _InterpreterContext{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varInterpreterContext)
+	err = json.Unmarshal(data, &varInterpreterContext)
 
 	if err != nil {
 		return err
 	}
 
 	*o = InterpreterContext(varInterpreterContext)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "active")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "cwd")
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "language")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

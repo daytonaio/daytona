@@ -55,6 +55,11 @@ public class CreateSandboxSnapshot {
   @javax.annotation.Nonnull
   private String name;
 
+  public static final String SERIALIZED_NAME_INCLUDE_MEMORY = "includeMemory";
+  @SerializedName(SERIALIZED_NAME_INCLUDE_MEMORY)
+  @javax.annotation.Nullable
+  private Boolean includeMemory = false;
+
   public CreateSandboxSnapshot() {
   }
 
@@ -74,6 +79,25 @@ public class CreateSandboxSnapshot {
 
   public void setName(@javax.annotation.Nonnull String name) {
     this.name = name;
+  }
+
+
+  public CreateSandboxSnapshot includeMemory(@javax.annotation.Nullable Boolean includeMemory) {
+    this.includeMemory = includeMemory;
+    return this;
+  }
+
+  /**
+   * Include the VM&#39;s memory in the snapshot. VM sandboxes only. When true the sandbox must be STARTED; when false (default) VM sandboxes must be STOPPED. Container sandboxes do not support memory snapshots.
+   * @return includeMemory
+   */
+  @javax.annotation.Nullable
+  public Boolean getIncludeMemory() {
+    return includeMemory;
+  }
+
+  public void setIncludeMemory(@javax.annotation.Nullable Boolean includeMemory) {
+    this.includeMemory = includeMemory;
   }
 
   /**
@@ -131,13 +155,14 @@ public class CreateSandboxSnapshot {
       return false;
     }
     CreateSandboxSnapshot createSandboxSnapshot = (CreateSandboxSnapshot) o;
-    return Objects.equals(this.name, createSandboxSnapshot.name)&&
+    return Objects.equals(this.name, createSandboxSnapshot.name) &&
+        Objects.equals(this.includeMemory, createSandboxSnapshot.includeMemory)&&
         Objects.equals(this.additionalProperties, createSandboxSnapshot.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, additionalProperties);
+    return Objects.hash(name, includeMemory, additionalProperties);
   }
 
   @Override
@@ -145,6 +170,7 @@ public class CreateSandboxSnapshot {
     StringBuilder sb = new StringBuilder();
     sb.append("class CreateSandboxSnapshot {\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    includeMemory: ").append(toIndentedString(includeMemory)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -164,7 +190,7 @@ public class CreateSandboxSnapshot {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("name"));
+    openapiFields = new HashSet<String>(Arrays.asList("name", "includeMemory"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("name"));

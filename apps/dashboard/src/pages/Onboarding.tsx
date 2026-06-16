@@ -19,7 +19,7 @@ import { getMaskedToken } from '@/lib/utils'
 import { ApiKeyResponse, CreateApiKeyPermissionsEnum, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { Check, ClipboardIcon, Eye, EyeOff, Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 const Onboarding: React.FC = () => {
@@ -325,7 +325,7 @@ const codeExamples = {
     install: `npm install @daytona/sdk`,
     run: `npx tsx index.mts`,
     example: `import { Daytona } from '@daytona/sdk'
-  
+
 // Initialize the Daytona client
 const daytona = new Daytona({ apiKey: 'your-api-key' });
 
@@ -343,7 +343,7 @@ console.log(response.result);
     install: `pip install daytona`,
     run: `python main.py`,
     example: `from daytona import Daytona, DaytonaConfig
-  
+
 # Define the configuration
 config = DaytonaConfig(api_key="your-api-key")
 

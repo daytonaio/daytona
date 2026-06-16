@@ -19,5 +19,9 @@ export interface CreateSandboxSnapshot {
      * Name for the new snapshot
      */
     'name': string;
+    /**
+     * Include the VM\'s memory in the snapshot. VM sandboxes only. When true the sandbox must be STARTED; when false (default) VM sandboxes must be STOPPED. Container sandboxes do not support memory snapshots.
+     */
+    'includeMemory'?: boolean;
 }
 

@@ -71,7 +71,7 @@ type Resources struct {
 
 // VolumeMount represents a volume mount configuration
 type VolumeMount struct {
-	VolumeID  string
+	VolumeID  string // ID or name of the volume to mount
 	MountPath string
 	Subpath   *string // Optional subpath within the volume; nil = mount entire volume
 }

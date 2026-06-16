@@ -30,7 +30,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
@@ -88,12 +90,13 @@ import {
 } from 'nuqs'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 type CreateSandboxSnapshotVariables = {
   sandboxId: string
   name: string
+  includeMemory: boolean
 }
 
 const SANDBOX_SORT_FIELDS: SandboxListSortField[] = [
@@ -500,6 +503,7 @@ const Sandboxes: React.FC = () => {
   const [recursiveDeleteSandboxId, setRecursiveDeleteSandboxId] = useState<string | null>(null)
   const [sandboxToSnapshot, setSandboxToSnapshot] = useState<string | null>(null)
   const [snapshotName, setSnapshotName] = useState('')
+  const [snapshotIncludeMemory, setSnapshotIncludeMemory] = useState(false)
   const [selectedSandbox, setSelectedSandbox] = useState<SandboxListItem | null>(null)
   const [orderedSandboxItems, setOrderedSandboxItems] = useState<SandboxListItem[] | null>(null)
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
@@ -591,8 +595,8 @@ const Sandboxes: React.FC = () => {
 
   const createSandboxSnapshotMutation = useMutation({
     mutationKey: mutationKeys.sandboxes.createSnapshot(),
-    mutationFn: async ({ sandboxId, name }: CreateSandboxSnapshotVariables) => {
-      await sandboxApi.createSandboxSnapshot(sandboxId, { name }, selectedOrganization?.id)
+    mutationFn: async ({ sandboxId, name, includeMemory }: CreateSandboxSnapshotVariables) => {
+      await sandboxApi.createSandboxSnapshot(sandboxId, { name, includeMemory }, selectedOrganization?.id)
     },
   })
 
@@ -798,8 +802,10 @@ const Sandboxes: React.FC = () => {
   }, [sandboxFromLoadedResults, sandboxIdParam, seedSandboxDetailsCache])
 
   const handleCreateSnapshot = (id: string) => {
+    const sandbox = sandboxes.find((s) => s.id === id)
     setSandboxToSnapshot(id)
     setSnapshotName('')
+    setSnapshotIncludeMemory(sandbox?.sandboxClass === SandboxClass.WINDOWS && sandbox?.state === SandboxState.STARTED)
   }
 
   const handleFork = async (id: string) => {
@@ -1223,10 +1229,12 @@ const Sandboxes: React.FC = () => {
       await createSandboxSnapshotMutation.mutateAsync({
         sandboxId: sandboxToSnapshot,
         name: snapshotName.trim(),
+        includeMemory: snapshotIncludeMemory,
       })
       toast.success('Snapshot creation started')
       setSandboxToSnapshot(null)
       setSnapshotName('')
+      setSnapshotIncludeMemory(false)
     } catch (error) {
       handleApiError(error, 'Failed to create snapshot')
     }
@@ -1342,6 +1350,7 @@ const Sandboxes: React.FC = () => {
               if (!isOpen) {
                 setSandboxToSnapshot(null)
                 setSnapshotName('')
+                setSnapshotIncludeMemory(false)
               }
             }}
           >
@@ -1356,6 +1365,21 @@ const Sandboxes: React.FC = () => {
                 placeholder="Snapshot name"
                 disabled={createSandboxSnapshotMutation.isPending}
               />
+              {sandboxes.find((s) => s.id === sandboxToSnapshot)?.sandboxClass === SandboxClass.WINDOWS && (
+                <div className="flex items-start gap-3">
+                  <Checkbox id="snapshot-include-memory" checked={snapshotIncludeMemory} disabled className="mt-0.5" />
+                  <div className="grid gap-1 leading-none">
+                    <Label htmlFor="snapshot-include-memory" className="text-sm">
+                      Include memory state
+                    </Label>
+                    <p className="text-muted-foreground text-xs">
+                      {snapshotIncludeMemory
+                        ? 'Sandbox is running — memory will be captured. Stop the sandbox first for a filesystem-only snapshot.'
+                        : 'Sandbox is stopped — filesystem-only snapshot. Start the sandbox first to capture memory.'}
+                    </p>
+                  </div>
+                </div>
+              )}
               <AlertDialogFooter>
                 <AlertDialogCancel disabled={createSandboxSnapshotMutation.isPending}>Cancel</AlertDialogCancel>
                 <AlertDialogAction

@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -22,6 +21,7 @@ var _ MappedNullable = &ListContextsResponse{}
 // ListContextsResponse struct for ListContextsResponse
 type ListContextsResponse struct {
 	Contexts []InterpreterContext `json:"contexts"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ListContextsResponse ListContextsResponse
@@ -79,6 +79,11 @@ func (o ListContextsResponse) MarshalJSON() ([]byte, error) {
 func (o ListContextsResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["contexts"] = o.Contexts
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -106,15 +111,20 @@ func (o *ListContextsResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varListContextsResponse := _ListContextsResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varListContextsResponse)
+	err = json.Unmarshal(data, &varListContextsResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ListContextsResponse(varListContextsResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "contexts")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

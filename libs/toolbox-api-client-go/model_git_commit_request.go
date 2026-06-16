@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -26,6 +25,7 @@ type GitCommitRequest struct {
 	Email string `json:"email"`
 	Message string `json:"message"`
 	Path string `json:"path"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitCommitRequest GitCommitRequest
@@ -196,6 +196,11 @@ func (o GitCommitRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize["email"] = o.Email
 	toSerialize["message"] = o.Message
 	toSerialize["path"] = o.Path
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -226,15 +231,24 @@ func (o *GitCommitRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitCommitRequest := _GitCommitRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitCommitRequest)
+	err = json.Unmarshal(data, &varGitCommitRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitCommitRequest(varGitCommitRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "allow_empty")
+		delete(additionalProperties, "author")
+		delete(additionalProperties, "email")
+		delete(additionalProperties, "message")
+		delete(additionalProperties, "path")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

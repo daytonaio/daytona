@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -24,6 +23,7 @@ type Match struct {
 	Content string `json:"content"`
 	File string `json:"file"`
 	Line int32 `json:"line"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Match Match
@@ -133,6 +133,11 @@ func (o Match) ToMap() (map[string]interface{}, error) {
 	toSerialize["content"] = o.Content
 	toSerialize["file"] = o.File
 	toSerialize["line"] = o.Line
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -162,15 +167,22 @@ func (o *Match) UnmarshalJSON(data []byte) (err error) {
 
 	varMatch := _Match{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varMatch)
+	err = json.Unmarshal(data, &varMatch)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Match(varMatch)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "content")
+		delete(additionalProperties, "file")
+		delete(additionalProperties, "line")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -21,7 +21,10 @@ var _ MappedNullable = &MouseMoveRequest{}
 type MouseMoveRequest struct {
 	X *int32 `json:"x,omitempty"`
 	Y *int32 `json:"y,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _MouseMoveRequest MouseMoveRequest
 
 // NewMouseMoveRequest instantiates a new MouseMoveRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -120,7 +123,34 @@ func (o MouseMoveRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Y) {
 		toSerialize["y"] = o.Y
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *MouseMoveRequest) UnmarshalJSON(data []byte) (err error) {
+	varMouseMoveRequest := _MouseMoveRequest{}
+
+	err = json.Unmarshal(data, &varMouseMoveRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = MouseMoveRequest(varMouseMoveRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableMouseMoveRequest struct {

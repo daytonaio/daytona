@@ -814,19 +814,31 @@ export class JobStateHandlerService {
         if (!snapshotName) {
           this.logger.error(`SNAPSHOT_SANDBOX job ${job.id} payload missing snapshot name`)
         } else {
-          // Prefer the ref the runner actually pushed to the registry. This
-          // avoids any drift between the pushed image and the stored ref.
-          // Fall back to reconstructing from {registry, project, hash} for
-          // older runners that don't return `ref`.
+          // Prefer the ref the runner actually pushed. Otherwise reconstruct
+          // from `hash`, matching the runner-side canonical form
+          // (apps/runner/cmd/runner/config/config.go): registry-based VM /
+          // container snapshots use `<registry>/<project>/daytona-<hash>:daytona`,
+          // Windows VM snapshots have no registry and use bare `daytona-<hash>`.
           const refFromRunner =
             (typeof metadata?.ref === 'string' && metadata.ref) ||
             (typeof metadata?.Ref === 'string' && metadata.Ref) ||
             undefined
 
-          let snapshotRef = refFromRunner ?? snapshotName
-          if (!refFromRunner && hash && payload?.registry?.url) {
-            const project = payload.registry.project || 'daytona'
-            snapshotRef = `${payload.registry.url}/${project}/daytona-${hash}:daytona`
+          let snapshotRef = refFromRunner
+          if (!snapshotRef && hash) {
+            const cleanHash = hash.replace(/^sha256:/, '')
+            if (payload?.registry?.url) {
+              const project = payload.registry.project || 'daytona'
+              snapshotRef = `${payload.registry.url}/${project}/daytona-${cleanHash}:daytona`
+            } else {
+              snapshotRef = `daytona-${cleanHash}`
+            }
+          }
+          if (!snapshotRef) {
+            this.logger.error(
+              `SNAPSHOT_SANDBOX job ${job.id} returned neither ref nor hash; falling back to snapshot name`,
+            )
+            snapshotRef = snapshotName
           }
 
           const rawSnapshotSizeGB = metadata?.sizeGB ?? metadata?.size_gb

@@ -123,6 +123,7 @@ import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.mo
         return [
           {
             rootPath: join(__dirname, '..', 'dashboard'),
+            serveRoot: '/dashboard',
             exclude: ['/api/{*path}'],
             renderPath: '/',
             serveStaticOptions: {

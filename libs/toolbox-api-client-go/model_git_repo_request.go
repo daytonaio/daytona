@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -24,6 +23,7 @@ type GitRepoRequest struct {
 	Password *string `json:"password,omitempty"`
 	Path string `json:"path"`
 	Username *string `json:"username,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitRepoRequest GitRepoRequest
@@ -151,6 +151,11 @@ func (o GitRepoRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -178,15 +183,22 @@ func (o *GitRepoRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitRepoRequest := _GitRepoRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitRepoRequest)
+	err = json.Unmarshal(data, &varGitRepoRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitRepoRequest(varGitRepoRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "password")
+		delete(additionalProperties, "path")
+		delete(additionalProperties, "username")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

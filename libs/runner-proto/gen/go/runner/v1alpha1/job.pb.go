@@ -147,6 +147,7 @@ type SnapshotSandboxPayload struct {
 	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	OrganizationId string                 `protobuf:"bytes,3,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	Registry       *Registry              `protobuf:"bytes,4,opt,name=registry,proto3,oneof" json:"registry,omitempty"`
+	IncludeMemory  bool                   `protobuf:"varint,5,opt,name=include_memory,json=includeMemory,proto3" json:"include_memory,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -207,6 +208,13 @@ func (x *SnapshotSandboxPayload) GetRegistry() *Registry {
 		return x.Registry
 	}
 	return nil
+}
+
+func (x *SnapshotSandboxPayload) GetIncludeMemory() bool {
+	if x != nil {
+		return x.IncludeMemory
+	}
+	return false
 }
 
 type ForkSandboxPayload struct {
@@ -370,17 +378,18 @@ const file_runner_v1alpha1_job_proto_rawDesc = "" +
 	"\t_usernameB\v\n" +
 	"\t_passwordB\n" +
 	"\n" +
-	"\b_project\"\xbd\x01\n" +
+	"\b_project\"\xe4\x01\n" +
 	"\x16SnapshotSandboxPayload\x12\x1d\n" +
 	"\n" +
 	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12'\n" +
 	"\x0forganization_id\x18\x03 \x01(\tR\x0eorganizationId\x12:\n" +
-	"\bregistry\x18\x04 \x01(\v2\x19.runner.v1alpha1.RegistryH\x00R\bregistry\x88\x01\x01B\v\n" +
-	"\t_registry\"\x89\x01\n" +
+	"\bregistry\x18\x04 \x01(\v2\x19.runner.v1alpha1.RegistryH\x00R\bregistry\x88\x01\x01\x12%\n" +
+	"\x0einclude_memory\x18\x05 \x01(\bR\rincludeMemoryB\v\n" +
+	"\t_registry\"f\n" +
 	"\x12ForkSandboxPayload\x12*\n" +
 	"\x11source_sandbox_id\x18\x01 \x01(\tR\x0fsourceSandboxId\x12$\n" +
-	"\x0enew_sandbox_id\x18\x02 \x01(\tR\fnewSandboxId\x12!\n" +
+	"\x0enew_sandbox_id\x18\x02 \x01(\tR\fnewSandboxId\"J\n" +
 	"\x15SnapshotSandboxResult\x12\x1d\n" +
 	"\n" +
 	"size_bytes\x18\x01 \x01(\x03R\tsizeBytes\x12\x12\n" +

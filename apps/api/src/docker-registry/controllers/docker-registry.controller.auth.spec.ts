@@ -14,6 +14,7 @@ import {
   getResourceAccessGuards,
   getRequiredOrganizationMemberRole,
   getRequiredOrganizationResourcePermissions,
+  getRequiredAnyOrganizationResourcePermissions,
   expectArrayMatch,
   createCoverageTracker,
   isPublicEndpoint,
@@ -58,6 +59,10 @@ describe('[AUTH] DockerRegistryController', () => {
     expectArrayMatch(getAuthContextGuards(DockerRegistryController, methodName), [OrganizationAuthContextGuard])
     expect(getRequiredOrganizationMemberRole(DockerRegistryController, methodName)).toBeUndefined()
     expect(getRequiredOrganizationResourcePermissions(DockerRegistryController, methodName)).toBeUndefined()
+    expectArrayMatch(getRequiredAnyOrganizationResourcePermissions(DockerRegistryController, methodName), [
+      OrganizationResourcePermission.WRITE_SNAPSHOTS,
+      OrganizationResourcePermission.WRITE_SANDBOXES,
+    ])
   })
 
   it('findOne', () => {

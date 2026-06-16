@@ -41,7 +41,7 @@ export function ConfigProvider(props: Props) {
         audience: config.oidc.audience,
       },
       scope: 'openid profile email',
-      redirect_uri: window.location.origin,
+      redirect_uri: window.location.origin + '/dashboard',
       staleStateAgeInSeconds: 60,
       accessTokenExpiringNotificationTimeInSeconds: 290,
       userStore: new WebStorageStateStore({ store: stateStore }),
@@ -51,7 +51,7 @@ export function ConfigProvider(props: Props) {
         window.history.replaceState({}, '', targetUrl)
         window.dispatchEvent(new PopStateEvent('popstate'))
       },
-      post_logout_redirect_uri: window.location.origin,
+      post_logout_redirect_uri: window.location.origin + '/dashboard',
     }
   }, [config])
 

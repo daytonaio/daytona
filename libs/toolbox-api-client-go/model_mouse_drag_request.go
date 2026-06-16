@@ -24,7 +24,10 @@ type MouseDragRequest struct {
 	EndY *int32 `json:"endY,omitempty"`
 	StartX *int32 `json:"startX,omitempty"`
 	StartY *int32 `json:"startY,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _MouseDragRequest MouseDragRequest
 
 // NewMouseDragRequest instantiates a new MouseDragRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -228,7 +231,37 @@ func (o MouseDragRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.StartY) {
 		toSerialize["startY"] = o.StartY
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *MouseDragRequest) UnmarshalJSON(data []byte) (err error) {
+	varMouseDragRequest := _MouseDragRequest{}
+
+	err = json.Unmarshal(data, &varMouseDragRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = MouseDragRequest(varMouseDragRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "button")
+		delete(additionalProperties, "endX")
+		delete(additionalProperties, "endY")
+		delete(additionalProperties, "startX")
+		delete(additionalProperties, "startY")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableMouseDragRequest struct {

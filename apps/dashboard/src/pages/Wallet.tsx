@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { AutomaticTopUp, BillingType, Invoice } from '@daytona/billing-api-client'
 import { BillingInfoCard } from '@/components/BillingInfoCard'
 import { ChargesTable } from '@/components/Charges'
 import { InvoicesTable } from '@/components/Invoices'
@@ -13,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
@@ -24,9 +24,11 @@ import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticT
 import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
 import { useOwnerInvoicesQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useChargesQuery } from '@/hooks/queries/useChargesQuery'
+import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
+import { AutomaticTopUp, BillingType, Invoice } from '@daytona/billing-api-client'
+import { CreditCardIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -53,8 +55,15 @@ const Wallet = () => {
     organizationId: selectedOrganization?.id ?? '',
     enabled: Boolean(selectedOrganization),
   })
+  const paymentMethodsQuery = usePaymentMethodsQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: Boolean(selectedOrganization),
+  })
 
   const wallet = walletQuery.data
+  const paymentMethods = paymentMethodsQuery.data
+  const paymentMethodsLoading = paymentMethodsQuery.isLoading
+  const hasNoPaymentMethod = (paymentMethods?.length ?? 0) === 0
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
   const redeemCouponMutation = useRedeemCouponMutation()
   const topUpWalletMutation = useTopUpWalletMutation()
@@ -108,37 +117,33 @@ const Wallet = () => {
     }
   }, [selectedOrganization, couponCode, redeemCouponMutation])
 
-  const saveAutomaticTopUpDisabled = useMemo(() => {
-    if (setAutomaticTopUpMutation.isPending) {
-      return true
-    }
-
+  const automaticTopUpHasChanges = useMemo(() => {
     if (wallet?.automaticTopUp?.disabled && (automaticTopUp?.thresholdAmount || 0) > 0) {
-      return false
+      return true
     }
 
     if (automaticTopUp?.thresholdAmount !== wallet?.automaticTopUp?.thresholdAmount) {
       if (!wallet?.automaticTopUp) {
         if ((automaticTopUp?.thresholdAmount || 0) !== 0) {
-          return false
+          return true
         }
       } else {
-        return false
+        return true
       }
     }
 
     if (automaticTopUp?.targetAmount !== wallet?.automaticTopUp?.targetAmount) {
       if (!wallet?.automaticTopUp) {
         if ((automaticTopUp?.targetAmount || 0) !== 0) {
-          return false
+          return true
         }
       } else {
-        return false
+        return true
       }
     }
 
-    return true
-  }, [setAutomaticTopUpMutation.isPending, wallet, automaticTopUp])
+    return false
+  }, [wallet, automaticTopUp])
 
   const handleTopUpWallet = useCallback(async () => {
     if (!selectedOrganization) {
@@ -202,10 +207,24 @@ const Wallet = () => {
     [selectedOrganization],
   )
 
-  const isBillingLoading = walletQuery.isLoading
   const isPostPaid = wallet?.billingType === BillingType.BillingTypePostPaid
-  const topUpEnabled =
-    wallet?.creditCardConnected && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount)
+  const showCreditCardBonusPrompt = Boolean(
+    hasNoPaymentMethod && user?.profile.email_verified && selectedOrganization?.personal,
+  )
+  const showMissingPaymentMethodTopUpMessage = Boolean(wallet && hasNoPaymentMethod)
+  const automaticTopUpSaveDisabled =
+    !automaticTopUpHasChanges ||
+    setAutomaticTopUpMutation.isPending ||
+    walletQuery.isLoading ||
+    !wallet ||
+    paymentMethodsLoading ||
+    hasNoPaymentMethod
+  const topUpEnabled = Boolean(
+    !paymentMethodsLoading &&
+      !hasNoPaymentMethod &&
+      !topUpWalletMutation.isPending &&
+      (selectedPreset || oneTimeTopUpAmount),
+  )
 
   return (
     <PageLayout>
@@ -213,7 +232,7 @@ const Wallet = () => {
 
       <PageContent>
         <PageIntro title="Wallet" />
-        {isBillingLoading && (
+        {walletQuery.isLoading && (
           <div className="flex flex-col gap-6">
             <Card className="flex flex-col gap-4">
               <CardContent className="flex flex-col gap-4">
@@ -238,6 +257,9 @@ const Wallet = () => {
             </Card>
           </div>
         )}
+        {walletQuery.isError && !wallet && (
+          <WalletErrorState onRetry={() => walletQuery.refetch()} retrying={walletQuery.isFetching} />
+        )}
         {wallet && (
           <>
             {user && (
@@ -261,7 +283,7 @@ const Wallet = () => {
                     </AlertDescription>
                   </Alert>
                 )}
-                {!wallet.creditCardConnected && user.profile.email_verified && selectedOrganization?.personal && (
+                {showCreditCardBonusPrompt && (
                   <Alert variant="neutral">
                     <SparklesIcon />
                     <AlertDescription>Connect a credit card to receive an additional $100 of credits.</AlertDescription>
@@ -356,7 +378,7 @@ const Wallet = () => {
               </>
             )}
 
-            {wallet.creditCardConnected && !isPostPaid && (
+            {!isPostPaid && (
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle>Automatic top-up</CardTitle>
@@ -448,10 +470,7 @@ const Wallet = () => {
                     <span className="text-sm ">Setting both values to 0 will disable automatic top-ups.</span>
                   </div>
                   <div className="flex gap-2 items-center ml-auto">
-                    <Button
-                      onClick={handleSetAutomaticTopUp}
-                      disabled={saveAutomaticTopUpDisabled || walletQuery.isLoading || !wallet}
-                    >
+                    <Button onClick={handleSetAutomaticTopUp} disabled={automaticTopUpSaveDisabled}>
                       {setAutomaticTopUpMutation.isPending && <Spinner />} Save
                     </Button>
                   </div>
@@ -470,16 +489,16 @@ const Wallet = () => {
                 <div className="grid grid-cols-1 gap-10 items-center lg:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <Label className="text-sm font-medium">Select amount</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 xxs:grid-cols-4 overflow-hidden rounded-md border border-input">
                       {[25, 500, 1000, 2000].map((amount) => (
                         <Button
                           key={amount}
                           type="button"
-                          variant={selectedPreset === amount ? 'default' : 'outline'}
+                          variant={selectedPreset === amount ? 'default' : 'ghost'}
                           size="default"
-                          className="flex h-9"
+                          className="flex h-9 min-w-0 rounded-none border-t border-border px-2 text-[13px] first:border-t-0 xxs:border-l xxs:border-t-0 xxs:first:border-l-0"
                           onClick={() => {
-                            setSelectedPreset(amount)
+                            setSelectedPreset((currentPreset) => (currentPreset === amount ? null : amount))
                             setOneTimeTopUpAmount(undefined)
                           }}
                         >
@@ -526,9 +545,18 @@ const Wallet = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between gap-2">
-                <div className="text-sm text-muted-foreground">
-                  You will be redirected to Stripe to complete the payment.
-                </div>
+                {paymentMethodsLoading ? (
+                  <Skeleton className="h-4 w-64 max-w-full" />
+                ) : showMissingPaymentMethodTopUpMessage ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CreditCardIcon className="w-4 h-4 shrink-0" />
+                    <span>Add a payment method to top up.</span>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    You will be redirected to Stripe to complete the payment.
+                  </div>
+                )}
                 <Button onClick={handleTopUpWallet} disabled={!topUpEnabled} size="sm">
                   {topUpWalletMutation.isPending && <Spinner />}
                   Top up
@@ -573,6 +601,26 @@ const Wallet = () => {
         )}
       </PageContent>
     </PageLayout>
+  )
+}
+
+function WalletErrorState({ onRetry, retrying }: { onRetry: () => void; retrying: boolean }) {
+  return (
+    <Empty className="flex-none rounded-md border py-12">
+      <EmptyHeader>
+        <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+          <TriangleAlertIcon />
+        </EmptyMedia>
+        <EmptyTitle className="text-destructive">Failed to load wallet</EmptyTitle>
+        <EmptyDescription>Something went wrong while fetching your wallet. Please try again.</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button variant="secondary" size="sm" onClick={onRetry} disabled={retrying}>
+          {retrying && <Spinner />}
+          Retry
+        </Button>
+      </EmptyContent>
+    </Empty>
   )
 }
 

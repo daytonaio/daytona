@@ -74,7 +74,7 @@ Navigate to `Applications` > `Applications` in the left sidebar and select the a
 In the `Allowed Callback URIs` field, add the following URLs:
 
 ```
-http://localhost:3000
+http://localhost:3000/dashboard
 http://localhost:3000/api/oauth2-redirect.html
 http://localhost:4000/callback
 http://proxy.localhost:4000/callback
@@ -83,7 +83,7 @@ http://proxy.localhost:4000/callback
 For `Allowed Logout URIs`, add:
 
 ```
-http://localhost:3000
+http://localhost:3000/dashboard
 ```
 
 And for `Allowed Web Origins`, add:

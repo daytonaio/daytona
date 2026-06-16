@@ -4,6 +4,9 @@
  */
 
 import { otelSdk } from './tracing'
+import http from 'node:http'
+import https from 'node:https'
+import CacheableLookup from 'cacheable-lookup'
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
@@ -29,6 +32,12 @@ import { Partitioners } from 'kafkajs'
 import { isApiEnabled, isWorkerEnabled } from './common/utils/app-mode'
 import cluster from 'node:cluster'
 import { Logger as PinoLogger, LoggerErrorInterceptor } from 'nestjs-pino'
+
+// cache DNS lookups on the global HTTP(S) agents so outbound requests don't
+// re-resolve hostnames on every call
+const cacheableLookup = new CacheableLookup()
+cacheableLookup.install(http.globalAgent)
+cacheableLookup.install(https.globalAgent)
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH

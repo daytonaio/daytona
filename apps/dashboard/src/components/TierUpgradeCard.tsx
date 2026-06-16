@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationTier, Tier } from '@daytona/billing-api-client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { RoutePath } from '@/enums/RoutePath'
@@ -12,9 +11,10 @@ import { useUpgradeTierMutation } from '@/hooks/mutations/useUpgradeTierMutation
 import { handleApiError } from '@/lib/error-handling'
 import { cn } from '@/lib/utils'
 import { Organization } from '@daytona/api-client/src'
+import { OrganizationTier, Tier } from '@daytona/billing-api-client'
 import { CheckIcon, ExternalLinkIcon, Loader2 } from 'lucide-react'
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { toast } from 'sonner'
 
 interface Props {
@@ -102,7 +102,7 @@ export function TierUpgradeCard({ tiers, organizationTier, requirementsState, or
                   </li>
                 ))}
               </ul>
-              {requirements.length && !canUpgrade && (
+              {requirements.length > 0 && !canUpgrade && (
                 <div className="text-xs text-muted-foreground">Please complete all requirements to upgrade.</div>
               )}
               <Button

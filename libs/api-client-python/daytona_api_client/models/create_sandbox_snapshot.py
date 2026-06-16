@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -31,8 +31,9 @@ class CreateSandboxSnapshot(BaseModel):
     CreateSandboxSnapshot
     """ # noqa: E501
     name: StrictStr = Field(description="Name for the new snapshot")
+    include_memory: Optional[StrictBool] = Field(default=False, description="Include the VM's memory in the snapshot. VM sandboxes only. When true the sandbox must be STARTED; when false (default) VM sandboxes must be STOPPED. Container sandboxes do not support memory snapshots.", serialization_alias="includeMemory")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["name", "includeMemory"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +92,8 @@ class CreateSandboxSnapshot(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "include_memory": obj.get("includeMemory") if obj.get("includeMemory") is not None else False
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

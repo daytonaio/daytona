@@ -42,7 +42,7 @@ export const CODE_TOOLBOX_LANGUAGE_LABEL = 'code-toolbox-language'
  * Represents a volume mount for a Sandbox.
  *
  * @interface
- * @property {string} volumeId - ID of the Volume to mount
+ * @property {string} volumeId - ID or name of the Volume to mount
  * @property {string} mountPath - Path on the Sandbox to mount the Volume
  */
 

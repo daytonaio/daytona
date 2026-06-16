@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { ApiClient } from '@/api/apiClient'
+import LoadingFallback from '@/components/LoadingFallback'
 import { ApiContext } from '@/contexts/ApiContext'
+import { useConfig } from '@/hooks/useConfig'
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
-import LoadingFallback from '@/components/LoadingFallback'
-import { ApiClient } from '@/api/apiClient'
-import { useLocation } from 'react-router-dom'
-import { useConfig } from '@/hooks/useConfig'
+import { useLocation } from 'react-router'
 
 export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading, signinRedirect } = useAuth()

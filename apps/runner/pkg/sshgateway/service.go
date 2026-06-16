@@ -136,14 +136,23 @@ func (s *Service) handleConnection(conn net.Conn, serverConfig *ssh.ServerConfig
 		}
 	}()
 
+	// connClosed signals per-channel watchers when the client connection dies.
+	// A single Wait() goroutine per connection lets every channel select on it
+	// instead of each blocking its own Wait() call.
+	connClosed := make(chan struct{})
+	go func() {
+		serverConn.Wait() // nolint:errcheck
+		close(connClosed)
+	}()
+
 	// Handle channels
 	for newChannel := range chans {
-		go s.handleChannel(newChannel, sandboxId)
+		go s.handleChannel(newChannel, connClosed, sandboxId)
 	}
 }
 
 // handleChannel handles an individual SSH channel
-func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
+func (s *Service) handleChannel(newChannel ssh.NewChannel, connClosed <-chan struct{}, sandboxId string) {
 	s.log.Debug("New channel", "channelType", newChannel.ChannelType(), "sandboxID", sandboxId)
 
 	// Accept the channel from the client
@@ -155,12 +164,13 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
 	defer clientChannel.Close()
 
 	// Connect to the sandbox container via toolbox
-	sandboxChannel, sandboxRequests, err := s.connectToSandbox(sandboxId, newChannel.ChannelType(), newChannel.ExtraData())
+	sandboxChannel, sandboxRequests, sandboxClient, err := s.connectToSandbox(sandboxId, newChannel.ChannelType(), newChannel.ExtraData())
 	if err != nil {
 		s.log.Warn("Could not connect to sandbox", "sandboxID", sandboxId, "error", err)
 		clientChannel.Close()
 		return
 	}
+	defer sandboxClient.Close()
 	defer sandboxChannel.Close()
 
 	// Forward requests from client to sandbox
@@ -211,11 +221,34 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
 		}
 	}()
 
-	// Bidirectional data forwarding
+	// Bidirectional data forwarding.
+	// On client EOF, half-close the sandbox channel (MSG_CHANNEL_EOF via CloseWrite)
+	// so the command in the sandbox can keep writing output and deliver its
+	// exit-status (RFC 4254 half-close, e.g. `cat file | ssh host cmd`).
 	go func() {
 		_, err := io.Copy(sandboxChannel, clientChannel)
 		if err != nil {
 			s.log.Debug("Client to sandbox copy error", "error", err)
+		}
+		sandboxChannel.CloseWrite() // nolint:errcheck
+	}()
+
+	// The SSH library surfaces client transport failures as io.EOF on channel reads,
+	// so the copy above cannot tell a clean stdin EOF from a SIGKILL/network drop, and
+	// long-lived processes (VS Code Remote Server, JetBrains Gateway) silently ignore
+	// MSG_CHANNEL_EOF. Watch the client connection itself instead: when it dies,
+	// hard-close the sandbox channel — MSG_CHANNEL_CLOSE forces a reply, which unblocks
+	// io.Copy(clientChannel, sandboxChannel) below and lets the sandbox shell receive
+	// a hangup signal so orphaned processes exit cleanly. The watcher exits with the
+	// session (sessionDone) so goroutines don't accumulate on long-lived connections
+	// that open many channels.
+	sessionDone := make(chan struct{})
+	defer close(sessionDone)
+	go func() {
+		select {
+		case <-connClosed:
+			sandboxChannel.Close() // nolint:errcheck
+		case <-sessionDone:
 		}
 	}()
 
@@ -228,11 +261,11 @@ func (s *Service) handleChannel(newChannel ssh.NewChannel, sandboxId string) {
 }
 
 // connectToSandbox connects to the sandbox container via the toolbox
-func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []byte) (ssh.Channel, <-chan *ssh.Request, error) {
+func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []byte) (ssh.Channel, <-chan *ssh.Request, *ssh.Client, error) {
 	// Get sandbox details via toolbox API
 	sandboxDetails, err := s.getSandboxDetails(sandboxId)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get sandbox details: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get sandbox details: %w", err)
 	}
 
 	// Create SSH client config to connect to the sandbox
@@ -246,18 +279,18 @@ func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []by
 	// Connect to the sandbox container via toolbox
 	sandboxClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:22220", sandboxDetails.Hostname), clientConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to connect to sandbox: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to connect to sandbox: %w", err)
 	}
 
 	// Open channel to the sandbox
 	sandboxChannel, sandboxRequests, err := sandboxClient.OpenChannel(channelType, extraData)
 	if err != nil {
 		sandboxClient.Close()
-		return nil, nil, fmt.Errorf("failed to open channel to sandbox: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to open channel to sandbox: %w", err)
 	}
 
-	// Return the real sandbox channel and requests
-	return sandboxChannel, sandboxRequests, nil
+	// Return the real sandbox channel, requests, and client (caller must close client)
+	return sandboxChannel, sandboxRequests, sandboxClient, nil
 }
 
 // getSandboxDetails gets sandbox information via docker client

@@ -5,12 +5,13 @@
 
 import { ConflictException, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In } from 'typeorm'
+import { Repository, Not, In, FindOptionsWhere } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
 import { v4 as uuidv4 } from 'uuid'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { isValidUuid } from '../../common/utils/uuid'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
@@ -212,33 +213,71 @@ export class VolumeService {
     return volume
   }
 
-  async validateVolumes(organizationId: string, volumeIdOrNames: string[]): Promise<void> {
+  // Looks up volumes where each reference may be a volume ID or a volume name, and
+  // returns them keyed by the requested reference. Throws when a reference is unknown,
+  // ambiguous, or points at a volume that is not ready.
+  async getVolumesByIdOrName(organizationId: string, volumeIdOrNames: string[]): Promise<Map<string, Volume>> {
     if (!volumeIdOrNames.length) {
-      return
+      return new Map()
     }
 
-    const volumes = await this.volumeRepository.find({
-      where: [
-        { id: In(volumeIdOrNames), organizationId, state: Not(VolumeState.DELETED) },
-        { name: In(volumeIdOrNames), organizationId, state: Not(VolumeState.DELETED) },
-      ],
-    })
+    // The id column is a Postgres uuid — filtering it by a non-UUID string makes the
+    // query itself throw, so only UUID-shaped references go into the id filter. Names
+    // may also be UUID-shaped, so every reference goes into the name filter.
+    // Postgres compares uuids case-insensitively but the in-memory maps below cannot,
+    // so UUID-shaped references are canonicalized to lowercase here and when matching.
+    const uuidRefs = volumeIdOrNames
+      .filter((idOrName) => isValidUuid(idOrName))
+      .map((idOrName) => idOrName.toLowerCase())
+    const where: FindOptionsWhere<Volume>[] = [
+      { name: In(volumeIdOrNames), organizationId, state: Not(VolumeState.DELETED) },
+    ]
+    if (uuidRefs.length > 0) {
+      where.push({ id: In(uuidRefs), organizationId, state: Not(VolumeState.DELETED) })
+    }
 
-    // Check if all requested volumes were found and are in a READY state
-    const foundIds = new Set(volumes.map((v) => v.id))
-    const foundNames = new Set(volumes.map((v) => v.name))
+    const foundVolumes = await this.volumeRepository.find({ where })
 
+    const volumesById = new Map<string, Volume>()
+    const volumesByName = new Map<string, Volume>()
+    for (const foundVolume of foundVolumes) {
+      volumesById.set(foundVolume.id, foundVolume)
+      volumesByName.set(foundVolume.name, foundVolume)
+    }
+
+    const volumes = new Map<string, Volume>()
     for (const idOrName of volumeIdOrNames) {
-      if (!foundIds.has(idOrName) && !foundNames.has(idOrName)) {
+      let matchedById: Volume | undefined
+      if (isValidUuid(idOrName)) {
+        matchedById = volumesById.get(idOrName.toLowerCase())
+      }
+      const matchedByName = volumesByName.get(idOrName)
+      if (matchedById !== undefined && matchedByName !== undefined && matchedById.id !== matchedByName.id) {
+        throw new BadRequestError(
+          `Volume reference '${idOrName}' matches one volume's ID and another volume's name; rename the volume to remove the ambiguity`,
+        )
+      }
+
+      let matchedVolume: Volume | undefined
+      if (matchedById !== undefined) {
+        matchedVolume = matchedById
+      } else {
+        matchedVolume = matchedByName
+      }
+
+      if (matchedVolume === undefined) {
         throw new NotFoundException(`Volume '${idOrName}' not found`)
       }
+      if (matchedVolume.state !== VolumeState.READY) {
+        throw new BadRequestError(
+          `Volume '${matchedVolume.name}' is not in a ready state. Current state: ${matchedVolume.state}`,
+        )
+      }
+
+      volumes.set(idOrName, matchedVolume)
     }
 
-    for (const volume of volumes) {
-      if (volume.state !== VolumeState.READY) {
-        throw new BadRequestError(`Volume '${volume.name}' is not in a ready state. Current state: ${volume.state}`)
-      }
-    }
+    return volumes
   }
 
   async getOrganizationId(params: { id: string } | { name: string; organizationId: string }): Promise<string> {

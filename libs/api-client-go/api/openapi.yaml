@@ -11002,12 +11002,13 @@ components:
     SandboxVolume:
       example:
         mountPath: /data
-        volumeId: volume123
+        volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
         subpath: users/alice
       properties:
         volumeId:
-          description: The ID of the volume
-          example: volume123
+          description: The ID or name of the volume. Resolved to the volume ID on
+            sandbox create.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           type: string
         mountPath:
           description: The mount path for the volume
@@ -11083,10 +11084,10 @@ components:
         networkAllowList: "192.168.1.0/16,10.0.0.0/24"
         volumes:
         - mountPath: /data
-          volumeId: volume123
+          volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           subpath: users/alice
         - mountPath: /data
-          volumeId: volume123
+          volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           subpath: users/alice
         cpu: 2
         recoverable: true
@@ -11318,10 +11319,10 @@ components:
           networkAllowList: "192.168.1.0/16,10.0.0.0/24"
           volumes:
           - mountPath: /data
-            volumeId: volume123
+            volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             subpath: users/alice
           - mountPath: /data
-            volumeId: volume123
+            volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             subpath: users/alice
           cpu: 2
           recoverable: true
@@ -11361,10 +11362,10 @@ components:
           networkAllowList: "192.168.1.0/16,10.0.0.0/24"
           volumes:
           - mountPath: /data
-            volumeId: volume123
+            volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             subpath: users/alice
           - mountPath: /data
-            volumeId: volume123
+            volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             subpath: users/alice
           cpu: 2
           recoverable: true
@@ -11428,10 +11429,10 @@ components:
         networkAllowList: "192.168.1.0/16,10.0.0.0/24"
         volumes:
         - mountPath: /data
-          volumeId: volume123
+          volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           subpath: users/alice
         - mountPath: /data
-          volumeId: volume123
+          volumeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           subpath: users/alice
         cpu: 2
         env:
@@ -11636,12 +11637,19 @@ components:
       type: object
     CreateSandboxSnapshot:
       example:
+        includeMemory: false
         name: my-dev-env-v1
       properties:
         name:
           description: Name for the new snapshot
           example: my-dev-env-v1
           type: string
+        includeMemory:
+          default: false
+          description: Include the VM's memory in the snapshot. VM sandboxes only.
+            When true the sandbox must be STARTED; when false (default) VM sandboxes
+            must be STOPPED. Container sandboxes do not support memory snapshots.
+          type: boolean
       required:
       - name
       type: object

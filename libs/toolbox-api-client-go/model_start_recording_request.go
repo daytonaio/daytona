@@ -20,7 +20,10 @@ var _ MappedNullable = &StartRecordingRequest{}
 // StartRecordingRequest struct for StartRecordingRequest
 type StartRecordingRequest struct {
 	Label *string `json:"label,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _StartRecordingRequest StartRecordingRequest
 
 // NewStartRecordingRequest instantiates a new StartRecordingRequest object
 // This constructor will assign default values to properties that have it defined,
@@ -84,7 +87,33 @@ func (o StartRecordingRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Label) {
 		toSerialize["label"] = o.Label
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *StartRecordingRequest) UnmarshalJSON(data []byte) (err error) {
+	varStartRecordingRequest := _StartRecordingRequest{}
+
+	err = json.Unmarshal(data, &varStartRecordingRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = StartRecordingRequest(varStartRecordingRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "label")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableStartRecordingRequest struct {

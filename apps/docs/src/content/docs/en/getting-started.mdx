@@ -27,11 +27,31 @@ Daytona provides command-line access to core features for interacting with Dayto
 brew install daytonaio/cli/daytona
 ```
 
+Trust the tap once so routine `brew upgrade` keeps the Daytona CLI up to date. Recent Homebrew versions require third-party taps to be explicitly trusted; without it, a bare `brew upgrade` skips the Daytona tap and the CLI goes stale:
+
+```bash
+brew trust daytonaio/cli
+```
+
 To upgrade the Daytona CLI to the latest version:
 
 ```bash
 brew upgrade daytonaio/cli/daytona
 ```
+
+Alternatively, install directly without Homebrew:
+
+For Apple Silicon (`arm64`):
+
+  ```bash
+  sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-darwin-arm64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  ```
+
+For Intel (`amd64`):
+
+  ```bash
+  sudo curl -fL https://github.com/daytonaio/daytona/releases/latest/download/daytona-darwin-amd64 -o /usr/local/bin/daytona && sudo chmod +x /usr/local/bin/daytona
+  ```
 
 </TabItem>
 <TabItem label="Linux">

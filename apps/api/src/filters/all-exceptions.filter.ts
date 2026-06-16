@@ -34,10 +34,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let error: string
     let message: string
 
-    // If the exception is a NotFoundException and the request path is not an API request, serve the dashboard index.html file
+    // If the exception is a NotFoundException and the request path is not an API request,
+    // redirect root requests to the dashboard and serve the dashboard index.html file for everything else
     if (exception instanceof NotFoundException && !request.path.startsWith('/api/')) {
       const response = ctx.getResponse()
-      response.sendFile(join(__dirname, '..', 'dashboard', 'index.html'))
+      if (request.path === '/') {
+        response.redirect(`/dashboard${request.url}`)
+      } else {
+        response.sendFile(join(__dirname, '..', 'dashboard', 'index.html'))
+      }
       return
     }
 

@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &LspPosition{}
 type LspPosition struct {
 	Character int32 `json:"character"`
 	Line int32 `json:"line"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _LspPosition LspPosition
@@ -106,6 +106,11 @@ func (o LspPosition) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["character"] = o.Character
 	toSerialize["line"] = o.Line
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -134,15 +139,21 @@ func (o *LspPosition) UnmarshalJSON(data []byte) (err error) {
 
 	varLspPosition := _LspPosition{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varLspPosition)
+	err = json.Unmarshal(data, &varLspPosition)
 
 	if err != nil {
 		return err
 	}
 
 	*o = LspPosition(varLspPosition)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "character")
+		delete(additionalProperties, "line")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

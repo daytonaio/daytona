@@ -691,6 +691,18 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/copilotkit/copilotkit-generative-ui-coding-agent-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.copilotkit'),
+          disablePagination: true,
+          attrs: {
+            icon: 'copilotkit.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/reinforcement-learning/trl-grpo-training',
             locale
           ),
@@ -722,6 +734,18 @@ export const getSidebarConfig = (
           disablePagination: true,
           attrs: {
             icon: 'tools.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/model-serving/vllm-gpu-model-serving',
+            locale
+          ),
+          label: t('sidebarconfig.vllm'),
+          disablePagination: true,
+          attrs: {
+            icon: 'vllm.svg',
           },
         },
         {

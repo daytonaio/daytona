@@ -55,11 +55,19 @@ export class ObjectStorageService {
               Action: ['s3:PutObject', 's3:GetObject'],
               Resource: [`arn:aws:s3:::${bucket}/${organizationId}/*`],
             },
-            // ListBucket only shows object keys and some metadata, not the actual objects
+            // ListBucket only shows object keys and some metadata, not the actual objects.
+            // Scope it to the organization's own prefix so a caller cannot enumerate object
+            // keys across other tenants. The CLI lists with prefix=<organizationId> (no trailing
+            // slash), so both the bare org id and the nested prefix must be permitted.
             {
               Effect: 'Allow',
               Action: ['s3:ListBucket'],
               Resource: [`arn:aws:s3:::${bucket}`],
+              Condition: {
+                StringLike: {
+                  's3:prefix': [`${organizationId}`, `${organizationId}/*`],
+                },
+              },
             },
           ],
         },

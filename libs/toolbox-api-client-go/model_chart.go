@@ -31,7 +31,10 @@ type Chart struct {
 	YScale *string `json:"y_scale,omitempty"`
 	YTickLabels []string `json:"y_tick_labels,omitempty"`
 	YTicks []float32 `json:"y_ticks,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _Chart Chart
 
 // NewChart instantiates a new Chart object
 // This constructor will assign default values to properties that have it defined,
@@ -480,7 +483,44 @@ func (o Chart) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.YTicks) {
 		toSerialize["y_ticks"] = o.YTicks
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *Chart) UnmarshalJSON(data []byte) (err error) {
+	varChart := _Chart{}
+
+	err = json.Unmarshal(data, &varChart)
+
+	if err != nil {
+		return err
+	}
+
+	*o = Chart(varChart)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "elements")
+		delete(additionalProperties, "png")
+		delete(additionalProperties, "title")
+		delete(additionalProperties, "type")
+		delete(additionalProperties, "x_label")
+		delete(additionalProperties, "x_scale")
+		delete(additionalProperties, "x_tick_labels")
+		delete(additionalProperties, "x_ticks")
+		delete(additionalProperties, "y_label")
+		delete(additionalProperties, "y_scale")
+		delete(additionalProperties, "y_tick_labels")
+		delete(additionalProperties, "y_ticks")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableChart struct {

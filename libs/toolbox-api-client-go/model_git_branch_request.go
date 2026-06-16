@@ -12,7 +12,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"bytes"
 	"fmt"
 )
 
@@ -23,6 +22,7 @@ var _ MappedNullable = &GitBranchRequest{}
 type GitBranchRequest struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitBranchRequest GitBranchRequest
@@ -106,6 +106,11 @@ func (o GitBranchRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
 	toSerialize["path"] = o.Path
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -134,15 +139,21 @@ func (o *GitBranchRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitBranchRequest := _GitBranchRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitBranchRequest)
+	err = json.Unmarshal(data, &varGitBranchRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitBranchRequest(varGitBranchRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "path")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

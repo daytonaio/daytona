@@ -5,11 +5,12 @@
 
 import { useBanner } from '@/components/Banner'
 import { RoutePath } from '@/enums/RoutePath'
+import { usePaymentMethodsQuery } from '@/hooks/queries/usePaymentMethodsQuery'
 import { Organization } from '@daytona/api-client'
 import { addHours, formatDistanceToNow } from 'date-fns'
 import { CreditCardIcon, MailIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 
 const SUSPENSION_BANNER_ID = 'suspension-banner'
 
@@ -28,7 +29,7 @@ function isCreditsDepletionSuspension(reason: string) {
 
 type Suspension = Pick<
   Organization,
-  'suspended' | 'suspensionReason' | 'suspendedAt' | 'suspensionCleanupGracePeriodHours'
+  'id' | 'suspended' | 'suspensionReason' | 'suspendedAt' | 'suspensionCleanupGracePeriodHours'
 >
 
 export function useSuspensionBanner(suspension?: Suspension | null) {
@@ -37,6 +38,12 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
   const location = useLocation()
   const path = location?.pathname
   const previousSuspendedRef = useRef<boolean | undefined>(undefined)
+  const paymentMethodsQuery = usePaymentMethodsQuery({
+    organizationId: suspension?.id ?? '',
+    enabled: suspension?.suspensionReason === PAYMENT_METHOD_REQUIRED_REASON,
+  })
+  const paymentMethods = paymentMethodsQuery.data
+  const hasPaymentMethod = (paymentMethods?.length ?? 0) > 0
 
   useEffect(() => {
     const wasSuspended = previousSuspendedRef.current
@@ -58,6 +65,30 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
 
     if (isSetupRequiredSuspension(reason)) {
       if (reason === PAYMENT_METHOD_REQUIRED_REASON) {
+        if (paymentMethodsQuery.isLoading) {
+          removeBanner(SUSPENSION_BANNER_ID)
+          return
+        }
+
+        if (hasPaymentMethod) {
+          addBanner({
+            id: SUSPENSION_BANNER_ID,
+            variant: 'error',
+            title: 'No credits',
+            description: 'Top up your wallet to continue creating sandboxes.',
+            icon: <CreditCardIcon className="h-4 w-4 flex-shrink-0 text-current" />,
+            action:
+              path !== RoutePath.BILLING_WALLET
+                ? {
+                    label: 'Go to Billing',
+                    onClick: () => navigate(RoutePath.BILLING_WALLET),
+                  }
+                : undefined,
+            isDismissible: false,
+          })
+          return
+        }
+
         addBanner({
           id: SUSPENSION_BANNER_ID,
           variant: 'info',
@@ -136,5 +167,5 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
       description: reason ? `${reason}. ${cleanupText}` : cleanupText,
       isDismissible: false,
     })
-  }, [suspension, addBanner, removeBanner, navigate, path])
+  }, [suspension, addBanner, removeBanner, navigate, path, hasPaymentMethod, paymentMethodsQuery.isLoading])
 }

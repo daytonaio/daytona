@@ -4,7 +4,7 @@
  */
 
 import type { ComponentType } from 'react'
-import type { LazyRouteFunction, RouteObject } from 'react-router-dom'
+import type { LazyRouteFunction, RouteObject } from 'react-router'
 
 type LazyRoute = LazyRouteFunction<RouteObject>
 

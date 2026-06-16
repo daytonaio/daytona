@@ -36,7 +36,7 @@ ENV NX_DAEMON=false
 
 RUN yarn nx build api --configuration=production --nxBail=true
 
-RUN VITE_API_URL=%DAYTONA_BASE_API_URL%/api yarn nx build dashboard --configuration=production --nxBail=true --output-style=stream
+RUN VITE_BASE_PATH=/dashboard/ VITE_API_URL=%DAYTONA_BASE_API_URL%/api yarn nx build dashboard --configuration=production --nxBail=true --output-style=stream
 
 # ── runtime ──────────────────────────────────────────────────────────────
 FROM node:24-slim AS daytona

@@ -23,6 +23,7 @@ import { createMockExecutionContext } from '../../test/helpers/execution-context
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
 import { RequiredOrganizationResourcePermissions } from '../decorators/required-organization-resource-permissions.decorator'
+import { RequiredAnyOrganizationResourcePermissions } from '../decorators/required-any-organization-resource-permissions.decorator'
 
 describe('[AUTH] OrganizationAuthContextGuard', () => {
   let guard: OrganizationAuthContextGuard
@@ -168,6 +169,91 @@ describe('[AUTH] OrganizationAuthContextGuard', () => {
     const user = createMockUserAuthContext({ organizationId: MOCK_ORGANIZATION_ID })
     const { context } = createMockExecutionContext({ user })
     await expect(guard.canActivate(context)).rejects.toThrow(AccessDeniedException)
+  })
+
+  it('should allow member when @RequiredAnyOrganizationResourcePermissions matches a held permission', async () => {
+    mockReflector.getAllAndOverride.mockImplementation((key: any) => {
+      if (key === RequiredAnyOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SNAPSHOTS, OrganizationResourcePermission.WRITE_SANDBOXES]
+      }
+      return undefined
+    })
+    const user = createMockUserAuthContext({ organizationId: MOCK_ORGANIZATION_ID })
+    const { context } = createMockExecutionContext({ user })
+    const result = await guard.canActivate(context)
+    expect(result).toBe(true)
+  })
+
+  it('should reject member when @RequiredAnyOrganizationResourcePermissions matches no held permission', async () => {
+    mockReflector.getAllAndOverride.mockImplementation((key: any) => {
+      if (key === RequiredAnyOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SNAPSHOTS, OrganizationResourcePermission.DELETE_SANDBOXES]
+      }
+      return undefined
+    })
+    const user = createMockUserAuthContext({ organizationId: MOCK_ORGANIZATION_ID })
+    const { context } = createMockExecutionContext({ user })
+    await expect(guard.canActivate(context)).rejects.toThrow(AccessDeniedException)
+  })
+
+  it('should allow member when both all-of and any-of permission requirements are satisfied', async () => {
+    mockReflector.getAllAndOverride.mockImplementation((key: any) => {
+      if (key === RequiredOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SANDBOXES]
+      }
+      if (key === RequiredAnyOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SNAPSHOTS, OrganizationResourcePermission.WRITE_SANDBOXES]
+      }
+      return undefined
+    })
+    const user = createMockUserAuthContext({ organizationId: MOCK_ORGANIZATION_ID })
+    const { context } = createMockExecutionContext({ user })
+    const result = await guard.canActivate(context)
+    expect(result).toBe(true)
+  })
+
+  it('should reject member when all-of permissions are satisfied but any-of permissions are not', async () => {
+    mockReflector.getAllAndOverride.mockImplementation((key: any) => {
+      if (key === RequiredOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SANDBOXES]
+      }
+      if (key === RequiredAnyOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SNAPSHOTS]
+      }
+      return undefined
+    })
+    const user = createMockUserAuthContext({ organizationId: MOCK_ORGANIZATION_ID })
+    const { context } = createMockExecutionContext({ user })
+    await expect(guard.canActivate(context)).rejects.toThrow(AccessDeniedException)
+  })
+
+  it('should reject member when any-of permissions are satisfied but all-of permissions are not', async () => {
+    mockReflector.getAllAndOverride.mockImplementation((key: any) => {
+      if (key === RequiredOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.DELETE_SANDBOXES]
+      }
+      if (key === RequiredAnyOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SANDBOXES]
+      }
+      return undefined
+    })
+    const user = createMockUserAuthContext({ organizationId: MOCK_ORGANIZATION_ID })
+    const { context } = createMockExecutionContext({ user })
+    await expect(guard.canActivate(context)).rejects.toThrow(AccessDeniedException)
+  })
+
+  it('should allow owner without API key when @RequiredAnyOrganizationResourcePermissions is set', async () => {
+    mockOrgUserService.findOne.mockResolvedValue(testOwner)
+    mockReflector.getAllAndOverride.mockImplementation((key: any) => {
+      if (key === RequiredAnyOrganizationResourcePermissions) {
+        return [OrganizationResourcePermission.WRITE_SNAPSHOTS, OrganizationResourcePermission.WRITE_SANDBOXES]
+      }
+      return undefined
+    })
+    const user = createMockUserAuthContext({ organizationId: MOCK_ORGANIZATION_ID })
+    const { context } = createMockExecutionContext({ user })
+    const result = await guard.canActivate(context)
+    expect(result).toBe(true)
   })
 
   it('should enrich request.user with organization data', async () => {

@@ -14,8 +14,9 @@ import {
   IsArray,
   Max,
   Min,
+  ValidateNested,
 } from 'class-validator'
-import { Transform } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
@@ -200,6 +201,8 @@ export class CreateSandboxDto {
   })
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SandboxVolume)
   volumes?: SandboxVolume[]
 
   @ApiPropertyOptional({
