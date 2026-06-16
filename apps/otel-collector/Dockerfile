@@ -1,15 +1,16 @@
+FROM golang:1.25.11-alpine AS go-toolchain
+
 FROM node:22-alpine AS build
 
 ENV CI=true
-ENV npm_config_nodedir=/usr/local
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
+COPY --from=go-toolchain /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-RUN apk add --no-cache git python3 py3-setuptools make g++
+RUN apk add --no-cache git
 
 WORKDIR /daytona
 
@@ -44,7 +45,8 @@ RUN yarn nx build otel-collector --configuration=production --nxBail=true
 
 FROM alpine:3.23 AS otel-collector
 
-RUN apk add --no-cache curl
+RUN apk update && apk upgrade --no-cache openssl pcre2 \
+  && apk add --no-cache curl
 
 WORKDIR /usr/local/bin
 
