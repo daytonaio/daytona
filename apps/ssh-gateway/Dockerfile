@@ -1,10 +1,12 @@
+FROM golang:1.25.11-alpine AS go-toolchain
+
 FROM node:22-alpine AS build
 
 ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
+COPY --from=go-toolchain /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -37,6 +39,8 @@ COPY libs/api-client-go/ libs/api-client-go/
 RUN yarn nx build ssh-gateway --configuration=production --nxBail=true
 
 FROM alpine:3.23 AS ssh-gateway
+
+RUN apk update && apk upgrade --no-cache openssl pcre2
 
 WORKDIR /usr/local/bin
 
