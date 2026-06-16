@@ -14,9 +14,10 @@ import { SandboxUsagePeriodArchive } from './entities/sandbox-usage-period-archi
 import { SandboxRepository } from '../sandbox/repositories/sandbox.repository'
 import { SandboxLookupCacheInvalidationService } from '../sandbox/services/sandbox-lookup-cache-invalidation.service'
 import { Sandbox } from '../sandbox/entities/sandbox.entity'
+import { Region } from '../region/entities/region.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SandboxUsagePeriod, Sandbox, SandboxUsagePeriodArchive])],
+  imports: [TypeOrmModule.forFeature([SandboxUsagePeriod, Sandbox, SandboxUsagePeriodArchive, Region])],
   providers: [
     UsageService,
     RedisLockProvider,

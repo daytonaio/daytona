@@ -7,6 +7,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 import { SandboxUsagePeriod } from './sandbox-usage-period.entity'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 import { GpuType } from '../../sandbox/enums/gpu-type.enum'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 // Duplicate of SandboxUsagePeriod
 // Used to archive usage periods and keep the original table lightweight
@@ -57,6 +58,9 @@ export class SandboxUsagePeriodArchive {
   })
   sandboxClass: SandboxClass = SandboxClass.CONTAINER
 
+  @Column({ type: 'character varying', default: RegionType.SHARED })
+  regionType: string
+
   public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
     const usagePeriodEntity = new SandboxUsagePeriodArchive()
     usagePeriodEntity.sandboxId = usagePeriod.sandboxId
@@ -70,6 +74,7 @@ export class SandboxUsagePeriodArchive {
     usagePeriodEntity.disk = usagePeriod.disk
     usagePeriodEntity.region = usagePeriod.region
     usagePeriodEntity.sandboxClass = usagePeriod.sandboxClass
+    usagePeriodEntity.regionType = usagePeriod.regionType
     return usagePeriodEntity
   }
 }
