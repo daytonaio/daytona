@@ -78,8 +78,10 @@ export function SandboxTableHeader({
   onRefresh,
   isRefreshing = false,
 }: SandboxTableHeaderProps) {
+  const sandboxClassColumn = table.getAllLeafColumns().find((column) => column.id === 'sandboxClass')
+  const classColumnAvailable = Boolean(sandboxClassColumn)
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
-  const hasClassFilter = ((table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []).length > 0
+  const hasClassFilter = ((sandboxClassColumn?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
   const hasRegionFilter = ((table.getColumn('region')?.getFilterValue() as string[]) || []).length > 0
   const hasLabelsFilter = ((table.getColumn('labels')?.getFilterValue() as string[]) || []).length > 0
@@ -137,20 +139,22 @@ export function SandboxTableHeader({
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Boxes className="w-4 h-4" />
-                  Class
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="p-0 w-64">
-                    <SandboxClassFilter
-                      value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
-                      onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
-                    />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
+              {classColumnAvailable && (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Boxes className="w-4 h-4" />
+                    Class
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent className="p-0 w-64">
+                      <SandboxClassFilter
+                        value={(sandboxClassColumn?.getFilterValue() as string[]) || []}
+                        onFilterChange={(value) => sandboxClassColumn?.setFilterValue(value)}
+                      />
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              )}
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <Camera className="w-4 h-4" />
@@ -311,10 +315,10 @@ export function SandboxTableHeader({
               onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
             />
           )}
-          {hasClassFilter && (
+          {classColumnAvailable && hasClassFilter && (
             <SandboxClassFilterIndicator
-              value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
-              onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
+              value={(sandboxClassColumn?.getFilterValue() as string[]) || []}
+              onFilterChange={(value) => sandboxClassColumn?.setFilterValue(value)}
             />
           )}
           {hasRegionFilter && (
