@@ -6,6 +6,7 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 import { GpuType } from '../../sandbox/enums/gpu-type.enum'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @Entity('sandbox_usage_periods')
 @Index('idx_sandbox_usage_periods_sandbox_end', ['sandboxId', 'endAt'])
@@ -58,6 +59,9 @@ export class SandboxUsagePeriod {
   })
   sandboxClass: SandboxClass = SandboxClass.CONTAINER
 
+  @Column({ type: 'character varying', default: RegionType.SHARED })
+  regionType: string
+
   public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
     const usagePeriodEntity = new SandboxUsagePeriod()
     usagePeriodEntity.sandboxId = usagePeriod.sandboxId
@@ -71,6 +75,7 @@ export class SandboxUsagePeriod {
     usagePeriodEntity.disk = usagePeriod.disk
     usagePeriodEntity.region = usagePeriod.region
     usagePeriodEntity.sandboxClass = usagePeriod.sandboxClass
+    usagePeriodEntity.regionType = usagePeriod.regionType
     return usagePeriodEntity
   }
 }

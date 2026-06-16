@@ -23,6 +23,8 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-desired-state-updated.event'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
+import { Region } from '../../region/entities/region.entity'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @Injectable()
 export class UsageService implements TrackableJobExecutions, OnApplicationShutdown {
@@ -34,6 +36,8 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     private sandboxUsagePeriodRepository: Repository<SandboxUsagePeriod>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly sandboxRepository: SandboxRepository,
+    @InjectRepository(Region)
+    private readonly regionRepository: Repository<Region>,
   ) {}
 
   async onApplicationShutdown() {
@@ -130,6 +134,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     usagePeriod.organizationId = event.sandbox.organizationId
     usagePeriod.region = event.sandbox.region
     usagePeriod.sandboxClass = event.sandbox.sandboxClass
+    usagePeriod.regionType = await this.getRegionType(event.sandbox.region)
 
     await this.sandboxUsagePeriodRepository.save(usagePeriod)
   }
@@ -267,5 +272,20 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
 
   private async releaseLock(sandboxId: string) {
     await this.redisLockProvider.unlock(`usage-period-${sandboxId}`)
+  }
+
+  private async getRegionType(regionId: string): Promise<string> {
+    const region = await this.regionRepository.findOne({
+      select: ['regionType'],
+      where: {
+        id: regionId,
+      },
+      cache: {
+        id: `region-type-${regionId}`,
+        milliseconds: 1000 * 60 * 60, // 1 hour
+      },
+    })
+
+    return region?.regionType ?? RegionType.SHARED
   }
 }
