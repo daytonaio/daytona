@@ -119,7 +119,7 @@ export function WebhooksMessagesTable() {
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-4">
-          <div className="min-w-0 flex-1 sm:max-w-sm">
+          <div className="w-full max-w-full sm:w-96 sm:shrink-0">
             <SearchInput
               debounced
               value={globalFilter ?? ''}
@@ -128,7 +128,7 @@ export function WebhooksMessagesTable() {
               containerClassName="w-full"
             />
           </div>
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex max-w-full shrink-0 flex-wrap items-center gap-4">
             {table.getColumn('eventType') && (
               <DataTableFacetedFilter
                 column={table.getColumn('eventType')}
