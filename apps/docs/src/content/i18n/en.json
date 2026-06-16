@@ -148,6 +148,7 @@
   "sidebarconfig.copilotkit": "CopilotKit",
   "sidebarconfig.opencode": "OpenCode",
   "sidebarconfig.claude": "Claude",
+  "sidebarconfig.gemini": "Gemini",
   "sidebarconfig.openclaw": "OpenClaw",
   "sidebarconfig.vercelAiSdk": "Vercel AI SDK",
   "sidebarconfig.codex": "Codex",
