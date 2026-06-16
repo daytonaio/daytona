@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"sync"
 	"time"
 
@@ -45,6 +46,7 @@ type DockerClientConfig struct {
 	InitializeDaemonTelemetry    bool
 	InterSandboxNetworkEnabled   bool
 	GpuEnabled                   bool
+	MountKvmDevice               bool
 }
 
 func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerClient, error) {
@@ -126,6 +128,13 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		}
 	}
 
+	if config.MountKvmDevice {
+		if _, err := os.Stat("/dev/kvm"); err != nil {
+			return nil, fmt.Errorf("MOUNT_KVM_DEVICE=true but /dev/kvm is not present on the host: %w", err)
+		}
+		logger.Info("KVM device mounting enabled; /dev/kvm will be exposed to every sandbox")
+	}
+
 	return &DockerClient{
 		apiClient:                    config.ApiClient,
 		backupInfoCache:              config.BackupInfoCache,
@@ -158,6 +167,7 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		gpuType:                      gpuType,
 		gpuAllocator:                 newGpuAllocator(gpuCount),
 		filesystem:                   filesystem,
+		mountKvmDevice:               config.MountKvmDevice,
 	}, nil
 }
 
@@ -215,4 +225,5 @@ type DockerClient struct {
 	gpuCount                     int
 	gpuType                      string
 	gpuAllocator                 *gpuAllocator
+	mountKvmDevice               bool
 }

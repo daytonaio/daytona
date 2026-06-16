@@ -165,6 +165,7 @@ func run() int {
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
 		InterSandboxNetworkEnabled:   cfg.InterSandboxNetworkEnabled,
 		GpuEnabled:                   cfg.GpuEnabled,
+		MountKvmDevice:               cfg.MountKvmDevice,
 	})
 	if err != nil {
 		logger.Error("Error creating Docker client wrapper", "error", err)

@@ -168,6 +168,19 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 		Binds:      binds,
 	}
 
+	// Selected runners dedicated to a single customer can opt into exposing
+	// the host's /dev/kvm device to every sandbox (enabled via the
+	// MOUNT_KVM_DEVICE env var). This is gated at startup by a check that the
+	// device exists on the host. The customer is aware of the security
+	// implications of sharing the KVM device with sandbox containers.
+	if d.mountKvmDevice {
+		hostConfig.Devices = append(hostConfig.Devices, container.DeviceMapping{
+			PathOnHost:        "/dev/kvm",
+			PathInContainer:   "/dev/kvm",
+			CgroupPermissions: "rwm",
+		})
+	}
+
 	if sandboxDto.OtelEndpoint != nil && strings.Contains(*sandboxDto.OtelEndpoint, "host.docker.internal") {
 		hostConfig.ExtraHosts = []string{
 			"host.docker.internal:host-gateway",
