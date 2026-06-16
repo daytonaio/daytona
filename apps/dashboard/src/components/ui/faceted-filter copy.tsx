@@ -69,6 +69,7 @@ const clearSegmentMotion = {
     },
   },
 }
+const reducedMotionAnimation = { initial: false } as const
 
 function getDelayedSegmentTransition(delay: number) {
   return {
@@ -235,9 +236,9 @@ export function FacetedFilter({
   const shouldReduceMotion = useReducedMotion()
   const layout = shouldReduceMotion ? false : true
   const contentLayout = shouldReduceMotion ? false : 'position'
-  const surfaceAnimation = shouldReduceMotion ? { initial: false } : surfaceMotion
-  const segmentAnimation = shouldReduceMotion ? { initial: false } : segmentMotion
-  const clearSegmentAnimation = shouldReduceMotion ? { initial: false } : clearSegmentMotion
+  const surfaceAnimation = shouldReduceMotion ? reducedMotionAnimation : surfaceMotion
+  const segmentAnimation = shouldReduceMotion ? reducedMotionAnimation : segmentMotion
+  const clearSegmentAnimation = shouldReduceMotion ? reducedMotionAnimation : clearSegmentMotion
   const valueSegmentTransition = shouldReduceMotion ? segmentTransition : getDelayedSegmentTransition(0.02)
   const clearSegmentTransition = shouldReduceMotion ? segmentTransition : { layout: { duration: 0.1 } }
   const selectedCount = values.size
@@ -319,7 +320,7 @@ export function FacetedFilter({
                 },
               )}
               aria-label={`Edit ${title} filter`}
-              {...(hasSelectedValues ? segmentAnimation : { initial: false })}
+              {...(hasSelectedValues ? segmentAnimation : reducedMotionAnimation)}
             >
               <AnimatePresence initial={false} mode="popLayout">
                 {hasSelectedValues ? (
