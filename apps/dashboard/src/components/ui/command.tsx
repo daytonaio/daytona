@@ -62,10 +62,13 @@ function CommandInputButton({ className, ...props }: React.ComponentProps<'butto
   return <button className={cn('text-sm text-muted-foreground hover:text-foreground px-2', className)} {...props} />
 }
 
-const CommandInput = React.forwardRef<
-  React.ComponentRef<typeof CommandPrimitive.Input>,
-  React.ComponentProps<typeof CommandPrimitive.Input> & { icon?: React.ReactNode }
->(({ className, children, icon, ...props }, ref) => {
+function CommandInput({
+  ref,
+  className,
+  children,
+  icon,
+  ...props
+}: React.ComponentProps<typeof CommandPrimitive.Input> & { icon?: React.ReactNode }) {
   return (
     <div data-slot="command-input-wrapper" className="flex items-center gap-2 border-b px-3">
       {icon !== null ? icon || <SearchIcon className="size-4 shrink-0 opacity-50" /> : null}
@@ -81,8 +84,7 @@ const CommandInput = React.forwardRef<
       {children}
     </div>
   )
-})
-CommandInput.displayName = 'CommandInput'
+}
 
 function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (

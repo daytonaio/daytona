@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { GithubLogoIcon } from '@phosphor-icons/react'
 import { ComponentType } from 'react'
-import { Github, Link2, Mail, LucideProps } from 'lucide-react'
+import { Link2, Mail } from 'lucide-react'
 
 type Props = {
   provider: string
@@ -25,7 +26,7 @@ const getIcon = (provider: string, className?: string) => {
   return <IconComponent className={className} />
 }
 
-const ICON: { [x: string]: ComponentType<LucideProps> } = {
-  github: Github,
+const ICON: { [x: string]: ComponentType<{ className?: string }> } = {
+  github: GithubLogoIcon,
   'google-oauth2': Mail,
 }

@@ -78,7 +78,6 @@ export function SandboxTableHeader({
   onRefresh,
   isRefreshing = false,
 }: SandboxTableHeaderProps) {
-  const classColumnAvailable = Boolean(table.getColumn('sandboxClass'))
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
   const hasClassFilter = ((table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
@@ -138,22 +137,20 @@ export function SandboxTableHeader({
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              {classColumnAvailable && (
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <Boxes className="w-4 h-4" />
-                    Class
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent className="p-0 w-64">
-                      <SandboxClassFilter
-                        value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
-                        onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
-                      />
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
-              )}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Boxes className="w-4 h-4" />
+                  Class
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="p-0 w-64">
+                    <SandboxClassFilter
+                      value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
+                      onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
+                    />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <Camera className="w-4 h-4" />
