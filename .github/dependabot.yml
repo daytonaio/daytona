@@ -59,10 +59,14 @@ updates:
       - dependency-name: "node"
         update-types:
           - "version-update:semver-major"
-      # python: sandbox-slim runs user code; minor jumps need lifecycle validation
+      # python: sandbox-slim runs user code. Auto-bump patch only; gate major AND
+      # minor manually after lifecycle validation. Ignoring minor also stops
+      # Dependabot proposing PEP 440 pre-release tags (e.g. 3.15.0bN), which it
+      # does not recognize as pre-releases.
       - dependency-name: "python"
         update-types:
           - "version-update:semver-major"
+          - "version-update:semver-minor"
     commit-message:
       prefix: "chore(deps)"
 
