@@ -16,12 +16,12 @@ import (
 //
 // LspServerService enables IDE-like features such as code completion, symbol search,
 // and document analysis through LSP. The service manages a language server instance
-// for a specific language and project path. Access through [Sandbox.Lsp].
+// for a specific language and project path. Access through [Sandbox.CreateLspServer].
 //
 // Example:
 //
-//	// Get LSP service for Python
-//	lsp := sandbox.Lsp(types.LspLanguageIDPython, "/home/user/project")
+//	// Create an LSP server for Python
+//	lsp := sandbox.CreateLspServer(types.LspLanguagePython, "/home/user/project")
 //
 //	// Start the language server
 //	if err := lsp.Start(ctx); err != nil {
@@ -46,13 +46,13 @@ type LspServerService struct {
 
 // NewLspServerService creates a new LspServerService.
 //
-// This is typically called internally by the SDK through [Sandbox.Lsp].
-// Users should access LspServerService through [Sandbox.Lsp] rather than
-// creating it directly.
+// This is typically called internally by the SDK through [Sandbox.CreateLspServer].
+// Users should obtain an LspServerService through [Sandbox.CreateLspServer] rather
+// than creating it directly.
 //
 // Parameters:
 //   - toolboxClient: The toolbox API client
-//   - languageID: The language identifier (e.g., [types.LspLanguageIDPython])
+//   - languageID: The language identifier (e.g., [types.LspLanguagePython])
 //   - projectPath: The root path of the project for LSP analysis
 func NewLspServerService(toolboxClient *toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel *otelState) *LspServerService {
 	return &LspServerService{

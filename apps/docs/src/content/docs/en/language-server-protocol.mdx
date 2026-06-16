@@ -80,8 +80,8 @@ if err != nil {
 	log.Fatal(err)
 }
 
-// Get LSP service for Python
-lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
+// Create LSP server for Python
+lsp := sandbox.CreateLspServer(types.LspLanguagePython, "workspace/project")
 ```
 
 </TabItem>
@@ -154,7 +154,7 @@ lsp.start  # Initialize the server
 <TabItem label="Go" icon="seti:go">
 
 ```go
-lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
+lsp := sandbox.CreateLspServer(types.LspLanguagePython, "workspace/project")
 err := lsp.Start(ctx)  // Initialize the server
 if err != nil {
 	log.Fatal(err)
