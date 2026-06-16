@@ -725,7 +725,7 @@ PY`)
 		require.NoError(t, sandbox.FileSystem.CreateFolder(ctx, lspProjectDir))
 		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("class Greeter:\n    def greet(self) -> str:\n        return 'hello'\n\ngreeter = Greeter()\ngreeter.\n"), lspFilePath))
 
-		lspServer = NewLspServerService(sandbox.ToolboxClient, types.LspLanguagePython, lspProjectDir, sandbox.otel)
+		lspServer = sandbox.CreateLspServer(types.LspLanguagePython, lspProjectDir)
 		require.NoError(t, lspServer.Start(ctx))
 	})
 

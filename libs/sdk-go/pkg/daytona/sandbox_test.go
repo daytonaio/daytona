@@ -371,6 +371,27 @@ func newSandboxForToolboxTest(toolboxClient *toolbox.APIClient, id string, state
 	return NewSandbox(nil, toolboxClient, dto, types.CodeLanguagePython)
 }
 
+func TestSandboxCreateLspServer(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	sandbox := newSandboxForToolboxTest(createTestToolboxClient(server), "sb", apiclient.SANDBOXSTATE_STARTED)
+	// Wire a non-nil otel state so we can assert it is propagated to the LSP
+	// service — instrumentation that external callers cannot supply themselves
+	// (otelState is unexported) is the reason this accessor exists.
+	sandbox.otel = &otelState{}
+
+	lsp := sandbox.CreateLspServer(types.LspLanguagePython, "/home/user/project")
+
+	require.NotNil(t, lsp)
+	require.Equal(t, types.LspLanguageID("python"), lsp.languageID)
+	require.Equal(t, "/home/user/project", lsp.projectPath)
+	require.Same(t, sandbox.ToolboxClient, lsp.toolboxClient)
+	require.Same(t, sandbox.otel, lsp.otel)
+}
+
 func TestSandboxRefreshDataSuccess(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		payload := testSandboxPayload("sb-1", "refreshed", apiclient.SANDBOXSTATE_STARTED)

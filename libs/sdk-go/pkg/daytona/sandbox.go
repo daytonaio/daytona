@@ -27,6 +27,9 @@ import (
 //   - CodeInterpreter: Python code execution
 //   - ComputerUse: Desktop automation (mouse, keyboard, screenshots)
 //
+// Language Server Protocol (LSP) servers are created on demand via
+// [Sandbox.CreateLspServer].
+//
 // Example:
 //
 //	// Create and use a sandbox
@@ -445,6 +448,23 @@ func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error) {
 
 		return resp.GetDir(), nil
 	})
+}
+
+// CreateLspServer creates a Language Server Protocol (LSP) server scoped to a
+// language and project path within the sandbox.
+//
+// The returned [LspServerService] must be started with [LspServerService.Start]
+// before use, and stopped with [LspServerService.Stop] when finished.
+//
+// Example:
+//
+//	lsp := sandbox.CreateLspServer(types.LspLanguagePython, "/home/user/project")
+//	if err := lsp.Start(ctx); err != nil {
+//	    return err
+//	}
+//	defer lsp.Stop(ctx)
+func (s *Sandbox) CreateLspServer(languageID types.LspLanguageID, pathToProject string) *LspServerService {
+	return NewLspServerService(s.ToolboxClient, languageID, pathToProject, s.otel)
 }
 
 // Start starts the sandbox with a default timeout of 60 seconds.
