@@ -366,7 +366,10 @@ const router = createBrowserRouter([
           {
             path: getRouteSubPath(RoutePath.BILLING_WALLET),
             element: <BillingOwnerAccessOutlet pageTitle="Wallet" />,
-            children: [{ index: true, lazy: lazyRoutes.Wallet }],
+            children: [
+              { index: true, lazy: lazyRoutes.Wallet },
+              { path: ':page', lazy: lazyRoutes.Wallet },
+            ],
           },
           {
             path: getRouteSubPath(RoutePath.EMAIL_VERIFY),

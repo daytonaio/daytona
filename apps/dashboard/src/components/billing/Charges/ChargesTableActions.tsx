@@ -4,8 +4,8 @@
  */
 
 import { ExternalLinkIcon, MoreHorizontalIcon } from 'lucide-react'
-import { Button } from '../ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { Button } from '../../ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../ui/dropdown-menu'
 import { ChargesTableActionsProps } from './types'
 
 export function ChargesTableActions({ charge }: ChargesTableActionsProps) {
