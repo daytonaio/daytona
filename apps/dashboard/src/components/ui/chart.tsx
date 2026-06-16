@@ -22,6 +22,11 @@ type ChartContextProps = {
   config: ChartConfig
 }
 
+const DEFAULT_CHART_INITIAL_DIMENSION = {
+  width: 0,
+  height: 0,
+} as const
+
 const ChartContext = React.createContext<ChartContextProps | null>(null)
 
 function useChart() {
@@ -39,24 +44,28 @@ const ChartContainer = React.forwardRef<
   React.ComponentProps<'div'> & {
     config: ChartConfig
     children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['children']
+    initialDimension?: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['initialDimension']
   }
->(({ id, className, children, config, ...props }, ref) => {
+>(({ id, className, children, config, initialDimension = DEFAULT_CHART_INITIAL_DIMENSION, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`
 
   return (
     <ChartContext.Provider value={{ config }}>
       <div
+        data-slot="chart"
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden",
           className,
         )}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+        <RechartsPrimitive.ResponsiveContainer initialDimension={initialDimension}>
+          {children}
+        </RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   )
@@ -177,7 +186,7 @@ const ChartTooltipContent = React.forwardRef<
                 key={item.dataKey}
                 className={cn(
                   'flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
-                  indicator === 'dot' && 'items-center',
+                  { 'items-center': indicator === 'dot' },
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
@@ -189,7 +198,7 @@ const ChartTooltipContent = React.forwardRef<
                     ) : (
                       !hideIndicator && (
                         <div
-                          className={cn('shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]', {
+                          className={cn('shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)', {
                             'h-2.5 w-2.5': indicator === 'dot',
                             'w-1': indicator === 'line',
                             'w-0 border-[1.5px] border-dashed bg-transparent': indicator === 'dashed',
@@ -205,10 +214,10 @@ const ChartTooltipContent = React.forwardRef<
                       )
                     )}
                     <div
-                      className={cn(
-                        'flex flex-1 justify-between gap-4 leading-none',
-                        nestLabel ? 'items-end' : 'items-center',
-                      )}
+                      className={cn('flex flex-1 justify-between gap-4 leading-none', {
+                        'items-end': nestLabel,
+                        'items-center': !nestLabel,
+                      })}
                     >
                       <div className="grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
@@ -251,7 +260,14 @@ const ChartLegendContent = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn('flex items-center justify-center gap-4', verticalAlign === 'top' ? 'pb-3' : 'pt-3', className)}
+      className={cn(
+        'flex items-center justify-center gap-4',
+        {
+          'pb-3': verticalAlign === 'top',
+          'pt-3': verticalAlign !== 'top',
+        },
+        className,
+      )}
     >
       {payload.map((item) => {
         const key = `${nameKey || item.dataKey || 'value'}`

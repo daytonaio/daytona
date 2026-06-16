@@ -34,9 +34,9 @@ const transition = {
 } as const
 
 const SEGMENTS = [
-  { key: 'cpu' as const, label: 'CPU', color: 'bg-[hsl(var(--chart-1))]' },
-  { key: 'ram' as const, label: 'RAM', color: 'bg-[hsl(var(--chart-2))]' },
-  { key: 'disk' as const, label: 'Disk', color: 'bg-[hsl(var(--chart-3))]' },
+  { key: 'cpu' as const, label: 'CPU', color: 'bg-(--chart-1)' },
+  { key: 'ram' as const, label: 'RAM', color: 'bg-(--chart-2)' },
+  { key: 'disk' as const, label: 'Disk', color: 'bg-(--chart-3)' },
 ]
 
 export const UsageSummary: React.FC<AggregatedUsageChartProps> = ({ data, isLoading }) => {
@@ -48,7 +48,7 @@ export const UsageSummary: React.FC<AggregatedUsageChartProps> = ({ data, isLoad
       <div className="flex flex-col gap-1">
         <div>Total Cost</div>
         <div className="relative">
-          <div className={cn('text-2xl font-semibold', isLoading && 'invisible')}>
+          <div className={cn('text-2xl font-semibold', { invisible: isLoading })}>
             $
             <NumberFlow
               value={Math.round(totalPrice * 100) / 100}
@@ -61,7 +61,7 @@ export const UsageSummary: React.FC<AggregatedUsageChartProps> = ({ data, isLoad
       <div className="flex flex-col gap-1">
         <div>Sandboxes</div>
         <div className="relative">
-          <div className={cn('text-2xl font-semibold', isLoading && 'invisible')}>
+          <div className={cn('text-2xl font-semibold', { invisible: isLoading })}>
             <NumberFlow value={sandboxCount} />
           </div>
           {isLoading && <Skeleton className="absolute inset-y-1 left-0 w-14" />}
@@ -112,7 +112,7 @@ function StatItem({
     <div className="px-4 py-2 sm:p-4 border-b border-r border-border flex items-center gap-2 sm:block">
       <p className="text-sm text-muted-foreground">{label}</p>
       <div className="relative">
-        <p className={cn('text-xl font-semibold', isLoading && 'invisible')}>
+        <p className={cn('text-xl font-semibold', { invisible: isLoading })}>
           {children}
           {suffix && <span className="text-base font-medium text-muted-foreground">{suffix}</span>}
         </p>

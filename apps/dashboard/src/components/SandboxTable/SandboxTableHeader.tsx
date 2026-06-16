@@ -20,6 +20,7 @@ import {
   Tag,
   Wrench,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { SearchInput } from '../SearchInput'
 import TooltipButton from '../TooltipButton'
 import { Button } from '../ui/button'
@@ -289,7 +290,7 @@ export function SandboxTableHeader({
             className="shrink-0"
             tooltipText="Refresh"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={cn('w-4 h-4', { 'animate-spin': isRefreshing })} />
           </TooltipButton>
           <SandboxTableSettings table={table} />
         </div>

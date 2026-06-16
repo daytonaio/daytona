@@ -235,7 +235,9 @@ export function OrganizationRoleTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className={loadingRoleAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}
+                    className={cn({
+                      'opacity-50 pointer-events-none': loadingRoleAction[row.original.id],
+                    })}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell

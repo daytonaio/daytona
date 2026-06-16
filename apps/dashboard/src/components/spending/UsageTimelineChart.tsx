@@ -35,9 +35,9 @@ type ChartMode = 'resources' | 'cost'
 type ResourceFilter = 'all' | 'cpu' | 'ram' | 'disk'
 
 const RESOURCE_COLORS = {
-  cpu: 'hsl(var(--chart-1))',
-  ram: 'hsl(var(--chart-2))',
-  disk: 'hsl(var(--chart-3))',
+  cpu: 'var(--chart-1)',
+  ram: 'var(--chart-2)',
+  disk: 'var(--chart-3)',
 }
 
 const LIMIT_COLOR = '#ef4444'

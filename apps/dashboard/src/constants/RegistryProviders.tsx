@@ -8,6 +8,7 @@ import awsIcon from '@/assets/aws.svg'
 import dockerIcon from '@/assets/docker.svg'
 import githubIcon from '@/assets/github.svg'
 import googleIcon from '@/assets/google.svg'
+import { cn } from '@/lib/utils'
 import { DAYTONA_DOCS_URL } from './ExternalLinks'
 
 export type RegistryProvider = 'generic' | 'dockerhub' | 'gcp' | 'ghcr' | 'ecr'
@@ -37,7 +38,7 @@ export const REGISTRY_PROVIDER_TAB_CONTENT: Record<RegistryProvider, ReactNode> 
   generic: 'Generic',
   dockerhub: <img src={dockerIcon} alt="" className={ICON_CLASS} />,
   gcp: <img src={googleIcon} alt="" className={ICON_CLASS} />,
-  ghcr: <img src={githubIcon} alt="" className={`${ICON_CLASS} dark:invert`} />,
+  ghcr: <img src={githubIcon} alt="" className={cn(ICON_CLASS, 'dark:invert')} />,
   ecr: <img src={awsIcon} alt="" className={ICON_CLASS} />,
 }
 

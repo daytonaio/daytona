@@ -72,15 +72,15 @@ export function CostBreakdown({ usageData, showTotal, isLoading, isError, onRetr
     const mapped: Record<string, { label: string; color: string }> = {
       cpu: {
         label: 'CPU',
-        color: 'hsl(var(--chart-1))',
+        color: 'var(--chart-1)',
       },
       ramGB: {
         label: 'RAM',
-        color: 'hsl(var(--chart-2))',
+        color: 'var(--chart-2)',
       },
       diskGB: {
         label: 'Disk',
-        color: 'hsl(var(--chart-3))',
+        color: 'var(--chart-3)',
       },
     }
 

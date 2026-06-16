@@ -15,7 +15,7 @@ import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { getMaskedToken } from '@/lib/utils'
+import { cn, getMaskedToken } from '@/lib/utils'
 import { ApiKeyResponse, CreateApiKeyPermissionsEnum, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import { Check, ClipboardIcon, Eye, EyeOff, Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -251,13 +251,17 @@ const Onboarding: React.FC = () => {
               {/* Step 3 */}
               <div className="relative pl-12">
                 <div
-                  className={`absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm ${
-                    !createdApiKey ? 'bg-secondary' : 'bg-muted-foreground'
-                  }`}
+                  className={cn(
+                    'absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm',
+                    {
+                      'bg-secondary': !createdApiKey,
+                      'bg-muted-foreground': createdApiKey,
+                    },
+                  )}
                 >
                   3
                 </div>
-                <div className={!createdApiKey ? 'opacity-40 pointer-events-none' : ''}>
+                <div className={cn({ 'opacity-40 pointer-events-none': !createdApiKey })}>
                   <h2 className="text-xl font-semibold mb-4">Create a Sandbox</h2>
                   <p className="mb-4">The example below will create a Sandbox and run a simple code snippet:</p>
                   <div className="transition-all duration-500">
@@ -277,13 +281,17 @@ const Onboarding: React.FC = () => {
               {/* Step 4 */}
               <div className="relative pl-12">
                 <div
-                  className={`absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm ${
-                    !createdApiKey ? 'bg-secondary' : 'bg-muted-foreground'
-                  }`}
+                  className={cn(
+                    'absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm',
+                    {
+                      'bg-secondary': !createdApiKey,
+                      'bg-muted-foreground': createdApiKey,
+                    },
+                  )}
                 >
                   4
                 </div>
-                <div className={!createdApiKey ? 'opacity-40 pointer-events-none' : ''}>
+                <div className={cn({ 'opacity-40 pointer-events-none': !createdApiKey })}>
                   <h2 className="text-xl font-semibold mb-4">Run the Example</h2>
                   <p className="mb-4">Run the following command in your terminal to run the example:</p>
                   <div className="transition-all duration-500">
@@ -295,13 +303,17 @@ const Onboarding: React.FC = () => {
               {/* Step 5 */}
               <div className="relative pl-12">
                 <div
-                  className={`absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm ${
-                    !createdApiKey ? 'bg-secondary' : 'bg-muted-foreground'
-                  }`}
+                  className={cn(
+                    'absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm',
+                    {
+                      'bg-secondary': !createdApiKey,
+                      'bg-muted-foreground': createdApiKey,
+                    },
+                  )}
                 >
                   5
                 </div>
-                <div className={!createdApiKey ? 'opacity-40 pointer-events-none' : ''}>
+                <div className={cn({ 'opacity-40 pointer-events-none': !createdApiKey })}>
                   <h2 className="text-xl font-semibold mb-4">That's It</h2>
                   <p className="text-muted-foreground">
                     It's as easy as that. For more examples check out the{' '}

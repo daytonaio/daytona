@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { cn } from '@/lib/utils'
 import { SandboxClass, SandboxState } from '@daytona/api-client'
 import { Loader2, MoreHorizontal, Play, Square, Terminal, Wrench } from 'lucide-react'
 import { useMemo } from 'react'
@@ -257,7 +258,7 @@ export function SandboxTableActions({
                   e.stopPropagation()
                   item.onClick?.()
                 }}
-                className={`cursor-pointer ${item.className || ''}`}
+                className={cn('cursor-pointer', item.className)}
                 disabled={item.disabled}
               >
                 {item.label}

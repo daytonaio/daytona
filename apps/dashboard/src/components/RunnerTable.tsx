@@ -180,7 +180,9 @@ export function RunnerTable({
       </div>
 
       <TableContainer
-        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        className={cn({
+          'min-h-[26rem]': isEmpty,
+        })}
         empty={
           isEmpty ? (
             <TableEmptyState
@@ -251,11 +253,10 @@ export function RunnerTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={cn(
-                    'group/table-row',
-                    isLoadingRunner(row.original) ? 'opacity-50 pointer-events-none' : '',
-                    onRowClick && 'cursor-pointer hover:bg-muted/50',
-                  )}
+                  className={cn('group/table-row', {
+                    'opacity-50 pointer-events-none': isLoadingRunner(row.original),
+                    'cursor-pointer hover:bg-muted/50': onRowClick,
+                  })}
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (

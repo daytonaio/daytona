@@ -13,12 +13,12 @@
 
   [data-scrolled-left] [data-sticky-state='left'] {
     box-shadow: 6px 0 8px -2px rgba(0, 0, 0, 0.05);
-    border-right-color: hsl(var(--border));
+    border-right-color: var(--border);
   }
 
   [data-overflow-right] [data-sticky-state='right'] {
     box-shadow: -6px 0 8px -2px rgba(0, 0, 0, 0.05);
-    border-left-color: hsl(var(--border));
+    border-left-color: var(--border);
   }
 
   .dark [data-scrolled-left] [data-sticky-state='left'] {

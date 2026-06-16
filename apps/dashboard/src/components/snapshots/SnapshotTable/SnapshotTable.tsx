@@ -305,7 +305,9 @@ export function SnapshotTable({
         </div>
       </div>
       <TableContainer
-        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        className={cn({
+          'min-h-[26rem]': isEmpty,
+        })}
         empty={
           isEmpty ? (
             <TableEmptyState

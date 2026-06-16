@@ -9,24 +9,6 @@ import { MoreVertical, Check } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../dropdown-menu'
 import { Separator } from '../separator'
 
-function hslToHex(hsl: string): string {
-  const parts = hsl.trim().split(/\s+/)
-  if (parts.length < 3) return '#000000'
-  const h = parseFloat(parts[0])
-  const s = parseFloat(parts[1]) / 100
-  const l = parseFloat(parts[2]) / 100
-
-  const a = s * Math.min(l, 1 - l)
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
-    return Math.round(255 * color)
-      .toString(16)
-      .padStart(2, '0')
-  }
-  return `#${f(0)}${f(8)}${f(4)}`
-}
-
 function ColorSwatch({ variable, label }: { variable: string; label: string }) {
   const [copied, setCopied] = useState<string | null>(null)
 
@@ -36,15 +18,15 @@ function ColorSwatch({ variable, label }: { variable: string; label: string }) {
     setTimeout(() => setCopied(null), 1500)
   }, [])
 
-  const hslValue =
+  const computedTokenValue =
     typeof window !== 'undefined' ? getComputedStyle(document.documentElement).getPropertyValue(variable).trim() : ''
-  const hex = hslToHex(hslValue)
+  const tokenValue = computedTokenValue || `var(${variable})`
 
   return (
     <div>
       <div
         className="relative w-[100px] aspect-square rounded-md border border-border"
-        style={{ backgroundColor: `hsl(var(${variable}))` }}
+        style={{ backgroundColor: `var(${variable})` }}
       >
         <div style={{ position: 'absolute', top: 4, right: 4, zIndex: 10 }}>
           <DropdownMenu>
@@ -66,10 +48,10 @@ function ColorSwatch({ variable, label }: { variable: string; label: string }) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[140px]">
-              <DropdownMenuItem onClick={() => copyToClipboard(hex, 'hex')}>
-                {copied === 'hex' ? <Check className="size-3.5" /> : null}
-                Copy hex
-                <span className="ml-auto text-xs text-muted-foreground">{hex}</span>
+              <DropdownMenuItem onClick={() => copyToClipboard(tokenValue, 'value')}>
+                {copied === 'value' ? <Check className="size-3.5" /> : null}
+                Copy value
+                <span className="ml-auto max-w-24 truncate text-xs text-muted-foreground">{tokenValue}</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => copyToClipboard(`var(${variable})`, 'var')}>
                 {copied === 'var' ? <Check className="size-3.5" /> : null}

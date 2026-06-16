@@ -208,7 +208,9 @@ export function UserOrganizationInvitationTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`h-14 ${loadingInvitationAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={cn('h-14', {
+                    'opacity-50 pointer-events-none': loadingInvitationAction[row.original.id],
+                  })}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell

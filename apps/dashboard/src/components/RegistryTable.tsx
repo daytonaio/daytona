@@ -5,6 +5,7 @@
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn } from '@/lib/utils'
 import { getColumnSizeStyles } from '@/lib/utils/table'
 import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
@@ -144,7 +145,9 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
         />
       </div>
       <TableContainer
-        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        className={cn({
+          'min-h-[26rem]': isEmpty,
+        })}
         empty={
           isEmpty ? (
             <TableEmptyState

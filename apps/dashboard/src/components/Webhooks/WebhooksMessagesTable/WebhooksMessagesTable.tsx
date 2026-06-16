@@ -191,7 +191,12 @@ export function WebhooksMessagesTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none ${sheetOpen && selectedMessageIndex === rowIndex ? 'bg-muted/50' : ''}`}
+                  className={cn(
+                    'cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-hidden',
+                    {
+                      'bg-muted/50': sheetOpen && selectedMessageIndex === rowIndex,
+                    },
+                  )}
                   tabIndex={0}
                   role="button"
                   onClick={() => handleRowClick(rowIndex)}

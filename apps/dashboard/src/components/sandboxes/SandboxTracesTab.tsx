@@ -184,7 +184,7 @@ function DetailRow({ label, children, mono = true }: { label: string; children: 
   return (
     <div>
       <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-semibold">{label}</span>
-      <div className={cn('flex items-center gap-1 mt-0.5', mono && 'font-mono')}>{children}</div>
+      <div className={cn('flex items-center gap-1 mt-0.5', { 'font-mono': mono })}>{children}</div>
     </div>
   )
 }
@@ -284,7 +284,9 @@ function TraceExpandedRow({ sandboxId, trace }: { sandboxId: string; trace: Trac
                   onClick={() => setSelectedSpanId(span.spanId)}
                   className={cn(
                     'w-full text-left flex items-center gap-2 px-3 py-1 hover:bg-muted/50 transition-colors',
-                    isSelected && 'bg-muted',
+                    {
+                      'bg-muted': isSelected,
+                    },
                   )}
                   style={{ paddingLeft: `${12 + span.depth * 14}px` }}
                 >
@@ -339,14 +341,15 @@ function TraceExpandedRow({ sandboxId, trace }: { sandboxId: string; trace: Trac
               {selectedSpan.statusCode && (
                 <DetailRow label="Status">
                   <span
-                    className={cn(
-                      'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-                      selectedSpan.statusCode.toUpperCase().includes('ERROR')
-                        ? 'bg-destructive/10 text-destructive'
-                        : selectedSpan.statusCode.toUpperCase().includes('OK')
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-muted text-muted-foreground',
-                    )}
+                    className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium', {
+                      'bg-destructive/10 text-destructive': selectedSpan.statusCode.toUpperCase().includes('ERROR'),
+                      'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400': selectedSpan.statusCode
+                        .toUpperCase()
+                        .includes('OK'),
+                      'bg-muted text-muted-foreground':
+                        !selectedSpan.statusCode.toUpperCase().includes('ERROR') &&
+                        !selectedSpan.statusCode.toUpperCase().includes('OK'),
+                    })}
                   >
                     {selectedSpan.statusCode}
                   </span>
@@ -487,10 +490,9 @@ export function SandboxTracesTab({ sandboxId }: { sandboxId: string }) {
                     >
                       <TableCell className="w-10 px-2">
                         <ChevronDown
-                          className={cn(
-                            'size-4 text-muted-foreground transition-transform duration-200',
-                            isExpanded && 'rotate-180',
-                          )}
+                          className={cn('size-4 text-muted-foreground transition-transform duration-200', {
+                            'rotate-180': isExpanded,
+                          })}
                         />
                       </TableCell>
                       <TableCell className="font-mono text-xs whitespace-nowrap">
