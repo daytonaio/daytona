@@ -1,7 +1,9 @@
 FROM node:22-alpine AS build
 
 ENV CI=true
+ENV npm_config_nodedir=/usr/local
 
+RUN apk add --no-cache python3 make g++
 RUN npm install -g corepack && corepack enable
 
 WORKDIR /daytona
