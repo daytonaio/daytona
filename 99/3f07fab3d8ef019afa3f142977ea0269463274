@@ -1,0 +1,39 @@
+apps/snapshot-manager/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 33-34
+apps/proxy/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 6,9-10,17,22-24,28,34,36,39,43,48-49,52-53,55-59
+apps/runner/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 12-13,18-20,26,33-37,46-48,61,69,71,89,95,100,102,104-105,118-119,127-128,133-135,141,145-146,150-151,153,157-161,163-167
+libs/common-go/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 52
+libs/sdk-go/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 44-45
+apps/cli/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 22,28,87-88,90-91,106
+apps/daytona-e2e/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 15
+libs/computer-use/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 18-19,26,28-29,38,40-41,48-49,52-56
+apps/cli/mcp/tools/execute_command.go
+  s_eee68c198161d9::t_00757da23176a3 116,121
+apps/daemon/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 12,14-15,18,24-25,30,37-42,52-54,60,62-63,83,93-94,98-99,103-104,107-108,110,113,115,117-119,121-126
+apps/otel-collector/exporter/go.mod
+  s_eee68c198161d9::t_bc3483e671ad51 16,25,48-52,55-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "993f07fab3d8ef019afa3f142977ea0269463274",
+  "prompts": {},
+  "sessions": {
+    "s_eee68c198161d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a99fabc2-5625-46ca-b684-c3d9ea1cb35b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
