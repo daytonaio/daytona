@@ -10,6 +10,7 @@ import { queryKeys } from './queryKeys'
 interface WebhookAppPortalAccess {
   token: string
   url: string
+  serverUrl?: string
 }
 
 export const useWebhookAppPortalAccessQuery = (organizationId?: string) => {

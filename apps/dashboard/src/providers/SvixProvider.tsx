@@ -87,7 +87,11 @@ export function SvixProvider({ children }: SvixProviderProps) {
   }
 
   return (
-    <SvixReactProvider token={appPortalAccess.token} appId={initStatus.svixApplicationId}>
+    <SvixReactProvider
+      token={appPortalAccess.token}
+      appId={initStatus.svixApplicationId}
+      options={appPortalAccess.serverUrl ? { serverUrl: appPortalAccess.serverUrl } : undefined}
+    >
       {children}
     </SvixReactProvider>
   )

@@ -7,12 +7,19 @@ This service provides webhook functionality using [Svix](https://svix.com) as th
 Set the following environment variables:
 
 ```bash
-# Required: Your Svix authentication token
+# Required: Your Svix authentication token.
 SVIX_AUTH_TOKEN=your_svix_auth_token_here
 
-# Optional: Custom Svix server URL (for self-hosted instances)
+# Optional: Custom server-side Svix API URL for the Daytona API.
 SVIX_SERVER_URL=https://your-svix-instance.com
+
+# Optional: Browser-facing Svix API URL for the dashboard. Defaults to SVIX_SERVER_URL.
+SVIX_PUBLIC_SERVER_URL=https://svix.example.com
 ```
+
+For self-hosted Svix, use `SVIX_SERVER_URL` for the URL reachable by the Daytona API service. Set
+`SVIX_PUBLIC_SERVER_URL` when browsers need a different public or proxied URL for `svix-react`; for example, API pods
+may use `http://svix.svc.cluster.local:8071` while browsers use `https://svix.example.com`.
 
 ## API Endpoints
 

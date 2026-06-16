@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,8 +32,9 @@ class WebhookAppPortalAccess(BaseModel):
     """ # noqa: E501
     token: StrictStr = Field(description="The authentication token for the Svix consumer app portal")
     url: StrictStr = Field(description="The URL to the webhook app portal")
+    server_url: Optional[StrictStr] = Field(default=None, description="The browser-facing Svix API URL for self-hosted Svix deployments", serialization_alias="serverUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["token", "url"]
+    __properties: ClassVar[List[str]] = ["token", "url", "serverUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,7 +94,8 @@ class WebhookAppPortalAccess(BaseModel):
 
         _obj = cls.model_validate({
             "token": obj.get("token"),
-            "url": obj.get("url")
+            "url": obj.get("url"),
+            "server_url": obj.get("serverUrl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

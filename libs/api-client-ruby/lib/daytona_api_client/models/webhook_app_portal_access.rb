@@ -21,11 +21,15 @@ module DaytonaApiClient
     # The URL to the webhook app portal
     attr_accessor :url
 
+    # The browser-facing Svix API URL for self-hosted Svix deployments
+    attr_accessor :server_url
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'token' => :'token',
-        :'url' => :'url'
+        :'url' => :'url',
+        :'server_url' => :'serverUrl'
       }
     end
 
@@ -43,7 +47,8 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'token' => :'String',
-        :'url' => :'String'
+        :'url' => :'String',
+        :'server_url' => :'String'
       }
     end
 
@@ -79,6 +84,10 @@ module DaytonaApiClient
         self.url = attributes[:'url']
       else
         self.url = nil
+      end
+
+      if attributes.key?(:'server_url')
+        self.server_url = attributes[:'server_url']
       end
     end
 
@@ -133,7 +142,8 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           token == o.token &&
-          url == o.url
+          url == o.url &&
+          server_url == o.server_url
     end
 
     # @see the `==` method
@@ -145,7 +155,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [token, url].hash
+      [token, url, server_url].hash
     end
 
     # Builds the object from hash

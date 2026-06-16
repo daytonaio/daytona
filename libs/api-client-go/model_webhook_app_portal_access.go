@@ -25,6 +25,8 @@ type WebhookAppPortalAccess struct {
 	Token string `json:"token"`
 	// The URL to the webhook app portal
 	Url string `json:"url"`
+	// The browser-facing Svix API URL for self-hosted Svix deployments
+	ServerUrl *string `json:"serverUrl,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -97,6 +99,38 @@ func (o *WebhookAppPortalAccess) SetUrl(v string) {
 	o.Url = v
 }
 
+// GetServerUrl returns the ServerUrl field value if set, zero value otherwise.
+func (o *WebhookAppPortalAccess) GetServerUrl() string {
+	if o == nil || IsNil(o.ServerUrl) {
+		var ret string
+		return ret
+	}
+	return *o.ServerUrl
+}
+
+// GetServerUrlOk returns a tuple with the ServerUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WebhookAppPortalAccess) GetServerUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.ServerUrl) {
+		return nil, false
+	}
+	return o.ServerUrl, true
+}
+
+// HasServerUrl returns a boolean if a field has been set.
+func (o *WebhookAppPortalAccess) HasServerUrl() bool {
+	if o != nil && !IsNil(o.ServerUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetServerUrl gets a reference to the given string and assigns it to the ServerUrl field.
+func (o *WebhookAppPortalAccess) SetServerUrl(v string) {
+	o.ServerUrl = &v
+}
+
 func (o WebhookAppPortalAccess) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -109,6 +143,9 @@ func (o WebhookAppPortalAccess) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["token"] = o.Token
 	toSerialize["url"] = o.Url
+	if !IsNil(o.ServerUrl) {
+		toSerialize["serverUrl"] = o.ServerUrl
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -155,6 +192,7 @@ func (o *WebhookAppPortalAccess) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "token")
 		delete(additionalProperties, "url")
+		delete(additionalProperties, "serverUrl")
 		o.AdditionalProperties = additionalProperties
 	}
 
