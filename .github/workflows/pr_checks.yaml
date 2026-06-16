@@ -158,6 +158,11 @@ jobs:
           version: v2.6.2
           working-directory: ${{ matrix.working-directory }}
           args: --timeout=5m ./...
+          # `config verify` downloads a schema from golangci-lint.run mid-run and
+          # times out when the runner can't reach it. The Linux lint jobs
+          # already verify this same root .golangci.yaml on every PR, so disabling
+          # it here drops a duplicate network call without losing any validation.
+          verify: false
         env:
           GOOS: windows
           GOARCH: amd64
