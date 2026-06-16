@@ -128,20 +128,30 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <SearchInput
-          debounced
-          value={globalFilter ?? ''}
-          onValueChange={handleChangeFilter}
-          placeholder="Search by Event Type, Message ID, or Status"
-          containerClassName="max-w-sm"
-        />
-        {table.getColumn('eventType') && (
-          <DataTableFacetedFilter column={table.getColumn('eventType')} title="Event Type" options={eventTypeOptions} />
-        )}
-        {table.getColumn('status') && (
-          <DataTableFacetedFilter column={table.getColumn('status')} title="Status" options={statusOptions} />
-        )}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="min-w-0 flex-1 sm:max-w-sm">
+            <SearchInput
+              debounced
+              value={globalFilter ?? ''}
+              onValueChange={handleChangeFilter}
+              placeholder="Search by Event Type, Message ID, or Status"
+              containerClassName="w-full"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            {table.getColumn('eventType') && (
+              <DataTableFacetedFilter
+                column={table.getColumn('eventType')}
+                title="Event Type"
+                options={eventTypeOptions}
+              />
+            )}
+            {table.getColumn('status') && (
+              <DataTableFacetedFilter column={table.getColumn('status')} title="Status" options={statusOptions} />
+            )}
+          </div>
+        </div>
       </div>
       <TableContainer
         className={cn({ 'min-h-[26rem]': isEmpty })}

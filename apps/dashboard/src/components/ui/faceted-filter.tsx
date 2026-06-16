@@ -321,7 +321,7 @@ function FacetedFilterLabelTrigger({
       disabled={isDisabled}
       data-slot="faceted-filter-label-trigger"
       className={cn(
-        'inline-flex cursor-pointer items-center gap-1.5 border border-input font-medium text-foreground transition-colors outline-hidden focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-default',
+        'inline-flex min-w-0 cursor-pointer items-center gap-1.5 border border-input font-medium text-foreground transition-colors outline-hidden focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-default',
         !context.hasValue && buttonVariants({ variant: 'outline', size: 'sm' }),
         'bg-transparent hover:bg-accent dark:bg-input/30 dark:hover:bg-accent',
         'h-full',
@@ -345,7 +345,9 @@ function FacetedFilterLabelTrigger({
       ) : (
         <>
           {hasIcon && <FacetedFilterIcon>{icon}</FacetedFilterIcon>}
-          {children}
+          <span data-slot="faceted-filter-label" className="min-w-0 truncate whitespace-nowrap">
+            {children}
+          </span>
         </>
       )}
     </Comp>
@@ -458,7 +460,7 @@ function FacetedFilterOperator({
                 transition={segmentTransition}
                 type="button"
                 className={cn(
-                  '-ml-px inline-flex cursor-pointer items-center border border-input bg-transparent px-3 text-muted-foreground transition-colors outline-hidden hover:text-foreground focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] dark:bg-input/30',
+                  '-ml-px inline-flex cursor-pointer items-center whitespace-nowrap border border-input bg-transparent px-3 text-muted-foreground transition-colors outline-hidden hover:text-foreground focus-visible:z-10 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] dark:bg-input/30',
                   'hover:bg-accent dark:hover:bg-accent',
                   className,
                 )}
@@ -482,7 +484,7 @@ function FacetedFilterOperator({
           <FacetedFilterSegment
             key="operator"
             className={cn(
-              '-ml-px inline-flex cursor-default items-center border border-input bg-transparent px-3 text-muted-foreground dark:bg-input/30',
+              '-ml-px inline-flex cursor-default items-center whitespace-nowrap border border-input bg-transparent px-3 text-muted-foreground dark:bg-input/30',
               className,
             )}
             {...props}
@@ -495,7 +497,7 @@ function FacetedFilterOperator({
 }
 
 function FacetedFilterValueSummary({ className, ...props }: FacetedFilterSpanProps) {
-  return <FacetedFilterSegment className={cn('inline-flex items-center truncate', className)} {...props} />
+  return <FacetedFilterSegment className={cn('inline-flex min-w-0 items-center truncate', className)} {...props} />
 }
 
 function FacetedFilterValueList({ className, children, ...props }: FacetedFilterSpanProps) {
@@ -506,7 +508,7 @@ function FacetedFilterValueList({ className, children, ...props }: FacetedFilter
       data-slot="faceted-filter-value-list"
       layout={context.contentLayout}
       transition={segmentTransition}
-      className={cn('flex min-w-0 items-stretch overflow-hidden', className)}
+      className={cn('flex min-w-0 max-w-full items-stretch overflow-hidden', className)}
       {...props}
     >
       <AnimatePresence initial={false} mode="popLayout">
@@ -527,7 +529,7 @@ function FacetedFilterValueItem({ asChild = false, className, children, ...props
     return (
       <Slot
         data-slot="faceted-filter-value-item"
-        className={cn('inline-flex min-w-0 items-center text-foreground', className)}
+        className={cn('inline-flex min-w-0 max-w-40 shrink items-center text-foreground', className)}
         {...props}
       >
         {children}
@@ -543,7 +545,7 @@ function FacetedFilterValueItem({ asChild = false, className, children, ...props
       initial={context.shouldReduceMotion ? false : { opacity: 0, x: 4, filter: 'blur(2px)' }}
       animate={context.shouldReduceMotion ? undefined : { opacity: 1, x: 0, filter: 'blur(0px)' }}
       exit={context.shouldReduceMotion ? undefined : { opacity: 0, x: 4, filter: 'blur(2px)' }}
-      className={cn('inline-flex min-w-0 items-center text-foreground', className)}
+      className={cn('inline-flex min-w-0 max-w-40 shrink items-center text-foreground', className)}
       {...props}
     >
       {children}
@@ -581,9 +583,7 @@ function FacetedFilterValues({ items, title, maxValues = 2, className, ...props 
             'border-l border-input': index > 0,
           })}
         >
-          <span className="inline-flex min-w-0 max-w-40 items-center overflow-hidden whitespace-nowrap px-2">
-            {item.label}
-          </span>
+          <span className="block min-w-0 w-full truncate px-2">{item.label}</span>
         </FacetedFilterValueItem>
       ))}
     </FacetedFilterValueList>

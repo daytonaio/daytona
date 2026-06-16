@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { WEBHOOK_EVENTS } from '@/constants/webhook-events'
 import { getRelativeTimeString } from '@/lib/utils'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
-import { CheckCircle, Clock, MoreHorizontal, XCircle } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import { EndpointMessageOut } from 'svix'
 import { CopyButton } from '../../CopyButton'
 
@@ -148,10 +148,28 @@ const eventTypeOptions: FacetedFilterOption[] = WEBHOOK_EVENTS.map((event) => ({
   value: event.value,
 }))
 
+function WebhookStatusFilterLabel({ colorClassName, label }: { colorClassName: string; label: string }) {
+  return (
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <span className={`size-2 shrink-0 rounded-full ${colorClassName}`} aria-hidden="true" />
+      <span className="truncate">{label}</span>
+    </span>
+  )
+}
+
 const statusOptions: FacetedFilterOption[] = [
-  { label: 'Success', value: 'success', icon: <CheckCircle className="size-4" /> },
-  { label: 'Pending', value: 'pending', icon: <Clock className="size-4" /> },
-  { label: 'Failed', value: 'fail', icon: <XCircle className="size-4" /> },
+  {
+    label: <WebhookStatusFilterLabel colorClassName="bg-success-foreground" label="Success" />,
+    value: 'success',
+  },
+  {
+    label: <WebhookStatusFilterLabel colorClassName="bg-muted-foreground" label="Pending" />,
+    value: 'pending',
+  },
+  {
+    label: <WebhookStatusFilterLabel colorClassName="bg-destructive" label="Failed" />,
+    value: 'fail',
+  },
 ]
 
 export { columns, eventTypeOptions, statusOptions }
