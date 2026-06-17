@@ -38,6 +38,7 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/common-go/pkg/log"
+	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	sloggin "github.com/samber/slog-gin"
 
 	swaggerfiles "github.com/swaggo/files"
@@ -166,6 +167,7 @@ func (a *ApiServer) Start(ctx context.Context) error {
 		Addr:    fmt.Sprintf(":%d", a.apiPort),
 		Handler: a.router,
 	}
+	common_proxy.ApplyServerTimeouts(a.httpServer)
 
 	listener, err := net.Listen("tcp", a.httpServer.Addr)
 	if err != nil {
