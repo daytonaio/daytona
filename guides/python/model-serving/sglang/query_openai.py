@@ -62,10 +62,14 @@ resp = client.chat.completions.create(
     response_format={"type": "json_schema", "json_schema": {"name": "haiku", "schema": schema}},
     max_tokens=4096,
 )
-haiku = json.loads(resp.choices[0].message.content)
-print(f"\nstructured: {haiku['title']} ({haiku['season']})")
-for line in haiku["lines"]:
-    print(f"  {line}")
+content = resp.choices[0].message.content
+if content:
+    haiku = json.loads(content)
+    print(f"\nstructured: {haiku['title']} ({haiku['season']})")
+    for line in haiku["lines"]:
+        print(f"  {line}")
+else:
+    print("\nstructured: response truncated (raise max_tokens)")
 
 
 # reasoning: gpt-oss thinks by default at medium effort; reasoning_effort

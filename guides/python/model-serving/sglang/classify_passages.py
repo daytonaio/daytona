@@ -59,7 +59,9 @@ def passages_from(author, book_id, count):
     if cached.exists():
         text = cached.read_text()
     else:
-        text = requests.get(f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt", timeout=60).text
+        response = requests.get(f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt", timeout=60)
+        response.raise_for_status()
+        text = response.text
         cached.parent.mkdir(exist_ok=True)
         cached.write_text(text)
     # keep only the body: drop the Gutenberg boilerplate, title page, and license
@@ -77,7 +79,8 @@ async def classify(passage, question, schema):
         reasoning_effort="low",
         max_tokens=2048,
     )
-    return json.loads(resp.choices[0].message.content), resp.usage
+    content = resp.choices[0].message.content  # None if thinking hit max_tokens
+    return (json.loads(content) if content else None), resp.usage
 
 
 def print_tokens(usages, dt, cached=False):
@@ -119,7 +122,7 @@ def report():
     print(f"classifying {len(passages)} passages, two questions each ...")
     by_author, dt1, by_setting, dt2 = asyncio.run(main(passages))
 
-    authors = [r["author"] for r, _ in by_author]
+    authors = [r["author"] if r else None for r, _ in by_author]
     correct = sum(g == t for g, t in zip(authors, truths))
     print(f"\npass 1 - author: {len(passages)} passages in {dt1:.1f}s")
     print(f"accuracy: {correct}/{len(passages)} ({100 * correct / len(passages):.0f}%)")
@@ -130,16 +133,18 @@ def report():
     print("per author: " + ", ".join(f"{a} {ok}/{n}" for a, (ok, n) in per_author.items()))
     print_tokens([u for _, u in by_author], dt1)
 
-    settings = [r["setting"] for r, _ in by_setting]
+    settings = [r["setting"] if r else None for r, _ in by_setting]
     print(f"\npass 2 - setting: {len(passages)} passages in {dt2:.1f}s ({dt1 / dt2:.1f}x faster)")
     # group books by the model's predominant call (not graded, just its read)
     lean = {}
     for a in AUTHORS:
-        calls = [s for t, s in zip(truths, settings) if t == a]
+        calls = [s for t, s in zip(truths, settings) if t == a and s is not None]
+        if not calls:
+            continue
         top = max(set(calls), key=calls.count)
         lean[a] = (top, calls.count(top), len(calls))
     for side in ("indoors", "outdoors"):
-        books = sorted((a for a in AUTHORS if lean[a][0] == side), key=lambda a: -lean[a][1])
+        books = sorted((a for a, v in lean.items() if v[0] == side), key=lambda a: -lean[a][1])
         print(f"predominantly {side + ':':<9} " + ", ".join(f"{a} {lean[a][1]}/{lean[a][2]}" for a in books))
     print_tokens([u for _, u in by_setting], dt2, cached=True)
 
