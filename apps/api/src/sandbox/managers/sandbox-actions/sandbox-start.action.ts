@@ -553,6 +553,9 @@ export class SandboxStartAction extends SandboxAction {
           sandbox.volumes.map((v) => ({ volumeId: v.volumeId, mountPath: v.mountPath, subpath: v.subpath })),
         )
       }
+      if (sandbox.domainAllowList) {
+        metadata['domainAllowList'] = sandbox.domainAllowList
+      }
 
       try {
         await runnerAdapter.startSandbox(sandbox.id, sandbox.authToken, metadata)

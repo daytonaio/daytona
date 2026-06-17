@@ -23,5 +23,9 @@ export interface UpdateSandboxNetworkSettings {
      * Comma-separated list of allowed CIDR network addresses for the sandbox
      */
     'networkAllowList'?: string;
+    /**
+     * Comma-separated list of allowed domains for the sandbox
+     */
+    'domainAllowList'?: string;
 }
 

@@ -95,6 +95,14 @@ export class CreateSandboxDto {
   networkAllowList?: string
 
   @ApiPropertyOptional({
+    description: 'Comma-separated list of allowed domains for the sandbox',
+    example: 'example.com,*.daytona.io',
+  })
+  @IsOptional()
+  @IsString()
+  domainAllowList?: string
+
+  @ApiPropertyOptional({
     description: 'The target (region) where the sandbox will be created',
     example: 'us',
   })

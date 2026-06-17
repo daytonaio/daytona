@@ -223,6 +223,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
+      domainAllowList: sandbox.domainAllowList,
       metadata: metadata,
       authToken: sandbox.authToken,
       otelEndpoint,

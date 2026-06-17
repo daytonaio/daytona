@@ -131,6 +131,9 @@ export class Sandbox {
   @Column({ nullable: true })
   networkAllowList?: string
 
+  @Column({ nullable: true })
+  domainAllowList?: string
+
   @Column('jsonb', { nullable: true })
   labels: { [key: string]: string }
 

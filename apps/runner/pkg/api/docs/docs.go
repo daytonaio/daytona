@@ -1556,6 +1556,9 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 1
                 },
+                "domainAllowList": {
+                    "type": "string"
+                },
                 "entrypoint": {
                     "type": "array",
                     "items": {

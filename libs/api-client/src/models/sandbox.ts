@@ -71,6 +71,10 @@ export interface Sandbox {
      */
     'networkAllowList'?: string;
     /**
+     * Comma-separated list of allowed domains for the sandbox
+     */
+    'domainAllowList'?: string;
+    /**
      * The target environment for the sandbox
      */
     'target': string;
