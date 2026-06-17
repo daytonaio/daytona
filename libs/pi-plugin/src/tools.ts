@@ -153,7 +153,12 @@ export function registerTools(pi: ExtensionAPI, getActive: () => ToolSandbox | n
   // host. With --daytona off, return undefined to let Pi run it locally.
   pi.on('user_bash', () => {
     const active = getActive()
-    if (active) return { operations: createBashOps(active.sandbox) }
+    // Route user `!` commands through sandbox operations. Pi runs these with the
+    // HOST working directory (sessionManager.getCwd()), which doesn't exist in the
+    // sandbox — passing it to Daytona's exec fails its chdir and surfaces as a
+    // misleading "fork/exec <shell>: no such file" error. So pin the cwd to the
+    // sandbox working dir (active.cwd), where the user expects `!` to run.
+    if (active) return { operations: createBashOps(active.sandbox, active.cwd) }
     if (pi.getFlag('daytona') === true) {
       return {
         result: {
