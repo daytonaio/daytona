@@ -19,7 +19,7 @@ import {
   getBulkActionCounts,
   isTransitioning,
 } from '@/lib/utils/sandbox'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, SandboxListItem, SandboxState } from '@daytona/api-client'
 import {
   flexRender,
@@ -145,8 +145,8 @@ export function SandboxTable({
   const selectableCount = useMemo(() => {
     return data.filter((sandbox) => !sandboxIsLoading[sandbox.id] && sandbox.state !== SandboxState.DESTROYED).length
   }, [sandboxIsLoading, data])
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: visibleColumns,
     manualFiltering: true,
@@ -172,9 +172,7 @@ export function SandboxTable({
       },
     },
     onColumnVisibilityChange: setColumnVisibility,
-    defaultColumn: {
-      minSize: 0,
-    },
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     enableRowSelection: (row) =>
       (writePermitted || deletePermitted) &&
       !sandboxIsLoading[row.original.id] &&
@@ -333,13 +331,14 @@ export function SandboxTable({
           ) : null
         }
       >
-        <Table style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    header={header}
                     sticky={header.column.getIsPinned()}
                     style={getColumnSizeStyles(header.column)}
                   >

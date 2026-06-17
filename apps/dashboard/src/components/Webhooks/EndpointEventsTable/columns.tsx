@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { MiddleTruncate } from '@/components/ui/middle-truncate'
 import { WEBHOOK_EVENTS } from '@/constants/webhook-events'
 import { getRelativeTimeString } from '@/lib/utils'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
@@ -37,10 +38,13 @@ const columns: ColumnDef<EndpointMessageOut>[] = [
     cell: ({ row }) => {
       const msgId = row.original.id
       return (
-        <div className="w-full truncate flex items-center gap-2 group/copy-button">
-          <span className="truncate block font-mono text-sm hover:underline focus:underline cursor-pointer">
-            {msgId ?? '-'}
-          </span>
+        <div className="w-full min-w-0 flex items-center gap-2 group/copy-button">
+          <MiddleTruncate
+            value={msgId ?? '-'}
+            start={8}
+            end={4}
+            className="font-mono text-sm hover:underline focus:underline cursor-pointer"
+          />
           {msgId && (
             <span onClick={(e) => e.stopPropagation()}>
               <CopyButton value={msgId} size="icon-xs" autoHide tooltipText="Copy Message ID" />

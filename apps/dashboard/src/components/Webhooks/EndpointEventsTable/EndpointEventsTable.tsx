@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import {
   ColumnFiltersState,
   flexRender,
@@ -52,10 +52,11 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
   const [globalFilter, setGlobalFilter] = useState('')
   const [selectedEventIndex, setSelectedEventIndex] = useState<number | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -164,7 +165,7 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
           ) : null
         }
       >
-        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -173,6 +174,7 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
                     <TableHead
                       className="px-2"
                       key={header.id}
+                      header={header}
                       style={getColumnSizeStyles(header.column)}
                       sticky={header.column.getIsPinned()}
                     >

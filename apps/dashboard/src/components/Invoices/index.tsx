@@ -5,7 +5,7 @@
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { flexRender } from '@tanstack/react-table'
 import { FileText } from 'lucide-react'
 import { Pagination } from '../Pagination'
@@ -68,13 +68,14 @@ export function InvoicesTable({
           ) : null
         }
       >
-        <Table className="table-fixed border-separate border-spacing-0" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed border-separate border-spacing-0" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    header={header}
                     sticky={header.column.getIsPinned()}
                     style={getColumnSizeStyles(header.column)}
                   >

@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationInvitation, UpdateOrganizationInvitationRoleEnum } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -127,10 +127,11 @@ export function OrganizationInvitationTable({
         : undefined,
     [invitationToUpdate],
   )
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: organizationInvitationColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       organizationInvitation: {
         onCancel: handleCancel,
@@ -209,7 +210,7 @@ export function OrganizationInvitationTable({
             ) : null
           }
         >
-          <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+          <Table className="table-fixed" style={getTableSizeStyles(table)}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -217,6 +218,7 @@ export function OrganizationInvitationTable({
                     return (
                       <TableHead
                         key={header.id}
+                        header={header}
                         sticky={header.column.getIsPinned()}
                         style={getColumnSizeStyles(header.column)}
                       >
