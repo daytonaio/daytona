@@ -11,8 +11,9 @@ import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { SandboxState as SandboxStateComponent } from '@/components/sandboxes/SandboxState'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { MiddleTruncate } from '@/components/ui/middle-truncate'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getRelativeTimeString, truncateUUID } from '@/lib/utils'
+import { getRelativeTimeString } from '@/lib/utils'
 import { SandboxDesiredState, SandboxListItem } from '@daytona/api-client'
 import { Column, ColumnDef, RowData, Table } from '@tanstack/react-table'
 import { Loader2 } from 'lucide-react'
@@ -169,8 +170,9 @@ const columns: ColumnDef<SandboxListItem>[] = [
   },
   {
     id: 'id',
-    size: 150,
-    maxSize: 150,
+    size: 240,
+    minSize: 150,
+    maxSize: 360,
     enableSorting: false,
     enableHiding: true,
     header: () => <span>UUID</span>,
@@ -178,8 +180,8 @@ const columns: ColumnDef<SandboxListItem>[] = [
     cell: ({ row }) => {
       const id = row.original.id
       return (
-        <div className="w-full truncate flex items-center gap-1 group/copy-button">
-          <span className="truncate block text-muted-foreground">{truncateUUID(id)}</span>
+        <div className="w-full min-w-0 flex items-center gap-1 group/copy-button">
+          <MiddleTruncate value={id} start={8} end={4} className="font-mono text-muted-foreground" />
           <CopyButton value={id} size="icon-xs" autoHide tooltipText="Copy UUID" />
         </div>
       )

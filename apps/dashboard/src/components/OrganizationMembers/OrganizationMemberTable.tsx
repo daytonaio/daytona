@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { capitalize, cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationUser, OrganizationUserRoleEnum } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -82,8 +82,8 @@ export function OrganizationMemberTable({
   const [isUpdateMemberAccessDialogOpen, setIsUpdateMemberAccessDialogOpen] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false)
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns,
     meta: {
@@ -195,6 +195,7 @@ export function OrganizationMemberTable({
           />
         </div>
         <TableContainer
+          table={table}
           className={cn('max-h-[550px]', {
             'min-h-[20rem]': isEmpty,
           })}
@@ -217,13 +218,14 @@ export function OrganizationMemberTable({
             ) : null
           }
         >
-          <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+          <Table className="table-fixed" style={getTableSizeStyles(table)}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
+                      header={header}
                       sticky={header.column.getIsPinned()}
                       style={getColumnSizeStyles(header.column)}
                     >

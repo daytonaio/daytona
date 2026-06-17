@@ -33,8 +33,8 @@ export function useChargesTable({ data }: UseChargesTableProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 
   const columns = useMemo(() => getColumns(), [])
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns,
     onColumnFiltersChange: setColumnFilters,

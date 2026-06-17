@@ -159,6 +159,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     accessorKey: 'imageName',
     size: 180,
+    minSize: 180,
     enableSorting: false,
     header: 'Image',
     cell: ({ row }) => {

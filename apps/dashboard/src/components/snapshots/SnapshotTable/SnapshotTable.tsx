@@ -16,7 +16,7 @@ import { SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Box } from 'lucide-react'
@@ -157,8 +157,8 @@ export function SnapshotTable({
       (snapshot) => !snapshot.general && !loadingSnapshots[snapshot.id] && snapshot.state !== SnapshotState.REMOVING,
     ).length
   }, [data, loadingSnapshots])
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns,
     defaultColumn: {
@@ -305,6 +305,7 @@ export function SnapshotTable({
         </div>
       </div>
       <TableContainer
+        table={table}
         className={cn({
           'min-h-[26rem]': isEmpty,
         })}
@@ -348,13 +349,14 @@ export function SnapshotTable({
           ) : null
         }
       >
-        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    header={header}
                     sticky={header.column.getIsPinned()}
                     style={getColumnSizeStyles(header.column)}
                   >

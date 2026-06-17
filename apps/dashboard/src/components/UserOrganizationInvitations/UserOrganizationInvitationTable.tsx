@@ -22,7 +22,7 @@ import {
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationInvitation } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -90,8 +90,8 @@ export function UserOrganizationInvitationTable({
     }
     return false
   }
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: userOrganizationInvitationColumns,
     meta: {
@@ -150,6 +150,7 @@ export function UserOrganizationInvitationTable({
         />
       </div>
       <TableContainer
+        table={table}
         className={cn({
           'min-h-64': isEmpty,
         })}
@@ -172,7 +173,7 @@ export function UserOrganizationInvitationTable({
           ) : null
         }
       >
-        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -180,6 +181,7 @@ export function UserOrganizationInvitationTable({
                   return (
                     <TableHead
                       key={header.id}
+                      header={header}
                       sticky={header.column.getIsPinned()}
                       style={getColumnSizeStyles(header.column)}
                     >

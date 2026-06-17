@@ -47,8 +47,8 @@ export function useInvoicesTable({
     },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: invoiceColumns,
     meta: {

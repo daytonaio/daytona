@@ -4,7 +4,7 @@
  */
 
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { flexRender } from '@tanstack/react-table'
 import { Receipt } from 'lucide-react'
 import { Pagination } from '../Pagination'
@@ -33,6 +33,7 @@ export function ChargesTable({ data, loading, onRowClick }: ChargesTableProps) {
       <ChargesTableHeader table={table} />
 
       <TableContainer
+        table={table}
         className={cn('max-h-[550px]', {
           'min-h-[20rem]': isEmpty,
         })}
@@ -54,13 +55,14 @@ export function ChargesTable({ data, loading, onRowClick }: ChargesTableProps) {
           ) : null
         }
       >
-        <Table className="table-fixed border-separate border-spacing-0" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed border-separate border-spacing-0" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    header={header}
                     sticky={header.column.getIsPinned()}
                     style={getColumnSizeStyles(header.column)}
                   >

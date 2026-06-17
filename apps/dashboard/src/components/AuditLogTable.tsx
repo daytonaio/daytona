@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn, getMaskedTokenFromParts, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { AuditLog } from '@daytona/api-client'
 import { Column, ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { TextSearch } from 'lucide-react'
@@ -55,6 +55,7 @@ export function AuditLogTable({
   toolbarActions,
 }: Props) {
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: auditLogColumns,
     getCoreRowModel: getCoreRowModel(),
@@ -81,6 +82,7 @@ export function AuditLogTable({
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
       <div className="flex items-center justify-between gap-2 empty:hidden">{toolbarActions}</div>
       <TableContainer
+        table={table}
         className={cn({
           'min-h-[26rem]': isEmpty,
         })}
@@ -107,13 +109,17 @@ export function AuditLogTable({
           ) : null
         }
       >
-        <Table>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} style={isEmpty ? undefined : getColumnSizeStyles(header.column)}>
+                    <TableHead
+                      key={header.id}
+                      header={header}
+                      style={isEmpty ? undefined : getColumnSizeStyles(header.column)}
+                    >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
