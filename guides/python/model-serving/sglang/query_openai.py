@@ -25,16 +25,17 @@ resp = client.chat.completions.create(
 print("chat:", resp.choices[0].message.content)
 
 
-# streaming
+# streaming: gpt-oss streams its reasoning first, then the answer, so print both
 stream = client.chat.completions.create(
     model=MODEL,
     messages=[{"role": "user", "content": "Write ten haikus about tokens arriving one at a time."}],
-    max_tokens=4096,
+    max_tokens=8192,
     stream=True,
 )
 print("stream:")
 for chunk in stream:
-    print(chunk.choices[0].delta.content or "", end="", flush=True)
+    delta = chunk.choices[0].delta
+    print(delta.reasoning_content or delta.content or "", end="", flush=True)
 print()
 
 
@@ -78,7 +79,7 @@ resp = client.chat.completions.create(
     model=MODEL,
     messages=[{"role": "user", "content": "Write a haiku about thinking before speaking."}],
     reasoning_effort="high",
-    max_tokens=4096,
+    max_tokens=8192,
 )
 print("\nreasoning:")
 print(resp.choices[0].message.reasoning_content)

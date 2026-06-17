@@ -79,7 +79,7 @@ The endpoint authenticates via the token header. Two alternatives: `sb.create_si
 
 ### Budget for thinking
 
-gpt-oss reasons before it answers, and `max_tokens` covers reasoning plus answer combined. If thinking exhausts the budget, the response has `finish_reason: "length"` and `content: null`, which looks like the model returned nothing. Thinking length varies a lot between identical runs, so the examples use generous budgets (`max_tokens=4096`) and turn `reasoning_effort` down to `"low"` for simple or high-volume tasks.
+gpt-oss reasons before it answers, and `max_tokens` covers reasoning plus answer combined. If thinking exhausts the budget, the response has `finish_reason: "length"` and `content: null`, which looks like the model returned nothing. Thinking length varies a lot between identical runs, so the examples use generous budgets and turn `reasoning_effort` down to `"low"` for simple or high-volume tasks.
 
 ### Querying from inside the sandbox
 

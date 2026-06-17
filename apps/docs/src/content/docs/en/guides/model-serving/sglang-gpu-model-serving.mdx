@@ -242,7 +242,7 @@ Paste the printed `export` lines into your shell, then use any OpenAI-compatible
 </Tabs>
 
 :::caution[Budget for thinking]
-That `max_tokens: 4096` on a haiku request is not a typo. gpt-oss reasons before it answers, and `max_tokens` covers reasoning plus answer combined. If thinking exhausts the budget, the request returns `finish_reason: "length"` with the truncated trace in `reasoning_content` and `content: null`, which looks like the model returned nothing. The thinking length also varies between identical runs: the same haiku prompt measured anywhere from 400 to over 1000 reasoning tokens. Give requests generous budgets, or turn `reasoning_effort` down for simple tasks.
+That `max_tokens: 4096` on a haiku request is not a typo. gpt-oss reasons before it answers, and `max_tokens` covers reasoning plus answer combined. If thinking exhausts the budget, the request returns `finish_reason: "length"` with the truncated trace in `reasoning_content` and `content: null`, which looks like the model returned nothing. The thinking length also varies widely between identical runs. Give requests generous budgets, or turn `reasoning_effort` down for simple tasks.
 :::
 
 The subsections below drive that same client through SGLang's features, each a runnable example in `query_openai.py`: reasoning effort, structured output, tool calling, and prefix caching.
@@ -258,7 +258,7 @@ The server was started with `--reasoning-parser gpt-oss`, which separates the mo
         model="gpt-oss-20b",
         messages=[{"role": "user", "content": "Write a haiku about thinking before speaking."}],
         reasoning_effort="high",
-        max_tokens=4096,
+        max_tokens=8192,
     )
     print("reasoning:")
     print(resp.choices[0].message.reasoning_content)
@@ -268,7 +268,7 @@ The server was started with `--reasoning-parser gpt-oss`, which separates the mo
   </TabItem>
 </Tabs>
 
-The dial matters in both directions: `"high"` buys more careful answers on hard problems, while `"low"` makes simple tasks faster, cheaper, and less variable, which is why the classification workload below runs at low effort.
+The dial matters in both directions: `"high"` buys more careful answers on hard problems but can spend several thousand reasoning tokens, which is why this request budgets 8192; `"low"` makes simple tasks faster, cheaper, and less variable, which is why the classification workload below runs at low effort.
 
 #### Structured Output
 
