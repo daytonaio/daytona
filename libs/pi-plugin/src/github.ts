@@ -149,3 +149,25 @@ export async function mergeBranch(
 export async function deleteBranch(pi: ExtensionAPI, slug: RepoSlug, name: string): Promise<void> {
   await gh(pi, ['api', '--method', 'DELETE', `repos/${slug.owner}/${slug.repo}/git/refs/heads/${name}`])
 }
+
+/**
+ * Number of commits `branch` is ahead of `base` on GitHub (its actual
+ * contribution). Undefined if the comparison can't be made. Used to decide
+ * whether a throwaway branch contributed anything before deleting it.
+ */
+export async function getBranchAhead(
+  pi: ExtensionAPI,
+  slug: RepoSlug,
+  base: string,
+  branch: string,
+): Promise<number | undefined> {
+  const res = await gh(pi, [
+    'api',
+    `repos/${slug.owner}/${slug.repo}/compare/${encodeURIComponent(base)}...${encodeURIComponent(branch)}`,
+    '--jq',
+    '.ahead_by',
+  ])
+  if (!res.ok) return undefined
+  const n = Number(res.stdout)
+  return Number.isFinite(n) ? n : undefined
+}

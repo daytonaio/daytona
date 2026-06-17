@@ -24,8 +24,10 @@ import {
   type RepoSlug,
   branchUrl,
   compareUrl,
+  deleteBranch,
   detectLocalRepo,
   ensureBranch,
+  getBranchAhead,
   getBranchSha,
   getDefaultBranch,
   getGithubToken,
@@ -415,7 +417,24 @@ export default function (pi: ExtensionAPI) {
       // sandbox stays (its session file still exists) and is paused by autoStop.
       if (daytona) await reapOrphans(daytona)
     } else {
-      // In-memory session: nothing to resume, so delete the sandbox now.
+      // In-memory session: nothing to resume, so tidy up GitHub and delete the
+      // sandbox now. Push any commits made after the last agent_end (e.g. a
+      // manual `!git commit`) so work isn't silently lost; then, if the branch
+      // contributed nothing, delete the throwaway ref we created at startup so
+      // it doesn't leak.
+      if (current.git) {
+        try {
+          const token = await getGithubToken(pi)
+          await pushChanges({ sandbox: current.sandbox, cwd: current.cwd, pushEnabled: true }, token)
+          // Delete the branch only if it contributed nothing (HEAD == base on
+          // GitHub). Compare on the remote — local ahead-of-remote is 0 right
+          // after the push and would wrongly flag branches with real work.
+          const ahead = await getBranchAhead(pi, current.git.slug, current.git.base, current.git.branch)
+          if (ahead === 0) await deleteBranch(pi, current.git.slug, current.git.branch)
+        } catch {
+          // Best-effort cleanup; a leaked branch is preferable to lost work.
+        }
+      }
       try {
         await current.sandbox.delete()
       } catch {
