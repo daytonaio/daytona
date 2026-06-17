@@ -750,6 +750,18 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath(
+            '/docs/guides/model-serving/sglang-gpu-model-serving',
+            locale
+          ),
+          label: t('sidebarconfig.sglang'),
+          disablePagination: true,
+          attrs: {
+            icon: 'sglang.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/rlm', locale),
           label: t('sidebarconfig.rlm'),
           disablePagination: true,
