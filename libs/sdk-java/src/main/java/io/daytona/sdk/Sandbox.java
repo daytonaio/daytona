@@ -63,6 +63,7 @@ public class Sandbox {
     private Map<String, String> env;
     private Boolean networkBlockAll;
     private String networkAllowList;
+    private String domainAllowList;
     private List<SandboxVolume> volumes;
     private BuildInfo buildInfo;
     private String backupCreatedAt;
@@ -404,6 +405,7 @@ public class Sandbox {
         this.env = d.getEnv() == null ? new HashMap<String, String>() : new HashMap<String, String>(d.getEnv());
         this.networkBlockAll = d.getNetworkBlockAll();
         this.networkAllowList = d.getNetworkAllowList();
+        this.domainAllowList = d.getDomainAllowList();
         this.volumes = d.getVolumes() == null ? null : Collections.unmodifiableList(d.getVolumes());
         this.buildInfo = d.getBuildInfo();
         this.backupCreatedAt = d.getBackupCreatedAt();
@@ -636,6 +638,14 @@ public class Sandbox {
      * @return allow list, or {@code null}
      */
     public String getNetworkAllowList() { return networkAllowList; }
+    /**
+     * Returns the comma-separated list of allowed domains, if any.
+     *
+     * <p>Not returned by {@link Daytona#list}; call {@link #refreshData()} on each item to populate.
+     *
+     * @return allowed domains, or {@code null}
+     */
+    public String getDomainAllowList() { return domainAllowList; }
     /**
      * Returns volumes attached to the Sandbox.
      *

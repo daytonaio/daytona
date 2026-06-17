@@ -83,6 +83,8 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * (not returned by list results; call `refreshData()` on each item to populate)
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
  * (not returned by list results; call `refreshData()` on each item to populate)
+ * @property {string} [domainAllowList] - Comma-separated list of allowed domains for the Sandbox
+ * (not returned by list results; call `refreshData()` on each item to populate)
  * @property {string} [linkedSandboxId] - ID of the Sandbox this Sandbox is linked to. When set, the Sandbox is co-located on the same runner as the linked Sandbox.
  * (not returned by list results; call `refreshData()` on each item to populate)
  *
@@ -123,6 +125,7 @@ export class Sandbox {
   public lastActivityAt?: string
   public networkBlockAll?: boolean
   public networkAllowList?: string
+  public domainAllowList?: string
   public linkedSandboxId?: string
   public toolboxProxyUrl: string
 
@@ -657,10 +660,11 @@ export class Sandbox {
    * Updates outbound network policy for this sandbox on the runner (for example block all traffic,
    * restore general internet access, or apply a CIDR allow list) without stopping the sandbox.
    *
-   * This maps to the same mechanism as creating a sandbox with `networkBlockAll` / `networkAllowList`:
-   * the runner applies iptables rules to the sandbox container.
+   * This maps to the same mechanism as creating a sandbox with `networkBlockAll` / `networkAllowList` /
+   * `domainAllowList`: the runner applies iptables rules to the sandbox container.
    *
-   * @param {UpdateSandboxNetworkSettings} settings - At least one of `networkBlockAll` or `networkAllowList` must be set.
+   * @param {UpdateSandboxNetworkSettings} settings - At least one of `networkBlockAll`, `networkAllowList` or
+   *   `domainAllowList` must be set.
    *   Set `networkBlockAll` to `false` to restore outbound access after a block (and clear a stored allow list).
    *
    * @example
@@ -668,11 +672,19 @@ export class Sandbox {
    * await sandbox.updateNetworkSettings({ networkBlockAll: true });
    * // Resume internet
    * await sandbox.updateNetworkSettings({ networkBlockAll: false });
+   * // Allow only specific domains
+   * await sandbox.updateNetworkSettings({ domainAllowList: 'example.com,*.daytona.io' });
    */
   @WithInstrumentation()
   public async updateNetworkSettings(settings: UpdateSandboxNetworkSettings): Promise<void> {
-    if (settings.networkBlockAll === undefined && settings.networkAllowList === undefined) {
-      throw new DaytonaValidationError('At least one of networkBlockAll or networkAllowList must be set')
+    if (
+      settings.networkBlockAll === undefined &&
+      settings.networkAllowList === undefined &&
+      settings.domainAllowList === undefined
+    ) {
+      throw new DaytonaValidationError(
+        'At least one of networkBlockAll, networkAllowList or domainAllowList must be set',
+      )
     }
     const response = await this.sandboxApi.updateNetworkSettings(this.id, settings)
     this.processSandboxDto(response.data)
@@ -887,6 +899,7 @@ export class Sandbox {
       this.env = sandboxDto.env
       this.networkBlockAll = sandboxDto.networkBlockAll
       this.networkAllowList = sandboxDto.networkAllowList
+      this.domainAllowList = sandboxDto.domainAllowList
       this.linkedSandboxId = sandboxDto.linkedSandboxId
       this.volumes = sandboxDto.volumes
       this.buildInfo = sandboxDto.buildInfo

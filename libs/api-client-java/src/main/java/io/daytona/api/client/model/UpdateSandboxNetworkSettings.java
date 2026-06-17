@@ -60,6 +60,11 @@ public class UpdateSandboxNetworkSettings {
   @javax.annotation.Nullable
   private String networkAllowList;
 
+  public static final String SERIALIZED_NAME_DOMAIN_ALLOW_LIST = "domainAllowList";
+  @SerializedName(SERIALIZED_NAME_DOMAIN_ALLOW_LIST)
+  @javax.annotation.Nullable
+  private String domainAllowList;
+
   public UpdateSandboxNetworkSettings() {
   }
 
@@ -98,6 +103,25 @@ public class UpdateSandboxNetworkSettings {
 
   public void setNetworkAllowList(@javax.annotation.Nullable String networkAllowList) {
     this.networkAllowList = networkAllowList;
+  }
+
+
+  public UpdateSandboxNetworkSettings domainAllowList(@javax.annotation.Nullable String domainAllowList) {
+    this.domainAllowList = domainAllowList;
+    return this;
+  }
+
+  /**
+   * Comma-separated list of allowed domains for the sandbox
+   * @return domainAllowList
+   */
+  @javax.annotation.Nullable
+  public String getDomainAllowList() {
+    return domainAllowList;
+  }
+
+  public void setDomainAllowList(@javax.annotation.Nullable String domainAllowList) {
+    this.domainAllowList = domainAllowList;
   }
 
   /**
@@ -156,13 +180,14 @@ public class UpdateSandboxNetworkSettings {
     }
     UpdateSandboxNetworkSettings updateSandboxNetworkSettings = (UpdateSandboxNetworkSettings) o;
     return Objects.equals(this.networkBlockAll, updateSandboxNetworkSettings.networkBlockAll) &&
-        Objects.equals(this.networkAllowList, updateSandboxNetworkSettings.networkAllowList)&&
+        Objects.equals(this.networkAllowList, updateSandboxNetworkSettings.networkAllowList) &&
+        Objects.equals(this.domainAllowList, updateSandboxNetworkSettings.domainAllowList)&&
         Objects.equals(this.additionalProperties, updateSandboxNetworkSettings.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(networkBlockAll, networkAllowList, additionalProperties);
+    return Objects.hash(networkBlockAll, networkAllowList, domainAllowList, additionalProperties);
   }
 
   @Override
@@ -171,6 +196,7 @@ public class UpdateSandboxNetworkSettings {
     sb.append("class UpdateSandboxNetworkSettings {\n");
     sb.append("    networkBlockAll: ").append(toIndentedString(networkBlockAll)).append("\n");
     sb.append("    networkAllowList: ").append(toIndentedString(networkAllowList)).append("\n");
+    sb.append("    domainAllowList: ").append(toIndentedString(domainAllowList)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -190,7 +216,7 @@ public class UpdateSandboxNetworkSettings {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("networkBlockAll", "networkAllowList"));
+    openapiFields = new HashSet<String>(Arrays.asList("networkBlockAll", "networkAllowList", "domainAllowList"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -211,6 +237,9 @@ public class UpdateSandboxNetworkSettings {
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       if ((jsonObj.get("networkAllowList") != null && !jsonObj.get("networkAllowList").isJsonNull()) && !jsonObj.get("networkAllowList").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `networkAllowList` to be a primitive type in the JSON string but got `%s`", jsonObj.get("networkAllowList").toString()));
+      }
+      if ((jsonObj.get("domainAllowList") != null && !jsonObj.get("domainAllowList").isJsonNull()) && !jsonObj.get("domainAllowList").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `domainAllowList` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domainAllowList").toString()));
       }
   }
 

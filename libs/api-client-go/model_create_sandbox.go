@@ -36,6 +36,8 @@ type CreateSandbox struct {
 	NetworkBlockAll *bool `json:"networkBlockAll,omitempty"`
 	// Comma-separated list of allowed CIDR network addresses for the sandbox
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
+	// Comma-separated list of allowed domains for the sandbox
+	DomainAllowList *string `json:"domainAllowList,omitempty"`
 	// The target (region) where the sandbox will be created
 	Target *string `json:"target,omitempty"`
 	// CPU cores allocated to the sandbox
@@ -336,6 +338,38 @@ func (o *CreateSandbox) HasNetworkAllowList() bool {
 // SetNetworkAllowList gets a reference to the given string and assigns it to the NetworkAllowList field.
 func (o *CreateSandbox) SetNetworkAllowList(v string) {
 	o.NetworkAllowList = &v
+}
+
+// GetDomainAllowList returns the DomainAllowList field value if set, zero value otherwise.
+func (o *CreateSandbox) GetDomainAllowList() string {
+	if o == nil || IsNil(o.DomainAllowList) {
+		var ret string
+		return ret
+	}
+	return *o.DomainAllowList
+}
+
+// GetDomainAllowListOk returns a tuple with the DomainAllowList field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSandbox) GetDomainAllowListOk() (*string, bool) {
+	if o == nil || IsNil(o.DomainAllowList) {
+		return nil, false
+	}
+	return o.DomainAllowList, true
+}
+
+// HasDomainAllowList returns a boolean if a field has been set.
+func (o *CreateSandbox) HasDomainAllowList() bool {
+	if o != nil && !IsNil(o.DomainAllowList) {
+		return true
+	}
+
+	return false
+}
+
+// SetDomainAllowList gets a reference to the given string and assigns it to the DomainAllowList field.
+func (o *CreateSandbox) SetDomainAllowList(v string) {
+	o.DomainAllowList = &v
 }
 
 // GetTarget returns the Target field value if set, zero value otherwise.
@@ -756,6 +790,9 @@ func (o CreateSandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.NetworkAllowList) {
 		toSerialize["networkAllowList"] = o.NetworkAllowList
 	}
+	if !IsNil(o.DomainAllowList) {
+		toSerialize["domainAllowList"] = o.DomainAllowList
+	}
 	if !IsNil(o.Target) {
 		toSerialize["target"] = o.Target
 	}
@@ -822,6 +859,7 @@ func (o *CreateSandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "public")
 		delete(additionalProperties, "networkBlockAll")
 		delete(additionalProperties, "networkAllowList")
+		delete(additionalProperties, "domainAllowList")
 		delete(additionalProperties, "target")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "gpu")

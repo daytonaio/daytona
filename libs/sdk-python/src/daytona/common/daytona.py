@@ -138,6 +138,7 @@ class CreateSandboxBaseParams(BaseModel):
         volumes (list[VolumeMount] | None): List of volumes mounts to attach to the Sandbox.
         network_block_all (bool | None): Whether to block all network access for the Sandbox.
         network_allow_list (str | None): Comma-separated list of allowed CIDR network addresses for the Sandbox.
+        domain_allow_list (str | None): Comma-separated list of allowed domains for the Sandbox.
         ephemeral (bool | None): Whether the Sandbox should be ephemeral.
             If True, auto_delete_interval will be set to 0.
         linked_sandbox (str | None): ID or name of an existing Sandbox to link the new Sandbox to. The new
@@ -158,6 +159,7 @@ class CreateSandboxBaseParams(BaseModel):
     volumes: list[VolumeMount] | None = None
     network_block_all: bool | None = None
     network_allow_list: str | None = None
+    domain_allow_list: str | None = None
     ephemeral: bool | None = None
     linked_sandbox: str | None = None
 

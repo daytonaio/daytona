@@ -107,6 +107,10 @@ type Sandbox struct {
 	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
 	NetworkAllowList *string
 
+	// DomainAllowList is a comma-separated list of allowed domains.
+	// Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
+	DomainAllowList *string
+
 	FileSystem      *FileSystemService      // File system operations
 	Git             *GitService             // Git operations
 	Process         *ProcessService         // Process and PTY operations
@@ -120,8 +124,8 @@ type Sandbox struct {
 // [Sandbox.populateFromDTO] accept either DTO without duplicating logic.
 //
 // Fields that exist only on the full [apiclient.Sandbox] DTO (Env,
-// NetworkBlockAll, NetworkAllowList, Volumes, BuildInfo, BackupCreatedAt) are
-// populated via a type assertion inside populateFromDTO.
+// NetworkBlockAll, NetworkAllowList, DomainAllowList, Volumes, BuildInfo,
+// BackupCreatedAt) are populated via a type assertion inside populateFromDTO.
 type sandboxDTO interface {
 	GetId() string
 	GetName() string
@@ -320,7 +324,7 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, dto sandboxDTO
 // populateFromDTO copies fields from a sandbox API DTO onto the receiver.
 //
 // Fields present only on the full *[apiclient.Sandbox] DTO (Env, NetworkBlockAll,
-// NetworkAllowList, Volumes, BuildInfo, BackupCreatedAt) are populated via a
+// NetworkAllowList, DomainAllowList, Volumes, BuildInfo, BackupCreatedAt) are populated via a
 // type assertion. When dto is a *[apiclient.SandboxListItem] they remain at
 // their zero values.
 func (s *Sandbox) populateFromDTO(dto sandboxDTO) {
@@ -374,6 +378,7 @@ func (s *Sandbox) populateFromDTO(dto sandboxDTO) {
 		s.Env = full.Env
 		s.NetworkBlockAll = &full.NetworkBlockAll
 		s.NetworkAllowList = full.NetworkAllowList
+		s.DomainAllowList = full.DomainAllowList
 		s.Volumes = full.Volumes
 		s.BuildInfo = full.BuildInfo
 		s.BackupCreatedAt = full.BackupCreatedAt
@@ -383,7 +388,7 @@ func (s *Sandbox) populateFromDTO(dto sandboxDTO) {
 // RefreshData refreshes the sandbox data from the API.
 //
 // This updates all sandbox fields from the server, including those not
-// populated by [Client.List] (Env, NetworkBlockAll, NetworkAllowList, Volumes,
+// populated by [Client.List] (Env, NetworkBlockAll, NetworkAllowList, DomainAllowList, Volumes,
 // BuildInfo, BackupCreatedAt).
 //
 // Example:

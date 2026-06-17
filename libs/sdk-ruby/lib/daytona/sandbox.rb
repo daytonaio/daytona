@@ -41,6 +41,10 @@ module Daytona
     #   Not returned by list results; call #refresh on each item to populate.
     attr_reader :network_allow_list
 
+    # @return [String, nil] Comma-separated list of allowed domains for the sandbox.
+    #   Not returned by list results; call #refresh on each item to populate.
+    attr_reader :domain_allow_list
+
     # @return [String] The target environment for the sandbox
     attr_reader :target
 
@@ -216,21 +220,24 @@ module Daytona
     #
     # @param network_block_all [Boolean, nil]
     # @param network_allow_list [String, nil]
+    # @param domain_allow_list [String, nil]
     # @return [void]
     # @raise [Daytona::Sdk::Error]
-    def update_network_settings(network_block_all: nil, network_allow_list: nil)
-      if network_block_all.nil? && network_allow_list.nil?
+    def update_network_settings(network_block_all: nil, network_allow_list: nil, domain_allow_list: nil)
+      if network_block_all.nil? && network_allow_list.nil? && domain_allow_list.nil?
         raise Sdk::Error,
-              'At least one of network_block_all or network_allow_list must be provided'
+              'At least one of network_block_all, network_allow_list or domain_allow_list must be provided'
       end
 
       body = DaytonaApiClient::UpdateSandboxNetworkSettings.new(
         network_block_all:,
-        network_allow_list:
+        network_allow_list:,
+        domain_allow_list:
       )
       data = sandbox_api.update_network_settings(id, body)
       @network_block_all = data.network_block_all
       @network_allow_list = data.network_allow_list
+      @domain_allow_list = data.domain_allow_list
     end
 
     # Sets the auto-stop interval for the Sandbox.
@@ -613,6 +620,7 @@ module Daytona
       @env = sandbox_dto.env
       @network_block_all = sandbox_dto.network_block_all
       @network_allow_list = sandbox_dto.network_allow_list
+      @domain_allow_list = sandbox_dto.domain_allow_list
       @volumes = sandbox_dto.volumes
       @build_info = sandbox_dto.build_info
       @backup_created_at = sandbox_dto.backup_created_at

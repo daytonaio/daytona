@@ -151,6 +151,7 @@ export interface Resources {
  * @property {VolumeMount[]} [volumes] - Optional array of volumes to mount to the Sandbox
  * @property {boolean} [networkBlockAll] - Whether to block all network access for the Sandbox
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
+ * @property {string} [domainAllowList] - Comma-separated list of allowed domains for the Sandbox
  * @property {boolean} [ephemeral] - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
  * @property {string} [linkedSandbox] - ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.
  */
@@ -167,6 +168,7 @@ export type CreateSandboxBaseParams = {
   volumes?: VolumeMount[]
   networkBlockAll?: boolean
   networkAllowList?: string
+  domainAllowList?: string
   ephemeral?: boolean
   linkedSandbox?: string
 }
@@ -568,6 +570,7 @@ export class Daytona implements AsyncDisposable {
           volumes: params.volumes,
           networkBlockAll: params.networkBlockAll,
           networkAllowList: params.networkAllowList,
+          domainAllowList: params.domainAllowList,
           linkedSandbox: params.linkedSandbox,
         },
         undefined,

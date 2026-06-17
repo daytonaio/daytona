@@ -41,6 +41,7 @@ class CreateSandbox(BaseModel):
     public: Optional[StrictBool] = Field(default=None, description="Whether the sandbox http preview is publicly accessible")
     network_block_all: Optional[StrictBool] = Field(default=None, description="Whether to block all network access for the sandbox", serialization_alias="networkBlockAll")
     network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed CIDR network addresses for the sandbox", serialization_alias="networkAllowList")
+    domain_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed domains for the sandbox", serialization_alias="domainAllowList")
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the sandbox will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the sandbox")
@@ -54,7 +55,7 @@ class CreateSandbox(BaseModel):
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the sandbox", serialization_alias="buildInfo")
     linked_sandbox: Optional[StrictStr] = Field(default=None, description="ID or name of an existing sandbox to link the new sandbox to. The new sandbox will be scheduled on the same runner as the linked sandbox so a local network can be established between them. Linked sandboxes must be ephemeral (autoDeleteInterval=0) and cannot themselves be linked to another sandbox.", serialization_alias="linkedSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "gpuType", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"]
+    __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "domainAllowList", "target", "cpu", "gpu", "gpuType", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "linkedSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -131,6 +132,7 @@ class CreateSandbox(BaseModel):
             "public": obj.get("public"),
             "network_block_all": obj.get("networkBlockAll"),
             "network_allow_list": obj.get("networkAllowList"),
+            "domain_allow_list": obj.get("domainAllowList"),
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),

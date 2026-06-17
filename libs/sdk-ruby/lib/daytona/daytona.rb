@@ -215,6 +215,7 @@ module Daytona
         volumes: params.volumes,
         network_block_all: params.network_block_all,
         network_allow_list: params.network_allow_list,
+        domain_allow_list: params.domain_allow_list,
         linked_sandbox: params.linked_sandbox
       )
 

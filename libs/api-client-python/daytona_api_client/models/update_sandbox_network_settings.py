@@ -32,8 +32,9 @@ class UpdateSandboxNetworkSettings(BaseModel):
     """ # noqa: E501
     network_block_all: Optional[StrictBool] = Field(default=None, description="Whether to block all network access for the sandbox", serialization_alias="networkBlockAll")
     network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed CIDR network addresses for the sandbox", serialization_alias="networkAllowList")
+    domain_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed domains for the sandbox", serialization_alias="domainAllowList")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["networkBlockAll", "networkAllowList"]
+    __properties: ClassVar[List[str]] = ["networkBlockAll", "networkAllowList", "domainAllowList"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,7 +94,8 @@ class UpdateSandboxNetworkSettings(BaseModel):
 
         _obj = cls.model_validate({
             "network_block_all": obj.get("networkBlockAll"),
-            "network_allow_list": obj.get("networkAllowList")
+            "network_allow_list": obj.get("networkAllowList"),
+            "domain_allow_list": obj.get("domainAllowList")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
