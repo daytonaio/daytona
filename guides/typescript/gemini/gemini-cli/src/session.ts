@@ -25,6 +25,9 @@ export class GeminiSession {
   private sessionId: string | null = null
   private ptyHandle: PtyHandle | null = null
   private buffer = ''
+  // Reused across handleData calls so partial multi-byte UTF-8 sequences split
+  // across PTY chunks are preserved instead of producing corrupt characters.
+  private decoder = new TextDecoder('utf-8')
   private onResponseComplete?: () => void
 
   constructor(private sandbox: Sandbox) {}
@@ -84,7 +87,7 @@ export class GeminiSession {
 
   // Buffer raw PTY bytes and dispatch each complete newline-delimited JSON event.
   private handleData(data: Uint8Array): void {
-    this.buffer += new TextDecoder().decode(data)
+    this.buffer += this.decoder.decode(data, { stream: true })
     const lines = this.buffer.split('\n')
     this.buffer = lines.pop() || ''
     for (const line of lines.map((l) => l.trim()).filter(Boolean)) {

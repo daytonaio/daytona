@@ -29,7 +29,7 @@ async function main() {
   let sandbox: Sandbox | undefined
   let session: GeminiSession | undefined
 
-  const cleanup = async () => {
+  const cleanup = async (exitCode = 0) => {
     try {
       console.log('\nCleaning up...')
       if (session) await session.cleanup()
@@ -37,7 +37,7 @@ async function main() {
     } catch (e) {
       console.error('Error during cleanup:', e)
     } finally {
-      process.exit(0)
+      process.exit(exitCode)
     }
   }
 
@@ -80,9 +80,7 @@ async function main() {
     }
   } catch (error) {
     console.error(error)
-    if (session) await session.cleanup()
-    if (sandbox) await sandbox.delete()
-    process.exit(1)
+    await cleanup(1)
   }
 }
 

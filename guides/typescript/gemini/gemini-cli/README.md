@@ -11,7 +11,7 @@ A headless coding agent powered by the [Gemini CLI](https://geminicli.com/) runn
 
 ## Prerequisites
 
-- Node.js 18 or newer
+- Node.js 20 or newer
 - A Daytona API key from [Daytona Dashboard](https://app.daytona.io/dashboard/keys)
 - A Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
 

@@ -46,6 +46,14 @@ export interface ErrorEvent extends GeminiStreamEvent {
   message: string
 }
 
+export interface ModelStreamStats {
+  total_tokens: number
+  input_tokens: number
+  output_tokens: number
+  cached: number
+  input: number
+}
+
 export interface ResultEvent extends GeminiStreamEvent {
   type: 'result'
   status: 'success' | 'error'
@@ -54,7 +62,10 @@ export interface ResultEvent extends GeminiStreamEvent {
     total_tokens: number
     input_tokens: number
     output_tokens: number
+    cached: number
+    input: number
     duration_ms: number
     tool_calls: number
+    models: Record<string, ModelStreamStats>
   }
 }
