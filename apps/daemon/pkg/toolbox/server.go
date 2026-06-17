@@ -3,9 +3,15 @@
 
 //	@title			Daytona Toolbox API
 //	@version		v0.0.0-dev
-//	@description	Daytona Toolbox API
+//	@description	Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Daytona Cloud: `https://proxy.app.daytona.io/toolbox/{sandboxId}`.
+//	@schemes		https
 //	@license.name	Apache-2.0
 //	@license.url	https://www.apache.org/licenses/LICENSE-2.0
+
+//	@securityDefinitions.apikey	Bearer
+//	@in							header
+//	@name						Authorization
+//	@description				Type "Bearer" followed by a space and your API key.
 
 package toolbox
 

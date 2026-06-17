@@ -1,7 +1,7 @@
 =begin
 #Daytona Toolbox API
 
-#Daytona Toolbox API
+#Daytona Toolbox API. The base URL comes from the sandbox's `toolboxProxyUrl` field (returned in sandbox DTO by the main Daytona API) plus the sandbox ID: `{toolboxProxyUrl}/{sandboxId}/{endpoint}`. Default for Daytona Cloud: `https://proxy.app.daytona.io/toolbox/{sandboxId}`.
 
 The version of the OpenAPI document: v0.0.0-dev
 
@@ -100,6 +100,7 @@ module DaytonaToolboxApiClient
       form_params = opts[:form_params] || {}
       follow_location = opts[:follow_location] || true
 
+      update_params_for_auth! header_params, query_params, opts[:auth_names]
 
       # set ssl_verifyhosts option based on @config.verify_ssl_host (true/false)
       _verify_ssl_host = @config.verify_ssl_host ? 2 : 0
