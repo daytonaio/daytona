@@ -471,13 +471,6 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/guides/pi/pi-plugin', locale),
-          label: t('sidebarconfig.pi'),
-          disablePagination: true,
-          hideInSidebar: true,
-        },
-        {
-          type: 'link',
           href: localizePath(
             '/docs/guides/langchain/langchain-data-analysis',
             locale
