@@ -45,4 +45,20 @@ public class CreateVolumeTest {
         // TODO: test name
     }
 
+    /**
+     * Test the property 'backend'
+     */
+    @Test
+    public void backendTest() {
+        // TODO: test backend
+    }
+
+    /**
+     * Test the property 'regionId'
+     */
+    @Test
+    public void regionIdTest() {
+        // TODO: test regionId
+    }
+
 }

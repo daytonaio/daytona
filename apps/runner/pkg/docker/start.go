@@ -4,10 +4,13 @@
 package docker
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
@@ -15,6 +18,7 @@ import (
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) (*container.InspectResponse, string, error) {
@@ -56,7 +60,8 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 	if volumesJSON, ok := metadata["volumes"]; ok {
 		var volumes []dto.VolumeDTO
 		if err := json.Unmarshal([]byte(volumesJSON), &volumes); err == nil && len(volumes) > 0 {
-			_, err = d.getVolumesMountPathBinds(ctx, volumes)
+			mounter := d.resolveVolumeMounter(metadata)
+			_, err = d.getVolumesMountPathBinds(ctx, volumes, mounter)
 			if err != nil {
 				d.logger.ErrorContext(ctx, "Failed to ensure volume FUSE mounts", "error", err)
 			}
@@ -151,6 +156,68 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 			if c.State.Running {
 				return c, nil
 			}
+
+			// Detect a container that exited before becoming healthy.
+			// Otherwise we'd poll until the start timeout and report a
+			// generic "entrypoint must be long-running" message that hides
+			// the real cause (e.g. a daemon-side volume mount failure).
+			if c.State.Status == container.StateExited && c.State.ExitCode != 0 {
+				return nil, d.formatEarlyExitError(ctx, containerId, c)
+			}
 		}
 	}
+}
+
+// formatEarlyExitError builds a user-facing error for a container that exited
+// before reaching Running, combining the docker exit code/reason with the
+// tail of its logs so the user gets actionable signal beyond an exit code.
+func (d *DockerClient) formatEarlyExitError(ctx context.Context, containerId string, c *container.InspectResponse) error {
+	tail := d.tailContainerLogs(ctx, containerId, 25)
+	tail = strings.TrimSpace(tail)
+
+	// Keep the message short when there are no logs, verbose when there are.
+	parts := []string{
+		fmt.Sprintf("sandbox exited prematurely with code %d", c.State.ExitCode),
+	}
+	if c.State.Error != "" {
+		parts = append(parts, fmt.Sprintf("docker reason: %s", c.State.Error))
+	}
+	if tail != "" {
+		parts = append(parts, fmt.Sprintf("last container logs:\n%s", tail))
+	} else {
+		parts = append(parts, "no container logs available — check the runner host's docker logs")
+	}
+	return errors.New(strings.Join(parts, "; "))
+}
+
+// tailContainerLogs returns up to `tail` lines of combined stdout/stderr,
+// best-effort. Errors are swallowed so a missing tail can't mask the original
+// failure.
+func (d *DockerClient) tailContainerLogs(ctx context.Context, containerId string, tail int) string {
+	rdr, err := d.apiClient.ContainerLogs(ctx, containerId, container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Tail:       fmt.Sprintf("%d", tail),
+	})
+	if err != nil {
+		return ""
+	}
+	defer rdr.Close()
+
+	var stdout, stderr bytes.Buffer
+	if _, err := stdcopy.StdCopy(&stdout, &stderr, rdr); err != nil {
+		// Keep whatever bytes were written before the error.
+	}
+
+	var combined strings.Builder
+	if stderr.Len() > 0 {
+		combined.WriteString(strings.TrimRight(stderr.String(), "\n"))
+	}
+	if stdout.Len() > 0 {
+		if combined.Len() > 0 {
+			combined.WriteString("\n")
+		}
+		combined.WriteString(strings.TrimRight(stdout.String(), "\n"))
+	}
+	return combined.String()
 }

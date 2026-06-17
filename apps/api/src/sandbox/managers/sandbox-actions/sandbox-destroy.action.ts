@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
@@ -13,16 +13,31 @@ import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { SandboxRepository } from '../../repositories/sandbox.repository'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { WithSpan } from '../../../common/decorators/otel.decorator'
+import { SandboxVolumeMountService } from '../../services/sandbox-volume-mount.service'
 
 @Injectable()
 export class SandboxDestroyAction extends SandboxAction {
+  private readonly destroyLogger = new Logger(SandboxDestroyAction.name)
+
   constructor(
     protected runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
     protected sandboxRepository: SandboxRepository,
     protected redisLockProvider: RedisLockProvider,
+    private readonly sandboxVolumeMountService: SandboxVolumeMountService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
+  }
+
+  // Revokes layered mount tokens and drops `sandbox_volume` rows.
+  // Best-effort: failures log and continue (orphaned tokens are a cleanup
+  // concern, not a correctness one).
+  private async detachVolumesBestEffort(sandboxId: string): Promise<void> {
+    try {
+      await this.sandboxVolumeMountService.detachVolumesFromSandbox(sandboxId)
+    } catch (error) {
+      this.destroyLogger.warn(`Failed to detach layered volumes for sandbox ${sandboxId}: ${error?.message ?? error}`)
+    }
   }
 
   @WithSpan()
@@ -32,6 +47,7 @@ export class SandboxDestroyAction extends SandboxAction {
     }
 
     if (sandbox.state === SandboxState.ARCHIVED || sandbox.state === SandboxState.PENDING_BUILD) {
+      await this.detachVolumesBestEffort(sandbox.id)
       await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
       return DONT_SYNC_AGAIN
     }
@@ -47,6 +63,7 @@ export class SandboxDestroyAction extends SandboxAction {
       const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
       if (sandboxInfo.state === SandboxState.DESTROYED) {
+        await this.detachVolumesBestEffort(sandbox.id)
         await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
         return DONT_SYNC_AGAIN
       }
@@ -60,6 +77,7 @@ export class SandboxDestroyAction extends SandboxAction {
     } catch (error) {
       //  if the sandbox is not found on runner, it is already destroyed
       if (error.response?.status === 404 || error.statusCode === 404) {
+        await this.detachVolumesBestEffort(sandbox.id)
         await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
         return DONT_SYNC_AGAIN
       }

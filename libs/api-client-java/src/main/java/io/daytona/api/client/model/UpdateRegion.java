@@ -66,6 +66,11 @@ public class UpdateRegion {
   @javax.annotation.Nullable
   private String snapshotManagerUrl;
 
+  public static final String SERIALIZED_NAME_STORAGE_REGION = "storageRegion";
+  @SerializedName(SERIALIZED_NAME_STORAGE_REGION)
+  @javax.annotation.Nullable
+  private String storageRegion;
+
   public UpdateRegion() {
   }
 
@@ -125,6 +130,25 @@ public class UpdateRegion {
     this.snapshotManagerUrl = snapshotManagerUrl;
   }
 
+
+  public UpdateRegion storageRegion(@javax.annotation.Nullable String storageRegion) {
+    this.storageRegion = storageRegion;
+    return this;
+  }
+
+  /**
+   * Provider-prefixed storage region slug (e.g. \&quot;aws-us-east-1\&quot;) used to pin layered volumes to a specific AWS S3 region. Pass null to clear.
+   * @return storageRegion
+   */
+  @javax.annotation.Nullable
+  public String getStorageRegion() {
+    return storageRegion;
+  }
+
+  public void setStorageRegion(@javax.annotation.Nullable String storageRegion) {
+    this.storageRegion = storageRegion;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -182,7 +206,8 @@ public class UpdateRegion {
     UpdateRegion updateRegion = (UpdateRegion) o;
     return Objects.equals(this.proxyUrl, updateRegion.proxyUrl) &&
         Objects.equals(this.sshGatewayUrl, updateRegion.sshGatewayUrl) &&
-        Objects.equals(this.snapshotManagerUrl, updateRegion.snapshotManagerUrl)&&
+        Objects.equals(this.snapshotManagerUrl, updateRegion.snapshotManagerUrl) &&
+        Objects.equals(this.storageRegion, updateRegion.storageRegion)&&
         Objects.equals(this.additionalProperties, updateRegion.additionalProperties);
   }
 
@@ -192,7 +217,7 @@ public class UpdateRegion {
 
   @Override
   public int hashCode() {
-    return Objects.hash(proxyUrl, sshGatewayUrl, snapshotManagerUrl, additionalProperties);
+    return Objects.hash(proxyUrl, sshGatewayUrl, snapshotManagerUrl, storageRegion, additionalProperties);
   }
 
   private static <T> int hashCodeNullable(JsonNullable<T> a) {
@@ -209,6 +234,7 @@ public class UpdateRegion {
     sb.append("    proxyUrl: ").append(toIndentedString(proxyUrl)).append("\n");
     sb.append("    sshGatewayUrl: ").append(toIndentedString(sshGatewayUrl)).append("\n");
     sb.append("    snapshotManagerUrl: ").append(toIndentedString(snapshotManagerUrl)).append("\n");
+    sb.append("    storageRegion: ").append(toIndentedString(storageRegion)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -228,7 +254,7 @@ public class UpdateRegion {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("proxyUrl", "sshGatewayUrl", "snapshotManagerUrl"));
+    openapiFields = new HashSet<String>(Arrays.asList("proxyUrl", "sshGatewayUrl", "snapshotManagerUrl", "storageRegion"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -255,6 +281,9 @@ public class UpdateRegion {
       }
       if ((jsonObj.get("snapshotManagerUrl") != null && !jsonObj.get("snapshotManagerUrl").isJsonNull()) && !jsonObj.get("snapshotManagerUrl").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `snapshotManagerUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("snapshotManagerUrl").toString()));
+      }
+      if ((jsonObj.get("storageRegion") != null && !jsonObj.get("storageRegion").isJsonNull()) && !jsonObj.get("storageRegion").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `storageRegion` to be a primitive type in the JSON string but got `%s`", jsonObj.get("storageRegion").toString()));
       }
   }
 

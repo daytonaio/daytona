@@ -54,6 +54,10 @@ export interface Region {
      * Snapshot Manager URL for the region
      */
     'snapshotManagerUrl'?: string | null;
+    /**
+     * Provider-prefixed storage region slug (e.g. \"aws-us-east-1\") used to pin layered volumes to a specific AWS S3 region. NULL means no layered storage is configured for this region. Operator-set.
+     */
+    'storageRegion'?: string | null;
 }
 
 

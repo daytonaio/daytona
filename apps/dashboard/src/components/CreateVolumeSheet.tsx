@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Sheet,
   SheetContent,
@@ -19,22 +20,36 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateVolumeMutation } from '@/hooks/mutations/useCreateVolumeMutation'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { FeatureFlags } from '@/enums/FeatureFlags'
 import { handleApiError } from '@/lib/error-handling'
+import { getRegionFullDisplayName } from '@/lib/utils'
+import { CreateVolume, OrganizationDefaultVolumeBackendEnum } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
-import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 const formSchema = z.object({
   name: z.string().trim().min(1, 'Volume name is required'),
+  backend: z.string().optional(),
+  regionId: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
 
 const defaultValues: FormValues = {
   name: '',
+  backend: undefined,
+  regionId: undefined,
 }
+
+const backendOptions: { value: string; label: string }[] = [
+  { value: OrganizationDefaultVolumeBackendEnum.S3FUSE, label: 'Standard' },
+  { value: OrganizationDefaultVolumeBackendEnum.LAYERED, label: 'Layered' },
+]
 
 export const CreateVolumeSheet = ({
   className,
@@ -48,15 +63,34 @@ export const CreateVolumeSheet = ({
   const [open, setOpen] = useState(false)
 
   const { selectedOrganization } = useSelectedOrganization()
+  const { availableRegions, loadingAvailableRegions } = useRegions()
   const { reset: resetCreateVolumeMutation, ...createVolumeMutation } = useCreateVolumeMutation()
   const formRef = useRef<HTMLFormElement>(null)
+
+  const backendPickerEnabled = !!useFeatureFlagEnabled(FeatureFlags.VOLUME_BACKEND_PICKER)
+  const orgDefaultBackend = selectedOrganization?.defaultVolumeBackend ?? OrganizationDefaultVolumeBackendEnum.S3FUSE
+  const regionOptions = availableRegions
+
+  // Picker lets the user choose; otherwise fall back to the org default.
+  const initialBackend = backendPickerEnabled ? orgDefaultBackend : undefined
+  const formDefaultValues = useMemo<FormValues>(
+    () => ({
+      ...defaultValues,
+      backend: initialBackend,
+      regionId:
+        orgDefaultBackend === OrganizationDefaultVolumeBackendEnum.LAYERED
+          ? selectedOrganization?.defaultRegionId
+          : undefined,
+    }),
+    [initialBackend, orgDefaultBackend, selectedOrganization?.defaultRegionId],
+  )
 
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
   }))
 
   const form = useForm({
-    defaultValues,
+    defaultValues: formDefaultValues,
     validators: {
       onSubmit: formSchema,
     },
@@ -78,9 +112,14 @@ export const CreateVolumeSheet = ({
       try {
         const volumeName = value.name.trim()
 
+        const effectiveBackend = backendPickerEnabled ? value.backend : undefined
+        const isLayered = (effectiveBackend ?? orgDefaultBackend) === OrganizationDefaultVolumeBackendEnum.LAYERED
+
         await createVolumeMutation.mutateAsync({
           volume: {
             name: volumeName,
+            backend: effectiveBackend as CreateVolume['backend'],
+            regionId: isLayered ? value.regionId : undefined,
           },
           organizationId: selectedOrganization.id,
         })
@@ -95,9 +134,9 @@ export const CreateVolumeSheet = ({
   const { reset: resetForm } = form
 
   const resetState = useCallback(() => {
-    resetForm(defaultValues)
+    resetForm(formDefaultValues)
     resetCreateVolumeMutation()
-  }, [resetForm, resetCreateVolumeMutation])
+  }, [resetForm, formDefaultValues, resetCreateVolumeMutation])
 
   useEffect(() => {
     if (open) {
@@ -150,6 +189,80 @@ export const CreateVolumeSheet = ({
                 )
               }}
             </form.Field>
+
+            {backendPickerEnabled && (
+              <form.Field name="backend">
+                {(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Backend</FieldLabel>
+                    <Select
+                      value={field.state.value ?? orgDefaultBackend}
+                      onValueChange={(v) => {
+                        field.handleChange(v)
+                        // Avoid sending a stale region for non-layered backends.
+                        if (v !== OrganizationDefaultVolumeBackendEnum.LAYERED) {
+                          form.setFieldValue('regionId', undefined)
+                        } else if (!form.getFieldValue('regionId')) {
+                          form.setFieldValue('regionId', selectedOrganization?.defaultRegionId)
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-8" id={field.name}>
+                        <SelectValue placeholder="Select a backend" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {backendOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>How the volume's data is stored and mounted.</FieldDescription>
+                  </Field>
+                )}
+              </form.Field>
+            )}
+
+            <form.Subscribe selector={(state) => state.values.backend}>
+              {(selectedBackend) => {
+                const effectiveBackend = backendPickerEnabled
+                  ? (selectedBackend ?? orgDefaultBackend)
+                  : orgDefaultBackend
+                if (effectiveBackend !== OrganizationDefaultVolumeBackendEnum.LAYERED) {
+                  return null
+                }
+                return (
+                  <form.Field name="regionId">
+                    {(field) => (
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>Region</FieldLabel>
+                        <Select value={field.state.value ?? ''} onValueChange={field.handleChange}>
+                          <SelectTrigger
+                            className="h-8"
+                            id={field.name}
+                            disabled={loadingAvailableRegions}
+                            loading={loadingAvailableRegions}
+                          >
+                            <SelectValue
+                              placeholder={loadingAvailableRegions ? 'Loading regions...' : 'Select a region'}
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {regionOptions.map((region) => (
+                              <SelectItem key={region.id} value={region.id}>
+                                {getRegionFullDisplayName(region)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FieldDescription>The region where the volume's data will be stored.</FieldDescription>
+                      </Field>
+                    )}
+                  </form.Field>
+                )
+              }}
+            </form.Subscribe>
           </form>
         </ScrollArea>
 

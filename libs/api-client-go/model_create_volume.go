@@ -22,6 +22,10 @@ var _ MappedNullable = &CreateVolume{}
 // CreateVolume struct for CreateVolume
 type CreateVolume struct {
 	Name string `json:"name"`
+	// Storage backend for this volume. 's3fuse' (default) mounts a dedicated S3 bucket on the runner host. 'layered' mounts inside the sandbox via the layered control plane and requires the volume_backend_picker feature flag. When omitted, the organization's default backend is used.
+	Backend *string `json:"backend,omitempty"`
+	// Daytona Region ID the volume should live in. Only honored for the layered backend; rejected for s3fuse. When omitted, defaults to the organization's default region.
+	RegionId *string `json:"regionId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -69,6 +73,70 @@ func (o *CreateVolume) SetName(v string) {
 	o.Name = v
 }
 
+// GetBackend returns the Backend field value if set, zero value otherwise.
+func (o *CreateVolume) GetBackend() string {
+	if o == nil || IsNil(o.Backend) {
+		var ret string
+		return ret
+	}
+	return *o.Backend
+}
+
+// GetBackendOk returns a tuple with the Backend field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateVolume) GetBackendOk() (*string, bool) {
+	if o == nil || IsNil(o.Backend) {
+		return nil, false
+	}
+	return o.Backend, true
+}
+
+// HasBackend returns a boolean if a field has been set.
+func (o *CreateVolume) HasBackend() bool {
+	if o != nil && !IsNil(o.Backend) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackend gets a reference to the given string and assigns it to the Backend field.
+func (o *CreateVolume) SetBackend(v string) {
+	o.Backend = &v
+}
+
+// GetRegionId returns the RegionId field value if set, zero value otherwise.
+func (o *CreateVolume) GetRegionId() string {
+	if o == nil || IsNil(o.RegionId) {
+		var ret string
+		return ret
+	}
+	return *o.RegionId
+}
+
+// GetRegionIdOk returns a tuple with the RegionId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateVolume) GetRegionIdOk() (*string, bool) {
+	if o == nil || IsNil(o.RegionId) {
+		return nil, false
+	}
+	return o.RegionId, true
+}
+
+// HasRegionId returns a boolean if a field has been set.
+func (o *CreateVolume) HasRegionId() bool {
+	if o != nil && !IsNil(o.RegionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegionId gets a reference to the given string and assigns it to the RegionId field.
+func (o *CreateVolume) SetRegionId(v string) {
+	o.RegionId = &v
+}
+
 func (o CreateVolume) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -80,6 +148,12 @@ func (o CreateVolume) MarshalJSON() ([]byte, error) {
 func (o CreateVolume) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+	if !IsNil(o.Backend) {
+		toSerialize["backend"] = o.Backend
+	}
+	if !IsNil(o.RegionId) {
+		toSerialize["regionId"] = o.RegionId
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -124,6 +198,8 @@ func (o *CreateVolume) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "name")
+		delete(additionalProperties, "backend")
+		delete(additionalProperties, "regionId")
 		o.AdditionalProperties = additionalProperties
 	}
 

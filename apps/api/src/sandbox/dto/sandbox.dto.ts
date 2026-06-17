@@ -41,6 +41,14 @@ export class SandboxVolume {
   @IsOptional()
   @IsString()
   subpath?: string
+
+  @ApiPropertyOptional({
+    description:
+      'Mount the volume read-only inside this sandbox. The volume itself is unchanged; this is a per-mount attribute, so the same volume can be mounted read-write in one sandbox and read-only in another. Defaults to false.',
+    example: false,
+    default: false,
+  })
+  readOnly?: boolean
 }
 
 @ApiSchema({ name: 'Sandbox' })

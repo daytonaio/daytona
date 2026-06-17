@@ -31,6 +31,7 @@ import Redis from 'ioredis'
 import { WithSpan } from '../../../common/decorators/otel.decorator'
 import { SandboxActivityService } from '../../services/sandbox-activity.service'
 import { getRunnerSandboxClass, isRegistryBasedSandboxClass } from '../../utils/sandbox-class.util'
+import { VolumeService } from '../../services/volume.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -46,6 +47,7 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
     private readonly sandboxActivityService: SandboxActivityService,
+    private readonly volumeService: VolumeService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
@@ -548,10 +550,15 @@ export class SandboxStartAction extends SandboxAction {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       const metadata: { [key: string]: string } = { ...organization?.sandboxMetadata }
-      if (sandbox.volumes?.length) {
-        metadata['volumes'] = JSON.stringify(
-          sandbox.volumes.map((v) => ({ volumeId: v.volumeId, mountPath: v.mountPath, subpath: v.subpath })),
-        )
+      // Resolve once so restart sends the same backend + (layered) disk and
+      // freshly minted token that create/recover would; otherwise start.go's
+      // FUSE-reestablish path only sees legacy s3fuse fields.
+      const prepared = await this.volumeService.prepareRunnerVolumes(sandbox.id, sandbox.volumes)
+      if (prepared.volumes.length) {
+        metadata['volumes'] = JSON.stringify(prepared.volumes)
+      }
+      if (prepared.backend) {
+        metadata['volumeBackend'] = prepared.backend
       }
 
       try {

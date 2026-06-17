@@ -483,6 +483,65 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Remove custom bucket configuration (revert to platform-managed bucket)
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def delete_custom_bucket_config(organization_id, opts = {})
+      delete_custom_bucket_config_with_http_info(organization_id, opts)
+      nil
+    end
+
+    # Remove custom bucket configuration (revert to platform-managed bucket)
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def delete_custom_bucket_config_with_http_info(organization_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.delete_custom_bucket_config ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.delete_custom_bucket_config"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/custom-bucket'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.delete_custom_bucket_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#delete_custom_bucket_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Delete organization
     # @param organization_id [String] Organization ID
     # @param [Hash] opts the optional parameters
@@ -1754,6 +1813,146 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: OrganizationsApi#regenerate_ssh_gateway_api_key\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Set custom bucket configuration for layered volumes
+    # @param organization_id [String] Organization ID
+    # @param update_organization_custom_bucket [UpdateOrganizationCustomBucket] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def set_custom_bucket_config(organization_id, update_organization_custom_bucket, opts = {})
+      set_custom_bucket_config_with_http_info(organization_id, update_organization_custom_bucket, opts)
+      nil
+    end
+
+    # Set custom bucket configuration for layered volumes
+    # @param organization_id [String] Organization ID
+    # @param update_organization_custom_bucket [UpdateOrganizationCustomBucket] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def set_custom_bucket_config_with_http_info(organization_id, update_organization_custom_bucket, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.set_custom_bucket_config ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.set_custom_bucket_config"
+      end
+      # verify the required parameter 'update_organization_custom_bucket' is set
+      if @api_client.config.client_side_validation && update_organization_custom_bucket.nil?
+        fail ArgumentError, "Missing the required parameter 'update_organization_custom_bucket' when calling OrganizationsApi.set_custom_bucket_config"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/custom-bucket'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(update_organization_custom_bucket)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.set_custom_bucket_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#set_custom_bucket_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Set default volume backend
+    # @param organization_id [String] Organization ID
+    # @param update_organization_default_volume_backend [UpdateOrganizationDefaultVolumeBackend] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def set_default_volume_backend(organization_id, update_organization_default_volume_backend, opts = {})
+      set_default_volume_backend_with_http_info(organization_id, update_organization_default_volume_backend, opts)
+      nil
+    end
+
+    # Set default volume backend
+    # @param organization_id [String] Organization ID
+    # @param update_organization_default_volume_backend [UpdateOrganizationDefaultVolumeBackend] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def set_default_volume_backend_with_http_info(organization_id, update_organization_default_volume_backend, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.set_default_volume_backend ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.set_default_volume_backend"
+      end
+      # verify the required parameter 'update_organization_default_volume_backend' is set
+      if @api_client.config.client_side_validation && update_organization_default_volume_backend.nil?
+        fail ArgumentError, "Missing the required parameter 'update_organization_default_volume_backend' when calling OrganizationsApi.set_default_volume_backend"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/default-volume-backend'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(update_organization_default_volume_backend)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.set_default_volume_backend",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#set_default_volume_backend\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

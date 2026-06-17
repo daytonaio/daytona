@@ -203,7 +203,9 @@ src/main/java/io/daytona/api/client/model/TraceSpan.java
 src/main/java/io/daytona/api/client/model/TraceSummary.java
 src/main/java/io/daytona/api/client/model/UpdateDockerRegistry.java
 src/main/java/io/daytona/api/client/model/UpdateJobStatus.java
+src/main/java/io/daytona/api/client/model/UpdateOrganizationCustomBucket.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationDefaultRegion.java
+src/main/java/io/daytona/api/client/model/UpdateOrganizationDefaultVolumeBackend.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationInvitation.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationMemberAccess.java
 src/main/java/io/daytona/api/client/model/UpdateOrganizationQuota.java
@@ -404,7 +406,9 @@ src/test/java/io/daytona/api/client/model/TraceSpanTest.java
 src/test/java/io/daytona/api/client/model/TraceSummaryTest.java
 src/test/java/io/daytona/api/client/model/UpdateDockerRegistryTest.java
 src/test/java/io/daytona/api/client/model/UpdateJobStatusTest.java
+src/test/java/io/daytona/api/client/model/UpdateOrganizationCustomBucketTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationDefaultRegionTest.java
+src/test/java/io/daytona/api/client/model/UpdateOrganizationDefaultVolumeBackendTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationInvitationTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationMemberAccessTest.java
 src/test/java/io/daytona/api/client/model/UpdateOrganizationQuotaTest.java

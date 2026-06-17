@@ -4,6 +4,7 @@
 package docker
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
+	"github.com/daytonaio/runner/pkg/volume"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
@@ -41,13 +43,13 @@ func isAndroidDeviceContainer(c *container.InspectResponse) bool {
 	return c.Config.Labels[androidDeviceLabel] == "true"
 }
 
-func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string, gpuIndex *int) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
-	containerConfig, err := d.getContainerCreateConfig(sandboxDto, image, gpuIndex)
+func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, volumeMountPathBinds []string, gpuIndex *int, mounter volume.Mounter) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
+	containerConfig, err := d.getContainerCreateConfig(ctx, sandboxDto, image, gpuIndex, mounter)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds, gpuIndex)
+	hostConfig, err := d.getContainerHostConfig(sandboxDto, volumeMountPathBinds, gpuIndex, mounter)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -57,7 +59,29 @@ func (d *DockerClient) getContainerConfigs(sandboxDto dto.CreateSandboxDTO, imag
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
-func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, gpuIndex *int) (*container.Config, error) {
+// volumesToMounterSpec converts volume DTOs into the package-neutral
+// volume.Volume shape consumed by InContainerMounter.
+func volumesToMounterSpec(in []dto.VolumeDTO) []volume.Volume {
+	out := make([]volume.Volume, 0, len(in))
+	for _, v := range in {
+		subpath := ""
+		if v.Subpath != nil {
+			subpath = *v.Subpath
+		}
+		out = append(out, volume.Volume{
+			VolumeID:          v.VolumeId,
+			MountPath:         v.MountPath,
+			Subpath:           subpath,
+			ReadOnly:          v.ReadOnly,
+			LayeredDisk:       v.LayeredDisk,
+			LayeredRegion:     v.LayeredRegion,
+			LayeredMountToken: v.LayeredMountToken,
+		})
+	}
+	return out
+}
+
+func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, image *image.InspectResponse, gpuIndex *int, mounter volume.Mounter) (*container.Config, error) {
 	if image == nil {
 		return nil, fmt.Errorf("image not found for sandbox: %s", sandboxDto.Id)
 	}
@@ -98,6 +122,17 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 
 	if sandboxDto.RegionId != nil && *sandboxDto.RegionId != "" {
 		envVars = append(envVars, "DAYTONA_REGION_ID="+*sandboxDto.RegionId)
+	}
+
+	// In-container mounters inject the volume spec + scoped credentials via
+	// env so the daemon can mount from within the sandbox. This may hit the
+	// network (e.g. STS AssumeRole) and fail; surface the error.
+	if icm, ok := mounter.(volume.InContainerMounter); ok && len(sandboxDto.Volumes) > 0 {
+		extra, err := icm.ContainerEnv(ctx, volumesToMounterSpec(sandboxDto.Volumes))
+		if err != nil {
+			return nil, fmt.Errorf("in-container volume env: %w", err)
+		}
+		envVars = append(envVars, extra...)
 	}
 
 	labels := make(map[string]string)
@@ -177,7 +212,7 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 	}, nil
 }
 
-func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string, gpuIndex *int) (*container.HostConfig, error) {
+func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string, gpuIndex *int, mounter volume.Mounter) (*container.HostConfig, error) {
 	// Android-device sandboxes run on plain docker runtime, without the bundled
 	// daytona daemon, and require /dev/kvm to be mounted for emulator acceleration.
 	if sandboxDto.IsAndroidSandbox() {
@@ -195,6 +230,11 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 
 	if len(volumeMountPathBinds) > 0 {
 		binds = append(binds, volumeMountPathBinds...)
+	}
+
+	// In-container mounters may need extra RO binds (e.g. the mount-s3 binary).
+	if icm, ok := mounter.(volume.InContainerMounter); ok {
+		binds = append(binds, icm.ContainerBinds()...)
 	}
 
 	hostConfig := &container.HostConfig{

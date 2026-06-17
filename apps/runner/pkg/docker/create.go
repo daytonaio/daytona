@@ -149,9 +149,11 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", "", err
 	}
 
+	mounter := d.resolveVolumeMounter(sandboxDto.Metadata)
+
 	volumeMountPathBinds := make([]string, 0)
 	if sandboxDto.Volumes != nil {
-		volumeMountPathBinds, err = d.getVolumesMountPathBinds(ctx, sandboxDto.Volumes)
+		volumeMountPathBinds, err = d.getVolumesMountPathBinds(ctx, sandboxDto.Volumes, mounter)
 		if err != nil {
 			return "", "", err
 		}
@@ -183,7 +185,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		gpuIndex = &idx
 	}
 
-	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(sandboxDto, image, volumeMountPathBinds, gpuIndex)
+	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(ctx, sandboxDto, image, volumeMountPathBinds, gpuIndex, mounter)
 	if err != nil {
 		return "", "", err
 	}

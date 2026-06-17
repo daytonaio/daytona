@@ -1928,8 +1928,24 @@
     "dto.VolumeDTO": {
       "type": "object",
       "properties": {
+        "layeredDisk": {
+          "description": "LayeredDisk identifies the layered-volume disk to mount, in the\nform \"owner/disk-name\" or \"dsk-XXXXXXXXXXXXXXXX\". Required when the\nsandbox uses the in-container layered backend.",
+          "type": "string"
+        },
+        "layeredMountToken": {
+          "description": "LayeredMountToken is the per-(sandbox, volume) mount token used to\nauthenticate the mount inside the sandbox. The runner forwards it\nto the daemon via env vars and never stores or logs it. Required\nwhen LayeredDisk is set.",
+          "type": "string"
+        },
+        "layeredRegion": {
+          "description": "LayeredRegion is the region the layered disk lives in\n(e.g. \"aws-us-east-1\"). Required when LayeredDisk is set.",
+          "type": "string"
+        },
         "mountPath": {
           "type": "string"
+        },
+        "readOnly": {
+          "description": "ReadOnly mounts the volume read-only for this sandbox. It is a\nper-mount attribute (not a per-volume one), so the same volume can\nbe mounted RW in one sandbox and RO in another. The s3fuse path\nenforces it via the Docker bind mode (\":ro\"); the layered path\nforwards it to the in-container mount binary's `--read-only` flag.",
+          "type": "boolean"
         },
         "subpath": {
           "type": "string"
