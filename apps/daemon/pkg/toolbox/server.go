@@ -375,6 +375,7 @@ func (s *server) Start() error {
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),
 		Handler: r,
 	}
+	common_proxy.ApplyServerTimeouts(s.httpServer)
 
 	// Print to stdout so the runner can know that the daemon is ready
 	fmt.Println("Starting toolbox server on port", config.TOOLBOX_API_PORT)
