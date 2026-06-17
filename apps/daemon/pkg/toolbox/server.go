@@ -187,6 +187,7 @@ func (s *server) Start() error {
 
 		// delete operations
 		fsController.DELETE("/", fs.DeleteFile)
+		fsController.DELETE("", fs.DeleteFile)
 	}
 
 	processLogger := s.logger.With(slog.String("component", "process_controller"))
