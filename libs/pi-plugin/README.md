@@ -94,7 +94,7 @@ The agent runs on your machine. Pi's tool layer is pluggable, so this extension 
 ### Lifecycle
 
 - **One sandbox per session, kept across runs.** A session's sandbox is recorded and **reattached** when you resume the session — your work and environment persist.
-- **Idle pauses** the sandbox (`autoStopInterval: 5` min). Its filesystem is preserved; resuming transparently restarts it.
+- **Idle pauses** the sandbox after 15 min (`autoStopInterval`, overridable with `--idle-stop <minutes>`). Its filesystem is preserved; resuming transparently restarts it.
 - **Deleted when the session is.** When you delete a session from Pi's resume menu, its sandbox is reaped on the next Pi launch/exit (Pi has no session-deleted hook, so the extension reconciles live sessions against its sandboxes). There is no auto-delete timer — a sandbox lives until its session is gone.
 - **In-memory sessions** (`--blank` / no session) can't be resumed, so their sandbox is deleted on exit.
 

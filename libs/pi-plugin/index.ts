@@ -67,6 +67,7 @@ export default function (pi: ExtensionAPI) {
   pi.registerFlag('branch', { description: 'Branch to clone (with --repo)', type: 'string' })
   pi.registerFlag('snapshot', { description: 'Daytona snapshot/base image to use', type: 'string' })
   pi.registerFlag('public', { description: 'Create a public sandbox (preview URLs need no token)', type: 'boolean' })
+  pi.registerFlag('idle-stop', { description: 'Minutes idle before the sandbox pauses (default 15)', type: 'string' })
 
   // Resolved lazily on session_start (CLI flags are not available at load time).
   let active: ActiveSandbox | null = null
@@ -267,7 +268,8 @@ export default function (pi: ExtensionAPI) {
         // Idle PAUSES the sandbox (filesystem preserved); the next tool call
         // transparently restarts it (see withRecovery). Auto-delete is disabled —
         // the sandbox is reaped only when its session is deleted (see reapOrphans).
-        autoStopInterval: 5, // minutes idle -> stop (pause)
+        // Default 15 min (matches Daytona's own default); overridable via --idle-stop.
+        autoStopInterval: numberFlag(pi.getFlag('idle-stop')) ?? 15,
         autoDeleteInterval: -1, // never auto-delete
         labels: { 'created-by': 'pi-daytona', 'session-id': sessionId },
       })
@@ -489,6 +491,12 @@ function setRunningStatus(ctx: ExtensionContext, id: string, cwd: string): void 
 
 function stringFlag(value: boolean | string | undefined): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined
+}
+
+/** Parse a flag into a positive integer (minutes), or undefined if unset/invalid. */
+function numberFlag(value: boolean | string | undefined): number | undefined {
+  const n = typeof value === 'string' ? Number(value) : NaN
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined
 }
 
 function errorMessage(err: unknown): string {
