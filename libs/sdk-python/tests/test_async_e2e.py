@@ -25,7 +25,7 @@ from collections.abc import AsyncIterator
 import pytest
 import pytest_asyncio
 
-from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams
+from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams, ListSandboxesQuery
 from daytona.common.errors import DaytonaConnectionError, DaytonaError, DaytonaNotFoundError
 
 if not os.getenv("DAYTONA_API_KEY"):
@@ -105,18 +105,20 @@ async def test_async_get_sandbox_by_id(async_daytona_client, async_sandbox):
 
 
 async def test_async_list_sandboxes_contains_created(async_daytona_client, async_sandbox):
-    result = await async_daytona_client.list()
-    assert result.total > 0
+    sandboxes = [s async for s in async_daytona_client.list()]
+    assert len(sandboxes) > 0
     assert any(
-        s.id == async_sandbox.id for s in result.items
+        s.id == async_sandbox.id for s in sandboxes
     ), f"Expected created sandbox {async_sandbox.id} to appear in list"
 
 
 async def test_async_list_with_pagination(async_daytona_client, async_sandbox):
-    result = await async_daytona_client.list(page=1, limit=1)
-    assert result.total >= 1
-    assert len(result.items) <= 1
-    assert result.page == 1
+    yielded = 0
+    async for _ in async_daytona_client.list(ListSandboxesQuery(limit=1)):
+        yielded += 1
+        if yielded >= 1:
+            break
+    assert yielded >= 1
 
 
 async def test_async_get_unknown_sandbox_raises_not_found(async_daytona_client):
