@@ -10,6 +10,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 RUN npm install -g corepack && corepack enable
 
+# Pre-cache Node headers so that if a native module's prebuilt-binary download
+# times out and node-gyp falls back to compiling from source, the header tarball
+# is already local — no flaky network/DNS lookup mid-install. Retried to absorb
+# transient DNS failures on this single fetch.
+RUN for i in 1 2 3; do npx --yes node-gyp install && break || sleep 5; done
+
 WORKDIR /daytona
 
 # Yarn caching layer

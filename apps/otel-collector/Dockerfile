@@ -11,6 +11,12 @@ RUN apk add --no-cache python3 make g++
 
 RUN npm install -g corepack && corepack enable
 
+# Pre-cache Node headers so that if a native module's prebuilt-binary download
+# times out and node-gyp falls back to compiling from source, the header tarball
+# is already local — no flaky network/DNS lookup mid-install. Retried to absorb
+# transient DNS failures on this single fetch.
+RUN for i in 1 2 3; do npx --yes node-gyp install && break || sleep 5; done
+
 COPY --from=go-toolchain /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
