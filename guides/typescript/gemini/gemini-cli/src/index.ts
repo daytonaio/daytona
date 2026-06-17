@@ -55,7 +55,7 @@ async function main() {
       },
     })
 
-    process.once('SIGINT', cleanup)
+    process.once('SIGINT', () => cleanup())
 
     console.log('Installing Gemini CLI...')
     const install = await sandbox.process.executeCommand('npm install -g @google/gemini-cli')
@@ -68,7 +68,7 @@ async function main() {
     await session.initialize()
 
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-    rl.once('SIGINT', cleanup)
+    rl.once('SIGINT', () => cleanup())
 
     console.log('Agent ready. Press Ctrl+C at any time to exit.\n')
 
