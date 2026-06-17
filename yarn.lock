@@ -22051,7 +22051,7 @@ __metadata:
     tailwind-merge: "npm:^3.6.0"
     tailwind-scrollbar: "npm:^4.0.2"
     tailwindcss: "npm:^4.3.0"
-    tar: "npm:^7.5.11"
+    tar: "npm:^7.5.16"
     ts-jest: "npm:29.4.1"
     ts-node: "npm:10.9.1"
     tslib: "npm:^2.8.1"
@@ -39474,16 +39474,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^7.5.11":
-  version: 7.5.11
-  resolution: "tar@npm:7.5.11"
+"tar@npm:^7.5.16":
+  version: 7.5.16
+  resolution: "tar@npm:7.5.16"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10c0/b6bb420550ef50ef23356018155e956cd83282c97b6128d8d5cfe5740c57582d806a244b2ef0bf686a74ce526babe8b8b9061527623e935e850008d86d838929
+  checksum: 10c0/4f37f3c4bd2ca2755fd736a5df1d573c1a868ec1b1e893346aeafa95ac510f9e2fd1469420bd866cc7904799e5bd4ac62b5d4f03fe27747d6e1e373b44505c5c
   languageName: node
   linkType: hard
 
