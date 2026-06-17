@@ -468,7 +468,9 @@ function Breadcrumbs() {
               </span>
             )}
             <button
-              className={cn(isLast && 'font-medium', 'hover:text-foreground transition-colors')}
+              className={cn('hover:text-foreground transition-colors', {
+                'font-medium': isLast,
+              })}
               onClick={() => goToPage(id)}
             >
               {page?.meta.label ?? id}
@@ -667,7 +669,7 @@ export function CommandError({
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-2 text-sm text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+          className="mt-2 text-sm text-primary hover:underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded"
         >
           Try again
         </button>

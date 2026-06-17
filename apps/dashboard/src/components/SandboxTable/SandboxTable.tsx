@@ -128,7 +128,12 @@ export function SandboxTable({
   }, [availableSandboxClasses])
 
   const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
-  const tableFilters = useMemo(() => convertApiFiltersToTableFilters(filters), [filters])
+  const tableFilters = useMemo(() => {
+    const visibleColumnIds = new Set(
+      visibleColumns.map((column) => column.id).filter((id): id is string => Boolean(id)),
+    )
+    return convertApiFiltersToTableFilters(filters).filter((filter) => visibleColumnIds.has(filter.id))
+  }, [filters, visibleColumns])
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
     return regionsData.map((region) => ({

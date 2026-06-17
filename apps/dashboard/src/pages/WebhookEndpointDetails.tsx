@@ -38,7 +38,7 @@ import { useReplayWebhookEventMutation } from '@/hooks/mutations/useReplayWebhoo
 import { useRotateWebhookSecretMutation } from '@/hooks/mutations/useRotateWebhookSecretMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
-import { getMaskedToken, getRelativeTimeString } from '@/lib/utils'
+import { cn, getMaskedToken, getRelativeTimeString } from '@/lib/utils'
 import { ArrowLeft, Eye, EyeOff, Loader2, MoreHorizontal, RefreshCcw } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
@@ -284,7 +284,11 @@ const WebhookEndpointDetails: React.FC = () => {
                         </div>
                       </div>
                     ) : stats.data ? (
-                      <div className={statsIsFetching ? 'opacity-50 transition-opacity' : ''}>
+                      <div
+                        className={cn({
+                          'opacity-50 transition-opacity': statsIsFetching,
+                        })}
+                      >
                         <DeliveryStatsLine stats={stats.data} />
                       </div>
                     ) : null}

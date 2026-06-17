@@ -24,7 +24,7 @@ function PlaygroundLayoutContent({ children, className }: { children: React.Reac
   return (
     <div
       className={cn(
-        'overflow-auto bg-[radial-gradient(hsl(var(--border))_1px,transparent_1px)] [background-size:12px_12px] flex items-center justify-center p-5 flex-col',
+        'overflow-auto bg-[radial-gradient(var(--border)_1px,transparent_1px)] [background-size:12px_12px] flex items-center justify-center p-5 flex-col',
         className,
       )}
     >

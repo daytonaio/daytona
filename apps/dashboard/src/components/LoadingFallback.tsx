@@ -33,7 +33,7 @@ function SidebarSkeletonItem({ width }: { width: string }) {
     <SidebarMenuItem>
       <div className="flex h-8 items-center gap-2 rounded-md px-2">
         <Skeleton className="size-4 shrink-0 rounded-sm" />
-        <Skeleton className={`h-4 ${width} group-data-[collapsible=icon]:hidden`} />
+        <Skeleton className={cn('h-4 group-data-[collapsible=icon]:hidden', width)} />
       </div>
     </SidebarMenuItem>
   )

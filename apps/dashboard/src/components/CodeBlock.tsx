@@ -27,7 +27,7 @@ const oneDark = {
   ...themes.oneDark,
   plain: {
     ...themes.oneDark.plain,
-    background: 'hsl(var(--code-background))',
+    background: 'var(--code-background)',
   },
 }
 

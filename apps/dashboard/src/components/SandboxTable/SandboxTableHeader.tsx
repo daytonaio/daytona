@@ -20,6 +20,7 @@ import {
   Tag,
   Wrench,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { SearchInput } from '../SearchInput'
 import TooltipButton from '../TooltipButton'
 import { Button } from '../ui/button'
@@ -77,9 +78,10 @@ export function SandboxTableHeader({
   onRefresh,
   isRefreshing = false,
 }: SandboxTableHeaderProps) {
-  const classColumnAvailable = Boolean(table.getColumn('sandboxClass'))
+  const sandboxClassColumn = table.getAllLeafColumns().find((column) => column.id === 'sandboxClass')
+  const classColumnAvailable = Boolean(sandboxClassColumn)
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
-  const hasClassFilter = ((table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []).length > 0
+  const hasClassFilter = ((sandboxClassColumn?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
   const hasRegionFilter = ((table.getColumn('region')?.getFilterValue() as string[]) || []).length > 0
   const hasLabelsFilter = ((table.getColumn('labels')?.getFilterValue() as string[]) || []).length > 0
@@ -146,8 +148,8 @@ export function SandboxTableHeader({
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent className="p-0 w-64">
                       <SandboxClassFilter
-                        value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
-                        onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
+                        value={(sandboxClassColumn?.getFilterValue() as string[]) || []}
+                        onFilterChange={(value) => sandboxClassColumn?.setFilterValue(value)}
                       />
                     </DropdownMenuSubContent>
                   </DropdownMenuPortal>
@@ -289,7 +291,7 @@ export function SandboxTableHeader({
             className="shrink-0"
             tooltipText="Refresh"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={cn('w-4 h-4', { 'animate-spin': isRefreshing })} />
           </TooltipButton>
           <SandboxTableSettings table={table} />
         </div>
@@ -313,10 +315,10 @@ export function SandboxTableHeader({
               onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
             />
           )}
-          {hasClassFilter && (
+          {classColumnAvailable && hasClassFilter && (
             <SandboxClassFilterIndicator
-              value={(table.getColumn('sandboxClass')?.getFilterValue() as string[]) || []}
-              onFilterChange={(value) => table.getColumn('sandboxClass')?.setFilterValue(value)}
+              value={(sandboxClassColumn?.getFilterValue() as string[]) || []}
+              onFilterChange={(value) => sandboxClassColumn?.setFilterValue(value)}
             />
           )}
           {hasRegionFilter && (

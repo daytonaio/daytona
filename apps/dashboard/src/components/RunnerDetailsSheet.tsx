@@ -6,7 +6,7 @@
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
+import { cn, formatTimestamp, getRelativeTimeString } from '@/lib/utils'
 import { Runner, RunnerState } from '@daytona/api-client'
 import { Copy, Trash, X, CheckCircle, AlertTriangle, Timer, Pause } from 'lucide-react'
 import React from 'react'
@@ -148,7 +148,7 @@ const RunnerDetailsSheet: React.FC<RunnerDetailsSheetProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <h3 className="text-sm text-muted-foreground">State</h3>
-                <div className={`mt-1 flex items-center gap-2 ${getStateColor(runner.state)}`}>
+                <div className={cn('mt-1 flex items-center gap-2', getStateColor(runner.state))}>
                   {getStateIcon(runner.state)}
                   <span className="text-sm font-medium">{getStateLabel(runner.state)}</span>
                 </div>

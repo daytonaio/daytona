@@ -248,10 +248,9 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
                   >
                     <TableCell>
                       <ChevronDown
-                        className={cn(
-                          'size-4 transition-transform duration-200',
-                          expandedRow === index && 'rotate-180',
-                        )}
+                        className={cn('size-4 transition-transform duration-200', {
+                          'rotate-180': expandedRow === index,
+                        })}
                       />
                     </TableCell>
                     <TableCell className="font-mono text-xs">{formatTimestamp(log.timestamp)}</TableCell>

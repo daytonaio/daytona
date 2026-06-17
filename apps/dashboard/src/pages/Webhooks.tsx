@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
+import { cn } from '@/lib/utils'
 import { AlertCircle, PlusIcon, RefreshCw } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -133,7 +134,9 @@ const Webhooks: React.FC = () => {
             <UpsertEndpointSheet
               onSuccess={handleSuccess}
               ref={createEndpointSheetRef}
-              className={activeTab === 'endpoints' ? '' : 'hidden'}
+              className={cn({
+                hidden: activeTab !== 'endpoints',
+              })}
             />
           }
         />

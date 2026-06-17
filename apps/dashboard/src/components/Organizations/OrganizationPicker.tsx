@@ -156,7 +156,7 @@ export const OrganizationPicker: React.FC = () => {
             <ChevronsUpDown className="ml-auto w-4 h-4 opacity-50" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
+        <DropdownMenuContent className="w-(--radix-popper-anchor-width)">
           <div className="max-h-44 overflow-y-auto">
             {sortedOrganizations.map((org) => (
               <DropdownMenuItem

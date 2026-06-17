@@ -81,7 +81,9 @@ export function AuditLogTable({
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
       <div className="flex items-center justify-between gap-2 empty:hidden">{toolbarActions}</div>
       <TableContainer
-        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        className={cn({
+          'min-h-[26rem]': isEmpty,
+        })}
         empty={
           isEmpty ? (
             <TableEmptyState
@@ -266,7 +268,7 @@ const auditLogColumns: ColumnDef<AuditLog>[] = [
 
       return (
         <div className="space-y-1">
-          <div className={`font-medium ${outcomeInfo.colorClass}`}>{outcomeInfo.label}</div>
+          <div className={cn('font-medium', outcomeInfo.colorClass)}>{outcomeInfo.label}</div>
           {!errorMessage ? (
             <div className="text-sm text-muted-foreground truncate">{statusCode || '204'}</div>
           ) : (

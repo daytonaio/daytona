@@ -225,7 +225,11 @@ export function WebhooksEndpointTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className={`${isLoading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none'}`}
+                    className={cn({
+                      'opacity-50 pointer-events-none': isLoading,
+                      'cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-hidden':
+                        !isLoading,
+                    })}
                     tabIndex={isLoading ? undefined : 0}
                     role={isLoading ? undefined : 'link'}
                     onClick={() => {
