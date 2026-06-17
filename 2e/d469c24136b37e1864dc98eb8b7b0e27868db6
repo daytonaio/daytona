@@ -1,0 +1,33 @@
+apps/ssh-gateway/Dockerfile
+  s_4b21de81e71f22::t_30615535750c5f 7-11
+apps/otel-collector/Dockerfile
+  s_4b21de81e71f22::t_aa69480e70d162 7-11
+apps/snapshot-manager/Dockerfile
+  s_4b21de81e71f22::t_6949609396b193 7-11
+apps/api/Dockerfile
+  s_4b21de81e71f22::t_529af972b2c635 6-8,10
+apps/runner/Dockerfile
+  s_4b21de81e71f22::t_c4f5c3d565aa4f 7-11
+apps/dashboard/Dockerfile
+  s_4b21de81e71f22::t_02fc4ad9c87eb3 5-9
+apps/docs/Dockerfile
+  s_4b21de81e71f22::t_9dee73d2326c7a 5-9
+apps/proxy/Dockerfile
+  s_4b21de81e71f22::t_d52f98f2a45567 7-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "2ed469c24136b37e1864dc98eb8b7b0e27868db6",
+  "prompts": {},
+  "sessions": {
+    "s_4b21de81e71f22": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "023c25a4-c6a1-4cff-975d-746bb698d596",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
