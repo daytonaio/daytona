@@ -24,6 +24,8 @@ func TestFilesRoutesAcceptSlashAndNoSlash(t *testing.T) {
 	{
 		fsController.GET("/", fs.ListFiles)
 		fsController.GET("", fs.ListFiles)
+		fsController.DELETE("/", fs.DeleteFile)
+		fsController.DELETE("", fs.DeleteFile)
 	}
 
 	tempDir := t.TempDir()
@@ -44,6 +46,40 @@ func TestFilesRoutesAcceptSlashAndNoSlash(t *testing.T) {
 
 	if statusSlash != http.StatusOK {
 		t.Fatalf("GET /files/ returned status %d, want %d", statusSlash, http.StatusOK)
+	}
+
+	deleteFileNoSlash, err := os.CreateTemp(t.TempDir(), "delete-no-slash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := deleteFileNoSlash.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	deleteFileSlash, err := os.CreateTemp(t.TempDir(), "delete-slash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := deleteFileSlash.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	checkDelete := func(path string) int {
+		req := httptest.NewRequest(http.MethodDelete, path, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+		return w.Code
+	}
+
+	deleteStatusNoSlash := checkDelete("/files?path=" + deleteFileNoSlash.Name())
+	deleteStatusSlash := checkDelete("/files/?path=" + deleteFileSlash.Name())
+
+	if deleteStatusNoSlash != http.StatusNoContent {
+		t.Fatalf("DELETE /files returned status %d, want %d", deleteStatusNoSlash, http.StatusNoContent)
+	}
+
+	if deleteStatusSlash != http.StatusNoContent {
+		t.Fatalf("DELETE /files/ returned status %d, want %d", deleteStatusSlash, http.StatusNoContent)
 	}
 }
 
