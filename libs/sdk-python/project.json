@@ -25,14 +25,14 @@
       "outputs": [],
       "options": {
         "cwd": "{workspaceRoot}",
-        "command": "poetry run python -m pytest libs/sdk-python/tests/ -v --tb=short --ignore=libs/sdk-python/tests/test_e2e.py"
+        "command": "poetry run python -m pytest libs/sdk-python/tests/ -v --tb=short --ignore=libs/sdk-python/tests/test_e2e.py --ignore=libs/sdk-python/tests/test_async_e2e.py"
       }
     },
     "test:e2e": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{workspaceRoot}",
-        "command": "poetry run python -m pytest libs/sdk-python/tests/test_e2e.py -v -s --timeout=180"
+        "command": "poetry run python -m pytest libs/sdk-python/tests/test_e2e.py libs/sdk-python/tests/test_async_e2e.py -v -s --timeout=180"
       }
     },
     "add-api-clients": {

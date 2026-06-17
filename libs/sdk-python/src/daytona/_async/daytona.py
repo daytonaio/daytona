@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
 import warnings
 from collections.abc import AsyncIterator
 from copy import deepcopy
@@ -57,6 +58,37 @@ from ..internal.shared_session import SharedAiohttpSession
 from .sandbox import AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
+
+_MISSING_HAPPY_EYEBALLS_DELAY = object()
+
+
+def _resolve_happy_eyeballs_delay(raw: str | None) -> object:
+    """Parse ``DAYTONA_HAPPY_EYEBALLS_DELAY`` into the value forwarded to
+    ``aiohttp.TCPConnector``.
+
+    - unset / empty → ``_MISSING_HAPPY_EYEBALLS_DELAY`` sentinel; the caller
+      omits the kwarg so ``aiohttp`` applies its own default
+    - ``"none"`` (case-insensitive) → ``None``; disables the IPv4/IPv6 race
+    - any finite non-negative float → that value, in seconds
+    - anything else (NaN, +/-inf, negative, non-numeric, …) →
+      :class:`DaytonaValidationError`
+    """
+    if raw is None or raw.strip() == "":
+        return _MISSING_HAPPY_EYEBALLS_DELAY
+    value = raw.strip()
+    if value.lower() == "none":
+        return None
+    invalid_message = f"DAYTONA_HAPPY_EYEBALLS_DELAY must be a finite non-negative float or 'none', got {raw!r}"
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise DaytonaValidationError(invalid_message) from exc
+    # ``float()`` accepts ``"nan"``, ``"inf"`` and ``"-inf"`` (case-insensitive).
+    # NaN compares False against any number, so ``parsed < 0`` would silently
+    # let it through; +inf would pass too.  ``math.isfinite`` rejects both.
+    if not math.isfinite(parsed) or parsed < 0:
+        raise DaytonaValidationError(invalid_message)
+    return parsed
 
 
 class AsyncDaytona:
@@ -195,11 +227,21 @@ class AsyncDaytona:
         pool_size = config.connection_pool_maxsize if config else 250
         configuration.connection_pool_maxsize = pool_size  # pyright: ignore[reportAttributeAccessIssue]
 
+        # ``DAYTONA_HAPPY_EYEBALLS_DELAY`` lets callers tune (or fully disable)
+        # aiohttp's RFC 8305 IPv4/IPv6 connection race. Introduced as an
+        # opt-out for users running on packages with known IP-resolution
+        # bugs (e.g. uvloop<=0.22.1, MagicStack/uvloop#738).
+        env_reader = env_reader or DaytonaEnvReader()
+        session_kwargs: dict[str, float | None] = {}
+        happy_eyeballs_delay = _resolve_happy_eyeballs_delay(env_reader.get("DAYTONA_HAPPY_EYEBALLS_DELAY"))
+        if happy_eyeballs_delay is not _MISSING_HAPPY_EYEBALLS_DELAY:
+            session_kwargs["happy_eyeballs_delay"] = cast(float | None, happy_eyeballs_delay)
+
         # All async traffic funnels through one aiohttp.ClientSession (both rest_clients
         # plus direct WS/streaming use). aiohttp.TCPConnector requires a running event
         # loop, so the session is lazy-created on the first awaited request and the
         # coordinator propagates it across attached rest_clients.
-        self._shared_session: SharedAiohttpSession = SharedAiohttpSession()
+        self._shared_session: SharedAiohttpSession = SharedAiohttpSession(**session_kwargs)
 
         self._api_client: ApiClient = ApiClient(configuration)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
@@ -254,12 +296,11 @@ class AsyncDaytona:
         )
 
         # Initialize OpenTelemetry if enabled
-        env = env_reader or DaytonaEnvReader()
         otel_enabled = (
             (config and config.otel_enabled)
             or (config and config._experimental and config._experimental.get("otelEnabled"))
-            or env.get("DAYTONA_OTEL_ENABLED") == "true"
-            or env.get("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
+            or env_reader.get("DAYTONA_OTEL_ENABLED") == "true"
+            or env_reader.get("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
         )
         if otel_enabled:
             self._init_otel(sdk_version)
