@@ -44,8 +44,10 @@ export async function runRemoteGrep(sandbox: Sandbox, cwd: string, params: GrepP
   const requested = limit ?? DEFAULT_LIMIT
   const max = Number.isFinite(requested) ? Math.max(1, Math.floor(requested)) : DEFAULT_LIMIT
   // Same guard as `max`: context is interpolated into `--context`/`-C`, so reject
-  // Infinity/non-integer before it becomes e.g. `--context Infinity`.
-  const ctxLines = Number.isFinite(context) && context > 0 ? Math.floor(context) : 0
+  // Infinity/non-integer before it becomes e.g. `--context Infinity`. Default to 0
+  // first so the value narrows to a number (mirrors find-tool.ts).
+  const ctxRequested = context ?? 0
+  const ctxLines = Number.isFinite(ctxRequested) && ctxRequested > 0 ? Math.floor(ctxRequested) : 0
 
   const rg = ['rg', '--line-number', '--no-heading', '--color=never', '--hidden']
   if (ignoreCase) rg.push('--ignore-case')
