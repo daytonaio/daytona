@@ -37,13 +37,8 @@ func getWindowsX11() ([]computeruse.WindowInfo, error) {
 			continue
 		}
 
-		id := 0
-		if pid, err := ewmh.WmPidGet(xu, win); err == nil {
-			id = int(pid)
-		}
-
 		windows = append(windows, computeruse.WindowInfo{
-			ID:    id,
+			ID:    int(win),
 			Title: title,
 			Position: computeruse.Position{
 				X: 0, // Would need platform-specific implementation.
