@@ -188,6 +188,17 @@ class TestImageFromDockerfile:
             finally:
                 os.unlink(f.name)
 
+    def test_from_dockerfile_parses_json_copy_with_spaces(self, tmp_path):
+        source = tmp_path / "config with spaces.txt"
+        source.write_text("test content")
+        dockerfile = tmp_path / "Dockerfile"
+        dockerfile.write_text('FROM python:3.12\nCOPY ["config with spaces.txt", "/app/config with spaces.txt"]\n')
+
+        img = Image.from_dockerfile(dockerfile)
+
+        assert img._context_list[0].source_path == str(source)
+        assert img._context_list[0].archive_path == "config with spaces.txt"
+
     def test_missing_dockerfile_raises(self):
         with pytest.raises(DaytonaError, match="does not exist"):
             Image.from_dockerfile("/nonexistent/Dockerfile")
@@ -267,3 +278,12 @@ class TestImageAddLocal:
                 assert f"/app/{os.path.basename(f.name)}" in img.dockerfile()
             finally:
                 os.unlink(f.name)
+
+    def test_add_local_file_handles_spaces_in_filename(self, tmp_path):
+        local_file = tmp_path / "config with spaces.txt"
+        local_file.write_text("test content")
+
+        img = Image.base("python:3.12").add_local_file(local_file, "/app/config with spaces.txt")
+
+        archive_path = str(local_file).lstrip("/")
+        assert f'COPY ["{archive_path}", "/app/config with spaces.txt"]' in img.dockerfile()

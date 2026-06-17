@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import glob
+import json
 import os
 import re
 import shlex
@@ -240,7 +241,7 @@ class Image(BaseModel):
 
         archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
-        self._dockerfile += f"COPY {archive_path} {remote_path}\n"
+        self._dockerfile += f"COPY {self.__dockerfile_json_args([archive_path, remote_path])}\n"
 
         return self
 
@@ -268,7 +269,7 @@ class Image(BaseModel):
 
         archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
-        self._dockerfile += f"COPY {archive_path} {remote_path}\n"
+        self._dockerfile += f"COPY {self.__dockerfile_json_args([archive_path, remote_path])}\n"
 
         return self
 
@@ -564,13 +565,14 @@ class Image(BaseModel):
         # Handle JSON array format: COPY ["src1", "src2", "dest"]
         if parts.startswith("["):
             try:
-                # Parse the JSON-like array format
-                elements = shlex.split(parts.replace("[", "").replace("]", ""))
+                elements = json.loads(parts)
                 if len(elements) < 2:
+                    return None
+                if not all(isinstance(element, str) for element in elements):
                     return None
 
                 return {"sources": elements[:-1], "dest": elements[-1]}
-            except:
+            except (json.JSONDecodeError, TypeError):
                 return None
 
         # Handle regular format with possible flags
@@ -613,6 +615,10 @@ class Image(BaseModel):
                 ret.extend(x)
 
         return ret
+
+    @staticmethod
+    def __dockerfile_json_args(args: list[str]) -> str:
+        return json.dumps(args)
 
     @staticmethod
     def __format_pip_install_args(
