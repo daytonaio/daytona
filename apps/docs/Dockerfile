@@ -13,7 +13,7 @@ RUN npm install -g corepack && corepack enable
 # times out and node-gyp falls back to compiling from source, the header tarball
 # is already local — no flaky network/DNS lookup mid-install. Retried to absorb
 # transient DNS failures on this single fetch.
-RUN for i in 1 2 3; do npx --yes node-gyp install && break || sleep 5; done
+RUN for i in 1 2 3; do npx --yes node-gyp install && exit 0; sleep 5; done; exit 1
 
 WORKDIR /daytona
 
