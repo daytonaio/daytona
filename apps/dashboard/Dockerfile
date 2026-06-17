@@ -2,6 +2,11 @@ FROM node:20-alpine AS builder
 
 ENV CI=true
 
+# Build toolchain (python3/make/g++) is needed when a native module's prebuilt
+# binary download fails and node-gyp falls back to compiling from source —
+# it stays out of the runtime image.
+RUN apk add --no-cache python3 make g++
+
 RUN npm install -g corepack && corepack enable
 
 WORKDIR /daytona
