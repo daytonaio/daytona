@@ -24,7 +24,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -86,6 +86,7 @@ export function OrganizationRoleTable({
     columnResizeMode: 'onEnd',
     data,
     columns: organizationRoleColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       organizationRole: {
         onUpdate: (role) => {

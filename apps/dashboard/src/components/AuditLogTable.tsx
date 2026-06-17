@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn, getMaskedTokenFromParts, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { AuditLog } from '@daytona/api-client'
 import { Column, ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { TextSearch } from 'lucide-react'
@@ -58,6 +58,7 @@ export function AuditLogTable({
     columnResizeMode: 'onEnd',
     data,
     columns: auditLogColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     pageCount: pageCount || 1,

@@ -4,12 +4,10 @@
  */
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
 import { useAvailableSandboxClassesForOrganization } from '@/hooks/useAvailableSandboxClasses'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import {
   filterArchivable,
@@ -19,19 +17,21 @@ import {
   getBulkActionCounts,
   isTransitioning,
 } from '@/lib/utils/sandbox'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, SandboxListItem, SandboxState } from '@daytona/api-client'
 import {
+  type ColumnPinningState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
+  type OnChangeFn,
   useReactTable,
-  VisibilityState,
+  type VisibilityState,
 } from '@tanstack/react-table'
 import { Container } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
-import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react'
+import { useCallback, useImperativeHandle, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useCommandPaletteActions } from '../CommandPalette'
 import { SelectionToast } from '../SelectionToast'
@@ -58,6 +58,26 @@ import {
   convertTableSortingToApiSorting,
 } from './types'
 import { useSandboxCommands } from './useSandboxCommands'
+
+const DEFAULT_SANDBOX_TABLE_COLUMN_VISIBILITY: VisibilityState = {
+  id: false,
+  isPublic: false,
+  isRecoverable: false,
+  labels: false,
+}
+
+const DEFAULT_SANDBOX_TABLE_COLUMN_PINNING: ColumnPinningState = {
+  left: ['select', 'name'],
+  right: ['actions'],
+}
+
+function getSandboxTableColumnVisibility(columnVisibility: VisibilityState): VisibilityState {
+  return {
+    ...columnVisibility,
+    isPublic: false,
+    isRecoverable: false,
+  }
+}
 
 export function SandboxTable({
   ref,
@@ -103,21 +123,16 @@ export function SandboxTable({
   const writePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)
   const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
 
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
-    const saved = getLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility)
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch {
-        return { id: false, labels: false }
-      }
-    }
-    return { id: false, labels: false }
-  })
+  const [columnOrder, setColumnOrder] = useState<string[]>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_SANDBOX_TABLE_COLUMN_VISIBILITY)
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(DEFAULT_SANDBOX_TABLE_COLUMN_PINNING)
+  const handleColumnVisibilityChange = useCallback<OnChangeFn<VisibilityState>>((updater) => {
+    setColumnVisibility((currentColumnVisibility) => {
+      const nextColumnVisibility = typeof updater === 'function' ? updater(currentColumnVisibility) : updater
 
-  useEffect(() => {
-    setLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility, JSON.stringify(columnVisibility))
-  }, [columnVisibility])
+      return getSandboxTableColumnVisibility(nextColumnVisibility)
+    })
+  }, [])
 
   const availableSandboxClasses = useAvailableSandboxClassesForOrganization()
   const visibleColumns = useMemo(() => {
@@ -162,19 +177,17 @@ export function SandboxTable({
     },
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    onColumnOrderChange: setColumnOrder,
+    onColumnPinningChange: setColumnPinning,
     state: {
       sorting: tableSorting,
       columnFilters: tableFilters,
+      columnOrder,
       columnVisibility,
-      columnPinning: {
-        left: ['select', 'name'],
-        right: ['actions'],
-      },
+      columnPinning,
     },
-    onColumnVisibilityChange: setColumnVisibility,
-    defaultColumn: {
-      minSize: 0,
-    },
+    onColumnVisibilityChange: handleColumnVisibilityChange,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     enableRowSelection: (row) =>
       (writePermitted || deletePermitted) &&
       !sandboxIsLoading[row.original.id] &&

@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import {
   ColumnFiltersState,
   flexRender,
@@ -56,6 +56,7 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
     columnResizeMode: 'onEnd',
     data,
     columns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

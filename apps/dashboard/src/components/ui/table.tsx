@@ -6,6 +6,7 @@
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
+import { getColumnSizeBounds } from '@/lib/utils/table'
 import type { Header, Table as ReactTable } from '@tanstack/react-table'
 import { useEffect, useRef } from 'react'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from './empty'
@@ -150,12 +151,7 @@ function getHeaderResizeLabel<TData>(header: Header<TData, unknown>) {
 }
 
 function getHeaderResizeBounds<TData>(header: Header<TData, unknown>) {
-  const defaultColumn = header.getContext().table.options.defaultColumn
-
-  return {
-    minSize: header.column.columnDef.minSize ?? defaultColumn?.minSize ?? 20,
-    maxSize: header.column.columnDef.maxSize ?? defaultColumn?.maxSize ?? Number.MAX_SAFE_INTEGER,
-  }
+  return getColumnSizeBounds(header.column, header.getContext().table.options.defaultColumn)
 }
 
 function getHeaderCanResize<TData>(header?: Header<TData, unknown>) {
@@ -176,7 +172,7 @@ type ColumnResizePreviewState = {
 
 type ColumnResizePreviewPosition = {
   boundaryX: number
-  limit?: 'max' | 'min'
+  isPastBounds: boolean
   size: number
   x: number
 }
@@ -195,6 +191,15 @@ function clearColumnResizeRelease(container: HTMLElement) {
   }
 
   delete container.dataset.columnResizeReleasing
+}
+
+function getColumnResizeAriaValueText(size: number) {
+  return `${Math.round(size)} pixels`
+}
+
+function resetColumnResizeIndicator(indicator: HTMLElement) {
+  indicator.style.transform = ''
+  indicator.style.removeProperty('--table-column-resize-indicator-height')
 }
 
 function getColumnResizePointerPosition(container: HTMLElement, clientX: number) {
@@ -229,7 +234,7 @@ function getColumnResizePreviewPosition(
   const pointerX = getColumnResizePointerPosition(container, clientX)
   const rawSize = initialSize + (pointerX - initialX) * directionMultiplier
   const nextSize = clampColumnResizeSize(rawSize, minSize, maxSize)
-  const limit = rawSize < minSize ? 'min' : rawSize > maxSize ? 'max' : undefined
+  const isPastBounds = rawSize < minSize || rawSize > maxSize
   const displaySize = applyColumnResizeFalloff(
     rawSize,
     minSize,
@@ -241,7 +246,7 @@ function getColumnResizePreviewPosition(
 
   return {
     boundaryX,
-    limit,
+    isPastBounds,
     size: nextSize,
     x: initialX + (displaySize - initialSize) * directionMultiplier,
   }
@@ -285,14 +290,9 @@ function startColumnResize<TData>(
     const position = getColumnResizePreviewPosition(container, latestClientX, previewState)
     lastPosition = position
 
-    if (position.limit) {
-      container.dataset.columnResizeLimit = position.limit
-    } else {
-      delete container.dataset.columnResizeLimit
-    }
-
     indicator.style.transform = `translate3d(${position.x}px, 0, 0)`
     target.setAttribute('aria-valuenow', String(Math.round(position.size)))
+    target.setAttribute('aria-valuetext', getColumnResizeAriaValueText(position.size))
   }
 
   const scheduleUpdate = (clientX: number) => {
@@ -332,15 +332,14 @@ function startColumnResize<TData>(
     commitSize(lastPosition?.size ?? previewState.initialSize)
     delete target.dataset.resizing
 
-    if (lastPosition?.limit) {
+    if (lastPosition?.isPastBounds) {
       container.dataset.columnResizeReleasing = 'true'
       indicator.style.transform = `translate3d(${lastPosition.boundaryX}px, 0, 0)`
 
       const releaseTimeout = window.setTimeout(() => {
         delete container.dataset.columnResizing
-        delete container.dataset.columnResizeLimit
         delete container.dataset.columnResizeReleasing
-        indicator.style.transform = ''
+        resetColumnResizeIndicator(indicator)
         columnResizeReleaseTimeouts.delete(container)
       }, COLUMN_RESIZE_LIMIT_RELEASE_MS)
       columnResizeReleaseTimeouts.set(container, releaseTimeout)
@@ -348,9 +347,8 @@ function startColumnResize<TData>(
     }
 
     delete container.dataset.columnResizing
-    delete container.dataset.columnResizeLimit
     delete container.dataset.columnResizeReleasing
-    indicator.style.transform = ''
+    resetColumnResizeIndicator(indicator)
   }
 
   const handlePointerEnd = (event: PointerEvent) => {
@@ -361,6 +359,7 @@ function startColumnResize<TData>(
 
   container.dataset.columnResizing = 'true'
   clearColumnResizeRelease(container)
+  indicator.style.setProperty('--table-column-resize-indicator-height', `${container.scrollHeight}px`)
   target.dataset.resizing = 'true'
   target.setPointerCapture(pointerId)
   update()
@@ -380,14 +379,30 @@ function TableColumnResizeHandle<TData>({ header }: { header: Header<TData, unkn
   const label = getHeaderResizeLabel(header)
 
   const updateColumnSize = (nextSize: number) => {
+    const size = clampColumnResizeSize(nextSize, minSize, maxSize)
+
     table.setColumnSizing((old) => ({
       ...old,
-      [header.column.id]: clampColumnResizeSize(nextSize, minSize, maxSize),
+      [header.column.id]: size,
     }))
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Home') {
+      event.preventDefault()
+      event.stopPropagation()
+      updateColumnSize(minSize)
+      return
+    }
+
+    if (event.key === 'End' && maxSize !== Number.MAX_SAFE_INTEGER) {
+      event.preventDefault()
+      event.stopPropagation()
+      updateColumnSize(maxSize)
+      return
+    }
+
+    if (event.key === 'Enter') {
       event.preventDefault()
       event.stopPropagation()
       header.column.resetSize()
@@ -407,7 +422,7 @@ function TableColumnResizeHandle<TData>({ header }: { header: Header<TData, unkn
   }
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!event.isPrimary) return
+    if (!event.isPrimary || event.button !== 0) return
 
     event.preventDefault()
     event.stopPropagation()
@@ -421,6 +436,7 @@ function TableColumnResizeHandle<TData>({ header }: { header: Header<TData, unkn
       aria-valuemax={maxSize === Number.MAX_SAFE_INTEGER ? undefined : maxSize}
       aria-valuemin={minSize}
       aria-valuenow={Math.round(size)}
+      aria-valuetext={getColumnResizeAriaValueText(size)}
       data-resizing={header.column.getIsResizing() ? 'true' : undefined}
       data-slot="table-column-resize-handle"
       onDoubleClick={(event) => {

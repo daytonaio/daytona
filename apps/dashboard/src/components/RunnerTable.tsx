@@ -5,7 +5,12 @@
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import {
+  DEFAULT_TABLE_COLUMN,
+  DEFAULT_TABLE_COLUMN_MIN_SIZE,
+  getColumnSizeStyles,
+  getTableSizeStyles,
+} from '@/lib/utils/table'
 import { Region, Runner, RunnerState } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -103,6 +108,7 @@ export function RunnerTable({
     columnResizeMode: 'onEnd',
     data,
     columns: runnerColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       runner: {
         deletePermitted,
@@ -368,7 +374,7 @@ const runnerColumns: ColumnDef<Runner>[] = [
   {
     accessorKey: 'unschedulable',
     header: 'Schedulable',
-    size: 60,
+    size: DEFAULT_TABLE_COLUMN_MIN_SIZE,
     cell: ({ row, table }) => {
       const { isLoadingRunner, onToggleEnabled, writePermitted } = getMeta(table)
       const isLoading = isLoadingRunner(row.original)

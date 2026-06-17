@@ -5,7 +5,7 @@
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { Region, RegionType } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -84,6 +84,7 @@ export function RegionTable({
     columnResizeMode: 'onEnd',
     data,
     columns: regionColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       region: {
         deletePermitted,

@@ -31,7 +31,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -108,9 +108,7 @@ export function VolumeTable({
     meta: {
       volume: { onDelete, processingVolumeAction, deletePermitted },
     },
-    defaultColumn: {
-      minSize: 0,
-    },
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

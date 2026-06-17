@@ -6,7 +6,7 @@
 import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytona/api-client'
 
 import {
@@ -75,9 +75,7 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevokeRequest }: Da
     meta: {
       apiKey: { isLoadingKey, onRevokeRequest },
     },
-    defaultColumn: {
-      minSize: 0,
-    },
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

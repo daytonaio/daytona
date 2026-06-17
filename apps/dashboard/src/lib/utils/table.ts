@@ -6,14 +6,35 @@
 import type { Column, Table } from '@tanstack/react-table'
 import type { CSSProperties } from 'react'
 
+export const DEFAULT_TABLE_COLUMN_MIN_SIZE = 80
+export const DEFAULT_TABLE_COLUMN = {
+  minSize: DEFAULT_TABLE_COLUMN_MIN_SIZE,
+}
+
+type ColumnSizingDefaults = {
+  maxSize?: number
+  minSize?: number
+}
+
+export function getColumnSizeBounds<T>(column: Column<T>, defaultColumn?: ColumnSizingDefaults) {
+  const maxSize = column.columnDef.maxSize ?? defaultColumn?.maxSize ?? Number.MAX_SAFE_INTEGER
+  const configuredMinSize = column.columnDef.minSize ?? defaultColumn?.minSize ?? DEFAULT_TABLE_COLUMN_MIN_SIZE
+  const minSize = Math.min(Math.max(configuredMinSize, DEFAULT_TABLE_COLUMN_MIN_SIZE), maxSize)
+
+  return {
+    maxSize,
+    minSize,
+  }
+}
+
 export function getColumnSizeStyles<T>(column: Column<T>): CSSProperties {
   const pinned = column.getIsPinned()
-  const maxSize = column.columnDef.maxSize
-  const hasMaxSize = maxSize !== undefined && maxSize !== Number.MAX_SAFE_INTEGER
+  const { maxSize, minSize } = getColumnSizeBounds(column)
+  const hasMaxSize = maxSize !== Number.MAX_SAFE_INTEGER
 
   return {
     width: column.getSize(),
-    minWidth: column.columnDef.minSize,
+    minWidth: minSize,
     maxWidth: hasMaxSize ? maxSize : undefined,
     left: pinned === 'left' ? column.getStart('left') : undefined,
     right: pinned === 'right' ? column.getAfter('right') : undefined,

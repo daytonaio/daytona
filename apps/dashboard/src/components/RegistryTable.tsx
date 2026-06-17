@@ -6,7 +6,7 @@
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -92,9 +92,7 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
     meta: {
       registry: { onDelete, onEdit, loading, writePermitted, deletePermitted },
     },
-    defaultColumn: {
-      minSize: 0,
-    },
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { capitalize, cn } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationUser, OrganizationUserRoleEnum } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -86,6 +86,7 @@ export function OrganizationMemberTable({
     columnResizeMode: 'onEnd',
     data,
     columns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       member: {
         onUpdateMemberRole: (member) => {

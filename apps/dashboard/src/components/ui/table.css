@@ -51,9 +51,10 @@
 
   [data-slot='table-column-resize-indicator'] {
     position: absolute;
-    inset-block: 0;
+    top: 0;
     left: 0;
     z-index: 30;
+    height: var(--table-column-resize-indicator-height, 100%);
     width: 0;
     opacity: 0;
     pointer-events: none;

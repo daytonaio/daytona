@@ -22,7 +22,7 @@ import {
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationInvitation } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -94,6 +94,7 @@ export function UserOrganizationInvitationTable({
     columnResizeMode: 'onEnd',
     data,
     columns: userOrganizationInvitationColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       userOrganizationInvitation: {
         onAccept: onAcceptInvitation,

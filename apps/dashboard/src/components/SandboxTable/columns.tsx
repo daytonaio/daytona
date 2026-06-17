@@ -192,7 +192,7 @@ const columns: ColumnDef<SandboxListItem>[] = [
     size: 110,
     minSize: 110,
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
     header: () => <span>State</span>,
     cell: ({ row }) => (
       <SandboxStateCell
@@ -206,9 +206,10 @@ const columns: ColumnDef<SandboxListItem>[] = [
   {
     id: 'sandboxClass',
     size: 64,
+    minSize: 64,
     maxSize: 64,
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
     header: () => <span>Class</span>,
     cell: ({ row }) => {
       const sandboxClass = row.original.sandboxClass
@@ -231,7 +232,7 @@ const columns: ColumnDef<SandboxListItem>[] = [
     id: 'snapshot',
     size: 150,
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
     header: () => <span>Snapshot</span>,
     cell: ({ row }) => (
       <div className="w-full truncate">
@@ -248,7 +249,7 @@ const columns: ColumnDef<SandboxListItem>[] = [
     id: 'region',
     size: 120,
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
     header: () => <span>Region</span>,
     cell: ({ row, table }) => {
       const { getRegionName } = getMeta(table)
@@ -264,7 +265,7 @@ const columns: ColumnDef<SandboxListItem>[] = [
     id: 'resources',
     size: 190,
     enableSorting: false,
-    enableHiding: false,
+    enableHiding: true,
     header: () => <span>Resources</span>,
     cell: ({ row }) => (
       <div className="flex w-full items-center gap-2 truncate">
@@ -326,7 +327,7 @@ const columns: ColumnDef<SandboxListItem>[] = [
     size: 140,
     maxSize: 140,
     enableSorting: true,
-    enableHiding: false,
+    enableHiding: true,
     header: ({ column }) => <SortableHeader column={column} label="Last Event" />,
     accessorFn: (row) => getLastEvent(row).date,
     cell: ({ row }) => {
@@ -345,7 +346,7 @@ const columns: ColumnDef<SandboxListItem>[] = [
     size: 180,
     maxSize: 180,
     enableSorting: true,
-    enableHiding: false,
+    enableHiding: true,
     header: ({ column }) => <SortableHeader column={column} label="Created" />,
     accessorFn: (row) => (row.createdAt ? new Date(row.createdAt) : new Date()),
     cell: ({ row }) => {
