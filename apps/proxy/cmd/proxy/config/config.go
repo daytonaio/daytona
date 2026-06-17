@@ -120,7 +120,7 @@ func GetConfig() (*Config, error) {
 	// Guard the type assertion so an unexpected http.DefaultTransport replacement
 	// can't panic at startup; fall back to the current DefaultTransport as-is so we
 	// don't silently lose its proxy/H2/dial defaults by using an empty transport.
-	var apiTransport http.RoundTripper = http.DefaultTransport
+	apiTransport := http.DefaultTransport
 	if dt, ok := http.DefaultTransport.(*http.Transport); ok {
 		cloned := dt.Clone()
 		cloned.IdleConnTimeout = 30 * time.Second
