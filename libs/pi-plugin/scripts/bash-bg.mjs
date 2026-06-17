@@ -16,10 +16,11 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(__dirname, '..')
-// Resolve the host package's exported entry via Node (walks up node_modules, so
-// it works whether the dep is local or hoisted to the workspace root), and
-// borrow its bundled jiti.
-const hostEntry = createRequire(import.meta.url).resolve('@earendil-works/pi-coding-agent')
+// Resolve the host package's exported entry with the ESM-aware resolver (the
+// package ships an import-only `exports` map, so CJS require.resolve throws
+// ERR_PACKAGE_PATH_NOT_EXPORTED); it walks hoisting too. Then anchor a CJS
+// require there for jiti (which is CJS-compatible).
+const hostEntry = fileURLToPath(import.meta.resolve('@earendil-works/pi-coding-agent'))
 const { createJiti } = createRequire(hostEntry)('jiti')
 const jiti = createJiti(import.meta.url, {
   moduleCache: false,
