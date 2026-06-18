@@ -31,7 +31,7 @@ import {
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { RoutePath } from '@/enums/RoutePath'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import {
   flexRender,
   getCoreRowModel,
@@ -81,10 +81,11 @@ export function WebhooksEndpointTable({
       setDisableEndpoint(null)
     }
   }
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -184,7 +185,7 @@ export function WebhooksEndpointTable({
           ) : null
         }
       >
-        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -193,6 +194,7 @@ export function WebhooksEndpointTable({
                     <TableHead
                       className="px-2"
                       key={header.id}
+                      header={header}
                       style={getColumnSizeStyles(header.column)}
                       sticky={header.column.getIsPinned()}
                     >

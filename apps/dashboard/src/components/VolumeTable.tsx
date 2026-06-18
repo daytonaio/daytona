@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableFacetedFilter, FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { MiddleTruncate } from '@/components/ui/middle-truncate'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -29,8 +30,13 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { cn, getRelativeTimeString, truncateUUID } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { cn, getRelativeTimeString } from '@/lib/utils'
+import {
+  DEFAULT_TABLE_COLUMN,
+  getColumnSizeStyles,
+  getTableColumnMaxResizeSize,
+  getTableSizeStyles,
+} from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -100,16 +106,14 @@ export function VolumeTable({
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns,
     meta: {
       volume: { onDelete, processingVolumeAction, deletePermitted },
     },
-    defaultColumn: {
-      minSize: 0,
-    },
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -250,13 +254,14 @@ export function VolumeTable({
           ) : null
         }
       >
-        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    header={header}
                     sticky={header.column.getIsPinned()}
                     style={getColumnSizeStyles(header.column)}
                   >
@@ -440,15 +445,15 @@ const columns: ColumnDef<VolumeDto>[] = [
   {
     accessorKey: 'id',
     size: 180,
-    maxSize: 180,
+    maxSize: getTableColumnMaxResizeSize(180),
     header: 'ID',
     enableSorting: false,
     cell: ({ row }) => {
       const id = row.original.id
 
       return (
-        <div className="w-full truncate flex items-center gap-1 group/copy-button">
-          <span className="truncate block text-muted-foreground">{truncateUUID(id)}</span>
+        <div className="w-full min-w-0 flex items-center gap-1 group/copy-button">
+          <MiddleTruncate value={id} start={8} end={4} className="font-mono text-muted-foreground" />
           <CopyButton value={id} size="icon-xs" autoHide tooltipText="Copy ID" />
         </div>
       )

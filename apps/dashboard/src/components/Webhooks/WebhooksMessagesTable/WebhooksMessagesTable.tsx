@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import {
   ColumnFiltersState,
   flexRender,
@@ -49,10 +49,11 @@ export function WebhooksMessagesTable() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const data = messages.data ?? []
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -161,12 +162,17 @@ export function WebhooksMessagesTable() {
           ) : null
         }
       >
-        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead className="px-2" key={header.id} style={getColumnSizeStyles(header.column)}>
+                  <TableHead
+                    className="px-2"
+                    key={header.id}
+                    header={header}
+                    style={getColumnSizeStyles(header.column)}
+                  >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}

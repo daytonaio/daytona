@@ -5,7 +5,7 @@
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn, getRelativeTimeString } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { Region, RegionType } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -28,6 +28,7 @@ import { SearchInput } from './SearchInput'
 import { TimestampTooltip } from './TimestampTooltip'
 import { Button } from './ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { MiddleTruncate } from './ui/middle-truncate'
 import { Skeleton } from './ui/skeleton'
 import {
   Table,
@@ -79,10 +80,11 @@ export function RegionTable({
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: regionColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       region: {
         deletePermitted,
@@ -159,7 +161,7 @@ export function RegionTable({
           ) : null
         }
       >
-        <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+        <Table className="table-fixed" style={getTableSizeStyles(table)}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -168,6 +170,7 @@ export function RegionTable({
                     <TableHead
                       className="px-2"
                       key={header.id}
+                      header={header}
                       style={getColumnSizeStyles(header.column)}
                       sticky={header.column.getIsPinned()}
                     >
@@ -260,8 +263,8 @@ const regionColumns: ColumnDef<Region>[] = [
     size: 300,
     cell: ({ row }) => {
       return (
-        <div className="w-full truncate flex items-center gap-1 group/copy-button">
-          <span className="truncate block">{row.original.id}</span>
+        <div className="w-full min-w-0 flex items-center gap-1 group/copy-button">
+          <MiddleTruncate value={row.original.id} start={8} end={4} className="font-mono" />
           <CopyButton value={row.original.id} size="icon-xs" autoHide tooltipText="Copy ID" />
         </div>
       )

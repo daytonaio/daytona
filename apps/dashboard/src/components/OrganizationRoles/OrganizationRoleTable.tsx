@@ -24,7 +24,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { cn } from '@/lib/utils'
-import { getColumnSizeStyles } from '@/lib/utils/table'
+import { DEFAULT_TABLE_COLUMN, getColumnSizeStyles, getTableSizeStyles } from '@/lib/utils/table'
 import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytona/api-client'
 import {
   ColumnDef,
@@ -82,10 +82,11 @@ export function OrganizationRoleTable({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [roleToUpdate, setRoleToUpdate] = useState<OrganizationRole | null>(null)
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: organizationRoleColumns,
+    defaultColumn: DEFAULT_TABLE_COLUMN,
     meta: {
       organizationRole: {
         onUpdate: (role) => {
@@ -199,7 +200,7 @@ export function OrganizationRoleTable({
             ) : null
           }
         >
-          <Table className="table-fixed" style={{ minWidth: table.getTotalSize() }}>
+          <Table className="table-fixed" style={getTableSizeStyles(table)}>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -207,6 +208,7 @@ export function OrganizationRoleTable({
                     return (
                       <TableHead
                         key={header.id}
+                        header={header}
                         sticky={header.column.getIsPinned()}
                         style={getColumnSizeStyles(header.column)}
                       >

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { DEFAULT_TABLE_COLUMN } from '@/lib/utils/table'
 import { Invoice } from '@daytona/billing-api-client'
 import {
   ColumnFiltersState,
@@ -47,8 +48,8 @@ export function useInvoicesTable({
     },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
   const table = useReactTable({
+    columnResizeMode: 'onEnd',
     data,
     columns: invoiceColumns,
     meta: {
@@ -84,6 +85,7 @@ export function useInvoicesTable({
       },
     },
     defaultColumn: {
+      ...DEFAULT_TABLE_COLUMN,
       size: 100,
     },
     getRowId: (row, index) => row.id ?? String(index),

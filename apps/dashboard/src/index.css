@@ -277,6 +277,88 @@
   @apply scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-background dark:scrollbar-thumb-neutral-700;
 }
 
+@property --scroll-fade-offset-y-top {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
+@property --scroll-fade-offset-y-bottom {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 100%;
+}
+
+@property --scroll-fade-offset-x-left {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
+@property --scroll-fade-offset-x-right {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 100%;
+}
+
+.scroll-fade {
+  --mask-offset: 20%;
+  --scroll-fade-offset-y-top: 0%;
+  --scroll-fade-offset-y-bottom: 100%;
+  --scroll-fade-mask: linear-gradient(
+    to bottom,
+    transparent,
+    black min(var(--scroll-fade-offset-y-top), var(--mask-offset)),
+    black calc(100% - min(var(--scroll-fade-offset-y-bottom), var(--mask-offset))),
+    transparent
+  );
+  animation: animate-scroll-fade-mask 1ms linear both;
+  animation-timeline: scroll(self y);
+  mask-image: var(--scroll-fade-mask);
+  -webkit-mask-image: var(--scroll-fade-mask);
+}
+
+.scroll-fade-horizontal {
+  --mask-offset: 20%;
+  --scroll-fade-offset-x-left: 0%;
+  --scroll-fade-offset-x-right: 100%;
+  --scroll-fade-mask: linear-gradient(
+    to right,
+    transparent,
+    black min(var(--scroll-fade-offset-x-left), var(--mask-offset)),
+    black calc(100% - min(var(--scroll-fade-offset-x-right), var(--mask-offset))),
+    transparent
+  );
+  animation: animate-scroll-fade-mask-horizontal 1ms linear both;
+  animation-timeline: scroll(self x);
+  mask-image: var(--scroll-fade-mask);
+  -webkit-mask-image: var(--scroll-fade-mask);
+}
+
+@keyframes animate-scroll-fade-mask {
+  0% {
+    --scroll-fade-offset-y-top: 0%;
+    --scroll-fade-offset-y-bottom: 100%;
+  }
+
+  100% {
+    --scroll-fade-offset-y-top: 100%;
+    --scroll-fade-offset-y-bottom: 0%;
+  }
+}
+
+@keyframes animate-scroll-fade-mask-horizontal {
+  0% {
+    --scroll-fade-offset-x-left: 0%;
+    --scroll-fade-offset-x-right: 100%;
+  }
+
+  100% {
+    --scroll-fade-offset-x-left: 100%;
+    --scroll-fade-offset-x-right: 0%;
+  }
+}
+
 @keyframes skeleton-shimmer {
   0% {
     transform: translateX(-100%);

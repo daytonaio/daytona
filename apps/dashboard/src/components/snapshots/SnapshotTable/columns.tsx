@@ -6,6 +6,7 @@
 import { CopyButton } from '@/components/CopyButton'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { getRelativeTimeString } from '@/lib/utils'
+import { getTableColumnMaxResizeSize } from '@/lib/utils/table'
 import { SnapshotDto, SnapshotState } from '@daytona/api-client'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
 import { Loader2, MoreHorizontal } from 'lucide-react'
@@ -159,6 +160,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     accessorKey: 'imageName',
     size: 180,
+    minSize: 180,
     enableSorting: false,
     header: 'Image',
     cell: ({ row }) => {
@@ -192,7 +194,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     accessorKey: 'regionIds',
     size: 140,
-    maxSize: 140,
+    maxSize: getTableColumnMaxResizeSize(140),
     enableSorting: false,
     header: 'Region',
     cell: ({ row, table }) => {
@@ -271,7 +273,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     accessorKey: 'state',
     size: 120,
-    maxSize: 120,
+    maxSize: getTableColumnMaxResizeSize(120),
     enableSorting: true,
     header: ({ column }) => <SortableHeader column={column} label="State" />,
     cell: ({ row }) => {
@@ -300,7 +302,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     accessorKey: 'createdAt',
     size: 120,
-    maxSize: 120,
+    maxSize: getTableColumnMaxResizeSize(120),
     enableSorting: true,
     header: ({ column }) => <SortableHeader column={column} label="Created" />,
     cell: ({ row }) => {
@@ -319,7 +321,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     accessorKey: 'lastUsedAt',
     size: 120,
-    maxSize: 120,
+    maxSize: getTableColumnMaxResizeSize(120),
     enableSorting: true,
     header: ({ column }) => <SortableHeader column={column} label="Last Used" />,
     cell: ({ row }) => {
