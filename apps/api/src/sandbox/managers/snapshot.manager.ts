@@ -859,11 +859,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       },
     })
 
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       snapshots.map(async (snapshot) => {
         await this.syncSnapshotState(snapshot.id)
       }),
     )
+
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        this.logger.error(
+          `Error syncing snapshot state for snapshot ${snapshots[index].id}: ${fromAxiosError(result.reason)}`,
+        )
+      }
+    })
   }
 
   async syncSnapshotState(snapshotId: string): Promise<void> {
