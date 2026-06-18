@@ -28,7 +28,13 @@ func getWindowsX11() ([]computeruse.WindowInfo, error) {
 	}
 
 	windows := make([]computeruse.WindowInfo, 0, len(clientList))
+	seen := make(map[uint]bool)
 	for _, win := range clientList {
+		pid, err := ewmh.WmPidGet(xu, win)
+		if err != nil || seen[pid] {
+			continue
+		}
+
 		title, err := ewmh.WmVisibleNameGet(xu, win)
 		if err != nil || title == "" {
 			title, _ = ewmh.WmNameGet(xu, win)
@@ -37,8 +43,9 @@ func getWindowsX11() ([]computeruse.WindowInfo, error) {
 			continue
 		}
 
+		seen[pid] = true
 		windows = append(windows, computeruse.WindowInfo{
-			ID:    int(win),
+			ID:    int(pid),
 			Title: title,
 			Position: computeruse.Position{
 				X: 0, // Would need platform-specific implementation.
