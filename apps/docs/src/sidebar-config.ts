@@ -462,7 +462,7 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/guides/pi', locale),
+          href: localizePath('/docs/guides/pi/pi-extension', locale),
           label: t('sidebarconfig.pi'),
           disablePagination: true,
           attrs: {
