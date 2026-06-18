@@ -82,14 +82,21 @@ func (c *Config) GetActiveProfile() (Profile, error) {
 	apiUrl := os.Getenv(DAYTONA_API_URL_ENV_VAR)
 	apiKey := os.Getenv(DAYTONA_API_KEY_ENV_VAR)
 
-	if apiUrl != "" && apiKey != "" {
-		return Profile{
-			Id: "env",
-			Api: ServerApi{
-				Url: apiUrl,
-				Key: &apiKey,
-			},
-		}, nil
+	if apiKey != "" {
+		if apiUrl == "" {
+			// Fall back to the default API URL baked into release builds;
+			// dev builds have none and fall through to stored profiles.
+			apiUrl = GetDaytonaApiUrl()
+		}
+		if apiUrl != "" {
+			return Profile{
+				Id: "env",
+				Api: ServerApi{
+					Url: apiUrl,
+					Key: &apiKey,
+				},
+			}, nil
+		}
 	}
 
 	if len(c.Profiles) == 0 {

@@ -90,20 +90,58 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 | `--version` | `-v` | Display the version of Daytona |
+
+
+## daytona api
+Make an authenticated request to the Daytona API
+
+```shell
+daytona api PATH [flags]
+```
+
+### Examples
+
+```shell
+  daytona api /sandbox
+  daytona api /sandbox/my-sandbox -X DELETE
+  daytona api /snapshots -X POST --input snapshot.json
+  cat body.json | daytona api /sandbox -X POST --input -
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--input` |  | Request body source: a file path or '-' for stdin (POST, PUT, and PATCH only) |
+| `--method` | `-X` | HTTP method (GET, POST, PUT, PATCH, DELETE, HEAD) |
+| `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona archive
 Archive a sandbox
 
 ```shell
-daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona archive [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona archive my-sandbox
+  daytona archive my-sandbox --wait --timeout 10m
+  daytona archive my-sandbox --wait --format json
 ```
 
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--timeout` |  | Maximum time to wait with --wait (0 waits indefinitely) |
+| `--wait` |  | Wait until the sandbox is archived |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona autocomplete
@@ -117,6 +155,7 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 <Aside type="note">
 If using bash shell environment, make sure you have bash-completion installed in order to get full autocompletion functionality.
@@ -124,11 +163,42 @@ Linux Installation: ```sudo apt-get install bash-completion```
 macOS Installation: ```brew install bash-completion```
 </Aside>
 
+## daytona cp
+Copy files between the local machine and a sandbox
+
+```shell
+daytona cp SOURCE DESTINATION [flags]
+```
+
+### Examples
+
+```shell
+  daytona cp ./config.yaml my-sandbox:/workspace/config.yaml
+  daytona cp my-sandbox:/workspace/output ./output
+  daytona cp ./src my-sandbox:/workspace/src --format json
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
+
+
 ## daytona create
 Create a new sandbox
 
 ```shell
 daytona create [flags]
+```
+
+### Examples
+
+```shell
+  daytona create --snapshot my-snapshot:1.0 --name my-sandbox
+  daytona create --name my-sandbox --env-file .env --if-exists reuse
+  daytona create --snapshot my-snapshot:1.0 --name my-sandbox --format json
 ```
 
 __Flags__
@@ -142,8 +212,12 @@ __Flags__
 | `--disk` |  | Disk space allocated to the sandbox in GB |
 | `--dockerfile` | `-f` | Path to Dockerfile for Sandbox snapshot |
 | `--env` | `-e` | Environment variables (format: KEY=VALUE) |
+| `--env-file` |  | Read environment variables from a dotenv-style file (entries from --env override file values) |
+| `--format` |  | Output format. Must be one of (yaml, json) |
 | `--gpu` |  | GPU units allocated to the sandbox |
+| `--if-exists` |  | Behavior when a sandbox with the same name already exists (error, reuse; reuse requires --name) |
 | `--label` | `-l` | Labels (format: KEY=VALUE) |
+| `--label-file` |  | Read labels from a dotenv-style file (entries from --label override file values) |
 | `--memory` |  | Memory allocated to the sandbox in MB |
 | `--name` |  | Name of the sandbox |
 | `--network-allow-list` |  | Comma-separated list of allowed CIDR network addresses for the sandbox |
@@ -151,23 +225,41 @@ __Flags__
 | `--public` |  | Make sandbox publicly accessible |
 | `--snapshot` |  | Snapshot to use for the sandbox |
 | `--target` |  | Target region (eu, us) |
+| `--timeout` |  | Maximum time to wait for the sandbox to start (0 means wait indefinitely) |
 | `--user` |  | User associated with the sandbox |
 | `--volume` | `-v` | Volumes to mount (format: VOLUME_ID_OR_NAME:MOUNT_PATH) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona delete
 Delete a sandbox
 
 ```shell
-daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona delete [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona delete my-sandbox
+  daytona delete my-sandbox --wait --format json
+  daytona delete --all --dry-run
+  daytona delete --all --yes
 ```
 
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | Delete all sandboxes |
+| `--dry-run` |  | Show what would be deleted without deleting anything |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--ignore-not-found` |  | Treat a missing sandbox as a successful delete |
+| `--timeout` |  | Maximum time to wait with --wait (0 waits indefinitely) |
+| `--wait` |  | Wait until the sandbox is fully deleted |
+| `--yes` | `-y` | Skip the confirmation prompt for bulk deletes |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona docs
@@ -181,6 +273,7 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona exec
@@ -190,19 +283,36 @@ Execute a command in a sandbox
 daytona exec [SANDBOX_ID | SANDBOX_NAME] -- [COMMAND] [ARGS...] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona exec my-sandbox -- ls -la /workspace
+  daytona exec my-sandbox -- python -c "print('hi')"
+  daytona exec my-sandbox --cwd /workspace --format json -- npm test
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--cwd` |  | Working directory for command execution |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--timeout` |  | Command timeout in seconds (0 for no timeout) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona info
 Get sandbox info
 
 ```shell
-daytona info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona info [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona info my-sandbox
+  daytona info my-sandbox --format json
 ```
 
 __Flags__
@@ -210,6 +320,7 @@ __Flags__
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona list
@@ -219,6 +330,14 @@ List sandboxes
 daytona list [flags]
 ```
 
+### Examples
+
+```shell
+  daytona list
+  daytona list --limit 50
+  daytona list --format json
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
@@ -226,6 +345,7 @@ __Flags__
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--limit` | `-l` | Maximum number of items per page |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona login
@@ -235,11 +355,22 @@ Log in to Daytona
 daytona login [flags]
 ```
 
+### Examples
+
+```shell
+  daytona login
+  daytona login --api-key $DAYTONA_API_KEY
+  daytona login --api-key-stdin < ~/.daytona-api-key
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--api-key` |  | API key to use for authentication |
+| `--api-key-file` |  | Read the API key from a file |
+| `--api-key-stdin` |  | Read the API key from stdin |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona logout
@@ -253,6 +384,29 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
+
+
+## daytona logs
+View the build logs of a sandbox
+
+```shell
+daytona logs [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona logs my-sandbox
+  daytona logs my-sandbox --follow
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--follow` | `-f` | Follow the logs until the sandbox build reaches a terminal state |
+| `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona mcp
@@ -266,19 +420,28 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona mcp config
 Outputs JSON configuration for Daytona MCP Server
 
 ```shell
-daytona mcp config [AGENT_NAME] [flags]
+daytona mcp config [flags]
+```
+
+### Examples
+
+```shell
+  daytona mcp config
+  daytona mcp config > daytona-mcp.json
 ```
 
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona mcp init
@@ -289,10 +452,18 @@ Initialize Daytona MCP Server with an agent (currently supported: claude, windsu
 daytona mcp init [AGENT_NAME] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona mcp init claude
+  daytona mcp init cursor
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona mcp start
@@ -302,10 +473,18 @@ Start Daytona MCP Server
 daytona mcp start [flags]
 ```
 
+### Examples
+
+```shell
+  # Typically launched by an MCP client (see 'daytona mcp init')
+  daytona mcp start
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona organization
@@ -319,6 +498,7 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona organization create
@@ -328,10 +508,19 @@ Create a new organization and set it as active
 daytona organization create [ORGANIZATION_NAME] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona organization create my-org
+  daytona organization create my-org --region us
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
+| `--region` | `-r` | Default region (id or name) for the organization |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona organization delete
@@ -341,10 +530,19 @@ Delete an organization
 daytona organization delete [ORGANIZATION] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona organization delete my-org
+  # With no argument, pick from a list interactively
+  daytona organization delete
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona organization list
@@ -354,11 +552,19 @@ List all organizations
 daytona organization list [flags]
 ```
 
+### Examples
+
+```shell
+  daytona organization list
+  daytona organization list --format json
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona organization use
@@ -368,10 +574,19 @@ Set active organization
 daytona organization use [ORGANIZATION] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona organization use my-org
+  # With no argument, pick from a list interactively
+  daytona organization use
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona preview-url
@@ -381,12 +596,22 @@ Get signed preview URL for a sandbox port
 daytona preview-url [SANDBOX_ID | SANDBOX_NAME] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona preview-url my-sandbox --port 3000
+  daytona preview-url my-sandbox --port 3000 --expires 7200
+  daytona preview-url my-sandbox --port 3000 --format json
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--expires` |  | URL expiration time in seconds |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--port` | `-p` | Port number to get preview URL for (required) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona snapshot
@@ -400,6 +625,7 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona snapshot create
@@ -407,6 +633,14 @@ Create a snapshot
 
 ```shell
 daytona snapshot create [SNAPSHOT] [flags]
+```
+
+### Examples
+
+```shell
+  daytona snapshot create my-snapshot:1.0 --image ubuntu:22.04 --entrypoint "sleep infinity"
+  daytona snapshot create my-snapshot:1.0 --dockerfile ./Dockerfile --context ./app
+  daytona snapshot create my-snapshot:1.0 --image ubuntu:22.04 --cpu 2 --memory 4 --disk 10
 ```
 
 __Flags__
@@ -420,7 +654,9 @@ __Flags__
 | `--image` | `-i` | The image name for the snapshot |
 | `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
 | `--region` |  | ID of the region where the snapshot will be available (defaults to organization default region) |
+| `--timeout` |  | Maximum time to wait for the snapshot to become active (0 means wait indefinitely) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona snapshot delete
@@ -430,11 +666,24 @@ Delete a snapshot
 daytona snapshot delete [SNAPSHOT_ID | SNAPSHOT_NAME] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona snapshot delete my-snapshot:1.0
+  daytona snapshot delete --all --dry-run
+  daytona snapshot delete --all --yes --format json
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | Delete all snapshots |
+| `--dry-run` |  | Show what would be deleted without deleting anything |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--ignore-not-found` |  | Treat a missing snapshot as a successful delete |
+| `--yes` | `-y` | Skip the confirmation prompt for bulk deletes |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona snapshot list
@@ -444,6 +693,14 @@ List all snapshots
 daytona snapshot list [flags]
 ```
 
+### Examples
+
+```shell
+  daytona snapshot list
+  daytona snapshot list --limit 50
+  daytona snapshot list --format json
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
@@ -451,6 +708,29 @@ __Flags__
 | `--limit` | `-l` | Maximum number of items per page |
 | `--page` | `-p` | Page number for pagination (starting from 1) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
+
+
+## daytona snapshot logs
+View the build logs of a snapshot
+
+```shell
+daytona snapshot logs [SNAPSHOT_ID | SNAPSHOT_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona snapshot logs my-snapshot:1.0
+  daytona snapshot logs my-snapshot:1.0 --follow
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--follow` | `-f` | Follow the logs until the snapshot build reaches a terminal state |
+| `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona snapshot push
@@ -458,6 +738,13 @@ Push local snapshot
 
 ```shell
 daytona snapshot push [SNAPSHOT] [flags]
+```
+
+### Examples
+
+```shell
+  daytona snapshot push my-image:latest --name my-snapshot:1.0
+  daytona snapshot push my-image:latest --name my-snapshot:1.0 --cpu 2 --memory 4
 ```
 
 __Flags__
@@ -469,14 +756,23 @@ __Flags__
 | `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
 | `--name` | `-n` | Specify the Snapshot name |
 | `--region` |  | ID of the region where the snapshot will be available (defaults to organization default region) |
+| `--timeout` |  | Maximum time to wait for the snapshot to be validated (0 means wait indefinitely) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona ssh
 SSH into a sandbox
 
 ```shell
-daytona ssh [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona ssh [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona ssh my-sandbox
+  daytona ssh my-sandbox --expires 60
 ```
 
 __Flags__
@@ -484,33 +780,58 @@ __Flags__
 | :--- | :---- | :---------- |
 | `--expires` |  | SSH access token expiration time in minutes (defaults to 24 hours) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona start
 Start a sandbox
 
 ```shell
-daytona start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona start [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona start my-sandbox
+  daytona start my-sandbox --wait --timeout 2m
+  daytona start my-sandbox --wait --format json
 ```
 
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--timeout` |  | Maximum time to wait with --wait (0 waits indefinitely) |
+| `--wait` |  | Wait until the sandbox is started |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona stop
 Stop a sandbox
 
 ```shell
-daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona stop [SANDBOX_ID | SANDBOX_NAME] [flags]
+```
+
+### Examples
+
+```shell
+  daytona stop my-sandbox
+  daytona stop my-sandbox --wait --timeout 2m
+  daytona stop my-sandbox --force --format json
 ```
 
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--force` | `-f` | Force stop the sandbox using SIGKILL |
+| `--format` |  | Output format. Must be one of (yaml, json) |
+| `--timeout` |  | Maximum time to wait with --wait (0 waits indefinitely) |
+| `--wait` |  | Wait until the sandbox is stopped |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona version
@@ -524,6 +845,7 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona volume
@@ -537,6 +859,7 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona volume create
@@ -546,11 +869,19 @@ Create a volume
 daytona volume create [NAME] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona volume create my-volume
+  # Mount it when creating a sandbox
+  daytona create --snapshot my-snapshot:1.0 --volume my-volume:/data
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--size` | `-s` | Size of the volume in GB |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona volume delete
@@ -560,10 +891,18 @@ Delete a volume
 daytona volume delete [VOLUME_ID_OR_NAME] [flags]
 ```
 
+### Examples
+
+```shell
+  # Delete a volume by name or ID
+  daytona volume delete my-volume
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona volume get
@@ -573,11 +912,19 @@ Get volume details
 daytona volume get [VOLUME_ID_OR_NAME] [flags]
 ```
 
+### Examples
+
+```shell
+  daytona volume get my-volume
+  daytona volume get my-volume --format json
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 
 ## daytona volume list
@@ -587,10 +934,18 @@ List all volumes
 daytona volume list [flags]
 ```
 
+### Examples
+
+```shell
+  daytona volume list
+  daytona volume list --format json
+```
+
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--help` |  | help for daytona |
+| `--no-input` |  | Never prompt for input; fail instead when input would be required |
 
 

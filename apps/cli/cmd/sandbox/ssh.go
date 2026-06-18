@@ -13,10 +13,12 @@ import (
 )
 
 var SSHCmd = &cobra.Command{
-	Use:   "ssh [SANDBOX_ID] | [SANDBOX_NAME]",
+	Use:   "ssh [SANDBOX_ID | SANDBOX_NAME]",
 	Short: "SSH into a sandbox",
 	Long:  "Establish an SSH connection to a running sandbox",
-	Args:  cobra.ExactArgs(1),
+	Example: `  daytona ssh my-sandbox
+  daytona ssh my-sandbox --expires 60`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

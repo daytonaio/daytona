@@ -1,0 +1,30 @@
+name: daytona api
+synopsis: Make an authenticated request to the Daytona API
+description: |-
+  Make an authenticated HTTP request to the Daytona API and print the raw response body to stdout.
+
+  PATH is resolved against the active profile's API URL and the request is authenticated with the active profile's credentials. Responses with status 400 or above still print the body, then exit non-zero.
+usage: daytona api PATH [flags]
+options:
+  - name: input
+    usage: |
+      Request body source: a file path or '-' for stdin (POST, PUT, and PATCH only)
+  - name: method
+    shorthand: X
+    default_value: GET
+    usage: HTTP method (GET, POST, PUT, PATCH, DELETE, HEAD)
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
+example: |4-
+      daytona api /sandbox
+      daytona api /sandbox/my-sandbox -X DELETE
+      daytona api /snapshots -X POST --input snapshot.json
+      cat body.json | daytona api /sandbox -X POST --input -
+see_also:
+  - daytona - Daytona CLI

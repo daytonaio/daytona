@@ -5,9 +5,14 @@ inherited_options:
   - name: help
     default_value: 'false'
     usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
 see_also:
   - daytona - Daytona CLI
   - daytona snapshot create - Create a snapshot
   - daytona snapshot delete - Delete a snapshot
   - daytona snapshot list - List all snapshots
+  - daytona snapshot logs - View the build logs of a snapshot
   - daytona snapshot push - Push local snapshot

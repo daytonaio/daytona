@@ -5,10 +5,11 @@ package apiclient
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/daytonaio/daytona/cli/internal/clierr"
 )
 
 type ApiErrorResponse struct {
@@ -18,7 +19,10 @@ type ApiErrorResponse struct {
 
 func HandleErrorResponse(res *http.Response, requestErr error) error {
 	if res == nil {
-		return requestErr
+		if requestErr == nil {
+			return nil
+		}
+		return clierr.New(clierr.CategoryNetwork, requestErr.Error())
 	}
 
 	defer res.Body.Close()
@@ -58,13 +62,7 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 		}
 	}
 
-	if res.StatusCode == http.StatusUnauthorized {
-		errMessage += " - run 'daytona login' to reauthenticate"
-	}
-
-	if res.StatusCode == http.StatusForbidden {
-		errMessage += " - check that your API key has sufficient permissions for this action"
-	}
-
-	return errors.New(errMessage)
+	// FromHTTPStatus attaches the 401/403 remediation hints; Error()
+	// re-appends them so the rendered text matches the previous output.
+	return clierr.FromHTTPStatus(res.StatusCode, errMessage)
 }

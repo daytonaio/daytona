@@ -1,14 +1,30 @@
 name: daytona stop
 synopsis: Stop a sandbox
-usage: daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+usage: daytona stop [SANDBOX_ID | SANDBOX_NAME] [flags]
 options:
   - name: force
     shorthand: f
     default_value: 'false'
     usage: Force stop the sandbox using SIGKILL
+  - name: format
+    usage: Output format. Must be one of (yaml, json)
+  - name: timeout
+    default_value: 5m0s
+    usage: Maximum time to wait with --wait (0 waits indefinitely)
+  - name: wait
+    default_value: 'false'
+    usage: Wait until the sandbox is stopped
 inherited_options:
   - name: help
     default_value: 'false'
     usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
+example: |4-
+      daytona stop my-sandbox
+      daytona stop my-sandbox --wait --timeout 2m
+      daytona stop my-sandbox --force --format json
 see_also:
   - daytona - Daytona CLI

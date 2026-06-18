@@ -1,9 +1,27 @@
 name: daytona archive
 synopsis: Archive a sandbox
-usage: daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+usage: daytona archive [SANDBOX_ID | SANDBOX_NAME] [flags]
+options:
+  - name: format
+    shorthand: f
+    usage: Output format. Must be one of (yaml, json)
+  - name: timeout
+    default_value: 5m0s
+    usage: Maximum time to wait with --wait (0 waits indefinitely)
+  - name: wait
+    default_value: 'false'
+    usage: Wait until the sandbox is archived
 inherited_options:
   - name: help
     default_value: 'false'
     usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
+example: |4-
+      daytona archive my-sandbox
+      daytona archive my-sandbox --wait --timeout 10m
+      daytona archive my-sandbox --wait --format json
 see_also:
   - daytona - Daytona CLI

@@ -25,9 +25,20 @@ options:
   - name: region
     usage: |
       ID of the region where the snapshot will be available (defaults to organization default region)
+  - name: timeout
+    default_value: 0s
+    usage: |
+      Maximum time to wait for the snapshot to be validated (0 means wait indefinitely)
 inherited_options:
   - name: help
     default_value: 'false'
     usage: help for daytona
+  - name: no-input
+    default_value: 'false'
+    usage: |
+      Never prompt for input; fail instead when input would be required
+example: |4-
+      daytona snapshot push my-image:latest --name my-snapshot:1.0
+      daytona snapshot push my-image:latest --name my-snapshot:1.0 --cpu 2 --memory 4
 see_also:
   - daytona snapshot - Manage Daytona snapshots

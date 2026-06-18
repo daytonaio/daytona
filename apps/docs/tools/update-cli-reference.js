@@ -170,6 +170,20 @@ function yamlToMarkdown(files) {
     output += `${rawDoc.usage}\n`
     output += '```\n\n'
 
+    if (rawDoc.example) {
+      const example = rawDoc.example
+        .split('\n')
+        .map(line => line.replace(/\s+$/, ''))
+        .join('\n')
+        .replace(/\n+$/, '')
+      if (example) {
+        output += '### Examples\n\n'
+        output += '```shell\n'
+        output += `${example}\n`
+        output += '```\n\n'
+      }
+    }
+
     output += '__Flags__\n'
     output += '| Long | Short | Description |\n'
     output += '| :--- | :---- | :---------- |\n'
