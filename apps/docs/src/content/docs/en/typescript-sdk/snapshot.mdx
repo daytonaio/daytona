@@ -203,6 +203,7 @@ Represents a paginated list of Daytona Snapshots.
 
 ```ts
 type CreateSnapshotParams = {
+  cold: boolean;
   entrypoint: string[];
   image: string | Image;
   name: string;
@@ -216,6 +217,7 @@ Parameters for creating a new snapshot.
 
 **Type declaration**:
 
+- `cold?` _boolean_
 - `entrypoint?` _string\[\]_
 - `image` _string \| Image_
 - `name` _string_

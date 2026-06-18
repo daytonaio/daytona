@@ -9,7 +9,7 @@ import pytest
 
 from daytona.common.errors import DaytonaError
 from daytona.common.image import Image
-from daytona.common.snapshot import Snapshot
+from daytona.common.snapshot import CreateSnapshotParams, Snapshot
 
 
 class TestSyncSnapshotService:
@@ -26,6 +26,7 @@ class TestSyncSnapshotService:
             "id": "snap-123",
             "organization_id": "org-1",
             "general": False,
+            "cold": False,
             "name": name,
             "image_name": "python:3.12",
             "ref": None,
@@ -80,6 +81,7 @@ class TestSyncSnapshotService:
                 "id": "snap-123",
                 "organization_id": "org-1",
                 "general": False,
+                "cold": False,
                 "name": "test-snapshot",
                 "image_name": "python:3.12",
                 "ref": None,
@@ -108,6 +110,19 @@ class TestSyncSnapshotService:
 
         assert result.name == "active-snapshot"
 
+    def test_create_cold_passes_cold_to_api(self):
+        service, api = self._make_service()
+        dto = self._make_snapshot_dto(name="cold-snapshot")
+        dto.state = "active"
+        dto.model_dump.return_value["cold"] = True
+        api.create_snapshot.return_value = dto
+
+        result = service.create(CreateSnapshotParams(name="cold-snapshot", image="python:3.12", cold=True))
+
+        request = api.create_snapshot.call_args[0][0]
+        assert request.cold is True
+        assert result.cold is True
+
     def test_process_image_context_returns_empty_for_images_without_context(self):
         assert (
             TestSyncSnapshotService._make_service(self)[0].process_image_context(MagicMock(), Image.base("python:3.12"))
@@ -129,6 +144,7 @@ class TestAsyncSnapshotService:
             "id": "snap-123",
             "organization_id": "org-1",
             "general": False,
+            "cold": False,
             "name": name,
             "image_name": "python:3.12",
             "ref": None,
@@ -180,6 +196,7 @@ class TestAsyncSnapshotService:
                 "id": "snap-123",
                 "organization_id": "org-1",
                 "general": False,
+                "cold": False,
                 "name": "test-snapshot",
                 "image_name": "python:3.12",
                 "ref": None,
@@ -208,6 +225,20 @@ class TestAsyncSnapshotService:
         result = await service.activate(Snapshot.model_validate(self._make_snapshot_dto().model_dump()))
 
         assert result.name == "active-snapshot"
+
+    @pytest.mark.asyncio
+    async def test_create_cold_passes_cold_to_api(self):
+        service, api = self._make_service()
+        dto = self._make_snapshot_dto(name="cold-snapshot")
+        dto.state = "active"
+        dto.model_dump.return_value["cold"] = True
+        api.create_snapshot.return_value = dto
+
+        result = await service.create(CreateSnapshotParams(name="cold-snapshot", image="python:3.12", cold=True))
+
+        request = api.create_snapshot.call_args[0][0]
+        assert request.cold is True
+        assert result.cold is True
 
     @pytest.mark.asyncio
     async def test_process_image_context_returns_empty_for_images_without_context(self):

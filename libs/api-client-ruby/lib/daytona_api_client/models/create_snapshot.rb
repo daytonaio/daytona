@@ -48,6 +48,9 @@ module DaytonaApiClient
     # Target sandbox class. Determines which runners can host sandboxes created from this snapshot.
     attr_accessor :sandbox_class
 
+    # When true, the snapshot is \"cold\": it is never auto-propagated to runners. Sandboxes can still be created from it via an on-demand pull (they briefly enter the pulling_snapshot state). Defaults to false (warm).
+    attr_accessor :cold
+
     class EnumAttributeValidator
       attr_reader :datatype
       attr_reader :allowable_values
@@ -83,7 +86,8 @@ module DaytonaApiClient
         :'disk' => :'disk',
         :'build_info' => :'buildInfo',
         :'region_id' => :'regionId',
-        :'sandbox_class' => :'sandboxClass'
+        :'sandbox_class' => :'sandboxClass',
+        :'cold' => :'cold'
       }
     end
 
@@ -110,7 +114,8 @@ module DaytonaApiClient
         :'disk' => :'Integer',
         :'build_info' => :'CreateBuildInfo',
         :'region_id' => :'String',
-        :'sandbox_class' => :'SandboxClass'
+        :'sandbox_class' => :'SandboxClass',
+        :'cold' => :'Boolean'
       }
     end
 
@@ -185,6 +190,12 @@ module DaytonaApiClient
       if attributes.key?(:'sandbox_class')
         self.sandbox_class = attributes[:'sandbox_class']
       end
+
+      if attributes.key?(:'cold')
+        self.cold = attributes[:'cold']
+      else
+        self.cold = false
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -232,7 +243,8 @@ module DaytonaApiClient
           disk == o.disk &&
           build_info == o.build_info &&
           region_id == o.region_id &&
-          sandbox_class == o.sandbox_class
+          sandbox_class == o.sandbox_class &&
+          cold == o.cold
     end
 
     # @see the `==` method
@@ -244,7 +256,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, image_name, entrypoint, cpu, gpu, gpu_type, memory, disk, build_info, region_id, sandbox_class].hash
+      [name, image_name, entrypoint, cpu, gpu, gpu_type, memory, disk, build_info, region_id, sandbox_class, cold].hash
     end
 
     # Builds the object from hash

@@ -223,4 +223,6 @@ Parameters for creating a new snapshot.
   Defaults to organization default region if not specified.
 - `sandbox_class` _SandboxClass | None_ - Target sandbox class. Determines which runners
   can host sandboxes created from this snapshot.
+- `cold` _bool | None_ - When True, the snapshot is not auto-propagated to runners; sandboxes
+  pull it on demand. Defaults to False (warm).
 

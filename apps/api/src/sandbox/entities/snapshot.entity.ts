@@ -21,6 +21,7 @@ import { SandboxClass } from '../enums/sandbox-class.enum'
 import { GpuType } from '../enums/gpu-type.enum'
 import { BuildInfo } from './build-info.entity'
 import { SnapshotRegion } from './snapshot-region.entity'
+import { BASE_PROPAGATION_FACTOR } from '../constants/snapshot.constants'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -86,6 +87,13 @@ export class Snapshot {
 
   @Column({ type: 'boolean', default: false })
   hideFromUsers = false
+
+  /**
+   * Share of shared runners this snapshot is auto-propagated to; 0 = cold (pulled on demand).
+   * Internal knob — users only toggle cold vs warm (0 vs BASE_PROPAGATION_FACTOR).
+   */
+  @Column({ type: 'float', default: BASE_PROPAGATION_FACTOR })
+  propagationFactor = BASE_PROPAGATION_FACTOR
 
   @Column({
     type: 'character varying',

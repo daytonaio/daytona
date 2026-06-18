@@ -152,6 +152,11 @@ const columns: ColumnDef<SnapshotDto>[] = [
               System
             </Badge>
           )}
+          {snapshot.cold && (
+            <Badge variant="outline" className="ml-1 shrink-0">
+              Cold
+            </Badge>
+          )}
           <CopyButton value={snapshot.name} size="icon-xs" autoHide tooltipText="Copy name" />
         </div>
       )

@@ -872,6 +872,10 @@ export class RunnerService {
     }
   }
 
+  async removeSnapshotRunner(snapshotRunnerId: string): Promise<void> {
+    await this.snapshotRunnerRepository.delete(snapshotRunnerId)
+  }
+
   // TODO: combine getRunnersWithMultipleSnapshotsBuilding and getRunnersWithMultipleSnapshotsPulling?
 
   async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 6): Promise<string[]> {

@@ -787,6 +787,92 @@ curl https://app.daytona.io/api/snapshots \
 </TabItem>
 </Tabs>
 
+<a id="cold-snapshots"></a>
+### Cold snapshots
+
+By default, an active snapshot is distributed to runners ahead of time so that sandboxes start instantly. A **cold** snapshot is not distributed ahead of time — it is pulled on demand the first time you create a sandbox from it, so that first sandbox takes a little longer to start (it briefly shows the `pulling_snapshot` state).
+
+Set `cold` when creating the snapshot:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona, CreateSnapshotParams
+
+daytona = Daytona()
+snapshot = daytona.snapshot.create(
+    CreateSnapshotParams(name="my-cold-snapshot", image="python:3.12", cold=True),
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from "@daytona/sdk";
+
+const daytona = new Daytona();
+const snapshot = await daytona.snapshot.create({
+  name: "my-cold-snapshot",
+  image: "python:3.12",
+  cold: true,
+});
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, _ := daytona.NewClient()
+	ctx := context.Background()
+	cold := true
+	snapshot, logCh, _ := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
+		Name:  "my-cold-snapshot",
+		Image: "python:3.12",
+		Cold:  &cold,
+	})
+	for range logCh {
+	}
+	_ = snapshot
+}
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-cold-snapshot --image python:3.12 --cold
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-cold-snapshot",
+    "imageName": "python:3.12",
+    "cold": true
+  }'
+```
+
+</TabItem>
+</Tabs>
+
 ## Get a Snapshot by name
 
 Daytona provides an option to get a snapshot by name.
@@ -902,7 +988,7 @@ curl 'https://app.daytona.io/api/snapshots?page=2&limit=10' \
 
 ## Activate Snapshots
 
-Snapshots automatically become inactive after 2 weeks of not being used. To activate an inactive snapshot:
+Warm snapshots automatically become inactive after 2 weeks of not being used ([cold snapshots](#cold-snapshots) are never auto-deactivated). To activate an inactive snapshot:
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the three dots at the end of the row for the snapshot you want to activate
@@ -937,7 +1023,7 @@ curl https://app.daytona.io/api/snapshots/my-inactive-snapshot/activate \
 
 ## Deactivate Snapshots
 
-Daytona provides an option to deactivate snapshots. Deactivated snapshots are not available for new sandboxes.
+Daytona provides an option to deactivate snapshots. Deactivating a snapshot removes its pre-distributed copies from runners to free resources. You can still create a sandbox from it afterwards via an on-demand pull, which re-activates the snapshot in the background.
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the three dots at the end of the row for the snapshot you want to deactivate
@@ -1020,7 +1106,7 @@ A snapshot can have several different states. Each state reflects the snapshot's
 - **Removing**: the snapshot is being deleted
 
 :::note
-Inactive snapshots cannot be used to create sandboxes. They must be explicitly [re-activated](#activate-snapshots) before use. When activated, the snapshot returns to `pending` state and is re-processed before becoming `active` again.
+You can still create a sandbox from an inactive snapshot: Daytona pulls it onto a runner on demand (the sandbox briefly enters the `pulling_snapshot` state), and warm snapshots are re-activated in the background so later sandboxes start instantly. This is the same on-demand flow used by [cold snapshots](#cold-snapshots). You can also [activate](#activate-snapshots) a snapshot manually to pre-distribute it ahead of time.
 :::
 
 ## Run Docker in a Sandbox

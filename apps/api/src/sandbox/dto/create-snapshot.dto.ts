@@ -9,6 +9,7 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsObject,
   IsNumber,
@@ -140,4 +141,14 @@ export class CreateSnapshotDto {
   @IsOptional()
   @IsEnum(SandboxClass)
   sandboxClass?: SandboxClass
+
+  @ApiPropertyOptional({
+    description:
+      'When true, the snapshot is "cold": it is never auto-propagated to runners. Sandboxes can still be ' +
+      'created from it via an on-demand pull (they briefly enter the pulling_snapshot state). Defaults to false (warm).',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  cold?: boolean
 }

@@ -50,6 +50,7 @@ import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { SnapshotRegion } from '../entities/snapshot-region.entity'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { SnapshotEvents } from '../constants/snapshot-events'
+import { BASE_PROPAGATION_FACTOR } from '../constants/snapshot.constants'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { RunnerService } from './runner.service'
 import { RegionService } from '../../region/services/region.service'
@@ -234,6 +235,7 @@ export class SnapshotService {
           state,
           ref,
           general,
+          propagationFactor: createSnapshotDto.cold ? 0 : BASE_PROPAGATION_FACTOR,
           snapshotRegions: [{ snapshotId, regionId: region.id }],
         })
 
@@ -330,6 +332,7 @@ export class SnapshotService {
         sandboxClass,
         state: SnapshotState.PENDING,
         general,
+        propagationFactor: createSnapshotDto.cold ? 0 : BASE_PROPAGATION_FACTOR,
         snapshotRegions: [{ snapshotId, regionId: region.id }],
       })
 

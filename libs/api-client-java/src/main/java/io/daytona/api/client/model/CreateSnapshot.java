@@ -110,6 +110,11 @@ public class CreateSnapshot {
   @javax.annotation.Nullable
   private SandboxClass sandboxClass;
 
+  public static final String SERIALIZED_NAME_COLD = "cold";
+  @SerializedName(SERIALIZED_NAME_COLD)
+  @javax.annotation.Nullable
+  private Boolean cold = false;
+
   public CreateSnapshot() {
   }
 
@@ -337,6 +342,25 @@ public class CreateSnapshot {
     this.sandboxClass = sandboxClass;
   }
 
+
+  public CreateSnapshot cold(@javax.annotation.Nullable Boolean cold) {
+    this.cold = cold;
+    return this;
+  }
+
+  /**
+   * When true, the snapshot is \&quot;cold\&quot;: it is never auto-propagated to runners. Sandboxes can still be created from it via an on-demand pull (they briefly enter the pulling_snapshot state). Defaults to false (warm).
+   * @return cold
+   */
+  @javax.annotation.Nullable
+  public Boolean getCold() {
+    return cold;
+  }
+
+  public void setCold(@javax.annotation.Nullable Boolean cold) {
+    this.cold = cold;
+  }
+
   /**
    * A container for additional, undeclared properties.
    * This is a holder for any undeclared properties as specified with
@@ -402,13 +426,14 @@ public class CreateSnapshot {
         Objects.equals(this.disk, createSnapshot.disk) &&
         Objects.equals(this.buildInfo, createSnapshot.buildInfo) &&
         Objects.equals(this.regionId, createSnapshot.regionId) &&
-        Objects.equals(this.sandboxClass, createSnapshot.sandboxClass)&&
+        Objects.equals(this.sandboxClass, createSnapshot.sandboxClass) &&
+        Objects.equals(this.cold, createSnapshot.cold)&&
         Objects.equals(this.additionalProperties, createSnapshot.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, imageName, entrypoint, cpu, gpu, gpuType, memory, disk, buildInfo, regionId, sandboxClass, additionalProperties);
+    return Objects.hash(name, imageName, entrypoint, cpu, gpu, gpuType, memory, disk, buildInfo, regionId, sandboxClass, cold, additionalProperties);
   }
 
   @Override
@@ -426,6 +451,7 @@ public class CreateSnapshot {
     sb.append("    buildInfo: ").append(toIndentedString(buildInfo)).append("\n");
     sb.append("    regionId: ").append(toIndentedString(regionId)).append("\n");
     sb.append("    sandboxClass: ").append(toIndentedString(sandboxClass)).append("\n");
+    sb.append("    cold: ").append(toIndentedString(cold)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -445,7 +471,7 @@ public class CreateSnapshot {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("name", "imageName", "entrypoint", "cpu", "gpu", "gpuType", "memory", "disk", "buildInfo", "regionId", "sandboxClass"));
+    openapiFields = new HashSet<String>(Arrays.asList("name", "imageName", "entrypoint", "cpu", "gpu", "gpuType", "memory", "disk", "buildInfo", "regionId", "sandboxClass", "cold"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("name"));

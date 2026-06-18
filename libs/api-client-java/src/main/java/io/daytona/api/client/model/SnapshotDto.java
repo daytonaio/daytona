@@ -72,6 +72,11 @@ public class SnapshotDto {
   @javax.annotation.Nonnull
   private Boolean general;
 
+  public static final String SERIALIZED_NAME_COLD = "cold";
+  @SerializedName(SERIALIZED_NAME_COLD)
+  @javax.annotation.Nonnull
+  private Boolean cold;
+
   public static final String SERIALIZED_NAME_NAME = "name";
   @SerializedName(SERIALIZED_NAME_NAME)
   @javax.annotation.Nonnull
@@ -282,6 +287,25 @@ public class SnapshotDto {
 
   public void setGeneral(@javax.annotation.Nonnull Boolean general) {
     this.general = general;
+  }
+
+
+  public SnapshotDto cold(@javax.annotation.Nonnull Boolean cold) {
+    this.cold = cold;
+    return this;
+  }
+
+  /**
+   * Whether the snapshot is cold (never auto-propagated to runners; pulled on demand).
+   * @return cold
+   */
+  @javax.annotation.Nonnull
+  public Boolean getCold() {
+    return cold;
+  }
+
+  public void setCold(@javax.annotation.Nonnull Boolean cold) {
+    this.cold = cold;
   }
 
 
@@ -719,6 +743,7 @@ public class SnapshotDto {
     return Objects.equals(this.id, snapshotDto.id) &&
         Objects.equals(this.organizationId, snapshotDto.organizationId) &&
         Objects.equals(this.general, snapshotDto.general) &&
+        Objects.equals(this.cold, snapshotDto.cold) &&
         Objects.equals(this.name, snapshotDto.name) &&
         Objects.equals(this.imageName, snapshotDto.imageName) &&
         Objects.equals(this.state, snapshotDto.state) &&
@@ -743,7 +768,7 @@ public class SnapshotDto {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, general, name, imageName, state, size, entrypoint, cpu, gpu, gpuType, mem, disk, errorReason, createdAt, updatedAt, lastUsedAt, buildInfo, regionIds, initialRunnerId, ref, sandboxClass, additionalProperties);
+    return Objects.hash(id, organizationId, general, cold, name, imageName, state, size, entrypoint, cpu, gpu, gpuType, mem, disk, errorReason, createdAt, updatedAt, lastUsedAt, buildInfo, regionIds, initialRunnerId, ref, sandboxClass, additionalProperties);
   }
 
   @Override
@@ -753,6 +778,7 @@ public class SnapshotDto {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    general: ").append(toIndentedString(general)).append("\n");
+    sb.append("    cold: ").append(toIndentedString(cold)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    imageName: ").append(toIndentedString(imageName)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
@@ -791,10 +817,10 @@ public class SnapshotDto {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "gpuType", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "general", "cold", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "gpuType", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref", "sandboxClass"));
 
     // a set of required properties/fields (JSON key names)
-    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "general", "name", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt"));
+    openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "general", "cold", "name", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt"));
   }
 
   /**

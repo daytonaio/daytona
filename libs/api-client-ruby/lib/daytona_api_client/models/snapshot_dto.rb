@@ -21,6 +21,9 @@ module DaytonaApiClient
 
     attr_accessor :general
 
+    # Whether the snapshot is cold (never auto-propagated to runners; pulled on demand).
+    attr_accessor :cold
+
     attr_accessor :name
 
     attr_accessor :image_name
@@ -93,6 +96,7 @@ module DaytonaApiClient
         :'id' => :'id',
         :'organization_id' => :'organizationId',
         :'general' => :'general',
+        :'cold' => :'cold',
         :'name' => :'name',
         :'image_name' => :'imageName',
         :'state' => :'state',
@@ -131,6 +135,7 @@ module DaytonaApiClient
         :'id' => :'String',
         :'organization_id' => :'String',
         :'general' => :'Boolean',
+        :'cold' => :'Boolean',
         :'name' => :'String',
         :'image_name' => :'String',
         :'state' => :'SnapshotState',
@@ -193,6 +198,12 @@ module DaytonaApiClient
         self.general = attributes[:'general']
       else
         self.general = nil
+      end
+
+      if attributes.key?(:'cold')
+        self.cold = attributes[:'cold']
+      else
+        self.cold = nil
       end
 
       if attributes.key?(:'name')
@@ -313,6 +324,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "general", general cannot be nil.')
       end
 
+      if @cold.nil?
+        invalid_properties.push('invalid value for "cold", cold cannot be nil.')
+      end
+
       if @name.nil?
         invalid_properties.push('invalid value for "name", name cannot be nil.')
       end
@@ -354,6 +369,7 @@ module DaytonaApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @id.nil?
       return false if @general.nil?
+      return false if @cold.nil?
       return false if @name.nil?
       return false if @state.nil?
       return false if @cpu.nil?
@@ -385,6 +401,16 @@ module DaytonaApiClient
       end
 
       @general = general
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] cold Value to be assigned
+    def cold=(cold)
+      if cold.nil?
+        fail ArgumentError, 'cold cannot be nil'
+      end
+
+      @cold = cold
     end
 
     # Custom attribute writer method with validation
@@ -485,6 +511,7 @@ module DaytonaApiClient
           id == o.id &&
           organization_id == o.organization_id &&
           general == o.general &&
+          cold == o.cold &&
           name == o.name &&
           image_name == o.image_name &&
           state == o.state &&
@@ -515,7 +542,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, general, name, image_name, state, size, entrypoint, cpu, gpu, gpu_type, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info, region_ids, initial_runner_id, ref, sandbox_class].hash
+      [id, organization_id, general, cold, name, image_name, state, size, entrypoint, cpu, gpu, gpu_type, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info, region_ids, initial_runner_id, ref, sandbox_class].hash
     end
 
     # Builds the object from hash

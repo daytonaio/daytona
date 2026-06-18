@@ -86,6 +86,7 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { isEphemeral } from '../utils/ephemeral.util'
+import { isColdSnapshot } from '../utils/snapshot.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
@@ -506,7 +507,9 @@ export class SandboxService {
         throw new BadRequestError(`Snapshot ${snapshotIdOrName} is not available in region ${region.id}`)
       }
 
-      if (snapshot.state !== SnapshotState.ACTIVE) {
+      // ACTIVE/INACTIVE both have a usable registry image; either can back a sandbox (a non-warm one
+      // falls back to the cold pull below). Other states (pending/pulling/building/error) aren't usable.
+      if (![SnapshotState.ACTIVE, SnapshotState.INACTIVE].includes(snapshot.state)) {
         throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
       }
 
@@ -608,7 +611,7 @@ export class SandboxService {
         gpuRunnerAssignmentLockKey = key
       }
 
-      let runner: Runner
+      let runner: Runner | undefined
       if (linkedSandbox && linkedSandbox.runnerId) {
         runner = await this.runnerService.findOneOrFail(linkedSandbox.runnerId)
 
@@ -620,13 +623,24 @@ export class SandboxService {
 
         this.runnerService.assertRunnerCanHost(runner)
       } else {
-        runner = await this.runnerService.getRandomAvailableRunner({
-          regions: [region.id],
-          sandboxClass: snapshot.sandboxClass,
-          snapshotRef: snapshot.ref,
-          gpu,
-          gpuType,
-        })
+        try {
+          runner = await this.runnerService.getRandomAvailableRunner({
+            regions: [region.id],
+            sandboxClass: snapshot.sandboxClass,
+            snapshotRef: snapshot.ref,
+            gpu,
+            gpuType,
+          })
+        } catch (error) {
+          // No runner has this snapshot warm — fall back to the cold pull: leave the sandbox
+          // unassigned in PULLING_SNAPSHOT for handleUnassignedRunnerSandbox to pull on demand.
+          const noRunnersAvailable =
+            error instanceof BadRequestError && error.message.startsWith('No available runners')
+          if (!noRunnersAvailable) {
+            throw error
+          }
+          runner = undefined
+        }
       }
 
       const sandbox = new Sandbox({ region: region.id, name: createSandboxDto.name })
@@ -672,11 +686,25 @@ export class SandboxService {
         sandbox.volumes = resolvedVolumes
       }
 
-      sandbox.runnerId = runner.id
+      if (runner) {
+        sandbox.runnerId = runner.id
+      } else {
+        // Cold-pull fallback: stays unassigned until a runner is picked and the ref is pulled.
+        sandbox.state = SandboxState.PULLING_SNAPSHOT
+      }
       sandbox.linkedSandboxId = linkedSandbox?.id ?? null
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+
+      // Re-warm an inactive warm snapshot in the background so future creates are fast. Cold
+      // snapshots are never activated. Activation may be rejected (cooldown/quota) — don't fail
+      // the create, the cold pull already serves this sandbox.
+      if (snapshot.state === SnapshotState.INACTIVE && !isColdSnapshot(snapshot)) {
+        this.snapshotService
+          .activateSnapshot(snapshot.id, organization)
+          .catch((err) => this.logger.warn(`Failed to auto-activate snapshot ${snapshot.id}: ${err?.message ?? err}`))
+      }
 
       if (gpuRunnerAssignmentLockKey) {
         const key = gpuRunnerAssignmentLockKey
