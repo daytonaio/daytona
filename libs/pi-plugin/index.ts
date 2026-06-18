@@ -406,7 +406,12 @@ export default function (pi: ExtensionAPI) {
   // also run here to catch sessions deleted during this run.
   pi.on('session_shutdown', async (event, ctx) => {
     if (!active) return
-    if (event.reason !== 'quit' && event.reason !== 'reload') return
+    // Skip only in-process session handoffs (new/resume/fork) — there the session
+    // continues and its sandbox is deliberately kept/reattached. Everything else
+    // (quit, reload, or an unlabeled shutdown from Pi builds that emit no reason)
+    // is a real teardown and must run cleanup. Matching an allow-list of
+    // {quit,reload} instead silently skipped cleanup whenever reason was absent.
+    if (event.reason === 'new' || event.reason === 'resume' || event.reason === 'fork') return
     const current = active
     active = null
     setStatus(ctx, undefined)
