@@ -801,38 +801,46 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       return
     }
 
-    const snapshots = await this.snapshotRepository.find({
-      where: {
-        state: SnapshotState.REMOVING,
-      },
-    })
+    try {
+      const snapshots = await this.snapshotRepository.find({
+        where: {
+          state: SnapshotState.REMOVING,
+        },
+      })
 
-    await Promise.all(
-      snapshots.map(async (snapshot) => {
-        const countActiveSnapshots = await this.snapshotRepository.count({
-          where: {
-            state: SnapshotState.ACTIVE,
-            ref: snapshot.ref,
-          },
-        })
+      const results = await Promise.allSettled(
+        snapshots.map(async (snapshot) => {
+          const countActiveSnapshots = await this.snapshotRepository.count({
+            where: {
+              state: SnapshotState.ACTIVE,
+              ref: snapshot.ref,
+            },
+          })
 
-        // Only remove snapshot runners if no other snapshots depend on them
-        if (countActiveSnapshots === 0) {
-          await this.snapshotRunnerRepository.update(
-            {
-              snapshotRef: snapshot.ref,
-            },
-            {
-              state: SnapshotRunnerState.REMOVING,
-            },
-          )
+          // Only remove snapshot runners if no other snapshots depend on them
+          if (countActiveSnapshots === 0) {
+            await this.snapshotRunnerRepository.update(
+              {
+                snapshotRef: snapshot.ref,
+              },
+              {
+                state: SnapshotRunnerState.REMOVING,
+              },
+            )
+          }
+
+          await this.snapshotRepository.remove(snapshot)
+        }),
+      )
+
+      results.forEach((result) => {
+        if (result.status === 'rejected') {
+          this.logger.error(`Error cleaning up snapshot: ${fromAxiosError(result.reason)}`)
         }
-
-        await this.snapshotRepository.remove(snapshot)
-      }),
-    )
-
-    await this.redisLockProvider.unlock(lockKey)
+      })
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-state' })
@@ -851,11 +859,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       },
     })
 
-    await Promise.all(
+    const results = await Promise.allSettled(
       snapshots.map(async (snapshot) => {
-        this.syncSnapshotState(snapshot.id)
+        await this.syncSnapshotState(snapshot.id)
       }),
     )
+
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        this.logger.error(
+          `Error syncing snapshot state for snapshot ${snapshots[index].id}: ${fromAxiosError(result.reason)}`,
+        )
+      }
+    })
   }
 
   async syncSnapshotState(snapshotId: string): Promise<void> {
@@ -904,7 +920,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     await this.redisLockProvider.unlock(lockKey)
     if (syncState === SYNC_AGAIN) {
-      this.syncSnapshotState(snapshotId)
+      void this.syncSnapshotState(snapshotId).catch((err) =>
+        this.logger.error(`Error syncing snapshot state for snapshot ${snapshotId}: ${fromAxiosError(err)}`),
+      )
     }
   }
 

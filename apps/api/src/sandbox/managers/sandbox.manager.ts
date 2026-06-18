@@ -153,7 +153,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   whereCondition: { pending: false, state: sandbox.state },
                 })
 
-                this.syncInstanceState(sandbox.id).catch(this.logger.error)
+                this.syncInstanceState(sandbox.id).catch((err) =>
+                  this.logger.error(`Error syncing instance state for sandbox ${sandbox.id}:`, err),
+                )
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -213,7 +215,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               whereCondition: { pending: false, state: sandbox.state },
             })
 
-            this.syncInstanceState(sandbox.id).catch(this.logger.error)
+            this.syncInstanceState(sandbox.id).catch((err) =>
+              this.logger.error(`Error syncing instance state for sandbox ${sandbox.id}:`, err),
+            )
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
           } finally {
@@ -276,7 +280,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   whereCondition: { pending: false, state: sandbox.state },
                 })
 
-                this.syncInstanceState(sandbox.id).catch(this.logger.error)
+                this.syncInstanceState(sandbox.id).catch((err) =>
+                  this.logger.error(`Error syncing instance state for sandbox ${sandbox.id}:`, err),
+                )
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -437,7 +443,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             whereCondition: { pending: false, state: SandboxState.STARTED },
           })
 
-          this.syncInstanceState(sandbox.id).catch(this.logger.error)
+          this.syncInstanceState(sandbox.id).catch((err) =>
+            this.logger.error(`Error syncing instance state for sandbox ${sandbox.id}:`, err),
+          )
         } catch (e) {
           this.logger.error(`Failed to request stop for sandbox ${sandbox.id} on draining runner ${runnerId}`, e)
         } finally {
@@ -955,9 +963,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       },
     })
 
-    await Promise.all(
+    await Promise.allSettled(
       sandboxes.map(async (sandbox) => {
-        this.syncInstanceState(sandbox.id)
+        await this.syncInstanceState(sandbox.id)
       }),
     )
     await this.redisLockProvider.unlock(lockKey)
