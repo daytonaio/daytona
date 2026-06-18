@@ -245,7 +245,27 @@ Paste the printed `export` lines into your shell, then use any OpenAI-compatible
 That `max_tokens: 4096` on a haiku request is not a typo. gpt-oss reasons before it answers, and `max_tokens` covers reasoning plus answer combined. If thinking exhausts the budget, the request returns `finish_reason: "length"` with the truncated trace in `reasoning_content` and `content: null`, which looks like the model returned nothing. The thinking length also varies widely between identical runs. Give requests generous budgets, or turn `reasoning_effort` down for simple tasks.
 :::
 
-The subsections below drive that same client through SGLang's features, each a runnable example in `query_openai.py`: reasoning effort, structured output, tool calling, and prefix caching.
+The subsections below drive that same client through SGLang's features, each a runnable example in `query_openai.py`: streaming, reasoning effort, structured output, tool calling, and prefix caching.
+
+#### Streaming
+
+Set `stream=True` and tokens arrive as deltas instead of one final message. gpt-oss streams its reasoning channel first and the answer second, in separate fields, so printing both `reasoning_content` and `content` follows the whole generation as it comes:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    stream = client.chat.completions.create(
+        model="gpt-oss-20b",
+        messages=[{"role": "user", "content": "Write ten haikus about tokens arriving one at a time."}],
+        max_tokens=8192,
+        stream=True,
+    )
+    for chunk in stream:
+        delta = chunk.choices[0].delta
+        print(delta.reasoning_content or delta.content or "", end="", flush=True)
+    ```
+  </TabItem>
+</Tabs>
 
 #### Reasoning on a Dial
 
@@ -507,7 +527,7 @@ To serve a different model, change three things in `serve_sglang.py`:
 
 For gated models, set `HF_TOKEN` in your `.env`; the script forwards it into the sandbox automatically. Keep in mind that the model has to fit on a single GPU, since sandboxes have at most one.
 
-#### Scaling up: gpt-oss-120b on one GPU
+### 8. Scaling Up: gpt-oss-120b on One GPU
 
 The 20b's big sibling also fits on a single H100, which is the point of its MXFP4 quantization: 117B parameters in about 67 GB of weights. It needs three additions to the launch command, because the weights occupy 85 percent of VRAM and nothing fits by default:
 
@@ -523,11 +543,11 @@ The allocator setting prevents fragmentation failures while the MXFP4 weights ar
 The resulting KV pool is about 89,000 tokens, a fraction of the model's 131k context window and less than a tenth of the 20b's pool. One request can use at most that much, and the classification workload above would not fit a quarter of its batch. The 120b on one sandbox is a capable single-user reasoning endpoint, not quite a concurrent-serving one.
 :::
 
-### 8. Going Further: One Endpoint, Many Sandboxes
+### 9. Going Further: One Endpoint, Many Sandboxes
 
 A single GPU sandbox is one worker. SGLang's companion [Model Gateway](https://github.com/sgl-project/sglang/tree/main/sgl-model-gateway) is built to sit in front of many: among its load-balancing strategies is a cache-aware one that tracks each worker's radix cache and routes prefix-sharing requests to the worker that already has them cached. Since every Daytona sandbox exposes its server through its own preview URL, a fleet of single-GPU sandboxes behind one gateway becomes a horizontally scaled endpoint, with workers joining and leaving as you create and delete sandboxes.
 
-### 9. Configuration Options
+### 10. Configuration Options
 
 Constants at the top of `serve_sglang.py`:
 
