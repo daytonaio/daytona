@@ -19,7 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@daytona/sdk": "^0.163.0",
+    "@daytona/sdk": "^0.187.0",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {
