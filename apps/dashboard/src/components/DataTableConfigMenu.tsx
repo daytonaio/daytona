@@ -23,7 +23,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 const DATA_TABLE_CONFIG_STORAGE_PREFIX = 'daytona:data-table-config'
-const DATA_TABLE_CONFIG_VERSION = 1
+const DATA_TABLE_CONFIG_VERSION = 2
 const DEFAULT_DATA_TABLE_CONFIG_EXCLUDED_COLUMN_IDS = ['actions', 'select'] as const
 const DATA_TABLE_CONFIG_PIN_SEPARATOR_ID = '__data-table-config-pin-separator__'
 
@@ -448,7 +448,35 @@ function normalizeColumnOrder(columnOrder: unknown, columnIds: string[]) {
   const orderedIdSet = new Set(orderedIds)
   const remainingIds = columnIds.filter((columnId) => !orderedIdSet.has(columnId))
 
-  return [...orderedIds, ...remainingIds]
+  return insertMissingColumnIds(orderedIds, remainingIds, columnIds)
+}
+
+function insertMissingColumnIds(orderedIds: string[], missingIds: string[], columnIds: string[]) {
+  const nextOrder = [...orderedIds]
+
+  for (const missingId of missingIds) {
+    const defaultIndex = columnIds.indexOf(missingId)
+    const previousColumnId = columnIds
+      .slice(0, defaultIndex)
+      .reverse()
+      .find((columnId) => nextOrder.includes(columnId))
+
+    if (previousColumnId) {
+      nextOrder.splice(nextOrder.indexOf(previousColumnId) + 1, 0, missingId)
+      continue
+    }
+
+    const nextColumnId = columnIds.slice(defaultIndex + 1).find((columnId) => nextOrder.includes(columnId))
+
+    if (nextColumnId) {
+      nextOrder.splice(nextOrder.indexOf(nextColumnId), 0, missingId)
+      continue
+    }
+
+    nextOrder.push(missingId)
+  }
+
+  return nextOrder
 }
 
 function normalizeColumnVisibility<TData>(columnVisibility: unknown, columns: Column<TData, unknown>[]) {
