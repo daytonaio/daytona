@@ -2,10 +2,11 @@ FROM node:22-alpine AS build
 
 ENV CI=true
 
-# Build toolchain (python3/make/g++) is needed when a native module's prebuilt
-# binary download fails and node-gyp falls back to compiling from source —
-# it stays out of the runtime image.
-RUN apk add --no-cache python3 make g++
+# Build toolchain (python3/py3-setuptools/make/g++) is needed when a native
+# module's prebuilt binary download fails and node-gyp falls back to compiling
+# from source — it stays out of the runtime image. py3-setuptools provides the
+# distutils module node-gyp needs on Python 3.12+.
+RUN apk add --no-cache python3 py3-setuptools make g++
 
 RUN npm install -g corepack && corepack enable
 

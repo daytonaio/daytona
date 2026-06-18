@@ -3,10 +3,11 @@ FROM node:24-slim AS builder
 
 ENV CI=true
 
-# Build toolchain (python3/make/g++) is only needed to compile the bundle and
-# any native devDependencies — it stays out of the runtime image.
+# Build toolchain (python3/python3-setuptools/make/g++) is only needed to compile
+# the bundle and any native devDependencies — it stays out of the runtime image.
+# python3-setuptools provides the distutils module node-gyp needs on Python 3.12+.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      bash curl python3 make g++ && \
+      bash curl python3 python3-setuptools make g++ && \
     rm -rf /var/lib/apt/lists/*
 RUN npm install -g corepack && corepack enable
 
