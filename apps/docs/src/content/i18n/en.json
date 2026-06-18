@@ -160,6 +160,7 @@
   "sidebarconfig.openenv": "OpenEnv",
   "sidebarconfig.verl": "veRL",
   "sidebarconfig.vllm": "vLLM",
+  "sidebarconfig.sglang": "SGLang",
   "sidebarconfig.openaiAgents": "OpenAI Agents SDK",
   "sidebarconfig.rlm": "RLMs",
   "sidebarconfig.recursiveLms": "RLMs",
