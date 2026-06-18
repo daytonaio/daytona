@@ -146,7 +146,7 @@ yarn install
 
 ### Development and Testing
 
-To modify the extension, edit the source files in `libs/pi-plugin`.
+To modify the extension, edit the source files in `libs/pi-extension`.
 
 > [!NOTE]
 > Because Pi loads extensions as TypeScript via [jiti](https://github.com/unjs/jiti), there is no build step — Pi runs the source directly.
@@ -156,7 +156,7 @@ To modify the extension, edit the source files in `libs/pi-plugin`.
 Install the extension's own dependencies once (needed for running it and for the tests):
 
 ```bash
-cd libs/pi-plugin && npm install
+cd libs/pi-extension && npm install
 ```
 
 This is needed even after `yarn install` at the repo root, which doesn't make `@daytona/sdk` resolvable at runtime.
@@ -173,7 +173,7 @@ pi uninstall <source>          # e.g. npm:@daytona/pi — use the source shown b
 Install the local directory:
 
 ```bash
-pi install ./libs/pi-plugin    # add --local to scope it to the current project instead of globally
+pi install ./libs/pi-extension    # add --local to scope it to the current project instead of globally
 ```
 
 Run Pi:
@@ -187,15 +187,15 @@ Edits to the source take effect on the next run — no reinstall needed.
 Alternatively, load the source for a single run without installing:
 
 ```bash
-DAYTONA_API_KEY=dtn_... pi -e ./libs/pi-plugin/index.ts --daytona
+DAYTONA_API_KEY=dtn_... pi -e ./libs/pi-extension/index.ts --daytona
 ```
 
 #### Tests
 
 ```bash
-npx nx run pi-plugin:type-check   # type-check (from the repo root; needs the monorepo installed)
+npx nx run pi-extension:type-check   # type-check (from the repo root; needs the monorepo installed)
 
-cd libs/pi-plugin
+cd libs/pi-extension
 npm run smoke                     # offline: load the extension and check it registers (no API key/network)
 npm run test:live                 # end-to-end against real Daytona (needs DAYTONA_API_KEY)
 ```
@@ -205,7 +205,7 @@ npm run test:live                 # end-to-end against real Daytona (needs DAYTO
 Publish the TypeScript source to npm:
 
 ```bash
-npx nx run pi-plugin:publish
+npx nx run pi-extension:publish
 ```
 
 This will publish to npm with public access and use the version number from `package.json`.
@@ -213,7 +213,7 @@ This will publish to npm with public access and use the version number from `pac
 ## Project Structure
 
 ```
-libs/pi-plugin/
+libs/pi-extension/
 ├── index.ts            # Extension entry point: flags, lifecycle, commands
 ├── src/                # Daytona-backed tool implementations
 │   ├── tools.ts        # Tool registration (sandbox-backed tools + preview_url)

@@ -1,8 +1,8 @@
 {
-  "name": "pi-plugin",
+  "name": "pi-extension",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/pi-plugin",
+  "sourceRoot": "libs/pi-extension",
   "targets": {
     "format": {
       "executor": "nx:run-commands",
@@ -13,7 +13,7 @@
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc --noEmit --project libs/pi-plugin/tsconfig.json"
+        "command": "tsc --noEmit --project libs/pi-extension/tsconfig.json"
       }
     },
     "set-version": {
