@@ -312,7 +312,7 @@
     black calc(100% - min(var(--scroll-fade-offset-y-bottom), var(--mask-offset))),
     transparent
   );
-  animation: animate-scroll-fade-mask linear both;
+  animation: animate-scroll-fade-mask 1ms linear both;
   animation-timeline: scroll(self y);
   mask-image: var(--scroll-fade-mask);
   -webkit-mask-image: var(--scroll-fade-mask);
@@ -329,7 +329,7 @@
     black calc(100% - min(var(--scroll-fade-offset-x-right), var(--mask-offset))),
     transparent
   );
-  animation: animate-scroll-fade-mask-horizontal linear both;
+  animation: animate-scroll-fade-mask-horizontal 1ms linear both;
   animation-timeline: scroll(self x);
   mask-image: var(--scroll-fade-mask);
   -webkit-mask-image: var(--scroll-fade-mask);

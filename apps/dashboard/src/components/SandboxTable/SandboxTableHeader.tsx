@@ -20,6 +20,7 @@ import {
   Wrench,
 } from 'lucide-react'
 import { DataTableConfigMenu } from '@/components/DataTableConfigMenu'
+import { useAvailableSandboxClassesForOrganization } from '@/hooks/useAvailableSandboxClasses'
 import { cn } from '@/lib/utils'
 import { SearchInput } from '../SearchInput'
 import TooltipButton from '../TooltipButton'
@@ -78,8 +79,9 @@ export function SandboxTableHeader({
   onRefresh,
   isRefreshing = false,
 }: SandboxTableHeaderProps) {
-  const sandboxClassColumn = table.getAllLeafColumns().find((column) => column.id === 'sandboxClass')
-  const classColumnAvailable = Boolean(sandboxClassColumn)
+  const availableSandboxClasses = useAvailableSandboxClassesForOrganization()
+  const sandboxClassColumn = table.getColumn('sandboxClass')
+  const showClassFilter = availableSandboxClasses.length > 1 && Boolean(sandboxClassColumn)
   const hasStateFilter = ((table.getColumn('state')?.getFilterValue() as string[]) || []).length > 0
   const hasClassFilter = ((sandboxClassColumn?.getFilterValue() as string[]) || []).length > 0
   const hasSnapshotFilter = ((table.getColumn('snapshot')?.getFilterValue() as string[]) || []).length > 0
@@ -139,7 +141,7 @@ export function SandboxTableHeader({
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              {classColumnAvailable && (
+              {showClassFilter && (
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <Boxes className="w-4 h-4" />
@@ -320,7 +322,7 @@ export function SandboxTableHeader({
               onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
             />
           )}
-          {classColumnAvailable && hasClassFilter && (
+          {hasClassFilter && (
             <SandboxClassFilterIndicator
               value={(sandboxClassColumn?.getFilterValue() as string[]) || []}
               onFilterChange={(value) => sandboxClassColumn?.setFilterValue(value)}

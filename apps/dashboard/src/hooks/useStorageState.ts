@@ -20,7 +20,7 @@ type StorageStateInitialValue<TValue> = TValue | (() => TValue)
 type StorageStateError = {
   error: unknown
   key: string
-  operation: 'read' | 'remove' | 'subscribe' | 'write'
+  operation: 'remove' | 'subscribe' | 'write'
 }
 
 type UseStorageStateOptions<TValue> = {
@@ -44,7 +44,7 @@ type StorageStateSnapshotReader<TValue> = {
 }
 
 type StorageStateSnapshotSource = {
-  kind: 'error' | 'memory' | 'storage' | 'unavailable'
+  kind: 'memory' | 'storage' | 'unavailable'
   rawValue: string | null
   storage: StorageStateStorage | null
 }
@@ -95,10 +95,9 @@ function useStorageState<TValue>(
     () =>
       createStorageSnapshotReader(key, initialValueRef, {
         deserialize,
-        onError,
         storage,
       }),
-    [deserialize, key, onError, storage],
+    [deserialize, key, storage],
   )
 
   const subscribe = useCallback(
@@ -144,11 +143,7 @@ function useStorageState<TValue>(
 function createStorageSnapshotReader<TValue>(
   key: string,
   initialValueRef: RefObject<StorageStateInitialValue<TValue>>,
-  {
-    deserialize,
-    onError,
-    storage,
-  }: Required<Pick<UseStorageStateOptions<TValue>, 'deserialize' | 'onError' | 'storage'>>,
+  { deserialize, storage }: Required<Pick<UseStorageStateOptions<TValue>, 'deserialize' | 'storage'>>,
 ): StorageStateSnapshotReader<TValue> {
   let cachedServerSnapshot: StorageStateSnapshot<TValue> | null = null
   let cachedSnapshot: StorageStateSnapshot<TValue> | null = null
@@ -170,20 +165,13 @@ function createStorageSnapshotReader<TValue>(
   }
 
   const getSnapshot = () => {
-    const storageResolution = resolveStorage(storage)
-    const storageArea = storageResolution.storage
+    const storageArea = resolveStorage(storage).storage
     let source: StorageStateSnapshotSource
 
     if (memoryValue !== undefined) {
       source = {
         kind: 'memory',
         rawValue: memoryValue,
-        storage: storageArea,
-      }
-    } else if (storageResolution.error) {
-      source = {
-        kind: 'error',
-        rawValue: null,
         storage: storageArea,
       }
     } else if (!storageArea) {
@@ -199,15 +187,11 @@ function createStorageSnapshotReader<TValue>(
           rawValue: storageArea.getItem(key),
           storage: storageArea,
         }
-      } catch (error) {
+      } catch {
         source = {
-          kind: 'error',
+          kind: 'unavailable',
           rawValue: null,
           storage: storageArea,
-        }
-
-        if (!isMatchingSnapshotSource(cachedSource, source)) {
-          onError({ error, key, operation: 'read' })
         }
       }
     }
@@ -217,10 +201,6 @@ function createStorageSnapshotReader<TValue>(
     }
 
     cachedSource = source
-
-    if (storageResolution.error) {
-      onError({ error: storageResolution.error, key, operation: 'read' })
-    }
 
     if (source.rawValue === null) {
       cachedSnapshot = {
@@ -234,13 +214,11 @@ function createStorageSnapshotReader<TValue>(
 
     try {
       cachedSnapshot = {
-        hasStoredValue: source.kind === 'storage',
+        hasStoredValue: source.rawValue !== null,
         isPersistent: source.kind === 'storage',
         value: deserialize(source.rawValue),
       }
-    } catch (error) {
-      onError({ error, key, operation: 'read' })
-
+    } catch {
       cachedSnapshot = getInitialSnapshot()
     }
 

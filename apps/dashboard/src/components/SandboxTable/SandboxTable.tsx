@@ -5,7 +5,6 @@
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { RoutePath } from '@/enums/RoutePath'
-import { useAvailableSandboxClassesForOrganization } from '@/hooks/useAvailableSandboxClasses'
 import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
@@ -64,6 +63,7 @@ const DEFAULT_SANDBOX_TABLE_COLUMN_VISIBILITY: VisibilityState = {
   isPublic: false,
   isRecoverable: false,
   labels: false,
+  sandboxClass: false,
 }
 
 const DEFAULT_SANDBOX_TABLE_COLUMN_PINNING: ColumnPinningState = {
@@ -134,21 +134,8 @@ export function SandboxTable({
     })
   }, [])
 
-  const availableSandboxClasses = useAvailableSandboxClassesForOrganization()
-  const visibleColumns = useMemo(() => {
-    if (availableSandboxClasses.length > 1) {
-      return columns
-    }
-    return columns.filter((column) => column.id !== 'sandboxClass')
-  }, [availableSandboxClasses])
-
   const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
-  const tableFilters = useMemo(() => {
-    const visibleColumnIds = new Set(
-      visibleColumns.map((column) => column.id).filter((id): id is string => Boolean(id)),
-    )
-    return convertApiFiltersToTableFilters(filters).filter((filter) => visibleColumnIds.has(filter.id))
-  }, [filters, visibleColumns])
+  const tableFilters = useMemo(() => convertApiFiltersToTableFilters(filters), [filters])
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
     return regionsData.map((region) => ({
@@ -163,7 +150,7 @@ export function SandboxTable({
   const table = useReactTable({
     columnResizeMode: 'onEnd',
     data,
-    columns: visibleColumns,
+    columns,
     manualFiltering: true,
     onColumnFiltersChange: (updater) => {
       const newTableFilters = typeof updater === 'function' ? updater(table.getState().columnFilters) : updater
@@ -309,7 +296,7 @@ export function SandboxTable({
           isEmpty ? (
             <TableEmptyState
               overlay
-              colSpan={table.getAllColumns().length}
+              colSpan={table.getVisibleLeafColumns().length}
               message={hasFilters ? 'No matching sandboxes found.' : 'No Sandboxes yet.'}
               icon={<Container />}
               description={
