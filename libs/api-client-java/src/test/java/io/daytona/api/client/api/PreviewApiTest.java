@@ -45,6 +45,18 @@ public class PreviewApiTest {
     }
 
     /**
+     * Get the signing key for a sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSigningKeyTest() throws ApiException {
+        String sandboxId = null;
+        String response = api.getSigningKey(sandboxId);
+        // TODO: test validations
+    }
+
+    /**
      * Check if user has access to the sandbox
      *
      * @throws ApiException if the Api call fails

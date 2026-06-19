@@ -175,7 +175,9 @@ type FileSystemAPI interface {
 	/*
 	UploadFile Upload a file
 
-	Upload a file to the specified path
+	Upload a file to the specified path. Accepts either multipart/form-data
+(field "file") or a raw request body (e.g. application/octet-stream).
+Parent directories are created if missing; an existing file is overwritten.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return FileSystemAPIUploadFileRequest
@@ -183,8 +185,8 @@ type FileSystemAPI interface {
 	UploadFile(ctx context.Context) FileSystemAPIUploadFileRequest
 
 	// UploadFileExecute executes the request
-	//  @return map[string]map[string]interface{}
-	UploadFileExecute(r FileSystemAPIUploadFileRequest) (map[string]map[string]interface{}, *http.Response, error)
+	//  @return UploadedFile
+	UploadFileExecute(r FileSystemAPIUploadFileRequest) (*UploadedFile, *http.Response, error)
 
 	/*
 	UploadFiles Upload multiple files
@@ -1467,20 +1469,22 @@ func (r FileSystemAPIUploadFileRequest) Path(path string) FileSystemAPIUploadFil
 	return r
 }
 
-// File to upload
+// File to upload (multipart/form-data)
 func (r FileSystemAPIUploadFileRequest) File(file *os.File) FileSystemAPIUploadFileRequest {
 	r.file = file
 	return r
 }
 
-func (r FileSystemAPIUploadFileRequest) Execute() (map[string]map[string]interface{}, *http.Response, error) {
+func (r FileSystemAPIUploadFileRequest) Execute() (*UploadedFile, *http.Response, error) {
 	return r.ApiService.UploadFileExecute(r)
 }
 
 /*
 UploadFile Upload a file
 
-Upload a file to the specified path
+Upload a file to the specified path. Accepts either multipart/form-data
+(field "file") or a raw request body (e.g. application/octet-stream).
+Parent directories are created if missing; an existing file is overwritten.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return FileSystemAPIUploadFileRequest
@@ -1493,13 +1497,13 @@ func (a *FileSystemAPIService) UploadFile(ctx context.Context) FileSystemAPIUplo
 }
 
 // Execute executes the request
-//  @return map[string]map[string]interface{}
-func (a *FileSystemAPIService) UploadFileExecute(r FileSystemAPIUploadFileRequest) (map[string]map[string]interface{}, *http.Response, error) {
+//  @return UploadedFile
+func (a *FileSystemAPIService) UploadFileExecute(r FileSystemAPIUploadFileRequest) (*UploadedFile, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  map[string]map[string]interface{}
+		localVarReturnValue  *UploadedFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.UploadFile")
@@ -1507,16 +1511,13 @@ func (a *FileSystemAPIService) UploadFileExecute(r FileSystemAPIUploadFileReques
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/files/upload"
+	localVarPath := localBasePath + "/files/upload-v2"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.path == nil {
 		return localVarReturnValue, nil, reportError("path is required and must be specified")
-	}
-	if r.file == nil {
-		return localVarReturnValue, nil, reportError("file is required and must be specified")
 	}
 
 	parameterAddToHeaderOrQuery(localVarQueryParams, "path", r.path, "", "")
@@ -1530,7 +1531,7 @@ func (a *FileSystemAPIService) UploadFileExecute(r FileSystemAPIUploadFileReques
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)

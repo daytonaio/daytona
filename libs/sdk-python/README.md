@@ -170,5 +170,3 @@ completions = lsp.completions('path/to/file.py', {"line": 10, "character": 15})
 ## Contributing
 
 Daytona is Open Source under the [Apache License 2.0](./LICENSE), and is the [copyright of its contributors](../../NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](../../CONTRIBUTING.md) to get started.
-
-Code in [\_sync](./src/daytona/_sync/) directory shouldn't be edited directly. It should be generated from the corresponding async code in the [\_async](./src/daytona/_async/) directory using the SDK generation scripts in the [scripts](./scripts/) directory.

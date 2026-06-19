@@ -538,6 +538,90 @@ class E2ETest {
     }
 
     @Test
+    @Order(17)
+    void signedUrlSetup() throws Exception {
+        String dir = fsDir + "/signed-url";
+        try {
+            toolboxFileSystemApi.deleteFile(dir, true);
+        } catch (Exception ignored) {
+        }
+        sandbox.getFs().createFolder(dir, "755");
+        sandbox.getFs().uploadFile("signed url test content".getBytes(StandardCharsets.UTF_8), dir + "/download-test.txt");
+    }
+
+    @Test
+    @Order(17)
+    void downloadUrlReturnsSignedUrl() throws Exception {
+        signedUrlSetup();
+
+        String url = sandbox.downloadUrl(fsDir + "/signed-url/download-test.txt");
+        assertThat(url).isNotNull().isNotEmpty();
+        assertThat(url).contains("signature=");
+        assertThat(url).contains("expires=");
+    }
+
+    @Test
+    @Order(17)
+    void downloadUrlServesCorrectContent() throws Exception {
+        signedUrlSetup();
+
+        String url = sandbox.downloadUrl(fsDir + "/signed-url/download-test.txt");
+        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+        java.net.http.HttpRequest req = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create(url))
+                .GET()
+                .build();
+        java.net.http.HttpResponse<String> resp = client.send(req, java.net.http.HttpResponse.BodyHandlers.ofString());
+        assertThat(resp.statusCode()).isEqualTo(200);
+        assertThat(resp.body()).isEqualTo("signed url test content");
+    }
+
+    @Test
+    @Order(17)
+    void uploadUrlAcceptsFile() throws Exception {
+        signedUrlSetup();
+
+        String url = sandbox.uploadUrl(fsDir + "/signed-url/uploaded-via-url.txt");
+        assertThat(url).contains("signature=");
+
+        String boundary = "----E2EBoundary" + System.currentTimeMillis();
+        String body = "--" + boundary + "\r\n"
+                + "Content-Disposition: form-data; name=\"file\"; filename=\"uploaded-via-url.txt\"\r\n"
+                + "Content-Type: application/octet-stream\r\n\r\n"
+                + "uploaded via signed url\r\n"
+                + "--" + boundary + "--\r\n";
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+        java.net.http.HttpRequest req = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create(url))
+                .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body))
+                .build();
+        java.net.http.HttpResponse<String> resp = client.send(req, java.net.http.HttpResponse.BodyHandlers.ofString());
+        assertThat(resp.statusCode()).isEqualTo(200);
+
+        byte[] content = sandbox.getFs().downloadFile(fsDir + "/signed-url/uploaded-via-url.txt");
+        assertThat(new String(content, StandardCharsets.UTF_8)).isEqualTo("uploaded via signed url");
+    }
+
+    @Test
+    @Order(17)
+    void rotateSigningKeyAndNewUrlWorks() throws Exception {
+        signedUrlSetup();
+
+        sandbox.rotateSigningKey();
+        String url = sandbox.downloadUrl(fsDir + "/signed-url/download-test.txt");
+        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+        java.net.http.HttpRequest req = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create(url))
+                .GET()
+                .build();
+        java.net.http.HttpResponse<String> resp = client.send(req, java.net.http.HttpResponse.BodyHandlers.ofString());
+        assertThat(resp.statusCode()).isEqualTo(200);
+        assertThat(resp.body()).isEqualTo("signed url test content");
+    }
+
+    @Test
     @Order(18)
     void volumeOperationsCreateListGetAndDeleteWork() throws Exception {
         Volume volume = daytona.volume().create(createdVolumeName);

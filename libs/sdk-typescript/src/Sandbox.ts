@@ -40,6 +40,7 @@ import { ComputerUse } from './ComputerUse'
 import type { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
+import { buildSignedFileUrl } from './utils/fileUrlSigning'
 
 /**
  * Represents a Daytona Sandbox.
@@ -127,6 +128,8 @@ export class Sandbox {
   public toolboxProxyUrl: string
 
   private infoApi: InfoApi
+  private signingKey: string | null = null
+  private signingKeyFetchedAt = 0
 
   /**
    * Creates a new Sandbox instance
@@ -698,6 +701,78 @@ export class Sandbox {
   }
 
   /**
+   * Creates a pre-signed URL for downloading a file from the Sandbox.
+   *
+   * The URL works with any HTTP client without auth headers and stays valid across
+   * sandbox restarts (downloads succeed only while the sandbox is running). The signing
+   * key is cached locally for up to 15 seconds; if the key was rotated from another
+   * client, URLs may be rejected until the cache refreshes.
+   *
+   * @example
+   * ```typescript
+   * const url = await sandbox.downloadUrl('/home/user/report.pdf')
+   * // curl "$url" -o report.pdf
+   * ```
+   *
+   * @param path - Path to the file in the Sandbox.
+   * @param ttlSeconds - How long the URL stays valid, in seconds. Defaults to 3600. Zero or negative means the URL never expires.
+   * @returns Pre-signed download URL.
+   */
+  @WithInstrumentation()
+  public async downloadUrl(path: string, ttlSeconds?: number): Promise<string> {
+    return buildSignedFileUrl(
+      this.toolboxProxyUrl,
+      this.id,
+      '/files/download',
+      'GET',
+      path,
+      await this.ensureSigningKey(),
+      ttlSeconds,
+    )
+  }
+
+  /**
+   * Creates a pre-signed URL for uploading a file to the Sandbox.
+   *
+   * Send a POST request with the file as multipart/form-data. The URL works with any
+   * HTTP client without auth headers. The signing key is cached locally for up to
+   * 15 seconds; if the key was rotated from another client, URLs may be rejected
+   * until the cache refreshes.
+   *
+   * @example
+   * ```typescript
+   * const url = await sandbox.uploadUrl('/home/user/data.bin')
+   * // curl -X POST -F "file=@local.bin" "$url"
+   * ```
+   *
+   * @param path - Destination path for the uploaded file in the Sandbox.
+   * @param ttlSeconds - How long the URL stays valid, in seconds. Defaults to 3600. Zero or negative means the URL never expires.
+   * @returns Pre-signed upload URL.
+   */
+  @WithInstrumentation()
+  public async uploadUrl(path: string, ttlSeconds?: number): Promise<string> {
+    return buildSignedFileUrl(
+      this.toolboxProxyUrl,
+      this.id,
+      '/files/upload-v2',
+      'POST',
+      path,
+      await this.ensureSigningKey(),
+      ttlSeconds,
+    )
+  }
+
+  /**
+   * Rotates the sandbox signing key, invalidating all previously signed URLs.
+   */
+  @WithInstrumentation()
+  public async rotateSigningKey(): Promise<void> {
+    const signingKey = (await this.sandboxApi.rotateSigningKey(this.id)).data
+    this.signingKey = signingKey
+    this.signingKeyFetchedAt = Date.now() / 1000
+  }
+
+  /**
    * Retrieves a signed preview url for the sandbox at the specified port.
    *
    * @param {number} port - The port to open the preview link on.
@@ -908,6 +983,17 @@ export class Sandbox {
         this.state = SandboxState.DESTROYED
       }
     }
+  }
+
+  private async ensureSigningKey(): Promise<string> {
+    const key = this.signingKey
+    if (key === null || Date.now() / 1000 - this.signingKeyFetchedAt > 15) {
+      const fetched = (await this.sandboxApi.getSandboxSigningKey(this.id)).data
+      this.signingKey = fetched
+      this.signingKeyFetchedAt = Date.now() / 1000
+      return fetched
+    }
+    return key
   }
 }
 

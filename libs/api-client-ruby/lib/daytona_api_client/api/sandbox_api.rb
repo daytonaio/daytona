@@ -1337,6 +1337,70 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get the signing key for a sandbox
+    # @param sandbox_id [String] ID of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [String]
+    def get_sandbox_signing_key(sandbox_id, opts = {})
+      data, _status_code, _headers = get_sandbox_signing_key_with_http_info(sandbox_id, opts)
+      data
+    end
+
+    # Get the signing key for a sandbox
+    # @param sandbox_id [String] ID of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(String, Integer, Hash)>] String data, response status code and response headers
+    def get_sandbox_signing_key_with_http_info(sandbox_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox_signing_key ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_sandbox_signing_key"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/signing-key'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'String'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandbox_signing_key",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandbox_signing_key\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get trace spans
     # Retrieve all spans for a specific trace
     # @param sandbox_id [String] ID of the sandbox
@@ -2303,6 +2367,70 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#revoke_ssh_access\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Rotate the signing key, invalidating all previously signed URLs
+    # @param sandbox_id [String] ID of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [String]
+    def rotate_signing_key(sandbox_id, opts = {})
+      data, _status_code, _headers = rotate_signing_key_with_http_info(sandbox_id, opts)
+      data
+    end
+
+    # Rotate the signing key, invalidating all previously signed URLs
+    # @param sandbox_id [String] ID of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(String, Integer, Hash)>] String data, response status code and response headers
+    def rotate_signing_key_with_http_info(sandbox_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.rotate_signing_key ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.rotate_signing_key"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/signing-key/rotate'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'String'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.rotate_signing_key",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#rotate_signing_key\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

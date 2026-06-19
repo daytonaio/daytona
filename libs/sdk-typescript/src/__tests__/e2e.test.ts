@@ -931,6 +931,65 @@ describe('TypeScript SDK E2E (real Daytona API)', () => {
   })
 
   // ──────────────────────────────────────────────
+  // Signed URL Operations
+  // ──────────────────────────────────────────────
+  describe('Signed URL Operations', () => {
+    const downloadPath = `fs-test/signed-download-${randomUUID()}.txt`
+    const uploadPath = `fs-test/signed-upload-${randomUUID()}.txt`
+    const downloadContent = 'signed-url-download-content'
+    const uploadContent = 'signed-url-upload-content'
+
+    test('setup uploads a file for signed URL tests', async () => {
+      console.log('[E2E][SignedURL] Uploading setup file...')
+      await sandbox.fs.uploadFile(Buffer.from(downloadContent), downloadPath)
+
+      const downloaded = await sandbox.fs.downloadFile(downloadPath)
+      expect(downloaded.equals(Buffer.from(downloadContent))).toBe(true)
+    })
+
+    test('downloadUrl returns signed URL', async () => {
+      console.log('[E2E][SignedURL] Getting signed download URL...')
+      const url = await sandbox.downloadUrl(downloadPath)
+
+      expect(url).toContain('signature=')
+      expect(url).toContain('expires=')
+    })
+
+    test('downloadUrl serves correct content', async () => {
+      console.log('[E2E][SignedURL] Fetching signed download URL...')
+      const url = await sandbox.downloadUrl(downloadPath)
+      const response = await fetch(url)
+
+      expect(response.status).toBe(200)
+      expect(await response.text()).toBe(downloadContent)
+    })
+
+    test('uploadUrl accepts file', async () => {
+      console.log('[E2E][SignedURL] Uploading file through signed upload URL...')
+      const url = await sandbox.uploadUrl(uploadPath)
+      const formData = new FormData()
+      formData.append('file', new Blob([uploadContent]), 'signed-upload.txt')
+
+      const response = await fetch(url, { method: 'POST', body: formData })
+      expect(response.status).toBe(200)
+
+      const downloaded = await sandbox.fs.downloadFile(uploadPath)
+      expect(downloaded.equals(Buffer.from(uploadContent))).toBe(true)
+    })
+
+    test('rotateSigningKey + new URLs work', async () => {
+      console.log('[E2E][SignedURL] Rotating signing key and verifying new URL...')
+      await sandbox.rotateSigningKey()
+
+      const url = await sandbox.downloadUrl(downloadPath)
+      const response = await fetch(url)
+
+      expect(response.status).toBe(200)
+      expect(await response.text()).toBe(downloadContent)
+    })
+  })
+
+  // ──────────────────────────────────────────────
   // Volume Operations
   // ──────────────────────────────────────────────
   describe('Volume Operations', () => {

@@ -371,7 +371,9 @@ func TestUploadFileFromBytes(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{})
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"name": "hello.txt", "path": "/home/user/hello.txt", "type": "file",
+		})
 	}))
 	defer server.Close()
 

@@ -57,6 +57,8 @@ public class Sandbox {
     private String updatedAt;
     private String lastActivityAt;
     private String toolboxProxyUrl;
+    private String signingKey = null;
+    private long signingKeyFetchedAt = 0;
 
     // Fields only present on the full Sandbox DTO; not populated by Daytona.list() —
     // call refreshData() on each item to populate.
@@ -334,6 +336,99 @@ public class Sandbox {
     }
 
     /**
+     * Creates a pre-signed URL for downloading a file from the Sandbox.
+     *
+     * <p>The URL works with any HTTP client without auth headers and stays valid across
+     * sandbox restarts (downloads succeed only while the sandbox is running). The signing
+     * key is cached locally for up to 15 seconds; if the key was rotated from another
+     * client, URLs may be rejected until the cache refreshes.</p>
+     *
+     * <pre>{@code
+     * String url = sandbox.downloadUrl("/home/user/report.pdf", null);
+     * // curl "$url" -o report.pdf
+     * }</pre>
+     *
+     * @param path Path to the file in the Sandbox.
+     * @param ttlSeconds How long the URL stays valid, in seconds. Defaults to 3600. Zero or negative means never expires.
+     * @return Pre-signed download URL.
+     * @throws DaytonaException if the signing key cannot be fetched.
+     */
+    public String downloadUrl(String path, Long ttlSeconds) {
+        return FileUrlSigning.buildSignedFileUrl(
+                getToolboxProxyUrl(),
+                getId(),
+                "/files/download",
+                "GET",
+                path,
+                ensureSigningKey(),
+                ttlSeconds
+        );
+    }
+
+    /**
+     * Creates a pre-signed URL for downloading a file from the Sandbox.
+     *
+     * @param path Path to the file in the Sandbox.
+     * @return Pre-signed download URL.
+     * @throws DaytonaException if the signing key cannot be fetched.
+     */
+    public String downloadUrl(String path) {
+        return downloadUrl(path, null);
+    }
+
+    /**
+     * Creates a pre-signed URL for uploading a file to the Sandbox.
+     *
+     * <p>Send a POST request with the file as multipart/form-data. The URL works with any
+     * HTTP client without auth headers. The signing key is cached locally for up to
+     * 15 seconds; if the key was rotated from another client, URLs may be rejected
+     * until the cache refreshes.</p>
+     *
+     * <pre>{@code
+     * String url = sandbox.uploadUrl("/home/user/data.bin", null);
+     * // curl -X POST -F "file=@local.bin" "$url"
+     * }</pre>
+     *
+     * @param path Destination path for the uploaded file in the Sandbox.
+     * @param ttlSeconds How long the URL stays valid, in seconds. Defaults to 3600. Zero or negative means never expires.
+     * @return Pre-signed upload URL.
+     * @throws DaytonaException if the signing key cannot be fetched.
+     */
+    public String uploadUrl(String path, Long ttlSeconds) {
+        return FileUrlSigning.buildSignedFileUrl(
+                getToolboxProxyUrl(),
+                getId(),
+                "/files/upload-v2",
+                "POST",
+                path,
+                ensureSigningKey(),
+                ttlSeconds
+        );
+    }
+
+    /**
+     * Creates a pre-signed URL for uploading a file to the Sandbox.
+     *
+     * @param path Destination path for the uploaded file in the Sandbox.
+     * @return Pre-signed upload URL.
+     * @throws DaytonaException if the signing key cannot be fetched.
+     */
+    public String uploadUrl(String path) {
+        return uploadUrl(path, null);
+    }
+
+    /**
+     * Rotates the sandbox signing key, invalidating all previously signed URLs.
+     *
+     * @throws DaytonaException if the signing key rotation fails.
+     */
+    public void rotateSigningKey() {
+        String signingKey = ExceptionMapper.callMain(() -> sandboxApi.rotateSigningKey(id, null));
+        this.signingKey = signingKey;
+        this.signingKeyFetchedAt = System.currentTimeMillis() / 1000;
+    }
+
+    /**
      * Waits until Sandbox reaches {@code started} state.
      *
      * @param timeoutSeconds maximum seconds to wait; {@code 0} disables timeout
@@ -470,6 +565,16 @@ public class Sandbox {
 
     private String asString(Object value) {
         return value == null ? "" : String.valueOf(value);
+    }
+
+    private String ensureSigningKey() {
+        String key = this.signingKey;
+        if (key == null || (System.currentTimeMillis() / 1000 - this.signingKeyFetchedAt) > 15) {
+            key = ExceptionMapper.callMain(() -> sandboxApi.getSandboxSigningKey(id, null));
+            this.signingKey = key;
+            this.signingKeyFetchedAt = System.currentTimeMillis() / 1000;
+        }
+        return key;
     }
 
     private static String trimTrailingSlash(String value) {

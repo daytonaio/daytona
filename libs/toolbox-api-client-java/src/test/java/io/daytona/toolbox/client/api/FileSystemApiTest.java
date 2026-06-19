@@ -21,6 +21,7 @@ import io.daytona.toolbox.client.model.Match;
 import io.daytona.toolbox.client.model.ReplaceRequest;
 import io.daytona.toolbox.client.model.ReplaceResult;
 import io.daytona.toolbox.client.model.SearchFilesResponse;
+import io.daytona.toolbox.client.model.UploadedFile;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -202,7 +203,7 @@ public class FileSystemApiTest {
     /**
      * Upload a file
      *
-     * Upload a file to the specified path
+     * Upload a file to the specified path. Accepts either multipart/form-data (field \&quot;file\&quot;) or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
      *
      * @throws ApiException if the Api call fails
      */
@@ -210,7 +211,7 @@ public class FileSystemApiTest {
     public void uploadFileTest() throws ApiException {
         String path = null;
         File _file = null;
-        Map<String, Object> response = api.uploadFile(path, _file);
+        UploadedFile response = api.uploadFile(path, _file);
         // TODO: test validations
     }
 

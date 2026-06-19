@@ -1285,9 +1285,12 @@ paths:
       summary: Search files by pattern
       tags:
       - file-system
-  /files/upload:
+  /files/upload-v2:
     post:
-      description: Upload a file to the specified path
+      description: |-
+        Upload a file to the specified path. Accepts either multipart/form-data
+        (field "file") or a raw request body (e.g. application/octet-stream).
+        Parent directories are created if missing; an existing file is overwritten.
       operationId: UploadFile
       parameters:
       - description: Destination path for the uploaded file
@@ -1301,13 +1304,12 @@ paths:
           multipart/form-data:
             schema:
               $ref: "#/components/schemas/UploadFile_request"
-        required: true
       responses:
         "200":
           content:
-            '*/*':
+            application/json:
               schema:
-                $ref: "#/components/schemas/gin.H"
+                $ref: "#/components/schemas/UploadedFile"
           description: OK
       summary: Upload a file
       tags:
@@ -4278,6 +4280,23 @@ components:
       required:
       - id
       type: object
+    UploadedFile:
+      example:
+        path: path
+        name: name
+        type: type
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+      required:
+      - name
+      - path
+      - type
+      type: object
     UserHomeDirResponse:
       example:
         dir: dir
@@ -4395,11 +4414,9 @@ components:
     UploadFile_request:
       properties:
         file:
-          description: File to upload
+          description: File to upload (multipart/form-data)
           format: binary
           type: string
-      required:
-      - file
       type: object
   securitySchemes:
     Bearer:

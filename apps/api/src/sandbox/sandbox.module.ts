@@ -58,6 +58,7 @@ import { ProxyAuthContextGuard } from './guards/proxy-auth-context.guard'
 import { SshGatewayAuthContextGuard } from './guards/ssh-gateway-auth-context.guard'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxLastActivity } from './entities/sandbox-last-activity.entity'
+import { SandboxMetadata } from './entities/sandbox-metadata.entity'
 import { SandboxActivityService } from './services/sandbox-activity.service'
 import { OpensearchModule } from 'nestjs-opensearch'
 import { TypedConfigService } from '../config/typed-config.service'
@@ -84,6 +85,7 @@ import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provide
       Job,
       SandboxLastActivity,
       SandboxFork,
+      SandboxMetadata,
     ]),
     OpensearchModule.forRootAsync({
       inject: [TypedConfigService],

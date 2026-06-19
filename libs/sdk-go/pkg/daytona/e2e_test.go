@@ -16,6 +16,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -67,6 +69,7 @@ func TestE2E(t *testing.T) {
 	overwritePath := textDir + "/overwrite.txt"
 	deepPath := textDir + "/a/b/c/deep.txt"
 	cleanPath := textDir + "/clean.txt"
+	signedUrlDir := baseDir + "/signed-url-test"
 	repoPath := baseDir + "/repo-default"
 	cloneBranchPath := baseDir + "/repo-branch"
 	sessionID := "test-session-" + suffix
@@ -893,6 +896,76 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 		require.NoError(t, execErr)
 		assert.Equal(t, 0, result.ExitCode)
 		assert.Contains(t, result.Result, "post-archive-check")
+	})
+
+	// Signed URL Operations
+	t.Run("SignedURL/Setup", func(t *testing.T) {
+		require.NoError(t, sandbox.FileSystem.CreateFolder(ctx, signedUrlDir, options.WithMode("0755")))
+		require.NoError(t, sandbox.FileSystem.UploadFile(ctx, []byte("signed url test content"), signedUrlDir+"/download-test.txt"))
+	})
+
+	t.Run("SignedURL/DownloadURLReturnsSignedURL", func(t *testing.T) {
+		url, urlErr := sandbox.DownloadURL(ctx, signedUrlDir+"/download-test.txt", nil)
+		require.NoError(t, urlErr)
+		assert.NotEmpty(t, url)
+		assert.Contains(t, url, "signature=")
+		assert.Contains(t, url, "expires=")
+	})
+
+	t.Run("SignedURL/DownloadURLServesContent", func(t *testing.T) {
+		url, urlErr := sandbox.DownloadURL(ctx, signedUrlDir+"/download-test.txt", nil)
+		require.NoError(t, urlErr)
+
+		resp, httpErr := http.Get(url)
+		require.NoError(t, httpErr)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		body, readErr := io.ReadAll(resp.Body)
+		require.NoError(t, readErr)
+		assert.Equal(t, "signed url test content", string(body))
+	})
+
+	t.Run("SignedURL/UploadURLAcceptsFile", func(t *testing.T) {
+		url, urlErr := sandbox.UploadURL(ctx, signedUrlDir+"/uploaded-via-url.txt", nil)
+		require.NoError(t, urlErr)
+		assert.Contains(t, url, "signature=")
+
+		var buf bytes.Buffer
+		writer := multipart.NewWriter(&buf)
+		part, partErr := writer.CreateFormFile("file", "uploaded-via-url.txt")
+		require.NoError(t, partErr)
+		_, writeErr := part.Write([]byte("uploaded via signed url"))
+		require.NoError(t, writeErr)
+		require.NoError(t, writer.Close())
+
+		resp, httpErr := http.Post(url, writer.FormDataContentType(), &buf)
+		require.NoError(t, httpErr)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		content, downloadErr := sandbox.FileSystem.DownloadFile(ctx, signedUrlDir+"/uploaded-via-url.txt", nil)
+		require.NoError(t, downloadErr)
+		assert.Equal(t, "uploaded via signed url", string(content))
+	})
+
+	t.Run("SignedURL/RotateAndNewURLWorks", func(t *testing.T) {
+		require.NoError(t, sandbox.RotateSigningKey(ctx))
+
+		url, urlErr := sandbox.DownloadURL(ctx, signedUrlDir+"/download-test.txt", nil)
+		require.NoError(t, urlErr)
+
+		resp, httpErr := http.Get(url)
+		require.NoError(t, httpErr)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		body, readErr := io.ReadAll(resp.Body)
+		require.NoError(t, readErr)
+		assert.Equal(t, "signed url test content", string(body))
 	})
 
 	t.Run("Volume/Create", func(t *testing.T) {

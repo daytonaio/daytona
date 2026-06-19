@@ -242,6 +242,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) CreateLspServer\(languageID types.LspLanguageID, pathToProject string\) \*LspServerService](<#Sandbox.CreateLspServer>)
   - [func \(s \*Sandbox\) Delete\(ctx context.Context\) error](<#Sandbox.Delete>)
   - [func \(s \*Sandbox\) DeleteWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.DeleteWithTimeout>)
+  - [func \(s \*Sandbox\) DownloadURL\(ctx context.Context, path string, ttlSeconds \*int\) \(string, error\)](<#Sandbox.DownloadURL>)
   - [func \(s \*Sandbox\) ExperimentalCreateSnapshot\(ctx context.Context, name string\) error](<#Sandbox.ExperimentalCreateSnapshot>)
   - [func \(s \*Sandbox\) ExperimentalCreateSnapshotWithTimeout\(ctx context.Context, name string, timeout time.Duration\) error](<#Sandbox.ExperimentalCreateSnapshotWithTimeout>)
   - [func \(s \*Sandbox\) ExperimentalFork\(ctx context.Context, name \*string\) \(\*Sandbox, error\)](<#Sandbox.ExperimentalFork>)
@@ -254,6 +255,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) RefreshData\(ctx context.Context\) error](<#Sandbox.RefreshData>)
   - [func \(s \*Sandbox\) Resize\(ctx context.Context, resources \*types.Resources\) error](<#Sandbox.Resize>)
   - [func \(s \*Sandbox\) ResizeWithTimeout\(ctx context.Context, resources \*types.Resources, timeout time.Duration\) error](<#Sandbox.ResizeWithTimeout>)
+  - [func \(s \*Sandbox\) RotateSigningKey\(ctx context.Context\) error](<#Sandbox.RotateSigningKey>)
   - [func \(s \*Sandbox\) SetAutoArchiveInterval\(ctx context.Context, intervalMinutes \*int\) error](<#Sandbox.SetAutoArchiveInterval>)
   - [func \(s \*Sandbox\) SetAutoDeleteInterval\(ctx context.Context, intervalMinutes \*int\) error](<#Sandbox.SetAutoDeleteInterval>)
   - [func \(s \*Sandbox\) SetLabels\(ctx context.Context, labels map\[string\]string\) error](<#Sandbox.SetLabels>)
@@ -262,6 +264,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) Stop\(ctx context.Context\) error](<#Sandbox.Stop>)
   - [func \(s \*Sandbox\) StopWithTimeout\(ctx context.Context, timeout time.Duration, force bool\) error](<#Sandbox.StopWithTimeout>)
   - [func \(s \*Sandbox\) UpdateNetworkSettings\(ctx context.Context, settings apiclient.UpdateSandboxNetworkSettings\) error](<#Sandbox.UpdateNetworkSettings>)
+  - [func \(s \*Sandbox\) UploadURL\(ctx context.Context, path string, ttlSeconds \*int\) \(string, error\)](<#Sandbox.UploadURL>)
   - [func \(s \*Sandbox\) WaitForResize\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForResize>)
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
@@ -4205,6 +4208,20 @@ Example:
 err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
 ```
 
+<a name="Sandbox.DownloadURL"></a>
+### func \(\*Sandbox\) DownloadURL
+
+```go
+func (s *Sandbox) DownloadURL(ctx context.Context, path string, ttlSeconds *int) (string, error)
+```
+
+DownloadURL creates a pre\-signed URL for downloading a file from the sandbox. The URL works with any HTTP client without auth headers and stays valid across sandbox restarts \(downloads succeed only while the sandbox is running\). The signing key is cached locally for up to 15 seconds; if the key was rotated from another client, URLs may be rejected until the cache refreshes.
+
+```
+url, err := sandbox.DownloadURL(ctx, "/home/user/report.pdf", nil)
+// curl "$url" -o report.pdf
+```
+
 <a name="Sandbox.ExperimentalCreateSnapshot"></a>
 ### func \(\*Sandbox\) ExperimentalCreateSnapshot
 
@@ -4442,6 +4459,15 @@ Example:
 err := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 4, Memory: 8}, 2*time.Minute)
 ```
 
+<a name="Sandbox.RotateSigningKey"></a>
+### func \(\*Sandbox\) RotateSigningKey
+
+```go
+func (s *Sandbox) RotateSigningKey(ctx context.Context) error
+```
+
+RotateSigningKey rotates the sandbox signing key and invalidates previously signed URLs.
+
 <a name="Sandbox.SetAutoArchiveInterval"></a>
 ### func \(\*Sandbox\) SetAutoArchiveInterval
 
@@ -4601,6 +4627,20 @@ func (s *Sandbox) UpdateNetworkSettings(ctx context.Context, settings apiclient.
 ```
 
 UpdateNetworkSettings updates outbound network policy for this sandbox on the runner \(for example block all traffic, restore general internet access, or apply a CIDR allow list\) without stopping the sandbox.
+
+<a name="Sandbox.UploadURL"></a>
+### func \(\*Sandbox\) UploadURL
+
+```go
+func (s *Sandbox) UploadURL(ctx context.Context, path string, ttlSeconds *int) (string, error)
+```
+
+UploadURL creates a pre\-signed URL for uploading a file to the sandbox. Send a POST request with the file as multipart/form\-data. The URL works with any HTTP client without auth headers. The signing key is cached locally for up to 15 seconds; if the key was rotated from another client, URLs may be rejected until the cache refreshes.
+
+```
+url, err := sandbox.UploadURL(ctx, "/home/user/data.bin", nil)
+// curl -X POST -F "file=@local.bin" "$url"
+```
 
 <a name="Sandbox.WaitForResize"></a>
 ### func \(\*Sandbox\) WaitForResize

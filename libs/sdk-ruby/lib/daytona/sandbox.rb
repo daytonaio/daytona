@@ -4,6 +4,7 @@
 # frozen_string_literal: true
 
 require 'timeout'
+require_relative 'utils/file_url_signing'
 
 module Daytona
   class Sandbox # rubocop:disable Metrics/ClassLength
@@ -133,6 +134,8 @@ module Daytona
       @config = config
       @sandbox_api = sandbox_api
       @otel_state = otel_state
+      @signing_key = nil
+      @signing_key_fetched_at = 0
 
       # Create toolbox API clients with dynamic configuration
       toolbox_api_config = build_toolbox_api_config
@@ -306,6 +309,76 @@ module Daytona
     # @param port [Integer]
     # @return [DaytonaApiClient::PortPreviewUrl]
     def preview_url(port) = sandbox_api.get_port_preview_url(id, port)
+
+    # Creates a pre-signed URL for downloading a file from the Sandbox.
+    #
+    # The URL works with any HTTP client without auth headers and stays valid across
+    # sandbox restarts (downloads succeed only while the sandbox is running). The signing
+    # key is cached locally for up to 15 seconds; if the key was rotated from another
+    # client, URLs may be rejected until the cache refreshes.
+    #
+    # @param path [String] Path to the file in the Sandbox.
+    # @param ttl_seconds [Integer, nil] How long the URL stays valid, in seconds.
+    #   Defaults to 3600. Zero or negative means the URL never expires.
+    # @return [String] Pre-signed download URL.
+    # @raise [Daytona::Sdk::Error] if the signing key cannot be fetched.
+    #
+    # @example
+    #   url = sandbox.download_url('/home/user/report.pdf')
+    #   # curl "$url" -o report.pdf
+    def download_url(path, ttl_seconds: nil)
+      Utils::FileUrlSigning.build_signed_file_url(
+        @toolbox_proxy_url,
+        id,
+        '/files/download',
+        'GET',
+        path,
+        ensure_signing_key,
+        ttl_seconds
+      )
+    end
+
+    # Creates a pre-signed URL for uploading a file to the Sandbox.
+    #
+    # Send a POST request with the file as multipart/form-data. The URL works with any
+    # HTTP client without auth headers. The signing key is cached locally for up to
+    # 15 seconds; if the key was rotated from another client, URLs may be rejected
+    # until the cache refreshes.
+    #
+    # @param path [String] Destination path for the uploaded file in the Sandbox.
+    # @param ttl_seconds [Integer, nil] How long the URL stays valid, in seconds.
+    #   Defaults to 3600. Zero or negative means the URL never expires.
+    # @return [String] Pre-signed upload URL.
+    # @raise [Daytona::Sdk::Error] if the signing key cannot be fetched.
+    #
+    # @example
+    #   url = sandbox.upload_url('/home/user/data.bin')
+    #   # curl -X POST -F "file=@local.bin" "$url"
+    def upload_url(path, ttl_seconds: nil)
+      Utils::FileUrlSigning.build_signed_file_url(
+        @toolbox_proxy_url,
+        id,
+        '/files/upload-v2',
+        'POST',
+        path,
+        ensure_signing_key,
+        ttl_seconds
+      )
+    end
+
+    # Rotates the sandbox signing key, invalidating all previously signed URLs.
+    #
+    # @return [void]
+    # @raise [DaytonaApiClient::ApiError] if the signing key rotation request fails.
+    #
+    # @example
+    #   sandbox.rotate_signing_key
+    #   puts 'All previously signed URLs are now invalid.'
+    def rotate_signing_key
+      @signing_key = @sandbox_api.rotate_signing_key(id)
+      @signing_key_fetched_at = Time.now.to_f
+      nil
+    end
 
     # Creates a signed preview URL for the sandbox at the specified port.
     #
@@ -549,7 +622,8 @@ module Daytona
     instrument :archive, :auto_archive_interval=, :auto_delete_interval=, :auto_stop_interval=,
                :update_network_settings,
                :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :labels=,
-               :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
+               :preview_url, :download_url, :upload_url, :rotate_signing_key,
+               :create_signed_preview_url, :expire_signed_preview_url,
                :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,
                :create_lsp_server, :validate_ssh_access, :wait_for_sandbox_start,
                :wait_for_sandbox_stop, :resize, :wait_for_resize_complete,
@@ -576,6 +650,16 @@ module Daytona
 
         cfg
       end
+    end
+
+    def ensure_signing_key
+      key = @signing_key
+      if key.nil? || (Time.now.to_f - @signing_key_fetched_at) > 15
+        key = @sandbox_api.get_sandbox_signing_key(id)
+        @signing_key = key
+        @signing_key_fetched_at = Time.now.to_f
+      end
+      key
     end
 
     # @params sandbox_dto [DaytonaApiClient::Sandbox, DaytonaApiClient::SandboxListItem]

@@ -320,6 +320,34 @@ describe('[AUTH] SandboxController', () => {
     expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
   })
 
+  it('getSandboxSigningKey', () => {
+    const methodName = trackMethod('getSandboxSigningKey')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expect(getRequiredOrganizationResourcePermissions(SandboxController, methodName)).toBeUndefined()
+  })
+
+  it('rotateSigningKey', () => {
+    const methodName = trackMethod('rotateSigningKey')
+    expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(SandboxController, methodName), [
+      AuthStrategyType.API_KEY,
+      AuthStrategyType.JWT,
+    ])
+    expectArrayMatch(getAuthContextGuards(SandboxController, methodName), [OrganizationAuthContextGuard])
+    expectArrayMatch(getResourceAccessGuards(SandboxController, methodName), [SandboxAccessGuard])
+    expect(getRequiredOrganizationMemberRole(SandboxController, methodName)).toBeUndefined()
+    expectArrayMatch(getRequiredOrganizationResourcePermissions(SandboxController, methodName), [
+      OrganizationResourcePermission.WRITE_SANDBOXES,
+    ])
+  })
+
   it('getSignedPortPreviewUrl', () => {
     const methodName = trackMethod('getSignedPortPreviewUrl')
     expect(isPublicEndpoint(SandboxController, methodName)).toBe(false)

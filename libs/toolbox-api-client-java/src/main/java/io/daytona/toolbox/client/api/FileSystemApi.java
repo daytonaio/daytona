@@ -34,6 +34,7 @@ import io.daytona.toolbox.client.model.Match;
 import io.daytona.toolbox.client.model.ReplaceRequest;
 import io.daytona.toolbox.client.model.ReplaceResult;
 import io.daytona.toolbox.client.model.SearchFilesResponse;
+import io.daytona.toolbox.client.model.UploadedFile;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -1564,7 +1565,7 @@ public class FileSystemApi {
     /**
      * Build call for uploadFile
      * @param path Destination path for the uploaded file (required)
-     * @param _file File to upload (required)
+     * @param _file File to upload (multipart/form-data) (optional)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
@@ -1575,7 +1576,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call uploadFileCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call uploadFileCall(@javax.annotation.Nonnull String path, @javax.annotation.Nullable File _file, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1592,7 +1593,7 @@ public class FileSystemApi {
         Object localVarPostBody = null;
 
         // create path and map variables
-        String localVarPath = "/files/upload";
+        String localVarPath = "/files/upload-v2";
 
         List<Pair> localVarQueryParams = new ArrayList<Pair>();
         List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
@@ -1609,7 +1610,7 @@ public class FileSystemApi {
         }
 
         final String[] localVarAccepts = {
-            "*/*"
+            "application/json"
         };
         final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
         if (localVarAccept != null) {
@@ -1629,15 +1630,10 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call uploadFileValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call uploadFileValidateBeforeCall(@javax.annotation.Nonnull String path, @javax.annotation.Nullable File _file, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'path' is set
         if (path == null) {
             throw new ApiException("Missing the required parameter 'path' when calling uploadFile(Async)");
-        }
-
-        // verify the required parameter '_file' is set
-        if (_file == null) {
-            throw new ApiException("Missing the required parameter '_file' when calling uploadFile(Async)");
         }
 
         return uploadFileCall(path, _file, _callback);
@@ -1646,10 +1642,10 @@ public class FileSystemApi {
 
     /**
      * Upload a file
-     * Upload a file to the specified path
+     * Upload a file to the specified path. Accepts either multipart/form-data (field \&quot;file\&quot;) or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
      * @param path Destination path for the uploaded file (required)
-     * @param _file File to upload (required)
-     * @return Map&lt;String, Object&gt;
+     * @param _file File to upload (multipart/form-data) (optional)
+     * @return UploadedFile
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
@@ -1658,17 +1654,17 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public Map<String, Object> uploadFile(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file) throws ApiException {
-        ApiResponse<Map<String, Object>> localVarResp = uploadFileWithHttpInfo(path, _file);
+    public UploadedFile uploadFile(@javax.annotation.Nonnull String path, @javax.annotation.Nullable File _file) throws ApiException {
+        ApiResponse<UploadedFile> localVarResp = uploadFileWithHttpInfo(path, _file);
         return localVarResp.getData();
     }
 
     /**
      * Upload a file
-     * Upload a file to the specified path
+     * Upload a file to the specified path. Accepts either multipart/form-data (field \&quot;file\&quot;) or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
      * @param path Destination path for the uploaded file (required)
-     * @param _file File to upload (required)
-     * @return ApiResponse&lt;Map&lt;String, Object&gt;&gt;
+     * @param _file File to upload (multipart/form-data) (optional)
+     * @return ApiResponse&lt;UploadedFile&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
      <table border="1">
@@ -1677,17 +1673,17 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<Map<String, Object>> uploadFileWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file) throws ApiException {
+    public ApiResponse<UploadedFile> uploadFileWithHttpInfo(@javax.annotation.Nonnull String path, @javax.annotation.Nullable File _file) throws ApiException {
         okhttp3.Call localVarCall = uploadFileValidateBeforeCall(path, _file, null);
-        Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
+        Type localVarReturnType = new TypeToken<UploadedFile>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * Upload a file (asynchronously)
-     * Upload a file to the specified path
+     * Upload a file to the specified path. Accepts either multipart/form-data (field \&quot;file\&quot;) or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
      * @param path Destination path for the uploaded file (required)
-     * @param _file File to upload (required)
+     * @param _file File to upload (multipart/form-data) (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -1698,10 +1694,10 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call uploadFileAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nonnull File _file, final ApiCallback<Map<String, Object>> _callback) throws ApiException {
+    public okhttp3.Call uploadFileAsync(@javax.annotation.Nonnull String path, @javax.annotation.Nullable File _file, final ApiCallback<UploadedFile> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = uploadFileValidateBeforeCall(path, _file, _callback);
-        Type localVarReturnType = new TypeToken<Map<String, Object>>(){}.getType();
+        Type localVarReturnType = new TypeToken<UploadedFile>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

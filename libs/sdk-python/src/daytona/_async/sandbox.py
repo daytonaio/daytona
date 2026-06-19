@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
@@ -32,6 +33,7 @@ from daytona_toolbox_api_client_async import (
 )
 
 from .._utils.errors import intercept_errors
+from .._utils.file_url_signing import build_signed_file_url
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.timeout import http_timeout, with_timeout
 from ..common.daytona import CODE_TOOLBOX_LANGUAGE_LABEL
@@ -118,6 +120,8 @@ class AsyncSandbox(SandboxDto):
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api: SandboxApi = sandbox_api
+        self._signing_key: str | None = None
+        self._signing_key_fetched_at: float = 0
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
             toolbox_api, self.id, self.toolbox_proxy_url, pool_tracker
@@ -263,6 +267,100 @@ class AsyncSandbox(SandboxDto):
         """
         self.labels = (await self._sandbox_api.replace_labels(self.id, SandboxLabels(labels=labels))).labels
         return self.labels
+
+    async def _ensure_signing_key(self) -> str:
+        key = self._signing_key
+        if key is None or (time.time() - self._signing_key_fetched_at) > 15:
+            key = await self._sandbox_api.get_sandbox_signing_key(self.id)
+            self._signing_key = key
+            self._signing_key_fetched_at = time.time()
+        return key
+
+    @intercept_errors(message_prefix="Failed to create download URL: ")
+    @with_instrumentation()
+    async def download_url(self, path: str, ttl_seconds: int | None = None) -> str:
+        """Creates a pre-signed URL for downloading a file from the Sandbox.
+
+        The URL works with any HTTP client without auth headers and stays valid across
+        sandbox restarts (downloads succeed only while the sandbox is running). The signing
+        key is cached locally for up to 15 seconds; if the key was rotated from another
+        client, URLs may be rejected until the cache refreshes.
+
+        Args:
+            path (str): Path to the file in the Sandbox.
+            ttl_seconds (int | None): How long the URL stays valid, in seconds.
+                Defaults to 3600. Zero or negative means the URL never expires.
+
+        Returns:
+            str: Pre-signed download URL.
+
+        Example:
+            ```python
+            url = await sandbox.download_url("/home/user/report.pdf")
+            ```
+            ```bash
+            curl "$url" -o report.pdf
+            ```
+        """
+        return build_signed_file_url(
+            self.toolbox_proxy_url,
+            self.id,
+            "/files/download",
+            "GET",
+            path,
+            await self._ensure_signing_key(),
+            ttl_seconds,
+        )
+
+    @intercept_errors(message_prefix="Failed to create upload URL: ")
+    @with_instrumentation()
+    async def upload_url(self, path: str, ttl_seconds: int | None = None) -> str:
+        """Creates a pre-signed URL for uploading a file to the Sandbox.
+
+        Send a POST request with the file as multipart/form-data. The URL works with any
+        HTTP client without auth headers. The signing key is cached locally for up to
+        15 seconds; if the key was rotated from another client, URLs may be rejected
+        until the cache refreshes.
+
+        Args:
+            path (str): Destination path for the uploaded file in the Sandbox.
+            ttl_seconds (int | None): How long the URL stays valid, in seconds.
+                Defaults to 3600. Zero or negative means the URL never expires.
+
+        Returns:
+            str: Pre-signed upload URL.
+
+        Example:
+            ```python
+            url = await sandbox.upload_url("/home/user/data.bin")
+            ```
+            ```bash
+            curl -X POST -F "file=@local.bin" "$url"
+            ```
+        """
+        return build_signed_file_url(
+            self.toolbox_proxy_url,
+            self.id,
+            "/files/upload-v2",
+            "POST",
+            path,
+            await self._ensure_signing_key(),
+            ttl_seconds,
+        )
+
+    @intercept_errors(message_prefix="Failed to rotate signing key: ")
+    @with_instrumentation()
+    async def rotate_signing_key(self) -> None:
+        """Rotates the sandbox signing key, invalidating all previously signed URLs.
+
+        Example:
+            ```python
+            await sandbox.rotate_signing_key()
+            # all URLs created before this call now return 401
+            ```
+        """
+        self._signing_key = await self._sandbox_api.rotate_signing_key(self.id)
+        self._signing_key_fetched_at = time.time()
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout()

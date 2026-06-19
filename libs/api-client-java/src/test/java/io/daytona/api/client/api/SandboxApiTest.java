@@ -330,6 +330,19 @@ public class SandboxApiTest {
     }
 
     /**
+     * Get the signing key for a sandbox
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void getSandboxSigningKeyTest() throws ApiException {
+        String sandboxId = null;
+        String xDaytonaOrganizationID = null;
+        String response = api.getSandboxSigningKey(sandboxId, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
      * Get trace spans
      *
      * Retrieve all spans for a specific trace
@@ -528,6 +541,19 @@ public class SandboxApiTest {
         String xDaytonaOrganizationID = null;
         String token = null;
         Sandbox response = api.revokeSshAccess(sandboxIdOrName, xDaytonaOrganizationID, token);
+        // TODO: test validations
+    }
+
+    /**
+     * Rotate the signing key, invalidating all previously signed URLs
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void rotateSigningKeyTest() throws ApiException {
+        String sandboxId = null;
+        String xDaytonaOrganizationID = null;
+        String response = api.rotateSigningKey(sandboxId, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

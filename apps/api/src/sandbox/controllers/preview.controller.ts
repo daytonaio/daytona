@@ -124,6 +124,27 @@ export class PreviewController {
     throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
   }
 
+  @Get(':sandboxId/signing-key')
+  @ApiOperation({
+    summary: 'Get the signing key for a sandbox',
+    operationId: 'getSigningKey',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signing key of the sandbox',
+    type: String,
+  })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(ProxyAuthContextGuard)
+  async getSigningKey(@Param('sandboxId') sandboxId: string): Promise<string> {
+    return this.sandboxService.getSigningKey(sandboxId)
+  }
+
   @Get(':sandboxId/access')
   @ApiOperation({
     summary: 'Check if user has access to the sandbox',

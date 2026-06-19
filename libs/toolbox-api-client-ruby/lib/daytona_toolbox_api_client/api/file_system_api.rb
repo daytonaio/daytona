@@ -760,23 +760,23 @@ module DaytonaToolboxApiClient
     end
 
     # Upload a file
-    # Upload a file to the specified path
+    # Upload a file to the specified path. Accepts either multipart/form-data (field \"file\") or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
     # @param path [String] Destination path for the uploaded file
-    # @param file [File] File to upload
     # @param [Hash] opts the optional parameters
-    # @return [Hash<String, Object>]
-    def upload_file(path, file, opts = {})
-      data, _status_code, _headers = upload_file_with_http_info(path, file, opts)
+    # @option opts [File] :file File to upload (multipart/form-data)
+    # @return [UploadedFile]
+    def upload_file(path, opts = {})
+      data, _status_code, _headers = upload_file_with_http_info(path, opts)
       data
     end
 
     # Upload a file
-    # Upload a file to the specified path
+    # Upload a file to the specified path. Accepts either multipart/form-data (field \&quot;file\&quot;) or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
     # @param path [String] Destination path for the uploaded file
-    # @param file [File] File to upload
     # @param [Hash] opts the optional parameters
-    # @return [Array<(Hash<String, Object>, Integer, Hash)>] Hash<String, Object> data, response status code and response headers
-    def upload_file_with_http_info(path, file, opts = {})
+    # @option opts [File] :file File to upload (multipart/form-data)
+    # @return [Array<(UploadedFile, Integer, Hash)>] UploadedFile data, response status code and response headers
+    def upload_file_with_http_info(path, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: FileSystemApi.upload_file ...'
       end
@@ -784,12 +784,8 @@ module DaytonaToolboxApiClient
       if @api_client.config.client_side_validation && path.nil?
         fail ArgumentError, "Missing the required parameter 'path' when calling FileSystemApi.upload_file"
       end
-      # verify the required parameter 'file' is set
-      if @api_client.config.client_side_validation && file.nil?
-        fail ArgumentError, "Missing the required parameter 'file' when calling FileSystemApi.upload_file"
-      end
       # resource path
-      local_var_path = '/files/upload'
+      local_var_path = '/files/upload-v2'
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -798,7 +794,7 @@ module DaytonaToolboxApiClient
       # header parameters
       header_params = opts[:header_params] || {}
       # HTTP header 'Accept' (if needed)
-      header_params['Accept'] = @api_client.select_header_accept(['*/*']) unless header_params['Accept']
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['multipart/form-data'])
       if !content_type.nil?
@@ -807,13 +803,13 @@ module DaytonaToolboxApiClient
 
       # form parameters
       form_params = opts[:form_params] || {}
-      form_params['file'] = file
+      form_params['file'] = opts[:'file'] if !opts[:'file'].nil?
 
       # http body (model)
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type] || 'Hash<String, Object>'
+      return_type = opts[:debug_return_type] || 'UploadedFile'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || []
