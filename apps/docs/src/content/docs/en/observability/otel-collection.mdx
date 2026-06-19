@@ -54,7 +54,7 @@ Sandbox telemetry collection works independently from SDK tracing. You can enabl
 - **SDK tracing only**: Monitor Daytona API operations and SDK calls
 - **Sandbox telemetry only**: Monitor application behavior inside sandboxes
 - **Both**: Get complete end-to-end observability across your entire stack
-:::
+  :::
 
 ### Configure Sandbox Collection
 
@@ -95,14 +95,14 @@ In addition to per-sandbox telemetry, Daytona exports organization-level resourc
 
 ### Exported Metrics
 
-| Metric | Unit | Description |
-| --- | --- | --- |
-| `daytona.sandbox.used_cpu` | cpu cores | Total CPU currently consumed by active sandboxes |
-| `daytona.sandbox.used_ram` | GiB | Total memory currently consumed by active sandboxes |
-| `daytona.sandbox.used_storage` | GiB | Total disk currently consumed by sandboxes |
-| `daytona.sandbox.total_cpu` | cpu cores | Total CPU quota for the organization |
-| `daytona.sandbox.total_ram` | GiB | Total memory quota for the organization |
-| `daytona.sandbox.total_storage` | GiB | Total disk quota for the organization |
+| Metric                          | Unit      | Description                                         |
+| ------------------------------- | --------- | --------------------------------------------------- |
+| `daytona.sandbox.used_cpu`      | cpu cores | Total CPU currently consumed by active sandboxes    |
+| `daytona.sandbox.used_ram`      | GiB       | Total memory currently consumed by active sandboxes |
+| `daytona.sandbox.used_storage`  | GiB       | Total disk currently consumed by sandboxes          |
+| `daytona.sandbox.total_cpu`     | cpu cores | Total CPU quota for the organization                |
+| `daytona.sandbox.total_ram`     | GiB       | Total memory quota for the organization             |
+| `daytona.sandbox.total_storage` | GiB       | Total disk quota for the organization               |
 
 ### Metric Attributes
 
@@ -285,6 +285,40 @@ OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <BASE64_ENCODED_CREDENTIALS>"
 ```
 
 Setup: Go to [Grafana Cloud Portal](https://grafana.com) → **Connections** → **Add new connection** → Search for **OpenTelemetry (OTLP)** → Follow the wizard to create an access token. The endpoint and headers will be provided in the instrumentation instructions. See the [Grafana dashboard example](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/grafana) for detailed setup steps.
+
+### Datadog
+
+Datadog exposes a native OTLP intake endpoint, so you can send telemetry directly — no Datadog Agent required.
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.datadoghq.com
+OTEL_EXPORTER_OTLP_HEADERS="dd-api-key=YOUR_DATADOG_API_KEY"
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+```
+
+When configuring Datadog as your [sandbox collection endpoint](#configure-sandbox-collection) in the Dashboard, enter the OTLP endpoint for your Datadog site and add a single header `dd-api-key` with your Datadog API key:
+
+| Datadog Site          | OTLP Endpoint                    |
+| --------------------- | -------------------------------- |
+| US1 (`datadoghq.com`) | `https://otlp.datadoghq.com`     |
+| EU (`datadoghq.eu`)   | `https://otlp.datadoghq.eu`      |
+| US3                   | `https://otlp.us3.datadoghq.com` |
+| US5                   | `https://otlp.us5.datadoghq.com` |
+| AP1                   | `https://otlp.ap1.datadoghq.com` |
+
+Use the base endpoint without a `/v1/...` path — the path is appended automatically. Generate an API key under **Datadog → Organization Settings → API Keys**. See the [Datadog dashboard example](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/datadog) for an importable dashboard and verification steps.
+
+Once data is flowing, your metrics appear under **Metrics → Summary** (search for `daytona.sandbox`), where you can also confirm the exact tag keys (e.g. `service`, `region.id`) Datadog assigned.
+
+:::caution
+
+Datadog's OTLP intake has a few limitations to be aware of:
+
+- **Traces are in Preview** (not GA). Metrics and logs are generally available, but trace ingestion via OTLP may need to be enabled for your account by Datadog — contact your Datadog account team if traces don't appear.
+- **Direct OTLP intake uses HTTP/protobuf only** (no gRPC), so don't append a gRPC port such as `:4317` to the endpoint.
+- **Host metadata is not populated** in the Datadog Infrastructure Host List when sending directly to the OTLP intake endpoint.
+
+:::
 
 ---
 
@@ -515,6 +549,7 @@ Each trace includes valuable metadata such as:
 
 - [New Relic](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/new-relic)
 - [Grafana](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/grafana)
+- [Datadog](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/datadog)
 
 ## Troubleshooting
 
