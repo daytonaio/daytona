@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { NotificationEmitter } from '../gateways/notification-emitter.abstract'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { OrganizationUserRemovedEvent } from '../../organization/events/organization-user-removed.event'
 import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
@@ -33,12 +35,26 @@ import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 
 @Injectable()
 export class NotificationService {
+  private readonly logger = new Logger(NotificationService.name)
+
   constructor(
     private readonly notificationEmitter: NotificationEmitter,
     private readonly regionService: RegionService,
     private readonly sandboxService: SandboxService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
+
+  @OnEvent(OrganizationEvents.USER_REMOVED)
+  handleOrganizationUserRemoved(event: OrganizationUserRemovedEvent) {
+    // The connect-time membership gate blocks new subscriptions; this ejects sockets that were
+    // already subscribed when membership ended. Best-effort: a failure here must not surface on
+    // the request that revoked membership.
+    try {
+      this.notificationEmitter.evictUserFromOrganization(event.userId, event.organizationId)
+    } catch (error) {
+      this.logger.error('Failed to evict user from organization notification room:', error)
+    }
+  }
 
   @OnEvent(SandboxEvents.CREATED)
   async handleSandboxCreated(event: SandboxCreatedEvent) {
