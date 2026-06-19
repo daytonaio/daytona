@@ -209,8 +209,4 @@ daytona_api_client_async/models/windows_response.py
 daytona_api_client_async/models/work_dir_response.py
 daytona_api_client_async/py.typed
 daytona_api_client_async/rest.py
-pyproject.toml
-requirements.txt
-setup.py
-test-requirements.txt
 tox.ini
