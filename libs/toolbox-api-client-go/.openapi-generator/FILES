@@ -102,6 +102,7 @@ model_session_send_input_request.go
 model_start_recording_request.go
 model_status.go
 model_stop_recording_request.go
+model_uploaded_file.go
 model_user_home_dir_response.go
 model_window_info.go
 model_windows_response.go

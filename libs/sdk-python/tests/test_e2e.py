@@ -10,6 +10,7 @@ import time
 import uuid
 
 import pytest
+import requests
 
 from daytona import (
     CreateSandboxFromImageParams,
@@ -911,6 +912,53 @@ def test_sandbox_remains_usable_after_archive_cycle(sandbox):
     resp = sandbox.process.exec("echo post-archive-check")
     assert resp.exit_code == 0
     assert "post-archive-check" in resp.result
+
+
+# ===========================================================================
+# Signed URL Operations
+# ===========================================================================
+
+SIGNED_URL_TEST_DIR = "e2e-signed-url-test"
+
+
+def test_signed_url_setup(sandbox):
+    try:
+        sandbox.fs.delete_file(SIGNED_URL_TEST_DIR, recursive=True)
+    except Exception:
+        pass
+    sandbox.fs.create_folder(SIGNED_URL_TEST_DIR, "755")
+    sandbox.fs.upload_file(b"signed url test content", f"{SIGNED_URL_TEST_DIR}/download-test.txt")
+
+
+def test_download_url_returns_signed_url(sandbox):
+    url = sandbox.download_url(f"{SIGNED_URL_TEST_DIR}/download-test.txt")
+    assert isinstance(url, str) and len(url) > 0, "download_url should return a non-empty string"
+    assert "signature=" in url, f"URL should contain signature param: {url}"
+    assert "expires=" in url, f"URL should contain expires param: {url}"
+
+
+def test_download_url_serves_correct_content(sandbox):
+    url = sandbox.download_url(f"{SIGNED_URL_TEST_DIR}/download-test.txt")
+    resp = requests.get(url, timeout=15)
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}"
+    assert resp.content == b"signed url test content", f"Expected exact content, got {resp.content!r}"
+
+
+def test_upload_url_accepts_file(sandbox):
+    url = sandbox.upload_url(f"{SIGNED_URL_TEST_DIR}/uploaded-via-url.txt")
+    assert isinstance(url, str) and "signature=" in url, "upload_url should return a signed URL"
+    resp = requests.post(url, files={"file": ("uploaded-via-url.txt", b"uploaded via signed url")}, timeout=15)
+    assert resp.status_code == 200, f"POST to upload URL failed: {resp.status_code}"
+    content = sandbox.fs.download_file(f"{SIGNED_URL_TEST_DIR}/uploaded-via-url.txt")
+    assert content == b"uploaded via signed url", f"Uploaded content mismatch: {content!r}"
+
+
+def test_rotate_signing_key_and_new_urls_work(sandbox):
+    sandbox.rotate_signing_key()
+    url = sandbox.download_url(f"{SIGNED_URL_TEST_DIR}/download-test.txt")
+    resp = requests.get(url, timeout=15)
+    assert resp.status_code == 200, f"New URL after rotation should work, got {resp.status_code}"
+    assert resp.content == b"signed url test content"
 
 
 # ===========================================================================

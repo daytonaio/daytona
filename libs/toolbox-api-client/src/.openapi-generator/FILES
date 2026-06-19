@@ -104,6 +104,7 @@ models/session.ts
 models/start-recording-request.ts
 models/status.ts
 models/stop-recording-request.ts
+models/uploaded-file.ts
 models/user-home-dir-response.ts
 models/window-info.ts
 models/windows-response.ts

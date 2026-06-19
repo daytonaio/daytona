@@ -33,6 +33,8 @@ import type { ReplaceRequest } from '../models';
 import type { ReplaceResult } from '../models';
 // @ts-ignore
 import type { SearchFilesResponse } from '../models';
+// @ts-ignore
+import type { UploadedFile } from '../models';
 /**
  * FileSystemApi - axios parameter creator
  */
@@ -484,19 +486,17 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
-         * Upload a file to the specified path
+         * Upload a file to the specified path. Accepts either multipart/form-data (field \"file\") or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
          * @summary Upload a file
          * @param {string} path Destination path for the uploaded file
-         * @param {File} file File to upload
+         * @param {File} [file] File to upload (multipart/form-data)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        uploadFile: async (path: string, file: File, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        uploadFile: async (path: string, file?: File, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'path' is not null or undefined
             assertParamExists('uploadFile', 'path', path)
-            // verify required parameter 'file' is not null or undefined
-            assertParamExists('uploadFile', 'file', file)
-            const localVarPath = `/files/upload`;
+            const localVarPath = `/files/upload-v2`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -518,7 +518,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
                 localVarFormParams.append('file', file as any);
             }
             localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-            localVarHeaderParameter['Accept'] = '*/*';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -720,14 +720,14 @@ export const FileSystemApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Upload a file to the specified path
+         * Upload a file to the specified path. Accepts either multipart/form-data (field \"file\") or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
          * @summary Upload a file
          * @param {string} path Destination path for the uploaded file
-         * @param {File} file File to upload
+         * @param {File} [file] File to upload (multipart/form-data)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async uploadFile(path: string, file: File, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: object; }>> {
+        async uploadFile(path: string, file?: File, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UploadedFile>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFile(path, file, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['FileSystemApi.uploadFile']?.[localVarOperationServerIndex]?.url;
@@ -873,14 +873,14 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
             return localVarFp.setFilePermissions(path, owner, group, mode, options).then((request) => request(axios, basePath));
         },
         /**
-         * Upload a file to the specified path
+         * Upload a file to the specified path. Accepts either multipart/form-data (field \"file\") or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
          * @summary Upload a file
          * @param {string} path Destination path for the uploaded file
-         * @param {File} file File to upload
+         * @param {File} [file] File to upload (multipart/form-data)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        uploadFile(path: string, file: File, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: object; }> {
+        uploadFile(path: string, file?: File, options?: RawAxiosRequestConfig): AxiosPromise<UploadedFile> {
             return localVarFp.uploadFile(path, file, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1029,14 +1029,14 @@ export class FileSystemApi extends BaseAPI {
     }
 
     /**
-     * Upload a file to the specified path
+     * Upload a file to the specified path. Accepts either multipart/form-data (field \"file\") or a raw request body (e.g. application/octet-stream). Parent directories are created if missing; an existing file is overwritten.
      * @summary Upload a file
      * @param {string} path Destination path for the uploaded file
-     * @param {File} file File to upload
+     * @param {File} [file] File to upload (multipart/form-data)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public uploadFile(path: string, file: File, options?: RawAxiosRequestConfig) {
+    public uploadFile(path: string, file?: File, options?: RawAxiosRequestConfig) {
         return FileSystemApiFp(this.configuration).uploadFile(path, file, options).then((request) => request(this.axios, this.basePath));
     }
 

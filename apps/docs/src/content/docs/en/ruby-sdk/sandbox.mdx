@@ -630,6 +630,103 @@ to the URL.
 
 - `DaytonaApiClient:PortPreviewUrl`
 
+#### download_url()
+
+```ruby
+def download_url(path, ttl_seconds:)
+
+```
+
+Creates a pre-signed URL for downloading a file from the Sandbox.
+
+The URL works with any HTTP client without auth headers and stays valid across
+sandbox restarts (downloads succeed only while the sandbox is running). The signing
+key is cached locally for up to 15 seconds; if the key was rotated from another
+client, URLs may be rejected until the cache refreshes.
+
+**Parameters**:
+
+- `path` _String_ - Path to the file in the Sandbox.
+- `ttl_seconds` _Integer, nil_ - How long the URL stays valid, in seconds.
+Defaults to 3600. Zero or negative means the URL never expires.
+
+**Returns**:
+
+- `String` - Pre-signed download URL.
+
+**Raises**:
+
+- `Daytona:Sdk:Error` - if the signing key cannot be fetched.
+
+**Examples:**
+
+```ruby
+url = sandbox.download_url('/home/user/report.pdf')
+# curl "$url" -o report.pdf
+
+```
+
+#### upload_url()
+
+```ruby
+def upload_url(path, ttl_seconds:)
+
+```
+
+Creates a pre-signed URL for uploading a file to the Sandbox.
+
+Send a POST request with the file as multipart/form-data. The URL works with any
+HTTP client without auth headers. The signing key is cached locally for up to
+15 seconds; if the key was rotated from another client, URLs may be rejected
+until the cache refreshes.
+
+**Parameters**:
+
+- `path` _String_ - Destination path for the uploaded file in the Sandbox.
+- `ttl_seconds` _Integer, nil_ - How long the URL stays valid, in seconds.
+Defaults to 3600. Zero or negative means the URL never expires.
+
+**Returns**:
+
+- `String` - Pre-signed upload URL.
+
+**Raises**:
+
+- `Daytona:Sdk:Error` - if the signing key cannot be fetched.
+
+**Examples:**
+
+```ruby
+url = sandbox.upload_url('/home/user/data.bin')
+# curl -X POST -F "file=@local.bin" "$url"
+
+```
+
+#### rotate_signing_key()
+
+```ruby
+def rotate_signing_key()
+
+```
+
+Rotates the sandbox signing key, invalidating all previously signed URLs.
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `DaytonaApiClient:ApiError` - if the signing key rotation request fails.
+
+**Examples:**
+
+```ruby
+sandbox.rotate_signing_key
+puts 'All previously signed URLs are now invalid.'
+
+```
+
 #### create_signed_preview_url()
 
 ```ruby

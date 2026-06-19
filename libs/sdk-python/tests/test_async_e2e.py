@@ -173,3 +173,65 @@ async def test_async_concurrent_get_no_connection_errors(async_daytona_client):
 
     leaked = results.get("conn_error", 0) + results.get("daytona_error", 0) + results.get("other", 0)
     assert leaked == 0, f"{leaked} connection/transport errors leaked through. Full results: {dict(results)}"
+
+
+# ===========================================================================
+# Signed URL Operations
+# ===========================================================================
+
+ASYNC_SIGNED_URL_DIR = "e2e-async-signed-url-test"
+
+
+async def test_async_signed_url_setup(async_sandbox):
+    try:
+        await async_sandbox.fs.delete_file(ASYNC_SIGNED_URL_DIR, recursive=True)
+    except Exception:
+        pass
+    await async_sandbox.fs.create_folder(ASYNC_SIGNED_URL_DIR, "755")
+    await async_sandbox.fs.upload_file(b"async signed url content", f"{ASYNC_SIGNED_URL_DIR}/download-test.txt")
+
+
+async def test_async_download_url_returns_signed_url(async_sandbox):
+    url = await async_sandbox.download_url(f"{ASYNC_SIGNED_URL_DIR}/download-test.txt")
+    assert isinstance(url, str) and len(url) > 0, "download_url should return a non-empty string"
+    assert "signature=" in url, f"URL should contain signature param: {url}"
+    assert "expires=" in url, f"URL should contain expires param: {url}"
+
+
+async def test_async_download_url_serves_correct_content(async_sandbox):
+    import aiohttp
+
+    url = await async_sandbox.download_url(f"{ASYNC_SIGNED_URL_DIR}/download-test.txt")
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            assert resp.status == 200, f"Expected 200, got {resp.status}"
+            body = await resp.read()
+            assert body == b"async signed url content", f"Expected exact content, got {body!r}"
+
+
+async def test_async_upload_url_accepts_file(async_sandbox):
+    import aiohttp
+
+    url = await async_sandbox.upload_url(f"{ASYNC_SIGNED_URL_DIR}/uploaded-via-url.txt")
+    assert isinstance(url, str) and "signature=" in url, "upload_url should return a signed URL"
+
+    form = aiohttp.FormData()
+    form.add_field("file", b"async uploaded via signed url", filename="uploaded-via-url.txt")
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=form) as resp:
+            assert resp.status == 200, f"POST to upload URL failed: {resp.status}"
+
+    content = await async_sandbox.fs.download_file(f"{ASYNC_SIGNED_URL_DIR}/uploaded-via-url.txt")
+    assert content == b"async uploaded via signed url", f"Uploaded content mismatch: {content!r}"
+
+
+async def test_async_rotate_signing_key_and_new_urls_work(async_sandbox):
+    import aiohttp
+
+    await async_sandbox.rotate_signing_key()
+    url = await async_sandbox.download_url(f"{ASYNC_SIGNED_URL_DIR}/download-test.txt")
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            assert resp.status == 200, f"New URL after rotation should work, got {resp.status}"
+            body = await resp.read()
+            assert body == b"async signed url content"

@@ -6,6 +6,7 @@ package daytona
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -45,9 +46,13 @@ import (
 //	// Work with files
 //	err = sandbox.FileSystem.UploadFile(ctx, "local.txt", "/home/user/remote.txt")
 type Sandbox struct {
-	client        *Client
-	otel          *otelState
-	ToolboxClient *toolbox.APIClient // Internal API client
+	client              *Client
+	otel                *otelState
+	ToolboxClient       *toolbox.APIClient // Internal API client
+	toolboxProxyURL     string
+	signingKeyMu        sync.Mutex
+	signingKey          string
+	signingKeyFetchedAt time.Time
 
 	ID             string                 // Unique sandbox identifier
 	Name           string                 // Human-readable sandbox name
@@ -304,14 +309,15 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, dto sandboxDTO
 		otelSt = client.Otel
 	}
 	s := &Sandbox{
-		client:          client,
-		otel:            otelSt,
-		ToolboxClient:   toolboxClient,
-		FileSystem:      NewFileSystemService(toolboxClient, otelSt),
-		Git:             NewGitService(toolboxClient, otelSt),
-		Process:         NewProcessService(toolboxClient, otelSt, language),
-		CodeInterpreter: NewCodeInterpreterService(toolboxClient, otelSt),
-		ComputerUse:     NewComputerUseService(toolboxClient, otelSt),
+		client:              client,
+		otel:                otelSt,
+		ToolboxClient:       toolboxClient,
+		FileSystem:          NewFileSystemService(toolboxClient, otelSt),
+		Git:                 NewGitService(toolboxClient, otelSt),
+		Process:             NewProcessService(toolboxClient, otelSt, language),
+		CodeInterpreter:     NewCodeInterpreterService(toolboxClient, otelSt),
+		ComputerUse:         NewComputerUseService(toolboxClient, otelSt),
+		signingKeyFetchedAt: time.Time{},
 	}
 	s.populateFromDTO(dto)
 	return s
@@ -340,6 +346,7 @@ func (s *Sandbox) populateFromDTO(dto sandboxDTO) {
 	s.Memory = dto.GetMemory()
 	s.Disk = dto.GetDisk()
 	s.State = dto.GetState()
+	s.toolboxProxyURL = dto.GetToolboxProxyUrl()
 	if v, ok := dto.GetErrorReasonOk(); ok {
 		s.ErrorReason = v
 	}
@@ -408,6 +415,29 @@ func (s *Sandbox) doRefreshData(ctx context.Context) error {
 
 	s.populateFromDTO(sandboxResp)
 	return nil
+}
+
+func (s *Sandbox) ensureSigningKey(ctx context.Context) (string, error) {
+	s.signingKeyMu.Lock()
+	if s.signingKey != "" && time.Since(s.signingKeyFetchedAt).Seconds() <= 15 {
+		key := s.signingKey
+		s.signingKeyMu.Unlock()
+		return key, nil
+	}
+	s.signingKeyMu.Unlock()
+
+	authCtx := s.client.getAuthContext(ctx)
+	key, httpResp, err := s.client.apiClient.SandboxAPI.GetSandboxSigningKey(authCtx, s.ID).Execute()
+	if err != nil {
+		return "", errors.ConvertAPIError(err, httpResp)
+	}
+
+	s.signingKeyMu.Lock()
+	s.signingKey = key
+	s.signingKeyFetchedAt = time.Now()
+	s.signingKeyMu.Unlock()
+
+	return key, nil
 }
 
 // GetUserHomeDir returns the user's home directory path in the sandbox.
@@ -797,6 +827,62 @@ func (s *Sandbox) doSetLabels(ctx context.Context, labels map[string]string) err
 	}
 
 	return s.RefreshData(ctx)
+}
+
+// DownloadURL creates a pre-signed URL for downloading a file from the sandbox.
+// The URL works with any HTTP client without auth headers and stays valid across
+// sandbox restarts (downloads succeed only while the sandbox is running). The signing
+// key is cached locally for up to 15 seconds; if the key was rotated from another
+// client, URLs may be rejected until the cache refreshes.
+//
+//	url, err := sandbox.DownloadURL(ctx, "/home/user/report.pdf", nil)
+//	// curl "$url" -o report.pdf
+func (s *Sandbox) DownloadURL(ctx context.Context, path string, ttlSeconds *int) (string, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "DownloadURL", func(ctx context.Context) (string, error) {
+		signingKey, err := s.ensureSigningKey(ctx)
+		if err != nil {
+			return "", err
+		}
+
+		return buildSignedFileUrl(s.toolboxProxyURL, s.ID, "/files/download", "GET", path, signingKey, ttlSeconds)
+	})
+}
+
+// UploadURL creates a pre-signed URL for uploading a file to the sandbox.
+// Send a POST request with the file as multipart/form-data. The URL works with any
+// HTTP client without auth headers. The signing key is cached locally for up to
+// 15 seconds; if the key was rotated from another client, URLs may be rejected
+// until the cache refreshes.
+//
+//	url, err := sandbox.UploadURL(ctx, "/home/user/data.bin", nil)
+//	// curl -X POST -F "file=@local.bin" "$url"
+func (s *Sandbox) UploadURL(ctx context.Context, path string, ttlSeconds *int) (string, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "UploadURL", func(ctx context.Context) (string, error) {
+		signingKey, err := s.ensureSigningKey(ctx)
+		if err != nil {
+			return "", err
+		}
+
+		return buildSignedFileUrl(s.toolboxProxyURL, s.ID, "/files/upload-v2", "POST", path, signingKey, ttlSeconds)
+	})
+}
+
+// RotateSigningKey rotates the sandbox signing key and invalidates previously signed URLs.
+func (s *Sandbox) RotateSigningKey(ctx context.Context) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "RotateSigningKey", func(ctx context.Context) error {
+		authCtx := s.client.getAuthContext(ctx)
+		key, httpResp, err := s.client.apiClient.SandboxAPI.RotateSigningKey(authCtx, s.ID).Execute()
+		if err != nil {
+			return errors.ConvertAPIError(err, httpResp)
+		}
+
+		s.signingKeyMu.Lock()
+		s.signingKey = key
+		s.signingKeyFetchedAt = time.Now()
+		s.signingKeyMu.Unlock()
+
+		return nil
+	})
 }
 
 // GetPreviewLink returns a preview link for accessing a port on the sandbox.

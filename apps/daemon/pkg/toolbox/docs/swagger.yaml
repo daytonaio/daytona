@@ -1069,6 +1069,19 @@ definitions:
     required:
       - id
     type: object
+  UploadedFile:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+      type:
+        type: string
+    required:
+      - name
+      - path
+      - type
+    type: object
   UserHomeDirResponse:
     properties:
       dir:
@@ -2320,11 +2333,14 @@ paths:
       summary: Search files by pattern
       tags:
         - file-system
-  /files/upload:
+  /files/upload-v2:
     post:
       consumes:
         - multipart/form-data
-      description: Upload a file to the specified path
+      description: |-
+        Upload a file to the specified path. Accepts either multipart/form-data
+        (field "file") or a raw request body (e.g. application/octet-stream).
+        Parent directories are created if missing; an existing file is overwritten.
       operationId: UploadFile
       parameters:
         - description: Destination path for the uploaded file
@@ -2332,16 +2348,17 @@ paths:
           name: path
           required: true
           type: string
-        - description: File to upload
+        - description: File to upload (multipart/form-data)
           in: formData
           name: file
-          required: true
           type: file
+      produces:
+        - application/json
       responses:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            $ref: '#/definitions/UploadedFile'
       summary: Upload a file
       tags:
         - file-system

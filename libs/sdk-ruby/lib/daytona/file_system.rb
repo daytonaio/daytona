@@ -216,10 +216,10 @@ module Daytona
     def upload_file(source, remote_path)
       if source.is_a?(String) && File.exist?(source)
         # Source is a file path
-        File.open(source, 'rb') { |file| toolbox_api.upload_file(remote_path, file) }
+        File.open(source, 'rb') { |file| toolbox_api.upload_file(remote_path, file: file) }
       elsif source.respond_to?(:read)
         # Source is an IO object
-        toolbox_api.upload_file(remote_path, source)
+        toolbox_api.upload_file(remote_path, file: source)
       else
         # Tempfile.create yields a ::File (works with Typhoeus) but deletes
         # on block exit — too early if curl reads asynchronously. Write via
@@ -229,7 +229,7 @@ module Daytona
           tmp.binmode
           tmp.write(source.to_s.b)
           tmp.close
-          File.open(tmp.path, 'rb') { |file| toolbox_api.upload_file(remote_path, file) }
+          File.open(tmp.path, 'rb') { |file| toolbox_api.upload_file(remote_path, file: file) }
         ensure
           tmp.unlink
         end

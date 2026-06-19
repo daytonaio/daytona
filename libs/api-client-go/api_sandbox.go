@@ -282,6 +282,19 @@ type SandboxAPI interface {
 	GetSandboxParentExecute(r SandboxAPIGetSandboxParentRequest) (*Sandbox, *http.Response, error)
 
 	/*
+	GetSandboxSigningKey Get the signing key for a sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIGetSandboxSigningKeyRequest
+	*/
+	GetSandboxSigningKey(ctx context.Context, sandboxId string) SandboxAPIGetSandboxSigningKeyRequest
+
+	// GetSandboxSigningKeyExecute executes the request
+	//  @return string
+	GetSandboxSigningKeyExecute(r SandboxAPIGetSandboxSigningKeyRequest) (string, *http.Response, error)
+
+	/*
 	GetSandboxTraceSpans Get trace spans
 
 	Retrieve all spans for a specific trace
@@ -444,6 +457,19 @@ type SandboxAPI interface {
 	// RevokeSshAccessExecute executes the request
 	//  @return Sandbox
 	RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*Sandbox, *http.Response, error)
+
+	/*
+	RotateSigningKey Rotate the signing key, invalidating all previously signed URLs
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIRotateSigningKeyRequest
+	*/
+	RotateSigningKey(ctx context.Context, sandboxId string) SandboxAPIRotateSigningKeyRequest
+
+	// RotateSigningKeyExecute executes the request
+	//  @return string
+	RotateSigningKeyExecute(r SandboxAPIRotateSigningKeyRequest) (string, *http.Response, error)
 
 	/*
 	SetAutoArchiveInterval Set sandbox auto-archive interval
@@ -2878,6 +2904,117 @@ func (a *SandboxAPIService) GetSandboxParentExecute(r SandboxAPIGetSandboxParent
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type SandboxAPIGetSandboxSigningKeyRequest struct {
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxId string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxSigningKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxSigningKeyRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIGetSandboxSigningKeyRequest) Execute() (string, *http.Response, error) {
+	return r.ApiService.GetSandboxSigningKeyExecute(r)
+}
+
+/*
+GetSandboxSigningKey Get the signing key for a sandbox
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return SandboxAPIGetSandboxSigningKeyRequest
+*/
+func (a *SandboxAPIService) GetSandboxSigningKey(ctx context.Context, sandboxId string) SandboxAPIGetSandboxSigningKeyRequest {
+	return SandboxAPIGetSandboxSigningKeyRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxId: sandboxId,
+	}
+}
+
+// Execute executes the request
+//  @return string
+func (a *SandboxAPIService) GetSandboxSigningKeyExecute(r SandboxAPIGetSandboxSigningKeyRequest) (string, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxSigningKey")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/signing-key"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type SandboxAPIGetSandboxTraceSpansRequest struct {
 	ctx context.Context
 	ApiService SandboxAPI
@@ -4794,6 +4931,117 @@ func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRe
 	if r.token != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "form", "")
 	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIRotateSigningKeyRequest struct {
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxId string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIRotateSigningKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIRotateSigningKeyRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIRotateSigningKeyRequest) Execute() (string, *http.Response, error) {
+	return r.ApiService.RotateSigningKeyExecute(r)
+}
+
+/*
+RotateSigningKey Rotate the signing key, invalidating all previously signed URLs
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return SandboxAPIRotateSigningKeyRequest
+*/
+func (a *SandboxAPIService) RotateSigningKey(ctx context.Context, sandboxId string) SandboxAPIRotateSigningKeyRequest {
+	return SandboxAPIRotateSigningKeyRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxId: sandboxId,
+	}
+}
+
+// Execute executes the request
+//  @return string
+func (a *SandboxAPIService) RotateSigningKeyExecute(r SandboxAPIRotateSigningKeyRequest) (string, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.RotateSigningKey")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/signing-key/rotate"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

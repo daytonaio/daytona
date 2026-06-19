@@ -47,4 +47,11 @@ describe('[AUTH] PreviewController', () => {
     expectArrayMatch(getAllowedAuthStrategies(PreviewController, methodName), [AuthStrategyType.API_KEY])
     expectArrayMatch(getAuthContextGuards(PreviewController, methodName), [ProxyAuthContextGuard])
   })
+
+  it('getSigningKey', () => {
+    const methodName = trackMethod('getSigningKey')
+    expect(isPublicEndpoint(PreviewController, methodName)).toBe(false)
+    expectArrayMatch(getAllowedAuthStrategies(PreviewController, methodName), [AuthStrategyType.API_KEY])
+    expectArrayMatch(getAuthContextGuards(PreviewController, methodName), [ProxyAuthContextGuard])
+  })
 })

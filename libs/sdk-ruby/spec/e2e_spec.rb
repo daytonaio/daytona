@@ -4,8 +4,10 @@
 # frozen_string_literal: true
 
 require 'timeout'
+require 'net/http'
 require 'securerandom'
 require 'tmpdir'
+require 'uri'
 require 'spec_helper'
 
 RSpec.describe 'Daytona SDK E2E', :e2e do
@@ -763,6 +765,64 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
       )
       expect(response.exit_code).to eq(0)
       expect(response.result).to include('long-run-complete')
+    end
+  end
+
+  context 'Signed URL Operations', order: :defined do
+    before(:all) do
+      @signed_url_dir = '/tmp/e2e-signed-url'
+      begin; @sandbox.fs.delete_file(@signed_url_dir, recursive: true); rescue StandardError; nil; end
+      @sandbox.fs.create_folder(@signed_url_dir, '755')
+      @sandbox.fs.upload_file('signed url test content', "#{@signed_url_dir}/download-test.txt")
+    end
+
+    it 'download_url returns a signed URL string' do
+      url = @sandbox.download_url("#{@signed_url_dir}/download-test.txt")
+      expect(url).to be_a(String)
+      expect(url).to include('signature=')
+      expect(url).to include('expires=')
+    end
+
+    it 'download_url serves correct content via HTTP GET' do
+      url = @sandbox.download_url("#{@signed_url_dir}/download-test.txt")
+      uri = URI.parse(url)
+      resp = Net::HTTP.get_response(uri)
+      expect(resp.code).to eq('200')
+      expect(resp.body).to eq('signed url test content')
+    end
+
+    it 'upload_url accepts file via HTTP POST' do
+      url = @sandbox.upload_url("#{@signed_url_dir}/uploaded-via-url.txt")
+      expect(url).to include('signature=')
+
+      uri = URI.parse(url)
+      boundary = SecureRandom.hex(16)
+      body = "--#{boundary}\r\n" \
+             "Content-Disposition: form-data; name=\"file\"; filename=\"uploaded-via-url.txt\"\r\n" \
+             "Content-Type: application/octet-stream\r\n\r\n" \
+             "uploaded via signed url\r\n" \
+             "--#{boundary}--\r\n"
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = (uri.scheme == 'https')
+      req = Net::HTTP::Post.new(uri)
+      req['Content-Type'] = "multipart/form-data; boundary=#{boundary}"
+      req.body = body
+      resp = http.request(req)
+
+      expect(resp.code).to eq('200')
+      downloaded = @sandbox.fs.download_file("#{@signed_url_dir}/uploaded-via-url.txt")
+      content = downloaded.open.read
+      expect(content).to include('uploaded via signed url')
+    end
+
+    it 'rotate_signing_key allows new URLs to work' do
+      @sandbox.rotate_signing_key
+      url = @sandbox.download_url("#{@signed_url_dir}/download-test.txt")
+      uri = URI.parse(url)
+      resp = Net::HTTP.get_response(uri)
+      expect(resp.code).to eq('200')
+      expect(resp.body).to eq('signed url test content')
     end
   end
 

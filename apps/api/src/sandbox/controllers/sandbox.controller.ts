@@ -911,6 +911,52 @@ export class SandboxController {
     return this.sandboxService.toSandboxDto(sandbox)
   }
 
+  @Get(':sandboxId/signing-key')
+  @ApiOperation({
+    summary: 'Get the signing key for a sandbox',
+    operationId: 'getSandboxSigningKey',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signing key of the sandbox',
+    type: String,
+  })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  async getSandboxSigningKey(@Param('sandboxId') sandboxId: string): Promise<string> {
+    return this.sandboxService.getSigningKey(sandboxId)
+  }
+
+  @Post(':sandboxId/signing-key/rotate')
+  @ApiOperation({
+    summary: 'Rotate the signing key, invalidating all previously signed URLs',
+    operationId: 'rotateSigningKey',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'New signing key',
+    type: String,
+  })
+  @UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @Audit({
+    action: AuditAction.ROTATE_SIGNING_KEY,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
+  async rotateSigningKey(@Param('sandboxId') sandboxId: string): Promise<string> {
+    return this.sandboxService.rotateSigningKey(sandboxId)
+  }
+
   @Post(':sandboxId/last-activity')
   @ApiOperation({
     summary: 'Update sandbox last activity',

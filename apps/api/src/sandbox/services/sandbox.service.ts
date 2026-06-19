@@ -17,6 +17,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxFork } from '../entities/sandbox-fork.entity'
+import { SandboxMetadata } from '../entities/sandbox-metadata.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
 import { ForkSandboxDto } from '../dto/fork-sandbox.dto'
@@ -153,6 +154,8 @@ export class SandboxService {
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRepository(SandboxFork)
     private readonly sandboxForkRepository: Repository<SandboxFork>,
+    @InjectRepository(SandboxMetadata)
+    private readonly sandboxMetadataRepository: Repository<SandboxMetadata>,
     @Inject(SANDBOX_SEARCH_ADAPTER)
     private readonly sandboxSearchAdapter: SandboxSearchAdapter,
   ) {}
@@ -2682,6 +2685,51 @@ export class SandboxService {
       updateData,
       entity: sandbox,
     })
+  }
+
+  private async ensureMetadata(sandboxId: string): Promise<SandboxMetadata> {
+    const existing = await this.sandboxMetadataRepository.findOne({ where: { sandboxId } })
+    if (existing) {
+      return existing
+    }
+
+    // ON CONFLICT do nothing to avoid race conditions on sandbox creation where multiple requests
+    // may attempt to create metadata for the same sandbox
+    await this.sandboxMetadataRepository
+      .createQueryBuilder()
+      .insert()
+      .into(SandboxMetadata)
+      .values({
+        sandboxId,
+        signingKey: nanoid(32),
+      })
+      .orIgnore()
+      .execute()
+
+    return this.sandboxMetadataRepository.findOneOrFail({ where: { sandboxId } })
+  }
+
+  async getSigningKey(sandboxId: string): Promise<string> {
+    const cacheKey = `signing-key:${sandboxId}`
+    const cached = await this.redis.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    const metadata = await this.ensureMetadata(sandboxId)
+    await this.redis.setex(cacheKey, 300, metadata.signingKey)
+    return metadata.signingKey
+  }
+
+  async rotateSigningKey(sandboxId: string): Promise<string> {
+    await this.ensureMetadata(sandboxId)
+    const newKey = nanoid(32)
+    await this.sandboxMetadataRepository.update(sandboxId, { signingKey: newKey })
+    // Write-through (not delete): a concurrent getSigningKey that read the old key from the
+    // DB before this update could otherwise re-cache it after a plain delete, pinning a stale
+    // key for the full TTL. Overwriting with the new key closes that rotation race window.
+    await this.redis.setex(`signing-key:${sandboxId}`, 300, newKey)
+    return newKey
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
