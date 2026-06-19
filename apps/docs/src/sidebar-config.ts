@@ -563,6 +563,18 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath(
+            '/docs/guides/gemini/gemini-cli-run-tasks-stream-logs-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.gemini'),
+          disablePagination: true,
+          attrs: {
+            icon: 'gemini.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/openclaw', locale),
           label: t('sidebarconfig.openclaw'),
           disablePagination: true,
