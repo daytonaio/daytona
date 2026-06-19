@@ -162,6 +162,8 @@ func run() int {
 		VolumeCleanupExclusionPeriod: cfg.VolumeCleanupExclusionPeriod,
 		BackupTimeoutMin:             cfg.BackupTimeoutMin,
 		SnapshotPullTimeout:          cfg.SnapshotPullTimeout,
+		DaemonStartTimeoutSec:        cfg.DaemonStartTimeoutSec,
+		SandboxStartTimeoutSec:       cfg.SandboxStartTimeoutSec,
 		BuildTimeoutMin:              cfg.BuildTimeoutMin,
 		BuildCPUCores:                cfg.BuildCPUCores,
 		BuildMemoryGB:                cfg.BuildMemoryGB,
