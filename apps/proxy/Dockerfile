@@ -1,4 +1,4 @@
-FROM golang:1.25.11-alpine AS go-toolchain
+FROM golang:1.26.4-alpine AS go-toolchain
 
 FROM node:22-alpine AS build
 
@@ -48,7 +48,7 @@ ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   VERSION=$VERSION yarn nx build proxy --configuration=production --nxBail=true
 
-FROM alpine:3.23 AS proxy
+FROM alpine:3.24 AS proxy
 
 RUN apk update && apk upgrade --no-cache openssl pcre2 \
   && apk add --no-cache curl

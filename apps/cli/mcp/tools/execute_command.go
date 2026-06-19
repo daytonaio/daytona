@@ -113,12 +113,12 @@ func returnCommandError(message, errorType string) (*mcp.CallToolResult, error) 
 	return &mcp.CallToolResult{
 		IsError: true,
 		Result: mcp.Result{
-			Meta: map[string]interface{}{
+			Meta: mcp.NewMetaFromMap(map[string]any{
 				"Stdout":    "",
 				"Stderr":    message,
 				"ExitCode":  -1,
 				"ErrorType": errorType,
-			},
+			}),
 		},
 	}, nil
 }

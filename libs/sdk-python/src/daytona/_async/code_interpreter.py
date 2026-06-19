@@ -17,6 +17,12 @@ from ..common.errors import DaytonaConnectionError, DaytonaTimeoutError
 from ..common.process import OutputHandler
 from ..internal.shared_session import http_session_of
 
+# The _open_ws cast below is required on aiohttp >= 3.14 (generic ClientWebSocketResponse,
+# Python 3.11+) but appears redundant on the 3.13.x pinned for Python <= 3.10, where
+# basedpyright flags it. The cast is legitimate on the generic build, so silence the
+# false positive for this file rather than splitting CI (Py3.12) and local (Py3.10) results.
+# pyright: reportUnnecessaryCast=false
+
 WEBSOCKET_TIMEOUT_CODE = 4008
 
 
@@ -116,7 +122,14 @@ class AsyncCodeInterpreter:
 
         result = ExecutionResult()
 
-        ws = await http_session_of(self._api_client.api_client).ws_connect(url, headers=headers)
+        # aiohttp >= 3.14 (Python 3.11+) types ws_connect() as ClientWebSocketResponse[bool],
+        # whereas the bare class defaults to [Literal[True]]; on Python <= 3.10 the locked
+        # aiohttp (3.13.x) is not generic. Cast to the bare type so this type-checks against
+        # both the generic and non-generic ClientWebSocketResponse across the supported matrix.
+        ws = cast(
+            "aiohttp.ClientWebSocketResponse",
+            await http_session_of(self._api_client.api_client).ws_connect(url, headers=headers),
+        )
         try:
             request: dict[str, str | int | dict[str, str]] = {"code": code}
             if context is not None:

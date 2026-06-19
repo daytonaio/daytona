@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Awaitable, Callable
+from typing import cast
 
 import aiohttp
 
@@ -38,6 +39,12 @@ from ..common.pty import PtySize
 from ..handle.async_pty_handle import AsyncPtyHandle
 from ..internal.shared_session import http_session_of
 
+# The _open_ws cast below is required on aiohttp >= 3.14 (generic ClientWebSocketResponse,
+# Python 3.11+) but appears redundant on the 3.13.x pinned for Python <= 3.10, where
+# basedpyright flags it. The cast is legitimate on the generic build, so silence the
+# false positive for this file rather than splitting CI (Py3.12) and local (Py3.10) results.
+# pyright: reportUnnecessaryCast=false
+
 
 class AsyncProcess:
     """Handles process and code execution within a Sandbox."""
@@ -60,7 +67,14 @@ class AsyncProcess:
         url: str,
         headers: dict[str, str],
     ) -> aiohttp.ClientWebSocketResponse:
-        return await http_session_of(self._api_client.api_client).ws_connect(url, headers=headers)
+        # aiohttp >= 3.14 (Python 3.11+) types ws_connect() as ClientWebSocketResponse[bool],
+        # whereas the bare class defaults to [Literal[True]]; on Python <= 3.10 the locked
+        # aiohttp (3.13.x) is not generic. Cast to the bare type so this type-checks against
+        # both the generic and non-generic ClientWebSocketResponse across the supported matrix.
+        return cast(
+            "aiohttp.ClientWebSocketResponse",
+            await http_session_of(self._api_client.api_client).ws_connect(url, headers=headers),
+        )
 
     async def _consume_log_websocket(
         self,

@@ -32,3 +32,9 @@ test/*
 docs/*
 README.md
 setup.cfg
+
+# Dependency version pins are managed manually; the generator must not overwrite them.
+pyproject.toml
+requirements.txt
+test-requirements.txt
+setup.py
