@@ -22,7 +22,7 @@ export const redirects = {
   'trl-grpo-training': 'guides/reinforcement-learning/trl-grpo-training',
   'preview-and-authentication': 'preview',
   'regions-and-runners': 'regions',
-  'runners': 'customer-managed-compute',
+  'runners': 'bring-your-own-compute',
   'claude': 'guides/claude',
   'computer-use-macos': 'computer-use',
   'computer-use-windows': 'computer-use',
