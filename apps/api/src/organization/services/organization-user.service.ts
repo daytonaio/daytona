@@ -155,10 +155,7 @@ export class OrganizationUserService {
     // so they stop receiving its realtime events. Emitted after the removal has committed (the
     // repository manager autocommits) so a concurrent reconnect cannot re-join the room against a
     // still-present row. Covers both admin removal and voluntary leave, which both route here.
-    this.eventEmitter.emit(
-      OrganizationEvents.USER_REMOVED,
-      new OrganizationUserRemovedEvent(organizationId, userId),
-    )
+    this.eventEmitter.emit(OrganizationEvents.USER_REMOVED, new OrganizationUserRemovedEvent(organizationId, userId))
   }
 
   private async removeWithEntityManager(
