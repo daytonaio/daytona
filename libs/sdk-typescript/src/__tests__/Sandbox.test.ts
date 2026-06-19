@@ -103,6 +103,11 @@ describe('Sandbox', () => {
     expect(sandbox.autoStopInterval).toBe(10)
   })
 
+  it('round-trips degradedReason from the dto', () => {
+    const { sandbox } = makeSandbox({ degradedReason: 'sandbox degraded: file descriptor exhaustion' })
+    expect(sandbox.degradedReason).toBe('sandbox degraded: file descriptor exhaustion')
+  })
+
   it('delegates start/stop/delete to sandbox api', async () => {
     const { sandbox, sandboxApi } = makeSandbox({ state: 'stopped' })
 

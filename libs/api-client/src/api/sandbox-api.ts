@@ -68,6 +68,8 @@ import type { ToolboxProxyUrl } from '../models';
 // @ts-ignore
 import type { TraceSpan } from '../models';
 // @ts-ignore
+import type { UpdateSandboxDegradedReasonDto } from '../models';
+// @ts-ignore
 import type { UpdateSandboxNetworkSettings } from '../models';
 // @ts-ignore
 import type { UpdateSandboxStateDto } from '../models';
@@ -2211,6 +2213,54 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
+         * @summary Update sandbox degraded reason
+         * @param {string} sandboxId ID of the sandbox
+         * @param {UpdateSandboxDegradedReasonDto} updateSandboxDegradedReasonDto 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSandboxDegradedReason: async (sandboxId: string, updateSandboxDegradedReasonDto: UpdateSandboxDegradedReasonDto, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxId' is not null or undefined
+            assertParamExists('updateSandboxDegradedReason', 'sandboxId', sandboxId)
+            // verify required parameter 'updateSandboxDegradedReasonDto' is not null or undefined
+            assertParamExists('updateSandboxDegradedReason', 'updateSandboxDegradedReasonDto', updateSandboxDegradedReasonDto)
+            const localVarPath = `/sandbox/{sandboxId}/degraded-reason`
+                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateSandboxDegradedReasonDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Update sandbox state
          * @param {string} sandboxId ID of the sandbox
          * @param {UpdateSandboxStateDto} updateSandboxStateDto 
@@ -2940,6 +2990,21 @@ export const SandboxApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Update sandbox degraded reason
+         * @param {string} sandboxId ID of the sandbox
+         * @param {UpdateSandboxDegradedReasonDto} updateSandboxDegradedReasonDto 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateSandboxDegradedReason(sandboxId: string, updateSandboxDegradedReasonDto: UpdateSandboxDegradedReasonDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateSandboxDegradedReason(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SandboxApi.updateSandboxDegradedReason']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Update sandbox state
          * @param {string} sandboxId ID of the sandbox
          * @param {UpdateSandboxStateDto} updateSandboxStateDto 
@@ -3483,6 +3548,18 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          */
         updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
             return localVarFp.updatePublicStatus(sandboxIdOrName, isPublic, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update sandbox degraded reason
+         * @param {string} sandboxId ID of the sandbox
+         * @param {UpdateSandboxDegradedReasonDto} updateSandboxDegradedReasonDto 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSandboxDegradedReason(sandboxId: string, updateSandboxDegradedReasonDto: UpdateSandboxDegradedReasonDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.updateSandboxDegradedReason(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -4059,6 +4136,19 @@ export class SandboxApi extends BaseAPI {
      */
     public updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SandboxApiFp(this.configuration).updatePublicStatus(sandboxIdOrName, isPublic, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Update sandbox degraded reason
+     * @param {string} sandboxId ID of the sandbox
+     * @param {UpdateSandboxDegradedReasonDto} updateSandboxDegradedReasonDto 
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public updateSandboxDegradedReason(sandboxId: string, updateSandboxDegradedReasonDto: UpdateSandboxDegradedReasonDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).updateSandboxDegradedReason(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -39,6 +39,7 @@ import io.daytona.api.client.model.SshAccessDto;
 import io.daytona.api.client.model.SshAccessValidationDto;
 import io.daytona.api.client.model.ToolboxProxyUrl;
 import io.daytona.api.client.model.TraceSpan;
+import io.daytona.api.client.model.UpdateSandboxDegradedReasonDto;
 import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
 import io.daytona.api.client.model.UpdateSandboxStateDto;
 import io.daytona.api.client.model.Url;
@@ -655,6 +656,20 @@ public class SandboxApiTest {
         Boolean isPublic = null;
         String xDaytonaOrganizationID = null;
         Sandbox response = api.updatePublicStatus(sandboxIdOrName, isPublic, xDaytonaOrganizationID);
+        // TODO: test validations
+    }
+
+    /**
+     * Update sandbox degraded reason
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void updateSandboxDegradedReasonTest() throws ApiException {
+        String sandboxId = null;
+        UpdateSandboxDegradedReasonDto updateSandboxDegradedReasonDto = null;
+        String xDaytonaOrganizationID = null;
+        api.updateSandboxDegradedReason(sandboxId, updateSandboxDegradedReasonDto, xDaytonaOrganizationID);
         // TODO: test validations
     }
 

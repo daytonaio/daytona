@@ -23,6 +23,8 @@ Represents a Daytona Sandbox.
 - `computerUse` _ComputerUse_ - Computer use operations interface for desktop automation
 - `cpu` _number_ - Number of CPUs allocated to the Sandbox
 - `createdAt?` _string_ - When the Sandbox was created
+- `degradedReason?` _string_ - Reason the Sandbox is degraded (e.g. file-descriptor exhaustion) while
+    still running (not returned by list results; call `refreshData()` on each item to populate)
 - `disk` _number_ - Amount of disk space allocated to the Sandbox in GiB
 - `env?` _Record\<string, string\>_ - Environment variables set in the Sandbox
     (not returned by list results; call `refreshData()` on each item to populate)

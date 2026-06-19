@@ -66,6 +66,8 @@ import { WithInstrumentation } from './utils/otel.decorator'
  * @property {SandboxState} state - Current state of the Sandbox (e.g., "started", "stopped")
  * @property {string} [errorReason] - Error message if Sandbox is in error state
  * @property {boolean} [recoverable] - Whether the Sandbox error is recoverable.
+ * @property {string} [degradedReason] - Reason the Sandbox is degraded (e.g. file-descriptor exhaustion) while
+ * still running (not returned by list results; call `refreshData()` on each item to populate)
  * @property {SandboxBackupStateEnum} [backupState] - Current state of Sandbox backup
  * @property {string} [backupCreatedAt] - When the backup was created (not returned by list results;
  * call `refreshData()` on each item to populate)
@@ -111,6 +113,7 @@ export class Sandbox {
   public state?: SandboxState
   public errorReason?: string
   public recoverable?: boolean
+  public degradedReason?: string
   public backupState?: SandboxBackupStateEnum
   public backupCreatedAt?: string
   public autoStopInterval?: number
@@ -950,6 +953,7 @@ export class Sandbox {
       this.volumes = sandboxDto.volumes
       this.buildInfo = sandboxDto.buildInfo
       this.backupCreatedAt = sandboxDto.backupCreatedAt
+      this.degradedReason = sandboxDto.degradedReason
     }
   }
 

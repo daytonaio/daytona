@@ -75,6 +75,9 @@ module DaytonaApiClient
     # Whether the sandbox error is recoverable.
     attr_accessor :recoverable
 
+    # Reason the sandbox is currently degraded (e.g. file-descriptor exhaustion). Set by the runner while the condition persists and cleared automatically when it resolves.
+    attr_accessor :degraded_reason
+
     # The state of the backup
     attr_accessor :backup_state
 
@@ -165,6 +168,7 @@ module DaytonaApiClient
         :'desired_state' => :'desiredState',
         :'error_reason' => :'errorReason',
         :'recoverable' => :'recoverable',
+        :'degraded_reason' => :'degradedReason',
         :'backup_state' => :'backupState',
         :'backup_created_at' => :'backupCreatedAt',
         :'auto_stop_interval' => :'autoStopInterval',
@@ -216,6 +220,7 @@ module DaytonaApiClient
         :'desired_state' => :'SandboxDesiredState',
         :'error_reason' => :'String',
         :'recoverable' => :'Boolean',
+        :'degraded_reason' => :'String',
         :'backup_state' => :'String',
         :'backup_created_at' => :'String',
         :'auto_stop_interval' => :'Float',
@@ -364,6 +369,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'recoverable')
         self.recoverable = attributes[:'recoverable']
+      end
+
+      if attributes.key?(:'degraded_reason')
+        self.degraded_reason = attributes[:'degraded_reason']
       end
 
       if attributes.key?(:'backup_state')
@@ -705,6 +714,7 @@ module DaytonaApiClient
           desired_state == o.desired_state &&
           error_reason == o.error_reason &&
           recoverable == o.recoverable &&
+          degraded_reason == o.degraded_reason &&
           backup_state == o.backup_state &&
           backup_created_at == o.backup_created_at &&
           auto_stop_interval == o.auto_stop_interval &&
@@ -731,7 +741,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, gpu_type, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, gpu_type, memory, disk, state, desired_state, error_reason, recoverable, degraded_reason, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

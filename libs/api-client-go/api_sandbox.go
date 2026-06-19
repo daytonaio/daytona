@@ -557,6 +557,18 @@ type SandboxAPI interface {
 	UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*Sandbox, *http.Response, error)
 
 	/*
+	UpdateSandboxDegradedReason Update sandbox degraded reason
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIUpdateSandboxDegradedReasonRequest
+	*/
+	UpdateSandboxDegradedReason(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxDegradedReasonRequest
+
+	// UpdateSandboxDegradedReasonExecute executes the request
+	UpdateSandboxDegradedReasonExecute(r SandboxAPIUpdateSandboxDegradedReasonRequest) (*http.Response, error)
+
+	/*
 	UpdateSandboxState Update sandbox state
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -5767,6 +5779,117 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIUpdateSandboxDegradedReasonRequest struct {
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxId string
+	updateSandboxDegradedReasonDto *UpdateSandboxDegradedReasonDto
+	xDaytonaOrganizationID *string
+}
+
+func (r SandboxAPIUpdateSandboxDegradedReasonRequest) UpdateSandboxDegradedReasonDto(updateSandboxDegradedReasonDto UpdateSandboxDegradedReasonDto) SandboxAPIUpdateSandboxDegradedReasonRequest {
+	r.updateSandboxDegradedReasonDto = &updateSandboxDegradedReasonDto
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIUpdateSandboxDegradedReasonRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIUpdateSandboxDegradedReasonRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIUpdateSandboxDegradedReasonRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateSandboxDegradedReasonExecute(r)
+}
+
+/*
+UpdateSandboxDegradedReason Update sandbox degraded reason
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return SandboxAPIUpdateSandboxDegradedReasonRequest
+*/
+func (a *SandboxAPIService) UpdateSandboxDegradedReason(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxDegradedReasonRequest {
+	return SandboxAPIUpdateSandboxDegradedReasonRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxId: sandboxId,
+	}
+}
+
+// Execute executes the request
+func (a *SandboxAPIService) UpdateSandboxDegradedReasonExecute(r SandboxAPIUpdateSandboxDegradedReasonRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.UpdateSandboxDegradedReason")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/degraded-reason"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateSandboxDegradedReasonDto == nil {
+		return nil, reportError("updateSandboxDegradedReasonDto is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.updateSandboxDegradedReasonDto
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type SandboxAPIUpdateSandboxStateRequest struct {

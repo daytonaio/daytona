@@ -116,6 +116,9 @@ export class Sandbox {
   @Column({ default: false, type: 'boolean' })
   recoverable = false
 
+  @Column({ nullable: true, type: 'text' })
+  degradedReason?: string | null
+
   @Column({
     type: 'jsonb',
     default: {},
@@ -456,6 +459,10 @@ export class Sandbox {
       isApiRecoverableError(this.errorReason)
     ) {
       changes.recoverable = true
+    }
+
+    if (this.state !== SandboxState.STARTED && this.degradedReason != null) {
+      changes.degradedReason = null
     }
 
     return changes
