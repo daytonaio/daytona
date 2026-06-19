@@ -53,6 +53,8 @@ jobs:
             # sdk-typescript is published by its own job; without this flag
             # opencode-plugin's publish would re-publish it via nx dependsOn
             exclude-task-deps: 'true'
+          - name: Pi Extension
+            projects: pi-extension
           - name: Analytics API Client
             projects: analytics-api-client
           - name: Billing API Client
