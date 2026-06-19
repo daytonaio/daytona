@@ -1,18 +1,18 @@
 ---
-title: Customer Managed Compute
+title: Bring Your Own Compute
 description: Bring your own compute (BYOC) infrastructure to provision and scale Daytona sandboxes.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
-import CustomerManagedComputeDiagram from '@components/CustomerManagedComputeDiagram.astro'
+import BringYourOwnCompute from '@components/BringYourOwnComputeDiagram.astro'
 
-Customer Managed Compute enables you to run sandbox workloads on your own infrastructure while using Daytona's control plane to manage them. Daytona uses regions for grouping runner nodes: instances running the sandbox workloads. Each sandbox is assigned to a single region.
+Bring Your Own Compute enables you to run sandbox workloads on your own infrastructure while using Daytona's control plane to manage them.
 
 Daytona provides two [built-in regions](/docs/en/regions) (**US** and **EU**) for shared compute resources and handling provisioning, maintenance, monitoring, and scaling on your behalf.
 
 You can define one or more [custom regions](#custom-regions) and attach your own runner nodes. Custom regions can also include a region-specific sandbox proxy service and snapshot manager service.
 
-<CustomerManagedComputeDiagram />
+<BringYourOwnCompute />
 
 ## Custom regions
 
@@ -22,18 +22,16 @@ Additionally, custom regions have no limits applied for concurrent resource usag
 
 ### Create a custom region
 
-Daytona provides methods to create a custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/POST/regions).
+Daytona provides methods to create a custom region.
 
-1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
-2. Click the **Create Region** button
+1. Navigate to [Daytona Regions ↗](https://app.daytona.io/dashboard/regions)
+2. Click **Create Region**
 3. Enter the **region name**, **proxy URL**, **SSH gateway URL**, and **snapshot manager URL**
-
-- **Region name**: a unique identifier for your region; must contain only letters, numbers, underscores, periods, and hyphens
-- **Proxy URL** (optional): the URL of the proxy service that routes traffic to sandboxes in this region
-- **SSH gateway URL** (optional): the URL of the SSH gateway that handles SSH connections to sandboxes in this region
-- **Snapshot manager URL** (optional): the URL of the snapshot manager that handles storage and retrieval of snapshots in this region
-
-4. Click **Create** to create the region
+   - **Region name**: a unique identifier; must contain only letters, numbers, underscores, periods, and hyphens
+   - **Proxy URL** (optional): the URL of the proxy service that routes traffic to sandboxes
+   - **SSH gateway URL** (optional): the URL of the SSH gateway that handles SSH connections to sandboxes
+   - **Snapshot manager URL** (optional): the URL of the snapshot manager that handles storage and retrieval
+4. Click **Create**
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -56,14 +54,13 @@ curl https://app.daytona.io/api/regions \
 
 ### List custom regions
 
-Daytona provides methods to list all available regions for your organization using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/GET/regions).
+Daytona provides methods to list all available regions for your organization.
 
-1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+1. Navigate to [Daytona Regions ↗](https://app.daytona.io/dashboard/regions)
 2. The list of regions is displayed in the **Regions** table with the following columns:
-
-- **Name**: the name of the region
-- **ID**: the ID of the region
-- **Created**: the date and time the region was created
+   - **Name**: the name of the region
+   - **ID**: the ID of the region
+   - **Created**: the date and time the region was created
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -78,16 +75,15 @@ curl https://app.daytona.io/api/regions \
 
 ### Get a custom region
 
-Daytona provides methods to get the details of a specific region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/GET/regions/{id}).
+Daytona provides methods to get the details of a specific region.
 
-1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+1. Navigate to [Daytona Regions ↗](https://app.daytona.io/dashboard/regions)
 2. Click the region you want to get the details of
 3. The region details are displayed in the **Region Details** panel with the following information:
-
-- **Name**: the name of the region
-- **ID**: the ID of the region
-- **Created**: the date and time the region was created
-- **URLs**: the URLs of the region's proxy, SSH gateway, and snapshot manager services
+   - **Name**: the name of the region
+   - **ID**: the ID of the region
+   - **Created**: the date and time the region was created
+   - **URLs**: the URLs of the region's proxy, SSH gateway, and snapshot manager services
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -102,18 +98,17 @@ curl https://app.daytona.io/api/regions/{regionId} \
 
 ### Update a custom region
 
-Daytona provides methods to update the configuration of an existing custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/PATCH/regions/{id}).
+Daytona provides methods to update the configuration of an existing custom region.
 
-1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+1. Navigate to [Daytona Regions ↗](https://app.daytona.io/dashboard/regions)
 2. Click the region you want to update the configuration of
 3. Click the three dots menu (**⋮**) next to the region and select the **Edit** icon
 4. Enter the new **proxy URL**, **SSH gateway URL**, and **snapshot manager URL**
+    - **Proxy URL** (optional): the new URL of the custom proxy
+    - **SSH gateway URL** (optional): the new URL of the custom SSH gateway
+    - **Snapshot manager URL** (optional): the new URL of the custom snapshot manager
 
-- **Proxy URL** (optional): the new URL of the custom proxy
-- **SSH gateway URL** (optional): the new URL of the custom SSH gateway
-- **Snapshot manager URL** (optional): the new URL of the custom snapshot manager
-
-5. Click **Update** to update the region configuration
+5. Click **Update**
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -135,9 +130,9 @@ curl https://app.daytona.io/api/regions/{regionId} \
 
 ### Delete a custom region
 
-Daytona provides methods to delete a custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/DELETE/regions/{id}). Regions that have runners assigned to them cannot be deleted.
+Daytona provides methods to delete a custom region. Regions that have runners assigned to them cannot be deleted.
 
-1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+1. Navigate to [Daytona Regions ↗](https://app.daytona.io/dashboard/regions)
 2. Click the region you want to delete
 3. Click the three dots menu (**⋮**) next to the region and select **Delete**
 4. Confirm the deletion
@@ -156,7 +151,7 @@ curl https://app.daytona.io/api/regions/{regionId} \
 
 ## Deployments
 
-Daytona provides official [Terraform modules](#terraform) and [Helm charts](#helm-charts) for provisioning and operating custom regions with your own compute infrastructure.
+Daytona provides official Terraform modules and Helm charts for provisioning and operating custom regions with your own compute infrastructure.
 
 ### Terraform
 

@@ -840,9 +840,9 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/customer-managed-compute', locale),
-          label: t('sidebarconfig.customerManagedCompute'),
-          description: t('sidebarconfig.customerManagedComputeDescription'),
+          href: localizePath('/docs/bring-your-own-compute', locale),
+          label: t('sidebarconfig.bringYourOwnCompute'),
+          description: t('sidebarconfig.bringYourOwnComputeDescription'),
           disablePagination: true,
           attrs: {
             icon: 'computer.svg',
