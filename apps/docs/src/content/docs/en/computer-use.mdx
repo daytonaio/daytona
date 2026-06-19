@@ -9,10 +9,10 @@ Computer Use enables programmatic control of desktop environments within sandbox
 
 Computer Use and [VNC](/docs/en/vnc-access) work together to enable both manual and automated desktop interactions. VNC provides the visual interface for users to manually interact with the desktop, while Computer Use provides the programmatic API for AI agents to automate operations.
 
-Computer Use is available for **Linux**. **Windows** and **macOS** support is currently in private alpha.
+Computer Use is available for **Linux** and **Windows**. **macOS** support is currently in private alpha.
 
-:::caution[Private Alpha]
-Computer Use for macOS and Windows is currently in private alpha and requires access. To request access, fill out the [Windows](https://docs.google.com/forms/d/e/1FAIpQLSfoK-77-VpfsMubw8F4f1opCxIL1AyJUgnM0ONYup5hZ0RTvQ/viewform?usp=dialog) or [macOS](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing&ouid=103304973264148733944) access request form. Our team will review your request and reach out with setup instructions.
+:::note[macOS access]
+Computer Use for macOS is currently in private alpha and requires access. To request access, fill out the [macOS access request form](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing&ouid=103304973264148733944). Our team will review your request and reach out with setup instructions.
 :::
 
 - **GUI application testing**: automate interactions with native applications, click buttons, fill forms, and validate UI behavior
@@ -1788,7 +1788,7 @@ from daytona import ScreenshotRegion, ScreenshotOptions
 region = ScreenshotRegion(x=0, y=0, width=800, height=600)
 screenshot = sandbox.computer_use.screenshot.take_compressed_region(
     region,
-    ScreenshotOptions(format="webp", quality=80, show_cursor=True)
+    ScreenshotOptions(format="jpeg", quality=80, show_cursor=True)
 )
 print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```
@@ -1799,7 +1799,7 @@ print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```typescript
 const region = { x: 0, y: 0, width: 800, height: 600 };
 const screenshot = await sandbox.computerUse.screenshot.takeCompressedRegion(region, {
-  format: 'webp',
+  format: 'jpeg',
   quality: 80,
   showCursor: true
 });
@@ -1813,7 +1813,7 @@ console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
 region = Daytona::ComputerUse::ScreenshotRegion.new(x: 0, y: 0, width: 800, height: 600)
 screenshot = sandbox.computer_use.screenshot.take_compressed_region(
   region: region,
-  options: Daytona::ComputerUse::ScreenshotOptions.new(format: "webp", quality: 80, show_cursor: true)
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: "jpeg", quality: 80, show_cursor: true)
 )
 puts "Compressed size: #{screenshot.size_bytes} bytes"
 ```
