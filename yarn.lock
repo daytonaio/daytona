@@ -4628,26 +4628,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@earendil-works/pi-agent-core@npm:^0.76.0":
-  version: 0.76.0
-  resolution: "@earendil-works/pi-agent-core@npm:0.76.0"
+"@earendil-works/pi-agent-core@npm:^0.79.0":
+  version: 0.79.8
+  resolution: "@earendil-works/pi-agent-core@npm:0.79.8"
   dependencies:
-    "@earendil-works/pi-ai": "npm:^0.76.0"
+    "@earendil-works/pi-ai": "npm:^0.79.8"
     ignore: "npm:7.0.5"
     typebox: "npm:1.1.38"
     yaml: "npm:2.9.0"
-  checksum: 10c0/bf0c433bd28a1124374606bd5aa9c6833ee5073a68b9050cc9b61d54d244dd587c0e97513df03cf29a7f890010f9ad4c78ab4fa5acbfbeeb05b04a04507d4f17
+  checksum: 10c0/d43e2b1391ba096f51caafdfa56e723fccf7aa0a9ac4d123faa59b66c58831afc640db8dfe62772eb9447716fdde8fa4ee32c9957882df746f0aa21c08143545
   languageName: node
   linkType: hard
 
-"@earendil-works/pi-ai@npm:^0.76.0":
-  version: 0.76.0
-  resolution: "@earendil-works/pi-ai@npm:0.76.0"
+"@earendil-works/pi-ai@npm:^0.79.0, @earendil-works/pi-ai@npm:^0.79.8":
+  version: 0.79.8
+  resolution: "@earendil-works/pi-ai@npm:0.79.8"
   dependencies:
     "@anthropic-ai/sdk": "npm:0.91.1"
     "@aws-sdk/client-bedrock-runtime": "npm:3.1048.0"
     "@google/genai": "npm:1.52.0"
-    "@mistralai/mistralai": "npm:2.2.1"
+    "@mistralai/mistralai": "npm:2.2.6"
+    "@opentelemetry/api": "npm:1.9.0"
     "@smithy/node-http-handler": "npm:4.7.3"
     http-proxy-agent: "npm:7.0.2"
     https-proxy-agent: "npm:7.0.6"
@@ -4656,18 +4657,18 @@ __metadata:
     typebox: "npm:1.1.38"
   bin:
     pi-ai: dist/cli.js
-  checksum: 10c0/e00280e23a9013d94e36aedcc9a11cb694c698e937699c2a8e6ebf71b93f8f2b4ba923f98888c6ec810fc7d838d0c13b2d78def6b68578ea0eef53f57b466d3a
+  checksum: 10c0/b05b346bf7a6cbe0dd64e756fd643c8b6343d489e4ff263f65e7b0f83c27193a55a728d94f0876157f6a80a8dfe64b5f98896a7e2767e88064d2b1536e6e66bc
   languageName: node
   linkType: hard
 
-"@earendil-works/pi-coding-agent@npm:^0.76.0":
-  version: 0.76.0
-  resolution: "@earendil-works/pi-coding-agent@npm:0.76.0"
+"@earendil-works/pi-coding-agent@npm:^0.79.0":
+  version: 0.79.0
+  resolution: "@earendil-works/pi-coding-agent@npm:0.79.0"
   dependencies:
-    "@earendil-works/pi-agent-core": "npm:^0.76.0"
-    "@earendil-works/pi-ai": "npm:^0.76.0"
-    "@earendil-works/pi-tui": "npm:^0.76.0"
-    "@mariozechner/clipboard": "npm:0.3.6"
+    "@earendil-works/pi-agent-core": "npm:^0.79.0"
+    "@earendil-works/pi-ai": "npm:^0.79.0"
+    "@earendil-works/pi-tui": "npm:^0.79.0"
+    "@mariozechner/clipboard": "npm:0.3.9"
     "@silvia-odwyer/photon-node": "npm:0.3.4"
     chalk: "npm:5.6.2"
     cross-spawn: "npm:7.0.6"
@@ -4687,17 +4688,17 @@ __metadata:
       optional: true
   bin:
     pi: dist/cli.js
-  checksum: 10c0/2d741a64850582457283582e8462a4c00f86215701b24edde37d751517615c6e0134ca47c468dcd9a0b6bdc8ef30dc335b3a84223e768722b926a489ecd0efdb
+  checksum: 10c0/232ffee363f6be1cff919ef5f151ba72975dea07e54653225cb9caf34bfdb22073eab47199cffc6140be55ab6a498a1ff7712bf942adaf9955a7414082928858
   languageName: node
   linkType: hard
 
-"@earendil-works/pi-tui@npm:^0.76.0":
-  version: 0.76.0
-  resolution: "@earendil-works/pi-tui@npm:0.76.0"
+"@earendil-works/pi-tui@npm:^0.79.0":
+  version: 0.79.8
+  resolution: "@earendil-works/pi-tui@npm:0.79.8"
   dependencies:
     get-east-asian-width: "npm:1.6.0"
-    marked: "npm:15.0.12"
-  checksum: 10c0/9bce9835e0f7f553ae723dfe78ba11e47a9050f7a81577115afec5aba610896dceb1e13d4e6f5d6eeae867619fc799c82f79f03ea6868b528326bb601a85d5ed
+    marked: "npm:18.0.5"
+  checksum: 10c0/9f02edd0791c81b187ea0405f06beeefa1e23ef610f722a5606ad754dd19aa4a5f3c03828991fb365c9ff4ecf5200af8b96c3611ee10fc7551ba0882afdf1178
   languageName: node
   linkType: hard
 
@@ -7663,90 +7664,90 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-darwin-arm64@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-darwin-arm64@npm:0.3.6"
+"@mariozechner/clipboard-darwin-arm64@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-darwin-arm64@npm:0.3.9"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-darwin-universal@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-darwin-universal@npm:0.3.6"
+"@mariozechner/clipboard-darwin-universal@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-darwin-universal@npm:0.3.9"
   conditions: os=darwin
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-darwin-x64@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-darwin-x64@npm:0.3.6"
+"@mariozechner/clipboard-darwin-x64@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-darwin-x64@npm:0.3.9"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-linux-arm64-gnu@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-linux-arm64-gnu@npm:0.3.6"
+"@mariozechner/clipboard-linux-arm64-gnu@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-linux-arm64-gnu@npm:0.3.9"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-linux-arm64-musl@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-linux-arm64-musl@npm:0.3.6"
+"@mariozechner/clipboard-linux-arm64-musl@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-linux-arm64-musl@npm:0.3.9"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-linux-riscv64-gnu@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-linux-riscv64-gnu@npm:0.3.6"
+"@mariozechner/clipboard-linux-riscv64-gnu@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-linux-riscv64-gnu@npm:0.3.9"
   conditions: os=linux & cpu=riscv64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-linux-x64-gnu@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-linux-x64-gnu@npm:0.3.6"
+"@mariozechner/clipboard-linux-x64-gnu@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-linux-x64-gnu@npm:0.3.9"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-linux-x64-musl@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-linux-x64-musl@npm:0.3.6"
+"@mariozechner/clipboard-linux-x64-musl@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-linux-x64-musl@npm:0.3.9"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-win32-arm64-msvc@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-win32-arm64-msvc@npm:0.3.6"
+"@mariozechner/clipboard-win32-arm64-msvc@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-win32-arm64-msvc@npm:0.3.9"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard-win32-x64-msvc@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard-win32-x64-msvc@npm:0.3.6"
+"@mariozechner/clipboard-win32-x64-msvc@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard-win32-x64-msvc@npm:0.3.9"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@mariozechner/clipboard@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@mariozechner/clipboard@npm:0.3.6"
+"@mariozechner/clipboard@npm:0.3.9":
+  version: 0.3.9
+  resolution: "@mariozechner/clipboard@npm:0.3.9"
   dependencies:
-    "@mariozechner/clipboard-darwin-arm64": "npm:0.3.6"
-    "@mariozechner/clipboard-darwin-universal": "npm:0.3.6"
-    "@mariozechner/clipboard-darwin-x64": "npm:0.3.6"
-    "@mariozechner/clipboard-linux-arm64-gnu": "npm:0.3.6"
-    "@mariozechner/clipboard-linux-arm64-musl": "npm:0.3.6"
-    "@mariozechner/clipboard-linux-riscv64-gnu": "npm:0.3.6"
-    "@mariozechner/clipboard-linux-x64-gnu": "npm:0.3.6"
-    "@mariozechner/clipboard-linux-x64-musl": "npm:0.3.6"
-    "@mariozechner/clipboard-win32-arm64-msvc": "npm:0.3.6"
-    "@mariozechner/clipboard-win32-x64-msvc": "npm:0.3.6"
+    "@mariozechner/clipboard-darwin-arm64": "npm:0.3.9"
+    "@mariozechner/clipboard-darwin-universal": "npm:0.3.9"
+    "@mariozechner/clipboard-darwin-x64": "npm:0.3.9"
+    "@mariozechner/clipboard-linux-arm64-gnu": "npm:0.3.9"
+    "@mariozechner/clipboard-linux-arm64-musl": "npm:0.3.9"
+    "@mariozechner/clipboard-linux-riscv64-gnu": "npm:0.3.9"
+    "@mariozechner/clipboard-linux-x64-gnu": "npm:0.3.9"
+    "@mariozechner/clipboard-linux-x64-musl": "npm:0.3.9"
+    "@mariozechner/clipboard-win32-arm64-msvc": "npm:0.3.9"
+    "@mariozechner/clipboard-win32-x64-msvc": "npm:0.3.9"
   dependenciesMeta:
     "@mariozechner/clipboard-darwin-arm64":
       optional: true
@@ -7768,7 +7769,7 @@ __metadata:
       optional: true
     "@mariozechner/clipboard-win32-x64-msvc":
       optional: true
-  checksum: 10c0/b7841a470dc87f4abcb0f8039b9dc984f031c86436735110476bc2a7d5fe777da30e1f6f324b257b3e9b81e4aa6e1a0b71c192f48b7d20ef889e12b15487c2ad
+  checksum: 10c0/088f48d4aae6cd7c5f3169fe3fc0c9b26e494d5640b970a623b31faf5da7cc62332b7415eee7a8d434807de3e73b92671cc3b28fb6e80b420dfa80f4c2211f62
   languageName: node
   linkType: hard
 
@@ -7824,14 +7825,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mistralai/mistralai@npm:2.2.1":
-  version: 2.2.1
-  resolution: "@mistralai/mistralai@npm:2.2.1"
+"@mistralai/mistralai@npm:2.2.6":
+  version: 2.2.6
+  resolution: "@mistralai/mistralai@npm:2.2.6"
   dependencies:
+    "@opentelemetry/semantic-conventions": "npm:^1.40.0"
     ws: "npm:^8.18.0"
     zod: "npm:^3.25.0 || ^4.0.0"
     zod-to-json-schema: "npm:^3.25.0"
-  checksum: 10c0/131d218192dde76c38739d498d0b9a5944eb0bacf0c832ed812961e7f366f527de33942bb3274d2be15132a4834a7f57ef2a315e4ee95ad9a050b79d76300535
+  peerDependencies:
+    "@opentelemetry/api": ^1.9.0
+  peerDependenciesMeta:
+    "@opentelemetry/api":
+      optional: true
+  checksum: 10c0/056efabcbb8a6dc0d14a529fef92d021df0f6e485f2ef9786fbfd95a5c70f1359d1b4eb0aee727ad6e76195a0d158808d97d68a367431226db788f8c6863369d
   languageName: node
   linkType: hard
 
@@ -10092,7 +10099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.3.0, @opentelemetry/api@npm:^1.9.0":
+"@opentelemetry/api@npm:1.9.0, @opentelemetry/api@npm:^1.3.0, @opentelemetry/api@npm:^1.9.0":
   version: 1.9.0
   resolution: "@opentelemetry/api@npm:1.9.0"
   checksum: 10c0/9aae2fe6e8a3a3eeb6c1fdef78e1939cf05a0f37f8a4fae4d6bf2e09eb1e06f966ece85805626e01ba5fab48072b94f19b835449e58b6d26720ee19a58298add
@@ -22440,7 +22447,7 @@ __metadata:
     "@docsearch/css": "npm:4.6.2"
     "@docsearch/react": "npm:4.6.2"
     "@dotenvx/dotenvx": "npm:^1.25.1"
-    "@earendil-works/pi-coding-agent": "npm:^0.76.0"
+    "@earendil-works/pi-coding-agent": "npm:^0.79.0"
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.3"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.2"
     "@eslint/js": "npm:^9.8.0"
@@ -31270,12 +31277,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:15.0.12":
-  version: 15.0.12
-  resolution: "marked@npm:15.0.12"
+"marked@npm:18.0.5":
+  version: 18.0.5
+  resolution: "marked@npm:18.0.5"
   bin:
     marked: bin/marked.js
-  checksum: 10c0/e09da211544b787ecfb25fed07af206060bf7cd6d9de6cb123f15c496a57f83b7aabea93340aaa94dae9c94e097ae129377cad6310abc16009590972e85f4212
+  checksum: 10c0/22763935a0a243c41851b010a086ea85a09951e379948b6aa629b6cecdcd66e3a5e8c4acac2f6b29c183c20609d3e5102495270207dfd5f4c46ddd773a4ddb9b
   languageName: node
   linkType: hard
 
