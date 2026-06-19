@@ -22,11 +22,12 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateSnapshotMutation } from '@/hooks/mutations/useCreateSnapshotMutation'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
+import { useAvailableRegionsQuery } from '@/hooks/queries/useRegionsQuery'
 import { useAvailableSandboxClasses } from '@/hooks/useAvailableSandboxClasses'
-import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { GPU_TYPE_LABELS } from '@/lib/gpu-types'
+import { EMPTY_REGIONS } from '@/lib/regions'
 import { imageNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import type { SnapshotDto } from '@daytona/api-client'
@@ -96,8 +97,10 @@ export const CreateSnapshotSheet = ({
 }) => {
   const [open, setOpen] = useState(false)
 
-  const { availableRegions: regions, loadingAvailableRegions: loadingRegions } = useRegions()
   const { selectedOrganization } = useSelectedOrganization()
+  const { data: regions = EMPTY_REGIONS, isLoading: loadingRegions } = useAvailableRegionsQuery(
+    selectedOrganization?.id,
+  )
   const { reset: resetCreateSnapshotMutation, ...createSnapshotMutation } = useCreateSnapshotMutation()
   const formRef = useRef<HTMLFormElement>(null)
   const { data: usageOverview } = useOrganizationUsageOverviewQuery({

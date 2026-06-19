@@ -71,6 +71,7 @@ interface RunnerTableProps {
   data: Runner[]
   regions: Region[]
   loading: boolean
+  activeRunnerId?: string
   isLoadingRunner: (runner: Runner) => boolean
   writePermitted: boolean
   deletePermitted: boolean
@@ -89,6 +90,7 @@ export function RunnerTable({
   data,
   regions,
   loading,
+  activeRunnerId,
   isLoadingRunner,
   writePermitted,
   deletePermitted,
@@ -260,8 +262,8 @@ export function RunnerTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className={cn('group/table-row', {
+                  data-selected={row.getIsSelected() || row.original.id === activeRunnerId ? true : undefined}
+                  className={cn('group/table-row transition-all', {
                     'opacity-50 pointer-events-none': isLoadingRunner(row.original),
                     'cursor-pointer hover:bg-muted/50': onRowClick,
                   })}

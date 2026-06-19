@@ -1,19 +1,14 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { CreateRegion, CreateRegionResponse } from '@daytona/api-client'
-import { useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
-import { z } from 'zod'
-import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
 import { CreateResourceButton } from '@/components/CreateResourceButton'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Sheet,
   SheetContent,
@@ -23,10 +18,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Spinner } from '@/components/ui/spinner'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
+import { useCreateRegionMutation } from '@/hooks/mutations/useCreateRegionMutation'
+import { useUpdateRegionMutation } from '@/hooks/mutations/useUpdateRegionMutation'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
 import { getMaskedToken } from '@/lib/utils'
+import { CreateRegionResponse, Region, UpdateRegion } from '@daytona/api-client'
+import { useForm } from '@tanstack/react-form'
+import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
+import { Ref, type ReactNode, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
 const REGION_NAME_REGEX = /^[a-zA-Z0-9._-]+$/
 
@@ -35,7 +39,13 @@ const optionalUrlSchema = z
   .trim()
   .refine((value) => value.length === 0 || z.string().url().safeParse(value).success, 'Must be a valid URL')
 
-const formSchema = z.object({
+const regionUrlsSchema = z.object({
+  proxyUrl: optionalUrlSchema,
+  sshGatewayUrl: optionalUrlSchema,
+  snapshotManagerUrl: optionalUrlSchema,
+})
+
+const createFormSchema = regionUrlsSchema.extend({
   name: z
     .string()
     .min(1, 'Region name is required')
@@ -43,12 +53,13 @@ const formSchema = z.object({
       (value) => REGION_NAME_REGEX.test(value),
       'Only letters, numbers, underscores, periods, and hyphens are allowed',
     ),
-  proxyUrl: optionalUrlSchema,
-  sshGatewayUrl: optionalUrlSchema,
-  snapshotManagerUrl: optionalUrlSchema,
 })
 
-type FormValues = z.infer<typeof formSchema>
+const editFormSchema = regionUrlsSchema.extend({
+  name: z.string(),
+})
+
+type FormValues = z.infer<typeof createFormSchema>
 
 const defaultValues: FormValues = {
   name: '',
@@ -57,11 +68,17 @@ const defaultValues: FormValues = {
   snapshotManagerUrl: '',
 }
 
-interface CreateRegionSheetProps {
-  onCreateRegion: (data: CreateRegion) => Promise<CreateRegionResponse | null>
-  writePermitted: boolean
-  loadingData: boolean
+type UpsertRegionSheetMode = 'create' | 'edit'
+
+interface UpsertRegionSheetProps {
+  className?: string
+  disabled?: boolean
+  trigger?: ReactNode | null
   ref?: Ref<{ open: () => void }>
+  mode?: UpsertRegionSheetMode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  region?: Region | null
 }
 
 const hasRegionCredentials = (region: CreateRegionResponse | null) => {
@@ -72,40 +89,84 @@ const hasRegionCredentials = (region: CreateRegionResponse | null) => {
   )
 }
 
-export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
-  onCreateRegion,
-  writePermitted,
-  loadingData,
+const getRegionUpdate = (value: FormValues, region: Region): UpdateRegion => {
+  const updateData: UpdateRegion = {}
+
+  const proxyUrlValue = value.proxyUrl.trim() || null
+  const sshGatewayUrlValue = value.sshGatewayUrl.trim() || null
+  const snapshotManagerUrlValue = value.snapshotManagerUrl.trim() || null
+
+  if (proxyUrlValue !== (region.proxyUrl || null)) {
+    updateData.proxyUrl = proxyUrlValue
+  }
+  if (sshGatewayUrlValue !== (region.sshGatewayUrl || null)) {
+    updateData.sshGatewayUrl = sshGatewayUrlValue
+  }
+  if (snapshotManagerUrlValue !== (region.snapshotManagerUrl || null)) {
+    updateData.snapshotManagerUrl = snapshotManagerUrlValue
+  }
+
+  return updateData
+}
+
+const hasRegionChanges = (value: FormValues, region: Region) => Object.keys(getRegionUpdate(value, region)).length > 0
+
+export const UpsertRegionSheet = ({
+  className,
+  disabled,
+  trigger,
   ref,
-}) => {
-  const [open, setOpen] = useState(false)
+  mode = 'create',
+  open,
+  onOpenChange,
+  region,
+}: UpsertRegionSheetProps) => {
+  const [internalOpen, setInternalOpen] = useState(false)
   const [createdRegion, setCreatedRegion] = useState<CreateRegionResponse | null>(null)
   const [isProxyApiKeyRevealed, setIsProxyApiKeyRevealed] = useState(false)
   const [isSshGatewayApiKeyRevealed, setIsSshGatewayApiKeyRevealed] = useState(false)
   const [isSnapshotManagerPasswordRevealed, setIsSnapshotManagerPasswordRevealed] = useState(false)
+
+  const isEditMode = mode === 'edit'
+  const isControlled = open !== undefined
+  const isOpen = open ?? internalOpen
+
   const formRef = useRef<HTMLFormElement>(null)
+  const { selectedOrganization } = useSelectedOrganization()
+  const { reset: resetCreateRegionMutation, ...createRegionMutation } = useCreateRegionMutation()
+  const { reset: resetUpdateRegionMutation, ...updateRegionMutation } = useUpdateRegionMutation()
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (!isControlled) {
+        setInternalOpen(nextOpen)
+      }
+      onOpenChange?.(nextOpen)
+    },
+    [isControlled, onOpenChange],
+  )
 
   useImperativeHandle(ref, () => ({
-    open: () => setOpen(true),
+    open: () => handleOpenChange(true),
   }))
 
-  const createRegionMutation = useMutation({
-    mutationFn: async (value: FormValues) => {
-      const createRegionData: CreateRegion = {
-        name: value.name.trim(),
-        proxyUrl: value.proxyUrl.trim() || null,
-        sshGatewayUrl: value.sshGatewayUrl.trim() || null,
-        snapshotManagerUrl: value.snapshotManagerUrl.trim() || null,
-      }
+  const getDefaultValues = useCallback((): FormValues => {
+    if (!isEditMode || !region) {
+      return defaultValues
+    }
 
-      return onCreateRegion(createRegionData)
-    },
-  })
+    return {
+      name: region.name,
+      proxyUrl: region.proxyUrl || '',
+      sshGatewayUrl: region.sshGatewayUrl || '',
+      snapshotManagerUrl: region.snapshotManagerUrl || '',
+    }
+  }, [isEditMode, region])
 
   const form = useForm({
-    defaultValues,
+    defaultValues: getDefaultValues(),
     validators: {
-      onSubmit: formSchema,
+      onSubmit: isEditMode ? editFormSchema : createFormSchema,
     },
     onSubmitInvalid: () => {
       const formEl = formRef.current
@@ -117,62 +178,107 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
       }
     },
     onSubmit: async ({ value }) => {
-      const region = await createRegionMutation.mutateAsync(value)
-
-      if (!region) {
+      if (!selectedOrganization?.id) {
+        toast.error(`Select an organization to ${isEditMode ? 'update' : 'create'} a region.`)
         return
       }
 
-      if (!hasRegionCredentials(region)) {
-        setOpen(false)
-        setCreatedRegion(null)
-      } else {
-        setCreatedRegion(region)
-      }
+      try {
+        if (isEditMode) {
+          if (!region) {
+            toast.error('No region selected for editing.')
+            return
+          }
 
-      resetForm(defaultValues)
+          const updateData = getRegionUpdate(value, region)
+          if (Object.keys(updateData).length === 0) {
+            return
+          }
+
+          await updateRegionMutation.mutateAsync({
+            regionId: region.id,
+            region: updateData,
+            organizationId: selectedOrganization.id,
+          })
+          toast.success('Region updated successfully')
+          handleOpenChange(false)
+          return
+        }
+
+        const createRegionData = {
+          name: value.name.trim(),
+          proxyUrl: value.proxyUrl.trim() || null,
+          sshGatewayUrl: value.sshGatewayUrl.trim() || null,
+          snapshotManagerUrl: value.snapshotManagerUrl.trim() || null,
+        }
+
+        const created = await createRegionMutation.mutateAsync({
+          region: createRegionData,
+          organizationId: selectedOrganization.id,
+        })
+        toast.success(`Creating region ${createRegionData.name}`)
+
+        if (hasRegionCredentials(created)) {
+          setCreatedRegion(created)
+          resetForm(defaultValues)
+          return
+        }
+
+        setCreatedRegion(null)
+        resetForm(defaultValues)
+        handleOpenChange(false)
+      } catch (error) {
+        handleApiError(error, `Failed to ${isEditMode ? 'update' : 'create'} region`)
+      }
     },
   })
   const { reset: resetForm } = form
-
-  const { reset: resetMutation } = createRegionMutation
 
   const resetState = useCallback(() => {
     setCreatedRegion(null)
     setIsProxyApiKeyRevealed(false)
     setIsSshGatewayApiKeyRevealed(false)
     setIsSnapshotManagerPasswordRevealed(false)
-    resetForm(defaultValues)
-    resetMutation()
-  }, [resetForm, resetMutation])
+    resetForm(getDefaultValues())
+    resetCreateRegionMutation()
+    resetUpdateRegionMutation()
+  }, [getDefaultValues, resetCreateRegionMutation, resetForm, resetUpdateRegionMutation])
 
   useEffect(() => {
-    if (open) {
+    if (isOpen) {
       resetState()
     }
-  }, [open, resetState])
+  }, [isOpen, resetState])
 
   const [copiedText, copyToClipboard] = useCopyToClipboard()
-
-  const showCredentials = useMemo(() => hasRegionCredentials(createdRegion), [createdRegion])
-
-  if (!writePermitted) {
-    return null
-  }
+  const showCredentials = useMemo(() => !isEditMode && hasRegionCredentials(createdRegion), [createdRegion, isEditMode])
+  const formId = isEditMode ? 'edit-region-form' : 'create-region-form'
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <CreateResourceButton resource="Region" disabled={loadingData} />
-      </SheetTrigger>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      {trigger === undefined ? (
+        <SheetTrigger asChild>
+          {isEditMode ? (
+            <Button variant="default" size="sm" disabled={disabled} className={className} title="Edit Region">
+              Edit Region
+            </Button>
+          ) : (
+            <CreateResourceButton resource="Region" disabled={disabled} className={className} title="Create Region" />
+          )}
+        </SheetTrigger>
+      ) : (
+        trigger
+      )}
 
       <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle>{createdRegion ? 'Region Created' : 'Create Region'}</SheetTitle>
+          <SheetTitle>{showCredentials ? 'Region Created' : isEditMode ? 'Edit Region' : 'Create Region'}</SheetTitle>
           <SheetDescription className="sr-only">
-            {!createdRegion
-              ? 'Add a new region for grouping runners and sandboxes.'
-              : "Save these credentials securely. You won't be able to see them again."}
+            {showCredentials
+              ? "Save these credentials securely. You won't be able to see them again."
+              : isEditMode
+                ? 'Update the region configuration.'
+                : 'Add a new region for grouping runners and sandboxes.'}
           </SheetDescription>
         </SheetHeader>
 
@@ -334,7 +440,7 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
             ) : (
               <form
                 ref={formRef}
-                id="create-region-form"
+                id={formId}
                 className="space-y-6"
                 onSubmit={(e) => {
                   e.preventDefault()
@@ -342,31 +448,34 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
                   form.handleSubmit()
                 }}
               >
-                <form.Field name="name">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Region Name</FieldLabel>
-                        <Input
-                          aria-invalid={isInvalid}
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="us-east-1"
-                        />
-                        <FieldDescription>
-                          Region name must contain only letters, numbers, underscores, periods, and hyphens.
-                        </FieldDescription>
-                        {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                </form.Field>
+                {!isEditMode && (
+                  <form.Field name="name">
+                    {(field) => {
+                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>Region Name</FieldLabel>
+                          <Input
+                            aria-invalid={isInvalid}
+                            autoComplete="off"
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="us-east-1"
+                          />
+                          <FieldDescription>
+                            Region name must contain only letters, numbers, underscores, periods, and hyphens.
+                          </FieldDescription>
+                          {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      )
+                    }}
+                  </form.Field>
+                )}
 
                 <form.Field name="proxyUrl">
                   {(field) => {
@@ -376,6 +485,7 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
                         <FieldLabel htmlFor={field.name}>Proxy URL</FieldLabel>
                         <Input
                           aria-invalid={isInvalid}
+                          autoComplete="off"
                           id={field.name}
                           name={field.name}
                           value={field.state.value}
@@ -400,6 +510,7 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
                         <FieldLabel htmlFor={field.name}>SSH gateway URL</FieldLabel>
                         <Input
                           aria-invalid={isInvalid}
+                          autoComplete="off"
                           id={field.name}
                           name={field.name}
                           value={field.state.value}
@@ -424,6 +535,7 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
                         <FieldLabel htmlFor={field.name}>Snapshot manager URL</FieldLabel>
                         <Input
                           aria-invalid={isInvalid}
+                          autoComplete="off"
                           id={field.name}
                           name={field.name}
                           value={field.state.value}
@@ -432,7 +544,9 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
                           placeholder="https://snapshot-manager.example.com"
                         />
                         <FieldDescription>
-                          (Optional) URL of the custom snapshot manager for this region.
+                          {isEditMode
+                            ? '(Optional) URL of the custom snapshot manager for this region. Cannot be changed if snapshots exist in this region.'
+                            : '(Optional) URL of the custom snapshot manager for this region.'}
                         </FieldDescription>
                         {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
                           <FieldError errors={field.state.meta.errors} />
@@ -447,18 +561,32 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
         </ScrollArea>
 
         <SheetFooter className="border-t border-border p-4 px-5">
-          <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+          <Button type="button" variant="secondary" onClick={() => handleOpenChange(false)}>
             {showCredentials ? 'Close' : 'Cancel'}
           </Button>
           {!showCredentials && (
             <form.Subscribe
-              selector={(state) => [state.canSubmit, state.isSubmitting]}
-              children={([canSubmit, isSubmitting]) => (
-                <Button type="submit" form="create-region-form" variant="default" disabled={!canSubmit || isSubmitting}>
-                  {isSubmitting && <Spinner />}
-                  Create
-                </Button>
-              )}
+              selector={(state) => [state.canSubmit, state.isSubmitting, state.values] as const}
+              children={([canSubmit, isSubmitting, values]) => {
+                const hasChanges = !isEditMode || !region || hasRegionChanges(values, region)
+
+                return (
+                  <Button
+                    type="submit"
+                    form={formId}
+                    variant="default"
+                    disabled={
+                      !canSubmit ||
+                      isSubmitting ||
+                      !hasChanges ||
+                      (isEditMode ? updateRegionMutation.isPending : createRegionMutation.isPending)
+                    }
+                  >
+                    {isSubmitting && <Spinner />}
+                    {isEditMode ? 'Save' : 'Create'}
+                  </Button>
+                )
+              }}
             />
           )}
         </SheetFooter>

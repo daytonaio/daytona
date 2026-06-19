@@ -14,9 +14,10 @@ import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { useApi } from '@/hooks/useApi'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import { useRegions } from '@/hooks/useRegions'
+import { useSharedRegionsQuery } from '@/hooks/queries/useRegionsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { EMPTY_REGIONS } from '@/lib/regions'
 import { Organization } from '@daytona/api-client'
 import { Building2, ChevronsUpDown, Copy, PlusCircle, SquareUserRound } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -71,7 +72,7 @@ export const OrganizationPicker: React.FC = () => {
 
   const { organizations, refreshOrganizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()
-  const { sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
+  const { data: regions = EMPTY_REGIONS, isLoading: loadingRegions } = useSharedRegionsQuery()
 
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)

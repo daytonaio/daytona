@@ -19,12 +19,13 @@ import { useUpdateOrganizationInvitationMutation } from '@/hooks/mutations/useUp
 import { useUpdateOrganizationMemberAccessMutation } from '@/hooks/mutations/useUpdateOrganizationMemberAccessMutation'
 import { useOrganizationInvitationsQuery } from '@/hooks/queries/useOrganizationInvitationsQuery'
 import { useOrganizationMembersQuery } from '@/hooks/queries/useOrganizationMembersQuery'
+import { useSharedRegionsQuery } from '@/hooks/queries/useRegionsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { usePendingMutationKeys } from '@/hooks/usePendingMutationKeys'
-import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { EMPTY_REGIONS } from '@/lib/regions'
 import {
   CreateOrganizationInvitationRoleEnum,
   type Organization,
@@ -59,7 +60,7 @@ const OrganizationMembers: React.FC = () => {
 
   const { organizationsApi } = useApi()
   const { refreshOrganizations } = useOrganizations()
-  const { sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
+  const { data: regions = EMPTY_REGIONS, isLoading: loadingRegions } = useSharedRegionsQuery()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
   const isPersonalOrganization = !!selectedOrganization?.personal
   const { data: organizationMembers = [], isLoading: loadingMembers } = useOrganizationMembersQuery(

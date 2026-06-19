@@ -84,6 +84,20 @@ export const queryKeys = {
     all: ['registries'] as const,
     list: (organizationId: string) => [...queryKeys.registries.all, organizationId, 'list'] as const,
   },
+  regions: {
+    all: ['regions'] as const,
+    shared: () => [...queryKeys.regions.all, 'shared'] as const,
+    available: (organizationId: string) => [...queryKeys.regions.all, organizationId, 'available'] as const,
+  },
+  runners: {
+    all: ['runners'] as const,
+    list: (organizationId: string, regionId?: string) => {
+      const base = [...queryKeys.runners.all, organizationId, 'list'] as const
+      if (!regionId) return base
+
+      return [...base, { regionId }] as const
+    },
+  },
   volumes: {
     all: ['volumes'] as const,
     list: (organizationId: string) => [...queryKeys.volumes.all, organizationId, 'list'] as const,

@@ -16,10 +16,11 @@ import {
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
+import { useSharedRegionsQuery } from '@/hooks/queries/useRegionsQuery'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { EMPTY_REGIONS } from '@/lib/regions'
 import { Ref, useId, useImperativeHandle, useState } from 'react'
 import { toast } from 'sonner'
 import { Spinner } from '../ui/spinner'
@@ -34,7 +35,7 @@ export type SetDefaultRegionDialogRef = {
 
 export const SetDefaultRegionDialog: React.FC<SetDefaultRegionDialogProps> = ({ ref }) => {
   const { refreshOrganizations } = useOrganizations()
-  const { sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
+  const { data: regions = EMPTY_REGIONS, isLoading: loadingRegions } = useSharedRegionsQuery()
   const { selectedOrganization } = useSelectedOrganization()
   const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
   const formId = useId()

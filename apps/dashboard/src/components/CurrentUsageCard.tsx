@@ -15,8 +15,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
+import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useConfig } from '@/hooks/useConfig'
-import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import { SandboxClass, type Organization, type RegionUsageOverview } from '@daytona/api-client'
@@ -26,8 +26,8 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react'
 
 export function CurrentUsageCard({ organizationTier }: { organizationTier?: { tier?: number | null } | null }) {
   const config = useConfig()
-  const { getRegionName } = useRegions()
   const { selectedOrganization } = useSelectedOrganization()
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
   const { data: usageOverview, ...usageOverviewQuery } = useOrganizationUsageOverviewQuery(
     {
       organizationId: selectedOrganization?.id || '',

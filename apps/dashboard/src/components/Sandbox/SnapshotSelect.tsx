@@ -8,9 +8,10 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { InputGroup, InputGroupAddon } from '@/components/ui/input-group'
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Spinner } from '@/components/ui/spinner'
+import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
-import { useRegions } from '@/hooks/useRegions'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import { SnapshotState, type SnapshotDto } from '@daytona/api-client'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -143,7 +144,8 @@ export function SnapshotSelect({
   const inputRef = useRef<HTMLInputElement>(null)
   const debouncedSearchValue = useDebouncedValue(searchValue, 300)
   const searchTerm = debouncedSearchValue.trim()
-  const { getRegionName } = useRegions()
+  const { selectedOrganization } = useSelectedOrganization()
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
 
   const {
     data: snapshotsData,

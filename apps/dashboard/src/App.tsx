@@ -51,7 +51,6 @@ import Logout from './pages/Logout'
 import NotFound from './pages/NotFound'
 
 import { ApiProvider } from './providers/ApiProvider'
-import { RegionsProvider } from './providers/RegionsProvider'
 import { SvixProvider } from './providers/SvixProvider'
 import { lazyRoutes } from './routes'
 
@@ -140,25 +139,23 @@ function DashboardOutlet() {
       <ApiProvider>
         <OrganizationsProvider>
           <SelectedOrganizationProvider>
-            <RegionsProvider>
-              <UserOrganizationInvitationsProvider>
-                <NotificationSocketProvider>
-                  <CommandPaletteProvider>
-                    <BannerProvider>
-                      <Dashboard>
-                        {isRouteLoading ? (
-                          <div className="flex min-h-screen w-full items-center justify-center bg-background p-6">
-                            <LoadingFallbackContent source="route-navigation" />
-                          </div>
-                        ) : (
-                          <Outlet />
-                        )}
-                      </Dashboard>
-                    </BannerProvider>
-                  </CommandPaletteProvider>
-                </NotificationSocketProvider>
-              </UserOrganizationInvitationsProvider>
-            </RegionsProvider>
+            <UserOrganizationInvitationsProvider>
+              <NotificationSocketProvider>
+                <CommandPaletteProvider>
+                  <BannerProvider>
+                    <Dashboard>
+                      {isRouteLoading ? (
+                        <div className="flex min-h-screen w-full items-center justify-center bg-background p-6">
+                          <LoadingFallbackContent source="route-navigation" />
+                        </div>
+                      ) : (
+                        <Outlet />
+                      )}
+                    </Dashboard>
+                  </BannerProvider>
+                </CommandPaletteProvider>
+              </NotificationSocketProvider>
+            </UserOrganizationInvitationsProvider>
           </SelectedOrganizationProvider>
         </OrganizationsProvider>
       </ApiProvider>

@@ -19,8 +19,8 @@ import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
 import { useDeleteOrganizationMutation } from '@/hooks/mutations/useDeleteOrganizationMutation'
 import { useLeaveOrganizationMutation } from '@/hooks/mutations/useLeaveOrganizationMutation'
+import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationUserRoleEnum } from '@daytona/api-client'
@@ -30,7 +30,7 @@ import { toast } from 'sonner'
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { getRegionName } = useRegions()
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
 
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()
