@@ -38,6 +38,7 @@ import { SnapshotService } from '../services/snapshot.service'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { parseDockerImage } from '../../common/utils/docker-image.util'
 import { getRunnerSandboxClass, isRegistryBasedSandboxClass } from '../utils/sandbox-class.util'
+import { isPendingCaptureSnapshot } from '../utils/persist-snapshot-from-sandbox.util'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -1194,6 +1195,20 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleSnapshotStatePending(snapshot: Snapshot): Promise<SyncState> {
+    // Capture records (snapshot-from-sandbox) have no imageName/buildInfo and
+    // are driven by the v0 background promise or the SNAPSHOT_SANDBOX job, not
+    // by the pull/build flow below — which would otherwise error them via
+    // parseDockerImage(''). Leave them alone until they exceed the capture
+    // timeout, then mark them ERROR (covers v0 promises lost to process
+    // restarts and vanished v2 jobs).
+    if (isPendingCaptureSnapshot(snapshot)) {
+      const timeoutMs = this.configService.getOrThrow('sandboxSnapshottingTimeoutMin') * 60 * 1000
+      if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
+        await this.updateSnapshotState(snapshot, SnapshotState.ERROR, 'Timeout creating snapshot from sandbox')
+      }
+      return DONT_SYNC_AGAIN
+    }
+
     let initialRunner: Runner | undefined = undefined
 
     if (!snapshot.initialRunnerId) {

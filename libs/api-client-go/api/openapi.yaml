@@ -2538,6 +2538,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Sandbox"
           description: Snapshot creation has been initiated
+        "409":
+          description: A snapshot with this name already exists for the organization
       security:
       - bearer: []
       - oauth2:

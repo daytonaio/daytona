@@ -59,7 +59,10 @@ import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import {
-  persistSnapshotFromSandbox,
+  activateSnapshotFromSandbox,
+  createPendingSnapshotFromSandbox,
+  CreatePendingSnapshotFromSandboxParams,
+  failSnapshotFromSandbox,
   PersistSnapshotFromSandboxParams,
 } from '../utils/persist-snapshot-from-sandbox.util'
 import { getRunnerSandboxClass } from '../utils/sandbox-class.util'
@@ -405,8 +408,30 @@ export class SnapshotService {
     }
   }
 
-  async persistSnapshotFromSandbox(params: PersistSnapshotFromSandboxParams): Promise<Snapshot> {
-    return persistSnapshotFromSandbox(
+  async createPendingSnapshotFromSandbox(params: CreatePendingSnapshotFromSandboxParams): Promise<Snapshot> {
+    return createPendingSnapshotFromSandbox(
+      {
+        snapshotRepository: this.snapshotRepository,
+        snapshotRunnerRepository: this.snapshotRunnerRepository,
+        eventEmitter: this.eventEmitter,
+      },
+      params,
+    )
+  }
+
+  async activateSnapshotFromSandbox(params: PersistSnapshotFromSandboxParams): Promise<Snapshot | null> {
+    return activateSnapshotFromSandbox(
+      {
+        snapshotRepository: this.snapshotRepository,
+        snapshotRunnerRepository: this.snapshotRunnerRepository,
+        eventEmitter: this.eventEmitter,
+      },
+      params,
+    )
+  }
+
+  async failSnapshotFromSandbox(params: { organizationId: string; name: string; errorReason: string }): Promise<void> {
+    return failSnapshotFromSandbox(
       {
         snapshotRepository: this.snapshotRepository,
         snapshotRunnerRepository: this.snapshotRunnerRepository,
