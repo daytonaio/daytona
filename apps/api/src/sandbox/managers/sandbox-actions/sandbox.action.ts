@@ -12,6 +12,7 @@ import { SandboxState } from '../../enums/sandbox-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { SandboxConflictError } from '../../errors/sandbox-conflict.error'
 
 export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -45,18 +46,21 @@ export abstract class SandboxAction {
     const lockKey = getStateChangeLockKey(sandbox.id)
     const currentLockCode = await this.redisLockProvider.getCode(lockKey)
 
+    // Lost our lock: abort instead of returning. Callers create runner jobs right after the save,
+    // so a silent no-op would still fire them, duplicating containers and leaving a stale runnerId.
+    // Throwing makes that unreachable; syncInstanceState catches SandboxConflictError and breaks.
     if (currentLockCode === null) {
       this.logger.warn(
-        `no lock code found - state update action expired - skipping - sandboxId: ${sandbox.id} - state: ${state}`,
+        `no lock code found - state update action expired - aborting - sandboxId: ${sandbox.id} - state: ${state}`,
       )
-      return
+      throw new SandboxConflictError()
     }
 
     if (expectedLockCode.getCode() !== currentLockCode.getCode()) {
       this.logger.warn(
-        `lock code mismatch - state update action expired - skipping - sandboxId: ${sandbox.id} - state: ${state}`,
+        `lock code mismatch - state update action expired - aborting - sandboxId: ${sandbox.id} - state: ${state}`,
       )
-      return
+      throw new SandboxConflictError()
     }
 
     if (state !== SandboxState.ARCHIVED && !sandbox.pending) {
