@@ -1,4 +1,6 @@
-// Copyright Daytona Platforms Inc.
+//go:build linux
+
+// Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package recording
@@ -8,50 +10,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/google/uuid"
 )
-
-// validateLabel validates a user-provided label to prevent path injection
-// and ensure it's safe for use in a filename. Returns error if invalid.
-func validateLabel(label string) error {
-	const maxLabelLength = 100
-
-	// Trim whitespace for validation
-	trimmed := strings.TrimSpace(label)
-
-	// Check if label is empty after trimming
-	if trimmed == "" {
-		return ErrInvalidLabel
-	}
-
-	// Check length
-	if len(label) > maxLabelLength {
-		return ErrInvalidLabel
-	}
-
-	// Check for path separators (directory traversal)
-	if strings.Contains(label, "/") || strings.Contains(label, "\\") {
-		return ErrInvalidLabel
-	}
-
-	// Check for leading dots (hidden files)
-	if strings.HasPrefix(trimmed, ".") {
-		return ErrInvalidLabel
-	}
-
-	// Only allow safe characters: alphanumeric, spaces, dots, underscores, and hyphens
-	safePattern := regexp.MustCompile(`^[A-Za-z0-9.\s_-]+$`)
-	if !safePattern.MatchString(label) {
-		return ErrInvalidLabel
-	}
-
-	return nil
-}
 
 // StartRecording starts a new screen recording session
 func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
@@ -141,35 +104,51 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 	done := make(chan error, 1)
 
 	// Store active recording
-	s.activeRecordings.Set(id, &activeRecording{
+	active := &activeRecording{
 		recording: recording,
 		cmd:       cmd,
 		stdinPipe: stdinPipe,
 		done:      done,
-	})
+	}
+	s.activeRecordings.Set(id, active)
 
 	// Start a goroutine to wait for the process and handle unexpected exits.
 	// Reap (not Wait): we don't read stdout/stderr; ffmpeg output goes to a
 	// file via -y target, so no Go I/O goroutines to drain.
 	go func() {
 		exitCode, err := childreap.Reap(cmd)
-		done <- err // Signal the done channel with the result
 
-		// Atomically remove from active recordings if still there
-		if active, exists := s.activeRecordings.Pop(id); exists {
-			// childreap.Reap returns (exitCode, nil) for *exec.ExitError
-			// cases — unlike the original cmd.Wait, where non-zero exits
-			// surfaced as err != nil. We have to check both here so a
-			// crashed/killed ffmpeg (OOM, SIGKILL, corrupt input, etc.)
-			// still gets marked failed instead of silently retaining
-			// whatever status it had.
-			if err != nil || exitCode != 0 {
+		// childreap.Reap returns (exitCode, nil) for *exec.ExitError cases —
+		// unlike cmd.Wait, where non-zero exits surface as err != nil — so
+		// check both to catch a crashed/killed ffmpeg (OOM, SIGKILL, corrupt
+		// input, etc.).
+		if err != nil || exitCode != 0 {
+			// Unexpected exit (a graceful 'q' stop yields exit code 0 and the
+			// entry is already popped by StopRecording). Keep the entry
+			// visible as "failed" so list/stop/delete can report and clean it
+			// up instead of having it silently vanish. markFailed must happen
+			// before the done send so StopRecording observes the failure.
+			if active, exists := s.activeRecordings.Get(id); exists {
 				s.logger.Warn("Recording ffmpeg process exited unexpectedly",
 					"id", id, "exitCode", exitCode, "error", err)
-				active.recording.Status = "failed"
+				active.markFailed(time.Now())
 			}
+		} else {
+			// Clean exit outside StopRecording (e.g. external quit): drop the
+			// active entry; the finalized file on disk represents it.
+			s.activeRecordings.Pop(id)
 		}
+
+		done <- err // Signal the done channel with the result
 	}()
+
+	// Don't acknowledge the recording until ffmpeg has survived a short
+	// startup window: x11grab failures (no display, bad screen) kill ffmpeg
+	// within milliseconds, and returning success for a process that already
+	// died would hand the caller a recording that never captured a frame.
+	if err := s.confirmStartup(id, active, startupConfirmation); err != nil {
+		return nil, err
+	}
 
 	return recording, nil
 }

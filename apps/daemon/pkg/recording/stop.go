@@ -15,6 +15,16 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 		return nil, ErrRecordingNotFound
 	}
 
+	// ffmpeg already exited unexpectedly: report the failure instead of
+	// fabricating "completed". Re-insert the entry (Pop claimed it) so the
+	// failed recording stays visible until DeleteRecording removes it. Skip
+	// the quit/wait dance: the done value was already consumed or would be
+	// consumed exactly once by the stop that raced the failure.
+	if rec := active.snapshot(); rec.Status == "failed" {
+		s.activeRecordings.Set(id, active)
+		return &rec, nil
+	}
+
 	// Send 'q' to ffmpeg stdin for graceful shutdown
 	// This allows ffmpeg to properly finalize the video file
 	if active.stdinPipe != nil {
@@ -42,8 +52,18 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 		<-active.done
 	}
 
-	// Update recording metadata
+	// Re-check: the process may have died on its own while we waited. The
+	// wait goroutine marks failed before signalling done, so the snapshot is
+	// authoritative here.
+	if rec := active.snapshot(); rec.Status == "failed" {
+		s.activeRecordings.Set(id, active)
+		return &rec, nil
+	}
+
+	// Update recording metadata under the lock; a concurrent ListRecordings
+	// may still be reading this entry through a pointer it captured earlier.
 	now := time.Now()
+	active.mu.Lock()
 	active.recording.EndTime = &now
 	active.recording.Status = "completed"
 
@@ -55,8 +75,10 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 		size := fileInfo.Size()
 		active.recording.SizeBytes = &size
 	}
+	rec := *active.recording
+	active.mu.Unlock()
 
 	s.logger.Debug("Stopped recording", "id", id, "durationSeconds", duration)
 
-	return active.recording, nil
+	return &rec, nil
 }

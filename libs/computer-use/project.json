@@ -14,7 +14,7 @@
       "configurations": {
         "production": {}
       },
-      "dependsOn": ["build-amd64"],
+      "dependsOn": ["build-amd64", "build-windows-amd64"],
       "inputs": [
         "goProduction",
         "^goProduction",
@@ -40,6 +40,26 @@
         "sharedGlobals"
       ],
       "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64"],
+      "cache": true
+    },
+    "build-windows-amd64": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/main.go",
+        "outputPath": "dist/libs/computer-use-amd64.exe",
+        "env": {
+          "GOARCH": "amd64",
+          "GOOS": "windows",
+          "CGO_ENABLED": "0"
+        }
+      },
+      "inputs": [
+        "{projectRoot}/**/*.go",
+        "{projectRoot}/go.mod",
+        "{projectRoot}/go.sum",
+        "sharedGlobals"
+      ],
+      "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64.exe"],
       "cache": true
     },
     "format": {

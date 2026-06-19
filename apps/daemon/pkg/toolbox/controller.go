@@ -5,7 +5,6 @@ package toolbox
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/daytonaio/daemon/internal"
 	"github.com/gin-gonic/gin"
@@ -73,7 +72,7 @@ func (s *server) GetWorkDir(ctx *gin.Context) {
 //
 //	@id				GetUserHomeDir
 func (s *server) GetUserHomeDir(ctx *gin.Context) {
-	userHomeDir, err := os.UserHomeDir()
+	userHomeDir, err := getUserHomeDir()
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return

@@ -1,3 +1,5 @@
+//go:build linux
+
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
@@ -10,7 +12,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/daytonaio/daemon/pkg/childreap"
@@ -18,31 +19,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 )
-
-type pluginRef struct {
-	client *plugin.Client
-	impl   computeruse.IComputerUse
-	path   string
-}
-
-var ComputerUseHandshakeConfig = plugin.HandshakeConfig{
-	ProtocolVersion:  1,
-	MagicCookieKey:   "DAYTONA_COMPUTER_USE_PLUGIN",
-	MagicCookieValue: "daytona_computer_use",
-}
-
-var computerUse = &pluginRef{}
-
-// ComputerUseError represents a computer-use plugin error with context
-type ComputerUseError struct {
-	Type    string // "dependency", "system", "plugin"
-	Message string
-	Details string
-}
-
-func (e *ComputerUseError) Error() string {
-	return e.Message
-}
 
 // detectPluginError tries to execute the plugin binary directly to get detailed error information
 func detectPluginError(logger *slog.Logger, path string) *ComputerUseError {
@@ -251,9 +227,7 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 	pluginName := filepath.Base(path)
 	pluginBasePath := filepath.Dir(path)
 
-	if runtime.GOOS == "windows" && strings.HasSuffix(path, ".exe") {
-		pluginName = strings.TrimSuffix(pluginName, ".exe")
-	}
+	pluginName = strings.TrimSuffix(pluginName, ".exe")
 
 	// Pre-flight check: detect critical issues (missing shared libraries, wrong
 	// architecture, permission errors) before starting the go-plugin client.
