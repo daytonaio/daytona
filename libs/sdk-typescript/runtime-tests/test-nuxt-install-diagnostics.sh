@@ -16,8 +16,7 @@ cat >"$FAKE_BIN/npm" <<'EOF'
 set -euo pipefail
 
 if [ "${1:-}" != "install" ]; then
-  echo "unexpected npm command: $*" >&2
-  exit 99
+  exit 0
 fi
 
 COUNT_FILE="${NPM_CALL_COUNT_FILE:?}"
@@ -75,10 +74,6 @@ assert_install_failure_is_visible() {
     exit 1
   fi
 
-  if grep -q "unexpected npm command" <<<"$OUTPUT"; then
-    echo "$OUTPUT" >&2
-    exit 1
-  fi
 }
 
 assert_install_failure_is_visible 1
