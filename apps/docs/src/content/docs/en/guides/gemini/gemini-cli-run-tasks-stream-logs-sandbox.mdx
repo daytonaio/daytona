@@ -179,11 +179,13 @@ async processPrompt(prompt: string): Promise<void> {
 
 #### Streaming JSON Messages
 
-The Gemini CLI outputs JSON lines that are parsed to track agent activity. The `handleData` method buffers incoming PTY bytes and processes each complete line, keeping any incomplete line for the next chunk:
+The Gemini CLI outputs JSON lines that are parsed to track agent activity. The `handleData` method buffers incoming PTY bytes and processes each complete line, keeping any incomplete line for the next chunk. A stateful `TextDecoder` is reused across calls so partial multi-byte UTF-8 sequences split across PTY chunks are preserved instead of being corrupted:
 
 ```ts
+private decoder = new TextDecoder('utf-8')
+
 private handleData(data: Uint8Array): void {
-  this.buffer += new TextDecoder().decode(data)
+  this.buffer += this.decoder.decode(data, { stream: true })
   const lines = this.buffer.split('\n')
   this.buffer = lines.pop() || ''
   for (const line of lines.map((l) => l.trim()).filter(Boolean)) {
