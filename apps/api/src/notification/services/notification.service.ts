@@ -46,9 +46,9 @@ export class NotificationService {
 
   @OnEvent(OrganizationEvents.USER_REMOVED)
   handleOrganizationUserRemoved(event: OrganizationUserRemovedEvent) {
-    // The connect-time membership gate blocks new subscriptions; this ejects sockets that were
-    // already subscribed when membership ended. Best-effort: a failure here must not surface on
-    // the request that revoked membership.
+    // The gateway's connect-time membership check (NotificationGateway -> OrganizationUserService.exists)
+    // blocks new and reconnecting subscriptions; this ejects sockets that were already subscribed when
+    // membership ended. Best-effort: a failure here must not surface on the request that revoked membership.
     try {
       this.notificationEmitter.evictUserFromOrganization(event.userId, event.organizationId)
     } catch (error) {

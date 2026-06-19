@@ -5,7 +5,7 @@
 
 export class OrganizationUserRemovedEvent {
   constructor(
-    public readonly organizationId: string,
     public readonly userId: string,
+    public readonly organizationId: string,
   ) {}
 }

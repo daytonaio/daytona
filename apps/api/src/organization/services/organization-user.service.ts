@@ -153,9 +153,10 @@ export class OrganizationUserService {
 
     // Membership is revoked: eject the user's live notification sockets from the organization room
     // so they stop receiving its realtime events. Emitted after the removal has committed (the
-    // repository manager autocommits) so a concurrent reconnect cannot re-join the room against a
-    // still-present row. Covers both admin removal and voluntary leave, which both route here.
-    this.eventEmitter.emit(OrganizationEvents.USER_REMOVED, new OrganizationUserRemovedEvent(organizationId, userId))
+    // repository manager autocommits) so the gateway's connect-time membership check
+    // (OrganizationUserService.exists) sees the row gone and a concurrent reconnect cannot re-join.
+    // Covers both admin removal and voluntary leave, which both route here.
+    this.eventEmitter.emit(OrganizationEvents.USER_REMOVED, new OrganizationUserRemovedEvent(userId, organizationId))
   }
 
   private async removeWithEntityManager(

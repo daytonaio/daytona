@@ -94,6 +94,9 @@ export class NotificationGateway extends NotificationEmitter implements OnGatewa
 
           // Join the organization room for organization scoped notifications
           if (authContext.organizationId) {
+            if (!(await this.organizationUserService.exists(authContext.organizationId, authContext.userId))) {
+              return next(new UnauthorizedException())
+            }
             await socket.join(authContext.organizationId)
           }
 

@@ -28,7 +28,7 @@ describe('NotificationService', () => {
 
   describe('handleOrganizationUserRemoved', () => {
     it('evicts the removed user from the organization room (userId keyed, org room target)', () => {
-      service.handleOrganizationUserRemoved(new OrganizationUserRemovedEvent('org-1', 'user-1'))
+      service.handleOrganizationUserRemoved(new OrganizationUserRemovedEvent('user-1', 'org-1'))
 
       expect(emitter.evictUserFromOrganization).toHaveBeenCalledTimes(1)
       expect(emitter.evictUserFromOrganization).toHaveBeenCalledWith('user-1', 'org-1')
@@ -40,7 +40,7 @@ describe('NotificationService', () => {
       })
 
       expect(() =>
-        service.handleOrganizationUserRemoved(new OrganizationUserRemovedEvent('org-1', 'user-1')),
+        service.handleOrganizationUserRemoved(new OrganizationUserRemovedEvent('user-1', 'org-1')),
       ).not.toThrow()
     })
   })
