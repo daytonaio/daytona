@@ -32,6 +32,7 @@ class SandboxDesiredState(str, Enum):
     STOPPED = 'stopped'
     RESIZED = 'resized'
     ARCHIVED = 'archived'
+    PAUSED = 'paused'
     UNKNOWN_DEFAULT_OPEN_API = 'unknown_default_open_api'
 
     @classmethod

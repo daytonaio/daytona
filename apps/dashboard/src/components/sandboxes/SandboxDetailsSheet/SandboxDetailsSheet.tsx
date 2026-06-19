@@ -39,6 +39,7 @@ export interface SandboxDetailsSheetProps {
   sandboxIsLoading: Record<string, boolean>
   handleStart: (id: string) => void
   handleStop: (id: string) => void
+  handlePause: (id: string) => void
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
@@ -130,6 +131,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   sandboxIsLoading,
   handleStart,
   handleStop,
+  handlePause,
   handleDelete,
   handleArchive,
   getRegionName,
@@ -333,6 +335,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 deletePermitted={deletePermitted}
                 handleStart={handleStart}
                 handleStop={handleStop}
+                handlePause={handlePause}
                 handleDelete={handleDelete}
                 handleArchive={handleArchive}
                 handleRecover={handleRecover}

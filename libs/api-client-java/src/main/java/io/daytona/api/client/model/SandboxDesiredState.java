@@ -39,6 +39,8 @@ public enum SandboxDesiredState {
   
   ARCHIVED("archived"),
   
+  PAUSED("paused"),
+  
   UNKNOWN_DEFAULT_OPEN_API("unknown_default_open_api");
 
   private String value;

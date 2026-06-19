@@ -9,6 +9,7 @@ import { SANDBOX_STATES_CONSUMING_COMPUTE } from './sandbox-states-consuming-com
 export const SANDBOX_STATES_CONSUMING_DISK: SandboxState[] = [
   ...SANDBOX_STATES_CONSUMING_COMPUTE,
   SandboxState.STOPPED,
+  SandboxState.PAUSED,
   SandboxState.ARCHIVING,
   SandboxState.RESIZING,
   SandboxState.SNAPSHOTTING,
