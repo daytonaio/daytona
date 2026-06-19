@@ -362,6 +362,32 @@ export class RunnerService {
   }
 
   /**
+   * Returns true if at least one runner is registered for the given (region, sandboxClass)
+   * and is currently schedulable.
+   *
+   * Callers must apply `getRunnerSandboxClass(snapshot.sandboxClass)` before calling, matching the
+   * convention used by `findAvailableRunners` / `getRandomAvailableRunner`. Otherwise classes
+   * that re-target to a different runner pool (currently `ANDROID → CONTAINER`) will be
+   * falsely reported as having no schedulable runners.
+   *
+   * Intentionally ignores transient signals like `state` (e.g. UNRESPONSIVE) and
+   * `availabilityScore`, so this returns true even if every matching runner is temporarily
+   * unhealthy. The purpose is to detect a *structural* misconfiguration where no runner could
+   * ever host a snapshot of that (region, sandboxClass) combination, and to fail snapshot
+   * creation fast with a 400 instead of letting it sit in PENDING indefinitely.
+   */
+  async hasSchedulableRunner(regionId: string, sandboxClass: SandboxClass): Promise<boolean> {
+    return this.runnerRepository.exists({
+      where: {
+        region: regionId,
+        sandboxClass,
+        unschedulable: Not(true),
+        draining: Not(true),
+      },
+    })
+  }
+
+  /**
    * @throws {NotFoundException} If the runner is not found.
    * @throws {HttpException} If the runner is not unschedulable.
    * @throws {HttpException} If the runner has sandboxes associated with it.

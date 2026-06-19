@@ -54,6 +54,20 @@ var CreateCmd = &cobra.Command{
 		if regionIdFlag != "" {
 			createSnapshot.SetRegionId(regionIdFlag)
 		}
+		if sandboxClassFlag != "" {
+			var sc apiclient.SandboxClass
+			switch sandboxClassFlag {
+			case "container":
+				sc = apiclient.SANDBOXCLASS_CONTAINER
+			case "linux-vm":
+				sc = apiclient.SANDBOXCLASS_LINUX_VM
+			case "android":
+				sc = apiclient.SANDBOXCLASS_ANDROID
+			default:
+				return fmt.Errorf("invalid --sandbox-class %q: must be 'container', 'linux-vm' or 'android'", sandboxClassFlag)
+			}
+			createSnapshot.SetSandboxClass(sc)
+		}
 
 		if usingDockerfile {
 			createBuildInfoDto, err := common.GetCreateBuildInfoDto(ctx, dockerfilePathFlag, contextFlag)
@@ -142,6 +156,7 @@ var (
 	memoryFlag         int32
 	diskFlag           int32
 	regionIdFlag       string
+	sandboxClassFlag   string
 )
 
 func init() {
@@ -153,6 +168,7 @@ func init() {
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
 	CreateCmd.Flags().StringVar(&regionIdFlag, "region", "", "ID of the region where the snapshot will be available (defaults to organization default region)")
+	CreateCmd.Flags().StringVar(&sandboxClassFlag, "sandbox-class", "", "Target sandbox class for the snapshot. One of: 'container', 'linux-vm' or 'android' (defaults to organization/server default)")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "context")
