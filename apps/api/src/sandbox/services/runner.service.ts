@@ -377,7 +377,7 @@ export class RunnerService {
    * creation fast with a 400 instead of letting it sit in PENDING indefinitely.
    */
   async hasSchedulableRunner(regionId: string, sandboxClass: SandboxClass): Promise<boolean> {
-    const count = await this.runnerRepository.count({
+    return this.runnerRepository.exists({
       where: {
         region: regionId,
         sandboxClass,
@@ -385,7 +385,6 @@ export class RunnerService {
         draining: Not(true),
       },
     })
-    return count > 0
   }
 
   /**
