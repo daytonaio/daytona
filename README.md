@@ -25,11 +25,11 @@
 
 &nbsp;
 
-Daytona is a secure and elastic infrastructure runtime for AI-generated code execution and agent workflows. Our open-source platform provides [sandboxes](https://www.daytona.io/docs/sandboxes/), full composable computers with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.
+Daytona is a secure and elastic infrastructure runtime for AI-generated code execution and agent workflows. Our open-source platform provides [sandboxes](https://www.daytona.io/docs/en/sandboxes/), full composable computers with complete isolation, a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk.
 
 Sandboxes are the core component of the Daytona platform, spinning up in under 90ms from code to execution and running any code in Python, TypeScript, and JavaScript. Built on OCI/Docker compatibility, massive parallelization, and unlimited persistence, sandboxes deliver consistent, predictable environments for agent workflows.
 
-Agents and developers interact with sandboxes programmatically using the Daytona [SDKs](https://www.daytona.io/docs/#3-install-the-sdk), [API](https://www.daytona.io/docs/tools/api/#daytona/), and [CLI](https://www.daytona.io/docs/tools/cli/). Operations span sandbox lifecycle management, filesystem operations, process and code execution, and runtime configuration through base images, packages, and tooling. Our stateful environment [snapshots](https://www.daytona.io/docs/snapshots/) enable persistent agent operations across sessions, making Daytona the ideal foundation for AI agent architectures.
+Agents and developers interact with sandboxes programmatically using the Daytona [SDKs](https://www.daytona.io/docs/en/#3-install-the-sdk), [API](https://www.daytona.io/docs/en/tools/api/#daytona/), and [CLI](https://www.daytona.io/docs/en/tools/cli/). Operations span sandbox lifecycle management, filesystem operations, process and code execution, and runtime configuration through base images, packages, and tooling. Our stateful environment [snapshots](https://www.daytona.io/docs/en/snapshots/) enable persistent agent operations across sessions, making Daytona the ideal foundation for AI agent architectures.
 
 ## Features
 
@@ -43,18 +43,18 @@ Daytona provides an extensive set of features and tools for interacting with san
 
 | Platform                                                                   | Sandboxes                                                               | Agent tools                                                                       | Human tools                                                               | System tools                                                  |
 | :------------------------------------------------------------------------- | :---------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------ |
-| [Organizations](https://www.daytona.io/docs/organizations/)                | [Environment](https://www.daytona.io/docs/configuration/)               | [Process & code execution](https://www.daytona.io/docs/process-code-execution/)   | [Dashboard](https://www.daytona.io/docs/getting-started#dashboard)        | [Webhooks](https://www.daytona.io/docs/webhooks/)             |
-| [API Keys](https://www.daytona.io/docs/api-keys/)                          | [Snapshots](https://www.daytona.io/docs/snapshots/)                     | [File system operations](https://www.daytona.io/docs/file-system-operations/)     | [Web terminal](https://www.daytona.io/docs/web-terminal/)                 | [Network limits](https://www.daytona.io/docs/network-limits/) |
-| [Limits](https://www.daytona.io/docs/limits/)                              | [Declarative builder](https://www.daytona.io/docs/declarative-builder/) | [Language server protocol](https://www.daytona.io/docs/language-server-protocol/) | [SSH access](https://www.daytona.io/docs/ssh-access/)                     |                                                               |
-| [Billing](https://www.daytona.io/docs/billing/)                            | [Volumes](https://www.daytona.io/docs/volumes/)                         | [Computer use](https://www.daytona.io/docs/computer-use/)                         | [VNC access](https://www.daytona.io/docs/vnc-access/)                     |                                                               |
-| [Audit logs](https://www.daytona.io/docs/audit-logs/)                      | [Regions](https://www.daytona.io/docs/regions/)                         | [MCP server](https://www.daytona.io/docs/mcp/)                                    | [VPN connection](https://www.daytona.io/docs/vpn-connections/)            |                                                               |
-| [OpenTelemetry](https://www.daytona.io/docs/experimental/otel-collection/) |                                                                         | [Git operations](https://www.daytona.io/docs/git-operations/)                     | [Preview](https://www.daytona.io/docs/preview/)                           |                                                               |
-| [Integrations](https://www.daytona.io/docs/guides/)                        |                                                                         | [Pseudo terminal (PTY)](https://www.daytona.io/docs/pty/)                         | [Custom preview proxy](https://www.daytona.io/docs/custom-preview-proxy/) |                                                               |
-| [Security exhibit](https://www.daytona.io/docs/security-exhibit/)          |                                                                         | [Log streaming](https://www.daytona.io/docs/log-streaming/)                       | [Playground](https://www.daytona.io/docs/playground/)                     |                                                               |
+| [Organizations](https://www.daytona.io/docs/en/organizations/)                | [Environment](https://www.daytona.io/docs/en/configuration/)               | [Process & code execution](https://www.daytona.io/docs/en/process-code-execution/)   | [Dashboard](https://www.daytona.io/docs/en/getting-started#dashboard)        | [Webhooks](https://www.daytona.io/docs/en/webhooks/)             |
+| [API Keys](https://www.daytona.io/docs/en/api-keys/)                          | [Snapshots](https://www.daytona.io/docs/en/snapshots/)                     | [File system operations](https://www.daytona.io/docs/en/file-system-operations/)     | [Web terminal](https://www.daytona.io/docs/en/web-terminal/)                 | [Network limits](https://www.daytona.io/docs/en/network-limits/) |
+| [Limits](https://www.daytona.io/docs/en/limits/)                              | [Declarative builder](https://www.daytona.io/docs/en/declarative-builder/) | [Language server protocol](https://www.daytona.io/docs/en/language-server-protocol/) | [SSH access](https://www.daytona.io/docs/en/ssh-access/)                     |                                                               |
+| [Billing](https://www.daytona.io/docs/en/billing/)                            | [Volumes](https://www.daytona.io/docs/en/volumes/)                         | [Computer use](https://www.daytona.io/docs/en/computer-use/)                         | [VNC access](https://www.daytona.io/docs/en/vnc-access/)                     |                                                               |
+| [Audit logs](https://www.daytona.io/docs/en/audit-logs/)                      | [Regions](https://www.daytona.io/docs/en/regions/)                         | [MCP server](https://www.daytona.io/docs/en/mcp/)                                    | [VPN connection](https://www.daytona.io/docs/en/vpn-connections/)            |                                                               |
+| [OpenTelemetry](https://www.daytona.io/docs/en/experimental/otel-collection/) |                                                                         | [Git operations](https://www.daytona.io/docs/en/git-operations/)                     | [Preview](https://www.daytona.io/docs/en/preview/)                           |                                                               |
+| [Integrations](https://www.daytona.io/docs/en/guides/)                        |                                                                         | [Pseudo terminal (PTY)](https://www.daytona.io/docs/en/pty/)                         | [Custom preview proxy](https://www.daytona.io/docs/en/custom-preview-proxy/) |                                                               |
+| [Security exhibit](https://www.daytona.io/docs/en/security-exhibit/)          |                                                                         | [Log streaming](https://www.daytona.io/docs/en/log-streaming/)                       | [Playground](https://www.daytona.io/docs/en/playground/)                     |                                                               |
 
 ## Architecture
 
-Daytona platform is organized into multiple plane components, each serving a specific purpose. A detailed overview of each component is available in the [architecture documentation](https://www.daytona.io/docs/architecture/).
+Daytona platform is organized into multiple plane components, each serving a specific purpose. A detailed overview of each component is available in the [architecture documentation](https://www.daytona.io/docs/en/architecture/).
 
 - **Interface plane**: provides client interfaces for interacting with Daytona
 - **Control plane**: orchestrates all sandbox operations
@@ -68,7 +68,7 @@ Runnable applications and services for the Daytona platform. Each directory is a
 - [`cli`](apps/cli): Go command-line interface access to core features for interacting with sandboxes
 - [`daemon`](apps/daemon): code execution agent that runs inside each sandbox
 - [`dashboard`](apps/dashboard): web user interface for visual sandbox management
-- [`docs`](apps/docs): documentation content; website published to [daytona.io/docs](https://www.daytona.io/docs/)
+- [`docs`](apps/docs): documentation content; website published to [daytona.io/docs](https://www.daytona.io/docs/en/)
 - [`otel-collector`](apps/otel-collector): trace and metric collection for Daytona SDK operations
 - [`proxy`](apps/proxy): reverse proxy for custom routing and preview URLs
 - [`runner`](apps/runner): compute nodes that power Daytona's compute plane and run sandboxes
@@ -147,8 +147,8 @@ Standalone packages and libraries for interacting with Daytona using Java:
 
 Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
 
-- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [`docker`](docker) directory using Docker Compose
-- [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
+- [Open source deployment](https://www.daytona.io/docs/en/oss-deployment/): full local stack from the [`docker`](docker) directory using Docker Compose
+- [Customer managed compute](https://www.daytona.io/docs/en/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
 
 ## Quick Start
 
