@@ -73,6 +73,36 @@ describe('SnapshotService', () => {
     await service.delete({ id: 's1' } as never)
   })
 
+  it('deserializes snapshot date fields returned by the API', async () => {
+    const snapshot = {
+      id: 's1',
+      name: 'snap1',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+      lastUsedAt: null,
+    }
+
+    snapshotsApi.getAllSnapshots.mockResolvedValue(
+      createApiResponse({ items: [snapshot], total: 1, page: 1, totalPages: 1 }),
+    )
+    snapshotsApi.getSnapshot.mockResolvedValue(createApiResponse(snapshot))
+    snapshotsApi.createSnapshot.mockResolvedValue(createApiResponse({ ...snapshot, state: 'active' }))
+    snapshotsApi.activateSnapshot.mockResolvedValue(createApiResponse(snapshot))
+
+    const listResult = await service.list()
+    const getResult = await service.get('snap1')
+    const createResult = await service.create({ name: 'snap1', image: 'python:3.12' })
+    const activateResult = await service.activate({ id: 's1' } as never)
+
+    for (const result of [listResult.items[0], getResult, createResult, activateResult]) {
+      expect(result.createdAt).toBeInstanceOf(Date)
+      expect(result.updatedAt).toBeInstanceOf(Date)
+      expect(result.createdAt.toISOString()).toBe(snapshot.createdAt)
+      expect(result.updatedAt.toISOString()).toBe(snapshot.updatedAt)
+      expect(result.lastUsedAt).toBeNull()
+    }
+  })
+
   it('creates snapshot from image name with resources and region', async () => {
     snapshotsApi.createSnapshot.mockResolvedValue(createApiResponse({ id: 's2', name: 'snap2', state: 'active' }))
 
