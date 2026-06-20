@@ -26,6 +26,10 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
 	}
 
+	if session.dead.Load() {
+		return nil, common_errors.NewBadRequestError(errors.New("session shell has exited; create a new session"))
+	}
+
 	if cmdId == util.EmptyCommandID {
 		cmdId = uuid.NewString()
 	}

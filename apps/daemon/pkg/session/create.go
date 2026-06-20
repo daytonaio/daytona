@@ -20,7 +20,8 @@ import (
 func (s *SessionService) Create(sessionId string, isLegacy bool) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	cmd := exec.CommandContext(ctx, common.GetShell())
+	shellArgs := common.GetShellArgs()
+	cmd := exec.CommandContext(ctx, shellArgs[0], shellArgs[1:]...)
 	cmd.Env = os.Environ()
 	// Put the shell in its own process group so we can signal the entire
 	// group (shell + every non-job-control descendant) atomically on Delete.
@@ -62,6 +63,11 @@ func (s *SessionService) Create(sessionId string, isLegacy bool) error {
 		cancel:      cancel,
 	}
 	s.sessions.Set(sessionId, session)
+
+	go func() {
+		_ = cmd.Wait()
+		session.dead.Store(true)
+	}()
 
 	err = os.MkdirAll(session.Dir(s.configDir), 0755)
 	if err != nil {
