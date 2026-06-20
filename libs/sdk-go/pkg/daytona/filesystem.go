@@ -113,9 +113,22 @@ func (f *FileSystemService) CreateFolder(ctx context.Context, path string, opts 
 //	}
 //
 // Returns an error if the path doesn't exist or isn't accessible.
-func (f *FileSystemService) ListFiles(ctx context.Context, path string) ([]*types.FileInfo, error) {
+func (f *FileSystemService) ListFiles(ctx context.Context, path string, opts ...func(*options.ListFiles)) ([]*types.FileInfo, error) {
 	return withInstrumentation(ctx, f.otel, "FileSystem", "ListFiles", func(ctx context.Context) ([]*types.FileInfo, error) {
-		files, httpResp, err := f.toolboxClient.FileSystemAPI.ListFiles(ctx).Path(path).Execute()
+		listOpts := &options.ListFiles{}
+		for _, opt := range opts {
+			opt(listOpts)
+		}
+
+		req := f.toolboxClient.FileSystemAPI.ListFiles(ctx).Path(path)
+		if listOpts.Depth != nil {
+			if *listOpts.Depth < 1 {
+				return nil, errors.NewDaytonaValidationError("depth must be at least 1", nil)
+			}
+			req = req.Depth(*listOpts.Depth)
+		}
+
+		files, httpResp, err := req.Execute()
 		if err != nil {
 			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
@@ -126,6 +139,7 @@ func (f *FileSystemService) ListFiles(ctx context.Context, path string) ([]*type
 			modTime, _ := time.Parse(time.RFC3339, file.GetModifiedAt())
 			result[i] = &types.FileInfo{
 				Name:         file.GetName(),
+				Path:         file.GetPath(),
 				Size:         int64(file.GetSize()),
 				Mode:         file.GetMode(),
 				ModifiedTime: modTime,

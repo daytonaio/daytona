@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -36,10 +36,11 @@ class FileInfo(BaseModel):
     modified_at: StrictStr = Field(serialization_alias="modifiedAt")
     name: StrictStr
     owner: StrictStr
+    path: Optional[StrictStr] = Field(default=None, description="Full path of the entry")
     permissions: StrictStr
     size: StrictInt
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "permissions", "size"]
+    __properties: ClassVar[List[str]] = ["group", "isDir", "modTime", "mode", "modifiedAt", "name", "owner", "path", "permissions", "size"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -105,6 +106,7 @@ class FileInfo(BaseModel):
             "modified_at": obj.get("modifiedAt"),
             "name": obj.get("name"),
             "owner": obj.get("owner"),
+            "path": obj.get("path"),
             "permissions": obj.get("permissions"),
             "size": obj.get("size")
         })

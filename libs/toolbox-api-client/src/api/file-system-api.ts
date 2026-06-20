@@ -276,13 +276,14 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
-         * List files and directories in the specified path
+         * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory\'s entries, depth=2 also includes their children, and so on.
          * @summary List files and directories
          * @param {string} [path] Directory path to list (defaults to working directory)
+         * @param {number} [depth] How many levels deep to list (default: 1, must be &gt;&#x3D; 1)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listFiles: async (path?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listFiles: async (path?: string, depth?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/files`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -297,6 +298,10 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
 
             if (path !== undefined) {
                 localVarQueryParameter['path'] = path;
+            }
+
+            if (depth !== undefined) {
+                localVarQueryParameter['depth'] = depth;
             }
 
             localVarHeaderParameter['Accept'] = 'application/json';
@@ -650,14 +655,15 @@ export const FileSystemApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List files and directories in the specified path
+         * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory\'s entries, depth=2 also includes their children, and so on.
          * @summary List files and directories
          * @param {string} [path] Directory path to list (defaults to working directory)
+         * @param {number} [depth] How many levels deep to list (default: 1, must be &gt;&#x3D; 1)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listFiles(path?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileInfo>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listFiles(path, options);
+        async listFiles(path?: string, depth?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileInfo>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listFiles(path, depth, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['FileSystemApi.listFiles']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -818,14 +824,15 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
             return localVarFp.getFileInfo(path, options).then((request) => request(axios, basePath));
         },
         /**
-         * List files and directories in the specified path
+         * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory\'s entries, depth=2 also includes their children, and so on.
          * @summary List files and directories
          * @param {string} [path] Directory path to list (defaults to working directory)
+         * @param {number} [depth] How many levels deep to list (default: 1, must be &gt;&#x3D; 1)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listFiles(path?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<FileInfo>> {
-            return localVarFp.listFiles(path, options).then((request) => request(axios, basePath));
+        listFiles(path?: string, depth?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<FileInfo>> {
+            return localVarFp.listFiles(path, depth, options).then((request) => request(axios, basePath));
         },
         /**
          * Move or rename a file or directory from source to destination
@@ -969,14 +976,15 @@ export class FileSystemApi extends BaseAPI {
     }
 
     /**
-     * List files and directories in the specified path
+     * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory\'s entries, depth=2 also includes their children, and so on.
      * @summary List files and directories
      * @param {string} [path] Directory path to list (defaults to working directory)
+     * @param {number} [depth] How many levels deep to list (default: 1, must be &gt;&#x3D; 1)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public listFiles(path?: string, options?: RawAxiosRequestConfig) {
-        return FileSystemApiFp(this.configuration).listFiles(path, options).then((request) => request(this.axios, this.basePath));
+    public listFiles(path?: string, depth?: number, options?: RawAxiosRequestConfig) {
+        return FileSystemApiFp(this.configuration).listFiles(path, depth, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

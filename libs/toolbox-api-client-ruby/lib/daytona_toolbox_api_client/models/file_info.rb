@@ -30,6 +30,9 @@ module DaytonaToolboxApiClient
 
     attr_accessor :owner
 
+    # Full path of the entry
+    attr_accessor :path
+
     attr_accessor :permissions
 
     attr_accessor :size
@@ -44,6 +47,7 @@ module DaytonaToolboxApiClient
         :'modified_at' => :'modifiedAt',
         :'name' => :'name',
         :'owner' => :'owner',
+        :'path' => :'path',
         :'permissions' => :'permissions',
         :'size' => :'size'
       }
@@ -69,6 +73,7 @@ module DaytonaToolboxApiClient
         :'modified_at' => :'String',
         :'name' => :'String',
         :'owner' => :'String',
+        :'path' => :'String',
         :'permissions' => :'String',
         :'size' => :'Integer'
       }
@@ -136,6 +141,10 @@ module DaytonaToolboxApiClient
         self.owner = attributes[:'owner']
       else
         self.owner = nil
+      end
+
+      if attributes.key?(:'path')
+        self.path = attributes[:'path']
       end
 
       if attributes.key?(:'permissions')
@@ -313,6 +322,7 @@ module DaytonaToolboxApiClient
           modified_at == o.modified_at &&
           name == o.name &&
           owner == o.owner &&
+          path == o.path &&
           permissions == o.permissions &&
           size == o.size
     end
@@ -326,7 +336,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [group, is_dir, mod_time, mode, modified_at, name, owner, permissions, size].hash
+      [group, is_dir, mod_time, mode, modified_at, name, owner, path, permissions, size].hash
     end
 
     # Builds the object from hash

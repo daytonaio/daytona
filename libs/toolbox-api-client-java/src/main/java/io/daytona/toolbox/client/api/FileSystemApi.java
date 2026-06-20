@@ -882,6 +882,7 @@ public class FileSystemApi {
     /**
      * Build call for listFiles
      * @param path Directory path to list (defaults to working directory) (optional)
+     * @param depth How many levels deep to list (default: 1, must be &gt;&#x3D; 1) (optional)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
@@ -892,7 +893,7 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listFilesCall(@javax.annotation.Nullable String path, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listFilesCall(@javax.annotation.Nullable String path, @javax.annotation.Nullable Integer depth, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -921,6 +922,10 @@ public class FileSystemApi {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("path", path));
         }
 
+        if (depth != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("depth", depth));
+        }
+
         final String[] localVarAccepts = {
             "application/json"
         };
@@ -941,15 +946,16 @@ public class FileSystemApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listFilesValidateBeforeCall(@javax.annotation.Nullable String path, final ApiCallback _callback) throws ApiException {
-        return listFilesCall(path, _callback);
+    private okhttp3.Call listFilesValidateBeforeCall(@javax.annotation.Nullable String path, @javax.annotation.Nullable Integer depth, final ApiCallback _callback) throws ApiException {
+        return listFilesCall(path, depth, _callback);
 
     }
 
     /**
      * List files and directories
-     * List files and directories in the specified path
+     * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth&#x3D;1 (default) lists the directory&#39;s entries, depth&#x3D;2 also includes their children, and so on.
      * @param path Directory path to list (defaults to working directory) (optional)
+     * @param depth How many levels deep to list (default: 1, must be &gt;&#x3D; 1) (optional)
      * @return List&lt;FileInfo&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -959,15 +965,16 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public List<FileInfo> listFiles(@javax.annotation.Nullable String path) throws ApiException {
-        ApiResponse<List<FileInfo>> localVarResp = listFilesWithHttpInfo(path);
+    public List<FileInfo> listFiles(@javax.annotation.Nullable String path, @javax.annotation.Nullable Integer depth) throws ApiException {
+        ApiResponse<List<FileInfo>> localVarResp = listFilesWithHttpInfo(path, depth);
         return localVarResp.getData();
     }
 
     /**
      * List files and directories
-     * List files and directories in the specified path
+     * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth&#x3D;1 (default) lists the directory&#39;s entries, depth&#x3D;2 also includes their children, and so on.
      * @param path Directory path to list (defaults to working directory) (optional)
+     * @param depth How many levels deep to list (default: 1, must be &gt;&#x3D; 1) (optional)
      * @return ApiResponse&lt;List&lt;FileInfo&gt;&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -977,16 +984,17 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<List<FileInfo>> listFilesWithHttpInfo(@javax.annotation.Nullable String path) throws ApiException {
-        okhttp3.Call localVarCall = listFilesValidateBeforeCall(path, null);
+    public ApiResponse<List<FileInfo>> listFilesWithHttpInfo(@javax.annotation.Nullable String path, @javax.annotation.Nullable Integer depth) throws ApiException {
+        okhttp3.Call localVarCall = listFilesValidateBeforeCall(path, depth, null);
         Type localVarReturnType = new TypeToken<List<FileInfo>>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * List files and directories (asynchronously)
-     * List files and directories in the specified path
+     * List files and directories in the specified path. Use the optional depth parameter to list recursively: depth&#x3D;1 (default) lists the directory&#39;s entries, depth&#x3D;2 also includes their children, and so on.
      * @param path Directory path to list (defaults to working directory) (optional)
+     * @param depth How many levels deep to list (default: 1, must be &gt;&#x3D; 1) (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -997,9 +1005,9 @@ public class FileSystemApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listFilesAsync(@javax.annotation.Nullable String path, final ApiCallback<List<FileInfo>> _callback) throws ApiException {
+    public okhttp3.Call listFilesAsync(@javax.annotation.Nullable String path, @javax.annotation.Nullable Integer depth, final ApiCallback<List<FileInfo>> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = listFilesValidateBeforeCall(path, _callback);
+        okhttp3.Call localVarCall = listFilesValidateBeforeCall(path, depth, _callback);
         Type localVarReturnType = new TypeToken<List<FileInfo>>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;

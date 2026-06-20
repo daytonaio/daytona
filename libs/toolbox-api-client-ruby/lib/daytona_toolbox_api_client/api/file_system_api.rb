@@ -421,9 +421,10 @@ module DaytonaToolboxApiClient
     end
 
     # List files and directories
-    # List files and directories in the specified path
+    # List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory's entries, depth=2 also includes their children, and so on.
     # @param [Hash] opts the optional parameters
     # @option opts [String] :path Directory path to list (defaults to working directory)
+    # @option opts [Integer] :depth How many levels deep to list (default: 1, must be &gt;&#x3D; 1)
     # @return [Array<FileInfo>]
     def list_files(opts = {})
       data, _status_code, _headers = list_files_with_http_info(opts)
@@ -431,9 +432,10 @@ module DaytonaToolboxApiClient
     end
 
     # List files and directories
-    # List files and directories in the specified path
+    # List files and directories in the specified path. Use the optional depth parameter to list recursively: depth&#x3D;1 (default) lists the directory&#39;s entries, depth&#x3D;2 also includes their children, and so on.
     # @param [Hash] opts the optional parameters
     # @option opts [String] :path Directory path to list (defaults to working directory)
+    # @option opts [Integer] :depth How many levels deep to list (default: 1, must be &gt;&#x3D; 1)
     # @return [Array<(Array<FileInfo>, Integer, Hash)>] Array<FileInfo> data, response status code and response headers
     def list_files_with_http_info(opts = {})
       if @api_client.config.debugging
@@ -445,6 +447,7 @@ module DaytonaToolboxApiClient
       # query parameters
       query_params = opts[:query_params] || {}
       query_params[:'path'] = opts[:'path'] if !opts[:'path'].nil?
+      query_params[:'depth'] = opts[:'depth'] if !opts[:'depth'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}

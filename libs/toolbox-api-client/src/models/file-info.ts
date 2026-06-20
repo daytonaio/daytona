@@ -25,6 +25,10 @@ export interface FileInfo {
     'modifiedAt': string;
     'name': string;
     'owner': string;
+    /**
+     * Full path of the entry
+     */
+    'path'?: string;
     'permissions': string;
     'size': number;
 }

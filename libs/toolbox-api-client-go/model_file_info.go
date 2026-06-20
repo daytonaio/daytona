@@ -28,6 +28,8 @@ type FileInfo struct {
 	ModifiedAt string `json:"modifiedAt"`
 	Name string `json:"name"`
 	Owner string `json:"owner"`
+	// Full path of the entry
+	Path *string `json:"path,omitempty"`
 	Permissions string `json:"permissions"`
 	Size int32 `json:"size"`
 	AdditionalProperties map[string]interface{}
@@ -229,6 +231,38 @@ func (o *FileInfo) SetOwner(v string) {
 	o.Owner = v
 }
 
+// GetPath returns the Path field value if set, zero value otherwise.
+func (o *FileInfo) GetPath() string {
+	if o == nil || IsNil(o.Path) {
+		var ret string
+		return ret
+	}
+	return *o.Path
+}
+
+// GetPathOk returns a tuple with the Path field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *FileInfo) GetPathOk() (*string, bool) {
+	if o == nil || IsNil(o.Path) {
+		return nil, false
+	}
+	return o.Path, true
+}
+
+// HasPath returns a boolean if a field has been set.
+func (o *FileInfo) HasPath() bool {
+	if o != nil && !IsNil(o.Path) {
+		return true
+	}
+
+	return false
+}
+
+// SetPath gets a reference to the given string and assigns it to the Path field.
+func (o *FileInfo) SetPath(v string) {
+	o.Path = &v
+}
+
 // GetPermissions returns the Permissions field value
 func (o *FileInfo) GetPermissions() string {
 	if o == nil {
@@ -294,6 +328,9 @@ func (o FileInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["modifiedAt"] = o.ModifiedAt
 	toSerialize["name"] = o.Name
 	toSerialize["owner"] = o.Owner
+	if !IsNil(o.Path) {
+		toSerialize["path"] = o.Path
+	}
 	toSerialize["permissions"] = o.Permissions
 	toSerialize["size"] = o.Size
 
@@ -354,6 +391,7 @@ func (o *FileInfo) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "modifiedAt")
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "owner")
+		delete(additionalProperties, "path")
 		delete(additionalProperties, "permissions")
 		delete(additionalProperties, "size")
 		o.AdditionalProperties = additionalProperties

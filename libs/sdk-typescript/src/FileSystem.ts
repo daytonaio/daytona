@@ -565,6 +565,10 @@ export class FileSystem {
    * Lists contents of a directory in the Sandbox.
    *
    * @param {string} path - Directory path to list. Relative paths are resolved based on the sandbox working directory.
+   * @param {object} [options] - Listing options
+   * @param {number} [options.depth] - How many levels deep to list. depth=1 (default) lists the
+   * directory's entries, depth=2 also includes their children, and so on. Must be an integer >= 1.
+   * Each returned FileInfo carries a full `path` field.
    * @returns {Promise<FileInfo[]>} Array of file and directory information
    *
    * @example
@@ -573,10 +577,17 @@ export class FileSystem {
    * files.forEach(file => {
    *   console.log(`${file.name} (${file.size} bytes)`);
    * });
+   *
+   * // List recursively two levels deep
+   * const tree = await fs.listFiles('app/src', { depth: 2 });
+   * tree.forEach(file => console.log(file.path));
    */
   @WithInstrumentation()
-  public async listFiles(path: string): Promise<FileInfo[]> {
-    const response = await this.apiClient.listFiles(path)
+  public async listFiles(path: string, options?: { depth?: number }): Promise<FileInfo[]> {
+    if (options?.depth !== undefined && (!Number.isInteger(options.depth) || options.depth < 1)) {
+      throw new DaytonaError('depth must be an integer of at least 1')
+    }
+    const response = await this.apiClient.listFiles(path, options?.depth)
     return response.data
   }
 

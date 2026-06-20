@@ -1026,7 +1026,10 @@ paths:
       tags:
       - file-system
     get:
-      description: List files and directories in the specified path
+      description: |-
+        List files and directories in the specified path. Use the optional depth
+        parameter to list recursively: depth=1 (default) lists the directory's
+        entries, depth=2 also includes their children, and so on.
       operationId: ListFiles
       parameters:
       - description: Directory path to list (defaults to working directory)
@@ -1034,6 +1037,11 @@ paths:
         name: path
         schema:
           type: string
+      - description: "How many levels deep to list (default: 1, must be >= 1)"
+        in: query
+        name: depth
+        schema:
+          type: integer
       responses:
         "200":
           content:
@@ -3176,6 +3184,7 @@ components:
       example:
         mode: mode
         owner: owner
+        path: path
         size: 0
         modTime: modTime
         modifiedAt: modifiedAt
@@ -3200,6 +3209,9 @@ components:
         name:
           type: string
         owner:
+          type: string
+        path:
+          description: Full path of the entry
           type: string
         permissions:
           type: string

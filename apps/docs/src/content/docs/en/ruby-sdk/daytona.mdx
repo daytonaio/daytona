@@ -12,7 +12,7 @@ Daytona class for Daytona SDK.
 #### new Daytona()
 
 ```ruby
-def initialize(config)
+def initialize(config = Config.new)
 
 ```
 
@@ -119,7 +119,7 @@ Shuts down OTel providers, flushing any pending telemetry data.
 #### create()
 
 ```ruby
-def create(params, on_snapshot_create_logs:)
+def create(params = nil, on_snapshot_create_logs: nil)
 
 ```
 
@@ -174,7 +174,7 @@ Gets a Sandbox by its ID.
 #### list()
 
 ```ruby
-def list(query)
+def list(query = nil)
 
 ```
 
@@ -204,7 +204,7 @@ end
 #### start()
 
 ```ruby
-def start(sandbox, timeout)
+def start(sandbox, timeout = Sandbox::DEFAULT_TIMEOUT)
 
 ```
 
@@ -222,7 +222,7 @@ Starts a Sandbox and waits for it to be ready.
 #### stop()
 
 ```ruby
-def stop(sandbox, timeout)
+def stop(sandbox, timeout = Sandbox::DEFAULT_TIMEOUT)
 
 ```
 

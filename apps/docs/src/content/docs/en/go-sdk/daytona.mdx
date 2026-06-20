@@ -149,7 +149,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(f \*FileSystemService\) DownloadFileStream\(ctx context.Context, remotePath string, opts ...DownloadStreamOption\) \(io.ReadCloser, error\)](<#FileSystemService.DownloadFileStream>)
   - [func \(f \*FileSystemService\) FindFiles\(ctx context.Context, path, pattern string\) \(any, error\)](<#FileSystemService.FindFiles>)
   - [func \(f \*FileSystemService\) GetFileInfo\(ctx context.Context, path string\) \(\*types.FileInfo, error\)](<#FileSystemService.GetFileInfo>)
-  - [func \(f \*FileSystemService\) ListFiles\(ctx context.Context, path string\) \(\[\]\*types.FileInfo, error\)](<#FileSystemService.ListFiles>)
+  - [func \(f \*FileSystemService\) ListFiles\(ctx context.Context, path string, opts ...func\(\*options.ListFiles\)\) \(\[\]\*types.FileInfo, error\)](<#FileSystemService.ListFiles>)
   - [func \(f \*FileSystemService\) MoveFiles\(ctx context.Context, source, destination string\) error](<#FileSystemService.MoveFiles>)
   - [func \(f \*FileSystemService\) ReplaceInFiles\(ctx context.Context, files \[\]string, pattern, newValue string\) \(any, error\)](<#FileSystemService.ReplaceInFiles>)
   - [func \(f \*FileSystemService\) SearchFiles\(ctx context.Context, path, pattern string\) \(any, error\)](<#FileSystemService.SearchFiles>)
@@ -1740,7 +1740,7 @@ Returns an error if the path doesn't exist.
 ### func \(\*FileSystemService\) ListFiles
 
 ```go
-func (f *FileSystemService) ListFiles(ctx context.Context, path string) ([]*types.FileInfo, error)
+func (f *FileSystemService) ListFiles(ctx context.Context, path string, opts ...func(*options.ListFiles)) ([]*types.FileInfo, error)
 ```
 
 ListFiles lists files and directories in the specified path.

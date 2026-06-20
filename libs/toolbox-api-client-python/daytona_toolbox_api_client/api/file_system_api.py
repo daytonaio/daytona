@@ -15,7 +15,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictBytes, StrictStr
+from pydantic import Field, StrictBool, StrictBytes, StrictInt, StrictStr
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 from daytona_toolbox_api_client.models.file_info import FileInfo
@@ -1667,6 +1667,7 @@ class FileSystemApi:
     def list_files(
         self,
         path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to working directory)")] = None,
+        depth: Annotated[Optional[StrictInt], Field(description="How many levels deep to list (default: 1, must be >= 1)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1682,10 +1683,12 @@ class FileSystemApi:
     ) -> List[FileInfo]:
         """List files and directories
 
-        List files and directories in the specified path
+        List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory's entries, depth=2 also includes their children, and so on.
 
         :param path: Directory path to list (defaults to working directory)
         :type path: str
+        :param depth: How many levels deep to list (default: 1, must be >= 1)
+        :type depth: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1710,6 +1713,7 @@ class FileSystemApi:
 
         _param = self._list_files_serialize(
             path=path,
+            depth=depth,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1734,6 +1738,7 @@ class FileSystemApi:
     def list_files_with_http_info(
         self,
         path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to working directory)")] = None,
+        depth: Annotated[Optional[StrictInt], Field(description="How many levels deep to list (default: 1, must be >= 1)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1749,10 +1754,12 @@ class FileSystemApi:
     ) -> ApiResponse[List[FileInfo]]:
         """List files and directories
 
-        List files and directories in the specified path
+        List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory's entries, depth=2 also includes their children, and so on.
 
         :param path: Directory path to list (defaults to working directory)
         :type path: str
+        :param depth: How many levels deep to list (default: 1, must be >= 1)
+        :type depth: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1777,6 +1784,7 @@ class FileSystemApi:
 
         _param = self._list_files_serialize(
             path=path,
+            depth=depth,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1801,6 +1809,7 @@ class FileSystemApi:
     def list_files_without_preload_content(
         self,
         path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to working directory)")] = None,
+        depth: Annotated[Optional[StrictInt], Field(description="How many levels deep to list (default: 1, must be >= 1)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1816,10 +1825,12 @@ class FileSystemApi:
     ) -> RESTResponseType:
         """List files and directories
 
-        List files and directories in the specified path
+        List files and directories in the specified path. Use the optional depth parameter to list recursively: depth=1 (default) lists the directory's entries, depth=2 also includes their children, and so on.
 
         :param path: Directory path to list (defaults to working directory)
         :type path: str
+        :param depth: How many levels deep to list (default: 1, must be >= 1)
+        :type depth: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1844,6 +1855,7 @@ class FileSystemApi:
 
         _param = self._list_files_serialize(
             path=path,
+            depth=depth,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1863,6 +1875,7 @@ class FileSystemApi:
     def _list_files_serialize(
         self,
         path,
+        depth,
         _request_auth,
         _content_type,
         _headers,
@@ -1888,6 +1901,10 @@ class FileSystemApi:
         if path is not None:
             
             _query_params.append(('path', path))
+            
+        if depth is not None:
+            
+            _query_params.append(('depth', depth))
             
         # process the header parameters
         # process the form parameters
