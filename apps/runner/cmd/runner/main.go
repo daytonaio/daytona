@@ -219,11 +219,12 @@ func run() int {
 
 	// Create metrics collector
 	metricsCollector := metrics.NewCollector(metrics.CollectorConfig{
-		Logger:                             logger,
-		Docker:                             dockerClient,
-		WindowSize:                         cfg.CollectorWindowSize,
-		CPUUsageSnapshotInterval:           cfg.CPUUsageSnapshotInterval,
-		AllocatedResourcesSnapshotInterval: cfg.AllocatedResourcesSnapshotInterval,
+		Logger:                                logger,
+		Docker:                                dockerClient,
+		WindowSize:                            cfg.CollectorWindowSize,
+		CPUUsageSnapshotInterval:              cfg.CPUUsageSnapshotInterval,
+		AllocatedResourcesSnapshotInterval:    cfg.AllocatedResourcesSnapshotInterval,
+		SandboxFdUsageWarningThresholdPercent: float64(cfg.SandboxFdUsageWarningThresholdPercent),
 	})
 	metricsCollector.Start(ctx)
 

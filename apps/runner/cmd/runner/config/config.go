@@ -17,56 +17,57 @@ import (
 )
 
 type Config struct {
-	DaytonaApiUrl                      string        `envconfig:"DAYTONA_API_URL"`
-	ApiToken                           string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
-	ApiPort                            int           `envconfig:"API_PORT"`
-	ApiLogRequests                     bool          `envconfig:"API_LOG_REQUESTS" default:"false"`
-	TLSCertFile                        string        `envconfig:"TLS_CERT_FILE"`
-	TLSKeyFile                         string        `envconfig:"TLS_KEY_FILE"`
-	EnableTLS                          bool          `envconfig:"ENABLE_TLS"`
-	OtelLoggingEnabled                 bool          `envconfig:"OTEL_LOGGING_ENABLED"`
-	OtelTracingEnabled                 bool          `envconfig:"OTEL_TRACING_ENABLED"`
-	OtelEndpoint                       string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
-	OtelHeaders                        string        `envconfig:"OTEL_EXPORTER_OTLP_HEADERS"`
-	BackupInfoCacheRetention           time.Duration `envconfig:"BACKUP_INFO_CACHE_RETENTION" default:"168h" validate:"min=5m"`
-	Environment                        string        `envconfig:"ENVIRONMENT"`
-	ContainerRuntime                   string        `envconfig:"CONTAINER_RUNTIME"`
-	ContainerNetwork                   string        `envconfig:"CONTAINER_NETWORK"`
-	InterSandboxNetworkEnabled         bool          `envconfig:"INTER_SANDBOX_NETWORK_ENABLED" default:"true"`
-	GpuEnabled                         bool          `envconfig:"GPU_ENABLED" default:"false"`
-	LogFilePath                        string        `envconfig:"LOG_FILE_PATH"`
-	AWSRegion                          string        `envconfig:"AWS_REGION"`
-	AWSEndpointUrl                     string        `envconfig:"AWS_ENDPOINT_URL"`
-	AWSAccessKeyId                     string        `envconfig:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey                 string        `envconfig:"AWS_SECRET_ACCESS_KEY"`
-	AWSDefaultBucket                   string        `envconfig:"AWS_DEFAULT_BUCKET"`
-	ResourceLimitsDisabled             bool          `envconfig:"RESOURCE_LIMITS_DISABLED"`
-	DaemonStartTimeoutSec              int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
-	SandboxStartTimeoutSec             int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
-	AndroidBootTimeoutSec              int           `envconfig:"ANDROID_BOOT_TIMEOUT_SEC"`
-	UseSnapshotEntrypoint              bool          `envconfig:"USE_SNAPSHOT_ENTRYPOINT"`
-	Domain                             string        `envconfig:"RUNNER_DOMAIN" validate:"omitempty,hostname|ip"`
-	VolumeCleanupInterval              time.Duration `envconfig:"VOLUME_CLEANUP_INTERVAL" default:"30s" validate:"min=10s"`
-	VolumeCleanupDryRun                bool          `envconfig:"VOLUME_CLEANUP_DRY_RUN" default:"true"`
-	VolumeCleanupExclusionPeriod       time.Duration `envconfig:"VOLUME_CLEANUP_EXCLUSION_PERIOD" default:"120s" validate:"min=0s"`
-	PollTimeout                        time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
-	PollLimit                          int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
-	CollectorWindowSize                int           `envconfig:"COLLECTOR_WINDOW_SIZE" default:"60" validate:"min=1"`
-	CPUUsageSnapshotInterval           time.Duration `envconfig:"CPU_USAGE_SNAPSHOT_INTERVAL" default:"5s" validate:"min=1s"`
-	AllocatedResourcesSnapshotInterval time.Duration `envconfig:"ALLOCATED_RESOURCES_SNAPSHOT_INTERVAL" default:"5s" validate:"min=1s"`
-	HealthcheckInterval                time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
-	HealthcheckTimeout                 time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
-	BackupTimeoutMin                   int           `envconfig:"BACKUP_TIMEOUT_MIN" default:"60" validate:"min=1"`
-	SnapshotPullTimeout                time.Duration `envconfig:"SNAPSHOT_PULL_TIMEOUT" default:"60m" validate:"min=1m"`
-	BuildTimeoutMin                    int           `envconfig:"BUILD_TIMEOUT_MIN" default:"120" validate:"min=1"`
-	BuildCPUCores                      int64         `envconfig:"BUILD_CPU_CORES" default:"4" validate:"min=1"`
-	BuildMemoryGB                      int64         `envconfig:"BUILD_MEMORY_GB" default:"8" validate:"min=1"`
-	ApiVersion                         int           `envconfig:"API_VERSION" default:"2"`
-	InitializeDaemonTelemetry          bool          `envconfig:"INITIALIZE_DAEMON_TELEMETRY" default:"true"`
-	SnapshotErrorCacheRetention        time.Duration `envconfig:"SNAPSHOT_ERROR_CACHE_RETENTION" default:"10m" validate:"min=5m"`
-	BuildEngine                        string        `envconfig:"BUILD_ENGINE" default:"buildkit" validate:"oneof=buildkit legacy"`
-	ForceSnapshotRemoval               bool          `envconfig:"FORCE_SNAPSHOT_REMOVAL" default:"true"`
-	MountKvmToAndroidSandbox           bool          `envconfig:"MOUNT_KVM_TO_ANDROID_SANDBOX" default:"false"`
+	DaytonaApiUrl                         string        `envconfig:"DAYTONA_API_URL"`
+	ApiToken                              string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
+	ApiPort                               int           `envconfig:"API_PORT"`
+	ApiLogRequests                        bool          `envconfig:"API_LOG_REQUESTS" default:"false"`
+	TLSCertFile                           string        `envconfig:"TLS_CERT_FILE"`
+	TLSKeyFile                            string        `envconfig:"TLS_KEY_FILE"`
+	EnableTLS                             bool          `envconfig:"ENABLE_TLS"`
+	OtelLoggingEnabled                    bool          `envconfig:"OTEL_LOGGING_ENABLED"`
+	OtelTracingEnabled                    bool          `envconfig:"OTEL_TRACING_ENABLED"`
+	OtelEndpoint                          string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+	OtelHeaders                           string        `envconfig:"OTEL_EXPORTER_OTLP_HEADERS"`
+	BackupInfoCacheRetention              time.Duration `envconfig:"BACKUP_INFO_CACHE_RETENTION" default:"168h" validate:"min=5m"`
+	Environment                           string        `envconfig:"ENVIRONMENT"`
+	ContainerRuntime                      string        `envconfig:"CONTAINER_RUNTIME"`
+	ContainerNetwork                      string        `envconfig:"CONTAINER_NETWORK"`
+	InterSandboxNetworkEnabled            bool          `envconfig:"INTER_SANDBOX_NETWORK_ENABLED" default:"true"`
+	GpuEnabled                            bool          `envconfig:"GPU_ENABLED" default:"false"`
+	LogFilePath                           string        `envconfig:"LOG_FILE_PATH"`
+	AWSRegion                             string        `envconfig:"AWS_REGION"`
+	AWSEndpointUrl                        string        `envconfig:"AWS_ENDPOINT_URL"`
+	AWSAccessKeyId                        string        `envconfig:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey                    string        `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AWSDefaultBucket                      string        `envconfig:"AWS_DEFAULT_BUCKET"`
+	ResourceLimitsDisabled                bool          `envconfig:"RESOURCE_LIMITS_DISABLED"`
+	DaemonStartTimeoutSec                 int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
+	SandboxStartTimeoutSec                int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
+	AndroidBootTimeoutSec                 int           `envconfig:"ANDROID_BOOT_TIMEOUT_SEC"`
+	UseSnapshotEntrypoint                 bool          `envconfig:"USE_SNAPSHOT_ENTRYPOINT"`
+	Domain                                string        `envconfig:"RUNNER_DOMAIN" validate:"omitempty,hostname|ip"`
+	VolumeCleanupInterval                 time.Duration `envconfig:"VOLUME_CLEANUP_INTERVAL" default:"30s" validate:"min=10s"`
+	VolumeCleanupDryRun                   bool          `envconfig:"VOLUME_CLEANUP_DRY_RUN" default:"true"`
+	VolumeCleanupExclusionPeriod          time.Duration `envconfig:"VOLUME_CLEANUP_EXCLUSION_PERIOD" default:"120s" validate:"min=0s"`
+	PollTimeout                           time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
+	PollLimit                             int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
+	CollectorWindowSize                   int           `envconfig:"COLLECTOR_WINDOW_SIZE" default:"60" validate:"min=1"`
+	CPUUsageSnapshotInterval              time.Duration `envconfig:"CPU_USAGE_SNAPSHOT_INTERVAL" default:"5s" validate:"min=1s"`
+	AllocatedResourcesSnapshotInterval    time.Duration `envconfig:"ALLOCATED_RESOURCES_SNAPSHOT_INTERVAL" default:"5s" validate:"min=1s"`
+	SandboxFdUsageWarningThresholdPercent int           `envconfig:"SANDBOX_FD_USAGE_WARNING_THRESHOLD_PERCENT" default:"70" validate:"min=1,max=100"`
+	HealthcheckInterval                   time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
+	HealthcheckTimeout                    time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
+	BackupTimeoutMin                      int           `envconfig:"BACKUP_TIMEOUT_MIN" default:"60" validate:"min=1"`
+	SnapshotPullTimeout                   time.Duration `envconfig:"SNAPSHOT_PULL_TIMEOUT" default:"60m" validate:"min=1m"`
+	BuildTimeoutMin                       int           `envconfig:"BUILD_TIMEOUT_MIN" default:"120" validate:"min=1"`
+	BuildCPUCores                         int64         `envconfig:"BUILD_CPU_CORES" default:"4" validate:"min=1"`
+	BuildMemoryGB                         int64         `envconfig:"BUILD_MEMORY_GB" default:"8" validate:"min=1"`
+	ApiVersion                            int           `envconfig:"API_VERSION" default:"2"`
+	InitializeDaemonTelemetry             bool          `envconfig:"INITIALIZE_DAEMON_TELEMETRY" default:"true"`
+	SnapshotErrorCacheRetention           time.Duration `envconfig:"SNAPSHOT_ERROR_CACHE_RETENTION" default:"10m" validate:"min=5m"`
+	BuildEngine                           string        `envconfig:"BUILD_ENGINE" default:"buildkit" validate:"oneof=buildkit legacy"`
+	ForceSnapshotRemoval                  bool          `envconfig:"FORCE_SNAPSHOT_REMOVAL" default:"true"`
+	MountKvmToAndroidSandbox              bool          `envconfig:"MOUNT_KVM_TO_ANDROID_SANDBOX" default:"false"`
 }
 
 var DEFAULT_API_PORT int = 8080

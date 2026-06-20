@@ -36,4 +36,37 @@ var (
 		},
 		[]string{"operation", "status"},
 	)
+
+	// Gauges tracking per-sandbox host-side file descriptor usage
+	SandboxOpenFds = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "sandbox_open_fds",
+			Help: "Total open file descriptors across the sandbox's host-side processes",
+		},
+		[]string{"sandbox_id"},
+	)
+
+	SandboxFdLimit = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "sandbox_fd_limit",
+			Help: "Effective soft RLIMIT_NOFILE of the sandbox host-side process closest to its limit; 0 means every sampled process reports unlimited RLIMIT_NOFILE (dashboards must guard division by zero)",
+		},
+		[]string{"sandbox_id"},
+	)
+
+	SandboxFdUsagePercent = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "sandbox_fd_usage_percent",
+			Help: "Highest per-process fd usage percentage (open/RLIMIT_NOFILE*100) among the sandbox's host-side processes",
+		},
+		[]string{"sandbox_id"},
+	)
+
+	SandboxRuntimeHelperOpenFds = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "sandbox_runtime_helper_open_fds",
+			Help: "Open file descriptors of the sandbox's runtime helper processes (shim and friends) outside the container cgroup",
+		},
+		[]string{"sandbox_id"},
+	)
 )
