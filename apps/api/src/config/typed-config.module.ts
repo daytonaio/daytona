@@ -6,7 +6,7 @@
 import { Global, Module, DynamicModule } from '@nestjs/common'
 import { ConfigModule as NestConfigModule, ConfigModuleOptions } from '@nestjs/config'
 import { TypedConfigService } from './typed-config.service'
-import { configuration } from './configuration'
+import { loadConfiguration } from './configuration'
 import { ConfigController } from './config.controller'
 
 @Global()
@@ -14,7 +14,7 @@ import { ConfigController } from './config.controller'
   imports: [
     NestConfigModule.forRoot({
       isGlobal: true,
-      load: [() => configuration],
+      load: [loadConfiguration],
     }),
   ],
   controllers: [ConfigController],
