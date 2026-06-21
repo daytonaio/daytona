@@ -886,6 +886,7 @@ Set these variables before running the install script to customize the runner co
 | **Variable name**           | **Description**              | **Default value / notes**                     |
 | --------------------------- | ---------------------------- | --------------------------------------------- |
 | **`CONTAINER_RUNTIME`**     | Container runtime to use     | `sysbox-runc`                                 |
+| **`DOCKER_DATA_ROOT`**      | Docker data root path for runner disk metrics | Auto-discovered from Docker; set when the reported path is not reachable from the runner |
 | **`API_TOKEN`**             | API token for runner         | Auto-generated or user-provided               |
 | **`TLS_CERT_FILE`**         | Path to TLS certificate file | `/etc/letsencrypt/live/$DOMAIN/fullchain.pem` |
 | **`TLS_KEY_FILE`**          | Path to TLS key file         | `/etc/letsencrypt/live/$DOMAIN/privkey.pem`   |
