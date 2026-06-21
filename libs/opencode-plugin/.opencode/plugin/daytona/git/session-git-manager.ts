@@ -45,7 +45,17 @@ export class SessionGitManager {
 
   private async getSshUrl(): Promise<string> {
     const sshAccess = await this.sandbox.createSshAccess(10)
-    return `ssh://${sshAccess.token}@ssh.app.daytona.io${this.repoPath}`
+    // sshCommand format: "ssh [-p PORT] TOKEN@HOST"
+    // Parse it to derive the correct host/port for any deployment (local or cloud).
+    const match = sshAccess.sshCommand.match(/ssh(?:\s+-p\s+(\d+))?\s+\S+@(\S+)/)
+    if (match) {
+      const port = match[1] ? `:${match[1]}` : ''
+      const host = match[2]
+      return `ssh://${sshAccess.token}@${host}${port}${this.repoPath}`
+    }
+    // Fallback: env var or cloud default
+    const gateway = process.env.DAYTONA_SSH_GATEWAY_URL || 'ssh.app.daytona.io'
+    return `ssh://${sshAccess.token}@${gateway}${this.repoPath}`
   }
 
   /**
