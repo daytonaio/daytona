@@ -449,6 +449,41 @@ export class SnapshotService {
     await this.snapshotRepository.update(snapshotId, { updateData, entity: snapshot })
   }
 
+  async retryFailedSnapshot(snapshotId: string): Promise<Snapshot> {
+    const snapshot = await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+    }
+    if (![SnapshotState.ERROR, SnapshotState.BUILD_FAILED].includes(snapshot.state)) {
+      throw new BadRequestException(`Snapshot ${snapshotId} is not in a failed state`)
+    }
+
+    const updateData: Partial<Snapshot> = {
+      state: SnapshotState.PENDING,
+      errorReason: null,
+      initialRunnerId: null,
+    }
+
+    // Pull snapshots derive their internal reference from the source image. Clear
+    // failed attempt metadata so the retry inspects and pulls the source again.
+    if (!snapshot.buildInfo) {
+      updateData.ref = null
+      updateData.size = null
+    }
+
+    const retriedSnapshot = await this.snapshotRepository.update(snapshotId, {
+      updateData,
+      entity: snapshot,
+    })
+
+    this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(retriedSnapshot))
+
+    return retriedSnapshot
+  }
+
   async getAllSnapshots(
     organizationId: string,
     page = 1,
