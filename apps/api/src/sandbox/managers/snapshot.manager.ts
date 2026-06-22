@@ -7,7 +7,7 @@ import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@n
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
-import { Equal, In, IsNull, LessThan, MoreThanOrEqual, Not, Or, Repository } from 'typeorm'
+import { Equal, FindOptionsWhere, In, IsNull, LessThan, MoreThanOrEqual, Not, Or, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -334,20 +334,28 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
+  // Shared by propagateSnapshotToRunners and scaleDownSnapshotFromRunners so both operate on the same data
+  private eligibleRunnerWhere(snapshot: Snapshot, regionIds: string[]): FindOptionsWhere<Runner> {
+    return {
+      state: RunnerState.READY,
+      unschedulable: Not(true),
+      region: In(regionIds),
+      gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
+      gpuType: snapshot.gpuType ? snapshot.gpuType : IsNull(),
+      sandboxClass: getRunnerSandboxClass(snapshot.sandboxClass),
+    }
+  }
+
+  private getTargetSharedRunnerCount(eligibleSharedRunnerCount: number, propagationFactor: number): number {
+    return Math.ceil(propagationFactor * eligibleSharedRunnerCount)
+  }
+
   async propagateSnapshotToRunners(snapshot: Snapshot, sharedRegionIds: string[], organizationRegionIds: string[]) {
     //  todo: remove try catch block and implement error handling
     try {
       //  get all runners in the regions to propagate to
       const runners = await this.runnerRepository.find({
-        where: {
-          state: RunnerState.READY,
-          unschedulable: Not(true),
-          region: In([...sharedRegionIds, ...organizationRegionIds]),
-          gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
-          gpuType: snapshot.gpuType ? snapshot.gpuType : IsNull(),
-          // Temporary: Android snapshots can go to container runners
-          sandboxClass: getRunnerSandboxClass(snapshot.sandboxClass),
-        },
+        where: this.eligibleRunnerWhere(snapshot, [...sharedRegionIds, ...organizationRegionIds]),
       })
 
       const sharedRunners = runners.filter((runner) => sharedRegionIds.includes(runner.region))
@@ -393,9 +401,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       runnersToPropagateTo.push(...unallocatedOrganizationRunners)
 
       // respect the propagation limit for shared runners
+      const targetSharedRunnerCount = this.getTargetSharedRunnerCount(sharedRunners.length, BASE_PROPAGATION_FACTOR)
       const sharedRunnersPropagateLimit = Math.max(
         0,
-        Math.ceil(sharedRunners.length * BASE_PROPAGATION_FACTOR) - sharedSnapshotRunnersDistinctRunnersIds.size,
+        targetSharedRunnerCount - sharedSnapshotRunnersDistinctRunnersIds.size,
       )
       runnersToPropagateTo.push(...shuffleArray(unallocatedSharedRunners).slice(0, sharedRunnersPropagateLimit))
 
@@ -423,7 +432,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
             throw new Error(`No internal registry found for snapshot ${snapshot.ref} in region ${runner.region}`)
           }
 
-          const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
+          let snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
 
           try {
             if (!snapshotRunner) {
@@ -445,9 +454,15 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
             }
           } catch (err) {
             this.logger.error(`Error propagating snapshot to runner ${runner.id}: ${fromAxiosError(err)}`)
-            snapshotRunner.state = SnapshotRunnerState.ERROR
-            snapshotRunner.errorReason = err.message
-            await this.snapshotRunnerRepository.update(snapshotRunner.id, snapshotRunner)
+            // The entry may have just been created above (snapshotRunner was null), so re-fetch it to update.
+            if (!snapshotRunner) {
+              snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
+            }
+            if (snapshotRunner) {
+              snapshotRunner.state = SnapshotRunnerState.ERROR
+              snapshotRunner.errorReason = err.message
+              await this.snapshotRunnerRepository.update(snapshotRunner.id, snapshotRunner)
+            }
           }
         }),
       )
@@ -472,16 +487,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         return 0
       }
 
-      // Get all shared runners in the regions
       const sharedRunners = await this.runnerRepository.find({
-        where: {
-          state: RunnerState.READY,
-          unschedulable: Not(true),
-          region: In(sharedRegionIds),
-          gpu: snapshot.gpu > 0 ? MoreThanOrEqual(snapshot.gpu) : Or(IsNull(), Equal(0)),
-          gpuType: snapshot.gpuType ? snapshot.gpuType : IsNull(),
-          sandboxClass: getRunnerSandboxClass(snapshot.sandboxClass),
-        },
+        where: this.eligibleRunnerWhere(snapshot, sharedRegionIds),
       })
 
       const sharedRunnerIds = sharedRunners.map((runner) => runner.id)
@@ -501,8 +508,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         },
       })
 
-      // Calculate the maximum allowed number of snapshot runners (same formula as propagation)
-      const maxSharedSnapshotRunners = Math.ceil(propagationFactor * sharedRunners.length)
+      // Must match propagateSnapshotToRunners: use the same target formula
+      const maxSharedSnapshotRunners = this.getTargetSharedRunnerCount(sharedRunners.length, propagationFactor)
 
       // Only scale down if the propagated amount exceeds the limit by more than 15%
       const scaleDownThreshold = Math.ceil(maxSharedSnapshotRunners * 1.15)
