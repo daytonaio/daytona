@@ -203,10 +203,10 @@ type ComputerUseStopResponse struct {
 } //	@name	ComputerUseStopResponse
 
 type ProcessStatus struct {
-	Running     bool
-	Priority    int
-	AutoRestart bool
-	Pid         *int
+	Running     bool `json:"running"`
+	Priority    int  `json:"priority"`
+	AutoRestart bool `json:"autoRestart"`
+	Pid         *int `json:"pid,omitempty"`
 } //	@name	ProcessStatus
 
 type ProcessStatusResponse struct {

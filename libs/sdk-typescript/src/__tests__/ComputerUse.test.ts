@@ -59,12 +59,12 @@ describe('ComputerUse', () => {
     apiClient.click.mockResolvedValue(createApiResponse({ success: true }))
     apiClient.drag.mockResolvedValue(createApiResponse({ success: true }))
     apiClient.scroll.mockResolvedValue(createApiResponse({ success: true }))
-    apiClient.takeScreenshot.mockResolvedValue(createApiResponse({ data: 'a' }))
-    apiClient.takeRegionScreenshot.mockResolvedValue(createApiResponse({ data: 'b' }))
-    apiClient.takeCompressedScreenshot.mockResolvedValue(createApiResponse({ data: 'c' }))
-    apiClient.takeCompressedRegionScreenshot.mockResolvedValue(createApiResponse({ data: 'd' }))
-    apiClient.getDisplayInfo.mockResolvedValue(createApiResponse({ total_displays: 1 }))
-    apiClient.getWindows.mockResolvedValue(createApiResponse({ count: 0, windows: [] }))
+    apiClient.takeScreenshot.mockResolvedValue(createApiResponse({ screenshot: 'a' }))
+    apiClient.takeRegionScreenshot.mockResolvedValue(createApiResponse({ screenshot: 'b' }))
+    apiClient.takeCompressedScreenshot.mockResolvedValue(createApiResponse({ screenshot: 'c' }))
+    apiClient.takeCompressedRegionScreenshot.mockResolvedValue(createApiResponse({ screenshot: 'd' }))
+    apiClient.getDisplayInfo.mockResolvedValue(createApiResponse({ displays: [] }))
+    apiClient.getWindows.mockResolvedValue(createApiResponse({ windows: [] }))
 
     await expect(computerUse.mouse.getPosition()).resolves.toEqual({ x: 1, y: 2 })
     await expect(computerUse.mouse.move(10, 20)).resolves.toEqual({ x: 10, y: 20 })
@@ -76,15 +76,17 @@ describe('ComputerUse', () => {
     await computerUse.keyboard.press('Enter', ['ctrl'])
     await computerUse.keyboard.hotkey('ctrl+c')
 
-    await expect(computerUse.screenshot.takeFullScreen()).resolves.toEqual({ data: 'a' })
-    await expect(computerUse.screenshot.takeRegion({ x: 1, y: 2, width: 3, height: 4 })).resolves.toEqual({ data: 'b' })
-    await expect(computerUse.screenshot.takeCompressed()).resolves.toEqual({ data: 'c' })
+    await expect(computerUse.screenshot.takeFullScreen()).resolves.toEqual({ screenshot: 'a' })
+    await expect(computerUse.screenshot.takeRegion({ x: 1, y: 2, width: 3, height: 4 })).resolves.toEqual({
+      screenshot: 'b',
+    })
+    await expect(computerUse.screenshot.takeCompressed()).resolves.toEqual({ screenshot: 'c' })
     await expect(
       computerUse.screenshot.takeCompressedRegion({ x: 1, y: 2, width: 3, height: 4 }, { format: 'png' }),
-    ).resolves.toEqual({ data: 'd' })
+    ).resolves.toEqual({ screenshot: 'd' })
 
-    await expect(computerUse.display.getInfo()).resolves.toEqual({ total_displays: 1 })
-    await expect(computerUse.display.getWindows()).resolves.toEqual({ count: 0, windows: [] })
+    await expect(computerUse.display.getInfo()).resolves.toEqual({ displays: [] })
+    await expect(computerUse.display.getWindows()).resolves.toEqual({ windows: [] })
   })
 
   it('sends default mouse and keyboard payloads', async () => {

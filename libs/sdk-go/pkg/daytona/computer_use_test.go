@@ -366,7 +366,6 @@ func TestScreenshotAndDisplayServices(t *testing.T) {
 		require.NotNil(t, full.SizeBytes)
 		region, err := ss.TakeRegion(context.Background(), types.ScreenshotRegion{X: 1, Y: 2, Width: 3, Height: 4}, nil)
 		require.NoError(t, err)
-		assert.Equal(t, 3, region.Width)
 		assert.Equal(t, "region-image", region.Image)
 	})
 

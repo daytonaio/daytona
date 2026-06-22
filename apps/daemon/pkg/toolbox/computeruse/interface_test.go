@@ -9,6 +9,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -61,6 +62,182 @@ func performScreenshotRequest(router *gin.Engine, path string) *httptest.Respons
 	req := httptest.NewRequest(http.MethodGet, path, nil)
 	router.ServeHTTP(rr, req)
 	return rr
+}
+
+type swaggerDefinition struct {
+	Properties map[string]json.RawMessage `json:"properties"`
+}
+
+type toolboxSwagger struct {
+	Definitions map[string]swaggerDefinition `json:"definitions"`
+}
+
+func loadToolboxSwagger(t *testing.T) toolboxSwagger {
+	t.Helper()
+
+	specBytes, err := os.ReadFile("../docs/swagger.json")
+	require.NoError(t, err)
+
+	var spec toolboxSwagger
+	require.NoError(t, json.Unmarshal(specBytes, &spec))
+
+	return spec
+}
+
+func swaggerPropertyKeys(t *testing.T, spec toolboxSwagger, definitionName string) []string {
+	t.Helper()
+
+	definition, ok := spec.Definitions[definitionName]
+	require.True(t, ok, "missing OpenAPI definition %s", definitionName)
+
+	keys := make([]string, 0, len(definition.Properties))
+	for key := range definition.Properties {
+		keys = append(keys, key)
+	}
+
+	return keys
+}
+
+func serializedObjectKeys(t *testing.T, value any) []string {
+	t.Helper()
+
+	payload, err := json.Marshal(value)
+	require.NoError(t, err)
+
+	var object map[string]json.RawMessage
+	require.NoError(t, json.Unmarshal(payload, &object))
+
+	keys := make([]string, 0, len(object))
+	for key := range object {
+		keys = append(keys, key)
+	}
+
+	return keys
+}
+
+func TestComputerUseResponseJSONMatchesOpenAPISchema(t *testing.T) {
+	spec := loadToolboxSwagger(t)
+	pid := 4312
+
+	tests := []struct {
+		name       string
+		definition string
+		value      any
+	}{
+		{
+			name:       "start response",
+			definition: "ComputerUseStartResponse",
+			value: ComputerUseStartResponse{
+				Message: "started",
+				Status: map[string]ProcessStatus{
+					"xvfb": {Running: true, Priority: 1, AutoRestart: true, Pid: &pid},
+				},
+			},
+		},
+		{
+			name:       "stop response",
+			definition: "ComputerUseStopResponse",
+			value: ComputerUseStopResponse{
+				Message: "stopped",
+				Status: map[string]ProcessStatus{
+					"xvfb": {Running: false, Priority: 1, AutoRestart: true, Pid: &pid},
+				},
+			},
+		},
+		{
+			name:       "screenshot response",
+			definition: "ScreenshotResponse",
+			value: ScreenshotResponse{
+				Screenshot:     "image",
+				CursorPosition: &Position{X: 1, Y: 2},
+				SizeBytes:      42,
+			},
+		},
+		{
+			name:       "mouse position response",
+			definition: "MousePositionResponse",
+			value:      MousePositionResponse{Position: Position{X: 1, Y: 2}},
+		},
+		{
+			name:       "mouse click response",
+			definition: "MouseClickResponse",
+			value:      MouseClickResponse{Position: Position{X: 1, Y: 2}},
+		},
+		{
+			name:       "mouse drag response",
+			definition: "MouseDragResponse",
+			value:      MouseDragResponse{Position: Position{X: 3, Y: 4}},
+		},
+		{
+			name:       "scroll response",
+			definition: "ScrollResponse",
+			value:      ScrollResponse{Success: true},
+		},
+		{
+			name:       "display info response",
+			definition: "DisplayInfoResponse",
+			value: DisplayInfoResponse{
+				Displays: []DisplayInfo{
+					{ID: 1, Position: Position{X: 0, Y: 0}, Size: Size{Width: 1024, Height: 768}, IsActive: true},
+				},
+			},
+		},
+		{
+			name:       "display info",
+			definition: "DisplayInfo",
+			value:      DisplayInfo{ID: 1, Position: Position{X: 0, Y: 0}, Size: Size{Width: 1024, Height: 768}, IsActive: true},
+		},
+		{
+			name:       "windows response",
+			definition: "WindowsResponse",
+			value: WindowsResponse{
+				Windows: []WindowInfo{
+					{ID: 1, Title: "Editor", Position: Position{X: 0, Y: 0}, Size: Size{Width: 1024, Height: 768}, IsActive: true},
+				},
+			},
+		},
+		{
+			name:       "window info",
+			definition: "WindowInfo",
+			value:      WindowInfo{ID: 1, Title: "Editor", Position: Position{X: 0, Y: 0}, Size: Size{Width: 1024, Height: 768}, IsActive: true},
+		},
+		{
+			name:       "computer use status response",
+			definition: "ComputerUseStatusResponse",
+			value:      ComputerUseStatusResponse{Status: "running"},
+		},
+		{
+			name:       "process status",
+			definition: "ProcessStatus",
+			value:      ProcessStatus{Running: true, Priority: 1, AutoRestart: true, Pid: &pid},
+		},
+		{
+			name:       "process status response",
+			definition: "ProcessStatusResponse",
+			value:      ProcessStatusResponse{ProcessName: "xvfb", Running: true},
+		},
+		{
+			name:       "process restart response",
+			definition: "ProcessRestartResponse",
+			value:      ProcessRestartResponse{Message: "restarted", ProcessName: "xvfb"},
+		},
+		{
+			name:       "process logs response",
+			definition: "ProcessLogsResponse",
+			value:      ProcessLogsResponse{ProcessName: "xvfb", Logs: "logs"},
+		},
+		{
+			name:       "process errors response",
+			definition: "ProcessErrorsResponse",
+			value:      ProcessErrorsResponse{ProcessName: "xvfb", Errors: "errors"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.ElementsMatch(t, swaggerPropertyKeys(t, spec, tt.definition), serializedObjectKeys(t, tt.value))
+		})
+	}
 }
 
 func TestWrapRegionScreenshotHandlerParsesLowercaseQueryParams(t *testing.T) {

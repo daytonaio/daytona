@@ -558,12 +558,8 @@ func (s *ScreenshotService) TakeFullScreen(ctx context.Context, showCursor *bool
 			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
 
-		// Note: Toolbox API returns screenshot but not width/height separately
-		// Width and height would need to be parsed from the image data if needed
 		return &types.ScreenshotResponse{
 			Image:     result.GetScreenshot(),
-			Width:     0, // Not provided by toolbox API
-			Height:    0, // Not provided by toolbox API
 			SizeBytes: convertInt32PtrToIntPtr(result.SizeBytes),
 		}, nil
 	})
@@ -602,12 +598,8 @@ func (s *ScreenshotService) TakeRegion(ctx context.Context, region types.Screens
 			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
 
-		// Note: Toolbox API returns screenshot but not width/height separately
-		// The region dimensions are known from the request parameters
 		return &types.ScreenshotResponse{
 			Image:     result.GetScreenshot(),
-			Width:     region.Width,
-			Height:    region.Height,
 			SizeBytes: convertInt32PtrToIntPtr(result.SizeBytes),
 		}, nil
 	})

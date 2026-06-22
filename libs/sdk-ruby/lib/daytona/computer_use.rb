@@ -243,12 +243,12 @@ module Daytona
       # Takes a screenshot of the entire screen.
       #
       # @param show_cursor [Boolean] Whether to show the cursor in the screenshot. Defaults to false
-      # @return [DaytonaApiClient::ScreenshotResponse] Screenshot data with base64 encoded image
+      # @return [DaytonaToolboxApiClient::ScreenshotResponse] Screenshot data with base64 encoded image
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
       #   screenshot = sandbox.computer_use.screenshot.take_full_screen
-      #   puts "Screenshot size: #{screenshot.width}x#{screenshot.height}"
+      #   puts "Screenshot bytes: #{screenshot.size_bytes}"
       #
       #   # With cursor visible
       #   with_cursor = sandbox.computer_use.screenshot.take_full_screen(show_cursor: true)
@@ -262,13 +262,13 @@ module Daytona
       #
       # @param region [ScreenshotRegion] The region to capture
       # @param show_cursor [Boolean] Whether to show the cursor in the screenshot. Defaults to false
-      # @return [DaytonaApiClient::RegionScreenshotResponse] Screenshot data with base64 encoded image
+      # @return [DaytonaToolboxApiClient::ScreenshotResponse] Screenshot data with base64 encoded image
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
       #   region = ScreenshotRegion.new(x: 100, y: 100, width: 300, height: 200)
       #   screenshot = sandbox.computer_use.screenshot.take_region(region)
-      #   puts "Captured region: #{screenshot.region.width}x#{screenshot.region.height}"
+      #   puts "Screenshot bytes: #{screenshot.size_bytes}"
       def take_region(region:, show_cursor: false)
         toolbox_api.take_region_screenshot(region.height, region.width, region.y, region.x, show_cursor:)
       rescue StandardError => e
@@ -278,7 +278,7 @@ module Daytona
       # Takes a compressed screenshot of the entire screen.
       #
       # @param options [ScreenshotOptions, nil] Compression and display options
-      # @return [DaytonaApiClient::CompressedScreenshotResponse] Compressed screenshot data
+      # @return [DaytonaToolboxApiClient::ScreenshotResponse] Compressed screenshot data
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
@@ -311,7 +311,7 @@ module Daytona
       #
       # @param region [ScreenshotRegion] The region to capture
       # @param options [ScreenshotOptions, nil] Compression and display options
-      # @return [DaytonaApiClient::CompressedScreenshotResponse] Compressed screenshot data
+      # @return [DaytonaToolboxApiClient::ScreenshotResponse] Compressed screenshot data
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
@@ -368,13 +368,12 @@ module Daytona
 
       # Gets information about the displays.
       #
-      # @return [DaytonaToolboxApiClient::DisplayInfoResponse] Display information including primary display and all available displays
+      # @return [DaytonaToolboxApiClient::DisplayInfoResponse] Display information for all available displays
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
       #   info = sandbox.computer_use.display.get_info
-      #   puts "Primary display: #{info.primary_display.width}x#{info.primary_display.height}"
-      #   puts "Total displays: #{info.total_displays}"
+      #   puts "Total displays: #{info.displays.length}"
       #   info.displays.each_with_index do |display, i|
       #     puts "Display #{i}: #{display.width}x#{display.height} at #{display.x},#{display.y}"
       #   end
@@ -391,7 +390,7 @@ module Daytona
       #
       # @example
       #   windows = sandbox.computer_use.display.get_windows
-      #   puts "Found #{windows.count} open windows:"
+      #   puts "Found #{windows.windows.length} open windows:"
       #   windows.windows.each do |window|
       #     puts "- #{window.title} (ID: #{window.id})"
       #   end

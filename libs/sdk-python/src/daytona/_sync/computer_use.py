@@ -316,7 +316,7 @@ class Screenshot:
         Example:
             ```python
             screenshot = sandbox.computer_use.screenshot.take_full_screen()
-            print(f"Screenshot size: {screenshot.width}x{screenshot.height}")
+            print(f"Screenshot bytes: {screenshot.size_bytes}")
 
             # With cursor visible
             with_cursor = sandbox.computer_use.screenshot.take_full_screen(True)
@@ -341,7 +341,7 @@ class Screenshot:
             ```python
             region = ScreenshotRegion(x=100, y=100, width=300, height=200)
             screenshot = sandbox.computer_use.screenshot.take_region(region)
-            print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
+            print(f"Screenshot bytes: {screenshot.size_bytes}")
             ```
         """
         response = self._api_client.take_region_screenshot(
@@ -444,8 +444,7 @@ class Display:
         Example:
             ```python
             info = sandbox.computer_use.display.get_info()
-            print(f"Primary display: {info.primary_display.width}x{info.primary_display.height}")
-            print(f"Total displays: {info.total_displays}")
+            print(f"Total displays: {len(info.displays)}")
             for i, display in enumerate(info.displays):
                 print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
             ```
@@ -464,7 +463,7 @@ class Display:
         Example:
             ```python
             windows = sandbox.computer_use.display.get_windows()
-            print(f"Found {windows.count} open windows:")
+            print(f"Found {len(windows.windows)} open windows:")
             for window in windows.windows:
                 print(f"- {window.title} (ID: {window.id})")
             ```
