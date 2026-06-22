@@ -1,0 +1,77 @@
+libs/sdk-go/pkg/daytona/client.go
+  s_d5b1a37852c285::t_85fb38f31ab152 494-496
+libs/sdk-python/src/daytona/_async/sandbox.py
+  s_d5b1a37852c285::t_8bb1b0bfb61db6 95-96
+  s_d5b1a37852c285::t_41dc6532808ee6 852
+  s_d5b1a37852c285::t_6b53b6433091c1 518,526,537-540,545,550
+libs/sdk-java/src/main/java/io/daytona/sdk/Daytona.java
+  s_d5b1a37852c285::t_0b884801e3668e 512
+libs/sdk-go/pkg/types/types.go
+  s_d5b1a37852c285::t_96b51c89ab964e 93
+libs/sdk-python/src/daytona/_sync/sandbox.py
+  s_d5b1a37852c285::t_25d68273855961 96-97
+  s_d5b1a37852c285::t_f3c6c826daaaaa 533,541,552-555,560,565
+  s_d5b1a37852c285::t_26f939d1a337a0 868
+libs/sdk-python/tests/conftest.py
+  s_d5b1a37852c285::t_41c7edd8e3c709 65
+libs/sdk-python/src/daytona/common/daytona.py
+  s_d5b1a37852c285::t_7cd53cad2e313e 162
+  s_d5b1a37852c285::t_9c97a5ae3b3c31 141
+libs/sdk-java/src/main/java/io/daytona/sdk/model/CreateSandboxParams.java
+  s_d5b1a37852c285::t_2326e3f933350a 30
+  s_d5b1a37852c285::t_41a69f3640d5d6 188-200
+libs/sdk-typescript/src/Sandbox.ts
+  s_d5b1a37852c285::t_7f0fd2c0bf802b 128
+  s_d5b1a37852c285::t_362e1b658ec0a4 86-87
+  s_d5b1a37852c285::t_d46d21e9f71513 663-664,666-667,675-676,680-685
+libs/sdk-go/pkg/daytona/sandbox.go
+  s_d5b1a37852c285::t_c6fd138f4605ca 381
+  s_d5b1a37852c285::t_fff3bc0050cdba 127-128
+  s_d5b1a37852c285::t_94d70d0ea9486f 391
+  s_d5b1a37852c285::t_4dc4e802ef67a3 327
+  s_d5b1a37852c285::t_90eb771f5145fb 110-113
+libs/sdk-typescript/src/Daytona.ts
+  s_d5b1a37852c285::t_3e3e33155d682b 171
+  s_d5b1a37852c285::t_72268ed5c6106d 573
+  s_d5b1a37852c285::t_55ce526a60e461 154
+libs/sdk-ruby/spec/spec_helper.rb
+  s_d5b1a37852c285::t_791cc3f9b1ffee 94
+libs/sdk-python/src/daytona/_async/daytona.py
+  s_d5b1a37852c285::t_882f36b9710f67 548
+libs/sdk-ruby/lib/daytona/sandbox.rb
+  s_d5b1a37852c285::t_c7fecc7b515734 223,226-227,229,234-235,240
+  s_d5b1a37852c285::t_b5326c41eb031e 623
+  s_d5b1a37852c285::t_4587db91d97c2a 44-47
+libs/sdk-ruby/lib/daytona/common/daytona.rb
+  s_d5b1a37852c285::t_05ca5530fb77c4 72
+  s_d5b1a37852c285::t_f94e4f2a50955a 215
+  s_d5b1a37852c285::t_e1a58a74123747 129
+  s_d5b1a37852c285::t_ebfe070dc4fa77 88
+  s_d5b1a37852c285::t_eb2791bf4821eb 104
+  s_d5b1a37852c285::t_f19efb0a8ea07c 176
+  s_d5b1a37852c285::t_ed0d8a31700c21 46-48
+libs/sdk-python/src/daytona/_sync/daytona.py
+  s_d5b1a37852c285::t_06ec436fd5a93d 433
+libs/sdk-java/src/main/java/io/daytona/sdk/Sandbox.java
+  s_d5b1a37852c285::t_ae06c777594193 66
+  s_d5b1a37852c285::t_a21b30a44facbe 642-648
+  s_d5b1a37852c285::t_c16e31e0a866c2 408
+libs/sdk-ruby/lib/daytona/daytona.rb
+  s_d5b1a37852c285::t_b09b0e8466721f 218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "13d8ea7b155dc290def9684be5b5d48219ccf758",
+  "prompts": {},
+  "sessions": {
+    "s_d5b1a37852c285": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b146bd4f-2000-4634-b21b-be2cc9fd086f",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Toma Puljak <toma.puljak@hotmail.com>"
+    }
+  }
+}
