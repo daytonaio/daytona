@@ -2016,6 +2016,17 @@ export class SandboxService {
 
     const updateData = Sandbox.getSoftDeleteUpdate(sandbox)
 
+    // When destroying a sandbox that is in error state, its instance may no longer exist on the
+    // runner. If the runner reports the sandbox as gone, detach it from the runner so the destroy
+    // doesn't get stuck waiting for a non-existent instance to be cleaned up.
+    if (sandbox.state === SandboxState.ERROR && sandbox.runnerId) {
+      const existsOnRunner = await this.sandboxExistsOnRunner(sandbox)
+      if (!existsOnRunner) {
+        updateData.prevRunnerId = sandbox.runnerId
+        updateData.runnerId = null
+      }
+    }
+
     const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
       updateData,
       whereCondition: { pending: sandbox.pending, state: sandbox.state },
@@ -2023,6 +2034,29 @@ export class SandboxService {
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(updatedSandbox))
     return updatedSandbox
+  }
+
+  // Checks whether the sandbox instance still exists on its assigned runner.
+  // The runner reports a missing instance as a DESTROYED state (HTTP 200), not a 404.
+  private async sandboxExistsOnRunner(sandbox: Sandbox): Promise<boolean> {
+    if (!sandbox.runnerId) {
+      return false
+    }
+
+    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (!runner) {
+      return false
+    }
+
+    try {
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      const info = await runnerAdapter.sandboxInfo(sandbox.id)
+      return info.state !== SandboxState.DESTROYED
+    } catch (error) {
+      this.logger.error(`Failed to check if sandbox ${sandbox.id} exists on runner ${sandbox.runnerId}:`, error)
+      // If we can't determine existence, assume it still exists to avoid detaching prematurely.
+      return true
+    }
   }
 
   async start(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
