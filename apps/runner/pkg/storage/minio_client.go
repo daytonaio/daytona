@@ -39,10 +39,10 @@ func GetObjectStorageClient() (ObjectStorageClient, error) {
 	bucketName := runnerConfig.AWSDefaultBucket
 	region := runnerConfig.AWSRegion
 
+	useSSL := strings.HasPrefix(endpoint, "https://")
+
 	endpoint = strings.TrimPrefix(endpoint, "http://")
 	endpoint = strings.TrimPrefix(endpoint, "https://")
-
-	useSSL := strings.Contains(endpoint, "https")
 
 	if endpoint == "" || accessKeyId == "" || secretKey == "" || bucketName == "" || region == "" {
 		return nil, fmt.Errorf("missing S3 configuration - endpoint, access key, secret key, region, or bucket name not provided")
