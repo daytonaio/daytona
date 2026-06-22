@@ -63,16 +63,41 @@ ARG VERSION=0.0.1
 RUN --mount=type=cache,target=/root/.cache/go-build \
   SKIP_COMPUTER_USE_BUILD=true VERSION=$VERSION yarn nx build runner --configuration=production --nxBail=true
 
+# Build mount-s3 (Mountpoint for Amazon S3) from source against Alpine musl.
+# AWS only publishes glibc-linked mount-s3 artifacts (the .deb/tar.gz on the
+# Mountpoint releases page), which cannot run on Alpine. Pinned to 1.20.0 to
+# match the version already pinned in .devcontainer/Dockerfile.
+FROM alpine:3.22 AS mount-s3-builder
+ARG MOUNTPOINT_S3_VERSION=1.20.0
+RUN apk add --no-cache \
+      git curl gcc g++ make cmake pkgconfig perl \
+      zlib zlib-dev openssl-dev fuse fuse-dev \
+      clang clang-dev rust cargo musl-dev linux-headers
+RUN git clone --recurse-submodules --shallow-submodules --depth 1 \
+      --branch mountpoint-s3-${MOUNTPOINT_S3_VERSION} \
+      https://github.com/awslabs/mountpoint-s3.git /src/mountpoint-s3
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    --mount=type=cache,target=/src/mountpoint-s3/target,sharing=locked \
+    cd /src/mountpoint-s3 \
+ && cargo build --release --locked --bin mount-s3 \
+ && cp /src/mountpoint-s3/target/release/mount-s3 /usr/local/bin/mount-s3 \
+ && strip /usr/local/bin/mount-s3 \
+ && /usr/local/bin/mount-s3 --version
+
 FROM docker:28.5.2-dind-alpine3.22 AS runner
 
 RUN apk update && apk upgrade --no-cache openssl pcre2 \
-  && apk add --no-cache curl rsync
+  && apk add --no-cache curl rsync fuse libgcc ca-certificates
 
 WORKDIR /usr/local/bin
 
 COPY --from=build /daytona/dist/apps/runner daytona-runner
+COPY --from=mount-s3-builder --chmod=0755 /usr/local/bin/mount-s3 /usr/local/bin/mount-s3
 
 RUN chmod +x daytona-runner
+
+# Verify mount-s3 loads against the final-stage runtime libraries.
+RUN /usr/local/bin/mount-s3 --version
 
 RUN mkdir -p /etc/docker && echo '{"insecure-registries": ["registry:6000"]}' > /etc/docker/daemon.json
 
