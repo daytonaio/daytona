@@ -51,6 +51,7 @@ import { normalizeGpuType } from '../utils/gpu-type-normalizer.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
+import { RunnerUsageService } from './runner-usage.service'
 
 @Injectable()
 export class RunnerService {
@@ -74,6 +75,7 @@ export class RunnerService {
     private readonly dataSource: DataSource,
     @InjectRedis()
     private readonly redis: Redis,
+    private readonly runnerUsageService: RunnerUsageService,
   ) {
     this.scoreConfig = this.getAvailabilityScoreConfig()
   }
@@ -1225,6 +1227,28 @@ export class RunnerService {
         ],
       },
     }
+  }
+
+  /**
+   * Computes the runner's availabilityScore as it would be with the currently-reserved
+   * pending usage applied on top of its last reported metrics. The resize admission gate
+   * calls this *after* reserving its own usage, so the projection already includes it.
+   */
+  async getProjectedAvailabilityScore(runner: Runner): Promise<number> {
+    const pending = await this.runnerUsageService.getPendingRunnerUsage(runner.id)
+    return this.calculateAvailabilityScore(runner.id, {
+      cpuLoadAverage: runner.currentCpuLoadAverage,
+      cpuUsage: runner.currentCpuUsagePercentage,
+      memoryUsage: runner.currentMemoryUsagePercentage,
+      diskUsage: runner.currentDiskUsagePercentage,
+      allocatedCpu: runner.currentAllocatedCpu + pending.cpu,
+      allocatedMemoryGiB: runner.currentAllocatedMemoryGiB + pending.memory,
+      allocatedDiskGiB: runner.currentAllocatedDiskGiB + pending.disk,
+      runnerCpu: runner.cpu,
+      runnerMemoryGiB: runner.memoryGiB,
+      runnerDiskGiB: runner.diskGiB,
+      startedSandboxes: runner.currentStartedSandboxes,
+    })
   }
 }
 

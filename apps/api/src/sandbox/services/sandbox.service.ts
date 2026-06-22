@@ -29,6 +29,7 @@ import { FeatureFlags } from '../../common/constants/feature-flags'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { resolveGpuTypePreferences } from '../utils/gpu-type-preferences.util'
 import { RunnerService } from './runner.service'
+import { RunnerUsageService } from './runner-usage.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { StateChangeInProgressError } from '../../exceptions/state-change-in-progress.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
@@ -137,6 +138,7 @@ export class SandboxService {
     @InjectRepository(SshAccess)
     private readonly sshAccessRepository: Repository<SshAccess>,
     private readonly runnerService: RunnerService,
+    private readonly runnerUsageService: RunnerUsageService,
     private readonly volumeService: VolumeService,
     private readonly configService: TypedConfigService,
     private readonly warmPoolService: SandboxWarmPoolService,
@@ -2439,6 +2441,7 @@ export class SandboxService {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
+    let admittedRunnerReservation: { runnerId: string; sandboxId: string } | undefined
     let pendingGpuIncrement: number | undefined
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
@@ -2540,6 +2543,12 @@ export class SandboxService {
       const memDeltaForQuota = isHotResize ? newMem - sandbox.mem : 0
       const diskDeltaForQuota = newDisk - sandbox.disk // Disk only increases (validated at start of method)
 
+      // Runner admission deltas: actual increase (hot or cold), clamped at >= 0 so a
+      // downsize reserves nothing and admission/release stay symmetric.
+      const cpuDeltaForRunner = Math.max(0, newCpu - sandbox.cpu)
+      const memDeltaForRunner = Math.max(0, newMem - sandbox.mem)
+      const diskDeltaForRunner = Math.max(0, newDisk - sandbox.disk)
+
       // Validate and track pending for any non-zero quota changes.
       // Resize never changes GPU allocation — always pass 0 for the GPU delta, but pass
       // `gpuEnabled = sandbox.gpu > 0` so per-sandbox limit checks use the GPU-specific table.
@@ -2587,6 +2596,26 @@ export class SandboxService {
 
       if (!previousState) {
         throw new BadRequestError('Sandbox must be in started or stopped state to resize')
+      }
+
+      // Lock-free admission: reserve first, then project the score from the post-reservation
+      // hash so concurrent resizes can't over-admit. Cold cpu/mem are gated as a proxy until
+      // start is also gated. Pure downsizes skip the gate — they only free resources, so a
+      // congested runner shouldn't 409 them.
+      if (cpuDeltaForRunner > 0 || memDeltaForRunner > 0 || diskDeltaForRunner > 0) {
+        await this.runnerUsageService.reservePendingRunnerUsageForResize(
+          runner.id,
+          sandbox.id,
+          cpuDeltaForRunner,
+          memDeltaForRunner,
+          diskDeltaForRunner,
+        )
+        admittedRunnerReservation = { runnerId: runner.id, sandboxId: sandbox.id }
+        const projectedScore = await this.runnerService.getProjectedAvailabilityScore(runner)
+        const resizeScoreThreshold = this.configService.getOrThrow('runnerScore.thresholds.resize')
+        if (projectedScore < resizeScoreThreshold) {
+          throw new ConflictException('Sandbox runner is temporarily at capacity. Please retry the resize shortly.')
+        }
       }
 
       // Now transition to RESIZING state
@@ -2641,11 +2670,18 @@ export class SandboxService {
             diskDeltaForQuota,
             0,
           )
-        }
 
-        return await this.findOneByIdOrName(sandbox.id, organization.id)
+          // V0 applies the resize synchronously; release now. Brief under-counting until
+          // the next healthcheck refreshes currentAllocatedCpu is accepted.
+          await this.runnerUsageService.safeReleasePendingRunnerUsageForResize(runner.id, sandbox.id)
+          admittedRunnerReservation = undefined
+        } else {
+          // V2: completion handler owns the release. Clear so the outer catch doesn't double-release.
+          admittedRunnerReservation = undefined
+        }
       } catch (error) {
-        // Return to previous state on error
+        // resize failed — revert RESIZING. Excludes the findOneByIdOrName below, which
+        // must not revert state for an in-flight V2 job.
         const updateData: Partial<Sandbox> = {
           state: previousState,
         }
@@ -2657,6 +2693,8 @@ export class SandboxService {
 
         throw error
       }
+
+      return await this.findOneByIdOrName(sandbox.id, organization.id)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -2667,6 +2705,12 @@ export class SandboxService {
         pendingDiskIncrement,
         pendingGpuIncrement,
       )
+      if (admittedRunnerReservation) {
+        await this.runnerUsageService.safeReleasePendingRunnerUsageForResize(
+          admittedRunnerReservation.runnerId,
+          admittedRunnerReservation.sandboxId,
+        )
+      }
       throw error
     }
   }
