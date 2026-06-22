@@ -7,6 +7,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/common"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
@@ -110,7 +112,12 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 			req.SetEnvs(execOpts.Env)
 		}
 
-		resp, httpResp, err := p.toolboxClient.ProcessAPI.ExecuteCommand(ctx).Request(*req).Execute()
+		toolboxClient := p.toolboxClient
+		if execOpts.Timeout != nil {
+			toolboxClient = toolboxClientWithTimeout(p.toolboxClient, *execOpts.Timeout)
+		}
+
+		resp, httpResp, err := toolboxClient.ProcessAPI.ExecuteCommand(ctx).Request(*req).Execute()
 		if err != nil {
 			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
@@ -128,6 +135,26 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 			},
 		}, nil
 	})
+}
+
+func toolboxClientWithTimeout(client *toolbox.APIClient, timeout time.Duration) *toolbox.APIClient {
+	if client == nil || timeout <= 0 {
+		return client
+	}
+
+	cfg := *client.GetConfig()
+	if cfg.HTTPClient == nil {
+		cfg.HTTPClient = &http.Client{Timeout: timeout}
+		return toolbox.NewAPIClient(&cfg)
+	}
+
+	httpClient := *cfg.HTTPClient
+	if httpClient.Timeout > 0 && httpClient.Timeout < timeout {
+		httpClient.Timeout = timeout
+	}
+	cfg.HTTPClient = &httpClient
+
+	return toolbox.NewAPIClient(&cfg)
 }
 
 // CodeRun executes code in a language-specific runtime and returns the result.
