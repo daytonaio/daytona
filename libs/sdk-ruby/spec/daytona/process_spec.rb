@@ -348,10 +348,11 @@ RSpec.describe Daytona::Process do
 
   describe '#create_pty_session' do
     it 'creates a PTY session and connects to it' do
-      response = double('PtyCreateResponse', session_id: 'pty-1')
+      socket = double('PtySocket')
       handle = instance_double(Daytona::PtyHandle)
-      allow(toolbox_api).to receive(:create_pty_session).and_return(response)
-      allow(process).to receive(:connect_pty_session).with('pty-1').and_return(handle)
+      allow(WebSocket::Client::Simple).to receive(:connect).and_return(socket)
+      allow(Daytona::PtyHandle).to receive(:new).and_return(handle)
+      allow(handle).to receive(:wait_for_connection)
 
       result = process.create_pty_session(
         id: 'pty-1',
@@ -361,14 +362,25 @@ RSpec.describe Daytona::Process do
       )
 
       expect(result).to eq(handle)
-      expect(toolbox_api).to have_received(:create_pty_session) do |req|
-        expect(req.id).to eq('pty-1')
-        expect(req.cwd).to eq('/workspace')
-        expect(req.envs).to eq({ 'TERM' => 'xterm' })
-        expect(req.rows).to eq(24)
-        expect(req.cols).to eq(80)
-        expect(req.lazy_start).to be(true)
-      end
+      expected_query = URI.encode_www_form(
+        id: 'pty-1', cols: 80, rows: 24, cwd: '/workspace'
+      )
+      expected_protocol =
+        "X-Daytona-Pty-Envs~#{Base64.urlsafe_encode64({ 'TERM' => 'xterm' }.to_json, padding: false)}"
+      expect(WebSocket::Client::Simple).to have_received(:connect).with(
+        "wss://preview.example.com/process/pty/create-connect?#{expected_query}",
+        headers: hash_including(
+          'X-Daytona-Preview-Token' => 'tok',
+          'Sec-WebSocket-Protocol' => expected_protocol
+        )
+      )
+      expect(Daytona::PtyHandle).to have_received(:new).with(
+        socket,
+        session_id: 'pty-1',
+        handle_resize: instance_of(Proc),
+        handle_kill: instance_of(Proc)
+      )
+      expect(handle).to have_received(:wait_for_connection)
     end
   end
 

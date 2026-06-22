@@ -7,8 +7,13 @@ import weakref
 
 import aiohttp
 import httpx
+from httpx._utils import get_environment_proxies
 
 DEFAULT_POOL_SIZE = 250
+
+# WS upgrades share this keep-alive pool with REST and can occasionally fail the
+# TLS handshake on a stale/concurrent connection; retries re-establish on a fresh one.
+CONNECT_RETRIES = 3
 
 # TCP three-way handshake cap (httpx ``connect`` / aiohttp ``sock_connect``).
 # Matches aiohttp's session DEFAULT_TIMEOUT.sock_connect so streaming callers
@@ -46,11 +51,33 @@ def request_timeout(timeout: float) -> httpx.Timeout:
 
 
 def build_async_http_client(pool_size: int | None = DEFAULT_POOL_SIZE) -> httpx.AsyncClient:
-    return httpx.AsyncClient(limits=_build_limits(pool_size), timeout=_build_timeout())
+    # Passing a custom transport disables httpx's built-in HTTP(S)_PROXY/NO_PROXY handling,
+    # so rebuild the env-proxy mounts ourselves (NO_PROXY patterns map to a ``None`` mount
+    # that bypasses the proxy) while keeping our retry/limit-tuned transport.
+    limits = _build_limits(pool_size)
+    mounts = {
+        pattern: (httpx.AsyncHTTPTransport(retries=CONNECT_RETRIES, limits=limits, proxy=url) if url else None)
+        for pattern, url in get_environment_proxies().items()
+    }
+    return httpx.AsyncClient(
+        transport=httpx.AsyncHTTPTransport(retries=CONNECT_RETRIES, limits=limits),
+        mounts=mounts,
+        timeout=_build_timeout(),
+    )
 
 
 def build_sync_http_client(pool_size: int | None = DEFAULT_POOL_SIZE) -> httpx.Client:
-    client = httpx.Client(limits=_build_limits(pool_size), timeout=_build_timeout())
+    # See build_async_http_client: rebuild env-proxy mounts that the custom transport bypasses.
+    limits = _build_limits(pool_size)
+    mounts = {
+        pattern: (httpx.HTTPTransport(retries=CONNECT_RETRIES, limits=limits, proxy=url) if url else None)
+        for pattern, url in get_environment_proxies().items()
+    }
+    client = httpx.Client(
+        transport=httpx.HTTPTransport(retries=CONNECT_RETRIES, limits=limits),
+        mounts=mounts,
+        timeout=_build_timeout(),
+    )
     _attach_self_finalizer(client)
     return client
 

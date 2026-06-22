@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import re
+from urllib.parse import urlencode
 
 import httpx
 import httpx_ws
@@ -14,7 +17,6 @@ from daytona_toolbox_api_client import (
     CreateSessionRequest,
     ExecuteRequest,
     ProcessApi,
-    PtyCreateRequest,
     PtyResizeRequest,
     PtySessionInfo,
     Session,
@@ -585,20 +587,60 @@ class Process:
         Raises:
             DaytonaError: If the PTY session creation fails or the session ID is already in use.
         """
-        response = self._api_client.create_pty_session(
-            request=PtyCreateRequest(
-                id=id,
-                cwd=cwd,
-                envs=envs,
-                cols=pty_size.cols if pty_size else None,
-                rows=pty_size.rows if pty_size else None,
-                lazy_start=True,
-            ),
-        )
+        cols = pty_size.cols if pty_size else 80
+        rows = pty_size.rows if pty_size else 24
 
-        return self.connect_pty_session(
-            response.session_id,
+        # Build query params for the combined create-connect endpoint (single round-trip)
+        params: dict[str, str] = {
+            "id": id,
+            "cols": str(cols),
+            "rows": str(rows),
+        }
+        if cwd:
+            params["cwd"] = cwd
+
+        # Derive the WS URL from the API client's base configuration
+        _, base_url, headers, *_ = self._api_client._connect_pty_session_serialize(
+            session_id="__placeholder__",
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
         )
+        url = base_url.replace("/process/pty/__placeholder__/connect", "/process/pty/create-connect")
+        url = re.sub(r"^http", "ws", url)
+        url = f"{url}?{urlencode(params)}"
+
+        # Envs travel as a WebSocket subprotocol token (base64url-no-pad of the JSON object)
+        # rather than the query string or a header, keeping the transport uniform across
+        # runtimes and potentially-large/secret values out of URLs and access logs.
+        subprotocols: list[str] | None = None
+        if envs:
+            encoded = base64.urlsafe_b64encode(json.dumps(envs).encode()).rstrip(b"=").decode()
+            subprotocols = [f"X-Daytona-Pty-Envs~{encoded}"]
+
+        ws_cm = httpx_ws.connect_ws(url, self._http_client, headers=headers, subprotocols=subprotocols)
+        ws = ws_cm.__enter__()  # pylint: disable=unnecessary-dunder-call
+
+        def resize_handler(pty_size_arg: PtySize) -> PtySessionInfo:
+            return self.resize_pty_session(id, pty_size_arg)
+
+        def kill_handler() -> None:
+            self.kill_pty_session(id)
+
+        handle = PtyHandle(
+            ws,
+            session_id=id,
+            handle_resize=resize_handler,
+            handle_kill=kill_handler,
+            ws_context_manager=ws_cm,
+        )
+        try:
+            handle.wait_for_connection()
+        except BaseException:
+            handle.disconnect()
+            raise
+        return handle
 
     @intercept_errors(message_prefix="Failed to connect PTY session: ")
     @with_instrumentation()

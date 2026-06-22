@@ -136,6 +136,58 @@ Sets callback invoked for each PTY output chunk.
 
 - `PtyCreateOptions` - this options instance
 
+#### getCwd()
+```java
+public String getCwd()
+```
+
+Returns the working directory for the PTY session.
+
+**Returns**:
+
+- `String` - working directory, or `null` to use the sandbox default
+
+#### setCwd()
+```java
+public PtyCreateOptions setCwd(String cwd)
+```
+
+Sets the working directory for the PTY session.
+
+**Parameters**:
+
+- `cwd` _String_ - working directory
+
+**Returns**:
+
+- `PtyCreateOptions` - this options instance
+
+#### getEnvs()
+```java
+public Map<String, String> getEnvs()
+```
+
+Returns environment variables for the PTY session.
+
+**Returns**:
+
+- `Map\<String, String\>` - environment variables, or `null` when none configured
+
+#### setEnvs()
+```java
+public PtyCreateOptions setEnvs(Map<String, String> envs)
+```
+
+Sets environment variables for the PTY session.
+
+**Parameters**:
+
+- `envs` _Map\<String, String\>_ - environment variables
+
+**Returns**:
+
+- `PtyCreateOptions` - this options instance
+
 ## PtyResult
 
 Final outcome of a PTY session.

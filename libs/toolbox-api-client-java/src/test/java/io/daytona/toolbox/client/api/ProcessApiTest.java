@@ -75,6 +75,24 @@ public class ProcessApiTest {
     }
 
     /**
+     * Create and connect to a PTY session in a single WebSocket upgrade
+     *
+     * Creates a new PTY session and immediately establishes a WebSocket connection. PTY configuration is passed as query parameters. The shell starts on WS open. This is faster than calling create + connect separately (1 round-trip vs 2).
+     *
+     * @throws ApiException if the Api call fails
+     */
+    @Test
+    public void createAndConnectPtySessionTest() throws ApiException {
+        String id = null;
+        String cwd = null;
+        Integer cols = null;
+        Integer rows = null;
+        String secWebSocketProtocol = null;
+        api.createAndConnectPtySession(id, cwd, cols, rows, secWebSocketProtocol);
+        // TODO: test validations
+    }
+
+    /**
      * Create a new PTY session
      *
      * Create a new pseudo-terminal session with specified configuration

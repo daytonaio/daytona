@@ -281,6 +281,17 @@ class AsyncPtyHandle:
 
         if status == "connected":
             self._connection_established = True
+        elif status == "exited":
+            # An instantly-exiting PTY may report "exited" before/instead of "connected".
+            # Mark the connection established so wait_for_connection() returns instead of
+            # timing out waiting for a "connected" message that will never arrive.
+            self._connection_established = True
+            exit_code = control_msg.get("exitCode")
+            if isinstance(exit_code, int):
+                self._exit_code = exit_code
+            exit_reason = control_msg.get("exitReason")
+            if isinstance(exit_reason, str):
+                self._error = exit_reason
         elif status == "error":
             self._error = cast(str, control_msg.get("error", "Unknown connection error"))
             self._connected = False

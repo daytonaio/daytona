@@ -51,6 +51,21 @@ type ProcessAPI interface {
 	ConnectPtySessionExecute(r ProcessAPIConnectPtySessionRequest) (*http.Response, error)
 
 	/*
+	CreateAndConnectPtySession Create and connect to a PTY session in a single WebSocket upgrade
+
+	Creates a new PTY session and immediately establishes a WebSocket connection.
+PTY configuration is passed as query parameters. The shell starts on WS open.
+This is faster than calling create + connect separately (1 round-trip vs 2).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPICreateAndConnectPtySessionRequest
+	*/
+	CreateAndConnectPtySession(ctx context.Context) ProcessAPICreateAndConnectPtySessionRequest
+
+	// CreateAndConnectPtySessionExecute executes the request
+	CreateAndConnectPtySessionExecute(r ProcessAPICreateAndConnectPtySessionRequest) (*http.Response, error)
+
+	/*
 	CreatePtySession Create a new PTY session
 
 	Create a new pseudo-terminal session with specified configuration
@@ -461,6 +476,147 @@ func (a *ProcessAPIService) ConnectPtySessionExecute(r ProcessAPIConnectPtySessi
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ProcessAPICreateAndConnectPtySessionRequest struct {
+	ctx context.Context
+	ApiService ProcessAPI
+	id *string
+	cwd *string
+	cols *int32
+	rows *int32
+	secWebSocketProtocol *string
+}
+
+// PTY session ID
+func (r ProcessAPICreateAndConnectPtySessionRequest) Id(id string) ProcessAPICreateAndConnectPtySessionRequest {
+	r.id = &id
+	return r
+}
+
+// Working directory
+func (r ProcessAPICreateAndConnectPtySessionRequest) Cwd(cwd string) ProcessAPICreateAndConnectPtySessionRequest {
+	r.cwd = &cwd
+	return r
+}
+
+// Terminal columns (default: 80)
+func (r ProcessAPICreateAndConnectPtySessionRequest) Cols(cols int32) ProcessAPICreateAndConnectPtySessionRequest {
+	r.cols = &cols
+	return r
+}
+
+// Terminal rows (default: 24)
+func (r ProcessAPICreateAndConnectPtySessionRequest) Rows(rows int32) ProcessAPICreateAndConnectPtySessionRequest {
+	r.rows = &rows
+	return r
+}
+
+// WebSocket subprotocols. Env vars may be passed as the token X-Daytona-Pty-Envs~&lt;base64url-no-padding JSON object&gt;
+func (r ProcessAPICreateAndConnectPtySessionRequest) SecWebSocketProtocol(secWebSocketProtocol string) ProcessAPICreateAndConnectPtySessionRequest {
+	r.secWebSocketProtocol = &secWebSocketProtocol
+	return r
+}
+
+func (r ProcessAPICreateAndConnectPtySessionRequest) Execute() (*http.Response, error) {
+	return r.ApiService.CreateAndConnectPtySessionExecute(r)
+}
+
+/*
+CreateAndConnectPtySession Create and connect to a PTY session in a single WebSocket upgrade
+
+Creates a new PTY session and immediately establishes a WebSocket connection.
+PTY configuration is passed as query parameters. The shell starts on WS open.
+This is faster than calling create + connect separately (1 round-trip vs 2).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPICreateAndConnectPtySessionRequest
+*/
+func (a *ProcessAPIService) CreateAndConnectPtySession(ctx context.Context) ProcessAPICreateAndConnectPtySessionRequest {
+	return ProcessAPICreateAndConnectPtySessionRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+func (a *ProcessAPIService) CreateAndConnectPtySessionExecute(r ProcessAPICreateAndConnectPtySessionRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.CreateAndConnectPtySession")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process/pty/create-connect"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.id == nil {
+		return nil, reportError("id is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "", "")
+	if r.cwd != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "cwd", r.cwd, "", "")
+	}
+	if r.cols != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "cols", r.cols, "", "")
+	}
+	if r.rows != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "rows", r.rows, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.secWebSocketProtocol != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "Sec-WebSocket-Protocol", r.secWebSocketProtocol, "", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {

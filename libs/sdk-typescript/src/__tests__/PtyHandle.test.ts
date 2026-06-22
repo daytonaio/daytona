@@ -263,6 +263,35 @@ describe('PtyHandle', () => {
     expect(handle.error).toBe('pty gone')
   })
 
+  it('unblocks waitForConnection when the PTY exits instantly', async () => {
+    jest.useFakeTimers()
+    const { handle, ws } = await makeHandle()
+
+    const waitPromise = handle.waitForConnection()
+    await ws.handlers.message?.({
+      data: JSON.stringify({ type: 'control', status: 'exited', exitCode: 0 }),
+    })
+    await jest.runOnlyPendingTimersAsync()
+
+    await expect(waitPromise).resolves.toBeUndefined()
+    await expect(handle.wait()).resolves.toEqual({ exitCode: 0, error: undefined })
+  })
+
+  it('resolves all concurrent wait() callers when the PTY exits', async () => {
+    const { handle, ws } = await makeHandle()
+
+    const waiters = [handle.wait(), handle.wait(), handle.wait()]
+    await ws.handlers.message?.({
+      data: JSON.stringify({ type: 'control', status: 'exited', exitCode: 42 }),
+    })
+
+    await expect(Promise.all(waiters)).resolves.toEqual([
+      { exitCode: 42, error: undefined },
+      { exitCode: 42, error: undefined },
+      { exitCode: 42, error: undefined },
+    ])
+  })
+
   it('throws for unsupported websocket implementations', async () => {
     const { PtyHandle } = await import('../PtyHandle')
     const handleResize = jest.fn().mockResolvedValue({ sessionId: 'pty-1', cols: 80, rows: 24 })

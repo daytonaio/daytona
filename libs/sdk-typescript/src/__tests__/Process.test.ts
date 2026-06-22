@@ -301,7 +301,6 @@ describe('Process', () => {
     const { process, apiClient } = await makeProcess()
     const ws = { close: jest.fn() }
 
-    apiClient.createPtySession.mockResolvedValue(createApiResponse({ sessionId: 'pty-1' }))
     mockCreateSandboxWebSocket.mockResolvedValue(ws)
 
     const onData = jest.fn()
@@ -314,18 +313,19 @@ describe('Process', () => {
       onData,
     })
 
-    expect(apiClient.createPtySession).toHaveBeenCalledWith({
-      id: 'pty-1',
-      cwd: '/tmp',
-      envs: { TERM: 'xterm-256color' },
-      cols: 120,
-      rows: 40,
-      lazyStart: true,
-    })
+    expect(apiClient.createPtySession).not.toHaveBeenCalled()
+    const expectedParams = new URLSearchParams({ id: 'pty-1', cols: '120', rows: '40' })
+    expectedParams.set('cwd', '/tmp')
+    const expectedEnvsToken = `X-Daytona-Pty-Envs~${Buffer.from(JSON.stringify({ TERM: 'xterm-256color' }), 'utf8')
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')}`
     expect(mockCreateSandboxWebSocket).toHaveBeenCalledWith(
-      'ws://sandbox/process/pty/pty-1/connect',
+      `ws://sandbox/process/pty/create-connect?${expectedParams.toString()}`,
       { Authorization: 'Bearer t' },
       expect.any(Function),
+      [expectedEnvsToken],
     )
     expect(handle.sessionId).toBe('pty-1')
   })

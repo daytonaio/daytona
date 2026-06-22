@@ -5,17 +5,61 @@ package pty
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
+	"time"
 
 	"github.com/creack/pty"
 	"github.com/daytonaio/daemon/pkg/childreap"
 	"github.com/daytonaio/daemon/pkg/common"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/shirou/gopsutil/v4/process"
 )
+
+// createAndStartSession creates a PTYSession, adds it to the manager, and starts it if not lazy.
+// On start failure it removes the session from the manager and returns the error.
+func createAndStartSession(id, cwd string, envs map[string]string, cols, rows uint16, lazyStart bool, logger *slog.Logger) (*PTYSession, error) {
+	if envs == nil {
+		envs = make(map[string]string, 1)
+	}
+	if envs["TERM"] == "" {
+		envs["TERM"] = "xterm-256color"
+	}
+
+	session := &PTYSession{
+		info: PTYSessionInfo{
+			ID:        id,
+			Cwd:       cwd,
+			Envs:      envs,
+			Cols:      cols,
+			Rows:      rows,
+			CreatedAt: time.Now(),
+			Active:    false,
+			LazyStart: lazyStart,
+		},
+		clients: cmap.New[*wsClient](),
+		logger:  logger.With(slog.String("sessionId", id)),
+	}
+
+	if !ptyManager.AddIfAbsent(session) {
+		return nil, fmt.Errorf("PTY session with ID '%s' already exists", id)
+	}
+
+	if !lazyStart {
+		if err := session.start(); err != nil {
+			ptyManager.Delete(id)
+			return nil, err
+		}
+	}
+
+	return session, nil
+}
 
 // Info returns the current session information
 func (s *PTYSession) Info() PTYSessionInfo {
@@ -109,7 +153,26 @@ func (s *PTYSession) start() error {
 		sessionID := s.info.ID
 		s.mu.Unlock()
 
-		// Close WebSocket connections with exit code and reason
+		// Send exit event as a data-channel control message FIRST (instant detection by SDK).
+		// Old SDKs that don't handle "exited" will simply ignore this text message and still
+		// receive the WS close frame below — no breaking change.
+		exitMsg := map[string]interface{}{
+			"type":     "control",
+			"status":   "exited",
+			"exitCode": exitCode,
+		}
+		// Only attach exitReason for a non-zero (failed) exit, matching
+		// closeClientsWithExitCode (which omits it for code 0). SDKs map
+		// exitReason -> error, so sending "clean exit" on a successful exit
+		// would make them report a spurious error on a clean run.
+		if exitCode != 0 && exitReason != "" {
+			exitMsg["exitReason"] = strings.TrimSpace(exitReason)
+		}
+		if exitJSON, err := json.Marshal(exitMsg); err == nil {
+			s.broadcastText(exitJSON)
+		}
+
+		// Close WebSocket connections with exit code and reason (transport-level close)
 		s.closeClientsWithExitCode(exitCode, exitReason)
 
 		// Remove session from manager - process has exited and won't be reused

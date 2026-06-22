@@ -221,6 +221,7 @@ func (s *server) Start() error {
 		ptyController := pty.NewPTYController(s.logger, s.WorkDir)
 		ptyGroup := processController.Group("/pty")
 		{
+			ptyGroup.GET("/create-connect", ptyController.CreateAndConnectPTYSession) // must be before /:sessionId
 			ptyGroup.GET("", ptyController.ListPTYSessions)
 			ptyGroup.POST("", ptyController.CreatePTYSession)
 			ptyGroup.GET("/:sessionId", ptyController.GetPTYSession)

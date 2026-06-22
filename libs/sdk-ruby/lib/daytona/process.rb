@@ -3,6 +3,8 @@
 
 # frozen_string_literal: true
 
+require 'base64'
+require 'json'
 require 'uri'
 
 module Daytona
@@ -410,19 +412,35 @@ module Daytona
     #   pty_handle.disconnect
     #
     # @raise [Daytona::Sdk::Error] If the PTY session creation fails or the session ID is already in use.
-    def create_pty_session(id:, cwd: nil, envs: nil, pty_size: nil) # rubocop:disable Metrics/MethodLength
-      response = toolbox_api.create_pty_session(
-        DaytonaToolboxApiClient::PtyCreateRequest.new(
-          id:,
-          cwd:,
-          envs:,
-          cols: pty_size&.cols,
-          rows: pty_size&.rows,
-          lazy_start: true
-        )
-      )
+    def create_pty_session(id:, cwd: nil, envs: nil, pty_size: nil) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize,Metrics/CyclomaticComplexity
+      cols = pty_size&.cols || 80
+      rows = pty_size&.rows || 24
 
-      connect_pty_session(response.session_id)
+      preview_link = get_preview_link.call(WS_PORT)
+      url = URI.parse(preview_link.url)
+      url.scheme = url.scheme == 'https' ? 'wss' : 'ws'
+      url.path = '/process/pty/create-connect'
+
+      params = { id:, cols:, rows: }
+      params[:cwd] = cwd if cwd
+      url.query = URI.encode_www_form(params)
+
+      headers = toolbox_api.api_client.default_headers.dup.merge(
+        'X-Daytona-Preview-Token' => preview_link.token
+      )
+      if envs
+        envs_protocol = "X-Daytona-Pty-Envs~#{Base64.urlsafe_encode64(envs.to_json, padding: false)}"
+        existing_protocol = headers['Sec-WebSocket-Protocol']
+        headers['Sec-WebSocket-Protocol'] =
+          existing_protocol ? "#{existing_protocol}, #{envs_protocol}" : envs_protocol
+      end
+
+      PtyHandle.new(
+        WebSocket::Client::Simple.connect(url.to_s, headers:),
+        session_id: id,
+        handle_resize: ->(pty_size_arg) { resize_pty_session(id, pty_size_arg) },
+        handle_kill: -> { delete_pty_session(id) }
+      ).tap(&:wait_for_connection)
     end
 
     # Connects to an existing PTY session in the Sandbox.
