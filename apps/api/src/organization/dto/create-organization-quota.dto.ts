@@ -4,7 +4,7 @@
  */
 
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsNumber, IsOptional } from 'class-validator'
+import { IsNumber, IsOptional, IsString } from 'class-validator'
 
 @ApiSchema({ name: 'CreateOrganizationQuota' })
 export class CreateOrganizationQuotaDto {
@@ -52,4 +52,9 @@ export class CreateOrganizationQuotaDto {
   @IsNumber()
   @IsOptional()
   volumeQuota?: number
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  otelEndpoint?: string
 }
