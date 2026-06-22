@@ -13,6 +13,8 @@ import io.daytona.api.client.model.SandboxVolume;
 import io.daytona.api.client.model.ToolboxProxyUrl;
 import io.daytona.api.client.model.UpdateSandboxNetworkSettings;
 import io.daytona.sdk.exception.DaytonaException;
+import io.daytona.toolbox.client.api.SystemApi;
+import io.daytona.toolbox.client.model.SystemMetrics;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -31,6 +33,7 @@ public class Sandbox {
     private final DaytonaConfig config;
     private final io.daytona.toolbox.client.ApiClient toolboxApiClient;
     private final io.daytona.toolbox.client.api.InfoApi infoApi;
+    private final SystemApi systemApi;
     private final String apiKey;
 
     // Fields shared by both io.daytona.api.client.model.Sandbox and SandboxListItem.
@@ -85,6 +88,7 @@ public class Sandbox {
         populateFromDTO(data);
         this.toolboxApiClient = buildToolboxApiClient(sandboxApi, config);
         this.infoApi = new io.daytona.toolbox.client.api.InfoApi(toolboxApiClient);
+        this.systemApi = new SystemApi(toolboxApiClient);
         this.process = new Process(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);
         this.fs = new FileSystem(new io.daytona.toolbox.client.api.FileSystemApi(toolboxApiClient));
         this.git = new Git(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
@@ -99,6 +103,7 @@ public class Sandbox {
         populateFromDTO(data);
         this.toolboxApiClient = buildToolboxApiClient(sandboxApi, config);
         this.infoApi = new io.daytona.toolbox.client.api.InfoApi(toolboxApiClient);
+        this.systemApi = new SystemApi(toolboxApiClient);
         this.process = new Process(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);
         this.fs = new FileSystem(new io.daytona.toolbox.client.api.FileSystemApi(toolboxApiClient));
         this.git = new Git(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
@@ -320,6 +325,16 @@ public class Sandbox {
     public String getUserHomeDir() {
         io.daytona.toolbox.client.model.UserHomeDirResponse value = ExceptionMapper.callToolbox(() -> infoApi.getUserHomeDir());
         return value == null ? "" : asString(value.getDir());
+    }
+
+    /**
+     * Gets a live snapshot of the sandbox's CPU/memory/disk usage.
+     *
+     * @return current sandbox system metrics snapshot
+     * @throws DaytonaException if the request fails
+     */
+    public SystemMetrics getMetrics() {
+        return ExceptionMapper.callToolbox(() -> systemApi.getSystemMetrics());
     }
 
     /**

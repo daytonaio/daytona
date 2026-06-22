@@ -30,6 +30,7 @@ import io.daytona.toolbox.client.model.LspSymbol;
 import io.daytona.toolbox.client.model.PtySessionInfo;
 import io.daytona.toolbox.client.model.ReplaceRequest;
 import io.daytona.toolbox.client.model.ReplaceResult;
+import io.daytona.toolbox.client.model.SystemMetrics;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -535,6 +536,21 @@ class E2ETest {
         assertThat(preview.getToken()).isNotBlank();
         assertThat(signed.getUrl()).contains("http");
         assertThat(signed.getToken()).isNotBlank();
+    }
+
+    @Test
+    @Order(17)
+    void getMetricsReturnsLiveSnapshot() {
+        SystemMetrics metrics = sandbox.getMetrics();
+
+        assertThat(metrics).isNotNull();
+        assertThat(metrics.getTimestamp()).isNotBlank();
+        assertThat(metrics.getCpuCount()).isGreaterThanOrEqualTo(1);
+        assertThat(metrics.getCpuUsedPct()).isGreaterThanOrEqualTo(0.0);
+        assertThat(metrics.getMemTotal()).isGreaterThan(0L);
+        assertThat(metrics.getMemUsed()).isBetween(0L, metrics.getMemTotal());
+        assertThat(metrics.getDiskTotal()).isGreaterThan(0L);
+        assertThat(metrics.getDiskUsed()).isBetween(0L, metrics.getDiskTotal());
     }
 
     @Test

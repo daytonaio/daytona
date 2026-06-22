@@ -594,6 +594,27 @@ puts "Sandbox working directory: #{work_dir}"
 
 ```
 
+#### get_metrics()
+
+```ruby
+def get_metrics()
+
+```
+
+Gets a live CPU, memory, and disk metrics snapshot for the Sandbox.
+
+**Returns**:
+
+- `DaytonaToolboxApiClient:SystemMetrics`
+
+**Examples:**
+
+```ruby
+metrics = sandbox.get_metrics
+puts "CPU used: #{metrics.cpu_used_pct}%"
+
+```
+
 #### labels=()
 
 ```ruby

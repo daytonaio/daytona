@@ -66,6 +66,8 @@ type APIClient struct {
 	ProcessAPI ProcessAPI
 
 	ServerAPI ServerAPI
+
+	SystemAPI SystemAPI
 }
 
 type service struct {
@@ -93,6 +95,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.PortAPI = (*PortAPIService)(&c.common)
 	c.ProcessAPI = (*ProcessAPIService)(&c.common)
 	c.ServerAPI = (*ServerAPIService)(&c.common)
+	c.SystemAPI = (*SystemAPIService)(&c.common)
 
 	return c
 }

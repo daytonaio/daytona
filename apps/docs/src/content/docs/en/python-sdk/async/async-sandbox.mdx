@@ -135,6 +135,20 @@ work_dir = await sandbox.get_work_dir()
 print(f"Sandbox working directory: {work_dir}")
 ```
 
+#### AsyncSandbox.get\_metrics
+
+```python
+@intercept_errors(message_prefix="Failed to get sandbox metrics: ")
+@with_instrumentation()
+async def get_metrics() -> SystemMetrics
+```
+
+Gets the current sandbox system metrics snapshot.
+
+**Returns**:
+
+- `SystemMetrics` - The current CPU, memory, and disk usage snapshot for the Sandbox.
+
 #### AsyncSandbox.create\_lsp\_server
 
 ```python

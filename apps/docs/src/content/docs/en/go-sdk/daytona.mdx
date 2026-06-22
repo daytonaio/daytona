@@ -247,6 +247,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) ExperimentalFork\(ctx context.Context, name \*string\) \(\*Sandbox, error\)](<#Sandbox.ExperimentalFork>)
   - [func \(s \*Sandbox\) ExperimentalForkWithTimeout\(ctx context.Context, name \*string, timeout time.Duration\) \(\*Sandbox, error\)](<#Sandbox.ExperimentalForkWithTimeout>)
   - [func \(s \*Sandbox\) ExpireSignedPreviewLink\(ctx context.Context, port int, token string\) error](<#Sandbox.ExpireSignedPreviewLink>)
+  - [func \(s \*Sandbox\) GetMetrics\(ctx context.Context\) \(\*toolbox.SystemMetrics, error\)](<#Sandbox.GetMetrics>)
   - [func \(s \*Sandbox\) GetPreviewLink\(ctx context.Context, port int\) \(\*types.PreviewLink, error\)](<#Sandbox.GetPreviewLink>)
   - [func \(s \*Sandbox\) GetSignedPreviewLink\(ctx context.Context, port int, expiresInSeconds int\) \(\*types.SignedPreviewLink, error\)](<#Sandbox.GetSignedPreviewLink>)
   - [func \(s \*Sandbox\) GetUserHomeDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetUserHomeDir>)
@@ -4302,6 +4303,25 @@ err := sandbox.ExpireSignedPreviewLink(ctx, 3000, "preview-token-to-expire")
 if err != nil {
     return err
 }
+```
+
+<a name="Sandbox.GetMetrics"></a>
+### func \(\*Sandbox\) GetMetrics
+
+```go
+func (s *Sandbox) GetMetrics(ctx context.Context) (*toolbox.SystemMetrics, error)
+```
+
+GetMetrics returns a live snapshot of the sandbox's CPU, memory and disk usage.
+
+Example:
+
+```
+metrics, err := sandbox.GetMetrics(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("CPU: %.1f%%\n", metrics.GetCpuUsedPct())
 ```
 
 <a name="Sandbox.GetPreviewLink"></a>

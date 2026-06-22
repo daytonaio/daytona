@@ -14,14 +14,16 @@
 
 
 
-export * from './api/computer-use-api';
-export * from './api/file-system-api';
-export * from './api/git-api';
-export * from './api/info-api';
-export * from './api/interpreter-api';
-export * from './api/lsp-api';
-export * from './api/port-api';
-export * from './api/process-api';
-export * from './api/server-api';
-export * from './api/system-api';
+export interface SystemMetrics {
+    'cpuCount'?: number;
+    'cpuUsedPct'?: number;
+    'diskFree'?: number;
+    'diskTotal'?: number;
+    'diskUsed'?: number;
+    'memCache'?: number;
+    'memTotal'?: number;
+    'memUsed'?: number;
+    'timestamp'?: string;
+    'timestampUnix'?: number;
+}
 

@@ -26,6 +26,7 @@ jest.mock(
     ProcessApi: jest.fn(() => ({})),
     LspApi: jest.fn(() => ({})),
     InfoApi: jest.fn(() => ({ getUserHomeDir: jest.fn(), getWorkDir: jest.fn() })),
+    SystemApi: jest.fn(() => ({ getSystemMetrics: jest.fn() })),
     ComputerUseApi: jest.fn(() => ({})),
     InterpreterApi: jest.fn(() => ({})),
   }),

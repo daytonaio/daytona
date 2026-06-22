@@ -223,6 +223,21 @@ Returns home directory path for Sandbox user.
 
 - `DaytonaException` - if the request fails
 
+#### getMetrics()
+```java
+public SystemMetrics getMetrics()
+```
+
+Gets a live snapshot of the sandbox's CPU/memory/disk usage.
+
+**Returns**:
+
+- `SystemMetrics` - current sandbox system metrics snapshot
+
+**Throws**:
+
+- `DaytonaException` - if the request fails
+
 #### getWorkDir()
 ```java
 public String getWorkDir()

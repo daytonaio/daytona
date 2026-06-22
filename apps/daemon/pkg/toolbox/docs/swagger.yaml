@@ -1069,6 +1069,37 @@ definitions:
     required:
       - id
     type: object
+  SystemMetrics:
+    properties:
+      cpuCount:
+        type: integer
+      cpuUsedPct:
+        format: double
+        type: number
+      diskFree:
+        format: int64
+        type: integer
+      diskTotal:
+        format: int64
+        type: integer
+      diskUsed:
+        format: int64
+        type: integer
+      memCache:
+        format: int64
+        type: integer
+      memTotal:
+        format: int64
+        type: integer
+      memUsed:
+        format: int64
+        type: integer
+      timestamp:
+        type: string
+      timestampUnix:
+        format: int64
+        type: integer
+    type: object
   UserHomeDirResponse:
     properties:
       dir:
@@ -3306,6 +3337,23 @@ paths:
       summary: Get entrypoint logs
       tags:
         - process
+  /system/metrics:
+    get:
+      description: |-
+        Current CPU/memory/disk usage snapshot for the sandbox. cpuUsedPct is the
+        average CPU usage as a percentage of the CPU limit over the last sample
+        window (0 until the first sample completes). Byte fields are in bytes.
+      operationId: GetSystemMetrics
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SystemMetrics'
+      summary: Get sandbox resource metrics
+      tags:
+        - system
   /user-home-dir:
     get:
       description: Get the current user home directory path.

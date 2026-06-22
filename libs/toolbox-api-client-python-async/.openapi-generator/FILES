@@ -10,6 +10,7 @@ daytona_toolbox_api_client_async/api/lsp_api.py
 daytona_toolbox_api_client_async/api/port_api.py
 daytona_toolbox_api_client_async/api/process_api.py
 daytona_toolbox_api_client_async/api/server_api.py
+daytona_toolbox_api_client_async/api/system_api.py
 daytona_toolbox_api_client_async/api_client.py
 daytona_toolbox_api_client_async/api_response.py
 daytona_toolbox_api_client_async/configuration.py
@@ -104,6 +105,7 @@ daytona_toolbox_api_client_async/models/session_send_input_request.py
 daytona_toolbox_api_client_async/models/start_recording_request.py
 daytona_toolbox_api_client_async/models/status.py
 daytona_toolbox_api_client_async/models/stop_recording_request.py
+daytona_toolbox_api_client_async/models/system_metrics.py
 daytona_toolbox_api_client_async/models/user_home_dir_response.py
 daytona_toolbox_api_client_async/models/window_info.py
 daytona_toolbox_api_client_async/models/windows_response.py

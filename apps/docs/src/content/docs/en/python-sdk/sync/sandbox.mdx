@@ -152,6 +152,20 @@ work_dir = sandbox.get_work_dir()
 print(f"Sandbox working directory: {work_dir}")
 ```
 
+#### Sandbox.get\_metrics
+
+```python
+@intercept_errors(message_prefix="Failed to get sandbox metrics: ")
+@with_instrumentation()
+def get_metrics() -> SystemMetrics
+```
+
+Gets the current sandbox system metrics snapshot.
+
+**Returns**:
+
+- `SystemMetrics` - The current CPU, memory, and disk usage snapshot for the Sandbox.
+
 #### Sandbox.create\_lsp\_server
 
 ```python

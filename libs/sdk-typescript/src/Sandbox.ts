@@ -27,9 +27,11 @@ import {
   ProcessApi,
   LspApi,
   InfoApi,
+  SystemApi,
   ComputerUseApi,
   InterpreterApi,
 } from '@daytona/toolbox-api-client'
+import type { SystemMetrics } from '@daytona/toolbox-api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
 import { Process } from './Process'
@@ -127,6 +129,7 @@ export class Sandbox {
   public toolboxProxyUrl: string
 
   private infoApi: InfoApi
+  private systemApi: SystemApi
 
   /**
    * Creates a new Sandbox instance
@@ -168,6 +171,7 @@ export class Sandbox {
     )
     this.computerUse = new ComputerUse(new ComputerUseApi(this.clientConfig, '', this.axiosInstance))
     this.infoApi = new InfoApi(this.clientConfig, '', this.axiosInstance)
+    this.systemApi = new SystemApi(this.clientConfig, '', this.axiosInstance)
   }
 
   /**
@@ -183,6 +187,21 @@ export class Sandbox {
   public async getUserHomeDir(): Promise<string | undefined> {
     const response = await this.infoApi.getUserHomeDir()
     return response.data.dir
+  }
+
+  /**
+   * Gets the sandbox's current resource usage (CPU, memory, disk).
+   *
+   * @returns A live snapshot of the sandbox's resource metrics.
+   *
+   * @example
+   * const metrics = await sandbox.getMetrics()
+   * console.log(`CPU: ${metrics.cpuUsedPct}%, mem: ${metrics.memUsed}/${metrics.memTotal}`)
+   */
+  @WithInstrumentation()
+  public async getMetrics(): Promise<SystemMetrics> {
+    const response = await this.systemApi.getSystemMetrics()
+    return response.data
   }
 
   /**

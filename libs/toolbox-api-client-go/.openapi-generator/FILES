@@ -9,6 +9,7 @@ api_lsp.go
 api_port.go
 api_process.go
 api_server.go
+api_system.go
 client.go
 configuration.go
 go.mod
@@ -102,6 +103,7 @@ model_session_send_input_request.go
 model_start_recording_request.go
 model_status.go
 model_stop_recording_request.go
+model_system_metrics.go
 model_user_home_dir_response.go
 model_window_info.go
 model_windows_response.go

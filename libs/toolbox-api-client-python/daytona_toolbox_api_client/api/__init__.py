@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.api.port_api import PortApi
     from daytona_toolbox_api_client.api.process_api import ProcessApi
     from daytona_toolbox_api_client.api.server_api import ServerApi
+    from daytona_toolbox_api_client.api.system_api import SystemApi
 
 
 _DYNAMIC_IMPORTS: dict[str, str] = {
@@ -28,6 +29,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "PortApi": "daytona_toolbox_api_client.api.port_api",
     "ProcessApi": "daytona_toolbox_api_client.api.process_api",
     "ServerApi": "daytona_toolbox_api_client.api.server_api",
+    "SystemApi": "daytona_toolbox_api_client.api.system_api",
 
 }
 

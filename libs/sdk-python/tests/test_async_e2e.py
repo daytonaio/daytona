@@ -94,6 +94,23 @@ async def test_async_sandbox_refresh_data_preserves_id(async_sandbox):
 
 
 # ===========================================================================
+# System Metrics
+# ===========================================================================
+
+
+async def test_async_get_metrics_returns_live_snapshot(async_sandbox):
+    m = await async_sandbox.get_metrics()
+    assert m is not None
+    assert isinstance(m.timestamp, str) and m.timestamp, "timestamp should be a non-empty string"
+    assert m.cpu_count >= 1, f"cpu_count should be >= 1, got {m.cpu_count}"
+    assert m.cpu_used_pct >= 0, f"cpu_used_pct should be >= 0, got {m.cpu_used_pct}"
+    assert m.mem_total > 0, f"mem_total should be > 0, got {m.mem_total}"
+    assert 0 <= m.mem_used <= m.mem_total, f"mem_used out of range: {m.mem_used}/{m.mem_total}"
+    assert m.disk_total > 0, f"disk_total should be > 0, got {m.disk_total}"
+    assert 0 <= m.disk_used <= m.disk_total, f"disk_used out of range: {m.disk_used}/{m.disk_total}"
+
+
+# ===========================================================================
 # AsyncDaytona Client Operations
 # ===========================================================================
 

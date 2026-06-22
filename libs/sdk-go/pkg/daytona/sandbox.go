@@ -430,6 +430,26 @@ func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error) {
 	})
 }
 
+// GetMetrics returns a live snapshot of the sandbox's CPU, memory and disk usage.
+//
+// Example:
+//
+//	metrics, err := sandbox.GetMetrics(ctx)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("CPU: %.1f%%\n", metrics.GetCpuUsedPct())
+func (s *Sandbox) GetMetrics(ctx context.Context) (*toolbox.SystemMetrics, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "GetMetrics", func(ctx context.Context) (*toolbox.SystemMetrics, error) {
+		resp, httpResp, err := s.ToolboxClient.SystemAPI.GetSystemMetrics(ctx).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
+
+		return resp, nil
+	})
+}
+
 // GetWorkingDir returns the current working directory in the sandbox.
 //
 // Example:

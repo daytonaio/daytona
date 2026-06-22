@@ -228,6 +228,93 @@ func getDiskStats(path string) (*DiskStats, error) {
 	}, nil
 }
 
+// CgroupV2 reports whether the limits were read from a cgroup v2 hierarchy.
+func (cl *ResourceLimits) CgroupV2() bool {
+	return cl.cgroupV2
+}
+
+// GetContainerLimits reads the container's CPU (cores) and memory (bytes) limits
+// from cgroups (v1 or v2). Exposed so components outside this package (e.g. the
+// daemon's live-metrics sampler) reuse the exact same limit detection that the
+// OTEL collection path uses.
+func GetContainerLimits() *ResourceLimits {
+	return getContainerLimits()
+}
+
+// GetDiskStats returns filesystem statistics (total/used/available bytes) for path.
+func GetDiskStats(path string) (*DiskStats, error) {
+	return getDiskStats(path)
+}
+
+// ReadCgroupMemUsageBytes reads current memory usage in bytes from the cgroup
+// (v2 memory.current / v1 memory.usage_in_bytes).
+func ReadCgroupMemUsageBytes(cgroupV2 bool) (uint64, error) {
+	if cgroupV2 {
+		return readUint64FromFile("/sys/fs/cgroup/memory.current")
+	}
+	return readUint64FromFile("/sys/fs/cgroup/memory/memory.usage_in_bytes")
+}
+
+// ReadCgroupMemCacheBytes reads the page-cache size in bytes from the cgroup
+// (v2 memory.stat "file" / v1 memory.stat "cache").
+func ReadCgroupMemCacheBytes(cgroupV2 bool) (uint64, error) {
+	var statPath, key string
+	if cgroupV2 {
+		statPath = "/sys/fs/cgroup/memory.stat"
+		key = "file"
+	} else {
+		statPath = "/sys/fs/cgroup/memory/memory.stat"
+		key = "cache"
+	}
+	data, err := os.ReadFile(statPath)
+	if err != nil {
+		return 0, err
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, key+" ") {
+			parts := strings.Fields(line)
+			if len(parts) >= 2 {
+				return strconv.ParseUint(parts[1], 10, 64)
+			}
+		}
+	}
+	return 0, fmt.Errorf("%s not found in %s", key, statPath)
+}
+
+// ReadCgroupCPUUsageNanos reads cumulative CPU usage in nanoseconds from the
+// cgroup (v2 cpu.stat usage_usec*1000 / v1 cpuacct.usage).
+func ReadCgroupCPUUsageNanos(cgroupV2 bool) (uint64, error) {
+	if !cgroupV2 {
+		return readUint64FromFile("/sys/fs/cgroup/cpu/cpuacct.usage")
+	}
+
+	data, err := os.ReadFile("/sys/fs/cgroup/cpu.stat")
+	if err != nil {
+		return 0, err
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "usage_usec") {
+			parts := strings.Fields(line)
+			if len(parts) >= 2 {
+				usec, err := strconv.ParseUint(parts[1], 10, 64)
+				if err != nil {
+					return 0, err
+				}
+				return usec * 1000, nil // microseconds → nanoseconds
+			}
+		}
+	}
+	return 0, fmt.Errorf("usage_usec not found in cpu.stat")
+}
+
+// CPUUsagePercent converts a cgroup CPU-time delta (nanoseconds) over a wall-clock
+// window (nanoseconds) into a percentage of the container's CPU limit, so a fully
+// busy N-core container with an N-core limit reads ~100%. Callers must guard
+// against wallDeltaNanos <= 0 and cpuLimit <= 0.
+func CPUUsagePercent(cpuDeltaNanos uint64, wallDeltaNanos int64, cpuLimit float64) float64 {
+	return (float64(cpuDeltaNanos) / float64(wallDeltaNanos)) / cpuLimit * 100.0
+}
+
 // registerLimitsMetrics registers gauges for resource limits
 func registerLimitsMetrics(name string, mp *sdk_metric.MeterProvider, limits *ResourceLimits) error {
 	meter := mp.Meter(fmt.Sprintf("%s-limits", name))
@@ -310,12 +397,7 @@ func registerUsageMetrics(name string, mp *sdk_metric.MeterProvider, limits *Res
 	_, err = meter.RegisterCallback(
 		func(ctx context.Context, observer metric.Observer) error {
 			// Read current memory usage
-			var memUsage uint64
-			if limits.cgroupV2 {
-				memUsage, _ = readUint64FromFile("/sys/fs/cgroup/memory.current")
-			} else {
-				memUsage, _ = readUint64FromFile("/sys/fs/cgroup/memory/memory.usage_in_bytes")
-			}
+			memUsage, _ := ReadCgroupMemUsageBytes(limits.cgroupV2)
 
 			if memUsage > 0 {
 				observer.ObserveInt64(memUsageGauge, int64(memUsage))
@@ -328,35 +410,16 @@ func registerUsageMetrics(name string, mp *sdk_metric.MeterProvider, limits *Res
 			}
 
 			// Read current CPU usage
-			var cpuUsage uint64
-			if limits.cgroupV2 {
-				// For cgroup v2, read usage_usec from cpu.stat
-				if data, err := os.ReadFile("/sys/fs/cgroup/cpu.stat"); err == nil {
-					lines := strings.Split(string(data), "\n")
-					for _, line := range lines {
-						if strings.HasPrefix(line, "usage_usec") {
-							parts := strings.Fields(line)
-							if len(parts) >= 2 {
-								usec, _ := strconv.ParseUint(parts[1], 10, 64)
-								cpuUsage = usec * 1000 // Convert to nanoseconds
-								break
-							}
-						}
-					}
-				}
-			} else {
-				cpuUsage, _ = readUint64FromFile("/sys/fs/cgroup/cpu/cpuacct.usage")
-			}
+			cpuUsage, _ := ReadCgroupCPUUsageNanos(limits.cgroupV2)
 
 			// Calculate CPU utilization
 			now := time.Now()
 			if !lastTimestamp.IsZero() && cpuUsage > lastCPUUsage && limits.CPULimit > 0 {
 				timeDelta := now.Sub(lastTimestamp).Nanoseconds()
-				cpuDelta := cpuUsage - lastCPUUsage
-
-				// CPU usage as percentage of allocated CPUs
-				cpuUsagePercent := (float64(cpuDelta) / float64(timeDelta)) / limits.CPULimit * 100.0
-				observer.ObserveFloat64(cpuUtilGauge, cpuUsagePercent)
+				if timeDelta > 0 {
+					cpuUsagePercent := CPUUsagePercent(cpuUsage-lastCPUUsage, timeDelta, limits.CPULimit)
+					observer.ObserveFloat64(cpuUtilGauge, cpuUsagePercent)
+				}
 			}
 
 			lastCPUUsage = cpuUsage

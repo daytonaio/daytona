@@ -45,6 +45,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
+	"github.com/daytonaio/daemon/pkg/toolbox/system"
 	sloggin "github.com/samber/slog-gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	otellog "go.opentelemetry.io/otel/sdk/log"
@@ -364,12 +365,20 @@ func (s *server) Start() error {
 		portController.GET("/:port/in-use", portDetector.IsPortInUse)
 	}
 
+	systemSampler := system.NewSampler()
+
+	systemController := r.Group("/system")
+	{
+		systemController.GET("/metrics", systemSampler.GetSystemMetrics)
+	}
+
 	proxyController := noTelemetryRouter.Group("/proxy")
 	{
 		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
 	}
 
 	go portDetector.Start(context.Background())
+	go systemSampler.Start(s.ctx)
 
 	s.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),
