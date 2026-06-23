@@ -17,17 +17,42 @@ describe('[SANDBOX] preview auth token rotation cache invalidation', () => {
       return { service, redis }
     }
 
-    it('evicts the proxy auth-key cache entry for the PREVIOUS token, not the new one', async () => {
+    it('evicts both the API-side and proxy-side caches for the PREVIOUS token, not the new one', async () => {
       const { service, redis } = createService()
 
       await service.handleSandboxAuthTokenRotated(
         new SandboxAuthTokenRotatedEvent({ id: 'sandbox-1' } as Sandbox, 'old-token', 'new-token'),
       )
 
-      // Must target the rotated-out token so it stops authorizing immediately.
+      // Must target the rotated-out token on BOTH cache layers so it stops authorizing immediately.
+      // The API-side preview:token cache re-poisons the proxy cache on the next miss if left in place.
+      expect(redis.del).toHaveBeenCalledWith('preview:token:sandbox-1:old-token')
       expect(redis.del).toHaveBeenCalledWith('proxy:sandbox-auth-key-valid:sandbox-1:old-token')
       // Deleting the new token would be a no-op and leave the stale entry alive.
       expect(redis.del).not.toHaveBeenCalledWith(expect.stringContaining('new-token'))
+    })
+
+    // Ordering is the correctness property: the proxy only re-queries the API on a cache miss,
+    // and a miss can only happen after the proxy key is gone. If the proxy key were evicted first,
+    // a request landing in the gap would re-validate against the still-cached API decision and
+    // re-poison the proxy's longer-lived cache. The API-side key must be evicted first.
+    it('evicts the API-side cache before the proxy-side cache', async () => {
+      const { service, redis } = createService()
+
+      await service.handleSandboxAuthTokenRotated(
+        new SandboxAuthTokenRotatedEvent({ id: 'sandbox-1' } as Sandbox, 'old-token', 'new-token'),
+      )
+
+      const apiKey = 'preview:token:sandbox-1:old-token'
+      const proxyKey = 'proxy:sandbox-auth-key-valid:sandbox-1:old-token'
+      const apiCallIndex = redis.del.mock.calls.findIndex((args) => args[0] === apiKey)
+      const proxyCallIndex = redis.del.mock.calls.findIndex((args) => args[0] === proxyKey)
+
+      expect(apiCallIndex).toBeGreaterThanOrEqual(0)
+      expect(proxyCallIndex).toBeGreaterThanOrEqual(0)
+      expect(redis.del.mock.invocationCallOrder[apiCallIndex]).toBeLessThan(
+        redis.del.mock.invocationCallOrder[proxyCallIndex],
+      )
     })
 
     it('does nothing when there is no previous token', async () => {

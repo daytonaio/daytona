@@ -19,6 +19,7 @@ export class ProxyCacheInvalidationService {
   private static readonly RUNNER_INFO_CACHE_PREFIX = 'proxy:sandbox-runner-info:'
   private static readonly PUBLIC_CACHE_PREFIX = 'proxy:sandbox-public:'
   private static readonly AUTH_KEY_VALID_CACHE_PREFIX = 'proxy:sandbox-auth-key-valid:'
+  private static readonly API_AUTH_TOKEN_CACHE_PREFIX = 'preview:token:'
 
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
@@ -62,6 +63,20 @@ export class ProxyCacheInvalidationService {
     if (!previousAuthToken) {
       return
     }
+    // Evict the API-side decision cache BEFORE the proxy-side cache. The proxy only
+    // re-queries the API on a cache miss, and a miss can only occur after the proxy key
+    // is gone. Deleting the API key first guarantees any such re-query re-validates against
+    // the rotated token (now invalid) instead of reading a stale 'valid' decision and
+    // re-poisoning the proxy's longer-lived cache.
+    try {
+      await this.redis.del(
+        `${ProxyCacheInvalidationService.API_AUTH_TOKEN_CACHE_PREFIX}${sandboxId}:${previousAuthToken}`,
+      )
+      this.logger.debug(`Invalidated API auth-token cache for ${sandboxId}`)
+    } catch (error) {
+      this.logger.warn(`Failed to invalidate API auth-token cache for sandbox ${sandboxId}: ${error.message}`)
+    }
+
     try {
       await this.redis.del(
         `${ProxyCacheInvalidationService.AUTH_KEY_VALID_CACHE_PREFIX}${sandboxId}:${previousAuthToken}`,
