@@ -26,7 +26,13 @@ func getImageSizeFromRegistry(ctx context.Context, imageName string, registry *d
 
 	opts := []remote.Option{
 		remote.WithContext(ctx),
-		remote.WithPlatform(v1.Platform{OS: "linux", Architecture: "amd64"}),
+		remote.WithPlatform(func() v1.Platform {
+			platform := getSandboxPlatform()
+			return v1.Platform{
+				OS:           platform.os,
+				Architecture: platform.architecture,
+			}
+		}()),
 	}
 
 	if registry != nil && registry.HasAuth() {

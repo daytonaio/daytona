@@ -126,6 +126,7 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		d.logger.DebugContext(ctx, "Setting memory", "gigabytes", memory)
 	}
 
+	platform := sandboxPlatformFromDockerPlatform(originalContainer.Platform)
 	err = utils.RetryWithExponentialBackoff(
 		ctx,
 		fmt.Sprintf("create sandbox %s", sandboxId),
@@ -139,8 +140,8 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 				newHostConfig,
 				nil,
 				&v1.Platform{
-					Architecture: "amd64",
-					OS:           "linux",
+					Architecture: platform.architecture,
+					OS:           platform.os,
 				},
 				sandboxId,
 			)
