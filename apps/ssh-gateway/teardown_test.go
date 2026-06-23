@@ -8,6 +8,7 @@ import (
 	"crypto/rsa"
 	"io"
 	"net"
+	"sync"
 	"testing"
 	"time"
 
@@ -32,8 +33,12 @@ func testSigner(t *testing.T) ssh.Signer {
 type channelPair struct {
 	// server is the channel as seen by the SSH server (Accept()-returned).
 	server ssh.Channel
+	// serverRequests receives channel requests sent from client to server.
+	serverRequests <-chan *ssh.Request
 	// client is the channel as seen by the SSH client (OpenChannel()-returned).
 	client ssh.Channel
+	// clientRequests receives channel requests sent from server to client.
+	clientRequests <-chan *ssh.Request
 	// connClosed is closed when the client connection dies — the signal the
 	// production watcher goroutine selects on to hard-close the upstream channel.
 	connClosed chan struct{}
@@ -84,7 +89,12 @@ func newChannelPair(t *testing.T) *channelPair {
 	serverCfg := &ssh.ServerConfig{NoClientAuth: true}
 	serverCfg.AddHostKey(testSigner(t))
 
-	serverChanCh := make(chan ssh.Channel, 1)
+	type acceptedChannel struct {
+		channel  ssh.Channel
+		requests <-chan *ssh.Request
+	}
+
+	serverChanCh := make(chan acceptedChannel, 1)
 	serverConnCh := make(chan *ssh.ServerConn, 1)
 	go func() {
 		sconn, chans, reqs, err := ssh.NewServerConn(srvConn, serverCfg)
@@ -101,8 +111,7 @@ func newChannelPair(t *testing.T) *channelPair {
 		if err != nil {
 			return
 		}
-		go ssh.DiscardRequests(reqs)
-		serverChanCh <- ch
+		serverChanCh <- acceptedChannel{channel: ch, requests: reqs}
 		for range chans {
 		} // drain remaining channels
 	}()
@@ -126,9 +135,8 @@ func newChannelPair(t *testing.T) *channelPair {
 	if err != nil {
 		t.Fatalf("open channel: %v", err)
 	}
-	go ssh.DiscardRequests(chReqs)
 
-	var serverCh ssh.Channel
+	var serverCh acceptedChannel
 	select {
 	case serverCh = <-serverChanCh:
 	case <-time.After(5 * time.Second):
@@ -145,9 +153,11 @@ func newChannelPair(t *testing.T) *channelPair {
 	}()
 
 	return &channelPair{
-		server:     serverCh,
-		client:     clientCh,
-		connClosed: connClosed,
+		server:         serverCh.channel,
+		serverRequests: serverCh.requests,
+		client:         clientCh,
+		clientRequests: chReqs,
+		connClosed:     connClosed,
 		closeConns: func() {
 			cliConn.Close() //nolint:errcheck
 			srvConn.Close() //nolint:errcheck
@@ -155,6 +165,101 @@ func newChannelPair(t *testing.T) *channelPair {
 		closeClient: func() {
 			cliConn.Close() //nolint:errcheck
 		},
+	}
+}
+
+func TestRunnerExitStatusRequestReachesClientAfterRunnerEOF(t *testing.T) {
+	t.Parallel()
+
+	clientPair := newChannelPair(t)
+	defer clientPair.closeConns()
+
+	runnerPair := newChannelPair(t)
+	defer runnerPair.closeConns()
+
+	clientChannel := clientPair.server
+	runnerChannel := runnerPair.client
+
+	runnerRequestsDone := forwardChannelRequests(runnerPair.clientRequests, clientChannel, "Runner", "client", "test-runner")
+	copyDone := make(chan struct{})
+
+	go func() {
+		copyRunnerToClient(clientChannel, runnerChannel, runnerRequestsDone, 5*time.Second, "test-runner")
+		close(copyDone)
+	}()
+
+	payload := []byte{0, 0, 0, 5}
+	if _, err := runnerPair.server.SendRequest("exit-status", false, payload); err != nil {
+		t.Fatalf("runner send exit-status: %v", err)
+	}
+	if err := runnerPair.server.Close(); err != nil {
+		t.Fatalf("runner close: %v", err)
+	}
+
+	select {
+	case req, ok := <-clientPair.clientRequests:
+		if !ok {
+			t.Fatal("client request stream closed before exit-status was forwarded")
+		}
+		if req.Type != "exit-status" {
+			t.Fatalf("client got request %q, want exit-status", req.Type)
+		}
+		if string(req.Payload) != string(payload) {
+			t.Fatalf("client got payload %v, want %v", req.Payload, payload)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("client did not receive forwarded exit-status")
+	}
+
+	select {
+	case <-copyDone:
+	case <-time.After(2 * time.Second):
+		t.Fatal("runner output copy did not finish after runner close")
+	}
+}
+
+type notifyingEOFReader struct {
+	once sync.Once
+	read chan struct{}
+}
+
+func (r *notifyingEOFReader) Read(_ []byte) (int, error) {
+	r.once.Do(func() {
+		close(r.read)
+	})
+	return 0, io.EOF
+}
+
+func TestRunnerOutputWaitsForRequestForwarderAfterEOF(t *testing.T) {
+	t.Parallel()
+
+	requestsDone := make(chan struct{})
+	copyDone := make(chan struct{})
+	runnerOutput := &notifyingEOFReader{read: make(chan struct{})}
+
+	go func() {
+		copyRunnerToClient(io.Discard, runnerOutput, requestsDone, 5*time.Second, "test-runner")
+		close(copyDone)
+	}()
+
+	select {
+	case <-runnerOutput.read:
+	case <-time.After(2 * time.Second):
+		t.Fatal("runner output copy did not read from runner channel")
+	}
+
+	select {
+	case <-copyDone:
+		t.Fatal("runner output copy returned before runner requests were drained")
+	case <-time.After(50 * time.Millisecond):
+	}
+
+	close(requestsDone)
+
+	select {
+	case <-copyDone:
+	case <-time.After(2 * time.Second):
+		t.Fatal("runner output copy did not return after runner requests drained")
 	}
 }
 

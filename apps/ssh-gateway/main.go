@@ -26,8 +26,9 @@ import (
 )
 
 const (
-	defaultPort = 2222
-	runnerPort  = 2220
+	defaultPort                = 2222
+	runnerPort                 = 2220
+	channelRequestDrainTimeout = 2 * time.Second
 )
 
 type SSHGateway struct {
@@ -294,45 +295,8 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, connClosed <-chan 
 	}
 	defer runnerChannel.Close()
 
-	// Forward requests from client to runner
-	go func() {
-		for req := range clientRequests {
-			if req == nil {
-				return
-			}
-			log.Printf("Client request: %s for runner %s", req.Type, runnerID)
-
-			ok, err := runnerChannel.SendRequest(req.Type, req.WantReply, req.Payload)
-			if req.WantReply {
-				if err != nil {
-					log.Printf("Failed to send request to runner: %v", err)
-					req.Reply(false, []byte(err.Error())) // nolint:errcheck
-				} else {
-					req.Reply(ok, nil) // nolint:errcheck
-				}
-			}
-		}
-	}()
-
-	// Forward requests from runner to client
-	go func() {
-		for req := range runnerRequests {
-			if req == nil {
-				return
-			}
-			log.Printf("Runner request: %s for runner %s", req.Type, runnerID)
-
-			ok, err := clientChannel.SendRequest(req.Type, req.WantReply, req.Payload)
-			if req.WantReply {
-				if err != nil {
-					log.Printf("Failed to send request to client: %v", err)
-					req.Reply(false, []byte(err.Error())) // nolint:errcheck
-				} else {
-					req.Reply(ok, nil) // nolint:errcheck
-				}
-			}
-		}
-	}()
+	forwardChannelRequests(clientRequests, runnerChannel, "Client", "runner", runnerID)
+	runnerRequestsDone := forwardChannelRequests(runnerRequests, clientChannel, "Runner", "client", runnerID)
 
 	// Bidirectional data forwarding.
 	// On client EOF, half-close the runner channel (MSG_CHANNEL_EOF via CloseWrite)
@@ -391,12 +355,46 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, connClosed <-chan 
 		}
 	}()
 
-	_, err = io.Copy(clientChannel, runnerChannel)
+	copyRunnerToClient(clientChannel, runnerChannel, runnerRequestsDone, channelRequestDrainTimeout, runnerID)
+
+	log.Printf("Channel closed for runner: %s", runnerID)
+}
+
+func forwardChannelRequests(requests <-chan *ssh.Request, target ssh.Channel, source string, targetName string, runnerID string) <-chan struct{} {
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for req := range requests {
+			if req == nil {
+				return
+			}
+			log.Printf("%s request: %s for runner %s", source, req.Type, runnerID)
+
+			ok, err := target.SendRequest(req.Type, req.WantReply, req.Payload)
+			if req.WantReply {
+				if err != nil {
+					log.Printf("Failed to send request to %s: %v", targetName, err)
+					req.Reply(false, []byte(err.Error())) // nolint:errcheck
+				} else {
+					req.Reply(ok, nil) // nolint:errcheck
+				}
+			}
+		}
+	}()
+	return done
+}
+
+func copyRunnerToClient(clientChannel io.Writer, runnerChannel io.Reader, runnerRequestsDone <-chan struct{}, drainTimeout time.Duration, runnerID string) {
+	_, err := io.Copy(clientChannel, runnerChannel)
 	if err != nil {
 		log.Printf("Runner to client copy error: %v", err)
 	}
 
-	log.Printf("Channel closed for runner: %s", runnerID)
+	select {
+	case <-runnerRequestsDone:
+	case <-time.After(drainTimeout):
+		log.Warnf("timed out waiting for runner channel requests to drain for runner: %s", runnerID)
+	}
 }
 
 func (g *SSHGateway) connectToRunner(sandboxId string, runnerDomain string, signer ssh.Signer) (*ssh.Client, error) {
