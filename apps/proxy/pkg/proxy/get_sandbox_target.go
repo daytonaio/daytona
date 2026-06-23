@@ -115,10 +115,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
 	}
 
-	return target, map[string]string{
-		"X-Daytona-Authorization": fmt.Sprintf("Bearer %s", runnerInfo.ApiKey),
-		"X-Forwarded-Host":        ctx.Request.Host,
-	}, nil
+	return target, BuildExtraHeaders(runnerInfo.ApiKey, ctx.Request.Header.Get("X-Forwarded-Host"), ctx.Request.Host), nil
 }
 
 func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInfo, error) {
