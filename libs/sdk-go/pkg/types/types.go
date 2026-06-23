@@ -295,9 +295,7 @@ type ScreenshotOptions struct {
 
 type ScreenshotResponse struct {
 	Image     string // base64-encoded image data
-	Width     int
-	Height    int
-	SizeBytes *int // Size in bytes
+	SizeBytes *int   // Size in bytes
 }
 
 type LspLanguageID string

@@ -69,14 +69,14 @@ class TestAsyncComputerUse:
     @pytest.mark.asyncio
     async def test_screenshot_methods_delegate_to_api(self):
         computer_use, api_client = _make_async_computer_use()
-        api_client.take_screenshot.return_value = MagicMock(width=1920)
-        api_client.take_region_screenshot.return_value = MagicMock(width=300)
+        api_client.take_screenshot.return_value = MagicMock(screenshot="full-image")
+        api_client.take_region_screenshot.return_value = MagicMock(screenshot="region-image")
         api_client.take_compressed_screenshot.return_value = MagicMock(size_bytes=123)
         api_client.take_compressed_region_screenshot.return_value = MagicMock(size_bytes=456)
         region = ScreenshotRegion(x=10, y=20, width=300, height=200)
 
-        assert (await computer_use.screenshot.take_full_screen(show_cursor=True)).width == 1920
-        assert (await computer_use.screenshot.take_region(region)).width == 300
+        assert (await computer_use.screenshot.take_full_screen(show_cursor=True)).screenshot == "full-image"
+        assert (await computer_use.screenshot.take_region(region)).screenshot == "region-image"
         assert (await computer_use.screenshot.take_compressed()).size_bytes == 123
         assert (
             await computer_use.screenshot.take_compressed(
@@ -90,15 +90,15 @@ class TestAsyncComputerUse:
     @pytest.mark.asyncio
     async def test_display_and_recording_methods_delegate_to_api(self, tmp_path: Path):
         computer_use, api_client = _make_async_computer_use()
-        api_client.get_display_info.return_value = MagicMock(total_displays=1)
-        api_client.get_windows.return_value = MagicMock(count=2)
+        api_client.get_display_info.return_value = MagicMock(displays=[MagicMock(id=1)])
+        api_client.get_windows.return_value = MagicMock(windows=[MagicMock(id=1), MagicMock(id=2)])
         api_client.start_recording.return_value = MagicMock(id="rec-1")
         api_client.stop_recording.return_value = MagicMock(id="rec-1")
         api_client.list_recordings.return_value = MagicMock(recordings=[])
         api_client.get_recording.return_value = MagicMock(id="rec-1")
 
-        assert (await computer_use.display.get_info()).total_displays == 1
-        assert (await computer_use.display.get_windows()).count == 2
+        assert len((await computer_use.display.get_info()).displays) == 1
+        assert len((await computer_use.display.get_windows()).windows) == 2
         assert (await computer_use.recording.start("label")).id == "rec-1"
         assert (await computer_use.recording.stop("rec-1")).id == "rec-1"
         assert (await computer_use.recording.list()).recordings == []

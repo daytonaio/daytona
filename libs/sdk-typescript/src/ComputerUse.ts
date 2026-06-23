@@ -333,7 +333,7 @@ export class Screenshot {
    * @example
    * ```typescript
    * const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
-   * console.log(`Screenshot size: ${screenshot.width}x${screenshot.height}`);
+   * console.log(`Screenshot bytes: ${screenshot.sizeBytes ?? 'unknown'}`);
    *
    * // With cursor visible
    * const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
@@ -356,7 +356,7 @@ export class Screenshot {
    * ```typescript
    * const region = { x: 100, y: 100, width: 300, height: 200 };
    * const screenshot = await sandbox.computerUse.screenshot.takeRegion(region);
-   * console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.height}`);
+   * console.log(`Screenshot bytes: ${screenshot.sizeBytes ?? 'unknown'}`);
    * ```
    */
   @WithInstrumentation()
@@ -458,8 +458,7 @@ export class Display {
    * @example
    * ```typescript
    * const info = await sandbox.computerUse.display.getInfo();
-   * console.log(`Primary display: ${info.primary_display.width}x${info.primary_display.height}`);
-   * console.log(`Total displays: ${info.total_displays}`);
+   * console.log(`Total displays: ${info.displays.length}`);
    * info.displays.forEach((display, index) => {
    *   console.log(`Display ${index}: ${display.width}x${display.height} at ${display.x},${display.y}`);
    * });
@@ -479,7 +478,7 @@ export class Display {
    * @example
    * ```typescript
    * const windows = await sandbox.computerUse.display.getWindows();
-   * console.log(`Found ${windows.count} open windows:`);
+   * console.log(`Found ${windows.windows.length} open windows:`);
    * windows.windows.forEach(window => {
    *   console.log(`- ${window.title} (ID: ${window.id})`);
    * });
