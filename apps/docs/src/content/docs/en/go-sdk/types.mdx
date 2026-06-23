@@ -291,7 +291,7 @@ type GitStatus struct {
 <a name="GpuType"></a>
 ## type GpuType
 
-GpuType identifies a specific NVIDIA GPU model. Used in [Resources.GpuType](<#Resources>) as an ordered preference list — the scheduler tries each in order and pins the sandbox/snapshot to the first that has capacity. It is an alias for the API client's GpuType type.
+GpuType identifies a specific NVIDIA GPU model. Used in \[Resources.GpuType\] as an ordered preference list — the scheduler tries each in order and pins the sandbox/snapshot to the first that has capacity. It is an alias for the API client's GpuType type.
 
 ```go
 type GpuType = apiclient.GpuType

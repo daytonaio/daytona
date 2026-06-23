@@ -657,7 +657,7 @@ for sandbox, err := range client.ListSeq(ctx, &ListSandboxesQuery{...}) {
 
 CodeInterpreterService provides Python code execution capabilities for a sandbox.
 
-CodeInterpreterService enables running Python code in isolated execution contexts with support for streaming output, persistent state, and environment variables. It uses WebSockets for real\-time output streaming. Access through [Sandbox.CodeInterpreter](<#Sandbox>).
+CodeInterpreterService enables running Python code in isolated execution contexts with support for streaming output, persistent state, and environment variables. It uses WebSockets for real\-time output streaming. Access through \[Sandbox.CodeInterpreter\].
 
 Example:
 
@@ -699,7 +699,7 @@ func NewCodeInterpreterService(toolboxClient *toolbox.APIClient, otel *otelState
 
 NewCodeInterpreterService creates a new CodeInterpreterService.
 
-This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access CodeInterpreterService through [Sandbox.CodeInterpreter](<#Sandbox>) rather than creating it directly.
+This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access CodeInterpreterService through \[Sandbox.CodeInterpreter\] rather than creating it directly.
 
 <a name="CodeInterpreterService.CreateContext"></a>
 ### func \(\*CodeInterpreterService\) CreateContext
@@ -834,7 +834,7 @@ Returns [OutputChannels](<#OutputChannels>) for receiving streamed output, or an
 
 ComputerUseService provides desktop automation operations for a sandbox.
 
-ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, display management, and screen recording. The desktop environment must be started before using these features. Access through [Sandbox.ComputerUse](<#Sandbox>).
+ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, display management, and screen recording. The desktop environment must be started before using these features. Access through \[Sandbox.ComputerUse\].
 
 Example:
 
@@ -875,7 +875,7 @@ func NewComputerUseService(toolboxClient *toolbox.APIClient, otel *otelState) *C
 
 NewComputerUseService creates a new ComputerUseService.
 
-This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access ComputerUseService through [Sandbox.ComputerUse](<#Sandbox>) rather than creating it directly.
+This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access ComputerUseService through \[Sandbox.ComputerUse\] rather than creating it directly.
 
 <a name="ComputerUseService.Accessibility"></a>
 ### func \(\*ComputerUseService\) Accessibility
@@ -1521,7 +1521,7 @@ WithDownloadProgress returns an option that enables progress tracking for stream
 
 FileSystemService provides file system operations for a sandbox.
 
-FileSystemService enables file and directory management including creating, reading, writing, moving, and deleting files. It also supports file searching and permission management. Access through [Sandbox.FileSystem](<#Sandbox>).
+FileSystemService enables file and directory management including creating, reading, writing, moving, and deleting files. It also supports file searching and permission management. Access through \[Sandbox.FileSystem\].
 
 Example:
 
@@ -1554,7 +1554,7 @@ func NewFileSystemService(toolboxClient *toolbox.APIClient, otel *otelState) *Fi
 
 NewFileSystemService creates a new FileSystemService with the provided toolbox client.
 
-This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access FileSystemService through [Sandbox.FileSystem](<#Sandbox>) rather than creating it directly.
+This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access FileSystemService through \[Sandbox.FileSystem\] rather than creating it directly.
 
 <a name="FileSystemService.CreateFolder"></a>
 ### func \(\*FileSystemService\) CreateFolder
@@ -1960,7 +1960,7 @@ err := sandbox.FileSystem.UploadFileStream(ctx, f, "/home/user/big.bin",
 
 GitService provides Git operations for a sandbox.
 
-GitService enables common Git workflows including cloning repositories, staging and committing changes, managing branches, and syncing with remote repositories. It is accessed through the [Sandbox.Git](<#Sandbox>) field.
+GitService enables common Git workflows including cloning repositories, staging and committing changes, managing branches, and syncing with remote repositories. It is accessed through the \[Sandbox.Git\] field.
 
 Example:
 
@@ -1994,7 +1994,7 @@ func NewGitService(toolboxClient *toolbox.APIClient, otel *otelState) *GitServic
 
 NewGitService creates a new GitService with the provided toolbox client.
 
-This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access GitService through [Sandbox.Git](<#Sandbox>) rather than creating it directly.
+This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access GitService through \[Sandbox.Git\] rather than creating it directly.
 
 <a name="GitService.Add"></a>
 ### func \(\*GitService\) Add
@@ -2859,7 +2859,7 @@ type OutputChannels struct {
 
 ProcessService provides process execution operations for a sandbox.
 
-ProcessService enables command execution, session management, and PTY \(pseudo\-terminal\) operations. It supports both synchronous command execution and interactive terminal sessions. Access through [Sandbox.Process](<#Sandbox>).
+ProcessService enables command execution, session management, and PTY \(pseudo\-terminal\) operations. It supports both synchronous command execution and interactive terminal sessions. Access through \[Sandbox.Process\].
 
 Example:
 
@@ -2894,7 +2894,7 @@ func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState, langua
 
 NewProcessService creates a new ProcessService with the provided toolbox client.
 
-This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access ProcessService through [Sandbox.Process](<#Sandbox>) rather than creating it directly.
+This is typically called internally by the SDK when creating a [Sandbox](<#Sandbox>). Users should access ProcessService through \[Sandbox.Process\] rather than creating it directly.
 
 <a name="ProcessService.CodeRun"></a>
 ### func \(\*ProcessService\) CodeRun
