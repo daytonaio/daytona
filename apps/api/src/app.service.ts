@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common'
 import { DockerRegistryService } from './docker-registry/services/docker-registry.service'
 import { RegistryType } from './docker-registry/enums/registry-type.enum'
 import { OrganizationService } from './organization/services/organization.service'
@@ -20,6 +20,8 @@ import { RunnerAdapterFactory } from './sandbox/runner-adapter/runnerAdapter'
 import { RegionType } from './region/enums/region-type.enum'
 import { RunnerState } from './sandbox/enums/runner-state.enum'
 import { OrganizationResourcePermission } from './organization/enums/organization-resource-permission.enum'
+import { SnapshotState } from './sandbox/enums/snapshot-state.enum'
+import { Snapshot } from './sandbox/entities/snapshot.entity'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -315,20 +317,25 @@ Admin user created with API key: ${value}
 
   private async initializeDefaultSnapshot(): Promise<void> {
     const adminPersonalOrg = await this.organizationService.findPersonal(DAYTONA_ADMIN_USER_ID)
+    const defaultSnapshot = this.configService.getOrThrow('defaultSnapshot')
+    let existingSnapshot: Snapshot | undefined
 
     try {
-      const existingSnapshot = await this.snapshotService.getSnapshotByName(
-        this.configService.getOrThrow('defaultSnapshot'),
-        adminPersonalOrg.id,
-      )
-      if (existingSnapshot) {
-        return
+      existingSnapshot = await this.snapshotService.getSnapshotByName(defaultSnapshot, adminPersonalOrg.id)
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        throw error
       }
-    } catch {
       this.logger.log('Default snapshot not found, creating...')
     }
 
-    const defaultSnapshot = this.configService.getOrThrow('defaultSnapshot')
+    if (existingSnapshot) {
+      if ([SnapshotState.ERROR, SnapshotState.BUILD_FAILED].includes(existingSnapshot.state)) {
+        this.logger.warn(`Default snapshot is in ${existingSnapshot.state} state, retrying...`)
+        await this.snapshotService.retryFailedSnapshot(existingSnapshot.id)
+      }
+      return
+    }
 
     await this.snapshotService.createFromPull(
       adminPersonalOrg,
