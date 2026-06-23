@@ -24,6 +24,8 @@ Represents a Daytona Sandbox.
 - `cpu` _number_ - Number of CPUs allocated to the Sandbox
 - `createdAt?` _string_ - When the Sandbox was created
 - `disk` _number_ - Amount of disk space allocated to the Sandbox in GiB
+- `domainAllowList?` _string_ - Comma-separated list of allowed domains for the Sandbox
+    (not returned by list results; call `refreshData()` on each item to populate)
 - `env?` _Record\<string, string\>_ - Environment variables set in the Sandbox
     (not returned by list results; call `refreshData()` on each item to populate)
 - `errorReason?` _string_ - Error message if Sandbox is in error state
@@ -767,12 +769,13 @@ updateNetworkSettings(settings: UpdateSandboxNetworkSettings): Promise<void>
 Updates outbound network policy for this sandbox on the runner (for example block all traffic,
 restore general internet access, or apply a CIDR allow list) without stopping the sandbox.
 
-This maps to the same mechanism as creating a sandbox with `networkBlockAll` / `networkAllowList`:
-the runner applies iptables rules to the sandbox container.
+This maps to the same mechanism as creating a sandbox with `networkBlockAll` / `networkAllowList` /
+`domainAllowList`: the runner applies iptables rules to the sandbox container.
 
 **Parameters**:
 
-- `settings` _UpdateSandboxNetworkSettings_ - At least one of `networkBlockAll` or `networkAllowList` must be set.
+- `settings` _UpdateSandboxNetworkSettings_ - At least one of `networkBlockAll`, `networkAllowList` or
+    `domainAllowList` must be set.
     Set `networkBlockAll` to `false` to restore outbound access after a block (and clear a stored allow list).
 
 
@@ -787,6 +790,8 @@ the runner applies iptables rules to the sandbox container.
 await sandbox.updateNetworkSettings({ networkBlockAll: true });
 // Resume internet
 await sandbox.updateNetworkSettings({ networkBlockAll: false });
+// Allow only specific domains
+await sandbox.updateNetworkSettings({ domainAllowList: 'example.com,*.daytona.io' });
 ```
 
 ***

@@ -380,6 +380,7 @@ Base parameters for creating a new Sandbox.
 - `autoArchiveInterval?` _number_ - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
 - `autoDeleteInterval?` _number_ - Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping). By default, auto-delete is disabled.
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
+- `domainAllowList?` _string_ - Comma-separated list of allowed domains for the Sandbox
 - `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
 - `ephemeral?` _boolean_ - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
 - `labels?` _Record\<string, string\>_ - Sandbox labels
@@ -400,6 +401,7 @@ Parameters for creating a new Sandbox.
 - `autoArchiveInterval?` _number_
 - `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
+- `domainAllowList?` _string_
 - `envVars?` _Record\<string, string\>_
 - `ephemeral?` _boolean_
 - `image` _string \| Image_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
@@ -424,6 +426,7 @@ Parameters for creating a new Sandbox from a snapshot.
 - `autoArchiveInterval?` _number_
 - `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
+- `domainAllowList?` _string_
 - `envVars?` _Record\<string, string\>_
 - `ephemeral?` _boolean_
 - `labels?` _Record\<string, string\>_
