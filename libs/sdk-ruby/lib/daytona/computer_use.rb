@@ -318,7 +318,7 @@ module Daytona
       #   region = ScreenshotRegion.new(x: 0, y: 0, width: 800, height: 600)
       #   screenshot = sandbox.computer_use.screenshot.take_compressed_region(
       #     region,
-      #     options: ScreenshotOptions.new(format: "webp", quality: 80, show_cursor: true)
+      #     options: ScreenshotOptions.new(format: "jpeg", quality: 80, show_cursor: true)
       #   )
       #   puts "Compressed size: #{screenshot.size_bytes} bytes"
       def take_compressed_region(region:, options: nil)
@@ -573,7 +573,7 @@ module Daytona
       # @return [Boolean, nil] Whether to show the cursor in the screenshot
       attr_accessor :show_cursor
 
-      # @return [String, nil] Image format (e.g., 'png', 'jpeg', 'webp')
+      # @return [String, nil] Image format (e.g., 'png', 'jpeg')
       attr_accessor :fmt
 
       # @return [Integer, nil] Compression quality (0-100)
@@ -583,7 +583,7 @@ module Daytona
       attr_accessor :scale
 
       # @param show_cursor [Boolean, nil] Whether to show the cursor in the screenshot
-      # @param format [String, nil] Image format (e.g., 'png', 'jpeg', 'webp')
+      # @param format [String, nil] Image format (e.g., 'png', 'jpeg')
       # @param quality [Integer, nil] Compression quality (0-100)
       # @param scale [Float, nil] Scale factor for the screenshot
       def initialize(show_cursor: nil, format: nil, quality: nil, scale: nil)

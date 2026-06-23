@@ -31,7 +31,7 @@ class ScreenshotOptions(BaseModel):
 
     Attributes:
         show_cursor (bool | None): Whether to show the cursor in the screenshot.
-        fmt (str | None): Image format (e.g., 'png', 'jpeg', 'webp').
+        fmt (str | None): Image format (e.g., 'png', 'jpeg').
         quality (int | None): Compression quality (0-100).
         scale (float | None): Scale factor for the screenshot.
     """
@@ -39,6 +39,6 @@ class ScreenshotOptions(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(extra="forbid")
 
     show_cursor: bool | None = Field(default=None, description="Whether to show the cursor in the screenshot.")
-    fmt: str | None = Field(default=None, description="Image format (png, jpeg, webp).")
+    fmt: str | None = Field(default=None, description="Image format (png, jpeg).")
     quality: int | None = Field(default=None, ge=0, le=100, description="Compression quality.")
     scale: float | None = Field(default=None, gt=0, description="Scale factor for the screenshot.")

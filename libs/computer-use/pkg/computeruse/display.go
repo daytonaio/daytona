@@ -29,6 +29,16 @@ func encodeImageWithCompression(img *image.RGBA, params ImageCompressionParams) 
 	var buf bytes.Buffer
 
 	switch params.Format {
+	case "", "png":
+		// Scale the image if needed
+		var scaledImg image.Image = img
+		if params.Scale != 1.0 {
+			scaledImg = scaleImage(img, params.Scale)
+		}
+		err := png.Encode(&buf, scaledImg)
+		if err != nil {
+			return nil, err
+		}
 	case "jpeg":
 		// Scale the image if needed
 		var scaledImg image.Image = img
@@ -39,22 +49,8 @@ func encodeImageWithCompression(img *image.RGBA, params ImageCompressionParams) 
 		if err != nil {
 			return nil, err
 		}
-	case "png":
-		// Scale the image if needed
-		var scaledImg image.Image = img
-		if params.Scale != 1.0 {
-			scaledImg = scaleImage(img, params.Scale)
-		}
-		err := png.Encode(&buf, scaledImg)
-		if err != nil {
-			return nil, err
-		}
 	default:
-		// Default to PNG
-		err := png.Encode(&buf, img)
-		if err != nil {
-			return nil, err
-		}
+		return nil, fmt.Errorf("unsupported image format %q: supported formats are png and jpeg", params.Format)
 	}
 
 	return buf.Bytes(), nil

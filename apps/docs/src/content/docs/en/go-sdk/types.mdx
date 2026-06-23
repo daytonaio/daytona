@@ -504,8 +504,8 @@ const (
 ```go
 type ScreenshotOptions struct {
     ShowCursor *bool    // nil = default, true = show, false = hide
-    Format     *string  // nil = default format (PNG), or "jpeg", "webp", etc.
-    Quality    *int     // nil = default quality, 0-100 for JPEG/WebP
+    Format     *string  // nil = default format (PNG), or "jpeg"
+    Quality    *int     // nil = default quality, 0-100 for JPEG
     Scale      *float64 // nil = 1.0, scaling factor for the screenshot
 }
 ```
@@ -621,4 +621,3 @@ type VolumeMount struct {
     Subpath   *string // Optional subpath within the volume; nil = mount entire volume
 }
 ```
-
