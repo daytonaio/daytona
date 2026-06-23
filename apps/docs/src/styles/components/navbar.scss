@@ -233,10 +233,12 @@
     align-items: center;
   }
 
-  .call,
-  .github {
+  .call {
     border-radius: 3px;
     transition: 0.6s;
+    background: #007fff33;
+    padding: 1px 0;
+    flex-shrink: 0;
 
     a {
       font-size: 0.875rem;
@@ -247,15 +249,6 @@
       height: 30px;
       display: inline-block;
       text-transform: none;
-    }
-  }
-
-  .call {
-    background: #007fff33;
-    padding: 1px 0;
-    flex-shrink: 0;
-
-    a {
       color: #007fff;
     }
 
@@ -267,44 +260,6 @@
           color: #fff;
         }
       }
-    }
-  }
-
-  .github {
-    background: var(--block-bg-color);
-    border: var(--border);
-    border-color: var(--block-bg-color);
-
-    a {
-      min-width: 100px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      color: var(--primary-text-color);
-    }
-
-    & svg path {
-      transition: 0.6s;
-      fill: var(--secondary-text-color);
-    }
-
-    @include for-hover-state {
-      &:hover {
-        background: var(--secondary-text-color);
-        border-color: var(--secondary-text-color);
-
-        a {
-          color: var(--white);
-        }
-
-        & svg path {
-          fill: var(--white);
-        }
-      }
-    }
-
-    img {
-      display: block;
     }
   }
 }
