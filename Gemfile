@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 # Local gems from libs
 gem 'daytona_api_client', '>= 0.0.0.pre.dev', path: 'libs/api-client-ruby'
+gem 'daytona_analytics_api_client', '>= 0.0.0.pre.dev', path: 'libs/analytics-api-client-ruby'
 gem 'daytona_toolbox_api_client', '>= 0.0.0.pre.dev', path: 'libs/toolbox-api-client-ruby'
 gem 'daytona', '>= 0.0.0.pre.dev', path: 'libs/sdk-ruby'
 

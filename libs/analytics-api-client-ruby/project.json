@@ -1,0 +1,62 @@
+{
+  "name": "analytics-api-client-ruby",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/analytics-api-client-ruby",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["rm -f *.gem", "bundle install", "gem build daytona_analytics_api_client.gemspec"],
+        "parallel": false
+      },
+      "dependsOn": ["set-version"],
+      "inputs": ["default", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
+      "outputs": ["{projectRoot}/**/*.gem"]
+    },
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "if [ -n \"$RUBYGEMS_PKG_VERSION\" ]; then sed -i \"s/VERSION = '[^']*'/VERSION = '$RUBYGEMS_PKG_VERSION'/\" lib/daytona_analytics_api_client/version.rb && echo \"Changed version to $RUBYGEMS_PKG_VERSION\"; else echo \"Using version from version.rb\"; fi"
+      },
+      "cache": true,
+      "inputs": [{ "env": "RUBYGEMS_PKG_VERSION" }, { "env": "VERSION" }],
+      "outputs": ["{projectRoot}/lib/daytona_analytics_api_client/version.rb"]
+    },
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/lib"],
+      "options": {
+        "commands": [
+          "rm -rf libs/analytics-api-client-ruby/lib",
+          "yarn run openapi-generator-cli generate -i tmp/swagger.json -g ruby -t hack/ruby-client/openapi-templates --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona Analytics API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemVersion=$DEFAULT_GEM_VERSION,gemName=daytona_analytics_api_client,enumUnknownDefaultCase=true -o libs/analytics-api-client-ruby",
+          "bash libs/analytics-api-client-ruby/fix-gemspec.sh",
+          "sed -i 's|OpenAPI-Generator/#{VERSION}/ruby|analytics-api-client-ruby/#{VERSION}|' libs/analytics-api-client-ruby/lib/daytona_analytics_api_client/api_client.rb",
+          "cd libs/analytics-api-client-ruby && bundle install"
+        ],
+        "parallel": false
+      },
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/tmp/swagger.json",
+        "{workspaceRoot}/hack/ruby-client/openapi-templates/**/*",
+        { "env": "DEFAULT_GEM_VERSION" }
+      ]
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "mkdir -p ~/.gem && echo \":rubygems: $RUBYGEMS_API_KEY\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials",
+          "gem push daytona_analytics_api_client-*.gem --key rubygems --host https://rubygems.org"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}

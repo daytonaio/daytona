@@ -1,0 +1,70 @@
+{
+  "name": "analytics-api-client-go",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/analytics-api-client-go",
+  "tags": [],
+  "targets": {
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "inputs": ["goProduction"],
+      "options": {
+        "main": "./{projectRoot}",
+        "outputPath": "dist/libs/analytics-api-client-go"
+      }
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/tmp/swagger.json",
+        "{workspaceRoot}/hack/go-client/openapi-templates/**/*",
+        "{workspaceRoot}/hack/go-client/postprocess.sh",
+        { "env": "DEFAULT_PACKAGE_VERSION" }
+      ],
+      "outputs": [
+        "{projectRoot}/*.go",
+        "{projectRoot}/go.mod",
+        "{projectRoot}/go.sum",
+        "{projectRoot}/api/openapi.yaml"
+      ],
+      "options": {
+        "commands": [
+          "rm -f {projectRoot}/*.go",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/analytics-api-client-go --git-user-id=daytonaio -i tmp/swagger.json -g go -t hack/go-client/openapi-templates --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=analyticsapiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true,enumUnknownDefaultCase=true -o libs/analytics-api-client-go",
+          "bash hack/go-client/postprocess.sh libs/analytics-api-client-go analyticsapiclient analytics-api-client-go"
+        ],
+        "parallel": false
+      }
+    },
+    "tidy": {
+      "executor": "@nx-go/nx-go:tidy"
+    },
+    "check-version-env": {},
+    "set-version": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/libs/sdk-go/go.mod",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{workspaceRoot}/libs/sdk-go/go.mod", "{projectRoot}/VERSION"],
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "commands": [
+          "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/analytics-api-client-go@$VERSION",
+          "echo \"$VERSION\" > libs/analytics-api-client-go/VERSION"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["check-version-env"]
+    }
+  }
+}

@@ -57,6 +57,14 @@ jobs:
             projects: pi-extension
           - name: Analytics API Client
             projects: analytics-api-client
+          - name: Analytics API Client Python
+            projects: analytics-api-client-python
+          - name: Analytics API Client Python Async
+            projects: analytics-api-client-python-async
+          - name: Analytics API Client Ruby
+            projects: analytics-api-client-ruby
+          - name: Analytics API Client Java
+            projects: analytics-api-client-java
           - name: Billing API Client
             projects: billing-api-client
           - name: Python SDK
