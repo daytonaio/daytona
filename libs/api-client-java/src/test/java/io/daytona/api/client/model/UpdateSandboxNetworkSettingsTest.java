@@ -53,4 +53,12 @@ public class UpdateSandboxNetworkSettingsTest {
         // TODO: test networkAllowList
     }
 
+    /**
+     * Test the property 'domainAllowList'
+     */
+    @Test
+    public void domainAllowListTest() {
+        // TODO: test domainAllowList
+    }
+
 }

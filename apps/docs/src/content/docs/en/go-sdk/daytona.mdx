@@ -4111,6 +4111,10 @@ type Sandbox struct {
     // Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
     NetworkAllowList *string
 
+    // DomainAllowList is a comma-separated list of allowed domains.
+    // Not populated by [Client.List]; call [Sandbox.RefreshData] on each item to populate.
+    DomainAllowList *string
+
     FileSystem      *FileSystemService      // File system operations
     Git             *GitService             // Git operations
     Process         *ProcessService         // Process and PTY operations
@@ -4426,7 +4430,7 @@ func (s *Sandbox) RefreshData(ctx context.Context) error
 
 RefreshData refreshes the sandbox data from the API.
 
-This updates all sandbox fields from the server, including those not populated by [Client.List](<#Client.List>) \(Env, NetworkBlockAll, NetworkAllowList, Volumes, BuildInfo, BackupCreatedAt\).
+This updates all sandbox fields from the server, including those not populated by [Client.List](<#Client.List>) \(Env, NetworkBlockAll, NetworkAllowList, DomainAllowList, Volumes, BuildInfo, BackupCreatedAt\).
 
 Example:
 

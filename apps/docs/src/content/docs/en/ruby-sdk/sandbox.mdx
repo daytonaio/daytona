@@ -124,6 +124,18 @@ def network_allow_list()
 - `String, nil` - Comma-separated list of allowed CIDR network addresses for the sandbox.
 Not returned by list results; call #refresh on each item to populate.
 
+#### domain_allow_list()
+
+```ruby
+def domain_allow_list()
+
+```
+
+**Returns**:
+
+- `String, nil` - Comma-separated list of allowed domains for the sandbox.
+Not returned by list results; call #refresh on each item to populate.
+
 #### target()
 
 ```ruby
@@ -480,7 +492,7 @@ The Sandbox will automatically delete after being continuously stopped for the s
 #### update_network_settings()
 
 ```ruby
-def update_network_settings(network_block_all:, network_allow_list:)
+def update_network_settings(network_block_all:, network_allow_list:, domain_allow_list:)
 
 ```
 
@@ -490,6 +502,7 @@ Updates outbound network policy on the runner (block all, restore access, or CID
 
 - `network_block_all` _Boolean, nil_ -
 - `network_allow_list` _String, nil_ -
+- `domain_allow_list` _String, nil_ -
 
 **Returns**:
 

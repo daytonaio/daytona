@@ -53,6 +53,8 @@ Represents a Daytona Sandbox.
   (not returned by list results; call `refresh_data()` on each item to populate).
 - `network_allow_list` _str | None_ - Comma-separated list of allowed CIDR network addresses for
   the Sandbox (not returned by list results; call `refresh_data()` on each item to populate).
+- `domain_allow_list` _str | None_ - Comma-separated list of allowed domains for
+  the Sandbox (not returned by list results; call `refresh_data()` on each item to populate).
 - `toolbox_proxy_url` _str_ - The toolbox proxy URL for the Sandbox.
 
 ##### env: `dict[str, str] | None`
@@ -452,7 +454,8 @@ sandbox.set_auto_delete_interval(-1)
 async def update_network_settings(
         *,
         network_block_all: bool | None = None,
-        network_allow_list: str | None = None) -> None
+        network_allow_list: str | None = None,
+        domain_allow_list: str | None = None) -> None
 ```
 
 Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
@@ -462,6 +465,7 @@ Updates outbound network policy on the runner (block all, restore access, or CID
 - `network_block_all` - When ``True``, blocks all outbound traffic. When ``False``, restores general
   outbound access (and clears a stored allow list).
 - `network_allow_list` - Comma-separated IPv4 CIDRs to allow; implies not blocking all.
+- `domain_allow_list` - Comma-separated domains to allow; implies not blocking all.
   
 
 **Raises**:

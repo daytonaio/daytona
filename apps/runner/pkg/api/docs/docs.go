@@ -1556,6 +1556,9 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 1
                 },
+                "domainAllowList": {
+                    "type": "string"
+                },
                 "entrypoint": {
                     "type": "array",
                     "items": {
@@ -2052,6 +2055,9 @@ const docTemplate = `{
         "UpdateNetworkSettingsDTO": {
             "type": "object",
             "properties": {
+                "domainAllowList": {
+                    "type": "string"
+                },
                 "networkAllowList": {
                     "type": "string"
                 },

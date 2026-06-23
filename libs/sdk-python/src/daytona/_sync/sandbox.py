@@ -93,6 +93,8 @@ class Sandbox(SandboxDto):
             (not returned by list results; call `refresh_data()` on each item to populate).
         network_allow_list (str | None): Comma-separated list of allowed CIDR network addresses for
             the Sandbox (not returned by list results; call `refresh_data()` on each item to populate).
+        domain_allow_list (str | None): Comma-separated list of allowed domains for
+            the Sandbox (not returned by list results; call `refresh_data()` on each item to populate).
         toolbox_proxy_url (str): The toolbox proxy URL for the Sandbox.
     """
 
@@ -528,6 +530,7 @@ class Sandbox(SandboxDto):
         *,
         network_block_all: bool | None = None,
         network_allow_list: str | None = None,
+        domain_allow_list: str | None = None,
     ) -> None:
         """Updates outbound network policy on the runner (block all, restore access, or CIDR allow list).
 
@@ -535,6 +538,7 @@ class Sandbox(SandboxDto):
             network_block_all: When ``True``, blocks all outbound traffic. When ``False``, restores general
                 outbound access (and clears a stored allow list).
             network_allow_list: Comma-separated IPv4 CIDRs to allow; implies not blocking all.
+            domain_allow_list: Comma-separated domains to allow; implies not blocking all.
 
         Raises:
             DaytonaValidationError: If neither argument is set.
@@ -545,16 +549,20 @@ class Sandbox(SandboxDto):
             sandbox.update_network_settings(network_block_all=False)
             ```
         """
-        if network_block_all is None and network_allow_list is None:
-            raise DaytonaValidationError("At least one of network_block_all or network_allow_list must be set")
+        if network_block_all is None and network_allow_list is None and domain_allow_list is None:
+            raise DaytonaValidationError(
+                "At least one of network_block_all, network_allow_list or domain_allow_list must be set"
+            )
 
         body = UpdateSandboxNetworkSettings(
             network_block_all=network_block_all,
             network_allow_list=network_allow_list,
+            domain_allow_list=domain_allow_list,
         )
         updated = self._sandbox_api.update_network_settings(self.id, body)
         self.network_block_all = updated.network_block_all
         self.network_allow_list = updated.network_allow_list
+        self.domain_allow_list = updated.domain_allow_list
 
     @intercept_errors(message_prefix="Failed to get preview link: ")
     @with_instrumentation()
@@ -896,6 +904,7 @@ class Sandbox(SandboxDto):
                 sandbox_dto.network_block_all
             )
             self.network_allow_list: str | None = sandbox_dto.network_allow_list
+            self.domain_allow_list: str | None = sandbox_dto.domain_allow_list
             self.volumes: list[SandboxVolume] | None = sandbox_dto.volumes
             self.build_info: BuildInfo | None = sandbox_dto.build_info
             self.backup_created_at: str | None = sandbox_dto.backup_created_at

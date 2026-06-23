@@ -43,6 +43,9 @@ module Daytona
     # @return [String, nil] Comma-separated list of allowed CIDR network addresses for the Sandbox
     attr_accessor :network_allow_list
 
+    # @return [String, nil] Comma-separated list of allowed domains for the Sandbox
+    attr_accessor :domain_allow_list
+
     # @return [Boolean, nil] Whether the Sandbox should be ephemeral
     attr_accessor :ephemeral
 
@@ -66,6 +69,7 @@ module Daytona
     # @param volumes [Array<DaytonaApiClient::SandboxVolume>, nil] List of volumes mounts to attach to the Sandbox
     # @param network_block_all [Boolean, nil] Whether to block all network access for the Sandbox
     # @param network_allow_list [String, nil] Comma-separated list of allowed CIDR network addresses for the Sandbox
+    # @param domain_allow_list [String, nil] Comma-separated list of allowed domains for the Sandbox
     # @param ephemeral [Boolean, nil] Whether the Sandbox should be ephemeral
     # @param linked_sandbox [String, nil] ID or name of an existing Sandbox to link the new Sandbox to
     def initialize( # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
@@ -81,6 +85,7 @@ module Daytona
       volumes: nil,
       network_block_all: nil,
       network_allow_list: nil,
+      domain_allow_list: nil,
       ephemeral: nil,
       linked_sandbox: nil
     )
@@ -96,6 +101,7 @@ module Daytona
       @volumes = volumes
       @network_block_all = network_block_all
       @network_allow_list = network_allow_list
+      @domain_allow_list = domain_allow_list
       @ephemeral = ephemeral
       @linked_sandbox = linked_sandbox
 
@@ -120,6 +126,7 @@ module Daytona
         volumes:,
         network_block_all:,
         network_allow_list:,
+        domain_allow_list:,
         ephemeral:,
         linked_sandbox:
       }.compact
@@ -166,6 +173,7 @@ module Daytona
     # @param volumes [Array<DaytonaApiClient::SandboxVolume>, nil] List of volumes mounts to attach to the Sandbox
     # @param network_block_all [Boolean, nil] Whether to block all network access for the Sandbox
     # @param network_allow_list [String, nil] Comma-separated list of allowed CIDR network addresses for the Sandbox
+    # @param domain_allow_list [String, nil] Comma-separated list of allowed domains for the Sandbox
     # @param ephemeral [Boolean, nil] Whether the Sandbox should be ephemeral
     def initialize(image:, resources: nil, **args)
       @image = image
@@ -204,6 +212,7 @@ module Daytona
     # @param volumes [Array<DaytonaApiClient::SandboxVolume>, nil] List of volumes mounts to attach to the Sandbox
     # @param network_block_all [Boolean, nil] Whether to block all network access for the Sandbox
     # @param network_allow_list [String, nil] Comma-separated list of allowed CIDR network addresses for the Sandbox
+    # @param domain_allow_list [String, nil] Comma-separated list of allowed domains for the Sandbox
     # @param ephemeral [Boolean, nil] Whether the Sandbox should be ephemeral
     def initialize(snapshot: nil, **args)
       @snapshot = snapshot

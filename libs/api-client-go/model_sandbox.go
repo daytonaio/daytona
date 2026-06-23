@@ -41,6 +41,8 @@ type Sandbox struct {
 	NetworkBlockAll bool `json:"networkBlockAll"`
 	// Comma-separated list of allowed CIDR network addresses for the sandbox
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
+	// Comma-separated list of allowed domains for the sandbox
+	DomainAllowList *string `json:"domainAllowList,omitempty"`
 	// The target environment for the sandbox
 	Target string `json:"target"`
 	// The CPU quota for the sandbox
@@ -381,6 +383,38 @@ func (o *Sandbox) HasNetworkAllowList() bool {
 // SetNetworkAllowList gets a reference to the given string and assigns it to the NetworkAllowList field.
 func (o *Sandbox) SetNetworkAllowList(v string) {
 	o.NetworkAllowList = &v
+}
+
+// GetDomainAllowList returns the DomainAllowList field value if set, zero value otherwise.
+func (o *Sandbox) GetDomainAllowList() string {
+	if o == nil || IsNil(o.DomainAllowList) {
+		var ret string
+		return ret
+	}
+	return *o.DomainAllowList
+}
+
+// GetDomainAllowListOk returns a tuple with the DomainAllowList field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetDomainAllowListOk() (*string, bool) {
+	if o == nil || IsNil(o.DomainAllowList) {
+		return nil, false
+	}
+	return o.DomainAllowList, true
+}
+
+// HasDomainAllowList returns a boolean if a field has been set.
+func (o *Sandbox) HasDomainAllowList() bool {
+	if o != nil && !IsNil(o.DomainAllowList) {
+		return true
+	}
+
+	return false
+}
+
+// SetDomainAllowList gets a reference to the given string and assigns it to the DomainAllowList field.
+func (o *Sandbox) SetDomainAllowList(v string) {
+	o.DomainAllowList = &v
 }
 
 // GetTarget returns the Target field value
@@ -1159,6 +1193,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.NetworkAllowList) {
 		toSerialize["networkAllowList"] = o.NetworkAllowList
 	}
+	if !IsNil(o.DomainAllowList) {
+		toSerialize["domainAllowList"] = o.DomainAllowList
+	}
 	toSerialize["target"] = o.Target
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["gpu"] = o.Gpu
@@ -1288,6 +1325,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "public")
 		delete(additionalProperties, "networkBlockAll")
 		delete(additionalProperties, "networkAllowList")
+		delete(additionalProperties, "domainAllowList")
 		delete(additionalProperties, "target")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "gpu")

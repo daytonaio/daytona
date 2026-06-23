@@ -15,6 +15,7 @@
 
 
 export interface UpdateNetworkSettingsDTO {
+    'domainAllowList'?: string;
     'networkAllowList'?: string;
     'networkBlockAll'?: boolean;
     'networkLimitEgress'?: boolean;

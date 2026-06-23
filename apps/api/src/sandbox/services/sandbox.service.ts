@@ -61,7 +61,7 @@ import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto, SandboxVolume } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
 import { RunnerAdapter, RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
-import { validateNetworkAllowList } from '../utils/network-validation.util'
+import { validateDomainAllowList, validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
@@ -656,6 +656,10 @@ export class SandboxService {
         sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
       }
 
+      if (createSandboxDto.domainAllowList !== undefined) {
+        sandbox.domainAllowList = this.resolveDomainAllowList(createSandboxDto.domainAllowList)
+      }
+
       if (createSandboxDto.autoStopInterval !== undefined) {
         sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
       }
@@ -797,6 +801,10 @@ export class SandboxService {
       updateData.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
     }
 
+    if (createSandboxDto.domainAllowList !== undefined) {
+      updateData.domainAllowList = this.resolveDomainAllowList(createSandboxDto.domainAllowList)
+    }
+
     if (!warmPoolSandbox.runnerId) {
       throw new SandboxError('Runner not found for warm pool sandbox')
     }
@@ -804,6 +812,7 @@ export class SandboxService {
     if (
       createSandboxDto.networkBlockAll !== undefined ||
       createSandboxDto.networkAllowList !== undefined ||
+      createSandboxDto.domainAllowList !== undefined ||
       organization.sandboxLimitedNetworkEgress
     ) {
       const runner = await this.runnerService.findOneOrFail(warmPoolSandbox.runnerId)
@@ -813,6 +822,7 @@ export class SandboxService {
         createSandboxDto.networkBlockAll,
         createSandboxDto.networkAllowList,
         organization.sandboxLimitedNetworkEgress,
+        updateData.domainAllowList ?? undefined,
       )
     }
 
@@ -915,6 +925,10 @@ export class SandboxService {
 
       if (createSandboxDto.networkAllowList !== undefined) {
         sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+      }
+
+      if (createSandboxDto.domainAllowList !== undefined) {
+        sandbox.domainAllowList = this.resolveDomainAllowList(createSandboxDto.domainAllowList)
       }
 
       if (createSandboxDto.autoStopInterval !== undefined) {
@@ -3054,6 +3068,7 @@ export class SandboxService {
     sandboxIdOrName: string,
     networkBlockAll?: boolean,
     networkAllowList?: string,
+    domainAllowList?: string,
     organizationId?: string,
   ): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
@@ -3061,6 +3076,17 @@ export class SandboxService {
     const updateData: Partial<Sandbox> = {}
     let effectiveNetworkBlockAll = sandbox.networkBlockAll
     let effectiveNetworkAllowList = sandbox.networkAllowList
+    let effectiveDomainAllowList = sandbox.domainAllowList
+
+    if (domainAllowList !== undefined) {
+      if (domainAllowList.trim() === '') {
+        updateData.domainAllowList = null
+        effectiveDomainAllowList = null
+      } else {
+        updateData.domainAllowList = this.resolveDomainAllowList(domainAllowList)
+        effectiveDomainAllowList = updateData.domainAllowList
+      }
+    }
 
     if (networkBlockAll !== undefined) {
       updateData.networkBlockAll = networkBlockAll
@@ -3096,6 +3122,8 @@ export class SandboxService {
           sandbox.id,
           effectiveNetworkBlockAll,
           effectiveNetworkAllowList ?? undefined,
+          undefined,
+          effectiveDomainAllowList ?? undefined,
         )
       }
     }
@@ -3289,6 +3317,16 @@ export class SandboxService {
     }
 
     return networkAllowList
+  }
+
+  private resolveDomainAllowList(domainAllowList: string): string {
+    try {
+      validateDomainAllowList(domainAllowList)
+    } catch (error) {
+      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid domain allow list')
+    }
+
+    return domainAllowList
   }
 
   // Resolves each volumeId (which may be a volume name) to the volume's UUID — the

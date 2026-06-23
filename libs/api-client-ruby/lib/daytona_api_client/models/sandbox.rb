@@ -45,6 +45,9 @@ module DaytonaApiClient
     # Comma-separated list of allowed CIDR network addresses for the sandbox
     attr_accessor :network_allow_list
 
+    # Comma-separated list of allowed domains for the sandbox
+    attr_accessor :domain_allow_list
+
     # The target environment for the sandbox
     attr_accessor :target
 
@@ -155,6 +158,7 @@ module DaytonaApiClient
         :'public' => :'public',
         :'network_block_all' => :'networkBlockAll',
         :'network_allow_list' => :'networkAllowList',
+        :'domain_allow_list' => :'domainAllowList',
         :'target' => :'target',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
@@ -206,6 +210,7 @@ module DaytonaApiClient
         :'public' => :'Boolean',
         :'network_block_all' => :'Boolean',
         :'network_allow_list' => :'String',
+        :'domain_allow_list' => :'String',
         :'target' => :'String',
         :'cpu' => :'Float',
         :'gpu' => :'Float',
@@ -314,6 +319,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'network_allow_list')
         self.network_allow_list = attributes[:'network_allow_list']
+      end
+
+      if attributes.key?(:'domain_allow_list')
+        self.domain_allow_list = attributes[:'domain_allow_list']
       end
 
       if attributes.key?(:'target')
@@ -695,6 +704,7 @@ module DaytonaApiClient
           public == o.public &&
           network_block_all == o.network_block_all &&
           network_allow_list == o.network_allow_list &&
+          domain_allow_list == o.domain_allow_list &&
           target == o.target &&
           cpu == o.cpu &&
           gpu == o.gpu &&
@@ -731,7 +741,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, gpu_type, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, domain_allow_list, target, cpu, gpu, gpu_type, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, last_activity_at, sandbox_class, daemon_version, runner_id, linked_sandbox_id, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

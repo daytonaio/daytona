@@ -50,7 +50,7 @@
           protoc-gen-go
           protoc-gen-go-grpc
           libgit2
-        ] ++ darwinDeps;
+        ] ++ darwinDeps ++ bpfPkgs;
 
         goShellHook = ''
           unset GOROOT
@@ -71,6 +71,26 @@
           _nix_install_go_tool gomarkdoc "github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0"
           unset -f _nix_install_go_tool
         '';
+
+        # ──────────────────────────────────────────────
+        # eBPF toolchain (Linux only)
+        # Covers: libs/netleash — `make generate` runs bpf2go, which compiles the
+        # BPF C sources with clang and strips them with llvm-strip. libbpf and the
+        # kernel UAPI headers supply <bpf/...> and <linux/...>/<asm/...>.
+        # Pinned to LLVM 18 to match the committed generated objects.
+        # The header packages go in buildInputs (not packages) so the clang
+        # cc-wrapper injects their include dirs via NIX_CFLAGS_COMPILE — this lets
+        # `make generate` find the headers without any Makefile changes.
+        # ──────────────────────────────────────────────
+        bpfPkgs = pkgs.lib.optionals pkgs.stdenv.isLinux [
+          pkgs.llvmPackages_18.clang # bpf2go: clang -cc
+          pkgs.llvmPackages_18.llvm # bpf2go: llvm-strip
+        ];
+
+        bpfHeaderInputs = pkgs.lib.optionals pkgs.stdenv.isLinux [
+          pkgs.libbpf # <bpf/bpf_helpers.h>, <bpf/bpf_endian.h>
+          pkgs.linuxHeaders # <linux/bpf.h>, <asm/types.h>, ...
+        ];
 
         # ──────────────────────────────────────────────
         # Node.js / TypeScript toolchain
@@ -140,6 +160,10 @@
           default = pkgs.mkShell {
             name = "daytona";
             packages = commonPkgs ++ goPkgs ++ nodePkgs ++ pythonPkgs ++ rubyPkgs ++ javaPkgs;
+            buildInputs = bpfHeaderInputs;
+            # bpf2go invokes clang with `-target bpf`; the cc-wrapper's hardening
+            # flags (e.g. -fzero-call-used-regs) are unsupported for that target.
+            hardeningDisable = [ "all" ];
             shellHook = ''
               ${goShellHook}
               ${nodeShellHook}
@@ -153,6 +177,10 @@
           go = pkgs.mkShell {
             name = "daytona-go";
             packages = commonPkgs ++ goPkgs;
+            buildInputs = bpfHeaderInputs;
+            # bpf2go invokes clang with `-target bpf`; the cc-wrapper's hardening
+            # flags (e.g. -fzero-call-used-regs) are unsupported for that target.
+            hardeningDisable = [ "all" ];
             shellHook = goShellHook;
           };
 

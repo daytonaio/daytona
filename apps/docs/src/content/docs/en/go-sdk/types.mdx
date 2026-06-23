@@ -466,6 +466,7 @@ type SandboxBaseParams struct {
     Volumes             []VolumeMount
     NetworkBlockAll     bool
     NetworkAllowList    *string
+    DomainAllowList     *string
     Ephemeral           bool
     // LinkedSandbox is the ID or name of an existing sandbox to link the new sandbox to.
     // The new sandbox will be scheduled on the same runner as the linked sandbox so a local

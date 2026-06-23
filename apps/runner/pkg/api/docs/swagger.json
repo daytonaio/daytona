@@ -1451,6 +1451,9 @@
           "type": "integer",
           "minimum": 1
         },
+        "domainAllowList": {
+          "type": "string"
+        },
         "entrypoint": {
           "type": "array",
           "items": {
@@ -1914,6 +1917,9 @@
     "UpdateNetworkSettingsDTO": {
       "type": "object",
       "properties": {
+        "domainAllowList": {
+          "type": "string"
+        },
         "networkAllowList": {
           "type": "string"
         },

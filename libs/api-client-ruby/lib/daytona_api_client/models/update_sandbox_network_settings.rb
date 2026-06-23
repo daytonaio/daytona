@@ -21,11 +21,15 @@ module DaytonaApiClient
     # Comma-separated list of allowed CIDR network addresses for the sandbox
     attr_accessor :network_allow_list
 
+    # Comma-separated list of allowed domains for the sandbox
+    attr_accessor :domain_allow_list
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'network_block_all' => :'networkBlockAll',
-        :'network_allow_list' => :'networkAllowList'
+        :'network_allow_list' => :'networkAllowList',
+        :'domain_allow_list' => :'domainAllowList'
       }
     end
 
@@ -43,7 +47,8 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'network_block_all' => :'Boolean',
-        :'network_allow_list' => :'String'
+        :'network_allow_list' => :'String',
+        :'domain_allow_list' => :'String'
       }
     end
 
@@ -76,6 +81,10 @@ module DaytonaApiClient
       if attributes.key?(:'network_allow_list')
         self.network_allow_list = attributes[:'network_allow_list']
       end
+
+      if attributes.key?(:'domain_allow_list')
+        self.domain_allow_list = attributes[:'domain_allow_list']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -99,7 +108,8 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           network_block_all == o.network_block_all &&
-          network_allow_list == o.network_allow_list
+          network_allow_list == o.network_allow_list &&
+          domain_allow_list == o.domain_allow_list
     end
 
     # @see the `==` method
@@ -111,7 +121,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [network_block_all, network_allow_list].hash
+      [network_block_all, network_allow_list, domain_allow_list].hash
     end
 
     # Builds the object from hash

@@ -109,6 +109,12 @@ export class SandboxDto {
   })
   networkAllowList?: string
 
+  @ApiPropertyOptional({
+    description: 'Comma-separated list of allowed domains for the sandbox',
+    example: 'example.com,*.daytona.io',
+  })
+  domainAllowList?: string
+
   @ApiProperty({
     description: 'The target environment for the sandbox',
     example: 'local',
@@ -328,6 +334,7 @@ export class SandboxDto {
       public: sandbox.public,
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
+      domainAllowList: sandbox.domainAllowList,
       labels: sandbox.labels,
       volumes: sandbox.volumes,
       state: this.getSandboxState(sandbox),
