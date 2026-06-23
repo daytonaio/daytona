@@ -17,6 +17,7 @@ export class ProxyCacheInvalidationService {
   private readonly logger = new Logger(ProxyCacheInvalidationService.name)
   private static readonly RUNNER_INFO_CACHE_PREFIX = 'proxy:sandbox-runner-info:'
   private static readonly PUBLIC_CACHE_PREFIX = 'proxy:sandbox-public:'
+  private static readonly API_PUBLIC_CACHE_PREFIX = 'preview:public:'
 
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
@@ -40,6 +41,18 @@ export class ProxyCacheInvalidationService {
   }
 
   private async invalidatePublicCache(sandboxId: string): Promise<void> {
+    // Evict the API-side decision cache BEFORE the proxy-side cache.
+    // The proxy only re-queries the API on a cache miss, and a miss can only
+    // occur after the proxy key is gone. Deleting the API key first guarantees
+    // any such re-query does a fresh lookup (now private) instead of reading a
+    // stale 'public' decision and re-poisoning the proxy's longer-lived cache.
+    try {
+      await this.redis.del(`${ProxyCacheInvalidationService.API_PUBLIC_CACHE_PREFIX}${sandboxId}`)
+      this.logger.debug(`Invalidated API public-status cache for ${sandboxId}`)
+    } catch (error) {
+      this.logger.warn(`Failed to invalidate API public-status cache for sandbox ${sandboxId}: ${error.message}`)
+    }
+
     try {
       await this.redis.del(`${ProxyCacheInvalidationService.PUBLIC_CACHE_PREFIX}${sandboxId}`)
       this.logger.debug(`Invalidated sandbox public cache for ${sandboxId}`)
