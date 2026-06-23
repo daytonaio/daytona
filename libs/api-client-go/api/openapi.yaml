@@ -11117,6 +11117,7 @@ components:
         createdAt: 2024-10-01T12:00:00Z
         networkBlockAll: false
         autoDeleteInterval: 30
+        domainAllowList: "example.com,*.daytona.io"
         public: false
         errorReason: The sandbox is not running
         runnerId: runner123
@@ -11197,6 +11198,10 @@ components:
           description: Comma-separated list of allowed CIDR network addresses for
             the sandbox
           example: "192.168.1.0/16,10.0.0.0/24"
+          type: string
+        domainAllowList:
+          description: Comma-separated list of allowed domains for the sandbox
+          example: "example.com,*.daytona.io"
           type: string
         target:
           description: The target environment for the sandbox
@@ -11352,6 +11357,7 @@ components:
           createdAt: 2024-10-01T12:00:00Z
           networkBlockAll: false
           autoDeleteInterval: 30
+          domainAllowList: "example.com,*.daytona.io"
           public: false
           errorReason: The sandbox is not running
           runnerId: runner123
@@ -11395,6 +11401,7 @@ components:
           createdAt: 2024-10-01T12:00:00Z
           networkBlockAll: false
           autoDeleteInterval: 30
+          domainAllowList: "example.com,*.daytona.io"
           public: false
           errorReason: The sandbox is not running
           runnerId: runner123
@@ -11490,6 +11497,7 @@ components:
         networkBlockAll: false
         disk: 3
         autoDeleteInterval: 30
+        domainAllowList: "example.com,*.daytona.io"
         public: false
         linkedSandbox: sandbox123
         name: MySandbox
@@ -11538,6 +11546,10 @@ components:
           description: Comma-separated list of allowed CIDR network addresses for
             the sandbox
           example: "192.168.1.0/16,10.0.0.0/24"
+          type: string
+        domainAllowList:
+          description: Comma-separated list of allowed domains for the sandbox
+          example: "example.com,*.daytona.io"
           type: string
         target:
           description: The target (region) where the sandbox will be created
@@ -11714,6 +11726,7 @@ components:
     UpdateSandboxNetworkSettings:
       example:
         networkBlockAll: false
+        domainAllowList: "example.com,*.daytona.io"
         networkAllowList: "192.168.1.0/16,10.0.0.0/24"
       properties:
         networkBlockAll:
@@ -11724,6 +11737,10 @@ components:
           description: Comma-separated list of allowed CIDR network addresses for
             the sandbox
           example: "192.168.1.0/16,10.0.0.0/24"
+          type: string
+        domainAllowList:
+          description: Comma-separated list of allowed domains for the sandbox
+          example: "example.com,*.daytona.io"
           type: string
       type: object
     PortPreviewUrl:

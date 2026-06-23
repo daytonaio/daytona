@@ -128,6 +128,14 @@ public class SandboxTest {
     }
 
     /**
+     * Test the property 'domainAllowList'
+     */
+    @Test
+    public void domainAllowListTest() {
+        // TODO: test domainAllowList
+    }
+
+    /**
      * Test the property 'target'
      */
     @Test

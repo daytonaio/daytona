@@ -110,6 +110,11 @@ public class Sandbox {
   @javax.annotation.Nullable
   private String networkAllowList;
 
+  public static final String SERIALIZED_NAME_DOMAIN_ALLOW_LIST = "domainAllowList";
+  @SerializedName(SERIALIZED_NAME_DOMAIN_ALLOW_LIST)
+  @javax.annotation.Nullable
+  private String domainAllowList;
+
   public static final String SERIALIZED_NAME_TARGET = "target";
   @SerializedName(SERIALIZED_NAME_TARGET)
   @javax.annotation.Nonnull
@@ -559,6 +564,25 @@ public class Sandbox {
 
   public void setNetworkAllowList(@javax.annotation.Nullable String networkAllowList) {
     this.networkAllowList = networkAllowList;
+  }
+
+
+  public Sandbox domainAllowList(@javax.annotation.Nullable String domainAllowList) {
+    this.domainAllowList = domainAllowList;
+    return this;
+  }
+
+  /**
+   * Comma-separated list of allowed domains for the sandbox
+   * @return domainAllowList
+   */
+  @javax.annotation.Nullable
+  public String getDomainAllowList() {
+    return domainAllowList;
+  }
+
+  public void setDomainAllowList(@javax.annotation.Nullable String domainAllowList) {
+    this.domainAllowList = domainAllowList;
   }
 
 
@@ -1109,6 +1133,7 @@ public class Sandbox {
         Objects.equals(this._public, sandbox._public) &&
         Objects.equals(this.networkBlockAll, sandbox.networkBlockAll) &&
         Objects.equals(this.networkAllowList, sandbox.networkAllowList) &&
+        Objects.equals(this.domainAllowList, sandbox.domainAllowList) &&
         Objects.equals(this.target, sandbox.target) &&
         Objects.equals(this.cpu, sandbox.cpu) &&
         Objects.equals(this.gpu, sandbox.gpu) &&
@@ -1139,7 +1164,7 @@ public class Sandbox {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, target, cpu, gpu, gpuType, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, sandboxClass, daemonVersion, runnerId, linkedSandboxId, toolboxProxyUrl, additionalProperties);
+    return Objects.hash(id, organizationId, name, snapshot, user, env, labels, _public, networkBlockAll, networkAllowList, domainAllowList, target, cpu, gpu, gpuType, memory, disk, state, desiredState, errorReason, recoverable, backupState, backupCreatedAt, autoStopInterval, autoArchiveInterval, autoDeleteInterval, volumes, buildInfo, createdAt, updatedAt, lastActivityAt, sandboxClass, daemonVersion, runnerId, linkedSandboxId, toolboxProxyUrl, additionalProperties);
   }
 
   @Override
@@ -1156,6 +1181,7 @@ public class Sandbox {
     sb.append("    _public: ").append(toIndentedString(_public)).append("\n");
     sb.append("    networkBlockAll: ").append(toIndentedString(networkBlockAll)).append("\n");
     sb.append("    networkAllowList: ").append(toIndentedString(networkAllowList)).append("\n");
+    sb.append("    domainAllowList: ").append(toIndentedString(domainAllowList)).append("\n");
     sb.append("    target: ").append(toIndentedString(target)).append("\n");
     sb.append("    cpu: ").append(toIndentedString(cpu)).append("\n");
     sb.append("    gpu: ").append(toIndentedString(gpu)).append("\n");
@@ -1200,7 +1226,7 @@ public class Sandbox {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "gpuType", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "linkedSandboxId", "toolboxProxyUrl"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "domainAllowList", "target", "cpu", "gpu", "gpuType", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "lastActivityAt", "sandboxClass", "daemonVersion", "runnerId", "linkedSandboxId", "toolboxProxyUrl"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("id", "organizationId", "name", "user", "env", "labels", "public", "networkBlockAll", "target", "cpu", "gpu", "memory", "disk", "toolboxProxyUrl"));
@@ -1243,6 +1269,9 @@ public class Sandbox {
       }
       if ((jsonObj.get("networkAllowList") != null && !jsonObj.get("networkAllowList").isJsonNull()) && !jsonObj.get("networkAllowList").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `networkAllowList` to be a primitive type in the JSON string but got `%s`", jsonObj.get("networkAllowList").toString()));
+      }
+      if ((jsonObj.get("domainAllowList") != null && !jsonObj.get("domainAllowList").isJsonNull()) && !jsonObj.get("domainAllowList").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `domainAllowList` to be a primitive type in the JSON string but got `%s`", jsonObj.get("domainAllowList").toString()));
       }
       if (!jsonObj.get("target").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `target` to be a primitive type in the JSON string but got `%s`", jsonObj.get("target").toString()));

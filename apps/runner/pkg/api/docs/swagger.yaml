@@ -41,6 +41,8 @@ definitions:
       cpuQuota:
         minimum: 1
         type: integer
+      domainAllowList:
+        type: string
       entrypoint:
         items:
           type: string
@@ -391,6 +393,8 @@ definitions:
     type: object
   UpdateNetworkSettingsDTO:
     properties:
+      domainAllowList:
+        type: string
       networkAllowList:
         type: string
       networkBlockAll:

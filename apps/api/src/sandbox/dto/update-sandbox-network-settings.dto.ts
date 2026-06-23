@@ -23,4 +23,12 @@ export class UpdateSandboxNetworkSettingsDto {
   @ValidateIf((_, value) => value !== undefined)
   @IsString()
   networkAllowList?: string
+
+  @ApiPropertyOptional({
+    description: 'Comma-separated list of allowed domains for the sandbox',
+    example: 'example.com,*.daytona.io',
+  })
+  @ValidateIf((_, value) => value !== undefined)
+  @IsString()
+  domainAllowList?: string
 }

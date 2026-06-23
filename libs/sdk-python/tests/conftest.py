@@ -62,6 +62,7 @@ def make_sandbox_dto(
         updated_at=cast(str | None, kwargs.get("updated_at", "2025-01-01T00:00:00Z")),
         network_block_all=cast(bool, kwargs.get("network_block_all", False)),
         network_allow_list=cast(str | None, kwargs.get("network_allow_list", None)),
+        domain_allow_list=cast(str | None, kwargs.get("domain_allow_list", None)),
         toolbox_proxy_url=cast(str, kwargs.get("toolbox_proxy_url", "http://localhost:2280")),
     )
 

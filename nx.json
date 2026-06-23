@@ -162,10 +162,10 @@
       "options": {
         "context": "{workspaceRoot}",
         "file": "{projectRoot}/Dockerfile",
-        "tags": ["daytonaio/daytona-{projectName}:$VERSION$ARCH"],
+        "tags": ["ghcr.io/daytonaio/daytona-{projectName}:$VERSION$ARCH"],
         "build-args": ["VERSION=$VERSION"],
-        "cache-from": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache$ARCH"],
-        "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache$ARCH,mode=max"]
+        "cache-from": ["type=registry,ref=ghcr.io/daytonaio/daytona-{projectName}:buildcache$ARCH"],
+        "cache-to": ["type=registry,ref=ghcr.io/daytonaio/daytona-{projectName}:buildcache$ARCH,mode=max"]
       },
       "configurations": {
         "production": {
@@ -174,24 +174,26 @@
         "production-multi-platform": {
           "push": true,
           "platforms": ["linux/amd64", "linux/arm64"],
-          "tags": ["daytonaio/daytona-{projectName}:$VERSION"],
-          "cache-from": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache"],
-          "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache,mode=max"]
+          "tags": ["ghcr.io/daytonaio/daytona-{projectName}:$VERSION"],
+          "cache-from": ["type=registry,ref=ghcr.io/daytonaio/daytona-{projectName}:buildcache"],
+          "cache-to": ["type=registry,ref=ghcr.io/daytonaio/daytona-{projectName}:buildcache,mode=max"]
         },
         "local-registry": {
           "push": true,
           "tags": [
-            "registry:5000/daytonaio/test-daytona-{projectName}:$VERSION",
-            "registry:5000/daytonaio/test-daytona-{projectName}:latest"
+            "registry:5000/ghcr.io/daytonaio/test-daytona-{projectName}:$VERSION",
+            "registry:5000/ghcr.io/daytonaio/test-daytona-{projectName}:latest"
           ],
-          "cache-from": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache"],
-          "cache-to": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache,mode=max"]
+          "cache-from": ["type=registry,ref=registry:5000/ghcr.io/daytonaio/test-daytona-{projectName}:buildcache"],
+          "cache-to": [
+            "type=registry,ref=registry:5000/ghcr.io/daytonaio/test-daytona-{projectName}:buildcache,mode=max"
+          ]
         },
         "pr-build": {
           "push": false,
           "load": false,
           "platforms": ["linux/amd64"],
-          "tags": ["daytonaio/daytona-{projectName}:$VERSION"],
+          "tags": ["ghcr.io/daytonaio/daytona-{projectName}:$VERSION"],
           "cache-from": ["type=gha,scope=docker-{projectName}"],
           "cache-to": ["type=gha,scope=docker-{projectName},mode=max"]
         }
@@ -203,10 +205,10 @@
       "options": {
         "parallel": false,
         "commands": [
-          "docker manifest create daytonaio/daytona-{projectName}:$VERSION daytonaio/daytona-{projectName}:$VERSION-amd64 daytonaio/daytona-{projectName}:$VERSION-arm64",
-          "docker manifest push daytonaio/daytona-{projectName}:$VERSION",
-          "docker manifest create daytonaio/daytona-{projectName}:latest daytonaio/daytona-{projectName}:$VERSION-amd64 daytonaio/daytona-{projectName}:$VERSION-arm64",
-          "docker manifest push daytonaio/daytona-{projectName}:latest"
+          "docker manifest create ghcr.io/daytonaio/daytona-{projectName}:$VERSION ghcr.io/daytonaio/daytona-{projectName}:$VERSION-amd64 ghcr.io/daytonaio/daytona-{projectName}:$VERSION-arm64",
+          "docker manifest push ghcr.io/daytonaio/daytona-{projectName}:$VERSION",
+          "docker manifest create ghcr.io/daytonaio/daytona-{projectName}:latest ghcr.io/daytonaio/daytona-{projectName}:$VERSION-amd64 ghcr.io/daytonaio/daytona-{projectName}:$VERSION-arm64",
+          "docker manifest push ghcr.io/daytonaio/daytona-{projectName}:latest"
         ]
       }
     },

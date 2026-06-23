@@ -184,6 +184,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
+      domainAllowList: sandbox.domainAllowList,
       metadata: metadata,
       authToken: sandbox.authToken,
       otelEndpoint: otelEndpoint,
@@ -530,11 +531,13 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     networkBlockAll?: boolean,
     networkAllowList?: string,
     networkLimitEgress?: boolean,
+    domainAllowList?: string,
   ): Promise<void> {
     const payload: UpdateNetworkSettingsDTO = {
       networkBlockAll: networkBlockAll,
       networkAllowList: networkAllowList,
       networkLimitEgress: networkLimitEgress,
+      domainAllowList: domainAllowList,
     }
 
     await this.jobService.createJob(

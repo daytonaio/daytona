@@ -24,6 +24,8 @@ type UpdateSandboxNetworkSettings struct {
 	NetworkBlockAll *bool `json:"networkBlockAll,omitempty"`
 	// Comma-separated list of allowed CIDR network addresses for the sandbox
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
+	// Comma-separated list of allowed domains for the sandbox
+	DomainAllowList *string `json:"domainAllowList,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -110,6 +112,38 @@ func (o *UpdateSandboxNetworkSettings) SetNetworkAllowList(v string) {
 	o.NetworkAllowList = &v
 }
 
+// GetDomainAllowList returns the DomainAllowList field value if set, zero value otherwise.
+func (o *UpdateSandboxNetworkSettings) GetDomainAllowList() string {
+	if o == nil || IsNil(o.DomainAllowList) {
+		var ret string
+		return ret
+	}
+	return *o.DomainAllowList
+}
+
+// GetDomainAllowListOk returns a tuple with the DomainAllowList field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateSandboxNetworkSettings) GetDomainAllowListOk() (*string, bool) {
+	if o == nil || IsNil(o.DomainAllowList) {
+		return nil, false
+	}
+	return o.DomainAllowList, true
+}
+
+// HasDomainAllowList returns a boolean if a field has been set.
+func (o *UpdateSandboxNetworkSettings) HasDomainAllowList() bool {
+	if o != nil && !IsNil(o.DomainAllowList) {
+		return true
+	}
+
+	return false
+}
+
+// SetDomainAllowList gets a reference to the given string and assigns it to the DomainAllowList field.
+func (o *UpdateSandboxNetworkSettings) SetDomainAllowList(v string) {
+	o.DomainAllowList = &v
+}
+
 func (o UpdateSandboxNetworkSettings) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -125,6 +159,9 @@ func (o UpdateSandboxNetworkSettings) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.NetworkAllowList) {
 		toSerialize["networkAllowList"] = o.NetworkAllowList
+	}
+	if !IsNil(o.DomainAllowList) {
+		toSerialize["domainAllowList"] = o.DomainAllowList
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -150,6 +187,7 @@ func (o *UpdateSandboxNetworkSettings) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "networkBlockAll")
 		delete(additionalProperties, "networkAllowList")
+		delete(additionalProperties, "domainAllowList")
 		o.AdditionalProperties = additionalProperties
 	}
 

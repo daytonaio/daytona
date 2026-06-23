@@ -27,6 +27,7 @@ public class CreateSandboxParams {
     private Integer autoDeleteInterval;
     private List<VolumeMount> volumes;
     private Boolean networkBlockAll;
+    private String domainAllowList;
     private String linkedSandbox;
 
     /**
@@ -182,6 +183,20 @@ public class CreateSandboxParams {
      * @param networkBlockAll network block flag
      */
     public void setNetworkBlockAll(Boolean networkBlockAll) { this.networkBlockAll = networkBlockAll; }
+
+    /**
+     * Returns the comma-separated list of allowed domains.
+     *
+     * @return allowed domains, or {@code null}
+     */
+    public String getDomainAllowList() { return domainAllowList; }
+
+    /**
+     * Sets the comma-separated list of allowed domains.
+     *
+     * @param domainAllowList allowed domains
+     */
+    public void setDomainAllowList(String domainAllowList) { this.domainAllowList = domainAllowList; }
 
     /**
      * Returns the ID or name of an existing Sandbox to link the new Sandbox to.

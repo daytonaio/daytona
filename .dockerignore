@@ -28,4 +28,5 @@ libs
 !libs/sdk-go
 !libs/runner-proto
 !libs/billing-api-client
+!libs/netleash
 Dockerfile

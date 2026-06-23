@@ -23,6 +23,7 @@ type CreateSandboxDTO struct {
 	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
 	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
 	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
+	DomainAllowList  *string           `json:"domainAllowList,omitempty"`
 	Metadata         map[string]string `json:"metadata,omitempty"`
 	AuthToken        *string           `json:"authToken,omitempty"`
 	OtelEndpoint     *string           `json:"otelEndpoint,omitempty"`
@@ -58,6 +59,7 @@ type ResizeSandboxDTO struct {
 type UpdateNetworkSettingsDTO struct {
 	NetworkBlockAll    *bool   `json:"networkBlockAll,omitempty"`
 	NetworkAllowList   *string `json:"networkAllowList,omitempty"`
+	DomainAllowList    *string `json:"domainAllowList,omitempty"`
 	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO
 

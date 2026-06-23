@@ -223,6 +223,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
+      domainAllowList: sandbox.domainAllowList,
       metadata: metadata,
       authToken: sandbox.authToken,
       otelEndpoint,
@@ -411,11 +412,13 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     networkBlockAll?: boolean,
     networkAllowList?: string,
     networkLimitEgress?: boolean,
+    domainAllowList?: string,
   ): Promise<void> {
     const updateNetworkSettingsDto: UpdateNetworkSettingsDTO = {
       networkBlockAll: networkBlockAll,
       networkAllowList: networkAllowList,
       networkLimitEgress: networkLimitEgress,
+      domainAllowList: domainAllowList,
     }
 
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)

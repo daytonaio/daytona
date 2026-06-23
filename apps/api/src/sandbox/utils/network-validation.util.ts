@@ -36,3 +36,27 @@ export function validateNetworkAllowList(networkAllowList: string): void {
     throw new Error(`Network allow list cannot contain more than 10 networks`)
   }
 }
+
+/**
+ * Validates domain allow list to ensure valid domain names are allowed
+ * @param domainAllowList - Comma-separated string of domains (optionally prefixed with a `*.` wildcard)
+ * @throws Error if any domain is invalid or the list is too long
+ */
+export function validateDomainAllowList(domainAllowList: string): void {
+  const domains = domainAllowList.split(',').map((domain: string) => domain.trim())
+
+  // Hostname label format, optionally prefixed with a single `*.` wildcard (e.g. "*.daytona.io")
+  const domainRegex = /^(\*\.)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/
+
+  for (const domain of domains) {
+    if (!domain) continue // Skip empty entries
+
+    if (!domainRegex.test(domain)) {
+      throw new Error(`Invalid domain: "${domain}". Must be a valid domain name`)
+    }
+  }
+
+  if (domains.length > 10) {
+    throw new Error(`Domain allow list cannot contain more than 10 domains`)
+  }
+}

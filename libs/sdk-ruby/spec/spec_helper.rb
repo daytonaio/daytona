@@ -91,6 +91,7 @@ def build_sandbox_dto(overrides = {}) # rubocop:disable Metrics/MethodLength
     daemon_version: '1.0.0',
     network_block_all: false,
     network_allow_list: nil,
+    domain_allow_list: nil,
     toolbox_proxy_url: 'https://proxy.example.com/'
   }.merge(overrides)
 

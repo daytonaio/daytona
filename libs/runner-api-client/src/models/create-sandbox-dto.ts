@@ -23,6 +23,7 @@ import type { RegistryDTO } from './registry-dto';
 export interface CreateSandboxDTO {
     'authToken'?: string;
     'cpuQuota'?: number;
+    'domainAllowList'?: string;
     'entrypoint'?: Array<string>;
     'env'?: { [key: string]: string; };
     'fromVolumeId'?: string;

@@ -57,6 +57,10 @@ export interface CreateSandbox {
      */
     'networkAllowList'?: string;
     /**
+     * Comma-separated list of allowed domains for the sandbox
+     */
+    'domainAllowList'?: string;
+    /**
      * The target (region) where the sandbox will be created
      */
     'target'?: string;

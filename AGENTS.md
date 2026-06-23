@@ -142,6 +142,9 @@ nix develop .#go --command bash -c "golangci-lint run ./apps/runner/..."
 # Generate swagger docs
 nix develop .#go --command bash -c "swag init -g apps/daemon/cmd/main.go"
 
+# Generate netleash eBPF bindings (clang + libbpf + kernel headers are in the go shell)
+nix develop .#go --command bash -c "cd libs/netleash && make generate"
+
 # Tidy all modules
 nix develop .#go --command bash -c 'for d in apps/*/go.mod libs/*/go.mod; do (cd "$(dirname "$d")" && go mod tidy); done'
 ```
