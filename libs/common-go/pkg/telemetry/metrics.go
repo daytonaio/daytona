@@ -391,6 +391,16 @@ func registerUsageMetrics(name string, mp *sdk_metric.MeterProvider, limits *Res
 		return err
 	}
 
+	// Memory Cache (page cache, absolute)
+	memCacheGauge, err := meter.Int64ObservableGauge(
+		fmt.Sprintf("%s.memory.cache", name),
+		metric.WithDescription("Memory page cache in bytes"),
+		metric.WithUnit("bytes"),
+	)
+	if err != nil {
+		return err
+	}
+
 	var lastCPUUsage uint64
 	var lastTimestamp time.Time
 
@@ -407,6 +417,11 @@ func registerUsageMetrics(name string, mp *sdk_metric.MeterProvider, limits *Res
 					memUtilPercent := float64(memUsage) / float64(limits.MemoryLimit) * 100.0
 					observer.ObserveFloat64(memUtilGauge, memUtilPercent)
 				}
+			}
+
+			// Read current memory page cache
+			if memCache, err := ReadCgroupMemCacheBytes(limits.cgroupV2); err == nil {
+				observer.ObserveInt64(memCacheGauge, int64(memCache))
 			}
 
 			// Read current CPU usage
@@ -430,6 +445,7 @@ func registerUsageMetrics(name string, mp *sdk_metric.MeterProvider, limits *Res
 		cpuUtilGauge,
 		memUtilGauge,
 		memUsageGauge,
+		memCacheGauge,
 	)
 
 	return err

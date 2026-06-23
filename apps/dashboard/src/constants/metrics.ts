@@ -9,6 +9,7 @@ export const METRIC_DISPLAY_NAMES: Record<string, string> = {
   'daytona.sandbox.memory.utilization': 'Memory Utilization',
   'daytona.sandbox.memory.usage': 'Memory Usage',
   'daytona.sandbox.memory.limit': 'Memory Limit',
+  'daytona.sandbox.memory.cache': 'Memory Cache',
   'daytona.sandbox.filesystem.utilization': 'Disk Utilization',
   'daytona.sandbox.filesystem.usage': 'Disk Usage',
   'daytona.sandbox.filesystem.total': 'Disk Total',

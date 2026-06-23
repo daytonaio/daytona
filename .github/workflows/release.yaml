@@ -58,9 +58,10 @@ jobs:
       - name: Tag Go modules
         run: |
           git tag "libs/api-client-go/$VERSION"
+          git tag "libs/analytics-api-client-go/$VERSION"
           git tag "libs/toolbox-api-client-go/$VERSION"
           git tag "libs/sdk-go/$VERSION"
-          git push origin "libs/api-client-go/$VERSION" "libs/toolbox-api-client-go/$VERSION" "libs/sdk-go/$VERSION"
+          git push origin "libs/api-client-go/$VERSION" "libs/analytics-api-client-go/$VERSION" "libs/toolbox-api-client-go/$VERSION" "libs/sdk-go/$VERSION"
 
       - name: Go work sync
         run: |

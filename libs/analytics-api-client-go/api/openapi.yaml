@@ -1,0 +1,594 @@
+openapi: 3.0.1
+info:
+  contact: {}
+  description: Daytona Analytics API - Read-only telemetry and usage data. Authenticated
+    via Daytona API keys or JWT tokens.
+  title: Daytona Analytics API
+  version: v0.4.0
+servers:
+- url: https://analytics.app.daytona.io/
+paths:
+  /organization/{organizationId}/sandbox/{sandboxId}/telemetry/logs:
+    get:
+      description: Returns paginated log entries with optional severity and search
+        filters
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      - description: Comma-separated severity levels
+        in: query
+        name: severity
+        schema:
+          type: string
+      - description: Search text (ILIKE)
+        in: query
+        name: search
+        schema:
+          type: string
+      - description: Page size
+        in: query
+        name: limit
+        schema:
+          default: 100
+          type: integer
+      - description: Offset
+        in: query
+        name: offset
+        schema:
+          default: 0
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/models.LogEntry"
+                type: array
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get sandbox logs
+      tags:
+      - Telemetry
+  /organization/{organizationId}/sandbox/{sandboxId}/telemetry/metrics:
+    get:
+      description: Returns gauge metrics aggregated in 1-minute intervals
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      - description: Comma-separated metric names
+        in: query
+        name: metricNames
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/models.MetricPoint"
+                type: array
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get sandbox metrics
+      tags:
+      - Telemetry
+  /organization/{organizationId}/sandbox/{sandboxId}/telemetry/traces:
+    get:
+      description: Returns paginated trace summaries with span counts and root span
+        info
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      - description: Page size
+        in: query
+        name: limit
+        schema:
+          default: 100
+          type: integer
+      - description: Offset
+        in: query
+        name: offset
+        schema:
+          default: 0
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/models.TraceSummary"
+                type: array
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get sandbox traces
+      tags:
+      - Telemetry
+  /organization/{organizationId}/sandbox/{sandboxId}/telemetry/traces/{traceId}:
+    get:
+      description: Returns all spans belonging to a specific trace ID
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+      - description: Trace ID
+        in: path
+        name: traceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/models.Span"
+                type: array
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get trace spans
+      tags:
+      - Telemetry
+  /organization/{organizationId}/sandbox/{sandboxId}/usage:
+    get:
+      description: Returns individual usage records for a specific sandbox within
+        a time range
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/models.UsagePeriod"
+                type: array
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get sandbox usage periods
+      tags:
+      - Usage
+  /organization/{organizationId}/usage/aggregated:
+    get:
+      description: Returns organization-level resource usage totals for a given time
+        period
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.AggregatedUsage"
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get aggregated usage
+      tags:
+      - Usage
+  /organization/{organizationId}/usage/chart:
+    get:
+      description: Returns resource usage data points for a given time period with
+        auto-scaled resolution
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      - description: Region filter
+        in: query
+        name: region
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/models.UsageChartPoint"
+                type: array
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get usage chart data
+      tags:
+      - Usage
+  /organization/{organizationId}/usage/sandbox:
+    get:
+      description: Returns resource usage aggregated per sandbox for a given time
+        period
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+      - description: Start time (RFC3339)
+        in: query
+        name: from
+        required: true
+        schema:
+          type: string
+      - description: End time (RFC3339)
+        in: query
+        name: to
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/models.SandboxUsage"
+                type: array
+          description: OK
+      security:
+      - Bearer: []
+      summary: Get per-sandbox usage
+      tags:
+      - Usage
+components:
+  schemas:
+    models.AggregatedUsage:
+      example:
+        firstStart: firstStart
+        lastEnd: lastEnd
+        totalPrice: 5.637376656633329
+        totalDiskGBSeconds: 1
+        sandboxCount: 0
+        totalRAMGBSeconds: 2
+        totalGPUSeconds: 5
+        totalCPUSeconds: 6
+      properties:
+        firstStart:
+          type: string
+        lastEnd:
+          type: string
+        sandboxCount:
+          type: integer
+        totalCPUSeconds:
+          type: integer
+        totalDiskGBSeconds:
+          type: integer
+        totalGPUSeconds:
+          type: integer
+        totalPrice:
+          type: number
+        totalRAMGBSeconds:
+          type: integer
+      type: object
+    models.LogEntry:
+      example:
+        spanId: spanId
+        traceId: traceId
+        severityText: severityText
+        logAttributes:
+          key: logAttributes
+        severityNumber: 0
+        body: body
+        serviceName: serviceName
+        resourceAttributes:
+          key: resourceAttributes
+        timestamp: timestamp
+      properties:
+        body:
+          type: string
+        logAttributes:
+          additionalProperties:
+            type: string
+          type: object
+        resourceAttributes:
+          additionalProperties:
+            type: string
+          type: object
+        serviceName:
+          type: string
+        severityNumber:
+          type: integer
+        severityText:
+          type: string
+        spanId:
+          type: string
+        timestamp:
+          type: string
+        traceId:
+          type: string
+      type: object
+    models.MetricPoint:
+      example:
+        metricName: metricName
+        value: 0.8008281904610115
+        timestamp: timestamp
+      properties:
+        metricName:
+          type: string
+        timestamp:
+          type: string
+        value:
+          type: number
+      type: object
+    models.SandboxUsage:
+      example:
+        firstStart: firstStart
+        lastEnd: lastEnd
+        totalPrice: 5.962133916683182
+        totalDiskGBSeconds: 6
+        sandboxId: sandboxId
+        totalRAMGBSeconds: 5
+        totalGPUSeconds: 1
+        totalCPUSeconds: 0
+      properties:
+        firstStart:
+          type: string
+        lastEnd:
+          type: string
+        sandboxId:
+          type: string
+        totalCPUSeconds:
+          type: integer
+        totalDiskGBSeconds:
+          type: integer
+        totalGPUSeconds:
+          type: integer
+        totalPrice:
+          type: number
+        totalRAMGBSeconds:
+          type: integer
+      type: object
+    models.Span:
+      example:
+        spanId: spanId
+        traceId: traceId
+        spanAttributes:
+          key: spanAttributes
+        durationMs: 0.8008281904610115
+        parentSpanId: parentSpanId
+        statusMessage: statusMessage
+        spanName: spanName
+        statusCode: statusCode
+        timestamp: timestamp
+      properties:
+        durationMs:
+          type: number
+        parentSpanId:
+          type: string
+        spanAttributes:
+          additionalProperties:
+            type: string
+          type: object
+        spanId:
+          type: string
+        spanName:
+          type: string
+        statusCode:
+          type: string
+        statusMessage:
+          type: string
+        timestamp:
+          type: string
+        traceId:
+          type: string
+      type: object
+    models.TraceSummary:
+      example:
+        traceId: traceId
+        spanCount: 0
+        rootSpanName: rootSpanName
+        totalDurationMs: 6.027456183070403
+        startTime: startTime
+        endTime: endTime
+        statusCode: statusCode
+      properties:
+        endTime:
+          type: string
+        rootSpanName:
+          type: string
+        spanCount:
+          type: integer
+        startTime:
+          type: string
+        statusCode:
+          type: string
+        totalDurationMs:
+          type: number
+        traceId:
+          type: string
+      type: object
+    models.UsageChartPoint:
+      example:
+        cpuPrice: 6.027456183070403
+        ramPrice: 2.3021358869347655
+        cpu: 0
+        diskGB: 1
+        diskPrice: 5.962133916683182
+        time: time
+        ramGB: 5
+      properties:
+        cpu:
+          type: integer
+        cpuPrice:
+          type: number
+        diskGB:
+          type: integer
+        diskPrice:
+          type: number
+        ramGB:
+          type: integer
+        ramPrice:
+          type: number
+        time:
+          type: string
+      type: object
+    models.UsagePeriod:
+      example:
+        price: 5.962133916683182
+        cpu: 0
+        diskGB: 6
+        endAt: endAt
+        gpu: 1
+        ramGB: 5
+        startAt: startAt
+      properties:
+        cpu:
+          type: integer
+        diskGB:
+          type: integer
+        endAt:
+          type: string
+        gpu:
+          type: integer
+        price:
+          type: number
+        ramGB:
+          type: integer
+        startAt:
+          type: string
+      type: object
+  securitySchemes:
+    Bearer:
+      description: "JWT token or Admin API key. Format: \"Bearer {token}\""
+      in: header
+      name: Authorization
+      type: apiKey
+x-original-swagger-version: "2.0"

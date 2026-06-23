@@ -9,6 +9,7 @@ use (
 	./apps/runner
 	./apps/snapshot-manager
 	./apps/ssh-gateway
+	./libs/analytics-api-client-go
 	./libs/api-client-go
 	./libs/common-go
 	./libs/computer-use
