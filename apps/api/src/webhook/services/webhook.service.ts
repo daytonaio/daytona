@@ -10,6 +10,7 @@ import { Organization } from '../../organization/entities/organization.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { WebhookInitialization } from '../entities/webhook-initialization.entity'
 import { Repository } from 'typeorm'
+import { WebhookAppPortalAccessDto } from '../dto/webhook-app-portal-access.dto'
 
 @Injectable()
 export class WebhookService implements OnModuleInit {
@@ -220,16 +221,18 @@ export class WebhookService implements OnModuleInit {
   /**
    * Get Svix Consumer App Portal access for an organization
    */
-  async getAppPortalAccess(organizationId: string): Promise<{ token: string; url: string }> {
+  async getAppPortalAccess(organizationId: string): Promise<WebhookAppPortalAccessDto> {
     if (!this.svix) {
       throw new ServiceUnavailableException('Webhook service is not configured')
     }
     try {
       const appPortalAccess = await this.svix.authentication.appPortalAccess(organizationId, {})
+      const publicServerUrl = this.configService.get('webhook.publicServerUrl')
       this.logger.debug(`Generated app portal access for organization ${organizationId}`)
       return {
         token: appPortalAccess.token,
         url: appPortalAccess.url,
+        ...(publicServerUrl ? { serverUrl: publicServerUrl } : {}),
       }
     } catch (error) {
       this.logger.debug(`Failed to generate app portal access for organization ${organizationId}:`, error)

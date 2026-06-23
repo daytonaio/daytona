@@ -60,6 +60,11 @@ public class WebhookAppPortalAccess {
   @javax.annotation.Nonnull
   private String url;
 
+  public static final String SERIALIZED_NAME_SERVER_URL = "serverUrl";
+  @SerializedName(SERIALIZED_NAME_SERVER_URL)
+  @javax.annotation.Nullable
+  private String serverUrl;
+
   public WebhookAppPortalAccess() {
   }
 
@@ -98,6 +103,25 @@ public class WebhookAppPortalAccess {
 
   public void setUrl(@javax.annotation.Nonnull String url) {
     this.url = url;
+  }
+
+
+  public WebhookAppPortalAccess serverUrl(@javax.annotation.Nullable String serverUrl) {
+    this.serverUrl = serverUrl;
+    return this;
+  }
+
+  /**
+   * The browser-facing Svix API URL for self-hosted Svix deployments
+   * @return serverUrl
+   */
+  @javax.annotation.Nullable
+  public String getServerUrl() {
+    return serverUrl;
+  }
+
+  public void setServerUrl(@javax.annotation.Nullable String serverUrl) {
+    this.serverUrl = serverUrl;
   }
 
   /**
@@ -156,13 +180,14 @@ public class WebhookAppPortalAccess {
     }
     WebhookAppPortalAccess webhookAppPortalAccess = (WebhookAppPortalAccess) o;
     return Objects.equals(this.token, webhookAppPortalAccess.token) &&
-        Objects.equals(this.url, webhookAppPortalAccess.url)&&
+        Objects.equals(this.url, webhookAppPortalAccess.url) &&
+        Objects.equals(this.serverUrl, webhookAppPortalAccess.serverUrl)&&
         Objects.equals(this.additionalProperties, webhookAppPortalAccess.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(token, url, additionalProperties);
+    return Objects.hash(token, url, serverUrl, additionalProperties);
   }
 
   @Override
@@ -171,6 +196,7 @@ public class WebhookAppPortalAccess {
     sb.append("class WebhookAppPortalAccess {\n");
     sb.append("    token: ").append(toIndentedString(token)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
+    sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -190,7 +216,7 @@ public class WebhookAppPortalAccess {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("token", "url"));
+    openapiFields = new HashSet<String>(Arrays.asList("token", "url", "serverUrl"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("token", "url"));
@@ -221,6 +247,9 @@ public class WebhookAppPortalAccess {
       }
       if (!jsonObj.get("url").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `url` to be a primitive type in the JSON string but got `%s`", jsonObj.get("url").toString()));
+      }
+      if ((jsonObj.get("serverUrl") != null && !jsonObj.get("serverUrl").isJsonNull()) && !jsonObj.get("serverUrl").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `serverUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("serverUrl").toString()));
       }
   }
 

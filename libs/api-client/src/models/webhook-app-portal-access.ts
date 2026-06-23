@@ -23,5 +23,9 @@ export interface WebhookAppPortalAccess {
      * The URL to the webhook app portal
      */
     'url': string;
+    /**
+     * The browser-facing Svix API URL for self-hosted Svix deployments
+     */
+    'serverUrl'?: string;
 }
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'WebhookAppPortalAccess' })
 export class WebhookAppPortalAccessDto {
@@ -18,4 +18,10 @@ export class WebhookAppPortalAccessDto {
     example: 'https://app.svix.com/app_1234567890',
   })
   url: string
+
+  @ApiPropertyOptional({
+    description: 'The browser-facing Svix API URL for self-hosted Svix deployments',
+    example: 'https://svix.example.com',
+  })
+  serverUrl?: string
 }

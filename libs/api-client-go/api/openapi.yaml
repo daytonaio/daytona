@@ -15081,6 +15081,7 @@ components:
       type: object
     WebhookAppPortalAccess:
       example:
+        serverUrl: https://svix.example.com
         url: https://app.svix.com/app_1234567890
         token: appsk_...
       properties:
@@ -15091,6 +15092,10 @@ components:
         url:
           description: The URL to the webhook app portal
           example: https://app.svix.com/app_1234567890
+          type: string
+        serverUrl:
+          description: The browser-facing Svix API URL for self-hosted Svix deployments
+          example: https://svix.example.com
           type: string
       required:
       - token

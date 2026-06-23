@@ -162,6 +162,7 @@ const configuration = {
   webhook: {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
+    publicServerUrl: process.env.SVIX_PUBLIC_SERVER_URL || process.env.SVIX_SERVER_URL,
   },
   healthCheck: {
     apiKey: process.env.HEALTH_CHECK_API_KEY,

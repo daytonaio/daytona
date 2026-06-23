@@ -53,4 +53,12 @@ public class WebhookAppPortalAccessTest {
         // TODO: test url
     }
 
+    /**
+     * Test the property 'serverUrl'
+     */
+    @Test
+    public void serverUrlTest() {
+        // TODO: test serverUrl
+    }
+
 }
