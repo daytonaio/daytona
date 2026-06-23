@@ -176,7 +176,7 @@ export class AuditInterceptor implements NestInterceptor {
     statusCode: number,
   ): Promise<void> {
     try {
-      await this.auditService.updateLog(auditLog.id, {
+      await this.auditService.updateLog(auditLog, {
         organizationId,
         targetId,
         statusCode,
@@ -188,7 +188,7 @@ export class AuditInterceptor implements NestInterceptor {
 
   private async recordHandlerError(auditLog: AuditLog, errorMessage: string, statusCode: number): Promise<void> {
     try {
-      await this.auditService.updateLog(auditLog.id, {
+      await this.auditService.updateLog(auditLog, {
         errorMessage,
         statusCode,
       })
