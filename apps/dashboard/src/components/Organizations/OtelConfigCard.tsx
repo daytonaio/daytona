@@ -5,7 +5,7 @@
 
 import TooltipButton from '@/components/TooltipButton'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
@@ -200,7 +200,7 @@ export const OtelConfigCard: React.FC = () => {
             </form.Field>
           </div>
 
-          <div className="border-b border-border p-4 last:border-b-0">
+          <div className="p-4">
             <form.Field name="headers" validators={headersValidators}>
               {(field) => {
                 const hasErrors = field.state.meta.errors.length > 0
@@ -260,32 +260,40 @@ export const OtelConfigCard: React.FC = () => {
             </form.Field>
           </div>
 
-          <div className="flex justify-end gap-2 p-4">
-            {hasOtelEnabled && (
+          <CardFooter className="flex items-center justify-between gap-2">
+            <p className="min-w-0 text-sm text-muted-foreground text-pretty">Changes take up to 5 minutes to apply.</p>
+            <div className="ml-auto flex shrink-0 gap-2">
+              {hasOtelEnabled && (
+                <form.Subscribe
+                  selector={(state) => state.isSubmitting}
+                  children={(isSubmitting) => (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleDisable}
+                      disabled={isSubmitting || disabling}
+                    >
+                      {disabling && <Spinner />}
+                      Disable
+                    </Button>
+                  )}
+                />
+              )}
               <form.Subscribe
-                selector={(state) => state.isSubmitting}
-                children={(isSubmitting) => (
-                  <Button type="button" variant="outline" onClick={handleDisable} disabled={isSubmitting || disabling}>
-                    {disabling && <Spinner />}
-                    Disable
+                selector={(state) => [state.canSubmit, state.isSubmitting]}
+                children={([canSubmit, isSubmitting]) => (
+                  <Button
+                    type="submit"
+                    form="otel-config-form"
+                    disabled={!canSubmit || isSubmitting || saving || disabling}
+                  >
+                    {(isSubmitting || saving) && <Spinner />}
+                    Save
                   </Button>
                 )}
               />
-            )}
-            <form.Subscribe
-              selector={(state) => [state.canSubmit, state.isSubmitting]}
-              children={([canSubmit, isSubmitting]) => (
-                <Button
-                  type="submit"
-                  form="otel-config-form"
-                  disabled={!canSubmit || isSubmitting || saving || disabling}
-                >
-                  {(isSubmitting || saving) && <Spinner />}
-                  Save
-                </Button>
-              )}
-            />
-          </div>
+            </div>
+          </CardFooter>
         </form>
       </CardContent>
     </Card>

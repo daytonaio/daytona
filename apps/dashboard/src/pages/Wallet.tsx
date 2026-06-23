@@ -464,10 +464,10 @@ const Wallet = () => {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between gap-2">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <InfoIcon className="w-4 h-4 shrink-0" />{' '}
-                    <span className="text-sm ">Setting both values to 0 will disable automatic top-ups.</span>
+                <CardFooter className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-start gap-2 text-muted-foreground text-pretty">
+                    <InfoIcon className="mt-0.5 w-4 h-4 shrink-0" />
+                    <span className="text-sm">Setting both values to 0 will disable automatic top-ups.</span>
                   </div>
                   <div className="flex gap-2 items-center ml-auto">
                     <Button onClick={handleSetAutomaticTopUp} disabled={automaticTopUpSaveDisabled}>
@@ -544,16 +544,16 @@ const Wallet = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between gap-2">
+              <CardFooter className="flex items-center justify-between gap-2">
                 {paymentMethodsLoading ? (
                   <Skeleton className="h-4 w-64 max-w-full" />
                 ) : showMissingPaymentMethodTopUpMessage ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CreditCardIcon className="w-4 h-4 shrink-0" />
+                  <div className="flex min-w-0 items-start gap-2 text-sm text-muted-foreground text-pretty">
+                    <CreditCardIcon className="mt-0.5 w-4 h-4 shrink-0" />
                     <span>Add a payment method to top up.</span>
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="min-w-0 text-sm text-muted-foreground text-pretty">
                     You will be redirected to Stripe to complete the payment.
                   </div>
                 )}
