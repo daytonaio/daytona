@@ -29,7 +29,7 @@ import {
   SnapshotSorting,
   useSnapshotsQuery,
 } from '@/hooks/queries/useSnapshotsQuery'
-import { useRegions } from '@/hooks/useRegions'
+import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useSnapshotWsSync } from '@/hooks/useSnapshotWsSync'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
@@ -95,7 +95,6 @@ const Snapshots: React.FC = () => {
   const queryClient = useQueryClient()
   useSnapshotWsSync()
 
-  const { getRegionName } = useRegions()
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -105,6 +104,7 @@ const Snapshots: React.FC = () => {
   const snapshotSheetRef = useRef<SnapshotSheetRef>(null)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
   const deleteSnapshotMutation = useDeleteSnapshotMutation({ invalidateOnSuccess: false })
   const activateSnapshotMutation = useActivateSnapshotMutation({ invalidateOnSuccess: false })
   const deactivateSnapshotMutation = useDeactivateSnapshotMutation({ invalidateOnSuccess: false })

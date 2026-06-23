@@ -54,14 +54,15 @@ import {
   useSandboxesQuery,
 } from '@/hooks/queries/useSandboxesQuery'
 import { SnapshotFilters, SnapshotQueryParams, useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
+import { useAvailableRegionsQuery, useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
-import { useRegions } from '@/hooks/useRegions'
 import { useSandboxWsSync, type SandboxWsSyncEvent } from '@/hooks/useSandboxWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
+import { EMPTY_REGIONS } from '@/lib/regions'
 import { formatDuration, pluralize } from '@/lib/utils'
 import {
   ListSandboxesResponse,
@@ -273,7 +274,8 @@ function useSandboxesPageWsSync({
       ) {
         updateSandboxInCache(event.sandbox.id, { ...event.sandbox, state: SandboxState.DESTROYED })
       } else {
-        const { state: _ignoredState, ...sandboxWithoutState } = event.sandbox
+        const sandboxWithoutState: Partial<Sandbox> = { ...event.sandbox }
+        delete sandboxWithoutState.state
         updateSandboxInCache(event.sandbox.id, sandboxWithoutState)
       }
 
@@ -781,7 +783,10 @@ const Sandboxes: React.FC = () => {
     }
   }, [snapshotsDataError])
 
-  const { availableRegions: regionsData, loadingAvailableRegions: regionsDataIsLoading, getRegionName } = useRegions()
+  const { data: regionsData = EMPTY_REGIONS, isLoading: regionsDataIsLoading } = useAvailableRegionsQuery(
+    selectedOrganization?.id,
+  )
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
 
   const sandboxFromLoadedResults = useMemo(
     () => sandboxes.find((sandbox) => sandbox.id === sandboxIdParam),

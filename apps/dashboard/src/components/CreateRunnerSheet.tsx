@@ -4,9 +4,8 @@
  */
 
 import React, { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { Region, CreateRunner, CreateRunnerResponse } from '@daytona/api-client'
+import { Region, CreateRunnerResponse } from '@daytona/api-client'
 import { useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, InfoIcon } from 'lucide-react'
@@ -29,7 +28,11 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Spinner } from '@/components/ui/spinner'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
+import { useCreateRunnerMutation } from '@/hooks/mutations/useCreateRunnerMutation'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
 import { getMaskedToken } from '@/lib/utils'
+import { toast } from 'sonner'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -40,7 +43,6 @@ type FormValues = z.infer<typeof formSchema>
 
 interface CreateRunnerSheetProps {
   regions: Region[]
-  onCreateRunner: (data: CreateRunner) => Promise<CreateRunnerResponse | null>
   ref?: Ref<{ open: () => void }>
 }
 
@@ -49,25 +51,18 @@ const buildDefaultValues = (regions: Region[]): FormValues => ({
   regionId: regions[0]?.id ?? '',
 })
 
-export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, onCreateRunner, ref }) => {
+export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, ref }) => {
   const [open, setOpen] = useState(false)
   const [createdRunner, setCreatedRunner] = useState<CreateRunnerResponse | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const { selectedOrganization } = useSelectedOrganization()
+  const { reset: resetCreateRunnerMutation, ...createRunnerMutation } = useCreateRunnerMutation()
 
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
   }))
 
   const defaultValues = useMemo(() => buildDefaultValues(regions), [regions])
-
-  const createRunnerMutation = useMutation({
-    mutationFn: async (value: FormValues) => {
-      return onCreateRunner({
-        name: value.name.trim(),
-        regionId: value.regionId,
-      })
-    },
-  })
 
   const form = useForm({
     defaultValues,
@@ -84,13 +79,26 @@ export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, o
       }
     },
     onSubmit: async ({ value }) => {
-      const runner = await createRunnerMutation.mutateAsync(value)
-      if (!runner) {
+      if (!selectedOrganization?.id) {
+        toast.error('Select an organization to create a runner.')
         return
       }
 
-      setCreatedRunner(runner)
-      resetForm(buildDefaultValues(regions))
+      try {
+        const runner = await createRunnerMutation.mutateAsync({
+          runner: {
+            name: value.name.trim(),
+            regionId: value.regionId,
+          },
+          organizationId: selectedOrganization.id,
+        })
+
+        toast.success('Runner created successfully')
+        setCreatedRunner(runner)
+        resetForm(buildDefaultValues(regions))
+      } catch (error) {
+        handleApiError(error, 'Failed to create runner')
+      }
     },
   })
   const { reset: resetForm } = form
@@ -101,13 +109,11 @@ export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, o
     }
   }, [form, regions])
 
-  const { reset: resetMutation } = createRunnerMutation
-
   const resetState = useCallback(() => {
     setCreatedRunner(null)
     resetForm(buildDefaultValues(regions))
-    resetMutation()
-  }, [resetForm, resetMutation, regions])
+    resetCreateRunnerMutation()
+  }, [resetForm, resetCreateRunnerMutation, regions])
 
   useEffect(() => {
     if (open) {
@@ -216,7 +222,12 @@ export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, o
             <form.Subscribe
               selector={(state) => [state.canSubmit, state.isSubmitting]}
               children={([canSubmit, isSubmitting]) => (
-                <Button type="submit" form="create-runner-form" variant="default" disabled={!canSubmit || isSubmitting}>
+                <Button
+                  type="submit"
+                  form="create-runner-form"
+                  variant="default"
+                  disabled={!canSubmit || isSubmitting || !selectedOrganization?.id}
+                >
                   {isSubmitting && <Spinner />}
                   Create
                 </Button>

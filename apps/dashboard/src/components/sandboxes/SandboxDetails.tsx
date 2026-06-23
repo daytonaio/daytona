@@ -26,10 +26,10 @@ import { useStartSandboxMutation } from '@/hooks/mutations/useStartSandboxMutati
 import { useStopSandboxMutation } from '@/hooks/mutations/useStopSandboxMutation'
 import { usePauseSandboxMutation } from '@/hooks/mutations/usePauseSandboxMutation'
 import { useSandboxQuery } from '@/hooks/queries/useSandboxQuery'
+import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
 import { useMatchMedia } from '@/hooks/useMatchMedia'
-import { useRegions } from '@/hooks/useRegions'
 import { useSandboxDetailsWsSync } from '@/hooks/useSandboxWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
@@ -57,7 +57,7 @@ export default function SandboxDetails() {
   const { sandboxApi } = useApi()
   const { authenticatedUserOrganizationMember, selectedOrganization, authenticatedUserHasPermission } =
     useSelectedOrganization()
-  const { getRegionName } = useRegions()
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
 
   const spendingTabAvailable = !!config.analyticsApiUrl
 

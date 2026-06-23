@@ -7,7 +7,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useRegions } from '@/hooks/useRegions'
+import { useRegionLookup } from '@/hooks/queries/useRegionsQuery'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import type { SandboxListItem } from '@daytona/api-client'
 import { SandboxFileSystemTab } from './SandboxFileSystemTab'
 import { SandboxInfoPanel } from './SandboxInfoPanel'
@@ -106,7 +107,8 @@ export function SandboxContentTabs({
   tab,
   onTabChange,
 }: SandboxContentTabsProps) {
-  const { getRegionName } = useRegions()
+  const { selectedOrganization } = useSelectedOrganization()
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
 
   if (isLoading) {
     return (

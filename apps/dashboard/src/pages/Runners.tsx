@@ -7,9 +7,10 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { CreateRunnerSheet } from '@/components/CreateRunnerSheet'
 import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
 import { RefreshIntervalValue } from '@/components/RefreshSegmentedButton'
-import RunnerDetailsSheet from '@/components/RunnerDetailsSheet'
+import RunnerDetailsSheet, { type RunnerDetailsSheetRef } from '@/components/RunnerDetailsSheet'
 import { RunnerTable } from '@/components/RunnerTable'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import {
   Dialog,
   DialogClose,
@@ -19,30 +20,47 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useApi } from '@/hooks/useApi'
-import { useNotificationSocket } from '@/hooks/useNotificationSocket'
-import { useRegions } from '@/hooks/useRegions'
+import { useDeleteRunnerMutation } from '@/hooks/mutations/useDeleteRunnerMutation'
+import { useMutatingRunners } from '@/hooks/mutations/useMutatingRunners'
+import { useUpdateRunnerSchedulingMutation } from '@/hooks/mutations/useUpdateRunnerSchedulingMutation'
+import { useAvailableRegionsQuery, useRegionLookup } from '@/hooks/queries/useRegionsQuery'
+import { useRunnersQuery } from '@/hooks/queries/useRunnersQuery'
+import { useRunnerWsSync } from '@/hooks/useRunnerWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import {
-  CreateRunner,
-  CreateRunnerResponse,
-  OrganizationRolePermissionsEnum,
-  Runner,
-  RunnerState,
-} from '@daytona/api-client'
+import { EMPTY_REGIONS, filterCustomRegions } from '@/lib/regions'
+import { OrganizationRolePermissionsEnum, Runner } from '@daytona/api-client'
 import { PlusIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 const Runners: React.FC = () => {
-  const { runnersApi } = useApi()
-  const { notificationSocket } = useNotificationSocket()
-  const { customRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
+  const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
+  const [refreshInterval, setRefreshInterval] = useState<RefreshIntervalValue>(false)
 
-  const [runners, setRunners] = useState<Runner[]>([])
-  const [loadingRunnersData, setLoadingRunnersData] = useState(false)
-  const [runnerIsLoading, setRunnerIsLoading] = useState<Record<string, boolean>>({})
+  useRunnerWsSync()
+
+  const { data: availableRegions = EMPTY_REGIONS, isLoading: loadingRegions } = useAvailableRegionsQuery(
+    selectedOrganization?.id,
+  )
+  const regions = useMemo(() => filterCustomRegions(availableRegions), [availableRegions])
+  const { getRegionName } = useRegionLookup(selectedOrganization?.id)
+  const {
+    data: runners = [],
+    dataUpdatedAt: runnersUpdatedAt,
+    error: runnersDataError,
+    isFetching: runnersDataIsFetching,
+    isLoading: loadingRunnersData,
+    refetch: refetchRunnersData,
+  } = useRunnersQuery({
+    refetchInterval: refreshInterval,
+  })
+  const updateRunnerSchedulingMutation = useUpdateRunnerSchedulingMutation()
+  const deleteRunnerMutation = useDeleteRunnerMutation()
+  const mutatingRunnerIds = useMutatingRunners()
+  const runnerIsLoading = useMemo<Record<string, boolean>>(() => {
+    return Object.fromEntries([...mutatingRunnerIds].map((runnerId) => [runnerId, true]))
+  }, [mutatingRunnerIds])
 
   const [runnerToDelete, setRunnerToDelete] = useState<Runner | null>(null)
   const [deleteRunnerDialogIsOpen, setDeleteRunnerDialogIsOpen] = useState(false)
@@ -53,116 +71,49 @@ const Runners: React.FC = () => {
   const [selectedRunner, setSelectedRunner] = useState<Runner | null>(null)
   const [showRunnerDetails, setShowRunnerDetails] = useState(false)
 
-  const [refreshInterval, setRefreshInterval] = useState<RefreshIntervalValue>(false)
-  const [runnersUpdatedAt, setRunnersUpdatedAt] = useState<number | undefined>()
   const createRunnerSheetRef = useRef<{ open: () => void }>(null)
-
-  const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
-
-  const fetchRunners = useCallback(
-    async (showTableLoadingState = true) => {
-      if (!selectedOrganization) {
-        return
-      }
-      if (showTableLoadingState) {
-        setLoadingRunnersData(true)
-      }
-      try {
-        const response = (await runnersApi.listRunners(undefined, selectedOrganization.id)).data
-        setRunners(response || [])
-        setRunnersUpdatedAt(Date.now())
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch runners')
-        setRunners([])
-      } finally {
-        setLoadingRunnersData(false)
-      }
-    },
-    [runnersApi, selectedOrganization],
-  )
+  const runnerDetailsSheetRef = useRef<RunnerDetailsSheetRef>(null)
 
   useEffect(() => {
-    fetchRunners()
-  }, [fetchRunners])
-
-  useEffect(() => {
-    if (typeof refreshInterval !== 'number') return
-    const interval = setInterval(() => {
-      fetchRunners(false)
-    }, refreshInterval)
-    return () => clearInterval(interval)
-  }, [refreshInterval, fetchRunners])
-
-  useEffect(() => {
-    const handleRunnerCreatedEvent = (runner: Runner) => {
-      if (!runners.some((r) => r.id === runner.id)) {
-        setRunners((prev) => [runner, ...prev])
-      }
+    if (runnersDataError) {
+      handleApiError(runnersDataError, 'Failed to fetch runners')
     }
-
-    const handleRunnerStateUpdatedEvent = (data: { runner: Runner; oldState: RunnerState; newState: RunnerState }) => {
-      if (!runners.some((r) => r.id === data.runner.id)) {
-        setRunners((prev) => [data.runner, ...prev])
-      } else {
-        setRunners((prev) =>
-          prev.map((r) =>
-            r.id === data.runner.id
-              ? {
-                  ...r,
-                  state: data.newState,
-                }
-              : r,
-          ),
-        )
-      }
-    }
-
-    const handleRunnerUnschedulableUpdatedEvent = (runner: Runner) => {
-      if (!runners.some((r) => r.id === runner.id)) {
-        setRunners((prev) => [runner, ...prev])
-      } else {
-        setRunners((prev) => prev.map((r) => (r.id === runner.id ? runner : r)))
-      }
-    }
-
-    if (!notificationSocket) {
-      return
-    }
-
-    notificationSocket.on('runner.created', handleRunnerCreatedEvent)
-    notificationSocket.on('runner.state.updated', handleRunnerStateUpdatedEvent)
-    notificationSocket.on('runner.unschedulable.updated', handleRunnerUnschedulableUpdatedEvent)
-
-    return () => {
-      notificationSocket.off('runner.created', handleRunnerCreatedEvent)
-      notificationSocket.off('runner.state.updated', handleRunnerStateUpdatedEvent)
-      notificationSocket.off('runner.unschedulable.updated', handleRunnerUnschedulableUpdatedEvent)
-    }
-  }, [notificationSocket, runners])
+  }, [runnersDataError])
 
   useEffect(() => {
     if (!selectedRunner || !runners) return
     const found = runners.find((r) => r.id === selectedRunner.id)
     if (!found) {
-      setSelectedRunner(null)
-      setShowRunnerDetails(false)
+      runnerDetailsSheetRef.current?.close()
       return
     }
     setSelectedRunner(found)
   }, [runners, selectedRunner])
 
-  const handleCreateRunner = async (createRunnerData: CreateRunner): Promise<CreateRunnerResponse | null> => {
-    try {
-      const response = (await runnersApi.createRunner(createRunnerData, selectedOrganization?.id)).data
-      toast.success('Runner created successfully')
-      return response
-    } catch (error) {
-      handleApiError(error, 'Failed to create runner')
-      return null
+  const selectedRunnerIndex = useMemo(() => {
+    if (!selectedRunner) {
+      return -1
     }
-  }
 
-  const handleToggleEnabled = async (runner: Runner) => {
+    return runners.findIndex((runner) => runner.id === selectedRunner.id)
+  }, [runners, selectedRunner])
+
+  const handleNavigateRunner = useCallback(
+    (direction: 'prev' | 'next') => {
+      if (selectedRunnerIndex === -1) {
+        return
+      }
+
+      const nextIndex = direction === 'prev' ? selectedRunnerIndex - 1 : selectedRunnerIndex + 1
+      const nextRunner = runners[nextIndex]
+      if (nextRunner) {
+        setSelectedRunner(nextRunner)
+      }
+    },
+    [runners, selectedRunnerIndex],
+  )
+
+  const handleToggleEnabled = (runner: Runner) => {
     setRunnerToToggleScheduling(runner)
     setToggleRunnerSchedulingDialogIsOpen(true)
   }
@@ -170,10 +121,11 @@ const Runners: React.FC = () => {
   const confirmToggleScheduling = async () => {
     if (!runnerToToggleScheduling) return
 
-    setRunnerIsLoading((prev) => ({ ...prev, [runnerToToggleScheduling.id]: true }))
     try {
-      await runnersApi.updateRunnerScheduling(runnerToToggleScheduling.id, selectedOrganization?.id, {
-        data: { unschedulable: !runnerToToggleScheduling.unschedulable },
+      await updateRunnerSchedulingMutation.mutateAsync({
+        runnerId: runnerToToggleScheduling.id,
+        organizationId: selectedOrganization?.id,
+        unschedulable: !runnerToToggleScheduling.unschedulable,
       })
       toast.success(
         `Runner is now ${runnerToToggleScheduling.unschedulable ? 'available' : 'unavailable'} for scheduling new sandboxes`,
@@ -181,13 +133,12 @@ const Runners: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to update runner scheduling status')
     } finally {
-      setRunnerIsLoading((prev) => ({ ...prev, [runnerToToggleScheduling.id]: false }))
       setToggleRunnerSchedulingDialogIsOpen(false)
       setRunnerToToggleScheduling(null)
     }
   }
 
-  const handleDelete = async (runner: Runner) => {
+  const handleDelete = (runner: Runner) => {
     setRunnerToDelete(runner)
     setDeleteRunnerDialogIsOpen(true)
   }
@@ -195,15 +146,15 @@ const Runners: React.FC = () => {
   const confirmDelete = async () => {
     if (!runnerToDelete) return
 
-    setRunnerIsLoading((prev) => ({ ...prev, [runnerToDelete.id]: true }))
     try {
-      await runnersApi.deleteRunner(runnerToDelete.id, selectedOrganization?.id)
+      await deleteRunnerMutation.mutateAsync({
+        runnerId: runnerToDelete.id,
+        organizationId: selectedOrganization?.id,
+      })
       toast.success('Runner deleted successfully')
-      await fetchRunners(false)
     } catch (error) {
       handleApiError(error, 'Failed to delete runner')
     } finally {
-      setRunnerIsLoading((prev) => ({ ...prev, [runnerToDelete.id]: false }))
       setDeleteRunnerDialogIsOpen(false)
       setRunnerToDelete(null)
     }
@@ -245,7 +196,7 @@ const Runners: React.FC = () => {
           title="Runners"
           actions={
             writePermitted && regions.length > 0 ? (
-              <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
+              <CreateRunnerSheet regions={regions} ref={createRunnerSheetRef} />
             ) : undefined
           }
         />
@@ -253,6 +204,7 @@ const Runners: React.FC = () => {
           data={runners}
           regions={regions}
           loading={loadingRunnersData || loadingRegions}
+          activeRunnerId={showRunnerDetails ? selectedRunner?.id : undefined}
           isLoadingRunner={(runner) => runnerIsLoading[runner.id] || false}
           writePermitted={writePermitted}
           deletePermitted={deletePermitted}
@@ -261,13 +213,13 @@ const Runners: React.FC = () => {
           getRegionName={getRegionName}
           onRowClick={(runner: Runner) => {
             setSelectedRunner(runner)
-            setShowRunnerDetails(true)
+            runnerDetailsSheetRef.current?.open()
           }}
           refreshInterval={refreshInterval}
           onRefreshIntervalChange={setRefreshInterval}
-          onRefresh={() => fetchRunners(false)}
-          isRefreshing={loadingRunnersData}
-          lastUpdatedAt={runnersUpdatedAt}
+          onRefresh={refetchRunnersData}
+          isRefreshing={runnersDataIsFetching}
+          lastUpdatedAt={runnersUpdatedAt || undefined}
         />
       </PageContent>
       <PageFooter />
@@ -293,11 +245,8 @@ const Runners: React.FC = () => {
                 onClick={confirmToggleScheduling}
                 disabled={runnerIsLoading[runnerToToggleScheduling.id]}
               >
-                {runnerIsLoading[runnerToToggleScheduling.id]
-                  ? 'Updating...'
-                  : runnerToToggleScheduling.unschedulable
-                    ? 'Mark as schedulable'
-                    : 'Mark as unschedulable'}
+                {runnerIsLoading[runnerToToggleScheduling.id] && <Spinner />}
+                {runnerToToggleScheduling.unschedulable ? 'Mark as schedulable' : 'Mark as unschedulable'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -320,7 +269,8 @@ const Runners: React.FC = () => {
                 </Button>
               </DialogClose>
               <Button variant="destructive" onClick={confirmDelete} disabled={runnerIsLoading[runnerToDelete.id]}>
-                {runnerIsLoading[runnerToDelete.id] ? 'Deleting...' : 'Delete'}
+                {runnerIsLoading[runnerToDelete.id] && <Spinner />}
+                Delete
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -328,16 +278,19 @@ const Runners: React.FC = () => {
       )}
 
       <RunnerDetailsSheet
+        ref={runnerDetailsSheetRef}
         runner={selectedRunner}
-        open={showRunnerDetails}
         onOpenChange={setShowRunnerDetails}
         runnerIsLoading={runnerIsLoading}
         writePermitted={writePermitted}
         deletePermitted={deletePermitted}
+        hasPrev={selectedRunnerIndex > 0}
+        hasNext={selectedRunnerIndex >= 0 && selectedRunnerIndex < runners.length - 1}
+        onNavigate={handleNavigateRunner}
+        onToggleEnabled={handleToggleEnabled}
         onDelete={(runner) => {
           setRunnerToDelete(runner)
           setDeleteRunnerDialogIsOpen(true)
-          setShowRunnerDetails(false)
         }}
         getRegionName={getRegionName}
       />

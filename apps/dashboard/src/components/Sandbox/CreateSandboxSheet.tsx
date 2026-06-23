@@ -24,12 +24,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
+import { useAvailableRegionsQuery } from '@/hooks/queries/useRegionsQuery'
 import { useConfig } from '@/hooks/useConfig'
-import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { parseEnvFile } from '@/lib/env'
 import { handleApiError } from '@/lib/error-handling'
 import { GPU_TYPE_LABELS } from '@/lib/gpu-types'
+import { EMPTY_REGIONS } from '@/lib/regions'
 import { imageNameSchema } from '@/lib/schema'
 import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import { GpuType, OrganizationUserRoleEnum, RegionType, type Region, type SnapshotDto } from '@daytona/api-client'
@@ -180,8 +181,10 @@ export const CreateSandboxSheet = ({
   const [selectedSnapshotOption, setSelectedSnapshotOption] = useState<SnapshotDto | undefined>(undefined)
 
   const config = useConfig()
-  const { availableRegions: regions, loadingAvailableRegions: loadingRegions } = useRegions()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { data: regions = EMPTY_REGIONS, isLoading: loadingRegions } = useAvailableRegionsQuery(
+    selectedOrganization?.id,
+  )
   const { reset: resetCreateSandboxMutation, ...createSandboxMutation } = useCreateSandboxMutation()
   const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
   const formRef = useRef<HTMLFormElement>(null)

@@ -4,21 +4,35 @@
  */
 
 import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { formatTimestamp } from '@/lib/utils'
+import { Spinner } from '@/components/ui/spinner'
+import { getRelativeTimeString } from '@/lib/utils'
 import { Region, RegionType } from '@daytona/api-client'
-import { Copy, Info, Pencil, Trash, X } from 'lucide-react'
-import React from 'react'
-import { toast } from 'sonner'
+import { ChevronDown, ChevronUp, KeyRound, Pencil, RefreshCw, Trash2, X } from 'lucide-react'
+import React, { Ref, useCallback, useImperativeHandle, useState } from 'react'
+import { CopyButton } from './CopyButton'
+import { InfoRow, InfoSection } from './sandboxes/SandboxInfoPanel'
+import { TimestampTooltip } from './TimestampTooltip'
+
+export interface RegionDetailsSheetRef {
+  open: () => void
+  close: () => void
+}
 
 interface RegionDetailsSheetProps {
   region: Region | null
-  open: boolean
+  ref?: Ref<RegionDetailsSheetRef>
   onOpenChange: (open: boolean) => void
   regionIsLoading: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  hasNext: boolean
+  hasPrev: boolean
   onDelete: (region: Region) => void
+  onNavigate: (direction: 'prev' | 'next') => void
   onUpdate: (region: Region) => void
   onRegenerateProxyApiKey: (region: Region) => void
   onRegenerateSshGatewayApiKey: (region: Region) => void
@@ -27,187 +41,202 @@ interface RegionDetailsSheetProps {
 
 const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
   region,
-  open,
+  ref,
   onOpenChange,
   regionIsLoading,
   writePermitted,
   deletePermitted,
+  hasNext,
+  hasPrev,
   onDelete,
+  onNavigate,
   onUpdate,
   onRegenerateProxyApiKey,
   onRegenerateSshGatewayApiKey,
   onRegenerateSnapshotManagerCredentials,
 }) => {
-  if (!region) return null
+  const [open, setOpen] = useState(false)
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success('Copied to clipboard')
-    } catch (err) {
-      console.error('Failed to copy text:', err)
-      toast.error('Failed to copy to clipboard')
-    }
-  }
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setOpen(isOpen)
+      onOpenChange(isOpen)
+    },
+    [onOpenChange],
+  )
+
+  useImperativeHandle(ref, () => ({
+    open: () => handleOpenChange(true),
+    close: () => handleOpenChange(false),
+  }))
+
+  if (!region) return null
 
   const isLoading = regionIsLoading[region.id] || false
   const isCustomRegion = region.regionType === RegionType.CUSTOM
+  const hasCredentialActions = Boolean(
+    isCustomRegion && writePermitted && (region.proxyUrl || region.sshGatewayUrl || region.snapshotManagerUrl),
+  )
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-dvw sm:w-[800px] p-0 flex flex-col gap-0 [&>button]:hidden">
-        <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
-          <SheetTitle>Region Details</SheetTitle>
-          <div className="flex items-center">
-            {writePermitted && isCustomRegion && (
-              <Button variant="outline" className="w-8 h-8" onClick={() => onUpdate(region)} disabled={isLoading}>
-                <Pencil className="w-4 h-4" />
-              </Button>
-            )}
-            {deletePermitted && isCustomRegion && (
-              <Button variant="outline" className="w-8 h-8" onClick={() => onDelete(region)} disabled={isLoading}>
-                <Trash className="w-4 h-4" />
-              </Button>
-            )}
-            <Button variant="outline" className="w-8 h-8" onClick={() => onOpenChange(false)} disabled={isLoading}>
-              <X className="w-4 h-4" />
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent className="w-dvw sm:w-[450px] p-0 flex flex-col gap-0 [&>button]:hidden">
+        <SheetHeader className="flex flex-row items-start justify-between p-4 px-5 space-y-0 border-b border-border">
+          <div className="min-w-0">
+            <SheetTitle>Region Details</SheetTitle>
+          </div>
+          <div className="flex flex-wrap items-center justify-end shrink-0">
+            <Button variant="ghost" size="icon-sm" disabled={!hasPrev || isLoading} onClick={() => onNavigate('prev')}>
+              <ChevronUp className="size-4" />
+              <span className="sr-only">Previous region</span>
+            </Button>
+            <Button variant="ghost" size="icon-sm" disabled={!hasNext || isLoading} onClick={() => onNavigate('next')}>
+              <ChevronDown className="size-4" />
+              <span className="sr-only">Next region</span>
+            </Button>
+            <Button variant="ghost" size="icon-sm" onClick={() => handleOpenChange(false)} disabled={isLoading}>
+              <X className="size-4" />
+              <span className="sr-only">Close</span>
             </Button>
           </div>
         </SheetHeader>
 
-        <div className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm text-muted-foreground">Name</h3>
-              <div className="mt-1 flex items-center gap-2">
-                <p className="text-sm font-medium truncate">{region.name}</p>
-                <button
-                  onClick={() => copyToClipboard(region.name)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Copy name"
-                >
-                  <Copy className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm text-muted-foreground">ID</h3>
-              <div className="mt-1 flex items-center gap-2">
-                <p className="text-sm font-medium truncate">{region.id}</p>
-                <button
-                  onClick={() => copyToClipboard(region.id)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Copy ID"
-                >
-                  <Copy className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          </div>
+        <ScrollArea fade="mask" className="flex-1 min-h-0">
+          <div className="flex flex-col">
+            <InfoSection>
+              <InfoRow label="Name" className="-mr-2">
+                <div className="flex items-center gap-1 min-w-0">
+                  <span className="truncate">{region.name}</span>
+                  <CopyButton value={region.name} tooltipText="Copy name" size="icon-xs" />
+                </div>
+              </InfoRow>
+              <InfoRow label="UUID" className="-mr-2">
+                <div className="flex items-center gap-1 min-w-0">
+                  <span className="truncate font-mono text-sm">{region.id}</span>
+                  <CopyButton value={region.id} tooltipText="Copy UUID" size="icon-xs" />
+                </div>
+              </InfoRow>
+              <InfoRow label="Type">{isCustomRegion ? 'Custom' : <Badge variant="secondary">Shared</Badge>}</InfoRow>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm text-muted-foreground">Created</h3>
-              <p className="mt-1 text-sm font-medium">{formatTimestamp(region.createdAt)}</p>
-            </div>
-          </div>
+              {isCustomRegion && (writePermitted || deletePermitted) && (
+                <div className="flex justify-end pt-3">
+                  <ButtonGroup>
+                    {writePermitted && (
+                      <Button variant="outline" size="sm" onClick={() => onUpdate(region)} disabled={isLoading}>
+                        {isLoading ? <Spinner /> : <Pencil className="size-4" />}
+                        Edit
+                      </Button>
+                    )}
+                    {deletePermitted && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onDelete(region)}
+                        disabled={isLoading}
+                        className="text-destructive-foreground hover:bg-destructive/10 hover:text-destructive-foreground"
+                      >
+                        {isLoading ? <Spinner /> : <Trash2 className="size-4" />}
+                        Delete
+                      </Button>
+                    )}
+                  </ButtonGroup>
+                </div>
+              )}
+            </InfoSection>
 
-          <div>
-            <h3 className="text-lg font-medium">URLs</h3>
-            <div className="mt-3 space-y-4">
-              <div>
-                <h4 className="text-sm text-muted-foreground">Proxy URL</h4>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{region.proxyUrl || '-'}</p>
+            <InfoSection title="Endpoints">
+              <EndpointRow label="Proxy URL" value={region.proxyUrl} />
+              <EndpointRow label="SSH Gateway URL" value={region.sshGatewayUrl} />
+              <EndpointRow label="Snapshot Manager URL" value={region.snapshotManagerUrl} />
+            </InfoSection>
+
+            {hasCredentialActions && (
+              <InfoSection title="Credentials">
+                <div>
                   {region.proxyUrl && (
-                    <button
-                      onClick={() => copyToClipboard(region.proxyUrl || '')}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Copy Proxy URL"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div>
-                <h4 className="text-sm text-muted-foreground">SSH Gateway URL</h4>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{region.sshGatewayUrl || '-'}</p>
-                  {region.sshGatewayUrl && (
-                    <button
-                      onClick={() => copyToClipboard(region.sshGatewayUrl || '')}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Copy SSH Gateway URL"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div>
-                <h4 className="text-sm text-muted-foreground">Snapshot Manager URL</h4>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{region.snapshotManagerUrl || '-'}</p>
-                  {region.snapshotManagerUrl && (
-                    <button
-                      onClick={() => copyToClipboard(region.snapshotManagerUrl || '')}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Copy Snapshot Manager URL"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {isCustomRegion &&
-            writePermitted &&
-            (region.proxyUrl || region.sshGatewayUrl || region.snapshotManagerUrl) && (
-              <div>
-                <h3 className="text-lg font-medium">Credentials</h3>
-                <div className="mt-3 space-y-3">
-                  {region.proxyUrl && (
-                    <Button
-                      variant="outline"
-                      onClick={() => onRegenerateProxyApiKey(region)}
-                      disabled={isLoading}
-                      className="w-full justify-start"
-                    >
-                      <Info className="w-4 h-4 mr-2" />
-                      Regenerate Proxy API Key
-                    </Button>
+                    <CredentialActionRow onClick={() => onRegenerateProxyApiKey(region)} disabled={isLoading}>
+                      Proxy API Key
+                    </CredentialActionRow>
                   )}
                   {region.sshGatewayUrl && (
-                    <Button
-                      variant="outline"
-                      onClick={() => onRegenerateSshGatewayApiKey(region)}
-                      disabled={isLoading}
-                      className="w-full justify-start"
-                    >
-                      <Info className="w-4 h-4 mr-2" />
-                      Regenerate SSH Gateway API Key
-                    </Button>
+                    <CredentialActionRow onClick={() => onRegenerateSshGatewayApiKey(region)} disabled={isLoading}>
+                      SSH Gateway API Key
+                    </CredentialActionRow>
                   )}
                   {region.snapshotManagerUrl && (
-                    <Button
-                      variant="outline"
+                    <CredentialActionRow
                       onClick={() => onRegenerateSnapshotManagerCredentials(region)}
                       disabled={isLoading}
-                      className="w-full justify-start"
                     >
-                      <Info className="w-4 h-4 mr-2" />
-                      Regenerate Snapshot Manager Credentials
-                    </Button>
+                      Snapshot Manager Credentials
+                    </CredentialActionRow>
                   )}
                 </div>
-              </div>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                  Regenerating keys will immediately invalidate existing connections using the old credentials.
+                </p>
+              </InfoSection>
             )}
-        </div>
+
+            <InfoSection title="Activity">
+              <InfoRow label="Created">
+                <RegionTimestamp timestamp={region.createdAt} />
+              </InfoRow>
+            </InfoSection>
+          </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
+  )
+}
+
+function CredentialActionRow({
+  children,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode
+  onClick: () => void
+  disabled?: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-border py-3 last:border-b-0">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground [background:color-mix(in_srgb,currentColor,transparent_90%)]">
+          <KeyRound className="size-3.5" />
+        </div>
+        <span className="min-w-0 break-words text-sm font-medium leading-tight">{children}</span>
+      </div>
+      <Button variant="secondary" size="sm" onClick={onClick} disabled={disabled} className="shrink-0">
+        {disabled ? <Spinner /> : <RefreshCw className="size-4" />}
+        Regenerate
+      </Button>
+    </div>
+  )
+}
+
+function EndpointRow({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <InfoRow label={label} className="-mr-2">
+      {value ? (
+        <div className="flex items-center gap-1 min-w-0">
+          <code className="block min-w-0 truncate rounded bg-muted px-1 py-1 font-mono text-[13px] text-foreground">
+            {value}
+          </code>
+          <CopyButton value={value} tooltipText={`Copy ${label}`} size="icon-xs" />
+        </div>
+      ) : (
+        <span className="text-muted-foreground">N/A</span>
+      )}
+    </InfoRow>
+  )
+}
+
+function RegionTimestamp({ timestamp }: { timestamp?: string }) {
+  return (
+    <TimestampTooltip timestamp={timestamp}>
+      <span>{getRelativeTimeString(timestamp).relativeTimeString}</span>
+    </TimestampTooltip>
   )
 }
 

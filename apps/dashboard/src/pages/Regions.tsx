@@ -4,10 +4,10 @@
  */
 
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { CreateRegionSheet } from '@/components/CreateRegionSheet'
 import { PageContent, PageFooter, PageHeader, PageIntro, PageLayout } from '@/components/PageLayout'
-import RegionDetailsSheet from '@/components/RegionDetailsSheet'
+import RegionDetailsSheet, { type RegionDetailsSheetRef } from '@/components/RegionDetailsSheet'
 import { RegionTable } from '@/components/RegionTable'
+import { UpsertRegionSheet } from '@/components/UpsertRegionSheet'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Spinner } from '@/components/ui/spinner'
 import {
   Dialog,
   DialogClose,
@@ -28,34 +32,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { UpdateRegionDialog } from '@/components/UpdateRegionDialog'
-import { useApi } from '@/hooks/useApi'
-import { useRegions } from '@/hooks/useRegions'
+import { useDeleteRegionMutation } from '@/hooks/mutations/useDeleteRegionMutation'
+import { useMutatingRegions } from '@/hooks/mutations/useMutatingRegions'
+import { useRegenerateRegionProxyApiKeyMutation } from '@/hooks/mutations/useRegenerateRegionProxyApiKeyMutation'
+import { useRegenerateRegionSnapshotManagerCredentialsMutation } from '@/hooks/mutations/useRegenerateRegionSnapshotManagerCredentialsMutation'
+import { useRegenerateRegionSshGatewayApiKeyMutation } from '@/hooks/mutations/useRegenerateRegionSshGatewayApiKeyMutation'
+import { useAvailableRegionsQuery } from '@/hooks/queries/useRegionsQuery'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { EMPTY_REGIONS } from '@/lib/regions'
 import { getMaskedToken } from '@/lib/utils'
-import {
-  CreateRegion,
-  CreateRegionResponse,
-  OrganizationRolePermissionsEnum,
-  Region,
-  SnapshotManagerCredentials,
-  UpdateRegion,
-} from '@daytona/api-client'
-import { Copy, PlusIcon } from 'lucide-react'
-import React, { useMemo, useRef, useState } from 'react'
+import { OrganizationRolePermissionsEnum, Region, SnapshotManagerCredentials } from '@daytona/api-client'
+import { AnimatePresence, motion } from 'framer-motion'
+import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, InfoIcon, PlusIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 const Regions: React.FC = () => {
-  const { organizationsApi } = useApi()
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
-  const {
-    availableRegions: regions,
-    loadingAvailableRegions: loadingRegions,
-    refreshAvailableRegions: refreshRegions,
-  } = useRegions()
+  const { data: regions = EMPTY_REGIONS, isLoading: loadingRegions } = useAvailableRegionsQuery(
+    selectedOrganization?.id,
+  )
+  const deleteRegionMutation = useDeleteRegionMutation()
+  const regenerateProxyApiKeyMutation = useRegenerateRegionProxyApiKeyMutation()
+  const regenerateSshGatewayApiKeyMutation = useRegenerateRegionSshGatewayApiKeyMutation()
+  const regenerateSnapshotManagerCredentialsMutation = useRegenerateRegionSnapshotManagerCredentialsMutation()
+  const mutatingRegionIds = useMutatingRegions()
 
-  const [regionIsLoading, setRegionIsLoading] = useState<Record<string, boolean>>({})
+  const regionIsLoading = useMemo<Record<string, boolean>>(() => {
+    return Object.fromEntries([...mutatingRegionIds].map((regionId) => [regionId, true]))
+  }, [mutatingRegionIds])
 
   const [regionToDelete, setRegionToDelete] = useState<Region | null>(null)
   const [deleteRegionDialogIsOpen, setDeleteRegionDialogIsOpen] = useState(false)
@@ -68,51 +75,28 @@ const Regions: React.FC = () => {
   const [regeneratedSnapshotManagerCreds, setRegeneratedSnapshotManagerCreds] =
     useState<SnapshotManagerCredentials | null>(null)
   const [regionForRegenerate, setRegionForRegenerate] = useState<Region | null>(null)
-  const [isApiKeyRevealed, setIsApiKeyRevealed] = useState(false)
-  const [isSnapshotManagerPasswordRevealed, setIsSnapshotManagerPasswordRevealed] = useState(false)
 
   // Region Details Sheet state
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null)
   const [showRegionDetails, setShowRegionDetails] = useState(false)
+  const regionDetailsSheetRef = useRef<RegionDetailsSheetRef>(null)
 
-  // Update Region Dialog state
-  const [showUpdateRegionDialog, setShowUpdateRegionDialog] = useState(false)
+  // Edit Region Sheet state
+  const [showEditRegionSheet, setShowEditRegionSheet] = useState(false)
   const [regionToUpdate, setRegionToUpdate] = useState<Region | null>(null)
-  const createRegionSheetRef = useRef<{ open: () => void }>(null)
-
-  const handleCreateRegion = async (createRegionData: CreateRegion): Promise<CreateRegionResponse | null> => {
-    if (!selectedOrganization) {
-      return null
-    }
-
-    try {
-      const response = (await organizationsApi.createRegion(createRegionData, selectedOrganization.id)).data
-      toast.success(`Creating region ${createRegionData.name}`)
-      await refreshRegions()
-      return response
-    } catch (error) {
-      handleApiError(error, 'Failed to create region')
-      return null
-    }
-  }
+  const upsertRegionSheetRef = useRef<{ open: () => void }>(null)
 
   const handleDelete = async (region: Region) => {
-    if (!selectedOrganization) {
-      return
-    }
-
-    setRegionIsLoading((prev) => ({ ...prev, [region.id]: true }))
-
     try {
-      await organizationsApi.deleteRegion(region.id, selectedOrganization.id)
+      await deleteRegionMutation.mutateAsync({
+        regionId: region.id,
+        organizationId: selectedOrganization?.id,
+      })
       setRegionToDelete(null)
       setDeleteRegionDialogIsOpen(false)
       toast.success(`Deleting region ${region.name}`)
-      await refreshRegions()
     } catch (error) {
       handleApiError(error, 'Failed to delete region')
-    } finally {
-      setRegionIsLoading((prev) => ({ ...prev, [region.id]: false }))
     }
   }
 
@@ -136,7 +120,7 @@ const Regions: React.FC = () => {
         id: 'create-region',
         label: 'Create Region',
         icon: <PlusIcon className="w-4 h-4" />,
-        onSelect: () => createRegionSheetRef.current?.open(),
+        onSelect: () => upsertRegionSheetRef.current?.open(),
       },
     ]
   }, [writePermitted])
@@ -163,50 +147,67 @@ const Regions: React.FC = () => {
 
   const handleOpenRegionDetails = (region: Region) => {
     setSelectedRegion(region)
-    setShowRegionDetails(true)
-  }
-
-  const handleUpdateRegion = async (regionId: string, updateData: UpdateRegion): Promise<boolean> => {
-    if (!selectedOrganization) return false
-
-    setRegionIsLoading((prev) => ({ ...prev, [regionId]: true }))
-    try {
-      await organizationsApi.updateRegion(regionId, updateData, selectedOrganization.id)
-      toast.success('Region updated successfully')
-      await refreshRegions()
-      return true
-    } catch (error) {
-      handleApiError(error, 'Failed to update region')
-      return false
-    } finally {
-      setRegionIsLoading((prev) => ({ ...prev, [regionId]: false }))
-    }
+    regionDetailsSheetRef.current?.open()
   }
 
   const handleOpenUpdateDialog = (region: Region) => {
     setRegionToUpdate(region)
-    setShowUpdateRegionDialog(true)
-    setShowRegionDetails(false)
+    setShowEditRegionSheet(true)
+    regionDetailsSheetRef.current?.close()
   }
+
+  useEffect(() => {
+    if (!selectedRegion) return
+
+    const found = regions.find((region) => region.id === selectedRegion.id)
+    if (!found) {
+      regionDetailsSheetRef.current?.close()
+      return
+    }
+
+    setSelectedRegion(found)
+  }, [regions, selectedRegion])
+
+  const selectedRegionIndex = useMemo(() => {
+    if (!selectedRegion) {
+      return -1
+    }
+
+    return regions.findIndex((region) => region.id === selectedRegion.id)
+  }, [regions, selectedRegion])
+
+  const handleNavigateRegion = useCallback(
+    (direction: 'prev' | 'next') => {
+      if (selectedRegionIndex === -1) {
+        return
+      }
+
+      const nextIndex = direction === 'prev' ? selectedRegionIndex - 1 : selectedRegionIndex + 1
+      const nextRegion = regions[nextIndex]
+      if (nextRegion) {
+        setSelectedRegion(nextRegion)
+      }
+    },
+    [regions, selectedRegionIndex],
+  )
 
   const confirmRegenerateProxyApiKey = async () => {
     if (!regionForRegenerate || !selectedOrganization) {
       return
     }
 
-    setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
-
     try {
-      const response = await organizationsApi.regenerateProxyApiKey(regionForRegenerate.id, selectedOrganization.id)
-      setRegeneratedApiKey(response.data.apiKey)
+      const response = await regenerateProxyApiKeyMutation.mutateAsync({
+        regionId: regionForRegenerate.id,
+        organizationId: selectedOrganization.id,
+      })
+      setRegeneratedApiKey(response.apiKey)
       setShowRegenerateProxyApiKeyDialog(true)
       toast.success('Proxy API key regenerated successfully')
     } catch (error) {
       handleApiError(error, 'Failed to regenerate proxy API key')
       setShowRegenerateProxyApiKeyDialog(false)
       setRegionForRegenerate(null)
-    } finally {
-      setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: false }))
     }
   }
 
@@ -215,22 +216,18 @@ const Regions: React.FC = () => {
       return
     }
 
-    setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
-
     try {
-      const response = await organizationsApi.regenerateSshGatewayApiKey(
-        regionForRegenerate.id,
-        selectedOrganization.id,
-      )
-      setRegeneratedApiKey(response.data.apiKey)
+      const response = await regenerateSshGatewayApiKeyMutation.mutateAsync({
+        regionId: regionForRegenerate.id,
+        organizationId: selectedOrganization.id,
+      })
+      setRegeneratedApiKey(response.apiKey)
       setShowRegenerateSshGatewayApiKeyDialog(true)
       toast.success('SSH Gateway API key regenerated successfully')
     } catch (error) {
       handleApiError(error, 'Failed to regenerate SSH Gateway API key')
       setShowRegenerateSshGatewayApiKeyDialog(false)
       setRegionForRegenerate(null)
-    } finally {
-      setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: false }))
     }
   }
 
@@ -239,32 +236,18 @@ const Regions: React.FC = () => {
       return
     }
 
-    setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
-
     try {
-      const response = await organizationsApi.regenerateSnapshotManagerCredentials(
-        regionForRegenerate.id,
-        selectedOrganization.id,
-      )
-      setRegeneratedSnapshotManagerCreds(response.data)
+      const response = await regenerateSnapshotManagerCredentialsMutation.mutateAsync({
+        regionId: regionForRegenerate.id,
+        organizationId: selectedOrganization.id,
+      })
+      setRegeneratedSnapshotManagerCreds(response)
       setShowRegenerateSnapshotManagerCredsDialog(true)
       toast.success('Snapshot Manager credentials regenerated successfully')
     } catch (error) {
       handleApiError(error, 'Failed to regenerate Snapshot Manager credentials')
       setShowRegenerateSnapshotManagerCredsDialog(false)
       setRegionForRegenerate(null)
-    } finally {
-      setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: false }))
-    }
-  }
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success('Copied to clipboard')
-    } catch (err) {
-      console.error('Failed to copy text:', err)
-      toast.error('Failed to copy to clipboard')
     }
   }
 
@@ -276,17 +259,13 @@ const Regions: React.FC = () => {
         <PageIntro
           title="Regions"
           actions={
-            <CreateRegionSheet
-              onCreateRegion={handleCreateRegion}
-              writePermitted={writePermitted}
-              loadingData={loadingRegions}
-              ref={createRegionSheetRef}
-            />
+            writePermitted ? <UpsertRegionSheet disabled={loadingRegions} ref={upsertRegionSheetRef} /> : undefined
           }
         />
         <RegionTable
           data={regions}
           loading={loadingRegions}
+          activeRegionId={showRegionDetails ? selectedRegion?.id : undefined}
           isLoadingRegion={(region) => regionIsLoading[region.id] || false}
           deletePermitted={deletePermitted}
           writePermitted={writePermitted}
@@ -295,26 +274,24 @@ const Regions: React.FC = () => {
             setDeleteRegionDialogIsOpen(true)
           }}
           onOpenDetails={handleOpenRegionDetails}
+          onUpdate={handleOpenUpdateDialog}
         />
       </PageContent>
       <PageFooter />
 
       <RegionDetailsSheet
+        ref={regionDetailsSheetRef}
         region={selectedRegion}
-        open={showRegionDetails}
-        onOpenChange={(open) => {
-          setShowRegionDetails(open)
-          if (!open) {
-            setSelectedRegion(null)
-          }
-        }}
+        onOpenChange={setShowRegionDetails}
         regionIsLoading={regionIsLoading}
         writePermitted={writePermitted}
         deletePermitted={deletePermitted}
+        hasPrev={selectedRegionIndex > 0}
+        hasNext={selectedRegionIndex >= 0 && selectedRegionIndex < regions.length - 1}
+        onNavigate={handleNavigateRegion}
         onDelete={(region) => {
           setRegionToDelete(region)
           setDeleteRegionDialogIsOpen(true)
-          setShowRegionDetails(false)
         }}
         onUpdate={handleOpenUpdateDialog}
         onRegenerateProxyApiKey={handleRegenerateProxyApiKey}
@@ -323,15 +300,15 @@ const Regions: React.FC = () => {
       />
 
       {regionToUpdate && (
-        <UpdateRegionDialog
+        <UpsertRegionSheet
+          mode="edit"
+          trigger={null}
           region={regionToUpdate}
-          open={showUpdateRegionDialog}
+          open={showEditRegionSheet}
           onOpenChange={(isOpen) => {
-            setShowUpdateRegionDialog(isOpen)
+            setShowEditRegionSheet(isOpen)
             if (!isOpen) setRegionToUpdate(null)
           }}
-          onUpdateRegion={handleUpdateRegion}
-          loading={regionToUpdate ? regionIsLoading[regionToUpdate.id] || false : false}
         />
       )}
 
@@ -363,7 +340,8 @@ const Regions: React.FC = () => {
                 onClick={() => handleDelete(regionToDelete)}
                 disabled={regionIsLoading[regionToDelete.id]}
               >
-                {regionIsLoading[regionToDelete.id] ? 'Deleting...' : 'Delete'}
+                {regionIsLoading[regionToDelete.id] && <Spinner />}
+                Delete
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -378,7 +356,6 @@ const Regions: React.FC = () => {
           if (!isOpen) {
             setRegionForRegenerate(null)
             setRegeneratedApiKey(null)
-            setIsApiKeyRevealed(false)
           }
         }}
       >
@@ -387,34 +364,22 @@ const Regions: React.FC = () => {
             <AlertDialogTitle>
               {regeneratedApiKey ? 'Proxy API Key Regenerated' : 'Regenerate Proxy API Key'}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {regeneratedApiKey ? (
-                'The new API key has been generated. Copy it now as it will not be shown again.'
-              ) : (
+            {regeneratedApiKey ? (
+              <AlertDialogDescription className="sr-only">
+                The new API key has been generated. Copy it now as it will not be shown again.
+              </AlertDialogDescription>
+            ) : (
+              <AlertDialogDescription>
                 <>
                   <strong>Warning:</strong> This will immediately invalidate the current proxy API key. The proxy will
                   need to be redeployed with the new API key.
                 </>
-              )}
-              {regeneratedApiKey && (
-                <div className="space-y-4 mt-4">
-                  <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                    <span
-                      className="overflow-x-auto pr-2 cursor-text select-all"
-                      onMouseEnter={() => setIsApiKeyRevealed(true)}
-                      onMouseLeave={() => setIsApiKeyRevealed(false)}
-                    >
-                      {isApiKeyRevealed ? regeneratedApiKey : getMaskedToken(regeneratedApiKey)}
-                    </span>
-                    <Copy
-                      className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => copyToClipboard(regeneratedApiKey)}
-                    />
-                  </div>
-                </div>
-              )}
-            </AlertDialogDescription>
+              </AlertDialogDescription>
+            )}
           </AlertDialogHeader>
+          {regeneratedApiKey && (
+            <RegeneratedApiKeyDisplay id="regenerated-proxy-api-key" apiKey={regeneratedApiKey} label="Proxy API Key" />
+          )}
 
           <AlertDialogFooter>
             {!regeneratedApiKey ? (
@@ -425,7 +390,8 @@ const Regions: React.FC = () => {
                   disabled={!regionForRegenerate || regionIsLoading[regionForRegenerate?.id || '']}
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 >
-                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] ? 'Regenerating...' : 'Regenerate'}
+                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] && <Spinner />}
+                  Regenerate
                 </AlertDialogAction>
               </>
             ) : (
@@ -434,7 +400,6 @@ const Regions: React.FC = () => {
                   setShowRegenerateProxyApiKeyDialog(false)
                   setRegionForRegenerate(null)
                   setRegeneratedApiKey(null)
-                  setIsApiKeyRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               >
@@ -453,7 +418,6 @@ const Regions: React.FC = () => {
           if (!isOpen) {
             setRegionForRegenerate(null)
             setRegeneratedApiKey(null)
-            setIsApiKeyRevealed(false)
           }
         }}
       >
@@ -462,34 +426,26 @@ const Regions: React.FC = () => {
             <AlertDialogTitle>
               {regeneratedApiKey ? 'SSH Gateway API Key Regenerated' : 'Regenerate SSH Gateway API Key'}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {regeneratedApiKey ? (
-                'The new API key has been generated. Copy it now as it will not be shown again.'
-              ) : (
+            {regeneratedApiKey ? (
+              <AlertDialogDescription className="sr-only">
+                The new API key has been generated. Copy it now as it will not be shown again.
+              </AlertDialogDescription>
+            ) : (
+              <AlertDialogDescription>
                 <>
                   <strong>Warning:</strong> This will immediately invalidate the current SSH gateway API key. The SSH
                   gateway will need to be redeployed with the new API key.
                 </>
-              )}
-              {regeneratedApiKey && (
-                <div className="space-y-4 mt-4">
-                  <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                    <span
-                      className="overflow-x-auto pr-2 cursor-text select-all"
-                      onMouseEnter={() => setIsApiKeyRevealed(true)}
-                      onMouseLeave={() => setIsApiKeyRevealed(false)}
-                    >
-                      {isApiKeyRevealed ? regeneratedApiKey : getMaskedToken(regeneratedApiKey)}
-                    </span>
-                    <Copy
-                      className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => copyToClipboard(regeneratedApiKey)}
-                    />
-                  </div>
-                </div>
-              )}
-            </AlertDialogDescription>
+              </AlertDialogDescription>
+            )}
           </AlertDialogHeader>
+          {regeneratedApiKey && (
+            <RegeneratedApiKeyDisplay
+              id="regenerated-ssh-gateway-api-key"
+              apiKey={regeneratedApiKey}
+              label="SSH Gateway API Key"
+            />
+          )}
 
           <AlertDialogFooter>
             {!regeneratedApiKey ? (
@@ -500,7 +456,8 @@ const Regions: React.FC = () => {
                   disabled={!regionForRegenerate || regionIsLoading[regionForRegenerate?.id || '']}
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 >
-                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] ? 'Regenerating...' : 'Regenerate'}
+                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] && <Spinner />}
+                  Regenerate
                 </AlertDialogAction>
               </>
             ) : (
@@ -509,7 +466,6 @@ const Regions: React.FC = () => {
                   setShowRegenerateSshGatewayApiKeyDialog(false)
                   setRegionForRegenerate(null)
                   setRegeneratedApiKey(null)
-                  setIsApiKeyRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               >
@@ -528,7 +484,6 @@ const Regions: React.FC = () => {
           if (!isOpen) {
             setRegionForRegenerate(null)
             setRegeneratedSnapshotManagerCreds(null)
-            setIsSnapshotManagerPasswordRevealed(false)
           }
         }}
       >
@@ -539,51 +494,22 @@ const Regions: React.FC = () => {
                 ? 'Snapshot Manager Credentials Regenerated'
                 : 'Regenerate Snapshot Manager Credentials'}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {regeneratedSnapshotManagerCreds ? (
-                'The new credentials have been generated. Copy them now as they will not be shown again.'
-              ) : (
+            {regeneratedSnapshotManagerCreds ? (
+              <AlertDialogDescription className="sr-only">
+                The new credentials have been generated. Copy them now as they will not be shown again.
+              </AlertDialogDescription>
+            ) : (
+              <AlertDialogDescription>
                 <>
                   <strong>Warning:</strong> This will immediately invalidate the current Snapshot Manager credentials.
                   The Snapshot Manager will need to be reconfigured with the new credentials.
                 </>
-              )}
-              {regeneratedSnapshotManagerCreds && (
-                <div className="space-y-4 mt-4">
-                  <div>
-                    <span className="text-xs text-muted-foreground">Username</span>
-                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                      <span className="overflow-x-auto pr-2 cursor-text select-all">
-                        {regeneratedSnapshotManagerCreds.username}
-                      </span>
-                      <Copy
-                        className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => copyToClipboard(regeneratedSnapshotManagerCreds.username)}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground">Password</span>
-                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                      <span
-                        className="overflow-x-auto pr-2 cursor-text select-all"
-                        onMouseEnter={() => setIsSnapshotManagerPasswordRevealed(true)}
-                        onMouseLeave={() => setIsSnapshotManagerPasswordRevealed(false)}
-                      >
-                        {isSnapshotManagerPasswordRevealed
-                          ? regeneratedSnapshotManagerCreds.password
-                          : getMaskedToken(regeneratedSnapshotManagerCreds.password)}
-                      </span>
-                      <Copy
-                        className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => copyToClipboard(regeneratedSnapshotManagerCreds.password)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </AlertDialogDescription>
+              </AlertDialogDescription>
+            )}
           </AlertDialogHeader>
+          {regeneratedSnapshotManagerCreds && (
+            <RegeneratedSnapshotManagerCredentialsDisplay credentials={regeneratedSnapshotManagerCreds} />
+          )}
 
           <AlertDialogFooter>
             {!regeneratedSnapshotManagerCreds ? (
@@ -594,7 +520,8 @@ const Regions: React.FC = () => {
                   disabled={!regionForRegenerate || regionIsLoading[regionForRegenerate?.id || '']}
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 >
-                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] ? 'Regenerating...' : 'Regenerate'}
+                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] && <Spinner />}
+                  Regenerate
                 </AlertDialogAction>
               </>
             ) : (
@@ -603,7 +530,6 @@ const Regions: React.FC = () => {
                   setShowRegenerateSnapshotManagerCredsDialog(false)
                   setRegionForRegenerate(null)
                   setRegeneratedSnapshotManagerCreds(null)
-                  setIsSnapshotManagerPasswordRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               >
@@ -614,6 +540,111 @@ const Regions: React.FC = () => {
         </AlertDialogContent>
       </AlertDialog>
     </PageLayout>
+  )
+}
+
+const MotionCopyIcon = motion(CopyIcon)
+const MotionCheckIcon = motion(CheckIcon)
+
+const iconProps = {
+  initial: { opacity: 0, y: 5 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -5 },
+  transition: { duration: 0.1 },
+}
+
+function OneTimeSecretAlert({ children }: { children: React.ReactNode }) {
+  return (
+    <Alert variant="warning">
+      <InfoIcon />
+      <AlertDescription>{children}</AlertDescription>
+    </Alert>
+  )
+}
+
+function CopyableCredentialField({
+  id,
+  label,
+  value,
+  revealable = false,
+  masked = false,
+}: {
+  id: string
+  label: string
+  value: string
+  revealable?: boolean
+  masked?: boolean
+}) {
+  const [copiedText, copyToClipboard] = useCopyToClipboard()
+  const [revealed, setRevealed] = useState(false)
+  const displayValue = masked && !revealed ? getMaskedToken(value) : value
+
+  return (
+    <Field>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+
+      <InputGroup className="pr-1 flex-1">
+        <InputGroupInput id={id} value={displayValue} readOnly />
+        {revealable && (
+          <InputGroupButton
+            variant="ghost"
+            size="icon-xs"
+            aria-label={revealed ? `Hide ${label}` : `Show ${label}`}
+            aria-pressed={revealed}
+            onClick={() => setRevealed(!revealed)}
+          >
+            {revealed ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+          </InputGroupButton>
+        )}
+        <InputGroupButton
+          variant="ghost"
+          size="icon-xs"
+          aria-label={`Copy ${label}`}
+          onClick={() => copyToClipboard(value)}
+        >
+          <AnimatePresence initial={false} mode="wait">
+            {copiedText === value ? (
+              <MotionCheckIcon className="h-4 w-4" key="copied" {...iconProps} />
+            ) : (
+              <MotionCopyIcon className="h-4 w-4" key="copy" {...iconProps} />
+            )}
+          </AnimatePresence>
+        </InputGroupButton>
+      </InputGroup>
+    </Field>
+  )
+}
+
+function RegeneratedApiKeyDisplay({ id, apiKey, label }: { id: string; apiKey: string; label: string }) {
+  return (
+    <div className="space-y-6">
+      <OneTimeSecretAlert>You can only view this key once. Store it safely.</OneTimeSecretAlert>
+      <FieldGroup className="gap-4">
+        <CopyableCredentialField id={id} label={label} value={apiKey} revealable masked />
+      </FieldGroup>
+    </div>
+  )
+}
+
+function RegeneratedSnapshotManagerCredentialsDisplay({ credentials }: { credentials: SnapshotManagerCredentials }) {
+  return (
+    <div className="space-y-6">
+      <OneTimeSecretAlert>You can only view these credentials once. Store them safely.</OneTimeSecretAlert>
+      <FieldGroup className="gap-4">
+        <CopyableCredentialField
+          id="regenerated-snapshot-manager-username"
+          label="Username"
+          value={credentials.username}
+        />
+        <CopyableCredentialField
+          id="regenerated-snapshot-manager-password"
+          label="Password"
+          value={credentials.password}
+          revealable
+          masked
+        />
+      </FieldGroup>
+    </div>
   )
 }
 
