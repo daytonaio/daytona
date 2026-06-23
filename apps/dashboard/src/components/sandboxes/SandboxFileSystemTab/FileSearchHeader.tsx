@@ -70,7 +70,7 @@ export function FileSearchHeader({
       <div
         aria-hidden={isOpen}
         inert={isOpen}
-        className={cn('absolute inset-0 flex items-center px-2 transition-all duration-200', {
+        className={cn('absolute inset-0 flex items-center px-2 pl-3 transition-all duration-200', {
           'z-10 translate-x-0 opacity-100': !isOpen,
           'z-0 -translate-x-6 opacity-0': isOpen,
         })}
