@@ -107,6 +107,7 @@ require 'daytona_toolbox_api_client/models/session_send_input_request'
 require 'daytona_toolbox_api_client/models/start_recording_request'
 require 'daytona_toolbox_api_client/models/status'
 require 'daytona_toolbox_api_client/models/stop_recording_request'
+require 'daytona_toolbox_api_client/models/system_metrics'
 require 'daytona_toolbox_api_client/models/user_home_dir_response'
 require 'daytona_toolbox_api_client/models/window_info'
 require 'daytona_toolbox_api_client/models/windows_response'
@@ -122,6 +123,7 @@ require 'daytona_toolbox_api_client/api/lsp_api'
 require 'daytona_toolbox_api_client/api/port_api'
 require 'daytona_toolbox_api_client/api/process_api'
 require 'daytona_toolbox_api_client/api/server_api'
+require 'daytona_toolbox_api_client/api/system_api'
 
 module DaytonaToolboxApiClient
   class << self

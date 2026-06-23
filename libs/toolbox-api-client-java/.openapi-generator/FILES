@@ -26,6 +26,7 @@ src/main/java/io/daytona/toolbox/client/api/LspApi.java
 src/main/java/io/daytona/toolbox/client/api/PortApi.java
 src/main/java/io/daytona/toolbox/client/api/ProcessApi.java
 src/main/java/io/daytona/toolbox/client/api/ServerApi.java
+src/main/java/io/daytona/toolbox/client/api/SystemApi.java
 src/main/java/io/daytona/toolbox/client/auth/ApiKeyAuth.java
 src/main/java/io/daytona/toolbox/client/auth/Authentication.java
 src/main/java/io/daytona/toolbox/client/auth/HttpBasicAuth.java
@@ -120,6 +121,7 @@ src/main/java/io/daytona/toolbox/client/model/SessionSendInputRequest.java
 src/main/java/io/daytona/toolbox/client/model/StartRecordingRequest.java
 src/main/java/io/daytona/toolbox/client/model/Status.java
 src/main/java/io/daytona/toolbox/client/model/StopRecordingRequest.java
+src/main/java/io/daytona/toolbox/client/model/SystemMetrics.java
 src/main/java/io/daytona/toolbox/client/model/UserHomeDirResponse.java
 src/main/java/io/daytona/toolbox/client/model/WindowInfo.java
 src/main/java/io/daytona/toolbox/client/model/WindowsResponse.java
@@ -133,6 +135,7 @@ src/test/java/io/daytona/toolbox/client/api/LspApiTest.java
 src/test/java/io/daytona/toolbox/client/api/PortApiTest.java
 src/test/java/io/daytona/toolbox/client/api/ProcessApiTest.java
 src/test/java/io/daytona/toolbox/client/api/ServerApiTest.java
+src/test/java/io/daytona/toolbox/client/api/SystemApiTest.java
 src/test/java/io/daytona/toolbox/client/model/AccessibilityBoundsTest.java
 src/test/java/io/daytona/toolbox/client/model/AccessibilityInvokeRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/AccessibilityNodeRequestTest.java
@@ -222,6 +225,7 @@ src/test/java/io/daytona/toolbox/client/model/SessionTest.java
 src/test/java/io/daytona/toolbox/client/model/StartRecordingRequestTest.java
 src/test/java/io/daytona/toolbox/client/model/StatusTest.java
 src/test/java/io/daytona/toolbox/client/model/StopRecordingRequestTest.java
+src/test/java/io/daytona/toolbox/client/model/SystemMetricsTest.java
 src/test/java/io/daytona/toolbox/client/model/UserHomeDirResponseTest.java
 src/test/java/io/daytona/toolbox/client/model/WindowInfoTest.java
 src/test/java/io/daytona/toolbox/client/model/WindowsResponseTest.java

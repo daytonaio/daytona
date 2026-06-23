@@ -108,6 +108,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.start_recording_request import StartRecordingRequest
     from daytona_toolbox_api_client.models.status import Status
     from daytona_toolbox_api_client.models.stop_recording_request import StopRecordingRequest
+    from daytona_toolbox_api_client.models.system_metrics import SystemMetrics
     from daytona_toolbox_api_client.models.user_home_dir_response import UserHomeDirResponse
     from daytona_toolbox_api_client.models.window_info import WindowInfo
     from daytona_toolbox_api_client.models.windows_response import WindowsResponse
@@ -203,6 +204,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "StartRecordingRequest": "daytona_toolbox_api_client.models.start_recording_request",
     "Status": "daytona_toolbox_api_client.models.status",
     "StopRecordingRequest": "daytona_toolbox_api_client.models.stop_recording_request",
+    "SystemMetrics": "daytona_toolbox_api_client.models.system_metrics",
     "UserHomeDirResponse": "daytona_toolbox_api_client.models.user_home_dir_response",
     "WindowInfo": "daytona_toolbox_api_client.models.window_info",
     "WindowsResponse": "daytona_toolbox_api_client.models.windows_response",

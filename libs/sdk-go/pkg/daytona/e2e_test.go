@@ -895,6 +895,22 @@ PY`, options.WithExecuteTimeout(10*time.Second))
 		assert.Contains(t, result.Result, "post-archive-check")
 	})
 
+	t.Run("SystemMetrics/GetMetrics", func(t *testing.T) {
+		m, metricsErr := sandbox.GetMetrics(ctx)
+		require.NoError(t, metricsErr)
+		require.NotNil(t, m)
+		assert.NotEmpty(t, m.GetTimestamp())
+		assert.GreaterOrEqual(t, m.GetCpuCount(), int32(1))
+		assert.GreaterOrEqual(t, m.GetCpuUsedPct(), float64(0))
+		assert.LessOrEqual(t, m.GetCpuUsedPct(), float64(100))
+		assert.Greater(t, m.GetMemTotal(), int64(0))
+		assert.GreaterOrEqual(t, m.GetMemUsed(), int64(0))
+		assert.LessOrEqual(t, m.GetMemUsed(), m.GetMemTotal())
+		assert.Greater(t, m.GetDiskTotal(), int64(0))
+		assert.GreaterOrEqual(t, m.GetDiskUsed(), int64(0))
+		assert.LessOrEqual(t, m.GetDiskUsed(), m.GetDiskTotal())
+	})
+
 	t.Run("Volume/Create", func(t *testing.T) {
 		vol, volErr := client.Volume.Create(ctx, volumeName)
 		require.NoError(t, volErr)

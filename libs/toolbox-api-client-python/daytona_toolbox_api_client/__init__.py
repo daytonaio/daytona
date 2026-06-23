@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.api.port_api import PortApi
     from daytona_toolbox_api_client.api.process_api import ProcessApi
     from daytona_toolbox_api_client.api.server_api import ServerApi
+    from daytona_toolbox_api_client.api.system_api import SystemApi
     # import ApiClient
     from daytona_toolbox_api_client.api_response import ApiResponse
     from daytona_toolbox_api_client.api_client import ApiClient
@@ -132,6 +133,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.start_recording_request import StartRecordingRequest
     from daytona_toolbox_api_client.models.status import Status
     from daytona_toolbox_api_client.models.stop_recording_request import StopRecordingRequest
+    from daytona_toolbox_api_client.models.system_metrics import SystemMetrics
     from daytona_toolbox_api_client.models.user_home_dir_response import UserHomeDirResponse
     from daytona_toolbox_api_client.models.window_info import WindowInfo
     from daytona_toolbox_api_client.models.windows_response import WindowsResponse
@@ -148,6 +150,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "PortApi": "daytona_toolbox_api_client.api.port_api",
     "ProcessApi": "daytona_toolbox_api_client.api.process_api",
     "ServerApi": "daytona_toolbox_api_client.api.server_api",
+    "SystemApi": "daytona_toolbox_api_client.api.system_api",
     # ApiClient
     "ApiResponse": "daytona_toolbox_api_client.api_response",
     "ApiClient": "daytona_toolbox_api_client.api_client",
@@ -248,6 +251,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "StartRecordingRequest": "daytona_toolbox_api_client.models.start_recording_request",
     "Status": "daytona_toolbox_api_client.models.status",
     "StopRecordingRequest": "daytona_toolbox_api_client.models.stop_recording_request",
+    "SystemMetrics": "daytona_toolbox_api_client.models.system_metrics",
     "UserHomeDirResponse": "daytona_toolbox_api_client.models.user_home_dir_response",
     "WindowInfo": "daytona_toolbox_api_client.models.window_info",
     "WindowsResponse": "daytona_toolbox_api_client.models.windows_response",
@@ -289,6 +293,7 @@ __all__ = [
     "PortApi",
     "ProcessApi",
     "ServerApi",
+    "SystemApi",
     "AccessibilityBounds",
     "AccessibilityInvokeRequest",
     "AccessibilityNodeRequest",
@@ -378,6 +383,7 @@ __all__ = [
     "StartRecordingRequest",
     "Status",
     "StopRecordingRequest",
+    "SystemMetrics",
     "UserHomeDirResponse",
     "WindowInfo",
     "WindowsResponse",

@@ -2287,6 +2287,23 @@ paths:
       tags:
       - process
       x-codegen-request-body-name: request
+  /system/metrics:
+    get:
+      description: |-
+        Current CPU/memory/disk usage snapshot for the sandbox. cpuUsedPct is the
+        average CPU usage as a percentage of the CPU limit over the last sample
+        window (0 until the first sample completes). Byte fields are in bytes.
+      operationId: GetSystemMetrics
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemMetrics"
+          description: OK
+      summary: Get sandbox resource metrics
+      tags:
+      - system
   /user-home-dir:
     get:
       description: Get the current user home directory path.
@@ -4277,6 +4294,48 @@ components:
           type: string
       required:
       - id
+      type: object
+    SystemMetrics:
+      example:
+        cpuUsedPct: 6.027456183070403
+        timestampUnix: 3
+        memTotal: 7
+        diskUsed: 5
+        diskTotal: 5
+        memUsed: 9
+        cpuCount: 0
+        memCache: 2
+        diskFree: 1
+        timestamp: timestamp
+      properties:
+        cpuCount:
+          type: integer
+        cpuUsedPct:
+          format: double
+          type: number
+        diskFree:
+          format: int64
+          type: integer
+        diskTotal:
+          format: int64
+          type: integer
+        diskUsed:
+          format: int64
+          type: integer
+        memCache:
+          format: int64
+          type: integer
+        memTotal:
+          format: int64
+          type: integer
+        memUsed:
+          format: int64
+          type: integer
+        timestamp:
+          type: string
+        timestampUnix:
+          format: int64
+          type: integer
       type: object
     UserHomeDirResponse:
       example:

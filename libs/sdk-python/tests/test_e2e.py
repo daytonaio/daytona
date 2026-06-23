@@ -104,6 +104,23 @@ def test_get_work_dir_returns_path(sandbox):
     assert isinstance(work, str) and work.startswith("/"), f"Expected absolute path, got {work!r}"
 
 
+# ===========================================================================
+# System Metrics
+# ===========================================================================
+
+
+def test_get_metrics_returns_live_snapshot(sandbox):
+    m = sandbox.get_metrics()
+    assert m is not None
+    assert isinstance(m.timestamp, str) and m.timestamp, "timestamp should be a non-empty string"
+    assert m.cpu_count >= 1, f"cpu_count should be >= 1, got {m.cpu_count}"
+    assert m.cpu_used_pct >= 0, f"cpu_used_pct should be >= 0, got {m.cpu_used_pct}"
+    assert m.mem_total > 0, f"mem_total should be > 0, got {m.mem_total}"
+    assert 0 <= m.mem_used <= m.mem_total, f"mem_used out of range: {m.mem_used}/{m.mem_total}"
+    assert m.disk_total > 0, f"disk_total should be > 0, got {m.disk_total}"
+    assert 0 <= m.disk_used <= m.disk_total, f"disk_used out of range: {m.disk_used}/{m.disk_total}"
+
+
 def test_set_labels_returns_updated_labels(sandbox):
     labels = sandbox.set_labels({"e2e": "true", "suite": "python"})
     assert isinstance(labels, dict), "set_labels should return a dict"

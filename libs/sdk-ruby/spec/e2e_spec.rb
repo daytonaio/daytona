@@ -766,6 +766,21 @@ RSpec.describe 'Daytona SDK E2E', :e2e do
     end
   end
 
+  context 'System Metrics', order: :defined do
+    it 'get_metrics returns a live snapshot' do
+      m = @sandbox.get_metrics
+      expect(m).not_to be_nil
+      expect(m.timestamp).to be_a(String)
+      expect(m.timestamp).not_to be_empty
+      expect(m.cpu_count).to be >= 1
+      expect(m.cpu_used_pct).to be >= 0
+      expect(m.mem_total).to be > 0
+      expect(m.mem_used).to be_between(0, m.mem_total)
+      expect(m.disk_total).to be > 0
+      expect(m.disk_used).to be_between(0, m.disk_total)
+    end
+  end
+
   context 'Volume Management', order: :defined do
     it 'creates a volume' do
       vol = @daytona.volume.create(@volume_name)

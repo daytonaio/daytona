@@ -155,6 +155,7 @@ module Daytona
       computer_use_api = DaytonaToolboxApiClient::ComputerUseApi.new(create_authenticated_client.call)
       interpreter_api = DaytonaToolboxApiClient::InterpreterApi.new(create_authenticated_client.call)
       info_api = DaytonaToolboxApiClient::InfoApi.new(create_authenticated_client.call)
+      system_api = DaytonaToolboxApiClient::SystemApi.new(create_authenticated_client.call)
 
       @process = Process.new(
         sandbox_id: id,
@@ -174,6 +175,7 @@ module Daytona
       )
       @lsp_api = lsp_api
       @info_api = info_api
+      @system_api = system_api
     end
 
     # Archives the sandbox, making it inactive and preserving its state. When sandboxes are
@@ -289,6 +291,19 @@ module Daytona
       @info_api.get_work_dir.dir
     rescue StandardError => e
       raise Sdk::Error, "Failed to get working directory path: #{e.message}"
+    end
+
+    # Gets a live CPU, memory, and disk metrics snapshot for the Sandbox.
+    #
+    # @return [DaytonaToolboxApiClient::SystemMetrics]
+    #
+    # @example
+    #   metrics = sandbox.get_metrics
+    #   puts "CPU used: #{metrics.cpu_used_pct}%"
+    def get_metrics
+      @system_api.get_system_metrics
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to get system metrics: #{e.message}"
     end
 
     # Sets labels for the Sandbox.
@@ -564,7 +579,7 @@ module Daytona
 
     instrument :archive, :auto_archive_interval=, :auto_delete_interval=, :auto_stop_interval=,
                :update_network_settings,
-               :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :labels=,
+               :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :get_metrics, :labels=,
                :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
                :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,
                :create_lsp_server, :validate_ssh_access, :wait_for_sandbox_start,

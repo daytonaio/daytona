@@ -3237,6 +3237,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/metrics": {
+            "get": {
+                "description": "Current CPU/memory/disk usage snapshot for the sandbox. cpuUsedPct is the\naverage CPU usage as a percentage of the CPU limit over the last sample\nwindow (0 until the first sample completes). Byte fields are in bytes.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "Get sandbox resource metrics",
+                "operationId": "GetSystemMetrics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SystemMetrics"
+                        }
+                    }
+                }
+            }
+        },
         "/user-home-dir": {
             "get": {
                 "description": "Get the current user home directory path.",
@@ -4893,6 +4914,49 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "SystemMetrics": {
+            "type": "object",
+            "properties": {
+                "cpuCount": {
+                    "type": "integer"
+                },
+                "cpuUsedPct": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "diskFree": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "diskTotal": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "diskUsed": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "memCache": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "memTotal": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "memUsed": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "timestampUnix": {
+                    "type": "integer",
+                    "format": "int64"
                 }
             }
         },

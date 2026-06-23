@@ -270,6 +270,27 @@ Expires a signed preview url for the sandbox at the specified port.
 
 ***
 
+#### getMetrics()
+
+```ts
+getMetrics(): Promise<SystemMetrics>
+```
+
+Gets the sandbox's current resource usage (CPU, memory, disk).
+
+**Returns**:
+
+- `Promise<SystemMetrics>` - A live snapshot of the sandbox's resource metrics.
+
+**Example:**
+
+```ts
+const metrics = await sandbox.getMetrics()
+console.log(`CPU: ${metrics.cpuUsedPct}%, mem: ${metrics.memUsed}/${metrics.memTotal}`)
+```
+
+***
+
 #### getPreviewLink()
 
 ```ts
