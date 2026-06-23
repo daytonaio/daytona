@@ -239,7 +239,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created DESTROY_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async recoverSandbox(sandbox: Sandbox, registry?: DockerRegistry, skipStart = false): Promise<void> {
+  async recoverSandbox(sandbox: Sandbox, registries?: DockerRegistry[], skipStart = false): Promise<void> {
     const recoverSandboxDTO: RecoverSandboxDTO = {
       userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
@@ -258,14 +258,12 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       networkAllowList: sandbox.networkAllowList,
       errorReason: sandbox.errorReason,
       backupErrorReason: sandbox.backupErrorReason,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url.replace(/^(https?:\/\/)/, ''),
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
+      registries: registries?.map((registry) => ({
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      })),
     }
     // skipStart is API-side metadata for the job-completion handler; the runner ignores extra fields.
     await this.jobService.createJob(null, JobType.RECOVER_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandbox.id, {
@@ -640,20 +638,18 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     cpu?: number,
     memory?: number,
     disk?: number,
-    registry?: DockerRegistry,
+    registries?: DockerRegistry[],
   ): Promise<void> {
     await this.jobService.createJob(null, JobType.RESIZE_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
       cpu,
       memory,
       disk,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url.replace(/^(https?:\/\/)/, ''),
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
+      registries: registries?.map((registry) => ({
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      })),
     })
 
     this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)

@@ -1802,8 +1802,11 @@ const docTemplate = `{
                 "osUser": {
                     "type": "string"
                 },
-                "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                "registries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/RegistryDTO"
+                    }
                 },
                 "snapshot": {
                     "type": "string"
@@ -1862,8 +1865,11 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 1
                 },
-                "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                "registries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/RegistryDTO"
+                    }
                 }
             }
         },
