@@ -35,4 +35,7 @@ export enum OrganizationResourcePermission {
 
   // audit
   READ_AUDIT_LOGS = 'read:audit_logs',
+
+  // api keys
+  MANAGE_API_KEYS = 'manage:api_keys',
 }

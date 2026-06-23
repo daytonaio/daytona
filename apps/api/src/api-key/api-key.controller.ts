@@ -44,6 +44,7 @@ export class ApiKeyController {
     description: 'API key created successfully.',
     type: ApiKeyResponseDto,
   })
+  @AuthStrategy([AuthStrategyType.JWT, AuthStrategyType.API_KEY])
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.API_KEY,
@@ -60,6 +61,7 @@ export class ApiKeyController {
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createApiKeyDto: CreateApiKeyDto,
   ): Promise<ApiKeyResponseDto> {
+    this.validateApiKeyCreator(authContext)
     this.validateRequestedApiKeyPermissions(authContext, createApiKeyDto.permissions)
 
     const { apiKey, value } = await this.apiKeyService.createApiKey(
@@ -179,10 +181,51 @@ export class ApiKeyController {
     await this.apiKeyService.deleteApiKey(authContext.organizationId, userId, name)
   }
 
+  /**
+   * When the request itself is authenticated with an API key (rather than an interactive JWT
+   * session), creating API keys is only allowed if the organization has opted in and the calling
+   * key carries the dedicated MANAGE_API_KEYS permission. This prevents a leaked key from silently
+   * minting persistent keys.
+   */
+  private validateApiKeyCreator(authContext: OrganizationAuthContext): void {
+    if (!authContext.apiKey) {
+      return
+    }
+
+    if (!authContext.organization.allowManageApiKeysPermission) {
+      throw new ForbiddenException('Managing API keys with an API key is not enabled for this organization')
+    }
+
+    if (!authContext.apiKey.permissions.includes(OrganizationResourcePermission.MANAGE_API_KEYS)) {
+      throw new ForbiddenException('This API key is not authorized to manage API keys')
+    }
+  }
+
   private validateRequestedApiKeyPermissions(
     authContext: OrganizationAuthContext,
     requestedPermissions: OrganizationResourcePermission[],
   ): void {
+    // The MANAGE_API_KEYS permission can only be assigned when the organization has opted in.
+    if (
+      requestedPermissions.includes(OrganizationResourcePermission.MANAGE_API_KEYS) &&
+      !authContext.organization.allowManageApiKeysPermission
+    ) {
+      throw new ForbiddenException('The manage:api_keys permission is not enabled for this organization')
+    }
+
+    // A request authenticated with an API key can never create a key more powerful than itself,
+    // regardless of the owning user's role.
+    if (authContext.apiKey) {
+      const callerPermissions = new Set(authContext.apiKey.permissions)
+      const forbiddenPermissions = requestedPermissions.filter((permission) => !callerPermissions.has(permission))
+
+      if (forbiddenPermissions.length) {
+        throw new ForbiddenException(`Insufficient permissions for assigning: ${forbiddenPermissions.join(', ')}`)
+      }
+
+      return
+    }
+
     if (authContext.organizationUser.role === OrganizationMemberRole.OWNER) {
       return
     }

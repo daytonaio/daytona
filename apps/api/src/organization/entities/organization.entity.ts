@@ -181,6 +181,11 @@ export class Organization {
   })
   sandboxLimitedNetworkEgress: boolean
 
+  @Column({
+    default: false,
+  })
+  allowManageApiKeysPermission: boolean
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
