@@ -1,3 +1,11 @@
+> [!IMPORTANT]
+> **This repository is no longer maintained.**
+>
+> As of June 2026, Daytona's core development has moved to a private codebase. This repository will receive no further updates, fixes, or releases.
+> It remains public and free to use, fork, and build on under the [LICENSE](LICENSE), as is and without support or warranty.
+>
+> Daytona resources are available at [github.com/daytona](https://github.com/daytona).
+
 &nbsp;
 
 <div align="center">

@@ -1,9 +1,0 @@
-name: daytona docs
-synopsis: Opens the Daytona documentation in your default browser.
-usage: daytona docs [flags]
-inherited_options:
-  - name: help
-    default_value: 'false'
-    usage: help for daytona
-see_also:
-  - daytona - Daytona CLI
