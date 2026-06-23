@@ -1,4 +1,0 @@
-self-hosted-runner:
-  labels:
-    - github-actions-runner-amd64
-    - github-actions-runner-arm

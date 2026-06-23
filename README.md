@@ -1,3 +1,11 @@
+> [!IMPORTANT]
+> **This repository is no longer maintained.**
+>
+> As of June 2026, Daytona's core development has moved to a private codebase. This repository will receive no further updates, fixes, or releases.
+> It remains public and free to use, fork, and build on under the [LICENSE](LICENSE), as is and without support or warranty.
+>
+> Daytona resources are available at [github.com/daytona](https://github.com/daytona).
+
 &nbsp;
 
 <div align="center">
@@ -59,21 +67,6 @@ Daytona platform is organized into multiple plane components, each serving a spe
 - **Interface plane**: provides client interfaces for interacting with Daytona
 - **Control plane**: orchestrates all sandbox operations
 - **Compute plane**: runs and manages sandbox instances
-
-### Applications
-
-Runnable applications and services for the Daytona platform. Each directory is a deployable or buildable component, available in the [apps](apps) directory.
-
-- [`api`](apps/api): NestJS-based RESTful service; primary entry point for all platform operations
-- [`cli`](apps/cli): Go command-line interface access to core features for interacting with sandboxes
-- [`daemon`](apps/daemon): code execution agent that runs inside each sandbox
-- [`dashboard`](apps/dashboard): web user interface for visual sandbox management
-- [`docs`](apps/docs): documentation content; website published to [daytona.io/docs](https://www.daytona.io/docs/)
-- [`otel-collector`](apps/otel-collector): trace and metric collection for Daytona SDK operations
-- [`proxy`](apps/proxy): reverse proxy for custom routing and preview URLs
-- [`runner`](apps/runner): compute nodes that power Daytona's compute plane and run sandboxes
-- [`snapshot-manager`](apps/snapshot-manager): orchestrates the creation of sandbox snapshots
-- [`ssh-gateway`](apps/ssh-gateway): standalone SSH gateway that accepts authenticated `ssh` connections
 
 ### Client libraries
 
@@ -142,13 +135,6 @@ Maven (`pom.xml`):
 Standalone packages and libraries for interacting with Daytona using Java:
 
 > [`sdk-java`](libs/sdk-java) • [`api-client-java`](libs/api-client-java) • [`toolbox-api-client-java`](libs/toolbox-api-client-java)
-
-## Deployments
-
-Daytona is available as a managed service on [app.daytona.io](https://app.daytona.io). Daytona can run as a fully hosted service, as an open-source stack you operate, or in a hybrid setup where Daytona orchestrates sandboxes while execution happens on machines you manage.
-
-- [Open source deployment](https://www.daytona.io/docs/oss-deployment/): full local stack from the [`docker`](docker) directory using Docker Compose
-- [Customer managed compute](https://www.daytona.io/docs/runners/): custom regions and runner machines that operate Daytona sandboxes on your own compute infrastructure
 
 ## Quick Start
 
@@ -250,46 +236,3 @@ curl 'https://app.daytona.io/api/sandbox' \
 ```bash
 daytona create
 ```
-
-## Development
-
-### Devcontainer (full environment)
-
-Open this repository in a [devcontainer](https://containers.dev/)-compatible editor (VS Code, GitHub Codespaces) for a batteries-included setup with all languages, tools, and supporting services.
-
-### Nix (lightweight, agent-friendly)
-
-If you prefer working outside the devcontainer — or are an AI agent executing build commands — use the Nix dev shells:
-
-```bash
-# Enter the full dev shell (Go + Node + Python + Ruby + JDK)
-nix develop
-
-# Or pick a language-specific shell
-nix develop .#go       # Go services & libs
-nix develop .#node     # TypeScript / Node.js apps & libs
-nix develop .#python   # Python SDKs & libs
-nix develop .#ruby     # Ruby SDKs & libs
-nix develop .#java     # Java SDKs & libs
-```
-
-**Prerequisites:** [Nix](https://nixos.org/download/) with flakes enabled (`experimental-features = nix-command flakes` in `~/.config/nix/nix.conf`).
-
-For non-interactive / CI usage:
-
-```bash
-nix develop .#go --command bash -c "go build ./..."
-```
-
-Optional: Install [direnv](https://direnv.net/) + [nix-direnv](https://github.com/nix-community/nix-direnv) for automatic shell activation when you `cd` into the project.
-
-See [`AGENTS.md`](AGENTS.md) for the full shell reference, project-to-shell mapping, and common commands.
-
-> **Note:** Supporting services (PostgreSQL, Redis, etc.) are still managed via `docker compose -f .devcontainer/docker-compose.yaml up`.
-
----
-
-## Contributing
-
-> [!NOTE]
-> Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the [Developer Certificate of Origin Version 1.1](https://developercertificate.org/) and the [contributing guide](CONTRIBUTING.md) to get started.
