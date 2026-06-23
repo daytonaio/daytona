@@ -1,0 +1,33 @@
+---
+import diagram from '@assets/docs/bring-your-own-compute.svg?raw'
+---
+
+<div class="byoc-diagram" set:html={diagram} />
+
+<style>
+  .byoc-diagram {
+    margin: 1.5rem 0;
+  }
+
+  .byoc-diagram :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  /*
+    The draw.io export uses CSS light-dark() values gated by color-scheme.
+    Bind color-scheme to Starlight's theme toggle instead of the OS setting.
+  */
+  :global(html[data-theme='light']) .byoc-diagram,
+  :global(html[data-theme='light']) .byoc-diagram :global(svg) {
+    color-scheme: light !important;
+  }
+
+  :global(html[data-theme='dark']) .byoc-diagram,
+  :global(html[data-theme='dark']) .byoc-diagram :global(svg) {
+    color-scheme: dark !important;
+  }
+</style>
