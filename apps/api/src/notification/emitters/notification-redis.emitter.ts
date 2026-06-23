@@ -36,6 +36,13 @@ export class NotificationRedisEmitter extends NotificationEmitter implements OnM
     this.logger.debug('Socket.io Redis emitter initialized (publish-only)')
   }
 
+  evictUserFromOrganization(userId: string, organizationId: string) {
+    // Gateway-disabled deployments only hold a publish-only emitter: it publishes the socketsLeave
+    // request over the Redis adapter and the gateway instances that own the sockets perform the
+    // room removal.
+    this.emitter.in(userId).socketsLeave(organizationId)
+  }
+
   emitSandboxCreated(sandbox: SandboxDto) {
     this.emitter.to(sandbox.organizationId).emit(SandboxEvents.CREATED, sandbox)
   }

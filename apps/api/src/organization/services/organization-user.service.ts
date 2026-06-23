@@ -16,6 +16,7 @@ import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
 import { OrganizationInvitationAcceptedEvent } from '../events/organization-invitation-accepted.event'
 import { OrganizationResourcePermissionsUnassignedEvent } from '../events/organization-resource-permissions-unassigned.event'
+import { OrganizationUserRemovedEvent } from '../events/organization-user-removed.event'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserService } from '../../user/user.service'
 import { UserEvents } from '../../user/constants/user-events.constant'
@@ -149,6 +150,13 @@ export class OrganizationUserService {
     }
 
     await this.removeWithEntityManager(this.organizationUserRepository.manager, organizationUser)
+
+    // Membership is revoked: eject the user's live notification sockets from the organization room
+    // so they stop receiving its realtime events. Emitted after the removal has committed (the
+    // repository manager autocommits) so the gateway's connect-time membership check
+    // (OrganizationUserService.exists) sees the row gone and a concurrent reconnect cannot re-join.
+    // Covers both admin removal and voluntary leave, which both route here.
+    this.eventEmitter.emit(OrganizationEvents.USER_REMOVED, new OrganizationUserRemovedEvent(userId, organizationId))
   }
 
   private async removeWithEntityManager(

@@ -35,4 +35,5 @@ export abstract class NotificationEmitter {
     newState: RunnerState,
   ): void
   abstract emitRunnerUnschedulableUpdated(runner: RunnerDto, organizationId: string | null): void
+  abstract evictUserFromOrganization(userId: string, organizationId: string): void
 }

@@ -94,6 +94,9 @@ export class NotificationGateway extends NotificationEmitter implements OnGatewa
 
           // Join the organization room for organization scoped notifications
           if (authContext.organizationId) {
+            if (!(await this.organizationUserService.exists(authContext.organizationId, authContext.userId))) {
+              return next(new UnauthorizedException())
+            }
             await socket.join(authContext.organizationId)
           }
 
@@ -105,6 +108,12 @@ export class NotificationGateway extends NotificationEmitter implements OnGatewa
         return next(new UnauthorizedException())
       }
     })
+  }
+
+  evictUserFromOrganization(userId: string, organizationId: string) {
+    // socketsLeave is broadcast to every gateway instance over the Redis adapter, so the user's
+    // sockets leave the organization room regardless of which node currently holds them.
+    this.server.in(userId).socketsLeave(organizationId)
   }
 
   emitSandboxCreated(sandbox: SandboxDto) {
