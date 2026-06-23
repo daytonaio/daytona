@@ -700,6 +700,18 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/tealtiger/tealtiger-governed-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.tealtiger'),
+          disablePagination: true,
+          attrs: {
+            icon: 'shield.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/flue/flue-autonomous-bug-fix-agent',
             locale
           ),
