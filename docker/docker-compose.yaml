@@ -141,6 +141,14 @@ services:
       - AWS_DEFAULT_BUCKET=daytona
       - DAYTONA_API_URL=http://api:3000/api
       - RUNNER_DOMAIN=runner
+      # URL of the Docker Hub pull-through cache (see the `registry-mirror`
+      # service) that Docker-in-Docker inside sandboxes should use as a registry
+      # mirror to avoid Docker Hub 429 rate limits. The runner injects it into
+      # every sandbox as DAYTONA_DIND_REGISTRY_MIRROR and the sandbox daemon
+      # writes it into /etc/docker/daemon.json before the nested dockerd starts.
+      # This must be an address reachable from *inside* sandboxes; uncomment and
+      # set it to a value routable from your sandbox network before enabling.
+      # - DAYTONA_DIND_REGISTRY_MIRROR=http://registry-mirror:5001
       - SSH_GATEWAY_ENABLE=true
       - SSH_PUBLIC_KEY=c3NoLXJzYSBBQUFBQjNOemFDMXljMkVBQUFBREFRQUJBQUFCZ1FEZUtocFdOYVhVNkpSMnJXekc1NlZJeksrcmsrdForcCtVUmwyeWF5cWRnZGg2bnVOL1NtVnJsYmV4MGlrRVZZemdRWUIwWno5M2dqOVhxSkd4WjJiMHVoSDFzNkp2bnhKZVdIK05rbjBNMzRiRjZkeVloZ3o4M0JaTitWcElJdnVDT1pxYWE4VnlRWjhPdjVLMU00enlmQnFCMld3ejcwZEVWUnFaMnVZckd5U0RqUUIrU3hRQ3phY0djb2JRQTFUd2QxdEJvSk5BaVpPWXFSU3d6TmNoTk5hZHlxSHRGdkZRQ0hhNjZWaVBmQ0FVUGt2cEN6ZGh3TmJGdVhGVWkxbnZOWkx4M056RU41M05LWUhZcWU3Y3dXZkI4QjBoRDhDd3hmSDd6T0o1b1RCMnBMVVlsUWpZRDNsN3k4SkFTbDZpYkpuR1A1SWczVXpZWlRIdUdkNzVXWktnNTRJTVROQlFPMWpJdE9HL0orUm1XbzB0YTdpRkF6ZExyL1BmbDdXTVMwbEZhSm9scTdUVmJLUG1JODFTOU04VEgrbXhLbGZ5b2NqZzhwSUdlQUllcEo3dXl1Vk1xT2wxeVVuSFNycDRlVEVlR0k3NlpCOFRoUzhkYnBLUTIvb2RYMHkwc3FSZDI0Y2lGdnM0dnZVaW80NFdYNlNWRG54dXpWRHc1Rzg9IGRheXRvbmFAMDQwNjZiZDIwY2Vi
       - INTER_SANDBOX_NETWORK_ENABLED=false
@@ -233,6 +241,28 @@ services:
     ports:
       - 5100:80
 
+  # Docker Hub pull-through cache. A nested Docker daemon (Docker-in-Docker)
+  # running inside a sandbox uses this as a registry mirror so that repeated
+  # `docker pull` of public images is served from cache instead of hitting
+  # Docker Hub's anonymous pull rate limit (HTTP 429). Set REGISTRY_PROXY_USERNAME
+  # / REGISTRY_PROXY_PASSWORD to a Docker Hub account or access token to raise
+  # the upstream limit even further.
+  registry-mirror:
+    image: registry:2.8.2
+    restart: always
+    environment:
+      REGISTRY_PROXY_REMOTEURL: https://registry-1.docker.io
+      # REGISTRY_PROXY_USERNAME: your-dockerhub-username
+      # REGISTRY_PROXY_PASSWORD: your-dockerhub-access-token
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5001
+    volumes:
+      - registry_mirror:/var/lib/registry
+    networks:
+      - daytona-network
+    ports:
+      - 5001:5001
+
   registry:
     image: registry:2.8.2
     restart: always
@@ -288,6 +318,7 @@ services:
 
 volumes:
   registry: {}
+  registry_mirror: {}
   minio_data: {}
   db_data: {}
   dex_db: {}

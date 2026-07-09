@@ -25,6 +25,11 @@ type Config struct {
 	OrganizationId           *string       `envconfig:"DAYTONA_ORGANIZATION_ID"`
 	RegionId                 *string       `envconfig:"DAYTONA_REGION_ID"`
 	Snapshot                 *string       `envconfig:"DAYTONA_SANDBOX_SNAPSHOT"`
+	// DindRegistryMirror is the URL of a registry pull-through cache that a
+	// nested Docker daemon (Docker-in-Docker) started inside the sandbox should
+	// use for docker.io pulls, avoiding Docker Hub's anonymous pull rate limit.
+	// It is injected by the runner and empty when the feature is disabled.
+	DindRegistryMirror string `envconfig:"DAYTONA_DIND_REGISTRY_MIRROR"`
 }
 
 var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"

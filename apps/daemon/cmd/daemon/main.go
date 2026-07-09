@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/childreap"
+	"github.com/daytonaio/daemon/pkg/dind"
 	"github.com/daytonaio/daemon/pkg/recording"
 	"github.com/daytonaio/daemon/pkg/recordingdashboard"
 	"github.com/daytonaio/daemon/pkg/session"
@@ -86,6 +87,15 @@ func run() int {
 	if err != nil {
 		logger.Error("Failed to get config", "error", err)
 		return 2
+	}
+
+	// Point a nested Docker daemon (Docker-in-Docker) at the registry
+	// pull-through cache before the user starts it, so `docker pull` inside the
+	// sandbox avoids Docker Hub's anonymous rate limit (HTTP 429). This is
+	// best-effort: sandboxes without Docker, or without write access to
+	// /etc/docker, simply skip it.
+	if err := dind.ConfigureRegistryMirror(logger, c.DindRegistryMirror); err != nil {
+		logger.Warn("Failed to configure Docker-in-Docker registry mirror", "error", err)
 	}
 
 	// If workdir in image is not set, use user home as workdir

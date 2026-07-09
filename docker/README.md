@@ -19,6 +19,7 @@ The Docker Compose configuration includes all the necessary services to run Dayt
 - **Redis**: In-memory data store for caching and sessions
 - **Dex**: OIDC authentication provider
 - **Registry**: Docker image registry with web UI
+- **Registry Mirror**: Docker Hub pull-through cache for Docker-in-Docker in sandboxes
 - **MinIO**: S3-compatible object storage
 - **MailDev**: Email testing service
 - **Jaeger**: Distributed tracing
@@ -58,6 +59,43 @@ This configures dnsmasq with `address=/proxy.localhost/127.0.0.1`.
 - Database and storage data is persisted in Docker volumes
 - The registry is configured to allow image deletion for testing
 - Sandbox resource limits are disabled due to inability to partition cgroups in DinD environment where the sock is not mounted
+
+## Avoiding Docker Hub Rate Limits in Docker-in-Docker Sandboxes
+
+When users run Docker-in-Docker (DinD) inside a sandbox and pull public images,
+those pulls go to Docker Hub **anonymously**. Because every sandbox on a runner
+shares the runner's single outbound IP, they collectively burn through Docker
+Hub's [anonymous pull rate limit](https://docs.docker.com/docker-hub/usage/) fast
+and start receiving `HTTP 429 Too Many Requests`.
+
+To fix this, Daytona can point each sandbox's nested Docker daemon at a
+**registry pull-through cache** (a Docker Hub mirror). This both serves repeated
+pulls straight from cache and — when the cache is given Docker Hub credentials —
+raises the upstream limit to the authenticated tier.
+
+**How it works**
+
+1. The `registry-mirror` service runs a standard `registry:2` in
+   [pull-through cache mode](https://distribution.github.io/distribution/recipes/mirror/)
+   (`REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io`). Set
+   `REGISTRY_PROXY_USERNAME` / `REGISTRY_PROXY_PASSWORD` to a Docker Hub account
+   or access token to lift the upstream rate limit.
+2. The runner is given `DAYTONA_DIND_REGISTRY_MIRROR`, the URL of that cache.
+3. The runner injects it into every sandbox as the `DAYTONA_DIND_REGISTRY_MIRROR`
+   environment variable.
+4. On startup, the sandbox daemon writes it into `/etc/docker/daemon.json` as a
+   `registry-mirror` (adding it to `insecure-registries` too when the mirror is
+   plain HTTP), **before** the user starts their nested `dockerd`. A mirror that
+   the user already configured in `daemon.json` is never overwritten.
+
+**Enabling it**
+
+Uncomment the `DAYTONA_DIND_REGISTRY_MIRROR` variable on the `runner` service in
+`docker-compose.yaml`. The value must be an address **reachable from inside the
+sandbox network** — a sandbox's nested `dockerd` cannot resolve Compose service
+names such as `registry-mirror` on its own, so set it to an address routable from
+your sandbox network (for example the runner host's IP and the published
+`5001` port).
 
 <br><br><br>
 

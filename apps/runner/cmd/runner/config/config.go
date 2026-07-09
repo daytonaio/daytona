@@ -67,6 +67,12 @@ type Config struct {
 	BuildEngine                        string        `envconfig:"BUILD_ENGINE" default:"buildkit" validate:"oneof=buildkit legacy"`
 	ForceSnapshotRemoval               bool          `envconfig:"FORCE_SNAPSHOT_REMOVAL" default:"true"`
 	MountKvmToAndroidSandbox           bool          `envconfig:"MOUNT_KVM_TO_ANDROID_SANDBOX" default:"false"`
+	// DindRegistryMirror is the URL of a registry pull-through cache that nested
+	// Docker daemons (Docker-in-Docker) inside sandboxes should use for docker.io
+	// pulls, so they avoid Docker Hub's anonymous pull rate limit (HTTP 429).
+	// It is injected into every sandbox as DAYTONA_DIND_REGISTRY_MIRROR and must
+	// be reachable from within sandboxes. The feature is disabled when empty.
+	DindRegistryMirror string `envconfig:"DAYTONA_DIND_REGISTRY_MIRROR" validate:"omitempty,url"`
 }
 
 var DEFAULT_API_PORT int = 8080
@@ -149,6 +155,13 @@ func GetContainerRuntime() string {
 
 func GetContainerNetwork() string {
 	return config.ContainerNetwork
+}
+
+func GetDindRegistryMirror() string {
+	if config == nil {
+		return ""
+	}
+	return config.DindRegistryMirror
 }
 
 func GetEnvironment() string {

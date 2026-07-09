@@ -68,6 +68,14 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		"DAYTONA_SANDBOX_USER=" + sandboxDto.OsUser,
 	}
 
+	// Advertise the registry pull-through cache to the sandbox so a nested
+	// Docker daemon (Docker-in-Docker) pulls docker.io images through it instead
+	// of hitting Docker Hub's anonymous rate limit (HTTP 429). Injected before
+	// the user's env below so an explicit per-sandbox value can still override it.
+	if mirror := config.GetDindRegistryMirror(); mirror != "" {
+		envVars = append(envVars, "DAYTONA_DIND_REGISTRY_MIRROR="+mirror)
+	}
+
 	// GPU sandboxes run non-privileged so CDI's per-device cgroup rules
 	// actually take effect. CDI already restricts the container to the one
 	// allocated physical GPU (see DeviceRequests below), and Linux/CUDA
