@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/mcp.so%2Fdaytona%2FDaytona.svg)](https://mcptoplist.com/server/mcp.so%2Fdaytona%2FDaytona)
+
 > [!IMPORTANT]
 > **This repository is no longer maintained.**
 >
