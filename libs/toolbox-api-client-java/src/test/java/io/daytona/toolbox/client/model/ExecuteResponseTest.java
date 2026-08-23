@@ -53,4 +53,44 @@ public class ExecuteResponseTest {
         // TODO: test result
     }
 
+    /**
+     * Test the property 'stderr'
+     */
+    @Test
+    public void stderrTest() {
+        // TODO: test stderr
+    }
+
+    /**
+     * Test the property 'stderrTruncated'
+     */
+    @Test
+    public void stderrTruncatedTest() {
+        // TODO: test stderrTruncated
+    }
+
+    /**
+     * Test the property 'stdout'
+     */
+    @Test
+    public void stdoutTest() {
+        // TODO: test stdout
+    }
+
+    /**
+     * Test the property 'stdoutTruncated'
+     */
+    @Test
+    public void stdoutTruncatedTest() {
+        // TODO: test stdoutTruncated
+    }
+
+    /**
+     * Test the property 'timedOut'
+     */
+    @Test
+    public void timedOutTest() {
+        // TODO: test timedOut
+    }
+
 }

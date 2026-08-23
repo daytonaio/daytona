@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,9 +33,10 @@ class ExecuteRequest(BaseModel):
     command: StrictStr
     cwd: Optional[StrictStr] = Field(default=None, description="Current working directory")
     envs: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables to set for the command")
+    max_output_bytes: Optional[Annotated[int, Field(le=2147483647, strict=True, ge=1)]] = Field(default=None, description="Maximum bytes retained from each output stream", serialization_alias="maxOutputBytes")
     timeout: Optional[StrictInt] = Field(default=None, description="Timeout in seconds, defaults to 10 seconds")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["command", "cwd", "envs", "timeout"]
+    __properties: ClassVar[List[str]] = ["command", "cwd", "envs", "maxOutputBytes", "timeout"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,6 +98,7 @@ class ExecuteRequest(BaseModel):
             "command": obj.get("command"),
             "cwd": obj.get("cwd"),
             "envs": obj.get("envs"),
+            "max_output_bytes": obj.get("maxOutputBytes"),
             "timeout": obj.get("timeout")
         })
         # store additional fields in additional_properties

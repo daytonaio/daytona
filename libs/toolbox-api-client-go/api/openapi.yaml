@@ -3138,7 +3138,8 @@ components:
         envs:
           key: envs
         command: command
-        timeout: 0
+        timeout: 6
+        maxOutputBytes: 171976545
       properties:
         command:
           type: string
@@ -3150,6 +3151,11 @@ components:
             type: string
           description: Environment variables to set for the command
           type: object
+        maxOutputBytes:
+          description: Maximum bytes retained from each output stream
+          maximum: 2147483647
+          minimum: 1
+          type: integer
         timeout:
           description: "Timeout in seconds, defaults to 10 seconds"
           type: integer
@@ -3159,12 +3165,27 @@ components:
     ExecuteResponse:
       example:
         result: result
+        timedOut: true
+        stdout: stdout
+        stderrTruncated: true
+        stdoutTruncated: true
         exitCode: 0
+        stderr: stderr
       properties:
         exitCode:
           type: integer
         result:
           type: string
+        stderr:
+          type: string
+        stderrTruncated:
+          type: boolean
+        stdout:
+          type: string
+        stdoutTruncated:
+          type: boolean
+        timedOut:
+          type: boolean
       required:
       - result
       type: object

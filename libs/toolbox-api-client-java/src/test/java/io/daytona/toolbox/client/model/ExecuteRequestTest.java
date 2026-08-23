@@ -64,6 +64,14 @@ public class ExecuteRequestTest {
     }
 
     /**
+     * Test the property 'maxOutputBytes'
+     */
+    @Test
+    public void maxOutputBytesTest() {
+        // TODO: test maxOutputBytes
+    }
+
+    /**
      * Test the property 'timeout'
      */
     @Test

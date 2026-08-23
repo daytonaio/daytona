@@ -3,10 +3,14 @@
 
 package process
 
+const maxOutputBytes uint32 = 1<<31 - 1
+
 type ExecuteRequest struct {
 	Command string `json:"command" validate:"required"`
 	// Timeout in seconds, defaults to 10 seconds
 	Timeout *uint32 `json:"timeout,omitempty" validate:"optional"`
+	// Maximum bytes retained from each output stream
+	MaxOutputBytes *uint32 `json:"maxOutputBytes,omitempty" validate:"optional" minimum:"1" maximum:"2147483647"`
 	// Current working directory
 	Cwd *string `json:"cwd,omitempty" validate:"optional"`
 	// Environment variables to set for the command
@@ -15,6 +19,11 @@ type ExecuteRequest struct {
 
 // TODO: Set ExitCode as required once all sandboxes migrated to the new daemon
 type ExecuteResponse struct {
-	ExitCode int    `json:"exitCode"`
-	Result   string `json:"result" validate:"required"`
+	ExitCode        int    `json:"exitCode"`
+	Result          string `json:"result" validate:"required"`
+	Stdout          string `json:"stdout,omitempty" validate:"optional"`
+	Stderr          string `json:"stderr,omitempty" validate:"optional"`
+	TimedOut        bool   `json:"timedOut,omitempty" validate:"optional"`
+	StdoutTruncated bool   `json:"stdoutTruncated,omitempty" validate:"optional"`
+	StderrTruncated bool   `json:"stderrTruncated,omitempty" validate:"optional"`
 } //	@name	ExecuteResponse

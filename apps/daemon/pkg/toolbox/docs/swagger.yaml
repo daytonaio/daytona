@@ -292,6 +292,11 @@ definitions:
           type: string
         description: Environment variables to set for the command
         type: object
+      maxOutputBytes:
+        description: Maximum bytes retained from each output stream
+        maximum: 2147483647
+        minimum: 1
+        type: integer
       timeout:
         description: Timeout in seconds, defaults to 10 seconds
         type: integer
@@ -304,6 +309,16 @@ definitions:
         type: integer
       result:
         type: string
+      stderr:
+        type: string
+      stderrTruncated:
+        type: boolean
+      stdout:
+        type: string
+      stdoutTruncated:
+        type: boolean
+      timedOut:
+        type: boolean
     required:
       - result
     type: object

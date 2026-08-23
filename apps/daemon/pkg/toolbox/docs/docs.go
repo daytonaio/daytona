@@ -3755,6 +3755,12 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "maxOutputBytes": {
+                    "description": "Maximum bytes retained from each output stream",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": 1
+                },
                 "timeout": {
                     "description": "Timeout in seconds, defaults to 10 seconds",
                     "type": "integer"
@@ -3772,6 +3778,21 @@ const docTemplate = `{
                 },
                 "result": {
                     "type": "string"
+                },
+                "stderr": {
+                    "type": "string"
+                },
+                "stderrTruncated": {
+                    "type": "boolean"
+                },
+                "stdout": {
+                    "type": "string"
+                },
+                "stdoutTruncated": {
+                    "type": "boolean"
+                },
+                "timedOut": {
+                    "type": "boolean"
                 }
             }
         },

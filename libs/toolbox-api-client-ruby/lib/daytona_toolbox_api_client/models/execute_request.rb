@@ -23,6 +23,9 @@ module DaytonaToolboxApiClient
     # Environment variables to set for the command
     attr_accessor :envs
 
+    # Maximum bytes retained from each output stream
+    attr_accessor :max_output_bytes
+
     # Timeout in seconds, defaults to 10 seconds
     attr_accessor :timeout
 
@@ -32,6 +35,7 @@ module DaytonaToolboxApiClient
         :'command' => :'command',
         :'cwd' => :'cwd',
         :'envs' => :'envs',
+        :'max_output_bytes' => :'maxOutputBytes',
         :'timeout' => :'timeout'
       }
     end
@@ -52,6 +56,7 @@ module DaytonaToolboxApiClient
         :'command' => :'String',
         :'cwd' => :'String',
         :'envs' => :'Hash<String, String>',
+        :'max_output_bytes' => :'Integer',
         :'timeout' => :'Integer'
       }
     end
@@ -94,6 +99,10 @@ module DaytonaToolboxApiClient
         end
       end
 
+      if attributes.key?(:'max_output_bytes')
+        self.max_output_bytes = attributes[:'max_output_bytes']
+      end
+
       if attributes.key?(:'timeout')
         self.timeout = attributes[:'timeout']
       end
@@ -108,6 +117,14 @@ module DaytonaToolboxApiClient
         invalid_properties.push('invalid value for "command", command cannot be nil.')
       end
 
+      if !@max_output_bytes.nil? && @max_output_bytes > 2147483647
+        invalid_properties.push('invalid value for "max_output_bytes", must be smaller than or equal to 2147483647.')
+      end
+
+      if !@max_output_bytes.nil? && @max_output_bytes < 1
+        invalid_properties.push('invalid value for "max_output_bytes", must be greater than or equal to 1.')
+      end
+
       invalid_properties
     end
 
@@ -116,6 +133,8 @@ module DaytonaToolboxApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @command.nil?
+      return false if !@max_output_bytes.nil? && @max_output_bytes > 2147483647
+      return false if !@max_output_bytes.nil? && @max_output_bytes < 1
       true
     end
 
@@ -129,6 +148,24 @@ module DaytonaToolboxApiClient
       @command = command
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] max_output_bytes Value to be assigned
+    def max_output_bytes=(max_output_bytes)
+      if max_output_bytes.nil?
+        fail ArgumentError, 'max_output_bytes cannot be nil'
+      end
+
+      if max_output_bytes > 2147483647
+        fail ArgumentError, 'invalid value for "max_output_bytes", must be smaller than or equal to 2147483647.'
+      end
+
+      if max_output_bytes < 1
+        fail ArgumentError, 'invalid value for "max_output_bytes", must be greater than or equal to 1.'
+      end
+
+      @max_output_bytes = max_output_bytes
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -137,6 +174,7 @@ module DaytonaToolboxApiClient
           command == o.command &&
           cwd == o.cwd &&
           envs == o.envs &&
+          max_output_bytes == o.max_output_bytes &&
           timeout == o.timeout
     end
 
@@ -149,7 +187,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [command, cwd, envs, timeout].hash
+      [command, cwd, envs, max_output_bytes, timeout].hash
     end
 
     # Builds the object from hash
