@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from pydantic import TypeAdapter
 from typing import Optional, Set
@@ -31,8 +31,13 @@ class ExecuteResponse(BaseModel):
     """ # noqa: E501
     exit_code: Optional[StrictInt] = Field(default=None, serialization_alias="exitCode")
     result: StrictStr
+    stderr: Optional[StrictStr] = None
+    stderr_truncated: Optional[StrictBool] = Field(default=None, serialization_alias="stderrTruncated")
+    stdout: Optional[StrictStr] = None
+    stdout_truncated: Optional[StrictBool] = Field(default=None, serialization_alias="stdoutTruncated")
+    timed_out: Optional[StrictBool] = Field(default=None, serialization_alias="timedOut")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["exitCode", "result"]
+    __properties: ClassVar[List[str]] = ["exitCode", "result", "stderr", "stderrTruncated", "stdout", "stdoutTruncated", "timedOut"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -92,7 +97,12 @@ class ExecuteResponse(BaseModel):
 
         _obj = cls.model_validate({
             "exit_code": obj.get("exitCode"),
-            "result": obj.get("result")
+            "result": obj.get("result"),
+            "stderr": obj.get("stderr"),
+            "stderr_truncated": obj.get("stderrTruncated"),
+            "stdout": obj.get("stdout"),
+            "stdout_truncated": obj.get("stdoutTruncated"),
+            "timed_out": obj.get("timedOut")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

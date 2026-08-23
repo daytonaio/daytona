@@ -34,6 +34,7 @@ from ..common.process import (
     SessionCommandLogsResponse,
     SessionExecuteRequest,
     SessionExecuteResponse,
+    validate_max_output_bytes,
 )
 from ..common.pty import PtySize
 from ..handle.pty_handle import PtyHandle
@@ -85,6 +86,7 @@ class Process:
         cwd: str | None = None,
         env: dict[str, str] | None = None,
         timeout: int | None = None,
+        max_output_bytes: int | None = None,
     ) -> ExecuteResponse:
         """Execute a shell command in the Sandbox.
 
@@ -95,13 +97,16 @@ class Process:
             env (dict[str, str] | None): Environment variables to set for the command.
             timeout (int | None): Maximum time in seconds to wait for the command
                 to complete.
+            max_output_bytes (int | None): Maximum bytes retained from stdout and
+                stderr independently. `None` preserves unbounded output.
 
         Returns:
             ExecuteResponse: Command execution results containing:
                 - exit_code: The command's exit status
-                - result: Standard output from the command
-                - artifacts: ExecutionArtifacts object containing `stdout` (same as result)
-                and `charts` (matplotlib charts metadata)
+                - result: Combined output retained for compatibility
+                - stdout: Standard output when supported by the Sandbox daemon
+                - stderr: Standard error when supported by the Sandbox daemon
+                - artifacts: ExecutionArtifacts containing combined output and charts
 
         Example:
             ```python
@@ -116,7 +121,10 @@ class Process:
             result = sandbox.process.exec("sleep 10", timeout=5)
             ```
         """
-        execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout, envs=env)
+        validate_max_output_bytes(max_output_bytes)
+        execute_request = ExecuteRequest(
+            command=command, cwd=cwd, timeout=timeout, envs=env, max_output_bytes=max_output_bytes
+        )
 
         response = self._api_client.execute_command(
             request=execute_request,
@@ -131,6 +139,11 @@ class Process:
                 response.exit_code if response.exit_code is not None else response.additional_properties.get("code")
             ),
             result=result,
+            stdout=response.stdout,
+            stderr=response.stderr,
+            timed_out=response.timed_out or False,
+            stdout_truncated=response.stdout_truncated or False,
+            stderr_truncated=response.stderr_truncated or False,
             artifacts=artifacts,
             additional_properties=response.additional_properties,
         )

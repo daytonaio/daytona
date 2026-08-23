@@ -23,6 +23,11 @@ var _ MappedNullable = &ExecuteResponse{}
 type ExecuteResponse struct {
 	ExitCode *int32 `json:"exitCode,omitempty"`
 	Result string `json:"result"`
+	Stderr *string `json:"stderr,omitempty"`
+	StderrTruncated *bool `json:"stderrTruncated,omitempty"`
+	Stdout *string `json:"stdout,omitempty"`
+	StdoutTruncated *bool `json:"stdoutTruncated,omitempty"`
+	TimedOut *bool `json:"timedOut,omitempty"`
 }
 
 type _ExecuteResponse ExecuteResponse
@@ -101,6 +106,166 @@ func (o *ExecuteResponse) SetResult(v string) {
 	o.Result = v
 }
 
+// GetStderr returns the Stderr field value if set, zero value otherwise.
+func (o *ExecuteResponse) GetStderr() string {
+	if o == nil || IsNil(o.Stderr) {
+		var ret string
+		return ret
+	}
+	return *o.Stderr
+}
+
+// GetStderrOk returns a tuple with the Stderr field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteResponse) GetStderrOk() (*string, bool) {
+	if o == nil || IsNil(o.Stderr) {
+		return nil, false
+	}
+	return o.Stderr, true
+}
+
+// HasStderr returns a boolean if a field has been set.
+func (o *ExecuteResponse) HasStderr() bool {
+	if o != nil && !IsNil(o.Stderr) {
+		return true
+	}
+
+	return false
+}
+
+// SetStderr gets a reference to the given string and assigns it to the Stderr field.
+func (o *ExecuteResponse) SetStderr(v string) {
+	o.Stderr = &v
+}
+
+// GetStderrTruncated returns the StderrTruncated field value if set, zero value otherwise.
+func (o *ExecuteResponse) GetStderrTruncated() bool {
+	if o == nil || IsNil(o.StderrTruncated) {
+		var ret bool
+		return ret
+	}
+	return *o.StderrTruncated
+}
+
+// GetStderrTruncatedOk returns a tuple with the StderrTruncated field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteResponse) GetStderrTruncatedOk() (*bool, bool) {
+	if o == nil || IsNil(o.StderrTruncated) {
+		return nil, false
+	}
+	return o.StderrTruncated, true
+}
+
+// HasStderrTruncated returns a boolean if a field has been set.
+func (o *ExecuteResponse) HasStderrTruncated() bool {
+	if o != nil && !IsNil(o.StderrTruncated) {
+		return true
+	}
+
+	return false
+}
+
+// SetStderrTruncated gets a reference to the given bool and assigns it to the StderrTruncated field.
+func (o *ExecuteResponse) SetStderrTruncated(v bool) {
+	o.StderrTruncated = &v
+}
+
+// GetStdout returns the Stdout field value if set, zero value otherwise.
+func (o *ExecuteResponse) GetStdout() string {
+	if o == nil || IsNil(o.Stdout) {
+		var ret string
+		return ret
+	}
+	return *o.Stdout
+}
+
+// GetStdoutOk returns a tuple with the Stdout field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteResponse) GetStdoutOk() (*string, bool) {
+	if o == nil || IsNil(o.Stdout) {
+		return nil, false
+	}
+	return o.Stdout, true
+}
+
+// HasStdout returns a boolean if a field has been set.
+func (o *ExecuteResponse) HasStdout() bool {
+	if o != nil && !IsNil(o.Stdout) {
+		return true
+	}
+
+	return false
+}
+
+// SetStdout gets a reference to the given string and assigns it to the Stdout field.
+func (o *ExecuteResponse) SetStdout(v string) {
+	o.Stdout = &v
+}
+
+// GetStdoutTruncated returns the StdoutTruncated field value if set, zero value otherwise.
+func (o *ExecuteResponse) GetStdoutTruncated() bool {
+	if o == nil || IsNil(o.StdoutTruncated) {
+		var ret bool
+		return ret
+	}
+	return *o.StdoutTruncated
+}
+
+// GetStdoutTruncatedOk returns a tuple with the StdoutTruncated field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteResponse) GetStdoutTruncatedOk() (*bool, bool) {
+	if o == nil || IsNil(o.StdoutTruncated) {
+		return nil, false
+	}
+	return o.StdoutTruncated, true
+}
+
+// HasStdoutTruncated returns a boolean if a field has been set.
+func (o *ExecuteResponse) HasStdoutTruncated() bool {
+	if o != nil && !IsNil(o.StdoutTruncated) {
+		return true
+	}
+
+	return false
+}
+
+// SetStdoutTruncated gets a reference to the given bool and assigns it to the StdoutTruncated field.
+func (o *ExecuteResponse) SetStdoutTruncated(v bool) {
+	o.StdoutTruncated = &v
+}
+
+// GetTimedOut returns the TimedOut field value if set, zero value otherwise.
+func (o *ExecuteResponse) GetTimedOut() bool {
+	if o == nil || IsNil(o.TimedOut) {
+		var ret bool
+		return ret
+	}
+	return *o.TimedOut
+}
+
+// GetTimedOutOk returns a tuple with the TimedOut field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteResponse) GetTimedOutOk() (*bool, bool) {
+	if o == nil || IsNil(o.TimedOut) {
+		return nil, false
+	}
+	return o.TimedOut, true
+}
+
+// HasTimedOut returns a boolean if a field has been set.
+func (o *ExecuteResponse) HasTimedOut() bool {
+	if o != nil && !IsNil(o.TimedOut) {
+		return true
+	}
+
+	return false
+}
+
+// SetTimedOut gets a reference to the given bool and assigns it to the TimedOut field.
+func (o *ExecuteResponse) SetTimedOut(v bool) {
+	o.TimedOut = &v
+}
+
 func (o ExecuteResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -115,6 +280,21 @@ func (o ExecuteResponse) ToMap() (map[string]interface{}, error) {
 		toSerialize["exitCode"] = o.ExitCode
 	}
 	toSerialize["result"] = o.Result
+	if !IsNil(o.Stderr) {
+		toSerialize["stderr"] = o.Stderr
+	}
+	if !IsNil(o.StderrTruncated) {
+		toSerialize["stderrTruncated"] = o.StderrTruncated
+	}
+	if !IsNil(o.Stdout) {
+		toSerialize["stdout"] = o.Stdout
+	}
+	if !IsNil(o.StdoutTruncated) {
+		toSerialize["stdoutTruncated"] = o.StdoutTruncated
+	}
+	if !IsNil(o.TimedOut) {
+		toSerialize["timedOut"] = o.TimedOut
+	}
 	return toSerialize, nil
 }
 

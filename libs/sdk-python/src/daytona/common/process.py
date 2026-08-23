@@ -16,6 +16,7 @@ from daytona_toolbox_api_client import SessionExecuteResponse as ApiSessionExecu
 from daytona_toolbox_api_client_async import SessionExecuteRequest as AsyncApiSessionExecuteRequest
 
 from .charts import Chart
+from .errors import DaytonaValidationError
 
 # 3-byte multiplexing markers inserted by the shell labelers
 STDOUT_PREFIX: bytes = b"\x01\x01\x01"
@@ -23,6 +24,16 @@ STDERR_PREFIX: bytes = b"\x02\x02\x02"
 MAX_PREFIX_LEN: int = max(len(STDOUT_PREFIX), len(STDERR_PREFIX))
 
 _VALID_ENV_KEY_REGEX = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_MAX_OUTPUT_BYTES = 2**31 - 1
+
+
+def validate_max_output_bytes(value: object) -> None:
+    if value is not None and (
+        not isinstance(value, int) or isinstance(value, bool) or value <= 0 or value > _MAX_OUTPUT_BYTES
+    ):
+        raise DaytonaValidationError(
+            f"max_output_bytes must be a positive integer no greater than {_MAX_OUTPUT_BYTES} or None, got {value!r}"
+        )
 
 
 @dataclass
@@ -80,12 +91,22 @@ class ExecuteResponse(BaseModel):
 
     Attributes:
         exit_code (int): The exit code from the command execution
-        result (str): The output from the command execution
+        result (str): Combined output retained for compatibility
+        stdout (str | None): Standard output when provided by the Sandbox daemon
+        stderr (str | None): Standard error when provided by the Sandbox daemon
+        timed_out (bool): Whether the daemon stopped the command at its timeout
+        stdout_truncated (bool): Whether earlier stdout bytes were discarded
+        stderr_truncated (bool): Whether earlier stderr bytes were discarded
         artifacts (ExecutionArtifacts | None): Artifacts from the command execution
     """
 
     exit_code: int
     result: str
+    stdout: str | None = None
+    stderr: str | None = None
+    timed_out: bool = False
+    stdout_truncated: bool = False
+    stderr_truncated: bool = False
     artifacts: ExecutionArtifacts | None = None
     additional_properties: dict[str, object] = Field(default_factory=dict)
 

@@ -17,5 +17,10 @@
 export interface ExecuteResponse {
     'exitCode'?: number;
     'result': string;
+    'stderr'?: string;
+    'stderrTruncated'?: boolean;
+    'stdout'?: string;
+    'stdoutTruncated'?: boolean;
+    'timedOut'?: boolean;
 }
 

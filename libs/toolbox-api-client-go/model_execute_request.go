@@ -26,6 +26,8 @@ type ExecuteRequest struct {
 	Cwd *string `json:"cwd,omitempty"`
 	// Environment variables to set for the command
 	Envs *map[string]string `json:"envs,omitempty"`
+	// Maximum bytes retained from each output stream
+	MaxOutputBytes *int32 `json:"maxOutputBytes,omitempty"`
 	// Timeout in seconds, defaults to 10 seconds
 	Timeout *int32 `json:"timeout,omitempty"`
 }
@@ -138,6 +140,38 @@ func (o *ExecuteRequest) SetEnvs(v map[string]string) {
 	o.Envs = &v
 }
 
+// GetMaxOutputBytes returns the MaxOutputBytes field value if set, zero value otherwise.
+func (o *ExecuteRequest) GetMaxOutputBytes() int32 {
+	if o == nil || IsNil(o.MaxOutputBytes) {
+		var ret int32
+		return ret
+	}
+	return *o.MaxOutputBytes
+}
+
+// GetMaxOutputBytesOk returns a tuple with the MaxOutputBytes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteRequest) GetMaxOutputBytesOk() (*int32, bool) {
+	if o == nil || IsNil(o.MaxOutputBytes) {
+		return nil, false
+	}
+	return o.MaxOutputBytes, true
+}
+
+// HasMaxOutputBytes returns a boolean if a field has been set.
+func (o *ExecuteRequest) HasMaxOutputBytes() bool {
+	if o != nil && !IsNil(o.MaxOutputBytes) {
+		return true
+	}
+
+	return false
+}
+
+// SetMaxOutputBytes gets a reference to the given int32 and assigns it to the MaxOutputBytes field.
+func (o *ExecuteRequest) SetMaxOutputBytes(v int32) {
+	o.MaxOutputBytes = &v
+}
+
 // GetTimeout returns the Timeout field value if set, zero value otherwise.
 func (o *ExecuteRequest) GetTimeout() int32 {
 	if o == nil || IsNil(o.Timeout) {
@@ -186,6 +220,9 @@ func (o ExecuteRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Envs) {
 		toSerialize["envs"] = o.Envs
+	}
+	if !IsNil(o.MaxOutputBytes) {
+		toSerialize["maxOutputBytes"] = o.MaxOutputBytes
 	}
 	if !IsNil(o.Timeout) {
 		toSerialize["timeout"] = o.Timeout

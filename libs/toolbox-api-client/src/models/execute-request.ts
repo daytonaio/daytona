@@ -25,6 +25,10 @@ export interface ExecuteRequest {
      */
     'envs'?: { [key: string]: string; };
     /**
+     * Maximum bytes retained from each output stream
+     */
+    'maxOutputBytes'?: number;
+    /**
      * Timeout in seconds, defaults to 10 seconds
      */
     'timeout'?: number;

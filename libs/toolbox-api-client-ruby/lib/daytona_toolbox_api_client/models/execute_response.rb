@@ -19,11 +19,26 @@ module DaytonaToolboxApiClient
 
     attr_accessor :result
 
+    attr_accessor :stderr
+
+    attr_accessor :stderr_truncated
+
+    attr_accessor :stdout
+
+    attr_accessor :stdout_truncated
+
+    attr_accessor :timed_out
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'exit_code' => :'exitCode',
-        :'result' => :'result'
+        :'result' => :'result',
+        :'stderr' => :'stderr',
+        :'stderr_truncated' => :'stderrTruncated',
+        :'stdout' => :'stdout',
+        :'stdout_truncated' => :'stdoutTruncated',
+        :'timed_out' => :'timedOut'
       }
     end
 
@@ -41,7 +56,12 @@ module DaytonaToolboxApiClient
     def self.openapi_types
       {
         :'exit_code' => :'Integer',
-        :'result' => :'String'
+        :'result' => :'String',
+        :'stderr' => :'String',
+        :'stderr_truncated' => :'Boolean',
+        :'stdout' => :'String',
+        :'stdout_truncated' => :'Boolean',
+        :'timed_out' => :'Boolean'
       }
     end
 
@@ -75,6 +95,26 @@ module DaytonaToolboxApiClient
         self.result = attributes[:'result']
       else
         self.result = nil
+      end
+
+      if attributes.key?(:'stderr')
+        self.stderr = attributes[:'stderr']
+      end
+
+      if attributes.key?(:'stderr_truncated')
+        self.stderr_truncated = attributes[:'stderr_truncated']
+      end
+
+      if attributes.key?(:'stdout')
+        self.stdout = attributes[:'stdout']
+      end
+
+      if attributes.key?(:'stdout_truncated')
+        self.stdout_truncated = attributes[:'stdout_truncated']
+      end
+
+      if attributes.key?(:'timed_out')
+        self.timed_out = attributes[:'timed_out']
       end
     end
 
@@ -114,7 +154,12 @@ module DaytonaToolboxApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           exit_code == o.exit_code &&
-          result == o.result
+          result == o.result &&
+          stderr == o.stderr &&
+          stderr_truncated == o.stderr_truncated &&
+          stdout == o.stdout &&
+          stdout_truncated == o.stdout_truncated &&
+          timed_out == o.timed_out
     end
 
     # @see the `==` method
@@ -126,7 +171,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [exit_code, result].hash
+      [exit_code, result, stderr, stderr_truncated, stdout, stdout_truncated, timed_out].hash
     end
 
     # Builds the object from hash

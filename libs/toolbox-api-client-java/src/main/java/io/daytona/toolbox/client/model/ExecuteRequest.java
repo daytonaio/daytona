@@ -67,6 +67,11 @@ public class ExecuteRequest {
   @javax.annotation.Nullable
   private Map<String, String> envs = new HashMap<>();
 
+  public static final String SERIALIZED_NAME_MAX_OUTPUT_BYTES = "maxOutputBytes";
+  @SerializedName(SERIALIZED_NAME_MAX_OUTPUT_BYTES)
+  @javax.annotation.Nullable
+  private Integer maxOutputBytes;
+
   public static final String SERIALIZED_NAME_TIMEOUT = "timeout";
   @SerializedName(SERIALIZED_NAME_TIMEOUT)
   @javax.annotation.Nullable
@@ -137,6 +142,27 @@ public class ExecuteRequest {
 
   public void setEnvs(@javax.annotation.Nullable Map<String, String> envs) {
     this.envs = envs;
+  }
+
+
+  public ExecuteRequest maxOutputBytes(@javax.annotation.Nullable Integer maxOutputBytes) {
+    this.maxOutputBytes = maxOutputBytes;
+    return this;
+  }
+
+  /**
+   * Maximum bytes retained from each output stream
+   * minimum: 1
+   * maximum: 2147483647
+   * @return maxOutputBytes
+   */
+  @javax.annotation.Nullable
+  public Integer getMaxOutputBytes() {
+    return maxOutputBytes;
+  }
+
+  public void setMaxOutputBytes(@javax.annotation.Nullable Integer maxOutputBytes) {
+    this.maxOutputBytes = maxOutputBytes;
   }
 
 
@@ -216,13 +242,14 @@ public class ExecuteRequest {
     return Objects.equals(this.command, executeRequest.command) &&
         Objects.equals(this.cwd, executeRequest.cwd) &&
         Objects.equals(this.envs, executeRequest.envs) &&
+        Objects.equals(this.maxOutputBytes, executeRequest.maxOutputBytes) &&
         Objects.equals(this.timeout, executeRequest.timeout)&&
         Objects.equals(this.additionalProperties, executeRequest.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(command, cwd, envs, timeout, additionalProperties);
+    return Objects.hash(command, cwd, envs, maxOutputBytes, timeout, additionalProperties);
   }
 
   @Override
@@ -232,6 +259,7 @@ public class ExecuteRequest {
     sb.append("    command: ").append(toIndentedString(command)).append("\n");
     sb.append("    cwd: ").append(toIndentedString(cwd)).append("\n");
     sb.append("    envs: ").append(toIndentedString(envs)).append("\n");
+    sb.append("    maxOutputBytes: ").append(toIndentedString(maxOutputBytes)).append("\n");
     sb.append("    timeout: ").append(toIndentedString(timeout)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
@@ -252,7 +280,7 @@ public class ExecuteRequest {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("command", "cwd", "envs", "timeout"));
+    openapiFields = new HashSet<String>(Arrays.asList("command", "cwd", "envs", "maxOutputBytes", "timeout"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(Arrays.asList("command"));

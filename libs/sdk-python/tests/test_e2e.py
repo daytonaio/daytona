@@ -8,6 +8,7 @@ import os
 import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -444,6 +445,39 @@ def test_exec_captures_stderr(sandbox):
     assert resp.exit_code == 0
     # stderr goes to result in the unified output
     assert "err" in resp.result
+
+
+def test_exec_returns_bounded_streams(sandbox):
+    resp = sandbox.process.exec("printf out; printf err >&2; exit 7", max_output_bytes=100)
+    assert resp.exit_code == 7
+    assert resp.stdout == "out"
+    assert resp.stderr == "err"
+    assert "out" in resp.result
+    assert "err" in resp.result
+    assert resp.timed_out is False
+
+
+def test_exec_drains_and_bounds_large_streams(sandbox):
+    command = 'python3 -c \'import sys; sys.stdout.write("a"*1048576); sys.stderr.write("b"*1048576)\''
+    resp = sandbox.process.exec(command, max_output_bytes=1024)
+    assert resp.stdout == "a" * 1024
+    assert resp.stderr == "b" * 1024
+    assert resp.stdout_truncated is True
+    assert resp.stderr_truncated is True
+
+
+def test_exec_timeout_preserves_partial_output(sandbox):
+    resp = sandbox.process.exec("printf partial; sleep 5", timeout=1, max_output_bytes=100)
+    assert resp.exit_code == -1
+    assert resp.stdout == "partial"
+    assert resp.timed_out is True
+
+
+def test_exec_concurrent_commands_keep_output_isolated(sandbox):
+    commands = ["printf left", "printf right"]
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(lambda command: sandbox.process.exec(command, max_output_bytes=100), commands))
+    assert [result.stdout for result in results] == ["left", "right"]
 
 
 def test_code_run_python_print(sandbox):

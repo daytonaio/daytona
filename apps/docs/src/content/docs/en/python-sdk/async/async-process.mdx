@@ -31,7 +31,8 @@ Initialize a new Process instance.
 async def exec(command: str,
                cwd: str | None = None,
                env: dict[str, str] | None = None,
-               timeout: int | None = None) -> ExecuteResponse
+               timeout: int | None = None,
+               max_output_bytes: int | None = None) -> ExecuteResponse
 ```
 
 Execute a shell command in the Sandbox.
@@ -44,15 +45,18 @@ Execute a shell command in the Sandbox.
 - `env` _dict[str, str] | None_ - Environment variables to set for the command.
 - `timeout` _int | None_ - Maximum time in seconds to wait for the command
   to complete.
+- `max_output_bytes` _int | None_ - Maximum bytes retained from stdout and
+  stderr independently. `None` preserves unbounded output.
   
 
 **Returns**:
 
 - `ExecuteResponse` - Command execution results containing:
   - exit_code: The command's exit status
-  - result: Standard output from the command
-  - artifacts: ExecutionArtifacts object containing `stdout` (same as result)
-  and `charts` (matplotlib charts metadata)
+  - result: Combined output retained for compatibility
+  - stdout: Standard output when supported by the Sandbox daemon
+  - stderr: Standard error when supported by the Sandbox daemon
+  - artifacts: ExecutionArtifacts containing combined output and charts
   
 
 **Example**:
@@ -781,7 +785,12 @@ Response from the command execution.
 **Attributes**:
 
 - `exit_code` _int_ - The exit code from the command execution
-- `result` _str_ - The output from the command execution
+- `result` _str_ - Combined output retained for compatibility
+- `stdout` _str | None_ - Standard output when provided by the Sandbox daemon
+- `stderr` _str | None_ - Standard error when provided by the Sandbox daemon
+- `timed_out` _bool_ - Whether the daemon stopped the command at its timeout
+- `stdout_truncated` _bool_ - Whether earlier stdout bytes were discarded
+- `stderr_truncated` _bool_ - Whether earlier stderr bytes were discarded
 - `artifacts` _ExecutionArtifacts | None_ - Artifacts from the command execution
 
 ## SessionExecuteResponse

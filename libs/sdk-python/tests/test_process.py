@@ -7,8 +7,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from daytona.common.errors import DaytonaValidationError
 from daytona.common.process import CodeRunParams
 from daytona_toolbox_api_client import Chart as GeneratedChart
+from daytona_toolbox_api_client import ExecuteResponse as GeneratedExecuteResponse
+from daytona_toolbox_api_client_async import ExecuteResponse as AsyncGeneratedExecuteResponse
 
 
 class TestSyncProcessExec:
@@ -39,6 +42,47 @@ class TestSyncProcessExec:
         api.execute_command.return_value = MagicMock(result="oops", exit_code=None, additional_properties={"code": 42})
         result = proc.exec("false")
         assert result.exit_code == 42
+
+    def test_exec_maps_bounded_stream_result(self):
+        proc, api = self._make_process()
+        api.execute_command.return_value = MagicMock(
+            result="combined",
+            stdout="out",
+            stderr="err",
+            timed_out=True,
+            stdout_truncated=True,
+            stderr_truncated=False,
+            exit_code=-1,
+            additional_properties={},
+        )
+
+        result = proc.exec("long command", timeout=5, max_output_bytes=1024)
+
+        request = api.execute_command.call_args.kwargs["request"]
+        assert request.max_output_bytes == 1024
+        assert result.stdout == "out"
+        assert result.stderr == "err"
+        assert result.timed_out is True
+        assert result.stdout_truncated is True
+        assert result.stderr_truncated is False
+
+    def test_exec_accepts_legacy_response(self):
+        proc, api = self._make_process()
+        api.execute_command.return_value = GeneratedExecuteResponse(exit_code=0, result="legacy")
+
+        result = proc.exec("echo legacy")
+
+        assert result.stdout is None
+        assert result.stderr is None
+        assert result.timed_out is False
+        assert result.stdout_truncated is False
+        assert result.stderr_truncated is False
+
+    @pytest.mark.parametrize("limit", [0, -1, True, 2**31])
+    def test_exec_rejects_invalid_output_limit(self, limit):
+        proc, _ = self._make_process()
+        with pytest.raises(DaytonaValidationError, match="max_output_bytes must be a positive integer"):
+            proc.exec("echo no", max_output_bytes=limit)
 
     def test_code_run_uses_language_and_params(self):
         proc, api = self._make_process()
@@ -173,6 +217,50 @@ class TestAsyncProcessExec:
         await proc.exec("echo $MY_VAR", env={"MY_VAR": "value"})
         request = api.execute_command.call_args.kwargs["request"]
         assert request.envs == {"MY_VAR": "value"}
+
+    @pytest.mark.asyncio
+    async def test_exec_maps_bounded_stream_result(self):
+        proc, api = self._make_process()
+        api.execute_command.return_value = MagicMock(
+            result="combined",
+            stdout="out",
+            stderr="err",
+            timed_out=True,
+            stdout_truncated=False,
+            stderr_truncated=True,
+            exit_code=-1,
+            additional_properties={},
+        )
+
+        result = await proc.exec("long command", timeout=5, max_output_bytes=1024)
+
+        request = api.execute_command.call_args.kwargs["request"]
+        assert request.max_output_bytes == 1024
+        assert result.stdout == "out"
+        assert result.stderr == "err"
+        assert result.timed_out is True
+        assert result.stdout_truncated is False
+        assert result.stderr_truncated is True
+
+    @pytest.mark.asyncio
+    async def test_exec_accepts_legacy_response(self):
+        proc, api = self._make_process()
+        api.execute_command.return_value = AsyncGeneratedExecuteResponse(exit_code=0, result="legacy")
+
+        result = await proc.exec("echo legacy")
+
+        assert result.stdout is None
+        assert result.stderr is None
+        assert result.timed_out is False
+        assert result.stdout_truncated is False
+        assert result.stderr_truncated is False
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("limit", [0, -1, True, 2**31])
+    async def test_exec_rejects_invalid_output_limit(self, limit):
+        proc, _ = self._make_process()
+        with pytest.raises(DaytonaValidationError, match="max_output_bytes must be a positive integer"):
+            await proc.exec("echo no", max_output_bytes=limit)
 
     @pytest.mark.asyncio
     async def test_code_run(self):
