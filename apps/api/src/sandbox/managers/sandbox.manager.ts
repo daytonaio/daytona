@@ -38,6 +38,7 @@ import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-ex
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { SandboxActivityService } from '../services/sandbox-activity.service'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
@@ -66,6 +67,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
   constructor(
     private readonly sandboxRepository: SandboxRepository,
+    private readonly sandboxActivityService: SandboxActivityService,
     private readonly runnerService: RunnerService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly sandboxStartAction: SandboxStartAction,
@@ -92,6 +94,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
       await setTimeout(1000)
     }
+  }
+
+  private async isAutoActionDue(sandboxId: string, intervalMinutes: number | undefined): Promise<boolean> {
+    if (intervalMinutes === undefined) {
+      return false
+    }
+
+    const lastActivityAt = await this.sandboxActivityService.getLastActivityAt(sandboxId)
+    return lastActivityAt !== null && lastActivityAt.getTime() < Date.now() - intervalMinutes * 60 * 1000
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'auto-stop-check' })
@@ -138,16 +149,20 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 return
               }
 
-              let updateData: Partial<Sandbox> = {}
-
-              if (isEphemeral(sandbox)) {
-                updateData = Sandbox.getSoftDeleteUpdate(sandbox)
-              } else {
-                updateData.pending = true
-                updateData.desiredState = SandboxDesiredState.STOPPED
-              }
-
               try {
+                if (!(await this.isAutoActionDue(sandbox.id, sandbox.autoStopInterval))) {
+                  return
+                }
+
+                let updateData: Partial<Sandbox> = {}
+
+                if (isEphemeral(sandbox)) {
+                  updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+                } else {
+                  updateData.pending = true
+                  updateData.desiredState = SandboxDesiredState.STOPPED
+                }
+
                 await this.sandboxRepository.updateWhere(sandbox.id, {
                   updateData,
                   whereCondition: { pending: false, state: sandbox.state },
@@ -205,6 +220,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           }
 
           try {
+            if (!(await this.isAutoActionDue(sandbox.id, sandbox.autoArchiveInterval))) {
+              return
+            }
+
             const updateData: Partial<Sandbox> = {
               desiredState: SandboxDesiredState.ARCHIVED,
             }
@@ -270,6 +289,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
+                if (!(await this.isAutoActionDue(sandbox.id, sandbox.autoDeleteInterval))) {
+                  return
+                }
+
                 const updateData = Sandbox.getSoftDeleteUpdate(sandbox)
                 await this.sandboxRepository.updateWhere(sandbox.id, {
                   updateData,
