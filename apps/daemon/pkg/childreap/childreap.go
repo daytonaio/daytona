@@ -1,6 +1,8 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
+//go:build !windows
+
 // Package childreap wraps github.com/ramr/go-reaper with cooperative recovery
 // of child exit status.
 //

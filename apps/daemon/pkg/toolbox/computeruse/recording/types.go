@@ -24,6 +24,7 @@ type RecordingDTO struct {
 // StartRecordingRequest represents the request to start a new recording
 type StartRecordingRequest struct {
 	Label *string `json:"label,omitempty"`
+	Name  *string `json:"name,omitempty"`
 } //	@name	StartRecordingRequest
 
 // StopRecordingRequest represents the request to stop an active recording

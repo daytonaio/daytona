@@ -33,7 +33,12 @@ func (h *RecordingController) StartRecording(ctx *gin.Context) {
 		request = StartRecordingRequest{}
 	}
 
-	recording, err := h.recordingService.StartRecording(request.Label)
+	label := request.Label
+	if label == nil || *label == "" {
+		label = request.Name
+	}
+
+	recording, err := h.recordingService.StartRecording(label)
 	if err != nil {
 		if errors.Is(err, recordingservice.ErrFFmpegNotFound) {
 			ctx.JSON(http.StatusBadRequest, gin.H{
@@ -46,6 +51,13 @@ func (h *RecordingController) StartRecording(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error":   "invalid_label",
 				"message": err.Error(),
+			})
+			return
+		}
+		if errors.Is(err, recordingservice.ErrUnsupportedPlatform) {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error":   "unsupported_platform",
+				"message": "Screen recording is not supported on this platform",
 			})
 			return
 		}

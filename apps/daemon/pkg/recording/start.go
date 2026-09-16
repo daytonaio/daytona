@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -55,6 +56,13 @@ func validateLabel(label string) error {
 
 // StartRecording starts a new screen recording session
 func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
+	// Validate label if provided (reject invalid labels without modification)
+	if label != nil && *label != "" {
+		if err := validateLabel(*label); err != nil {
+			return nil, err
+		}
+	}
+
 	// Ensure recordings directory exists
 	if err := os.MkdirAll(s.recordingsDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create recordings directory: %w", err)
@@ -66,24 +74,11 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		return nil, ErrFFmpegNotFound
 	}
 
-	// Check for DISPLAY environment variable (required for X11)
-	display := os.Getenv("DISPLAY")
-	if display == "" {
-		display = ":0" // Default to :0 if not set
-	}
-
 	// Generate recording ID and filename
 	// ID is included in filename so it can be recovered when scanning disk
 	id := uuid.New().String()
 	now := time.Now()
 	timestamp := now.Format("20060102_150405")
-
-	// Validate label if provided (reject invalid labels without modification)
-	if label != nil && *label != "" {
-		if err := validateLabel(*label); err != nil {
-			return nil, err
-		}
-	}
 
 	var fileName string
 	if label != nil && *label != "" {
@@ -103,26 +98,60 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		Status:    "recording",
 	}
 
-	// Build ffmpeg command for Linux screen capture using x11grab
-	// -f x11grab: X11 screen capture
-	// -framerate 30: 30 FPS
-	// -i :0.0: Capture from display :0, screen 0
+	// Build platform-specific ffmpeg capture arguments
+	var captureArgs []string
+	switch runtime.GOOS {
+	case "windows":
+		// Windows GDI screen capture
+		// -f gdigrab: Windows GDI screen capture device
+		// -framerate 30: 30 FPS
+		// -i desktop: Capture the entire desktop
+		captureArgs = []string{
+			"-f", "gdigrab",
+			"-framerate", "30",
+			"-i", "desktop",
+		}
+	case "linux":
+		// X11 screen capture
+		// -f x11grab: X11 screen capture
+		// -framerate 30: 30 FPS
+		// -i :0: Capture from display :0, screen 0
+		display := os.Getenv("DISPLAY")
+		if display == "" {
+			display = ":0" // Default to :0 if not set
+		}
+		captureArgs = []string{
+			"-f", "x11grab",
+			"-framerate", "30",
+			"-i", display,
+		}
+	default:
+		return nil, ErrUnsupportedPlatform
+	}
+
+	// Common encoding arguments
 	// -c:v libx264: H.264 codec
 	// -preset ultrafast: Fast encoding for real-time capture
 	// -pix_fmt yuv420p: Standard pixel format for compatibility
-	cmd := exec.Command(ffmpegPath,
-		"-f", "x11grab",
-		"-framerate", "30",
-		"-i", display,
+	// -y: Overwrite output file if exists
+	args := append(captureArgs,
 		"-c:v", "libx264",
 		"-preset", "ultrafast",
 		"-pix_fmt", "yuv420p",
-		"-y", // Overwrite output file if exists
+		"-y",
 		filePath,
 	)
 
-	// Set environment to ensure DISPLAY is available
-	cmd.Env = append(os.Environ(), fmt.Sprintf("DISPLAY=%s", display))
+	cmd := exec.Command(ffmpegPath, args...)
+
+	// On Linux, ensure DISPLAY environment variable is set for X11
+	if runtime.GOOS == "linux" {
+		display := os.Getenv("DISPLAY")
+		if display == "" {
+			display = ":0"
+		}
+		cmd.Env = append(os.Environ(), fmt.Sprintf("DISPLAY=%s", display))
+	}
 
 	// Get stdin pipe for graceful shutdown
 	stdinPipe, err := cmd.StdinPipe()
@@ -135,22 +164,16 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		return nil, fmt.Errorf("failed to start ffmpeg: %w", err)
 	}
 
-	s.logger.Debug("Started recording", "id", id, "path", filePath, "display", display)
+	s.logger.Debug("Started recording", "id", id, "path", filePath, "platform", runtime.GOOS)
 
 	// Create a done channel to receive the Wait() result exactly once
 	done := make(chan error, 1)
 
-	// Store active recording
-	s.activeRecordings.Set(id, &activeRecording{
-		recording: recording,
-		cmd:       cmd,
-		stdinPipe: stdinPipe,
-		done:      done,
-	})
-
 	// Start a goroutine to wait for the process and handle unexpected exits.
 	// Reap (not Wait): we don't read stdout/stderr; ffmpeg output goes to a
 	// file via -y target, so no Go I/O goroutines to drain.
+	// NOTE: This goroutine must be started BEFORE the startup health check
+	// so the done channel receives the exit status if ffmpeg crashes immediately.
 	go func() {
 		exitCode, err := childreap.Reap(cmd)
 		done <- err // Signal the done channel with the result
@@ -170,6 +193,31 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 			}
 		}
 	}()
+
+	// Startup health check: verify ffmpeg survives initial startup.
+	// This catches wrong capture device, missing codec, unsupported format, etc.
+	// FFmpeg typically fails within ~50ms when the capture device is unavailable;
+	// 500ms is generous while still keeping the API responsive.
+	startupCheck := time.NewTimer(500 * time.Millisecond)
+	select {
+	case err := <-done:
+		startupCheck.Stop()
+		// FFmpeg exited during startup — capture device likely unavailable
+		if err != nil {
+			return nil, fmt.Errorf("ffmpeg exited immediately during startup: %w", err)
+		}
+		return nil, fmt.Errorf("ffmpeg exited immediately during startup (exit code non-zero)")
+	case <-startupCheck.C:
+		// FFmpeg survived startup — recording is genuinely active
+	}
+
+	// Store active recording (only after startup health check passes)
+	s.activeRecordings.Set(id, &activeRecording{
+		recording: recording,
+		cmd:       cmd,
+		stdinPipe: stdinPipe,
+		done:      done,
+	})
 
 	return recording, nil
 }

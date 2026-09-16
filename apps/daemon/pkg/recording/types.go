@@ -16,6 +16,7 @@ var (
 	ErrRecordingStillActive = errors.New("cannot delete an active recording")
 	ErrFFmpegNotFound       = errors.New("ffmpeg not found in PATH")
 	ErrInvalidLabel         = errors.New("invalid label: must be 1-100 characters, cannot start with dot, cannot contain path separators (/ or \\), and can only contain letters, numbers, spaces, dots, underscores, and hyphens")
+	ErrUnsupportedPlatform  = errors.New("screen recording is not supported on this platform")
 )
 
 type Recording struct {
